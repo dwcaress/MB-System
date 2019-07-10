@@ -47,7 +47,6 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hsldeoih";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -57,7 +56,6 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HSDS;
 	*beams_bath_max = 59;
@@ -82,6 +80,8 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -117,7 +117,6 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 	char *function_name = "mbr_zero_hsldeoih";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_struct *data;
 
 	/* print input debug statements */
@@ -243,7 +242,7 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -260,7 +259,6 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hsldeoih";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_struct *data;
 	char *data_ptr;
 
@@ -275,14 +273,11 @@ int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_hsldeoih_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -306,7 +301,6 @@ int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hsldeoih";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -320,8 +314,8 @@ int mbr_dem_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -337,7 +331,6 @@ int mbr_dem_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_rd_nav_source";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_nav_source_struct read_data;
 	int read_size;
 
@@ -352,6 +345,7 @@ int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -428,7 +422,6 @@ int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_rd_mean_velocity";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_mean_velocity_struct read_data;
 	int read_size;
 
@@ -443,6 +436,7 @@ int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -523,7 +517,6 @@ int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_rd_velocity_profile";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_velocity_profile_struct read_data;
 	int read_size;
 
@@ -538,6 +531,7 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -620,7 +614,6 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_rd_standby";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_standby_struct read_data;
 	int read_size;
 
@@ -635,6 +628,7 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -722,7 +716,6 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_rd_survey";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_survey_struct read_data;
 	int read_size;
 	int need_back, gain_ok;
@@ -740,6 +733,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1045,7 +1039,6 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_rd_calibrate";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_calibrate_struct read_data;
 	int read_size;
 	int need_back, gain_ok;
@@ -1063,6 +1056,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1362,7 +1356,6 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_rd_comment";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_comment_struct read_data;
 	int read_size;
 
@@ -1377,6 +1370,7 @@ int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1411,7 +1405,6 @@ int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_hsldeoih_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_struct *data = NULL;
 	char *data_ptr = NULL;
 	FILE *mbfp = NULL;
@@ -1443,6 +1436,8 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* get next record type */
 	if (fread(&label, 1, sizeof(int), mbfp) == sizeof(int)) {
@@ -1609,7 +1604,6 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hsldeoih";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_struct *data;
 	struct mbsys_hsds_struct *store;
 
@@ -1628,7 +1622,7 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_hsldeoih_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_hsldeoih_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -1752,7 +1746,6 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_wr_nav_source";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_nav_source_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -1785,38 +1778,34 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
-		write_data.pos_corr_x = data->pos_corr_x;
-		write_data.pos_corr_y = data->pos_corr_y;
-		strncpy(write_data.sensors, data->sensors, 8);
-	}
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
+	write_data.pos_corr_x = data->pos_corr_x;
+	write_data.pos_corr_y = data->pos_corr_y;
+	strncpy(write_data.sensors, data->sensors, 8);
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
-		mb_swap_float(&write_data.pos_corr_x);
-		mb_swap_float(&write_data.pos_corr_y);
-	}
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
+	mb_swap_float(&write_data.pos_corr_x);
+	mb_swap_float(&write_data.pos_corr_y);
 #endif
 
 	/* write record to file */
@@ -1825,6 +1814,7 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1856,7 +1846,6 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_wr_mean_velocity";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_mean_velocity_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -1890,41 +1879,37 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
-		write_data.draught = data->draught;
-		write_data.vel_mean = data->vel_mean;
-		write_data.vel_keel = data->vel_keel;
-		write_data.tide = data->tide;
-	}
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
+	write_data.draught = data->draught;
+	write_data.vel_mean = data->vel_mean;
+	write_data.vel_keel = data->vel_keel;
+	write_data.tide = data->tide;
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
-		mb_swap_float(&write_data.draught);
-		mb_swap_float(&write_data.vel_mean);
-		mb_swap_float(&write_data.vel_keel);
-		mb_swap_float(&write_data.tide);
-	}
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
+	mb_swap_float(&write_data.draught);
+	mb_swap_float(&write_data.vel_mean);
+	mb_swap_float(&write_data.vel_keel);
+	mb_swap_float(&write_data.tide);
 #endif
 
 	/* write record to file */
@@ -1933,6 +1918,7 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1964,7 +1950,6 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_wr_velocity_profile";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_velocity_profile_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -1996,38 +1981,34 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.num_vel = data->num_vel;
-		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
-			write_data.vdepth[i] = data->vdepth[i];
-			write_data.velocity[i] = data->velocity[i];
-		}
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.num_vel = data->num_vel;
+	for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		write_data.vdepth[i] = data->vdepth[i];
+		write_data.velocity[i] = data->velocity[i];
 	}
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		data->num_vel = mb_swap_short(write_data.num_vel);
-		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
-			mb_swap_float(&write_data.vdepth[i]);
-			mb_swap_float(&write_data.velocity[i]);
-		}
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	data->num_vel = mb_swap_short(write_data.num_vel);
+	for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		mb_swap_float(&write_data.vdepth[i]);
+		mb_swap_float(&write_data.velocity[i]);
 	}
 #endif
 
@@ -2037,6 +2018,7 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2068,7 +2050,6 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_wr_standby";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_standby_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2105,46 +2086,42 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
-		write_data.course_true = data->course_true;
-		write_data.speed_transverse = data->speed_transverse;
-		write_data.speed = data->speed;
-		write_data.speed_reference[0] = data->speed_reference[0];
-		write_data.pitch = data->pitch;
-		write_data.track = data->track;
-		write_data.depth_center = data->depth_center;
-	}
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
+	write_data.course_true = data->course_true;
+	write_data.speed_transverse = data->speed_transverse;
+	write_data.speed = data->speed;
+	write_data.speed_reference[0] = data->speed_reference[0];
+	write_data.pitch = data->pitch;
+	write_data.track = data->track;
+	write_data.depth_center = data->depth_center;
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
-		mb_swap_float(&write_data.course_true);
-		mb_swap_float(&write_data.speed_transverse);
-		mb_swap_float(&write_data.speed);
-		mb_swap_float(&write_data.pitch);
-		write_data.track = mb_swap_short(write_data.track);
-		mb_swap_float(&write_data.depth_center);
-	}
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
+	mb_swap_float(&write_data.course_true);
+	mb_swap_float(&write_data.speed_transverse);
+	mb_swap_float(&write_data.speed);
+	mb_swap_float(&write_data.pitch);
+	write_data.track = mb_swap_short(write_data.track);
+	mb_swap_float(&write_data.depth_center);
 #endif
 
 	/* write record to file */
@@ -2153,6 +2130,7 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2184,7 +2162,6 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_wr_survey";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_survey_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2269,161 +2246,157 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		/* position */
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
+	/* position */
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
 
-		/* time stamp */
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
+	/* time stamp */
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
 
-		/* additional navigation and depths */
-		write_data.course_true = data->course_true;
-		write_data.speed_transverse = data->speed_transverse;
-		write_data.speed = data->speed;
-		write_data.speed_reference[0] = data->speed_reference[0];
-		write_data.pitch = data->pitch;
-		write_data.track = data->track;
-		write_data.depth_center = data->depth_center;
-		write_data.depth_scale = data->depth_scale;
-		write_data.spare = data->spare;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.distance[i] = data->distance[i];
-			write_data.depth[i] = data->depth[i];
-		}
-
-		/* travel time data */
-		write_data.course_ground = data->course_ground;
-		write_data.speed_ground = data->speed_ground;
-		write_data.heave = data->heave;
-		write_data.roll = data->roll;
-		write_data.time_center = data->time_center;
-		write_data.time_scale = data->time_scale;
-		write_data.mode[0] = data->mode[0];
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.time[i] = data->time[i];
-		for (int i = 0; i < 11; i++)
-			write_data.gyro[i] = data->gyro[i];
-
-		/* amplitude data */
-		write_data.trans_strbd = data->trans_strbd;
-		write_data.trans_vert = data->trans_vert;
-		write_data.trans_port = data->trans_port;
-		write_data.pulse_len_strbd = data->pulse_len_strbd;
-		write_data.pulse_len_vert = data->pulse_len_vert;
-		write_data.pulse_len_port = data->pulse_len_port;
-		write_data.gain_start = data->gain_start;
-		write_data.r_compensation_factor = data->r_compensation_factor;
-		write_data.compensation_start = data->compensation_start;
-		write_data.increase_start = data->increase_start;
-		write_data.tvc_near = data->tvc_near;
-		write_data.tvc_far = data->tvc_far;
-		write_data.increase_int_near = data->increase_int_near;
-		write_data.increase_int_far = data->increase_int_far;
-		write_data.gain_center = data->gain_center;
-		write_data.filter_gain = data->filter_gain;
-		write_data.amplitude_center = data->amplitude_center;
-		write_data.echo_duration_center = data->echo_duration_center;
-		write_data.echo_scale_center = data->echo_scale_center;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.amplitude[i] = data->amplitude[i];
-			write_data.echo_duration[i] = data->echo_duration[i];
-		}
-		for (int i = 0; i < 16; i++) {
-			write_data.gain[i] = data->gain[i];
-			write_data.echo_scale[i] = data->echo_scale[i];
-		}
-
-		/* processed backscatter data */
-		write_data.back_scale = data->back_scale;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.back[i] = data->back[i];
+	/* additional navigation and depths */
+	write_data.course_true = data->course_true;
+	write_data.speed_transverse = data->speed_transverse;
+	write_data.speed = data->speed;
+	write_data.speed_reference[0] = data->speed_reference[0];
+	write_data.pitch = data->pitch;
+	write_data.track = data->track;
+	write_data.depth_center = data->depth_center;
+	write_data.depth_scale = data->depth_scale;
+	write_data.spare = data->spare;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.distance[i] = data->distance[i];
+		write_data.depth[i] = data->depth[i];
 	}
+
+	/* travel time data */
+	write_data.course_ground = data->course_ground;
+	write_data.speed_ground = data->speed_ground;
+	write_data.heave = data->heave;
+	write_data.roll = data->roll;
+	write_data.time_center = data->time_center;
+	write_data.time_scale = data->time_scale;
+	write_data.mode[0] = data->mode[0];
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.time[i] = data->time[i];
+	for (int i = 0; i < 11; i++)
+		write_data.gyro[i] = data->gyro[i];
+
+	/* amplitude data */
+	write_data.trans_strbd = data->trans_strbd;
+	write_data.trans_vert = data->trans_vert;
+	write_data.trans_port = data->trans_port;
+	write_data.pulse_len_strbd = data->pulse_len_strbd;
+	write_data.pulse_len_vert = data->pulse_len_vert;
+	write_data.pulse_len_port = data->pulse_len_port;
+	write_data.gain_start = data->gain_start;
+	write_data.r_compensation_factor = data->r_compensation_factor;
+	write_data.compensation_start = data->compensation_start;
+	write_data.increase_start = data->increase_start;
+	write_data.tvc_near = data->tvc_near;
+	write_data.tvc_far = data->tvc_far;
+	write_data.increase_int_near = data->increase_int_near;
+	write_data.increase_int_far = data->increase_int_far;
+	write_data.gain_center = data->gain_center;
+	write_data.filter_gain = data->filter_gain;
+	write_data.amplitude_center = data->amplitude_center;
+	write_data.echo_duration_center = data->echo_duration_center;
+	write_data.echo_scale_center = data->echo_scale_center;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.amplitude[i] = data->amplitude[i];
+		write_data.echo_duration[i] = data->echo_duration[i];
+	}
+	for (int i = 0; i < 16; i++) {
+		write_data.gain[i] = data->gain[i];
+		write_data.echo_scale[i] = data->echo_scale[i];
+	}
+
+	/* processed backscatter data */
+	write_data.back_scale = data->back_scale;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.back[i] = data->back[i];
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		/* position */
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
+	/* position */
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
 
-		/* time stamp */
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
+	/* time stamp */
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
 
-		/* additional navigation and depths */
-		mb_swap_float(&write_data.course_true);
-		mb_swap_float(&write_data.speed_transverse);
-		mb_swap_float(&write_data.speed);
-		mb_swap_float(&write_data.pitch);
-		write_data.track = mb_swap_short(write_data.track);
-		mb_swap_float(&write_data.depth_center);
-		mb_swap_float(&write_data.depth_scale);
-		write_data.spare = mb_swap_short(write_data.spare);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.distance[i] = mb_swap_short(write_data.distance[i]);
-			write_data.depth[i] = mb_swap_short(write_data.depth[i]);
-		}
-
-		/* travel time data */
-		mb_swap_float(&write_data.course_ground);
-		mb_swap_float(&write_data.speed_ground);
-		mb_swap_float(&write_data.heave);
-		mb_swap_float(&write_data.roll);
-		mb_swap_float(&write_data.time_center);
-		mb_swap_float(&write_data.time_scale);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.time[i] = mb_swap_short(write_data.time[i]);
-		for (int i = 0; i < 11; i++)
-			mb_swap_float(&write_data.gyro[i]);
-
-		/* amplitude data */
-		write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
-		write_data.trans_vert = mb_swap_short(write_data.trans_vert);
-		write_data.trans_port = mb_swap_short(write_data.trans_port);
-		write_data.pulse_len_strbd = mb_swap_short(write_data.pulse_len_strbd);
-		write_data.pulse_len_vert = mb_swap_short(write_data.pulse_len_vert);
-		write_data.pulse_len_port = mb_swap_short(write_data.pulse_len_port);
-		write_data.gain_start = mb_swap_short(write_data.gain_start);
-		write_data.r_compensation_factor = mb_swap_short(write_data.r_compensation_factor);
-		write_data.compensation_start = mb_swap_short(write_data.compensation_start);
-		write_data.increase_start = mb_swap_short(write_data.increase_start);
-		write_data.tvc_near = mb_swap_short(write_data.tvc_near);
-		write_data.tvc_far = mb_swap_short(write_data.tvc_far);
-		write_data.increase_int_near = mb_swap_short(write_data.increase_int_near);
-		write_data.increase_int_far = mb_swap_short(write_data.increase_int_far);
-		write_data.gain_center = mb_swap_short(write_data.gain_center);
-		mb_swap_float(&write_data.filter_gain);
-		write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
-		write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
-		write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
-			write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
-		}
-		for (int i = 0; i < 16; i++) {
-			write_data.gain[i] = mb_swap_short(write_data.gain[i]);
-			write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
-		}
-
-		/* processed backscatter data */
-		mb_swap_float(&write_data.back_scale);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.back[i] = mb_swap_short(write_data.back[i]);
+	/* additional navigation and depths */
+	mb_swap_float(&write_data.course_true);
+	mb_swap_float(&write_data.speed_transverse);
+	mb_swap_float(&write_data.speed);
+	mb_swap_float(&write_data.pitch);
+	write_data.track = mb_swap_short(write_data.track);
+	mb_swap_float(&write_data.depth_center);
+	mb_swap_float(&write_data.depth_scale);
+	write_data.spare = mb_swap_short(write_data.spare);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.distance[i] = mb_swap_short(write_data.distance[i]);
+		write_data.depth[i] = mb_swap_short(write_data.depth[i]);
 	}
+
+	/* travel time data */
+	mb_swap_float(&write_data.course_ground);
+	mb_swap_float(&write_data.speed_ground);
+	mb_swap_float(&write_data.heave);
+	mb_swap_float(&write_data.roll);
+	mb_swap_float(&write_data.time_center);
+	mb_swap_float(&write_data.time_scale);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.time[i] = mb_swap_short(write_data.time[i]);
+	for (int i = 0; i < 11; i++)
+		mb_swap_float(&write_data.gyro[i]);
+
+	/* amplitude data */
+	write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
+	write_data.trans_vert = mb_swap_short(write_data.trans_vert);
+	write_data.trans_port = mb_swap_short(write_data.trans_port);
+	write_data.pulse_len_strbd = mb_swap_short(write_data.pulse_len_strbd);
+	write_data.pulse_len_vert = mb_swap_short(write_data.pulse_len_vert);
+	write_data.pulse_len_port = mb_swap_short(write_data.pulse_len_port);
+	write_data.gain_start = mb_swap_short(write_data.gain_start);
+	write_data.r_compensation_factor = mb_swap_short(write_data.r_compensation_factor);
+	write_data.compensation_start = mb_swap_short(write_data.compensation_start);
+	write_data.increase_start = mb_swap_short(write_data.increase_start);
+	write_data.tvc_near = mb_swap_short(write_data.tvc_near);
+	write_data.tvc_far = mb_swap_short(write_data.tvc_far);
+	write_data.increase_int_near = mb_swap_short(write_data.increase_int_near);
+	write_data.increase_int_far = mb_swap_short(write_data.increase_int_far);
+	write_data.gain_center = mb_swap_short(write_data.gain_center);
+	mb_swap_float(&write_data.filter_gain);
+	write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
+	write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
+	write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
+		write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
+	}
+	for (int i = 0; i < 16; i++) {
+		write_data.gain[i] = mb_swap_short(write_data.gain[i]);
+		write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
+	}
+
+	/* processed backscatter data */
+	mb_swap_float(&write_data.back_scale);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.back[i] = mb_swap_short(write_data.back[i]);
 #endif
 
 	/* write record to file */
@@ -2432,6 +2405,7 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2463,7 +2437,6 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_wr_calibrate";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_calibrate_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2548,161 +2521,157 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		/* position */
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
+	/* position */
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
 
-		/* time stamp */
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
+	/* time stamp */
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
 
-		/* additional navigation and depths */
-		write_data.course_true = data->course_true;
-		write_data.speed_transverse = data->speed_transverse;
-		write_data.speed = data->speed;
-		write_data.speed_reference[0] = data->speed_reference[0];
-		write_data.pitch = data->pitch;
-		write_data.track = data->track;
-		write_data.depth_center = data->depth_center;
-		write_data.depth_scale = data->depth_scale;
-		write_data.spare = data->spare;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.distance[i] = data->distance[i];
-			write_data.depth[i] = data->depth[i];
-		}
-
-		/* travel time data */
-		write_data.course_ground = data->course_ground;
-		write_data.speed_ground = data->speed_ground;
-		write_data.heave = data->heave;
-		write_data.roll = data->roll;
-		write_data.time_center = data->time_center;
-		write_data.time_scale = data->time_scale;
-		write_data.mode[0] = data->mode[0];
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.time[i] = data->time[i];
-		for (int i = 0; i < 11; i++)
-			write_data.gyro[i] = data->gyro[i];
-
-		/* amplitude data */
-		write_data.trans_strbd = data->trans_strbd;
-		write_data.trans_vert = data->trans_vert;
-		write_data.trans_port = data->trans_port;
-		write_data.pulse_len_strbd = data->pulse_len_strbd;
-		write_data.pulse_len_vert = data->pulse_len_vert;
-		write_data.pulse_len_port = data->pulse_len_port;
-		write_data.gain_start = data->gain_start;
-		write_data.r_compensation_factor = data->r_compensation_factor;
-		write_data.compensation_start = data->compensation_start;
-		write_data.increase_start = data->increase_start;
-		write_data.tvc_near = data->tvc_near;
-		write_data.tvc_far = data->tvc_far;
-		write_data.increase_int_near = data->increase_int_near;
-		write_data.increase_int_far = data->increase_int_far;
-		write_data.gain_center = data->gain_center;
-		write_data.filter_gain = data->filter_gain;
-		write_data.amplitude_center = data->amplitude_center;
-		write_data.echo_duration_center = data->echo_duration_center;
-		write_data.echo_scale_center = data->echo_scale_center;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.amplitude[i] = data->amplitude[i];
-			write_data.echo_duration[i] = data->echo_duration[i];
-		}
-		for (int i = 0; i < 16; i++) {
-			write_data.gain[i] = data->gain[i];
-			write_data.echo_scale[i] = data->echo_scale[i];
-		}
-
-		/* processed backscatter data */
-		write_data.back_scale = data->back_scale;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.back[i] = data->back[i];
+	/* additional navigation and depths */
+	write_data.course_true = data->course_true;
+	write_data.speed_transverse = data->speed_transverse;
+	write_data.speed = data->speed;
+	write_data.speed_reference[0] = data->speed_reference[0];
+	write_data.pitch = data->pitch;
+	write_data.track = data->track;
+	write_data.depth_center = data->depth_center;
+	write_data.depth_scale = data->depth_scale;
+	write_data.spare = data->spare;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.distance[i] = data->distance[i];
+		write_data.depth[i] = data->depth[i];
 	}
+
+	/* travel time data */
+	write_data.course_ground = data->course_ground;
+	write_data.speed_ground = data->speed_ground;
+	write_data.heave = data->heave;
+	write_data.roll = data->roll;
+	write_data.time_center = data->time_center;
+	write_data.time_scale = data->time_scale;
+	write_data.mode[0] = data->mode[0];
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.time[i] = data->time[i];
+	for (int i = 0; i < 11; i++)
+		write_data.gyro[i] = data->gyro[i];
+
+	/* amplitude data */
+	write_data.trans_strbd = data->trans_strbd;
+	write_data.trans_vert = data->trans_vert;
+	write_data.trans_port = data->trans_port;
+	write_data.pulse_len_strbd = data->pulse_len_strbd;
+	write_data.pulse_len_vert = data->pulse_len_vert;
+	write_data.pulse_len_port = data->pulse_len_port;
+	write_data.gain_start = data->gain_start;
+	write_data.r_compensation_factor = data->r_compensation_factor;
+	write_data.compensation_start = data->compensation_start;
+	write_data.increase_start = data->increase_start;
+	write_data.tvc_near = data->tvc_near;
+	write_data.tvc_far = data->tvc_far;
+	write_data.increase_int_near = data->increase_int_near;
+	write_data.increase_int_far = data->increase_int_far;
+	write_data.gain_center = data->gain_center;
+	write_data.filter_gain = data->filter_gain;
+	write_data.amplitude_center = data->amplitude_center;
+	write_data.echo_duration_center = data->echo_duration_center;
+	write_data.echo_scale_center = data->echo_scale_center;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.amplitude[i] = data->amplitude[i];
+		write_data.echo_duration[i] = data->echo_duration[i];
+	}
+	for (int i = 0; i < 16; i++) {
+		write_data.gain[i] = data->gain[i];
+		write_data.echo_scale[i] = data->echo_scale[i];
+	}
+
+	/* processed backscatter data */
+	write_data.back_scale = data->back_scale;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.back[i] = data->back[i];
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		/* position */
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
+	/* position */
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
 
-		/* time stamp */
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
+	/* time stamp */
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
 
-		/* additional navigation and depths */
-		mb_swap_float(&write_data.course_true);
-		mb_swap_float(&write_data.speed_transverse);
-		mb_swap_float(&write_data.speed);
-		mb_swap_float(&write_data.pitch);
-		write_data.track = mb_swap_short(write_data.track);
-		mb_swap_float(&write_data.depth_center);
-		mb_swap_float(&write_data.depth_scale);
-		write_data.spare = mb_swap_short(write_data.spare);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.distance[i] = mb_swap_short(write_data.distance[i]);
-			write_data.depth[i] = mb_swap_short(write_data.depth[i]);
-		}
-
-		/* travel time data */
-		mb_swap_float(&write_data.course_ground);
-		mb_swap_float(&write_data.speed_ground);
-		mb_swap_float(&write_data.heave);
-		mb_swap_float(&write_data.roll);
-		mb_swap_float(&write_data.time_center);
-		mb_swap_float(&write_data.time_scale);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.time[i] = mb_swap_short(write_data.time[i]);
-		for (int i = 0; i < 11; i++)
-			mb_swap_float(&write_data.gyro[i]);
-
-		/* amplitude data */
-		write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
-		write_data.trans_vert = mb_swap_short(write_data.trans_vert);
-		write_data.trans_port = mb_swap_short(write_data.trans_port);
-		write_data.pulse_len_strbd = mb_swap_short(write_data.pulse_len_strbd);
-		write_data.pulse_len_vert = mb_swap_short(write_data.pulse_len_vert);
-		write_data.pulse_len_port = mb_swap_short(write_data.pulse_len_port);
-		write_data.gain_start = mb_swap_short(write_data.gain_start);
-		write_data.r_compensation_factor = mb_swap_short(write_data.r_compensation_factor);
-		write_data.compensation_start = mb_swap_short(write_data.compensation_start);
-		write_data.increase_start = mb_swap_short(write_data.increase_start);
-		write_data.tvc_near = mb_swap_short(write_data.tvc_near);
-		write_data.tvc_far = mb_swap_short(write_data.tvc_far);
-		write_data.increase_int_near = mb_swap_short(write_data.increase_int_near);
-		write_data.increase_int_far = mb_swap_short(write_data.increase_int_far);
-		write_data.gain_center = mb_swap_short(write_data.gain_center);
-		mb_swap_float(&write_data.filter_gain);
-		write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
-		write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
-		write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
-			write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
-		}
-		for (int i = 0; i < 16; i++) {
-			write_data.gain[i] = mb_swap_short(write_data.gain[i]);
-			write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
-		}
-
-		/* processed backscatter data */
-		mb_swap_float(&write_data.back_scale);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.back[i] = mb_swap_short(write_data.back[i]);
+	/* additional navigation and depths */
+	mb_swap_float(&write_data.course_true);
+	mb_swap_float(&write_data.speed_transverse);
+	mb_swap_float(&write_data.speed);
+	mb_swap_float(&write_data.pitch);
+	write_data.track = mb_swap_short(write_data.track);
+	mb_swap_float(&write_data.depth_center);
+	mb_swap_float(&write_data.depth_scale);
+	write_data.spare = mb_swap_short(write_data.spare);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.distance[i] = mb_swap_short(write_data.distance[i]);
+		write_data.depth[i] = mb_swap_short(write_data.depth[i]);
 	}
+
+	/* travel time data */
+	mb_swap_float(&write_data.course_ground);
+	mb_swap_float(&write_data.speed_ground);
+	mb_swap_float(&write_data.heave);
+	mb_swap_float(&write_data.roll);
+	mb_swap_float(&write_data.time_center);
+	mb_swap_float(&write_data.time_scale);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.time[i] = mb_swap_short(write_data.time[i]);
+	for (int i = 0; i < 11; i++)
+		mb_swap_float(&write_data.gyro[i]);
+
+	/* amplitude data */
+	write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
+	write_data.trans_vert = mb_swap_short(write_data.trans_vert);
+	write_data.trans_port = mb_swap_short(write_data.trans_port);
+	write_data.pulse_len_strbd = mb_swap_short(write_data.pulse_len_strbd);
+	write_data.pulse_len_vert = mb_swap_short(write_data.pulse_len_vert);
+	write_data.pulse_len_port = mb_swap_short(write_data.pulse_len_port);
+	write_data.gain_start = mb_swap_short(write_data.gain_start);
+	write_data.r_compensation_factor = mb_swap_short(write_data.r_compensation_factor);
+	write_data.compensation_start = mb_swap_short(write_data.compensation_start);
+	write_data.increase_start = mb_swap_short(write_data.increase_start);
+	write_data.tvc_near = mb_swap_short(write_data.tvc_near);
+	write_data.tvc_far = mb_swap_short(write_data.tvc_far);
+	write_data.increase_int_near = mb_swap_short(write_data.increase_int_near);
+	write_data.increase_int_far = mb_swap_short(write_data.increase_int_far);
+	write_data.gain_center = mb_swap_short(write_data.gain_center);
+	mb_swap_float(&write_data.filter_gain);
+	write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
+	write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
+	write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
+		write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
+	}
+	for (int i = 0; i < 16; i++) {
+		write_data.gain[i] = mb_swap_short(write_data.gain[i]);
+		write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
+	}
+
+	/* processed backscatter data */
+	mb_swap_float(&write_data.back_scale);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.back[i] = mb_swap_short(write_data.back[i]);
 #endif
 
 	/* write record to file */
@@ -2711,6 +2680,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2742,7 +2712,6 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
 	char *function_name = "mbr_hsldeoih_wr_comment";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_comment_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2763,9 +2732,7 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		strncpy(write_data.comment, data->comment, MBF_HSLDEOIH_MAXLINE);
-	}
+	strncpy(write_data.comment, data->comment, MBF_HSLDEOIH_MAXLINE);
 
 	/* write record to file */
 	write_size = sizeof(write_data);
@@ -2773,6 +2740,7 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2804,7 +2772,6 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_hsldeoih_wr_data";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_struct *data;
 	FILE *mbfp;
 	unsigned int label;
@@ -2837,6 +2804,7 @@ int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 #ifdef BYTESWAPPED
 	label = mb_swap_int(label);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&label, 1, sizeof(int), mbfp)) != sizeof(int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2918,7 +2886,6 @@ int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hsldeoih";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_struct *data;
 	char *data_ptr;
 	struct mbsys_hsds_struct *store;
@@ -3045,7 +3012,7 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_hsldeoih_wr_data(verbose, mbio_ptr, data_ptr, error);
+	const int status = mbr_hsldeoih_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -3062,7 +3029,6 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hsldeoih";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3075,7 +3041,7 @@ int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsldeoih(
+	const int status = mbr_info_hsldeoih(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
