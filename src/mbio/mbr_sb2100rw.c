@@ -37,23 +37,10 @@
 #include "mbf_sb2100rw.h"
 #include "mbsys_sb2100.h"
 
-int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error);
-
-int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error);
-int mbr_sb2100rw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *error);
-int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error);
-int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error);
-int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error);
-int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error);
-int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
-int mbr_sb2100rw_wr_label(int verbose, FILE *mbfp, char type, int *error);
-int mbr_sb2100rw_write_line(int verbose, FILE *mbfp, char *line, int *error);
-int mbr_sb2100rw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error);
-int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error);
-int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, void *data_ptr, int *error);
-int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error);
-int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error);
+// int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error);
+// int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error);
+// int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error);
+// int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_sb2100rw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -126,83 +113,6 @@ int mbr_info_sb2100rw(int verbose, int *system, int *beams_bath_max, int *beams_
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:         %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_sb2100rw";
-	int status = MB_SUCCESS;
-	struct mbsys_sb2100_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_sb2100rw_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
-
-	/* get store structure pointer */
-	store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
-
-	/* set comment pointer */
-	store->comment = (char *)&(store->roll_bias_port);
-
-	/* initialize everything to zeros */
-	mbr_zero_sb2100rw(verbose, mb_io_ptr->raw_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_sb2100rw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_sb2100rw";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
 	return (status);
@@ -335,390 +245,10 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_sb2100rw";
+int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_alm_sb2100rw";
 	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
 	struct mbsys_sb2100_struct *store;
-	double scale;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_sb2100_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_sb2100rw_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* translate values to sb2100 data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		/* type of data record */
-		store->kind = data->kind;
-
-		/* sonar parameters (PR) */
-		if (data->kind == MB_DATA_VELOCITY_PROFILE) {
-			store->year = data->year;
-			store->jday = data->jday;
-			store->hour = data->hour;
-			store->minute = data->minute;
-			store->sec = 0.001 * data->msec;
-			store->msec = data->msec - 1000 * store->sec;
-			store->roll_bias_port = 0.01 * data->roll_bias_port;
-			store->roll_bias_starboard = 0.01 * data->roll_bias_starboard;
-			store->pitch_bias = 0.01 * data->pitch_bias;
-			store->ship_draft = 0.01 * data->ship_draft;
-			store->offset_x = 0.0;
-			store->offset_y = 0.0;
-			store->offset_z = 0.0;
-			store->num_svp = data->num_svp;
-			for (int i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
-				store->svp[i].depth = 0.01 * data->vdepth[i];
-				store->svp[i].velocity = 0.01 * data->velocity[i];
-			}
-		}
-
-		/* ping data */
-		else if (data->kind == MB_DATA_DATA) {
-			/* time stamp */
-			store->year = data->year;
-			store->jday = data->jday;
-			store->hour = data->hour;
-			store->minute = data->minute;
-			store->sec = 0.001 * data->msec;
-			store->msec = data->msec - 1000 * store->sec;
-
-			/* DR and SS header info */
-			store->longitude = data->longitude;
-			store->latitude = data->latitude;
-			store->speed = 0.01 * data->speed;
-			store->heave = 0.001 * data->heave;
-			store->range_scale = data->range_scale;
-			store->ssv = 0.01 * data->surface_sound_velocity;
-			store->ssv_source = data->ssv_source;
-			store->depth_gate_mode = data->depth_gate_mode;
-
-			/* DR header info */
-			store->nbeams = data->num_beams;
-			store->svp_correction = data->svp_corr_beams;
-			for (int i = 0; i < 2; i++)
-				store->spare_dr[i] = data->spare_dr[i];
-			store->num_algorithms = data->num_algorithms;
-			for (int i = 0; i < 4; i++)
-				store->algorithm_order[i] = data->algorithm_order[i];
-
-			/* transmit parameters and navigation (DR and SS) */
-			store->frequency = data->frequency[0];
-			if (data->frequency[0] != 'H') {
-				store->ping_gain = data->ping_gain_12khz;
-				store->ping_pulse_width = data->ping_pulse_width_12khz;
-				store->transmitter_attenuation = data->transmitter_attenuation_12khz;
-				store->pitch = 0.001 * data->pitch_12khz;
-				store->roll = 0.001 * data->roll_12khz;
-				store->heading = 0.001 * data->heading_12khz;
-			}
-			else {
-				store->ping_gain = data->ping_gain_36khz;
-				store->ping_pulse_width = data->ping_pulse_width_36khz;
-				store->transmitter_attenuation = data->transmitter_attenuation_36khz;
-				store->pitch = 0.001 * data->pitch_36khz;
-				store->roll = 0.001 * data->roll_36khz;
-				store->heading = 0.001 * data->heading_36khz;
-			}
-
-			/* formed beam data (DR) */
-			if (data->range_scale == 'S')
-				scale = 0.01;
-			else if (data->range_scale == 'I')
-				scale = 0.1;
-			else if (data->range_scale == 'D')
-				scale = 1.0;
-			for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
-				store->beams[i].depth = scale * data->depth[i];
-				store->beams[i].acrosstrack = scale * data->acrosstrack_beam[i];
-				store->beams[i].alongtrack = scale * data->alongtrack_beam[i];
-				store->beams[i].range = 0.001 * data->travel_time[i];
-				store->beams[i].angle_across = 0.001 * data->angle_across[i];
-				store->beams[i].angle_forward = 0.01 * data->angle_forward[i];
-				store->beams[i].amplitude = data->amplitude_beam[i];
-				store->beams[i].signal_to_noise = data->signal_to_noise[i];
-				store->beams[i].echo_length = data->echo_length[i];
-				store->beams[i].quality = data->quality[i];
-				store->beams[i].source = data->source[i];
-			}
-
-			/* SS header info */
-			store->ss_data_length = data->ss_data_length;
-			store->npixels = data->num_pixels;
-			store->pixel_algorithm = data->pixel_algorithm;
-			store->pixel_size_scale = data->pixel_size_scale;
-			store->svp_corr_ss = data->svp_corr_ss;
-			if (data->frequency[0] != 'H')
-				store->pixel_size = data->pixel_size_12khz;
-			else
-				store->pixel_size = data->pixel_size_36khz;
-			store->spare_ss = data->spare_ss;
-
-			/* sidescan data (SS) */
-			for (int i = 0; i < MBF_SB2100RW_PIXELS; i++) {
-				store->pixels[i].amplitude = data->amplitude_ss[i];
-				store->pixels[i].alongtrack = scale * data->alongtrack_ss[i];
-			}
-		}
-
-		/* comment (TR) */
-		else if (data->kind == MB_DATA_COMMENT)
-			strncpy(store->comment, data->comment, MBF_SB2100RW_MAXLINE);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_sb2100rw";
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-	char *data_ptr;
-	struct mbsys_sb2100_struct *store;
-	double scale;
-	double depth_max, across_max, along_max;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_sb2100_struct *)store_ptr;
-
-	/* first translate values from data storage structure */
-	if (store != NULL) {
-		/* type of data record */
-		data->kind = store->kind;
-
-		/* sonar parameters (PR) */
-		if (data->kind == MB_DATA_VELOCITY_PROFILE) {
-			data->year = store->year;
-			data->jday = store->jday;
-			data->hour = store->hour;
-			data->minute = store->minute;
-			data->msec = 1000 * store->sec + store->msec;
-			data->roll_bias_port = 100 * store->roll_bias_port;
-			data->roll_bias_starboard = 100 * store->roll_bias_starboard;
-			data->pitch_bias = 100 * store->pitch_bias;
-			data->ship_draft = 100 * store->ship_draft;
-			data->num_svp = store->num_svp;
-			for (int i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
-				data->vdepth[i] = 100 * store->svp[i].depth;
-				data->velocity[i] = 100 * store->svp[i].velocity;
-			}
-		}
-
-		/* ping data */
-		else if (data->kind == MB_DATA_DATA) {
-			/* time stamp */
-			data->year = store->year;
-			data->jday = store->jday;
-			data->hour = store->hour;
-			data->minute = store->minute;
-			data->msec = 1000 * store->sec + store->msec;
-
-			/* DR and SS header info */
-			data->longitude = store->longitude;
-			data->latitude = store->latitude;
-			data->speed = 100 * store->speed;
-			data->heave = 1000 * store->heave;
-			data->range_scale = store->range_scale;
-			data->surface_sound_velocity = 100 * store->ssv;
-			data->ssv_source = store->ssv_source;
-			data->depth_gate_mode = store->depth_gate_mode;
-
-			/* DR header info */
-			data->num_beams = store->nbeams;
-			data->svp_corr_beams = store->svp_correction;
-			for (int i = 0; i < 2; i++)
-				data->spare_dr[i] = store->spare_dr[i];
-			data->num_algorithms = store->num_algorithms;
-			for (int i = 0; i < 4; i++)
-				data->algorithm_order[i] = store->algorithm_order[i];
-
-			/* transmit parameters and navigation (DR and SS) */
-			data->frequency[0] = store->frequency;
-			data->frequency[1] = store->frequency;
-			if (store->frequency != 'H') {
-				if (store->frequency == 'L') {
-					data->frequency[0] = 'L';
-					data->frequency[1] = 'L';
-				}
-				else if (store->frequency == '2') {
-					data->frequency[0] = '2';
-					data->frequency[1] = '0';
-				}
-				data->ping_gain_12khz = store->ping_gain;
-				data->ping_pulse_width_12khz = store->ping_pulse_width;
-				data->transmitter_attenuation_12khz = store->transmitter_attenuation;
-				data->pitch_12khz = 1000 * store->pitch;
-				data->roll_12khz = 1000 * store->roll;
-				data->heading_12khz = 1000 * store->heading;
-				data->ping_gain_36khz = 0;
-				data->ping_pulse_width_36khz = 0;
-				data->transmitter_attenuation_36khz = 0;
-				data->pitch_36khz = 0;
-				data->roll_36khz = 0;
-				data->heading_36khz = 0;
-			}
-			else {
-				data->frequency[0] = 'H';
-				data->frequency[1] = 'H';
-				data->ping_gain_12khz = 0;
-				data->ping_pulse_width_12khz = 0;
-				data->transmitter_attenuation_12khz = 0;
-				data->pitch_12khz = 0;
-				data->roll_12khz = 0;
-				data->heading_12khz = 0;
-				data->ping_gain_36khz = store->ping_gain;
-				data->ping_pulse_width_36khz = store->ping_pulse_width;
-				data->transmitter_attenuation_36khz = store->transmitter_attenuation;
-				data->pitch_36khz = 1000 * store->pitch;
-				data->roll_36khz = 1000 * store->roll;
-				data->heading_36khz = 1000 * store->heading;
-			}
-
-			/* formed beam data (DR) */
-			if (data->range_scale == 'S')
-				scale = 0.01;
-			else if (data->range_scale == 'I')
-				scale = 0.1;
-			else if (data->range_scale == 'D')
-				scale = 1.0;
-			else {
-				/* find best scale for data */
-				depth_max = 0.0;
-				across_max = 0.0;
-				along_max = 0.0;
-				for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
-					if (store->beams[i].depth != 0.0 && store->beams[i].quality == ' ') {
-						depth_max = MAX(depth_max, fabs(store->beams[i].depth));
-						across_max = MAX(across_max, fabs(store->beams[i].acrosstrack));
-						along_max = MAX(along_max, fabs(store->beams[i].alongtrack));
-					}
-				}
-				if (depth_max > 9999.9 || across_max > 9999.9 || along_max > 9999.9) {
-					scale = 1.0;
-					data->range_scale = 'D';
-				}
-				else if (depth_max > 999.9 || across_max > 999.9 || along_max > 999.9) {
-					scale = 0.1;
-					data->range_scale = 'I';
-				}
-				else {
-					scale = 0.01;
-					data->range_scale = 'S';
-				}
-			}
-			for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
-				data->depth[i] = store->beams[i].depth / scale;
-				data->acrosstrack_beam[i] = store->beams[i].acrosstrack / scale;
-				data->alongtrack_beam[i] = store->beams[i].alongtrack / scale;
-				data->travel_time[i] = 1000 * store->beams[i].range;
-				data->angle_across[i] = 1000 * store->beams[i].angle_across;
-				data->angle_forward[i] = 100 * store->beams[i].angle_forward;
-				data->amplitude_beam[i] = store->beams[i].amplitude;
-				data->signal_to_noise[i] = store->beams[i].signal_to_noise;
-				data->echo_length[i] = store->beams[i].echo_length;
-				data->quality[i] = store->beams[i].quality;
-				data->source[i] = store->beams[i].source;
-			}
-
-			/* SS header info */
-			data->ss_data_length = store->ss_data_length;
-			data->num_pixels = store->npixels;
-			data->pixel_algorithm = store->pixel_algorithm;
-			data->pixel_size_scale = 'D';
-			data->svp_corr_ss = store->svp_corr_ss;
-			if (data->frequency[0] != 'H') {
-				data->num_pixels_12khz = store->npixels;
-				data->pixel_size_12khz = store->pixel_size;
-				data->num_pixels_36khz = 0;
-				data->pixel_size_36khz = 0.0;
-			}
-			else {
-				data->num_pixels_12khz = 0;
-				data->pixel_size_12khz = 0.0;
-				data->num_pixels_36khz = store->npixels;
-				data->pixel_size_36khz = store->pixel_size;
-			}
-			store->spare_ss = data->spare_ss;
-
-			/* sidescan data (SS) */
-			for (int i = 0; i < MBF_SB2100RW_PIXELS; i++) {
-				data->amplitude_ss[i] = store->pixels[i].amplitude;
-				data->alongtrack_ss[i] = store->pixels[i].alongtrack / scale;
-			}
-		}
-
-		/* comment (TR) */
-		else if (data->kind == MB_DATA_COMMENT)
-			strncpy(data->comment, store->comment, MBF_SB2100RW_MAXLINE);
-	}
-
-	/* write next data to file */
-	status = mbr_sb2100rw_wr_data(verbose, mbio_ptr, data_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_sb2100rw_rd_data";
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-	char *data_ptr;
-	FILE *mbfp;
-	int done;
-	int expect;
-
-	static int line_save_flag = MB_NO;
-	static char raw_line[MBF_SB2100RW_MAXLINE] = "\0";
-	static int type = MBF_SB2100RW_NONE;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -731,102 +261,23 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	mbfp = mb_io_ptr->mbfp;
+	/* set initial status */
+	status = MB_SUCCESS;
+
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbf_sb2100rw_struct);
+	mb_io_ptr->data_structure_size = 0;
+	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
+
+	/* get store structure pointer */
+	store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
+
+	/* set comment pointer */
+	store->comment = (char *)&(store->roll_bias_port);
 
 	/* initialize everything to zeros */
-	mbr_zero_sb2100rw(verbose, data_ptr, error);
-
-	/* get file position at record beginning */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	done = MB_NO;
-	expect = MBF_SB2100RW_NONE;
-	while (done == MB_NO) {
-
-		/* get next record label */
-		if (line_save_flag == MB_NO) {
-			/* save position in file */
-			mb_io_ptr->file_bytes = ftell(mbfp);
-
-			/* read the label */
-			status = mbr_sb2100rw_rd_label(verbose, mbfp, raw_line, &type, error);
-		}
-		else
-			line_save_flag = MB_NO;
-
-		/* read the appropriate data records */
-		if (status == MB_FAILURE && expect == MBF_SB2100RW_NONE) {
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
-		}
-		else if (status == MB_FAILURE && expect != MBF_SB2100RW_NONE) {
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-		else if (expect != MBF_SB2100RW_NONE && expect != type) {
-			done = MB_YES;
-			expect = MBF_SB2100RW_NONE;
-			line_save_flag = MB_YES;
-		}
-		else if (type == MBF_SB2100RW_RAW_LINE) {
-			strcpy(data->comment, raw_line);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			done = MB_YES;
-			data->kind = MB_DATA_RAW_LINE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-			status = MB_FAILURE;
-		}
-		else if (type == MBF_SB2100RW_PR) {
-			status = mbr_sb2100rw_rd_pr(verbose, mbfp, data, error);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_VELOCITY_PROFILE;
-			}
-		}
-		else if (type == MBF_SB2100RW_TR) {
-			status = mbr_sb2100rw_rd_tr(verbose, mbfp, data, error);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				data->kind = MB_DATA_COMMENT;
-			}
-		}
-		else if (type == MBF_SB2100RW_DR) {
-			status = mbr_sb2100rw_rd_dr(verbose, mbfp, data, error);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS) {
-				done = MB_NO;
-				data->kind = MB_DATA_DATA;
-				expect = MBF_SB2100RW_SS;
-			}
-		}
-		else if (type == MBF_SB2100RW_SS) {
-			status = mbr_sb2100rw_rd_ss(verbose, mbfp, data, error);
-			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS && expect == MBF_SB2100RW_SS) {
-				done = MB_YES;
-			}
-			else if (status == MB_SUCCESS) {
-				done = MB_YES;
-				expect = MBF_SB2100RW_NONE;
-				*error = MB_ERROR_UNINTELLIGIBLE;
-				status = MB_FAILURE;
-			}
-			else if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE && expect == MBF_SB2100RW_SS) {
-				/* this preserves the bathymetry
-				   that has already been read */
-				done = MB_YES;
-				status = MB_SUCCESS;
-				*error = MB_ERROR_NO_ERROR;
-			}
-		}
-	}
+	mbr_zero_sb2100rw(verbose, mb_io_ptr->raw_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -840,50 +291,29 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *error) {
-	char *function_name = "mbr_sb2100rw_rd_label";
+int mbr_dem_sb2100rw(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dem_sb2100rw";
 	int status = MB_SUCCESS;
-	char *label;
-	int icmp;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* read next line in file */
-	status = mbr_sb2100rw_read_line(verbose, mbfp, 1, line, error);
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* see if we just encountered an identifier record */
-	if (status == MB_SUCCESS) {
-		*type = MBF_SB2100RW_RAW_LINE;
-		for (int i = 1; i < MBF_SB2100RW_RECORDS; i++) {
-			icmp = strncmp(line, mbf_sb2100rw_labels[i], 8);
-			if (icmp == 0)
-				*type = i;
-		}
-
-		/* if it looks like a raw line, check for up to
-		   four lost bytes */
-		if (*type == MBF_SB2100RW_RAW_LINE)
-			for (int i = 1; i < MBF_SB2100RW_RECORDS; i++)
-				for (int j = 1; j < 5; j++) {
-					label = mbf_sb2100rw_labels[i];
-					icmp = strncmp(line, &label[j], 8 - j);
-					if (icmp == 0)
-						*type = i;
-				}
-	}
+	/* deallocate memory for data descriptor */
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       line:       %s\n", line);
-		fprintf(stderr, "dbg2       type:       %d\n", *type);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -944,6 +374,58 @@ int mbr_sb2100rw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       line:       %s\n", line);
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100rw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *error) {
+	char *function_name = "mbr_sb2100rw_rd_label";
+	int status = MB_SUCCESS;
+	char *label;
+	int icmp;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+	}
+
+	/* read next line in file */
+	status = mbr_sb2100rw_read_line(verbose, mbfp, 1, line, error);
+
+	/* see if we just encountered an identifier record */
+	if (status == MB_SUCCESS) {
+		*type = MBF_SB2100RW_RAW_LINE;
+		for (int i = 1; i < MBF_SB2100RW_RECORDS; i++) {
+			icmp = strncmp(line, mbf_sb2100rw_labels[i], 8);
+			if (icmp == 0)
+				*type = i;
+		}
+
+		/* if it looks like a raw line, check for up to
+		   four lost bytes */
+		if (*type == MBF_SB2100RW_RAW_LINE)
+			for (int i = 1; i < MBF_SB2100RW_RECORDS; i++)
+				for (int j = 1; j < 5; j++) {
+					label = mbf_sb2100rw_labels[i];
+					icmp = strncmp(line, &label[j], 8 - j);
+					if (icmp == 0)
+						*type = i;
+				}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       line:       %s\n", line);
+		fprintf(stderr, "dbg2       type:       %d\n", *type);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -1449,11 +931,18 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_sb2100rw_wr_data";
+int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_sb2100rw_rd_data";
 	int status = MB_SUCCESS;
 	struct mbf_sb2100rw_struct *data;
+	char *data_ptr;
 	FILE *mbfp;
+	int done;
+	int expect;
+
+	static int line_save_flag = MB_NO;
+	static char raw_line[MBF_SB2100RW_MAXLINE] = "\0";
+	static int type = MBF_SB2100RW_NONE;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1461,38 +950,106 @@ int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)data_ptr;
+	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
 	mbfp = mb_io_ptr->mbfp;
 
-	if (data->kind == MB_DATA_RAW_LINE) {
-		status = mbr_sb2100rw_wr_rawline(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
-		status = mbr_sb2100rw_wr_pr(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_COMMENT) {
-		status = mbr_sb2100rw_wr_tr(verbose, mbfp, data, error);
-	}
-	else if (data->kind == MB_DATA_DATA) {
-		status = mbr_sb2100rw_wr_dr(verbose, mbfp, data, error);
-		status = mbr_sb2100rw_wr_ss(verbose, mbfp, data, error);
-	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
-	}
+	/* initialize everything to zeros */
+	mbr_zero_sb2100rw(verbose, data_ptr, error);
 
-	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
+	/* get file position at record beginning */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	done = MB_NO;
+	expect = MBF_SB2100RW_NONE;
+	while (done == MB_NO) {
+
+		/* get next record label */
+		if (line_save_flag == MB_NO) {
+			/* save position in file */
+			mb_io_ptr->file_bytes = ftell(mbfp);
+
+			/* read the label */
+			status = mbr_sb2100rw_rd_label(verbose, mbfp, raw_line, &type, error);
+		}
+		else
+			line_save_flag = MB_NO;
+
+		/* read the appropriate data records */
+		if (status == MB_FAILURE && expect == MBF_SB2100RW_NONE) {
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			done = MB_YES;
+		}
+		else if (status == MB_FAILURE && expect != MBF_SB2100RW_NONE) {
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			done = MB_YES;
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+		else if (expect != MBF_SB2100RW_NONE && expect != type) {
+			done = MB_YES;
+			expect = MBF_SB2100RW_NONE;
+			line_save_flag = MB_YES;
+		}
+		else if (type == MBF_SB2100RW_RAW_LINE) {
+			strcpy(data->comment, raw_line);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			done = MB_YES;
+			data->kind = MB_DATA_RAW_LINE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			status = MB_FAILURE;
+		}
+		else if (type == MBF_SB2100RW_PR) {
+			status = mbr_sb2100rw_rd_pr(verbose, mbfp, data, error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_VELOCITY_PROFILE;
+			}
+		}
+		else if (type == MBF_SB2100RW_TR) {
+			status = mbr_sb2100rw_rd_tr(verbose, mbfp, data, error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				data->kind = MB_DATA_COMMENT;
+			}
+		}
+		else if (type == MBF_SB2100RW_DR) {
+			status = mbr_sb2100rw_rd_dr(verbose, mbfp, data, error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			if (status == MB_SUCCESS) {
+				done = MB_NO;
+				data->kind = MB_DATA_DATA;
+				expect = MBF_SB2100RW_SS;
+			}
+		}
+		else if (type == MBF_SB2100RW_SS) {
+			status = mbr_sb2100rw_rd_ss(verbose, mbfp, data, error);
+			mb_io_ptr->file_bytes = ftell(mbfp);
+			if (status == MB_SUCCESS && expect == MBF_SB2100RW_SS) {
+				done = MB_YES;
+			}
+			else if (status == MB_SUCCESS) {
+				done = MB_YES;
+				expect = MBF_SB2100RW_NONE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				status = MB_FAILURE;
+			}
+			else if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE && expect == MBF_SB2100RW_SS) {
+				/* this preserves the bathymetry
+				   that has already been read */
+				done = MB_YES;
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
+			}
+		}
 	}
 
 	/* print output debug statements */
@@ -1507,57 +1064,152 @@ int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
-	char *function_name = "mbr_sb2100rw_wr_label";
+int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_sb2100rw";
 	int status = MB_SUCCESS;
-	char line[MBF_SB2100RW_MAXLINE];
+	struct mbf_sb2100rw_struct *data;
+	struct mbsys_sb2100_struct *store;
+	double scale;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       type:       %d\n", (int)type);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* write label in file */
-	sprintf(line, "%8s\r\n", mbf_sb2100rw_labels[(int)type]);
-	status = mbr_sb2100rw_write_line(verbose, mbfp, line, error);
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_sb2100_struct *)store_ptr;
 
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
+	/* read next data from file */
+	status = mbr_sb2100rw_rd_data(verbose, mbio_ptr, error);
 
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100rw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
-	char *function_name = "mbr_sb2100rw_write_line";
-	int status = MB_SUCCESS;
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
 
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       line:       %s\n", line);
-	}
+	/* translate values to sb2100 data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		/* type of data record */
+		store->kind = data->kind;
 
-	/* write next line in file */
-	if ((status = fputs(line, mbfp)) != EOF) {
-		*error = MB_ERROR_NO_ERROR;
-		status = MB_SUCCESS;
-	}
-	else {
-		*error = MB_ERROR_WRITE_FAIL;
-		status = MB_FAILURE;
+		/* sonar parameters (PR) */
+		if (data->kind == MB_DATA_VELOCITY_PROFILE) {
+			store->year = data->year;
+			store->jday = data->jday;
+			store->hour = data->hour;
+			store->minute = data->minute;
+			store->sec = 0.001 * data->msec;
+			store->msec = data->msec - 1000 * store->sec;
+			store->roll_bias_port = 0.01 * data->roll_bias_port;
+			store->roll_bias_starboard = 0.01 * data->roll_bias_starboard;
+			store->pitch_bias = 0.01 * data->pitch_bias;
+			store->ship_draft = 0.01 * data->ship_draft;
+			store->offset_x = 0.0;
+			store->offset_y = 0.0;
+			store->offset_z = 0.0;
+			store->num_svp = data->num_svp;
+			for (int i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
+				store->svp[i].depth = 0.01 * data->vdepth[i];
+				store->svp[i].velocity = 0.01 * data->velocity[i];
+			}
+		}
+
+		/* ping data */
+		else if (data->kind == MB_DATA_DATA) {
+			/* time stamp */
+			store->year = data->year;
+			store->jday = data->jday;
+			store->hour = data->hour;
+			store->minute = data->minute;
+			store->sec = 0.001 * data->msec;
+			store->msec = data->msec - 1000 * store->sec;
+
+			/* DR and SS header info */
+			store->longitude = data->longitude;
+			store->latitude = data->latitude;
+			store->speed = 0.01 * data->speed;
+			store->heave = 0.001 * data->heave;
+			store->range_scale = data->range_scale;
+			store->ssv = 0.01 * data->surface_sound_velocity;
+			store->ssv_source = data->ssv_source;
+			store->depth_gate_mode = data->depth_gate_mode;
+
+			/* DR header info */
+			store->nbeams = data->num_beams;
+			store->svp_correction = data->svp_corr_beams;
+			for (int i = 0; i < 2; i++)
+				store->spare_dr[i] = data->spare_dr[i];
+			store->num_algorithms = data->num_algorithms;
+			for (int i = 0; i < 4; i++)
+				store->algorithm_order[i] = data->algorithm_order[i];
+
+			/* transmit parameters and navigation (DR and SS) */
+			store->frequency = data->frequency[0];
+			if (data->frequency[0] != 'H') {
+				store->ping_gain = data->ping_gain_12khz;
+				store->ping_pulse_width = data->ping_pulse_width_12khz;
+				store->transmitter_attenuation = data->transmitter_attenuation_12khz;
+				store->pitch = 0.001 * data->pitch_12khz;
+				store->roll = 0.001 * data->roll_12khz;
+				store->heading = 0.001 * data->heading_12khz;
+			}
+			else {
+				store->ping_gain = data->ping_gain_36khz;
+				store->ping_pulse_width = data->ping_pulse_width_36khz;
+				store->transmitter_attenuation = data->transmitter_attenuation_36khz;
+				store->pitch = 0.001 * data->pitch_36khz;
+				store->roll = 0.001 * data->roll_36khz;
+				store->heading = 0.001 * data->heading_36khz;
+			}
+
+			/* formed beam data (DR) */
+			if (data->range_scale == 'S')
+				scale = 0.01;
+			else if (data->range_scale == 'I')
+				scale = 0.1;
+			else if (data->range_scale == 'D')
+				scale = 1.0;
+			for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
+				store->beams[i].depth = scale * data->depth[i];
+				store->beams[i].acrosstrack = scale * data->acrosstrack_beam[i];
+				store->beams[i].alongtrack = scale * data->alongtrack_beam[i];
+				store->beams[i].range = 0.001 * data->travel_time[i];
+				store->beams[i].angle_across = 0.001 * data->angle_across[i];
+				store->beams[i].angle_forward = 0.01 * data->angle_forward[i];
+				store->beams[i].amplitude = data->amplitude_beam[i];
+				store->beams[i].signal_to_noise = data->signal_to_noise[i];
+				store->beams[i].echo_length = data->echo_length[i];
+				store->beams[i].quality = data->quality[i];
+				store->beams[i].source = data->source[i];
+			}
+
+			/* SS header info */
+			store->ss_data_length = data->ss_data_length;
+			store->npixels = data->num_pixels;
+			store->pixel_algorithm = data->pixel_algorithm;
+			store->pixel_size_scale = data->pixel_size_scale;
+			store->svp_corr_ss = data->svp_corr_ss;
+			if (data->frequency[0] != 'H')
+				store->pixel_size = data->pixel_size_12khz;
+			else
+				store->pixel_size = data->pixel_size_36khz;
+			store->spare_ss = data->spare_ss;
+
+			/* sidescan data (SS) */
+			for (int i = 0; i < MBF_SB2100RW_PIXELS; i++) {
+				store->pixels[i].amplitude = data->amplitude_ss[i];
+				store->pixels[i].alongtrack = scale * data->alongtrack_ss[i];
+			}
+		}
+
+		/* comment (TR) */
+		else if (data->kind == MB_DATA_COMMENT)
+			strncpy(store->comment, data->comment, MBF_SB2100RW_MAXLINE);
 	}
 
 	/* print output debug statements */
@@ -1608,6 +1260,71 @@ int mbr_sb2100rw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 			status = MB_FAILURE;
 		}
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100rw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
+	char *function_name = "mbr_sb2100rw_write_line";
+	int status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       line:       %s\n", line);
+	}
+
+	/* write next line in file */
+	if ((status = fputs(line, mbfp)) != EOF) {
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+	}
+	else {
+		*error = MB_ERROR_WRITE_FAIL;
+		status = MB_FAILURE;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100rw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
+	char *function_name = "mbr_sb2100rw_wr_label";
+	int status = MB_SUCCESS;
+	char line[MBF_SB2100RW_MAXLINE];
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       type:       %d\n", (int)type);
+	}
+
+	/* write label in file */
+	sprintf(line, "%8s\r\n", mbf_sb2100rw_labels[(int)type]);
+	status = mbr_sb2100rw_write_line(verbose, mbfp, line, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -2121,6 +1838,276 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 			status = MB_FAILURE;
 		}
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
+	char *function_name = "mbr_sb2100rw_wr_data";
+	int status = MB_SUCCESS;
+	struct mbf_sb2100rw_struct *data;
+	FILE *mbfp;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_sb2100rw_struct *)data_ptr;
+	mbfp = mb_io_ptr->mbfp;
+
+	if (data->kind == MB_DATA_RAW_LINE) {
+		status = mbr_sb2100rw_wr_rawline(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
+		status = mbr_sb2100rw_wr_pr(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_COMMENT) {
+		status = mbr_sb2100rw_wr_tr(verbose, mbfp, data, error);
+	}
+	else if (data->kind == MB_DATA_DATA) {
+		status = mbr_sb2100rw_wr_dr(verbose, mbfp, data, error);
+		status = mbr_sb2100rw_wr_ss(verbose, mbfp, data, error);
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_sb2100rw";
+	int status = MB_SUCCESS;
+	struct mbf_sb2100rw_struct *data;
+	char *data_ptr;
+	struct mbsys_sb2100_struct *store;
+	double scale;
+	double depth_max, across_max, along_max;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
+	store = (struct mbsys_sb2100_struct *)store_ptr;
+
+	/* first translate values from data storage structure */
+	if (store != NULL) {
+		/* type of data record */
+		data->kind = store->kind;
+
+		/* sonar parameters (PR) */
+		if (data->kind == MB_DATA_VELOCITY_PROFILE) {
+			data->year = store->year;
+			data->jday = store->jday;
+			data->hour = store->hour;
+			data->minute = store->minute;
+			data->msec = 1000 * store->sec + store->msec;
+			data->roll_bias_port = 100 * store->roll_bias_port;
+			data->roll_bias_starboard = 100 * store->roll_bias_starboard;
+			data->pitch_bias = 100 * store->pitch_bias;
+			data->ship_draft = 100 * store->ship_draft;
+			data->num_svp = store->num_svp;
+			for (int i = 0; i < MBF_SB2100RW_MAXVEL; i++) {
+				data->vdepth[i] = 100 * store->svp[i].depth;
+				data->velocity[i] = 100 * store->svp[i].velocity;
+			}
+		}
+
+		/* ping data */
+		else if (data->kind == MB_DATA_DATA) {
+			/* time stamp */
+			data->year = store->year;
+			data->jday = store->jday;
+			data->hour = store->hour;
+			data->minute = store->minute;
+			data->msec = 1000 * store->sec + store->msec;
+
+			/* DR and SS header info */
+			data->longitude = store->longitude;
+			data->latitude = store->latitude;
+			data->speed = 100 * store->speed;
+			data->heave = 1000 * store->heave;
+			data->range_scale = store->range_scale;
+			data->surface_sound_velocity = 100 * store->ssv;
+			data->ssv_source = store->ssv_source;
+			data->depth_gate_mode = store->depth_gate_mode;
+
+			/* DR header info */
+			data->num_beams = store->nbeams;
+			data->svp_corr_beams = store->svp_correction;
+			for (int i = 0; i < 2; i++)
+				data->spare_dr[i] = store->spare_dr[i];
+			data->num_algorithms = store->num_algorithms;
+			for (int i = 0; i < 4; i++)
+				data->algorithm_order[i] = store->algorithm_order[i];
+
+			/* transmit parameters and navigation (DR and SS) */
+			data->frequency[0] = store->frequency;
+			data->frequency[1] = store->frequency;
+			if (store->frequency != 'H') {
+				if (store->frequency == 'L') {
+					data->frequency[0] = 'L';
+					data->frequency[1] = 'L';
+				}
+				else if (store->frequency == '2') {
+					data->frequency[0] = '2';
+					data->frequency[1] = '0';
+				}
+				data->ping_gain_12khz = store->ping_gain;
+				data->ping_pulse_width_12khz = store->ping_pulse_width;
+				data->transmitter_attenuation_12khz = store->transmitter_attenuation;
+				data->pitch_12khz = 1000 * store->pitch;
+				data->roll_12khz = 1000 * store->roll;
+				data->heading_12khz = 1000 * store->heading;
+				data->ping_gain_36khz = 0;
+				data->ping_pulse_width_36khz = 0;
+				data->transmitter_attenuation_36khz = 0;
+				data->pitch_36khz = 0;
+				data->roll_36khz = 0;
+				data->heading_36khz = 0;
+			}
+			else {
+				data->frequency[0] = 'H';
+				data->frequency[1] = 'H';
+				data->ping_gain_12khz = 0;
+				data->ping_pulse_width_12khz = 0;
+				data->transmitter_attenuation_12khz = 0;
+				data->pitch_12khz = 0;
+				data->roll_12khz = 0;
+				data->heading_12khz = 0;
+				data->ping_gain_36khz = store->ping_gain;
+				data->ping_pulse_width_36khz = store->ping_pulse_width;
+				data->transmitter_attenuation_36khz = store->transmitter_attenuation;
+				data->pitch_36khz = 1000 * store->pitch;
+				data->roll_36khz = 1000 * store->roll;
+				data->heading_36khz = 1000 * store->heading;
+			}
+
+			/* formed beam data (DR) */
+			if (data->range_scale == 'S')
+				scale = 0.01;
+			else if (data->range_scale == 'I')
+				scale = 0.1;
+			else if (data->range_scale == 'D')
+				scale = 1.0;
+			else {
+				/* find best scale for data */
+				depth_max = 0.0;
+				across_max = 0.0;
+				along_max = 0.0;
+				for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
+					if (store->beams[i].depth != 0.0 && store->beams[i].quality == ' ') {
+						depth_max = MAX(depth_max, fabs(store->beams[i].depth));
+						across_max = MAX(across_max, fabs(store->beams[i].acrosstrack));
+						along_max = MAX(along_max, fabs(store->beams[i].alongtrack));
+					}
+				}
+				if (depth_max > 9999.9 || across_max > 9999.9 || along_max > 9999.9) {
+					scale = 1.0;
+					data->range_scale = 'D';
+				}
+				else if (depth_max > 999.9 || across_max > 999.9 || along_max > 999.9) {
+					scale = 0.1;
+					data->range_scale = 'I';
+				}
+				else {
+					scale = 0.01;
+					data->range_scale = 'S';
+				}
+			}
+			for (int i = 0; i < MBF_SB2100RW_BEAMS; i++) {
+				data->depth[i] = store->beams[i].depth / scale;
+				data->acrosstrack_beam[i] = store->beams[i].acrosstrack / scale;
+				data->alongtrack_beam[i] = store->beams[i].alongtrack / scale;
+				data->travel_time[i] = 1000 * store->beams[i].range;
+				data->angle_across[i] = 1000 * store->beams[i].angle_across;
+				data->angle_forward[i] = 100 * store->beams[i].angle_forward;
+				data->amplitude_beam[i] = store->beams[i].amplitude;
+				data->signal_to_noise[i] = store->beams[i].signal_to_noise;
+				data->echo_length[i] = store->beams[i].echo_length;
+				data->quality[i] = store->beams[i].quality;
+				data->source[i] = store->beams[i].source;
+			}
+
+			/* SS header info */
+			data->ss_data_length = store->ss_data_length;
+			data->num_pixels = store->npixels;
+			data->pixel_algorithm = store->pixel_algorithm;
+			data->pixel_size_scale = 'D';
+			data->svp_corr_ss = store->svp_corr_ss;
+			if (data->frequency[0] != 'H') {
+				data->num_pixels_12khz = store->npixels;
+				data->pixel_size_12khz = store->pixel_size;
+				data->num_pixels_36khz = 0;
+				data->pixel_size_36khz = 0.0;
+			}
+			else {
+				data->num_pixels_12khz = 0;
+				data->pixel_size_12khz = 0.0;
+				data->num_pixels_36khz = store->npixels;
+				data->pixel_size_36khz = store->pixel_size;
+			}
+			store->spare_ss = data->spare_ss;
+
+			/* sidescan data (SS) */
+			for (int i = 0; i < MBF_SB2100RW_PIXELS; i++) {
+				data->amplitude_ss[i] = store->pixels[i].amplitude;
+				data->alongtrack_ss[i] = store->pixels[i].alongtrack / scale;
+			}
+		}
+
+		/* comment (TR) */
+		else if (data->kind == MB_DATA_COMMENT)
+			strncpy(data->comment, store->comment, MBF_SB2100RW_MAXLINE);
+	}
+
+	/* write next data to file */
+	status = mbr_sb2100rw_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {

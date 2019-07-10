@@ -39,7 +39,6 @@
 /* turn on debug statements here */
 // #define MBF_SWPLSSXI_DEBUG 1
 
-int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -235,181 +234,6 @@ int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 } /* mbr_dem_swplssxi */
 /*--------------------------------------------------------------------*/
-int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_swplssxi";
-	int status = MB_SUCCESS;
-	struct mbsys_swathplus_struct *store;
-	swpls_projection *projection;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* read next data from file */
-	status = mbr_swplssxi_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* get pointers to data structures */
-	store = (struct mbsys_swathplus_struct *)store_ptr;
-	projection = &store->projection;
-
-	/* check if projection has been set from *.prj file, if so, copy into projection structure */
-	if ((store->projection_set == MB_NO) && (mb_io_ptr->projection_initialized == MB_YES)) {
-		projection->time_d = time(NULL);
-		projection->microsec = 0;
-		projection->nchars = strnlen(mb_io_ptr->projection_id, MB_NAME_LENGTH);
-		if (projection->projection_alloc < projection->nchars) {
-			status = mb_reallocd(verbose, __FILE__, __LINE__, (size_t)projection->nchars, (void **)&(projection->projection_id),
-			                     error);
-			if (status != MB_SUCCESS) {
-				projection->projection_alloc = 0;
-			}
-			else {
-				projection->projection_alloc = projection->nchars;
-			}
-		}
-
-		if (status == MB_SUCCESS) {
-			strncpy(projection->projection_id, mb_io_ptr->projection_id, (size_t)projection->nchars);
-			store->projection_set = MB_YES;
-		}
-	}
-	/* check if projection has been read from *mb222 file, if so, tell mb system */
-	else if ((store->projection_set == MB_YES) && (mb_io_ptr->projection_initialized == MB_NO)) {
-		mb_proj_init(verbose, projection->projection_id, &(mb_io_ptr->pjptr), error);
-		strncpy(mb_io_ptr->projection_id, projection->projection_id, MB_NAME_LENGTH);
-		mb_io_ptr->projection_initialized = MB_YES;
-	}
-
-	/* throw away multibeam data if the time stamp makes no sense */
-	if ((status == MB_SUCCESS) && (store->kind == MB_DATA_DATA) && (store->time_i[0] < 2003)) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-	}
-	/* save geographic position fix data */
-	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_NAV) && (store->projection_set == MB_NO)) {
-		mb_navint_add(verbose, mbio_ptr, store->time_d, store->posll.longitude, store->posll.latitude, error);
-	}
-	/* save projected position fix data */
-	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_NAV1) && (store->projection_set == MB_YES)) {
-		mb_navint_add(verbose, mbio_ptr, store->time_d, store->posen.easting, store->posen.northing, error);
-	}
-	/* save heading and attitude fix data */
-	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_ATTITUDE)) {
-		mb_attint_add(verbose, mbio_ptr, store->time_d, store->attitude.height, store->attitude.roll, store->attitude.pitch,
-		              error);
-		mb_hedint_add(verbose, mbio_ptr, store->time_d, store->attitude.heading, error);
-	}
-	/* save tide data (as altitude) */
-	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_TIDE)) {
-		mb_altint_add(verbose, mbio_ptr, store->time_d, store->tide.tide, error);
-	}
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-} /* mbr_rt_swplssxi */
-/*--------------------------------------------------------------------*/
-int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_swplssxi";
-	int status = MB_SUCCESS;
-	struct mbsys_swathplus_struct *store;
-	int *header_rec_written;
-	int *projection_rec_written;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_swathplus_struct *)store_ptr;
-
-	/* get pointers to saved data */
-	header_rec_written = &(mb_io_ptr->save1);
-	projection_rec_written = &(mb_io_ptr->save2);
-
-	/* write header record if needed */
-	if ((store->sxi_header_set == MB_YES) && (*header_rec_written == MB_NO)) {
-		int origkind = store->kind;
-		int origtype = store->type;
-		store->kind = MB_DATA_HEADER;
-		store->type = SWPLS_ID_SXI_HEADER_DATA;
-		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
-		if (status == MB_SUCCESS) {
-			*header_rec_written = MB_YES;
-		}
-		store->kind = origkind;
-		store->type = origtype;
-	}
-
-	/* write projection record if needed */
-	if ((store->projection_set == MB_YES) && (*projection_rec_written == MB_NO)) {
-		int origkind = store->kind;
-		int origtype = store->type;
-		store->kind = MB_DATA_PARAMETER;
-		store->type = SWPLS_ID_PROJECTION;
-		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
-		if (status == MB_SUCCESS) {
-			*projection_rec_written = MB_YES;
-		}
-		store->kind = origkind;
-		store->type = origtype;
-	}
-
-	/* write projection file if needed */
-	//	if ((*projection_file_created == MB_NO) &&
-	//		(store->projection_set == MB_YES))
-	//		{
-	//		sprintf(projection_file, "%s.prj", mb_io_ptr->file);
-	//		if ((pfp = fopen(projection_file, "w")) != NULL)
-	//			{
-	//			fprintf(pfp, "%s\n", store->projection_id);
-	//			*projection_file_created = MB_YES;
-	//			}
-	//		fclose(pfp);
-	//		}
-
-	/* write next data to file */
-	status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-} /* mbr_wt_swplssxi */
-/*--------------------------------------------------------------------*/
 int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_swplssxi_rd_data";
 	int status = MB_SUCCESS;
@@ -595,6 +419,181 @@ int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	return (status);
 } /* mbr_swplssxi_rd_data */
+/*--------------------------------------------------------------------*/
+int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_swplssxi";
+	int status = MB_SUCCESS;
+	struct mbsys_swathplus_struct *store;
+	swpls_projection *projection;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* read next data from file */
+	status = mbr_swplssxi_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* get pointers to data structures */
+	store = (struct mbsys_swathplus_struct *)store_ptr;
+	projection = &store->projection;
+
+	/* check if projection has been set from *.prj file, if so, copy into projection structure */
+	if ((store->projection_set == MB_NO) && (mb_io_ptr->projection_initialized == MB_YES)) {
+		projection->time_d = time(NULL);
+		projection->microsec = 0;
+		projection->nchars = strnlen(mb_io_ptr->projection_id, MB_NAME_LENGTH);
+		if (projection->projection_alloc < projection->nchars) {
+			status = mb_reallocd(verbose, __FILE__, __LINE__, (size_t)projection->nchars, (void **)&(projection->projection_id),
+			                     error);
+			if (status != MB_SUCCESS) {
+				projection->projection_alloc = 0;
+			}
+			else {
+				projection->projection_alloc = projection->nchars;
+			}
+		}
+
+		if (status == MB_SUCCESS) {
+			strncpy(projection->projection_id, mb_io_ptr->projection_id, (size_t)projection->nchars);
+			store->projection_set = MB_YES;
+		}
+	}
+	/* check if projection has been read from *mb222 file, if so, tell mb system */
+	else if ((store->projection_set == MB_YES) && (mb_io_ptr->projection_initialized == MB_NO)) {
+		mb_proj_init(verbose, projection->projection_id, &(mb_io_ptr->pjptr), error);
+		strncpy(mb_io_ptr->projection_id, projection->projection_id, MB_NAME_LENGTH);
+		mb_io_ptr->projection_initialized = MB_YES;
+	}
+
+	/* throw away multibeam data if the time stamp makes no sense */
+	if ((status == MB_SUCCESS) && (store->kind == MB_DATA_DATA) && (store->time_i[0] < 2003)) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+	}
+	/* save geographic position fix data */
+	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_NAV) && (store->projection_set == MB_NO)) {
+		mb_navint_add(verbose, mbio_ptr, store->time_d, store->posll.longitude, store->posll.latitude, error);
+	}
+	/* save projected position fix data */
+	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_NAV1) && (store->projection_set == MB_YES)) {
+		mb_navint_add(verbose, mbio_ptr, store->time_d, store->posen.easting, store->posen.northing, error);
+	}
+	/* save heading and attitude fix data */
+	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_ATTITUDE)) {
+		mb_attint_add(verbose, mbio_ptr, store->time_d, store->attitude.height, store->attitude.roll, store->attitude.pitch,
+		              error);
+		mb_hedint_add(verbose, mbio_ptr, store->time_d, store->attitude.heading, error);
+	}
+	/* save tide data (as altitude) */
+	else if ((status == MB_SUCCESS) && (store->kind == MB_DATA_TIDE)) {
+		mb_altint_add(verbose, mbio_ptr, store->time_d, store->tide.tide, error);
+	}
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+} /* mbr_rt_swplssxi */
+/*--------------------------------------------------------------------*/
+int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_swplssxi";
+	int status = MB_SUCCESS;
+	struct mbsys_swathplus_struct *store;
+	int *header_rec_written;
+	int *projection_rec_written;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_swathplus_struct *)store_ptr;
+
+	/* get pointers to saved data */
+	header_rec_written = &(mb_io_ptr->save1);
+	projection_rec_written = &(mb_io_ptr->save2);
+
+	/* write header record if needed */
+	if ((store->sxi_header_set == MB_YES) && (*header_rec_written == MB_NO)) {
+		int origkind = store->kind;
+		int origtype = store->type;
+		store->kind = MB_DATA_HEADER;
+		store->type = SWPLS_ID_SXI_HEADER_DATA;
+		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
+		if (status == MB_SUCCESS) {
+			*header_rec_written = MB_YES;
+		}
+		store->kind = origkind;
+		store->type = origtype;
+	}
+
+	/* write projection record if needed */
+	if ((store->projection_set == MB_YES) && (*projection_rec_written == MB_NO)) {
+		int origkind = store->kind;
+		int origtype = store->type;
+		store->kind = MB_DATA_PARAMETER;
+		store->type = SWPLS_ID_PROJECTION;
+		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
+		if (status == MB_SUCCESS) {
+			*projection_rec_written = MB_YES;
+		}
+		store->kind = origkind;
+		store->type = origtype;
+	}
+
+	/* write projection file if needed */
+	//	if ((*projection_file_created == MB_NO) &&
+	//		(store->projection_set == MB_YES))
+	//		{
+	//		sprintf(projection_file, "%s.prj", mb_io_ptr->file);
+	//		if ((pfp = fopen(projection_file, "w")) != NULL)
+	//			{
+	//			fprintf(pfp, "%s\n", store->projection_id);
+	//			*projection_file_created = MB_YES;
+	//			}
+	//		fclose(pfp);
+	//		}
+
+	/* write next data to file */
+	status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+} /* mbr_wt_swplssxi */
 
 /*--------------------------------------------------------------------*/
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error) {

@@ -39,8 +39,6 @@
 /* turn on debug statements here */
 /* #define MBR_WASSPENLDEBUG 1 */
 
-int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *error);
@@ -217,96 +215,6 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 
 	/* deallocate memory for data descriptor */
 	status = mbsys_wassp_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_wasspenl";
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "About to call mbr_wasspenl_rd_data...\n");
-#endif
-
-	/* read next data from file */
-	status = mbr_wasspenl_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* get pointers to data structures */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "Done with mbr_wasspenl_rd_data: status:%d error:%d record kind:%d\n\n", status, *error, store->kind);
-#endif
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_wasspenl";
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "About to call mbr_wasspenl_wr_data record kind:%d\n", store->kind);
-#endif
-
-	/* write next data to file */
-	status = mbr_wasspenl_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-#ifdef MBR_WASSPENLDEBUG
-	fprintf(stderr, "Done with mbr_wasspenl_wr_data: status:%d error:%d\n", status, *error);
-#endif
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -564,6 +472,53 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_wasspenl";
+	int status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "About to call mbr_wasspenl_rd_data...\n");
+#endif
+
+	/* read next data from file */
+	status = mbr_wasspenl_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* get pointers to data structures */
+	store = (struct mbsys_wassp_struct *)store_ptr;
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "Done with mbr_wasspenl_rd_data: status:%d error:%d record kind:%d\n\n", status, *error, store->kind);
+#endif
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wasspenl_wr_data";
 	int status = MB_SUCCESS;
@@ -683,6 +638,49 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 #ifdef MBR_WASSPENLDEBUG
 	fprintf(stderr, "WASSPENL DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
+#endif
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_wasspenl";
+	int status = MB_SUCCESS;
+	struct mbsys_wassp_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_wassp_struct *)store_ptr;
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "About to call mbr_wasspenl_wr_data record kind:%d\n", store->kind);
+#endif
+
+	/* write next data to file */
+	status = mbr_wasspenl_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+#ifdef MBR_WASSPENLDEBUG
+	fprintf(stderr, "Done with mbr_wasspenl_wr_data: status:%d error:%d\n", status, *error);
 #endif
 
 	/* print output debug statements */

@@ -66,21 +66,12 @@ static const int MBF_SB2100BI_LABEL_LEN = 8;
 /* define end of record label */
 static const char mbf_sb2100bi_eor[2] = {'\r', '\n'};
 
-int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error);
-int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error);
-int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error);
-int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error);
-int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error);
-int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
+/* int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error); */
+/* int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
+/* int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
+/* int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
+/* int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
+/* int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
 
 /* text for ascii file header */
 static const char *mbf_sb2100bi_file_header_text_1 = {"\
@@ -534,81 +525,6 @@ int mbr_info_sb2100b2(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_sb2100bi";
-	int status = MB_SUCCESS;
-	struct mbsys_sb2100_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbsys_sb2100_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
-
-	/* get store structure pointer */
-	store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
-
-	/* set comment pointer */
-	store->comment = (char *)&(store->roll_bias_port);
-
-	/* initialize everything to zeros */
-	mbr_zero_sb2100bi(verbose, mb_io_ptr->raw_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_sb2100bi";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
 int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 	char *function_name = "mbr_zero_sb2100bi";
 	int status = MB_SUCCESS;
@@ -724,115 +640,10 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_sb2100bi";
+int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_alm_sb2100bi";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_sb2100_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_sb2100bi_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* zero sidescan for format MBF_SB2100B2 (43) */
-	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT && mb_io_ptr->format == MBF_SB2100B2)
-		store->npixels = 0;
-
-	/* set unset parameters in sb2100 data storage structure */
-	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT) {
-		/* parameters for MBF_SB2100RW format */
-		store->range_scale = ' ';
-		store->spare_dr[0] = ' ';
-		store->spare_dr[1] = ' ';
-		store->num_algorithms = 1;
-		for (int i = 0; i < 4; i++)
-			store->algorithm_order[i] = ' ';
-		store->svp_corr_ss = 0;
-		store->ss_data_length = 4 * MBSYS_SB2100_PIXELS;
-		store->pixel_size_scale = 'D';
-		store->spare_ss = ' ';
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_sb2100bi";
-	int status = MB_SUCCESS;
-	struct mbsys_sb2100_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
-
-	/* make sure no sidescan is written for format MBF_SB2100B2 (43) */
-	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT && mb_io_ptr->format == MBF_SB2100B2)
-		store->npixels = 0;
-
-	/* write next data to file */
-	status = mbr_sb2100bi_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_data";
-	int status = MB_SUCCESS;
-	struct mbsys_sb2100_struct *store;
-	FILE *mbfp;
-	int done;
-	char *label;
-	int *label_save_flag;
-	int type;
-	int expect;
-	short record_length;
-	char *record_length_ptr;
-	char record_length_fh_str[8];
-	int record_length_fh;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -845,154 +656,52 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	/* set initial status */
+	status = MB_SUCCESS;
 
-	/* get saved values */
-	label = (char *)mb_io_ptr->save_label;
-	label_save_flag = (int *)&mb_io_ptr->save_label_flag;
-	record_length_ptr = (char *)&record_length;
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbsys_sb2100_struct);
+	mb_io_ptr->data_structure_size = 0;
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
+
+	/* get store structure pointer */
+	store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
+
+	/* set comment pointer */
+	store->comment = (char *)&(store->roll_bias_port);
 
 	/* initialize everything to zeros */
-	mbr_zero_sb2100bi(verbose, store_ptr, error);
+	mbr_zero_sb2100bi(verbose, mb_io_ptr->raw_data, error);
 
-	done = MB_NO;
-	expect = MBF_SB2100BI_NONE;
-	while (done == MB_NO) {
-		/* if no label saved get next record label */
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		if (*label_save_flag == MB_NO) {
-			/* get next 10 bytes */
-			if ((status = fread(&label[0], 10, 1, mbfp)) != 1) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-			/* if not a format 42 label read individual
-			    bytes until label found or eof */
-			while (status == MB_SUCCESS && strncmp(label, "SB21BI", 6) != 0) {
-				for (int i = 0; i < 9; i++)
-					label[i] = label[i + 1];
-				if ((status = fread(&label[9], 1, 1, mbfp)) != 1) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-				}
-			}
-		}
-
-		/* else use saved label */
-		else
-			*label_save_flag = MB_NO;
-
-		/* get the label type */
-		if (status == MB_SUCCESS) {
-			/* get type */
-			type = MBF_SB2100BI_NONE;
-			for (int i = 1; i <= MBF_SB2100BI_RECORDS; i++)
-				if (strncmp(label, mbf_sb2100bi_labels[i], 8) == 0)
-					type = i;
-
-			/* get the record length */
-			if (type != MBF_SB2100BI_FH) {
-				mb_get_binary_short(MB_NO, &label[8], &record_length);
-			}
-			else {
-				record_length_fh_str[0] = label[8];
-				record_length_fh_str[1] = label[9];
-				if ((status = fread(&record_length_fh_str[2], 4, 1, mbfp)) != 1) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-				}
-				record_length_fh_str[6] = 0;
-				record_length_fh_str[7] = 0;
-				sscanf(record_length_fh_str, "%d", &record_length_fh);
-			}
-		}
-
-		/* read the appropriate data records */
-		if ((status == MB_FAILURE || type == MBF_SB2100BI_NONE) && expect == MBF_SB2100BI_NONE) {
-			done = MB_YES;
-		}
-		else if ((status == MB_FAILURE || type == MBF_SB2100BI_NONE) && expect != MBF_SB2100BI_NONE) {
-			done = MB_YES;
-			*error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-		}
-		else if (expect != MBF_SB2100BI_NONE && expect != type) {
-			done = MB_YES;
-			expect = MBF_SB2100BI_NONE;
-			*label_save_flag = MB_YES;
-		}
-		else if (type == MBF_SB2100BI_FH) {
-			status = mbr_sb2100bi_rd_fh(verbose, mbfp, record_length_fh, error);
-			if (status == MB_SUCCESS) {
-				done = MB_NO;
-				expect = MBF_SB2100BI_NONE;
-				store->kind = MB_DATA_NONE;
-			}
-		}
-		else if (type == MBF_SB2100BI_PR) {
-			status = mbr_sb2100bi_rd_pr(verbose, mbfp, store, record_length, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				store->kind = MB_DATA_VELOCITY_PROFILE;
-			}
-		}
-		else if (type == MBF_SB2100BI_TR) {
-			status = mbr_sb2100bi_rd_tr(verbose, mbfp, store, record_length, error);
-			if (status == MB_SUCCESS) {
-				done = MB_YES;
-				store->kind = MB_DATA_COMMENT;
-			}
-		}
-		else if (type == MBF_SB2100BI_DH) {
-			status = mbr_sb2100bi_rd_dh(verbose, mbfp, store, record_length, error);
-			if (status == MB_SUCCESS) {
-				done = MB_NO;
-				store->kind = MB_DATA_DATA;
-				expect = MBF_SB2100BI_BR;
-			}
-		}
-		else if (type == MBF_SB2100BI_BR) {
-			status = mbr_sb2100bi_rd_br(verbose, mbfp, store, record_length, error);
-			if (status == MB_SUCCESS && expect == MBF_SB2100BI_BR) {
-				done = MB_NO;
-				store->kind = MB_DATA_DATA;
-				expect = MBF_SB2100BI_SR;
-			}
-			else if (status == MB_SUCCESS) {
-				done = MB_YES;
-				expect = MBF_SB2100BI_NONE;
-				*error = MB_ERROR_UNINTELLIGIBLE;
-				status = MB_FAILURE;
-			}
-			else if (status == MB_FAILURE) {
-				done = MB_YES;
-				expect = MBF_SB2100BI_NONE;
-			}
-		}
-		else if (type == MBF_SB2100BI_SR) {
-			status = mbr_sb2100bi_rd_sr(verbose, mbfp, store, record_length, error);
-			if (status == MB_SUCCESS && expect == MBF_SB2100BI_SR) {
-				done = MB_YES;
-			}
-			else if (status == MB_SUCCESS) {
-				done = MB_YES;
-				expect = MBF_SB2100BI_NONE;
-				*error = MB_ERROR_UNINTELLIGIBLE;
-				status = MB_FAILURE;
-			}
-			else if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE && expect == MBF_SB2100BI_SR) {
-				/* this preserves the bathymetry
-				   that has already been read */
-				done = MB_YES;
-				status = MB_SUCCESS;
-				*error = MB_ERROR_NO_ERROR;
-			}
-		}
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error) {
+	char *function_name = "mbr_dem_sb2100bi";
+	int status = MB_SUCCESS;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* deallocate memory for data descriptor */
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1638,11 +1347,197 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_data";
+int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
+	char *function_name = "mbr_sb2100bi_rd_data";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 	FILE *mbfp;
+	int done;
+	char *label;
+	int *label_save_flag;
+	int type;
+	int expect;
+	short record_length;
+	char *record_length_ptr;
+	char record_length_fh_str[8];
+	int record_length_fh;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_sb2100_struct *)store_ptr;
+	mbfp = mb_io_ptr->mbfp;
+
+	/* get saved values */
+	label = (char *)mb_io_ptr->save_label;
+	label_save_flag = (int *)&mb_io_ptr->save_label_flag;
+	record_length_ptr = (char *)&record_length;
+
+	/* initialize everything to zeros */
+	mbr_zero_sb2100bi(verbose, store_ptr, error);
+
+	done = MB_NO;
+	expect = MBF_SB2100BI_NONE;
+	while (done == MB_NO) {
+		/* if no label saved get next record label */
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		if (*label_save_flag == MB_NO) {
+			/* get next 10 bytes */
+			if ((status = fread(&label[0], 10, 1, mbfp)) != 1) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+			/* if not a format 42 label read individual
+			    bytes until label found or eof */
+			while (status == MB_SUCCESS && strncmp(label, "SB21BI", 6) != 0) {
+				for (int i = 0; i < 9; i++)
+					label[i] = label[i + 1];
+				if ((status = fread(&label[9], 1, 1, mbfp)) != 1) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+				}
+			}
+		}
+
+		/* else use saved label */
+		else
+			*label_save_flag = MB_NO;
+
+		/* get the label type */
+		if (status == MB_SUCCESS) {
+			/* get type */
+			type = MBF_SB2100BI_NONE;
+			for (int i = 1; i <= MBF_SB2100BI_RECORDS; i++)
+				if (strncmp(label, mbf_sb2100bi_labels[i], 8) == 0)
+					type = i;
+
+			/* get the record length */
+			if (type != MBF_SB2100BI_FH) {
+				mb_get_binary_short(MB_NO, &label[8], &record_length);
+			}
+			else {
+				record_length_fh_str[0] = label[8];
+				record_length_fh_str[1] = label[9];
+				if ((status = fread(&record_length_fh_str[2], 4, 1, mbfp)) != 1) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+				}
+				record_length_fh_str[6] = 0;
+				record_length_fh_str[7] = 0;
+				sscanf(record_length_fh_str, "%d", &record_length_fh);
+			}
+		}
+
+		/* read the appropriate data records */
+		if ((status == MB_FAILURE || type == MBF_SB2100BI_NONE) && expect == MBF_SB2100BI_NONE) {
+			done = MB_YES;
+		}
+		else if ((status == MB_FAILURE || type == MBF_SB2100BI_NONE) && expect != MBF_SB2100BI_NONE) {
+			done = MB_YES;
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+		}
+		else if (expect != MBF_SB2100BI_NONE && expect != type) {
+			done = MB_YES;
+			expect = MBF_SB2100BI_NONE;
+			*label_save_flag = MB_YES;
+		}
+		else if (type == MBF_SB2100BI_FH) {
+			status = mbr_sb2100bi_rd_fh(verbose, mbfp, record_length_fh, error);
+			if (status == MB_SUCCESS) {
+				done = MB_NO;
+				expect = MBF_SB2100BI_NONE;
+				store->kind = MB_DATA_NONE;
+			}
+		}
+		else if (type == MBF_SB2100BI_PR) {
+			status = mbr_sb2100bi_rd_pr(verbose, mbfp, store, record_length, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				store->kind = MB_DATA_VELOCITY_PROFILE;
+			}
+		}
+		else if (type == MBF_SB2100BI_TR) {
+			status = mbr_sb2100bi_rd_tr(verbose, mbfp, store, record_length, error);
+			if (status == MB_SUCCESS) {
+				done = MB_YES;
+				store->kind = MB_DATA_COMMENT;
+			}
+		}
+		else if (type == MBF_SB2100BI_DH) {
+			status = mbr_sb2100bi_rd_dh(verbose, mbfp, store, record_length, error);
+			if (status == MB_SUCCESS) {
+				done = MB_NO;
+				store->kind = MB_DATA_DATA;
+				expect = MBF_SB2100BI_BR;
+			}
+		}
+		else if (type == MBF_SB2100BI_BR) {
+			status = mbr_sb2100bi_rd_br(verbose, mbfp, store, record_length, error);
+			if (status == MB_SUCCESS && expect == MBF_SB2100BI_BR) {
+				done = MB_NO;
+				store->kind = MB_DATA_DATA;
+				expect = MBF_SB2100BI_SR;
+			}
+			else if (status == MB_SUCCESS) {
+				done = MB_YES;
+				expect = MBF_SB2100BI_NONE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				status = MB_FAILURE;
+			}
+			else if (status == MB_FAILURE) {
+				done = MB_YES;
+				expect = MBF_SB2100BI_NONE;
+			}
+		}
+		else if (type == MBF_SB2100BI_SR) {
+			status = mbr_sb2100bi_rd_sr(verbose, mbfp, store, record_length, error);
+			if (status == MB_SUCCESS && expect == MBF_SB2100BI_SR) {
+				done = MB_YES;
+			}
+			else if (status == MB_SUCCESS) {
+				done = MB_YES;
+				expect = MBF_SB2100BI_NONE;
+				*error = MB_ERROR_UNINTELLIGIBLE;
+				status = MB_FAILURE;
+			}
+			else if (status == MB_FAILURE && *error == MB_ERROR_UNINTELLIGIBLE && expect == MBF_SB2100BI_SR) {
+				/* this preserves the bathymetry
+				   that has already been read */
+				done = MB_YES;
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
+			}
+		}
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_sb2100bi";
+	int status = MB_SUCCESS;
+	struct mbsys_sb2100_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1653,39 +1548,34 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
+	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
 	store = (struct mbsys_sb2100_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
 
-	/* write file header if not written yet */
-	if (mb_io_ptr->save_flag == MB_NO) {
-		status = mbr_sb2100bi_wr_fh(verbose, mbfp, error);
-		mb_io_ptr->save_flag = MB_YES;
-	}
+	/* read next data from file */
+	status = mbr_sb2100bi_rd_data(verbose, mbio_ptr, store_ptr, error);
 
-	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
-		status = mbr_sb2100bi_wr_pr(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_COMMENT) {
-		status = mbr_sb2100bi_wr_tr(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_DATA) {
-		status = mbr_sb2100bi_wr_dh(verbose, mbfp, store, error);
-		status = mbr_sb2100bi_wr_br(verbose, mbfp, store, error);
-		status = mbr_sb2100bi_wr_sr(verbose, mbfp, store, error);
-	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
-	}
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
 
-	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  store record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	/* zero sidescan for format MBF_SB2100B2 (43) */
+	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT && mb_io_ptr->format == MBF_SB2100B2)
+		store->npixels = 0;
+
+	/* set unset parameters in sb2100 data storage structure */
+	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT) {
+		/* parameters for MBF_SB2100RW format */
+		store->range_scale = ' ';
+		store->spare_dr[0] = ' ';
+		store->spare_dr[1] = ' ';
+		store->num_algorithms = 1;
+		for (int i = 0; i < 4; i++)
+			store->algorithm_order[i] = ' ';
+		store->svp_corr_ss = 0;
+		store->ss_data_length = 4 * MBSYS_SB2100_PIXELS;
+		store->pixel_size_scale = 'D';
+		store->spare_ss = ' ';
 	}
 
 	/* print output debug statements */
@@ -2390,6 +2280,107 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 			status = MB_SUCCESS;
 		}
 	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
+	char *function_name = "mbr_sb2100bi_wr_data";
+	int status = MB_SUCCESS;
+	struct mbsys_sb2100_struct *store;
+	FILE *mbfp;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_sb2100_struct *)store_ptr;
+	mbfp = mb_io_ptr->mbfp;
+
+	/* write file header if not written yet */
+	if (mb_io_ptr->save_flag == MB_NO) {
+		status = mbr_sb2100bi_wr_fh(verbose, mbfp, error);
+		mb_io_ptr->save_flag = MB_YES;
+	}
+
+	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
+		status = mbr_sb2100bi_wr_pr(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_COMMENT) {
+		status = mbr_sb2100bi_wr_tr(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_DATA) {
+		status = mbr_sb2100bi_wr_dh(verbose, mbfp, store, error);
+		status = mbr_sb2100bi_wr_br(verbose, mbfp, store, error);
+		status = mbr_sb2100bi_wr_sr(verbose, mbfp, store, error);
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  store record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_sb2100bi";
+	int status = MB_SUCCESS;
+	struct mbsys_sb2100_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_sb2100_struct *)store_ptr;
+
+	/* make sure no sidescan is written for format MBF_SB2100B2 (43) */
+	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT && mb_io_ptr->format == MBF_SB2100B2)
+		store->npixels = 0;
+
+	/* write next data to file */
+	status = mbr_sb2100bi_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
