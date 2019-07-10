@@ -40,10 +40,6 @@
 /* turn on debug statements here */
 //#define MBR_KEMKMALL_DEBUG 1
 
-int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error);    //size_t block_size
-int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, void *new_index_ptr, int *error);
-int mbr_kemkmall_indextable_compare(const void *a, const void *b);
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm_type_ptr, int *error);
@@ -274,13 +270,13 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_rt_kemkmall";
+
+int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_kemkmall_create_dgm_index_table";
   int status = MB_SUCCESS;
-  int interp_error = MB_ERROR_NO_ERROR;
   struct mbsys_kmbes_struct *store = NULL;
-  int *file_indexed = NULL;
-  double *pixel_size, *swath_width;
+  struct mbsys_kmbes_index_table *dgm_index_table = NULL;
+  size_t size_bytes = 0;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -290,107 +286,217 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
-
-  /* get pointers to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get saved values */
-  file_indexed = (int *)&mb_io_ptr->save2;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
-
-  /* if needed index the file */
-  if (*file_indexed == MB_NO) {
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "About to call mbr_kemkmall_index_data...\n");
-#endif
-    status = mbr_kemkmall_index_data(verbose, mbio_ptr, store_ptr, error);
-  }
-
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "\nAbout to call mbr_kemkmall_rd_data...\n");
-#endif
-
-  /* read next data from file */
-  status = mbr_kemkmall_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-  /* get pointers to data structures */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-
-  /* if this is a ping and the first time read by MB-System generate pseudosidescan */
-  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
-    && store->xmb.pseudosidescan_enabled == MB_NO) {
-		status = mbsys_kmbes_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
-  }
-
-  /* set error and kind in mb_io_ptr */
-  mb_io_ptr->new_error = *error;
-  mb_io_ptr->new_kind = store->kind;
-
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "Done with mbr_kemkmall_rd_data: status:%d error:%d kind:%d\n", status, *error, store->kind);
-#endif
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  /* return status */
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_wt_kemkmall";
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-    /* check for non-null pointers */
-    assert(mbio_ptr != NULL);
-    assert(store_ptr != NULL);
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+  /* we will store the datagram index table in mbio descriptor field saveptr1 */
+  dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
+
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
 
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "\nAbout to call mbr_kemkmall_wr_data record kind:%d\n", store->kind);
-#endif
+  /* allocate the datagram index table struct (vector struct) */
+  status = mb_mallocd(verbose, __FILE__, __LINE__,
+             sizeof(struct mbsys_kmbes_index_table), (void **)(&dgm_index_table), error);
 
-  /* write next data to file */
-  status = mbr_kemkmall_wr_data(verbose, mbio_ptr, store_ptr, error);
+  if (status == MB_SUCCESS) {
+    dgm_index_table->dgm_count = 0;
 
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "Done with mbr_kemkmall_wr_data: status:%d error:%d\n", status, *error);
-#endif
+    /* allocate the datagram index table array */
+    size_bytes = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE * sizeof(struct mbsys_kmbes_index);
+    status = mb_mallocd(verbose, __FILE__, __LINE__, size_bytes,
+               (void **)(&dgm_index_table->indextable), error);
+    if (status == MB_SUCCESS) {
+      dgm_index_table->num_alloc = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE;
+    } else {
+      dgm_index_table->num_alloc = 0;
 
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
+    }
   }
 
+  /* init internal data structure variables */
+  mb_io_ptr->saveptr1 = (void *)dgm_index_table;
+  mb_io_ptr->save1 = 0;     // most recently read entry in index table, after indexing
+  mb_io_ptr->save2 = MB_NO; // file has been indexed
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:      %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:  %d\n", status);
+    }
+
   /* return status */
-  return (status);
-}
+  return(status);
+};
+/*--------------------------------------------------------------------*/
+
+int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, void *new_index_ptr, int *error) {
+  char *function_name = "mbr_kemkmall_add_dgm_to_dgm_index_table";
+  int status = MB_SUCCESS;
+  struct mbsys_kmbes_index_table *dgm_index_table = NULL;
+  struct mbsys_kmbes_index *new_dgm_index = NULL;
+  size_t dgm_count = 0;
+  size_t new_num_alloc = 0;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+    fprintf(stderr, "dbg2       index_table_ptr: %p\n", (void *)index_table_ptr);
+    fprintf(stderr, "dbg2       new_index_ptr:   %p\n", (void *)new_index_ptr);
+  }
+
+  /* get pointer to datagram index table */
+  dgm_index_table = (struct mbsys_kmbes_index_table *)index_table_ptr;
+
+  /* get pointer to the new datagram index structure */
+  new_dgm_index = (struct mbsys_kmbes_index *)new_index_ptr;
+
+  /* reallocate the datagram index table array if needed */
+  dgm_count = dgm_index_table->dgm_count;
+  if (dgm_count >= (dgm_index_table->num_alloc-1)) {
+    new_num_alloc = dgm_index_table->num_alloc + MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE;
+
+    /* reallocate the datagram index table array */
+    status = mb_reallocd(verbose, __FILE__, __LINE__,
+               sizeof(struct mbsys_kmbes_index) * new_num_alloc,
+               (void **)(&dgm_index_table->indextable), error);
+
+    if (status == MB_SUCCESS) {
+      dgm_index_table->num_alloc = new_num_alloc;
+    } else {
+      dgm_index_table->num_alloc = 0;
+      dgm_index_table->dgm_count = 0;
+    }
+  }
+
+  if (status == MB_SUCCESS) {
+    dgm_index_table->indextable[dgm_count] = *new_dgm_index;
+    dgm_index_table->dgm_count++;
+  }
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:      %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:  %d\n", status);
+    }
+
+  /* return status */
+  return(status);
+};
+
+/*--------------------------------------------------------------------*/
+
+int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
+  struct mbsys_kmbes_index *aa = NULL;
+  struct mbsys_kmbes_index *bb = NULL;
+  int result = 0;
+
+  aa = (struct mbsys_kmbes_index*) a;
+  bb = (struct mbsys_kmbes_index*) b;
+
+  /* compare so that index table of datagrams is ordered correctly
+      - Any comment datagrams should be at the beginning in time order
+      - The first datagram after any comments should be the IIP (installation parameters)
+      - The first datagram after the IIP should be the first IOP (runtime parameters)
+      - All other datagrams should be in time order, excepting that all datagrams
+        associated with a ping should be grouped together (MRZ, XMS, MWC)
+      - Within a ping datagram group, the MRZ datagrams should be first, then
+        the XMS datagram, then the MWC datagrams.
+      - The MRZ datagrams in a ping should be grouped by receiver index
+      - The MWC datagrams in a ping should be grouped by reciever index
+      */
+
+  /* deal with comment datagrams */
+  if (aa->emdgm_type == XMC || bb->emdgm_type == XMC) {
+    if (aa->emdgm_type == bb->emdgm_type) {
+      if (aa->time_d < bb->time_d)
+        result = -1;
+      else if (aa->time_d > bb->time_d)
+        result = 1;
+      else
+        result = 0;
+    }
+    else if (aa->emdgm_type == XMC)
+      result = -1;
+    else // if (bb->emdgm_type == XMC)
+      result = 1;
+  }
+
+  /* deal with IIP datagram */
+  else if (aa->emdgm_type == IIP) {
+    result = -1;
+  }
+  else if (bb->emdgm_type == IIP) {
+  result = 1;
+  }
+
+  /* deal with XMB datagram */
+  else if (aa->emdgm_type == XMB) {
+    result = -1;
+  }
+  else if (bb->emdgm_type == XMB) {
+  result = 1;
+  }
+
+  /* deal with both datagrams being ping datagrams (MRZ, XMS, MWC) */
+  else if ((aa->emdgm_type == MRZ || aa->emdgm_type == XMS || bb->emdgm_type == MWC)
+      && (bb->emdgm_type == MRZ || bb->emdgm_type == XMS || bb->emdgm_type == MWC)) {
+
+    /* if ping numbers are different order by time stamp */
+    if (aa->ping_num != bb->ping_num) {
+      if (aa->time_d < bb->time_d)
+        result = -1;
+      else if (aa->time_d > bb->time_d)
+        result = 1;
+      else
+        result = 0;
+    }
+
+    /* if ping numbers match */
+    else { /* if (aa->ping_num == bb->ping_num) */
+
+      /* if ping numbers match and datagram types are different order by MRZ < XMS < MWC */
+      if ((aa->emdgm_type == MRZ && bb->emdgm_type == XMS)
+          || (aa->emdgm_type == MRZ && bb->emdgm_type == MWC)
+          || (aa->emdgm_type == XMS && bb->emdgm_type == MWC))
+        result = -1;
+      else if ((bb->emdgm_type == MRZ && aa->emdgm_type == XMS)
+          || (bb->emdgm_type == MRZ && aa->emdgm_type == MWC)
+          || (bb->emdgm_type == XMS && aa->emdgm_type == MWC))
+        result = 1;
+
+      /* if ping numbers match and datagram types match order by receiver index
+          - set ping timestamp for later datagrams within the ping if possible */
+      else { //if (aa->emdgm_type == bb->emdgm_type)
+        if (aa->rx_index < bb->rx_index)
+          result = -1;
+        else if (aa->rx_index > bb->rx_index)
+          result = 1;
+        else // if (aa->rx_index == bb->rx_index) ==> this shouldn't happen
+          result = 0;
+      }
+    }
+  }
+
+  /* deal with all other pairs of datagrams - order by timestamp */
+  else if (aa->time_d < bb->time_d)
+    result = -1;
+  else if (aa->time_d > bb->time_d)
+    result = 1;
+  else
+    result = 0;
+
+  return(result);
+};
 
 /*--------------------------------------------------------------------*/
 
@@ -742,15 +848,14 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   return (status);
 
 };
-
 /*--------------------------------------------------------------------*/
-
-int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_create_dgm_index_table";
+int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_rt_kemkmall";
   int status = MB_SUCCESS;
+  int interp_error = MB_ERROR_NO_ERROR;
   struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_index_table *dgm_index_table = NULL;
-  size_t size_bytes = 0;
+  int *file_indexed = NULL;
+  double *pixel_size, *swath_width;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -761,217 +866,106 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get pointer to mbio descriptor */
+  /* get pointers to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* we will store the datagram index table in mbio descriptor field saveptr1 */
-  dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
+  /* get saved values */
+  file_indexed = (int *)&mb_io_ptr->save2;
+	pixel_size = (double *)&mb_io_ptr->saved1;
+	swath_width = (double *)&mb_io_ptr->saved2;
 
-  /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-
-  /* allocate the datagram index table struct (vector struct) */
-  status = mb_mallocd(verbose, __FILE__, __LINE__,
-             sizeof(struct mbsys_kmbes_index_table), (void **)(&dgm_index_table), error);
-
-  if (status == MB_SUCCESS) {
-    dgm_index_table->dgm_count = 0;
-
-    /* allocate the datagram index table array */
-    size_bytes = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE * sizeof(struct mbsys_kmbes_index);
-    status = mb_mallocd(verbose, __FILE__, __LINE__, size_bytes,
-               (void **)(&dgm_index_table->indextable), error);
-    if (status == MB_SUCCESS) {
-      dgm_index_table->num_alloc = MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE;
-    } else {
-      dgm_index_table->num_alloc = 0;
-
-    }
+  /* if needed index the file */
+  if (*file_indexed == MB_NO) {
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "About to call mbr_kemkmall_index_data...\n");
+#endif
+    status = mbr_kemkmall_index_data(verbose, mbio_ptr, store_ptr, error);
   }
 
-  /* init internal data structure variables */
-  mb_io_ptr->saveptr1 = (void *)dgm_index_table;
-  mb_io_ptr->save1 = 0;     // most recently read entry in index table, after indexing
-  mb_io_ptr->save2 = MB_NO; // file has been indexed
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "\nAbout to call mbr_kemkmall_rd_data...\n");
+#endif
 
-    /* print output debug statements */
-    if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-        fprintf(stderr, "dbg2  Return values:\n");
-        fprintf(stderr, "dbg2       error:      %d\n", *error);
-        fprintf(stderr, "dbg2  Return status:\n");
-        fprintf(stderr, "dbg2       status:  %d\n", status);
-    }
+  /* read next data from file */
+  status = mbr_kemkmall_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+  /* get pointers to data structures */
+  store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  /* if this is a ping and the first time read by MB-System generate pseudosidescan */
+  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
+    && store->xmb.pseudosidescan_enabled == MB_NO) {
+		status = mbsys_kmbes_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
+  }
+
+  /* set error and kind in mb_io_ptr */
+  mb_io_ptr->new_error = *error;
+  mb_io_ptr->new_kind = store->kind;
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "Done with mbr_kemkmall_rd_data: status:%d error:%d kind:%d\n", status, *error, store->kind);
+#endif
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
 
   /* return status */
-  return(status);
-};
-
+  return (status);
+}
 /*--------------------------------------------------------------------*/
-
-int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, void *new_index_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_add_dgm_to_dgm_index_table";
+int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_wt_kemkmall";
   int status = MB_SUCCESS;
-  struct mbsys_kmbes_index_table *dgm_index_table = NULL;
-  struct mbsys_kmbes_index *new_dgm_index = NULL;
-  size_t dgm_count = 0;
-  size_t new_num_alloc = 0;
+  struct mbsys_kmbes_struct *store = NULL;
 
   /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-    fprintf(stderr, "dbg2       index_table_ptr: %p\n", (void *)index_table_ptr);
-    fprintf(stderr, "dbg2       new_index_ptr:   %p\n", (void *)new_index_ptr);
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get pointer to datagram index table */
-  dgm_index_table = (struct mbsys_kmbes_index_table *)index_table_ptr;
+    /* check for non-null pointers */
+    assert(mbio_ptr != NULL);
+    assert(store_ptr != NULL);
 
-  /* get pointer to the new datagram index structure */
-  new_dgm_index = (struct mbsys_kmbes_index *)new_index_ptr;
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* reallocate the datagram index table array if needed */
-  dgm_count = dgm_index_table->dgm_count;
-  if (dgm_count >= (dgm_index_table->num_alloc-1)) {
-    new_num_alloc = dgm_index_table->num_alloc + MBSYS_KMBES_INDEX_TABLE_BLOCK_SIZE;
+  /* get pointer to raw data structure */
+  store = (struct mbsys_kmbes_struct *)store_ptr;
 
-    /* reallocate the datagram index table array */
-    status = mb_reallocd(verbose, __FILE__, __LINE__,
-               sizeof(struct mbsys_kmbes_index) * new_num_alloc,
-               (void **)(&dgm_index_table->indextable), error);
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "\nAbout to call mbr_kemkmall_wr_data record kind:%d\n", store->kind);
+#endif
 
-    if (status == MB_SUCCESS) {
-      dgm_index_table->num_alloc = new_num_alloc;
-    } else {
-      dgm_index_table->num_alloc = 0;
-      dgm_index_table->dgm_count = 0;
-    }
+  /* write next data to file */
+  status = mbr_kemkmall_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "Done with mbr_kemkmall_wr_data: status:%d error:%d\n", status, *error);
+#endif
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
   }
-
-  if (status == MB_SUCCESS) {
-    dgm_index_table->indextable[dgm_count] = *new_dgm_index;
-    dgm_index_table->dgm_count++;
-  }
-
-    /* print output debug statements */
-    if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-        fprintf(stderr, "dbg2  Return values:\n");
-        fprintf(stderr, "dbg2       error:      %d\n", *error);
-        fprintf(stderr, "dbg2  Return status:\n");
-        fprintf(stderr, "dbg2       status:  %d\n", status);
-    }
 
   /* return status */
-  return(status);
-};
-
-/*--------------------------------------------------------------------*/
-
-int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
-  struct mbsys_kmbes_index *aa = NULL;
-  struct mbsys_kmbes_index *bb = NULL;
-  int result = 0;
-
-  aa = (struct mbsys_kmbes_index*) a;
-  bb = (struct mbsys_kmbes_index*) b;
-
-  /* compare so that index table of datagrams is ordered correctly
-      - Any comment datagrams should be at the beginning in time order
-      - The first datagram after any comments should be the IIP (installation parameters)
-      - The first datagram after the IIP should be the first IOP (runtime parameters)
-      - All other datagrams should be in time order, excepting that all datagrams
-        associated with a ping should be grouped together (MRZ, XMS, MWC)
-      - Within a ping datagram group, the MRZ datagrams should be first, then
-        the XMS datagram, then the MWC datagrams.
-      - The MRZ datagrams in a ping should be grouped by receiver index
-      - The MWC datagrams in a ping should be grouped by reciever index
-      */
-
-  /* deal with comment datagrams */
-  if (aa->emdgm_type == XMC || bb->emdgm_type == XMC) {
-    if (aa->emdgm_type == bb->emdgm_type) {
-      if (aa->time_d < bb->time_d)
-        result = -1;
-      else if (aa->time_d > bb->time_d)
-        result = 1;
-      else
-        result = 0;
-    }
-    else if (aa->emdgm_type == XMC)
-      result = -1;
-    else // if (bb->emdgm_type == XMC)
-      result = 1;
-  }
-
-  /* deal with IIP datagram */
-  else if (aa->emdgm_type == IIP) {
-    result = -1;
-  }
-  else if (bb->emdgm_type == IIP) {
-  result = 1;
-  }
-
-  /* deal with XMB datagram */
-  else if (aa->emdgm_type == XMB) {
-    result = -1;
-  }
-  else if (bb->emdgm_type == XMB) {
-  result = 1;
-  }
-
-  /* deal with both datagrams being ping datagrams (MRZ, XMS, MWC) */
-  else if ((aa->emdgm_type == MRZ || aa->emdgm_type == XMS || bb->emdgm_type == MWC)
-      && (bb->emdgm_type == MRZ || bb->emdgm_type == XMS || bb->emdgm_type == MWC)) {
-
-    /* if ping numbers are different order by time stamp */
-    if (aa->ping_num != bb->ping_num) {
-      if (aa->time_d < bb->time_d)
-        result = -1;
-      else if (aa->time_d > bb->time_d)
-        result = 1;
-      else
-        result = 0;
-    }
-
-    /* if ping numbers match */
-    else { /* if (aa->ping_num == bb->ping_num) */
-
-      /* if ping numbers match and datagram types are different order by MRZ < XMS < MWC */
-      if ((aa->emdgm_type == MRZ && bb->emdgm_type == XMS)
-          || (aa->emdgm_type == MRZ && bb->emdgm_type == MWC)
-          || (aa->emdgm_type == XMS && bb->emdgm_type == MWC))
-        result = -1;
-      else if ((bb->emdgm_type == MRZ && aa->emdgm_type == XMS)
-          || (bb->emdgm_type == MRZ && aa->emdgm_type == MWC)
-          || (bb->emdgm_type == XMS && aa->emdgm_type == MWC))
-        result = 1;
-
-      /* if ping numbers match and datagram types match order by receiver index
-          - set ping timestamp for later datagrams within the ping if possible */
-      else { //if (aa->emdgm_type == bb->emdgm_type)
-        if (aa->rx_index < bb->rx_index)
-          result = -1;
-        else if (aa->rx_index > bb->rx_index)
-          result = 1;
-        else // if (aa->rx_index == bb->rx_index) ==> this shouldn't happen
-          result = 0;
-      }
-    }
-  }
-
-  /* deal with all other pairs of datagrams - order by timestamp */
-  else if (aa->time_d < bb->time_d)
-    result = -1;
-  else if (aa->time_d > bb->time_d)
-    result = 1;
-  else
-    result = 0;
-
-  return(result);
-};
+  return (status);
+}
 
 /*--------------------------------------------------------------------*/
 

@@ -41,7 +41,7 @@
 /* turn on debug statements here */
 // #define MBF_SWPLSSXP_DEBUG 1
 
-int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+// int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -230,6 +230,156 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 } /* mbr_dem_swplssxp */
 /*--------------------------------------------------------------------*/
+int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_swplssxp_rd_data";
+	int status = MB_SUCCESS;
+	struct mbsys_swathplus_struct *store;
+	char **bufferptr;
+	char *buffer;
+	int *bufferalloc;
+	int *recordid;
+	int *recordidlast;
+	int *size;
+	int *nbadrec;
+	int done;
+	size_t read_len;
+	int skip;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_swathplus_struct *)store_ptr;
+
+	/* get saved values */
+	recordid = (int *)&mb_io_ptr->save3;
+	recordidlast = (int *)&mb_io_ptr->save4;
+	bufferptr = (char **)&mb_io_ptr->saveptr1;
+	buffer = (char *)*bufferptr;
+	bufferalloc = (int *)&mb_io_ptr->save6;
+	size = (int *)&mb_io_ptr->save8;
+	nbadrec = (int *)&mb_io_ptr->save9;
+
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	/* loop over reading data until a record is ready for return */
+	done = MB_NO;
+	*error = MB_ERROR_NO_ERROR;
+	while (done == MB_NO) {
+		/* read next record header into buffer */
+		read_len = (size_t)SWPLS_SIZE_BLOCKHEADER;
+		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+
+		/* check header - if not a good header read a byte
+		    at a time until a good header is found */
+		skip = 0;
+		while (status == MB_SUCCESS && swpls_chk_header(verbose, mbio_ptr, buffer, recordid, size, error) != MB_SUCCESS) {
+			/* get next byte */
+			for (int i = 0; i < SWPLS_SIZE_BLOCKHEADER - 1; i++) {
+				buffer[i] = buffer[i + 1];
+			}
+			read_len = (size_t)1;
+			status = mb_fileio_get(verbose, mbio_ptr, &buffer[SWPLS_SIZE_BLOCKHEADER - 1], &read_len, error);
+			skip++;
+		}
+
+		/* report problem */
+		if ((skip > 0) && (verbose >= 0)) {
+			if (*nbadrec == 0) {
+				fprintf(stderr, "The MBR_SWPLSSXP module skipped data between identified\n"
+				                "data records. Something is broken, most probably the data...\n"
+				                "However, the data may include a data record type that we\n"
+				                "haven't seen yet, or there could be an error in the code.\n"
+				                "If skipped data are reported multiple times, \n"
+				                "we recommend you send a data sample and problem \n"
+				                "description to the MB-System team \n"
+				                "(caress@mbari.org and dale@ldeo.columbia.edu)\n"
+				                "Have a nice day...\n");
+			}
+			fprintf(stderr, "MBR_SWPLSSXP skipped %d bytes between records %4.4X:%d and %4.4X:%d\n", skip, *recordidlast,
+			        *recordidlast, *recordid, *recordid);
+			(*nbadrec)++;
+		}
+
+		*recordidlast = *recordid;
+		store->type = *recordid;
+
+		/* allocate memory to read rest of record if necessary */
+		if (*bufferalloc < *size + SWPLS_SIZE_BLOCKHEADER) {
+			status = mb_reallocd(verbose, __FILE__, __LINE__, *size + SWPLS_SIZE_BLOCKHEADER, (void **)bufferptr, error);
+			if (status != MB_SUCCESS) {
+				*bufferalloc = 0;
+				done = MB_YES;
+			}
+			else {
+				*bufferalloc = *size + SWPLS_SIZE_BLOCKHEADER;
+				buffer = (char *)*bufferptr;
+			}
+		}
+
+		/* read the rest of the record */
+		if (status == MB_SUCCESS) {
+			read_len = (size_t)*size;
+			status = mb_fileio_get(verbose, mbio_ptr, &buffer[SWPLS_SIZE_BLOCKHEADER], &read_len, error);
+		}
+
+		/* parse the data record */
+		if ((status == MB_SUCCESS) && (done == MB_NO)) {
+			if (*recordid == SWPLS_ID_SXP_HEADER_DATA) {
+				status = swpls_rd_sxpheader(verbose, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (*recordid == SWPLS_ID_PROCESSED_PING) {
+				status = swpls_rd_sxpping(verbose, buffer, store_ptr, SWPLS_ID_PROCESSED_PING, error);
+				done = MB_YES;
+			}
+			else if (*recordid == SWPLS_ID_PROCESSED_PING2) {
+				status = swpls_rd_sxpping(verbose, buffer, store_ptr, SWPLS_ID_PROCESSED_PING2, error);
+				done = MB_YES;
+			}
+			else if (*recordid == SWPLS_ID_COMMENT) {
+				status = swpls_rd_comment(verbose, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (*recordid == SWPLS_ID_PROJECTION) {
+				status = swpls_rd_projection(verbose, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else {
+				done = MB_NO;
+			}
+		}
+
+		if (status == MB_FAILURE) {
+			done = MB_YES;
+		}
+	}
+
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+} /* mbr_swplssxp_rd_data */
+/*--------------------------------------------------------------------*/
 int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_swplssxp";
 	int status = MB_SUCCESS;
@@ -387,156 +537,6 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	return (status);
 } /* mbr_wt_swplssxp */
-/*--------------------------------------------------------------------*/
-int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_swplssxp_rd_data";
-	int status = MB_SUCCESS;
-	struct mbsys_swathplus_struct *store;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
-	int *recordid;
-	int *recordidlast;
-	int *size;
-	int *nbadrec;
-	int done;
-	size_t read_len;
-	int skip;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_swathplus_struct *)store_ptr;
-
-	/* get saved values */
-	recordid = (int *)&mb_io_ptr->save3;
-	recordidlast = (int *)&mb_io_ptr->save4;
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
-	size = (int *)&mb_io_ptr->save8;
-	nbadrec = (int *)&mb_io_ptr->save9;
-
-	/* set file position */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
-	*error = MB_ERROR_NO_ERROR;
-	while (done == MB_NO) {
-		/* read next record header into buffer */
-		read_len = (size_t)SWPLS_SIZE_BLOCKHEADER;
-		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
-
-		/* check header - if not a good header read a byte
-		    at a time until a good header is found */
-		skip = 0;
-		while (status == MB_SUCCESS && swpls_chk_header(verbose, mbio_ptr, buffer, recordid, size, error) != MB_SUCCESS) {
-			/* get next byte */
-			for (int i = 0; i < SWPLS_SIZE_BLOCKHEADER - 1; i++) {
-				buffer[i] = buffer[i + 1];
-			}
-			read_len = (size_t)1;
-			status = mb_fileio_get(verbose, mbio_ptr, &buffer[SWPLS_SIZE_BLOCKHEADER - 1], &read_len, error);
-			skip++;
-		}
-
-		/* report problem */
-		if ((skip > 0) && (verbose >= 0)) {
-			if (*nbadrec == 0) {
-				fprintf(stderr, "The MBR_SWPLSSXP module skipped data between identified\n"
-				                "data records. Something is broken, most probably the data...\n"
-				                "However, the data may include a data record type that we\n"
-				                "haven't seen yet, or there could be an error in the code.\n"
-				                "If skipped data are reported multiple times, \n"
-				                "we recommend you send a data sample and problem \n"
-				                "description to the MB-System team \n"
-				                "(caress@mbari.org and dale@ldeo.columbia.edu)\n"
-				                "Have a nice day...\n");
-			}
-			fprintf(stderr, "MBR_SWPLSSXP skipped %d bytes between records %4.4X:%d and %4.4X:%d\n", skip, *recordidlast,
-			        *recordidlast, *recordid, *recordid);
-			(*nbadrec)++;
-		}
-
-		*recordidlast = *recordid;
-		store->type = *recordid;
-
-		/* allocate memory to read rest of record if necessary */
-		if (*bufferalloc < *size + SWPLS_SIZE_BLOCKHEADER) {
-			status = mb_reallocd(verbose, __FILE__, __LINE__, *size + SWPLS_SIZE_BLOCKHEADER, (void **)bufferptr, error);
-			if (status != MB_SUCCESS) {
-				*bufferalloc = 0;
-				done = MB_YES;
-			}
-			else {
-				*bufferalloc = *size + SWPLS_SIZE_BLOCKHEADER;
-				buffer = (char *)*bufferptr;
-			}
-		}
-
-		/* read the rest of the record */
-		if (status == MB_SUCCESS) {
-			read_len = (size_t)*size;
-			status = mb_fileio_get(verbose, mbio_ptr, &buffer[SWPLS_SIZE_BLOCKHEADER], &read_len, error);
-		}
-
-		/* parse the data record */
-		if ((status == MB_SUCCESS) && (done == MB_NO)) {
-			if (*recordid == SWPLS_ID_SXP_HEADER_DATA) {
-				status = swpls_rd_sxpheader(verbose, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (*recordid == SWPLS_ID_PROCESSED_PING) {
-				status = swpls_rd_sxpping(verbose, buffer, store_ptr, SWPLS_ID_PROCESSED_PING, error);
-				done = MB_YES;
-			}
-			else if (*recordid == SWPLS_ID_PROCESSED_PING2) {
-				status = swpls_rd_sxpping(verbose, buffer, store_ptr, SWPLS_ID_PROCESSED_PING2, error);
-				done = MB_YES;
-			}
-			else if (*recordid == SWPLS_ID_COMMENT) {
-				status = swpls_rd_comment(verbose, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (*recordid == SWPLS_ID_PROJECTION) {
-				status = swpls_rd_projection(verbose, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else {
-				done = MB_NO;
-			}
-		}
-
-		if (status == MB_FAILURE) {
-			done = MB_YES;
-		}
-	}
-
-	/* get file position */
-	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-} /* mbr_swplssxp_rd_data */
 
 /*--------------------------------------------------------------------*/
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error) {
