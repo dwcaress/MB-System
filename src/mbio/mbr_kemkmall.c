@@ -40,47 +40,6 @@
 /* turn on debug statements here */
 //#define MBR_KEMKMALL_DEBUG 1
 
-int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm_type_ptr, int *error);
-int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error);
-int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int *error);
-int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error);
-int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error);
-int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
            char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -497,987 +456,6 @@ int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
 
   return(result);
 };
-
-/*--------------------------------------------------------------------*/
-
-int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_index_data";
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_index_table *dgm_index_table = NULL;
-  struct mbsys_kmbes_index dgm_index;
-  struct mbsys_kmbes_header header;
-  struct mbsys_kmbes_m_body cmnPart;
-  mbsys_kmbes_emdgm_type emdgm_type;
-  int *file_indexed = NULL;
-  int *dgm_id = NULL;
-  char buffer[256];
-  size_t read_len, offset;
-  int index, skip, valid_id, num_bytes_dgm_end;
-  int iip_location = -1;
-  const int HEADER_SKIP = 8;
-  unsigned short pingCnt;
-  int time_i[7];
-  int i;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* check for non-null pointers */
-  assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
-
-  /* create a datagram index table in mbio descriptor */
-  mbr_kemkmall_create_dgm_index_table(verbose, mbio_ptr, store_ptr, error);
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-
-  /* now get the index table from the mbio descriptor field saveptr1 */
-  dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
-  dgm_index_table->dgm_count = 0;
-  dgm_id = (int *)&mb_io_ptr->save1;
-  *dgm_id = 0;
-  file_indexed = (int *)&mb_io_ptr->save2;
-  *file_indexed = MB_NO;
-
-  /* set file position to the start */
-  fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
-  mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
-
-  /* set status */
-  status = MB_SUCCESS;
-  *error = MB_ERROR_NO_ERROR;
-  valid_id = MB_YES;
-
-  while (*error <= MB_ERROR_NO_ERROR) {
-
-    /* find the next valid datagram header */
-    memset(&buffer, 0, sizeof(buffer));
-    read_len = (size_t)MBSYS_KMBES_HEADER_SIZE;
-    skip = 0;
-    status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
-    status = mbr_kemkmall_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
-    while (status == MB_SUCCESS && emdgm_type == UNKNOWN) {
-      for (i=0;i<MBSYS_KMBES_HEADER_SIZE-1;i++) {
-        buffer[i] = buffer[i+1];
-      }
-      read_len = 1;
-      status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[MBSYS_KMBES_HEADER_SIZE-1], &read_len, error);
-      skip++;
-      if (status == MB_SUCCESS) {
-        status = mbr_kemkmall_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
-      }
-    }
-
-    /* report problem */
-    if (status == MB_SUCCESS && skip > 0 && verbose >= 0) {
-      fprintf(stderr, "\nThe MBF_KEMKMALL module skipped data between identified\n"
-              "data records. Something is broken, most likely the data...\n"
-              "However, the data may include a data record type that we\n"
-              "haven't seen yet, or there could be an error in the code.\n"
-              "If skipped data are reported multiple times, we recommend \n"
-              "you post a problem description through the discussion list \n"
-              "available at https://listserver.mbari.org/sympa/arc/mbsystem \n"
-              "and make a data sample available. \n"
-              "Have a nice day...\n");
-      fprintf(stderr, "MBF_KEMKMALL skipped %d bytes before record %.4s at file pos %ld\n",
-                      skip, header.dgmType, ftell(mb_io_ptr->mbfp));
-    }
-
-    /* now parse the header and index the datagram */
-    if (status == MB_SUCCESS && emdgm_type != UNKNOWN) {
-
-      /* verify datagram is intact - seek to end of the datagram and read last int
-         - make survey mb_io_ptr->file_pos records the position of the start of the datagram */
-      mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp) - MBSYS_KMBES_HEADER_SIZE;
-      offset = (header.numBytesDgm - MBSYS_KMBES_HEADER_SIZE - sizeof(int));
-      fseek(mb_io_ptr->mbfp, offset, SEEK_CUR);
-
-      read_len = sizeof(int);
-      status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
-
-      if (status == MB_SUCCESS) {
-        /* Confirm that that byte count in the last int matches start int */
-        mb_get_binary_int(MB_YES, &buffer[0], &num_bytes_dgm_end);
-
-        if (header.numBytesDgm != num_bytes_dgm_end) {
-          /* No match. Assume packet header was really corrupt, so reset
-            file pointer past corrupted packet header and set datagram type to unknown. */
-#ifdef MBR_KEMKMALL_DEBUG
-          fprintf(stderr, "\nError in record %.4s at file pointer position %ld.\n"
-                "Expected a dgm with %u bytes, but dgm closing byte indicated %u.\n"
-                "Skipping past the corrupted packet header and setting datagram type to unknown.\n",
-                header.dgmType, mb_io_ptr->file_pos, header.numBytesDgm, num_bytes_dgm_end);
-#endif
-          mb_io_ptr->file_pos += HEADER_SKIP;
-          fseek(mb_io_ptr->mbfp, mb_io_ptr->file_pos, SEEK_SET);
-          emdgm_type = UNKNOWN;
-          valid_id = MB_NO;
-        }
-      }
-
-      /* handle a valid datagram */
-      if (status == MB_SUCCESS && emdgm_type != UNKNOWN) {
-
-        /* populate the index entry structure. */
-        memset(&dgm_index, 0, sizeof(struct mbsys_kmbes_index));
-        switch (emdgm_type) {
-
-          case MWC:
-          case MRZ:
-            /* Valid multibeam datagram: */
-            /* parse the dgm to get additional info about ping. */
-            /* this is necessary to insure multi-TX/RX and dual-swath modes are handled correctly. */
-
-            /* get ping info */
-            /* skip past the header and the 2 shorts that make up the dgm partition part */
-            offset = (mb_io_ptr->file_pos + MBSYS_KMBES_HEADER_SIZE + sizeof(int));
-            fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
-
-            read_len = 12;
-            status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
-
-            if (status == MB_SUCCESS) {
-
-              /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-              index = 0;
-              mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.numBytesCmnPart));
-              index += 2;
-              mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.pingCnt));
-              index += 2;
-              cmnPart.rxFansPerPing = buffer[index];
-              index++;
-              cmnPart.rxFanIndex = buffer[index];
-              index++;
-              cmnPart.swathsPerPing = buffer[index];
-              index++;
-              cmnPart.swathAlongPosition = buffer[index];
-              index++;
-              cmnPart.txTransducerInd = buffer[index];
-              index++;
-              cmnPart.rxTransducerInd = buffer[index];
-              index++;
-              cmnPart.numRxTransducers = buffer[index];
-              index++;
-              cmnPart.algorithmType = buffer[index];
-              index++;
-
-              /* populate the datagram index entry */
-              dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
-              dgm_index.emdgm_type = emdgm_type;
-              memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
-              dgm_index.file_pos = mb_io_ptr->file_pos;
-              dgm_index.ping_num = cmnPart.pingCnt;
-              dgm_index.rx_per_ping = cmnPart.rxFansPerPing;
-              dgm_index.rx_index = cmnPart.rxFanIndex;
-              dgm_index.swaths_per_ping = cmnPart.swathsPerPing;
-#ifdef MBR_KEMKMALL_DEBUG
-              mb_get_date(verbose, dgm_index.time_d, time_i);
-              fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-                      header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
-                      cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
-                      cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
-                      time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
-#endif
-
-              status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
-            }
-
-            if (status == MB_SUCCESS) {
-              offset = (size_t) (mb_io_ptr->file_pos + header.numBytesDgm);
-              fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
-            }
-            // TODO: what happens if alloc fails - while condition?
-            break;
-
-          case XMS:
-            /* Valid multibeam pseudosidescan datagram: */
-            /* parse the dgm to get additional info about ping. */
-            /* this is necessary to insure multi-TX/RX and dual-swath modes are handled correctly. */
-
-            /* get ping info */
-            /* skip past the header and the 2 shorts that make up the dgm partition part */
-            offset = (mb_io_ptr->file_pos + MBSYS_KMBES_HEADER_SIZE + sizeof(int));
-            fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
-
-            read_len = 12;
-            status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
-
-            if (status == MB_SUCCESS) {
-
-              /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
-              index = 0;
-              mb_get_binary_short(MB_YES, &buffer[index], &(pingCnt));
-
-              /* populate the datagram index entry */
-              dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
-              dgm_index.emdgm_type = emdgm_type;
-              memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
-              dgm_index.file_pos = mb_io_ptr->file_pos;
-              dgm_index.ping_num = cmnPart.pingCnt;
-              dgm_index.rx_per_ping = 0;
-              dgm_index.rx_index = 0;
-              dgm_index.swaths_per_ping = 0;
-#ifdef MBR_KEMKMALL_DEBUG
-              mb_get_date(verbose, dgm_index.time_d, time_i);
-              fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-                      header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
-                      cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
-                      cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
-                      time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
-#endif
-
-              status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
-            }
-
-            if (status == MB_SUCCESS) {
-              offset = (size_t) (mb_io_ptr->file_pos + header.numBytesDgm);
-              fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
-            }
-            // TODO: what happens if alloc fails - while condition?
-            break;
-
-          default:
-            /* Other valid datagram: */
-
-            /* save index of first #IIP datagram */
-            if (iip_location < 0 && emdgm_type == IIP) {
-              iip_location = dgm_index_table->dgm_count;
-            }
-
-            /* populate the datagram index entry */
-            dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
-            dgm_index.emdgm_type = emdgm_type;
-            memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
-            dgm_index.file_pos = mb_io_ptr->file_pos;
-            dgm_index.ping_num = 0;
-            dgm_index.rx_per_ping = 0;
-            dgm_index.rx_index = 0;
-            dgm_index.swaths_per_ping = 0;
-#ifdef MBR_KEMKMALL_DEBUG
-            mb_get_date(verbose, dgm_index.time_d, time_i);
-            fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
-                    header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
-#endif
-
-            status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
-
-            if (status == MB_SUCCESS) {
-              offset = (size_t) (mb_io_ptr->file_pos + header.numBytesDgm);
-              fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
-            }
-            break;
-        }
-
-        /* update file position */
-        mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
-      }
-    }
-  }
-
-  /* set indexed flag */
-  *file_indexed = MB_YES;
-  *dgm_id = 0;
-  if ((dgm_index_table->dgm_count > 0) && (*error = MB_ERROR_EOF)) {
-    status = MB_SUCCESS;
-    *error = MB_ERROR_NO_ERROR;
-  }
-
-  /* sort the index table into the order to be read */
-  if (status == MB_SUCCESS && dgm_index_table->dgm_count > 0) {
-
-    /* each ping can have multiple MRZ and MWC datagrams - the ping timestamp is
-        the timestamp of the first MRZ datagram - add ping timestamp to index entries
-        for all MRZ and MWC datagrams */
-    /* start by sorting the index table on ping number alone, and then looping
-          over all datagrams in ping order setting the ping timestamp */
-    //qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
-    //    sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare_pings);
-
-
-    /* sort the datagram index table, leaving the datagrams up through the
-       #IIP datagram in place at the start of the file - in practice this means
-       any comment datagrams stay at the start of the file */
-
-    qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
-        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
-//    qsort((void *)&(dgm_index_table->indextable[iip_location+2]), dgm_index_table->dgm_count-iip_location-2,
-//        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
-  }
-
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "\n\nIndexed %ld valid EM datagrams:\n", dgm_index_table->dgm_count);
-  for (i=0; i<dgm_index_table->dgm_count; i++)
-  {
-    fprintf(stderr, "ID: %4d, ", i);
-    fprintf(stderr, "file_pos: %8.zu, ", dgm_index_table->indextable[i].file_pos);
-    fprintf(stderr, "dgm: %.4s, ", dgm_index_table->indextable[i].header.dgmType);
-    fprintf(stderr, "type: %2d, ", dgm_index_table->indextable[i].emdgm_type);
-    fprintf(stderr, "size: %6u, ", dgm_index_table->indextable[i].header.numBytesDgm);
-    fprintf(stderr, "time: %9.3f, ", dgm_index_table->indextable[i].time_d);
-    fprintf(stderr, "ping: %5d, ", dgm_index_table->indextable[i].ping_num);
-    fprintf(stderr, "rxIndex: %u/%u.\n", dgm_index_table->indextable[i].rx_index,
-                                dgm_index_table->indextable[i].rx_per_ping);
-  }
-  fprintf(stderr, "\n");
-#endif
-
-  /* set file position back to the start */
-  fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
-
-    /* print output debug statements */
-    if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-        fprintf(stderr, "dbg2  Return values:\n");
-        fprintf(stderr, "dbg2       error:      %d\n", *error);
-        fprintf(stderr, "dbg2  Return status:\n");
-        fprintf(stderr, "dbg2       status:  %d\n", status);
-    }
-
-  /* return status */
-  return (status);
-
-};
-/*--------------------------------------------------------------------*/
-int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_rt_kemkmall";
-  int status = MB_SUCCESS;
-  int interp_error = MB_ERROR_NO_ERROR;
-  struct mbsys_kmbes_struct *store = NULL;
-  int *file_indexed = NULL;
-  double *pixel_size, *swath_width;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* get pointers to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get saved values */
-  file_indexed = (int *)&mb_io_ptr->save2;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
-
-  /* if needed index the file */
-  if (*file_indexed == MB_NO) {
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "About to call mbr_kemkmall_index_data...\n");
-#endif
-    status = mbr_kemkmall_index_data(verbose, mbio_ptr, store_ptr, error);
-  }
-
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "\nAbout to call mbr_kemkmall_rd_data...\n");
-#endif
-
-  /* read next data from file */
-  status = mbr_kemkmall_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-  /* get pointers to data structures */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-
-  /* if this is a ping and the first time read by MB-System generate pseudosidescan */
-  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
-    && store->xmb.pseudosidescan_enabled == MB_NO) {
-		status = mbsys_kmbes_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
-  }
-
-  /* set error and kind in mb_io_ptr */
-  mb_io_ptr->new_error = *error;
-  mb_io_ptr->new_kind = store->kind;
-
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "Done with mbr_kemkmall_rd_data: status:%d error:%d kind:%d\n", status, *error, store->kind);
-#endif
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  /* return status */
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_wt_kemkmall";
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-    /* check for non-null pointers */
-    assert(mbio_ptr != NULL);
-    assert(store_ptr != NULL);
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "\nAbout to call mbr_kemkmall_wr_data record kind:%d\n", store->kind);
-#endif
-
-  /* write next data to file */
-  status = mbr_kemkmall_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "Done with mbr_kemkmall_wr_data: status:%d error:%d\n", status, *error);
-#endif
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  /* return status */
-  return (status);
-}
-
-/*--------------------------------------------------------------------*/
-
-int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_data";
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_index_table *dgm_index_table = NULL;
-  struct mbsys_kmbes_index *dgm_index = NULL;
-  size_t read_len = 0;
-  char **bufferptr = NULL;
-  char *buffer = NULL;
-  int *bufferalloc = NULL;
-  int *dgm_id = NULL;
-  int done = MB_NO;
-  int imrz, imwc, isounding;
-  int numSoundings, numBackscatterSamples;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get buffer and related vars from mbio saved values */
-  bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
-  buffer = (char *)*bufferptr;
-
-  /* get the datagram index table */
-  dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
-  dgm_id = (int *)&mb_io_ptr->save1;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-
-  /* check index to see if more datagrams can be read */
-  if (*dgm_id < dgm_index_table->dgm_count) {
-    done = MB_NO;
-    *error = MB_ERROR_NO_ERROR;
-  }
-  else {
-    done = MB_YES;
-    *error = MB_ERROR_EOF;
-    status = MB_FAILURE;
-  }
-
-  /* if not done loop over reading data until a record is ready for return */
-  while (done == MB_NO) {
-    /* identify the next record in the index */
-    dgm_index = &(dgm_index_table->indextable[*dgm_id]);
-    store->time_d = dgm_index->time_d;
-    mb_get_date(verbose, store->time_d, store->time_i);
-
-    /* allocate memory to read the record if necessary */
-    read_len = (size_t)dgm_index->header.numBytesDgm;
-//fprintf(stderr, "\n----------->%s:%d READ dgm_index->header.numBytesDgm:%d\n", __FILE__, __LINE__, dgm_index->header.numBytesDgm);
-    if (*bufferalloc <= read_len) {
-      *bufferalloc = ((read_len / MBSYS_KMBES_START_BUFFER_SIZE) + 1) * MBSYS_KMBES_START_BUFFER_SIZE;
-//fprintf(stderr, "\nAlloc more buffer: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
-//*bufferalloc, bufferptr, buffer, status);
-      status = mb_reallocd(verbose, __FILE__, __LINE__, *bufferalloc, (void **)bufferptr, error);
-      if (status != MB_SUCCESS) {
-        *bufferalloc = 0;
-        done = MB_YES;
-      }
-      else {
-        buffer = (char *)*bufferptr;
-      }
-//fprintf(stderr, "Realloc done: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
-//*bufferalloc, bufferptr, buffer, status);
-    }
-
-    /* read the next datagram */
-    if (status == MB_SUCCESS) {
-//fprintf(stderr, "Reading datagram %c%c%c%c size:%d *bufferalloc:%d bufferptr:%p buffer:%p\n",
-//dgm_index->header.dgmType[0], dgm_index->header.dgmType[1],
-//dgm_index->header.dgmType[2], dgm_index->header.dgmType[3],
-//dgm_index->header.numBytesDgm, *bufferalloc, bufferptr, buffer);
-      fseek(mb_io_ptr->mbfp, dgm_index->file_pos, SEEK_SET);
-      status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
-      mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
-//fprintf(stderr, "Read %zu bytes status:%d\n", read_len, status);
-    }
-
-    /* if valid read the record type */
-    if (status == MB_SUCCESS) {
-
-      switch (dgm_index->emdgm_type) {
-
-        case IIP:
-            /* #IIP - Info Installation PU */
-          status = mbr_kemkmall_rd_iip(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case IOP:
-            /* #IOP -  Runtime datagram */
-          status = mbr_kemkmall_rd_iop(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case SPO:
-            /* #SPO - Sensor POsition data */
-          status = mbr_kemkmall_rd_spo(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case SKM:
-            /* #SKM - KM binary sensor data */
-          status = mbr_kemkmall_rd_skm(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case SVP:
-            /* #SVP - Sound Velocity Profile */
-          status = mbr_kemkmall_rd_svp(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case SVT:
-          /* #SVP - Sensor sound Velocity measured at Transducer */
-          status = mbr_kemkmall_rd_svt(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case SCL:
-            /* #SCL - Sensor CLock datagram */
-          status = mbr_kemkmall_rd_scl(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case SDE:
-          /* #SDE - Sensor DEpth data */
-          status = mbr_kemkmall_rd_sde(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case SHI:
-          /* #SHI - Sensor HeIght data */
-          status = mbr_kemkmall_rd_shi(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case SHA:
-          /* #SHA - Sensor HeAding */
-          status = mbr_kemkmall_rd_sha(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case MRZ:
-          /* #MRZ - multibeam data for raw range, depth, reflectivity, seabed image(SI) etc. */
-          /*        not done until all MRZ datagrams for a ping are read */
-          status = mbr_kemkmall_rd_mrz(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-//store = (struct mbsys_kmbes_struct *)store_ptr;
-//fprintf(stderr, "----------->%s:%d READ dgm_index->header.numBytesDgm:%d store->mrz[0].header.numBytesDgm:%d store->mrz[1].header.numBytesDgm:%d \n",
-//__FILE__, __LINE__, dgm_index->header.numBytesDgm, store->mrz[0].header.numBytesDgm, store->mrz[0].header.numBytesDgm);
-
-          /* check to see if done */
-          if (status != MB_SUCCESS) {
-            done = MB_NO;
-          } else {
-            done = MB_YES;
-            store->n_mrz_read = 0;
-            store->n_mrz_needed = dgm_index->rx_per_ping;
-            for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
-              if (dgm_index->ping_num != store->mrz[imrz].cmnPart.pingCnt) {
-                done = MB_NO;
-              } else {
-                store->n_mrz_read++;
-              }
-            }
-            store->num_soundings = 0;
-            store->num_backscatter_samples = 0;
-            store->num_pixels = 0;
-            if (done == MB_YES) {
-              for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
-                numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain + store->mrz[imrz].rxInfo.numExtraDetections;
-                numBackscatterSamples = 0;
-                for (isounding=0;isounding<numSoundings;isounding++) {
-                  numBackscatterSamples += store->mrz[imrz].sounding[isounding].SInumSamples;
-                }
-                store->num_soundings += numSoundings;
-                store->num_backscatter_samples += numBackscatterSamples;
-              }
-            }
-          }
-
-          /* if pseudosidescan is expected and XMS datagram not read, then not done yet */
-          if (done == MB_YES && store->xmb.pseudosidescan_enabled == MB_YES
-              && dgm_index->ping_num != store->xms.pingCnt) {
-            done = MB_NO;
-          }
-          break;
-
-        case MWC:
-          /* #MWC - multibeam water column datagram */
-          /*        not done until all MRZ datagrams for a ping are read */
-          status = mbr_kemkmall_rd_mwc(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-
-          /* check to see if done */
-          //done = MB_YES;
-          store->n_mwc_read = 0;
-          store->n_mwc_needed = dgm_index->rx_per_ping;
-          for (imwc=0;imwc<dgm_index->rx_per_ping;imwc++) {
-            if (dgm_index->ping_num != store->mwc[imwc].cmnPart.pingCnt) {
-              done = MB_NO;
-            } else {
-              store->n_mwc_read++;
-            }
-          }
-          break;
-
-        case CPO:
-          /* #CPO - Compatibility position sensor data */
-          status = mbr_kemkmall_rd_cpo(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case CHE:
-          /* #CHE - Compatibility heave data */
-          status = mbr_kemkmall_rd_che(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case XMB:
-          /* #XMB - Indicates these data were written by MB-System (MB-System only) */
-          status = mbr_kemkmall_rd_xmb(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case XMC:
-          /* #XMC - Comment datagram (MB-System only) */
-          status = mbr_kemkmall_rd_xmc(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        case XMS:
-          /* #XMS - MB-System multibeam pseudosidescan */
-          status = mbr_kemkmall_rd_xms(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-          if (status != MB_SUCCESS) {
-            done = MB_NO;
-          } else {
-            if (store->n_mrz_read > 0 && store->n_mrz_read == store->n_mrz_needed
-                && store->mrz[0].cmnPart.pingCnt == store->xms.pingCnt) {
-              done = MB_YES;
-            } else {
-              done = MB_NO;
-            }
-          }
-          break;
-
-        case UNKNOWN:
-          /* Unknown datagram format */
-          status = mbr_kemkmall_rd_unknown(verbose, buffer, store_ptr, (void *)&dgm_index->header, error); // TODO: implement!
-          if (status == MB_SUCCESS)
-            done = MB_YES;
-          break;
-
-        default:
-          /* should never get here */
-          status = MB_FAILURE;
-          done = MB_YES;
-          break;
-
-      }
-    }
-
-    /* set done if read failure */
-    else {
-      done = MB_YES;
-    }
-
-    /* increment the index counter */
-    (*dgm_id)++;
-
-    /* if not done but no more data in index then done with error */
-    if (done == MB_NO && *dgm_id >= dgm_index_table->dgm_count) {
-      done = MB_YES;
-      *error = MB_ERROR_EOF;
-      status = MB_FAILURE;
-    }
-
-  }
-
-  /* get file position */
-  mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  /* return status */
-  return (status);
-}
-
-/*--------------------------------------------------------------------*/
-int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_wr_data";
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  size_t write_len = 0;
-  char **bufferptr = NULL;
-  char *buffer = NULL;
-  int *bufferalloc = NULL;
-  int imrz, imwc = 0;
-  size_t size = 0;
-
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get buffer and related vars from mbio saved values */
-  bufferptr = (char **)&mb_io_ptr->raw_data;
-  bufferalloc = (int *)&mb_io_ptr->structure_size;
-  buffer = (char *)*bufferptr;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-
-  /* write the current data record type */
-  switch (store->kind) {
-
-    case MB_DATA_INSTALLATION:
-      /* #IIP - Info Installation PU */
-      status = mbr_kemkmall_wr_iip(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      status = mbr_kemkmall_wr_xmb(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_RUN_PARAMETER:
-      /* #IOP -  Runtime datagram */
-      status = mbr_kemkmall_wr_iop(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_NAV:
-      /* #SPO - Sensor POsition data */
-      status = mbr_kemkmall_wr_spo(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_NAV1:
-      /* #SKM - KM binary sensor data */
-      status = mbr_kemkmall_wr_skm(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_VELOCITY_PROFILE:
-      /* #SVP - Sound Velocity Profile */
-      status = mbr_kemkmall_wr_svp(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_SSV:
-      /* #SVT - Sensor sound Velocity measured at Transducer */
-      status = mbr_kemkmall_wr_svt(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_CLOCK:
-      /* #SCL - Sensor CLock datagram */
-      status = mbr_kemkmall_wr_scl(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_SONARDEPTH:
-      /* #SDE - Sensor DEpth data */
-      status = mbr_kemkmall_wr_sde(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_HEIGHT:
-      /* #SHI - Sensor HeIght data */
-      status = mbr_kemkmall_wr_shi(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_HEADING:
-      /* #SHA - Sensor HeAding */
-      status = mbr_kemkmall_wr_sha(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_DATA:
-      /* #MRZ - multibeam data for raw range,
-      depth, reflectivity, seabed image(SI) etc. */
-      for (imrz=0;imrz<store->n_mrz_read;imrz++) {
-////fprintf(stderr, "************>%s:%d WRITE mbr_kemkmall_wr_data imrz:%d mrz->header.numBytesDgm:%d\n", __FILE__, __LINE__, imrz, store->mrz[imrz].header.numBytesDgm);
-        status = mbr_kemkmall_wr_mrz(verbose, bufferalloc, bufferptr, store_ptr, imrz, &size, error);
-        if (status == MB_SUCCESS)
-          status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      }
-      /* #XMS - multibeam pseudosidescan (MB-System only) */
-      status = mbr_kemkmall_wr_xms(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_WATER_COLUMN:
-      /* #MWC - multibeam water column datagram */
-      for (imwc=0;imwc< store->n_mwc_read;imwc++) {
-        status = mbr_kemkmall_wr_mwc(verbose, bufferalloc, bufferptr, store_ptr, imwc, &size, error);
-        if (status == MB_SUCCESS)
-          status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      }
-      break;
-
-    case MB_DATA_NAV2:
-      /* #CPO - Compatibility position sensor data */
-      status = mbr_kemkmall_wr_cpo(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_HEAVE:
-      /* #CHE - Compatibility heave data */
-      status = mbr_kemkmall_wr_che(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_MBSYSTEM:
-      /* #XMB - Indicates these data were written by MB-System (MB-System only) */
-      /* Always written immediately after the #IIP datagram */
-      //status = mbr_kemkmall_wr_xmb(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      //if (status == MB_SUCCESS)
-      //  status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case MB_DATA_COMMENT:
-      /* #XMC - Comment datagram (MB-System only) */
-      status = mbr_kemkmall_wr_xmc(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    case UNKNOWN:
-      /* Unknown datagram format */
-      status = mbr_kemkmall_wr_unknown(verbose, bufferalloc, bufferptr, store_ptr, &size, error); // TODO: implement!
-      if (status == MB_SUCCESS)
-        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
-      break;
-
-    default:
-        /* should never get here */
-        status = MB_FAILURE;
-        break;
-  }
-
-#ifdef MBR_KEMKMALL_DEBUG
-  fprintf(stderr, "Data record written: type:%d status:%d error:%d\n", store->kind, status, *error);
-#endif
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  /* return status */
-  return (status);
-}
 
 /*--------------------------------------------------------------------*/
 
@@ -4232,7 +3210,745 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
   /* return status */
   return (status);
 };
+/*--------------------------------------------------------------------*/
 
+int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_kemkmall_index_data";
+  int status = MB_SUCCESS;
+  struct mbsys_kmbes_struct *store = NULL;
+  struct mbsys_kmbes_index_table *dgm_index_table = NULL;
+  struct mbsys_kmbes_index dgm_index;
+  struct mbsys_kmbes_header header;
+  struct mbsys_kmbes_m_body cmnPart;
+  mbsys_kmbes_emdgm_type emdgm_type;
+  int *file_indexed = NULL;
+  int *dgm_id = NULL;
+  char buffer[256];
+  size_t read_len, offset;
+  int index, skip, valid_id, num_bytes_dgm_end;
+  int iip_location = -1;
+  const int HEADER_SKIP = 8;
+  unsigned short pingCnt;
+  int time_i[7];
+  int i;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* check for non-null pointers */
+  assert(mbio_ptr != NULL);
+  assert(store_ptr != NULL);
+
+  /* create a datagram index table in mbio descriptor */
+  mbr_kemkmall_create_dgm_index_table(verbose, mbio_ptr, store_ptr, error);
+
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  /* now get the index table from the mbio descriptor field saveptr1 */
+  dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
+  dgm_index_table->dgm_count = 0;
+  dgm_id = (int *)&mb_io_ptr->save1;
+  *dgm_id = 0;
+  file_indexed = (int *)&mb_io_ptr->save2;
+  *file_indexed = MB_NO;
+
+  /* set file position to the start */
+  fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
+  mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
+
+  /* set status */
+  status = MB_SUCCESS;
+  *error = MB_ERROR_NO_ERROR;
+  valid_id = MB_YES;
+
+  while (*error <= MB_ERROR_NO_ERROR) {
+
+    /* find the next valid datagram header */
+    memset(&buffer, 0, sizeof(buffer));
+    read_len = (size_t)MBSYS_KMBES_HEADER_SIZE;
+    skip = 0;
+    status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
+    status = mbr_kemkmall_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
+    while (status == MB_SUCCESS && emdgm_type == UNKNOWN) {
+      for (i=0;i<MBSYS_KMBES_HEADER_SIZE-1;i++) {
+        buffer[i] = buffer[i+1];
+      }
+      read_len = 1;
+      status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[MBSYS_KMBES_HEADER_SIZE-1], &read_len, error);
+      skip++;
+      if (status == MB_SUCCESS) {
+        status = mbr_kemkmall_rd_hdr(verbose, buffer, (void *)&header, (void *)&emdgm_type, error);
+      }
+    }
+
+    /* report problem */
+    if (status == MB_SUCCESS && skip > 0 && verbose >= 0) {
+      fprintf(stderr, "\nThe MBF_KEMKMALL module skipped data between identified\n"
+              "data records. Something is broken, most likely the data...\n"
+              "However, the data may include a data record type that we\n"
+              "haven't seen yet, or there could be an error in the code.\n"
+              "If skipped data are reported multiple times, we recommend \n"
+              "you post a problem description through the discussion list \n"
+              "available at https://listserver.mbari.org/sympa/arc/mbsystem \n"
+              "and make a data sample available. \n"
+              "Have a nice day...\n");
+      fprintf(stderr, "MBF_KEMKMALL skipped %d bytes before record %.4s at file pos %ld\n",
+                      skip, header.dgmType, ftell(mb_io_ptr->mbfp));
+    }
+
+    /* now parse the header and index the datagram */
+    if (status == MB_SUCCESS && emdgm_type != UNKNOWN) {
+
+      /* verify datagram is intact - seek to end of the datagram and read last int
+         - make survey mb_io_ptr->file_pos records the position of the start of the datagram */
+      mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp) - MBSYS_KMBES_HEADER_SIZE;
+      offset = (header.numBytesDgm - MBSYS_KMBES_HEADER_SIZE - sizeof(int));
+      fseek(mb_io_ptr->mbfp, offset, SEEK_CUR);
+
+      read_len = sizeof(int);
+      status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
+
+      if (status == MB_SUCCESS) {
+        /* Confirm that that byte count in the last int matches start int */
+        mb_get_binary_int(MB_YES, &buffer[0], &num_bytes_dgm_end);
+
+        if (header.numBytesDgm != num_bytes_dgm_end) {
+          /* No match. Assume packet header was really corrupt, so reset
+            file pointer past corrupted packet header and set datagram type to unknown. */
+#ifdef MBR_KEMKMALL_DEBUG
+          fprintf(stderr, "\nError in record %.4s at file pointer position %ld.\n"
+                "Expected a dgm with %u bytes, but dgm closing byte indicated %u.\n"
+                "Skipping past the corrupted packet header and setting datagram type to unknown.\n",
+                header.dgmType, mb_io_ptr->file_pos, header.numBytesDgm, num_bytes_dgm_end);
+#endif
+          mb_io_ptr->file_pos += HEADER_SKIP;
+          fseek(mb_io_ptr->mbfp, mb_io_ptr->file_pos, SEEK_SET);
+          emdgm_type = UNKNOWN;
+          valid_id = MB_NO;
+        }
+      }
+
+      /* handle a valid datagram */
+      if (status == MB_SUCCESS && emdgm_type != UNKNOWN) {
+
+        /* populate the index entry structure. */
+        memset(&dgm_index, 0, sizeof(struct mbsys_kmbes_index));
+        switch (emdgm_type) {
+
+          case MWC:
+          case MRZ:
+            /* Valid multibeam datagram: */
+            /* parse the dgm to get additional info about ping. */
+            /* this is necessary to insure multi-TX/RX and dual-swath modes are handled correctly. */
+
+            /* get ping info */
+            /* skip past the header and the 2 shorts that make up the dgm partition part */
+            offset = (mb_io_ptr->file_pos + MBSYS_KMBES_HEADER_SIZE + sizeof(int));
+            fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
+
+            read_len = 12;
+            status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
+
+            if (status == MB_SUCCESS) {
+
+              /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
+              index = 0;
+              mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.numBytesCmnPart));
+              index += 2;
+              mb_get_binary_short(MB_YES, &buffer[index], &(cmnPart.pingCnt));
+              index += 2;
+              cmnPart.rxFansPerPing = buffer[index];
+              index++;
+              cmnPart.rxFanIndex = buffer[index];
+              index++;
+              cmnPart.swathsPerPing = buffer[index];
+              index++;
+              cmnPart.swathAlongPosition = buffer[index];
+              index++;
+              cmnPart.txTransducerInd = buffer[index];
+              index++;
+              cmnPart.rxTransducerInd = buffer[index];
+              index++;
+              cmnPart.numRxTransducers = buffer[index];
+              index++;
+              cmnPart.algorithmType = buffer[index];
+              index++;
+
+              /* populate the datagram index entry */
+              dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.emdgm_type = emdgm_type;
+              memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
+              dgm_index.file_pos = mb_io_ptr->file_pos;
+              dgm_index.ping_num = cmnPart.pingCnt;
+              dgm_index.rx_per_ping = cmnPart.rxFansPerPing;
+              dgm_index.rx_index = cmnPart.rxFanIndex;
+              dgm_index.swaths_per_ping = cmnPart.swathsPerPing;
+#ifdef MBR_KEMKMALL_DEBUG
+              mb_get_date(verbose, dgm_index.time_d, time_i);
+              fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+                      header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
+                      cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
+                      cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
+                      time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+#endif
+
+              status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
+            }
+
+            if (status == MB_SUCCESS) {
+              offset = (size_t) (mb_io_ptr->file_pos + header.numBytesDgm);
+              fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
+            }
+            // TODO: what happens if alloc fails - while condition?
+            break;
+
+          case XMS:
+            /* Valid multibeam pseudosidescan datagram: */
+            /* parse the dgm to get additional info about ping. */
+            /* this is necessary to insure multi-TX/RX and dual-swath modes are handled correctly. */
+
+            /* get ping info */
+            /* skip past the header and the 2 shorts that make up the dgm partition part */
+            offset = (mb_io_ptr->file_pos + MBSYS_KMBES_HEADER_SIZE + sizeof(int));
+            fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
+
+            read_len = 12;
+            status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
+
+            if (status == MB_SUCCESS) {
+
+              /* EMdgmMbody - information of transmitter and receiver used to find data in datagram */
+              index = 0;
+              mb_get_binary_short(MB_YES, &buffer[index], &(pingCnt));
+
+              /* populate the datagram index entry */
+              dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+              dgm_index.emdgm_type = emdgm_type;
+              memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
+              dgm_index.file_pos = mb_io_ptr->file_pos;
+              dgm_index.ping_num = cmnPart.pingCnt;
+              dgm_index.rx_per_ping = 0;
+              dgm_index.rx_index = 0;
+              dgm_index.swaths_per_ping = 0;
+#ifdef MBR_KEMKMALL_DEBUG
+              mb_get_date(verbose, dgm_index.time_d, time_i);
+              fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u Cnt:%d rxFans:%d:%d swaths:%d along:%d tx:%d rx:%d numrx:%d alg:%d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+                      header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,cmnPart.pingCnt, cmnPart.rxFansPerPing, cmnPart.rxFanIndex,
+                      cmnPart.swathsPerPing, cmnPart.swathAlongPosition, cmnPart.txTransducerInd,
+                      cmnPart.rxTransducerInd, cmnPart.numRxTransducers, cmnPart.algorithmType,
+                      time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+#endif
+
+              status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
+            }
+
+            if (status == MB_SUCCESS) {
+              offset = (size_t) (mb_io_ptr->file_pos + header.numBytesDgm);
+              fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
+            }
+            // TODO: what happens if alloc fails - while condition?
+            break;
+
+          default:
+            /* Other valid datagram: */
+
+            /* save index of first #IIP datagram */
+            if (iip_location < 0 && emdgm_type == IIP) {
+              iip_location = dgm_index_table->dgm_count;
+            }
+
+            /* populate the datagram index entry */
+            dgm_index.time_d = ((double)header.time_sec) + MBSYS_KMBES_NANO * header.time_nanosec;
+            dgm_index.emdgm_type = emdgm_type;
+            memcpy(&dgm_index.header, &header, sizeof(struct mbsys_kmbes_header));
+            dgm_index.file_pos = mb_io_ptr->file_pos;
+            dgm_index.ping_num = 0;
+            dgm_index.rx_per_ping = 0;
+            dgm_index.rx_index = 0;
+            dgm_index.swaths_per_ping = 0;
+#ifdef MBR_KEMKMALL_DEBUG
+            mb_get_date(verbose, dgm_index.time_d, time_i);
+            fprintf(stderr,"%.4s:%d pos:%ld nbytes:%u %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+                    header.dgmType,emdgm_type,dgm_index.file_pos,header.numBytesDgm,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]);
+#endif
+
+            status = mbr_kemkmall_add_dgm_to_dgm_index_table(verbose, dgm_index_table, &dgm_index, error);
+
+            if (status == MB_SUCCESS) {
+              offset = (size_t) (mb_io_ptr->file_pos + header.numBytesDgm);
+              fseek(mb_io_ptr->mbfp, offset, SEEK_SET);
+            }
+            break;
+        }
+
+        /* update file position */
+        mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
+      }
+    }
+  }
+
+  /* set indexed flag */
+  *file_indexed = MB_YES;
+  *dgm_id = 0;
+  if ((dgm_index_table->dgm_count > 0) && (*error = MB_ERROR_EOF)) {
+    status = MB_SUCCESS;
+    *error = MB_ERROR_NO_ERROR;
+  }
+
+  /* sort the index table into the order to be read */
+  if (status == MB_SUCCESS && dgm_index_table->dgm_count > 0) {
+
+    /* each ping can have multiple MRZ and MWC datagrams - the ping timestamp is
+        the timestamp of the first MRZ datagram - add ping timestamp to index entries
+        for all MRZ and MWC datagrams */
+    /* start by sorting the index table on ping number alone, and then looping
+          over all datagrams in ping order setting the ping timestamp */
+    //qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
+    //    sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare_pings);
+
+
+    /* sort the datagram index table, leaving the datagrams up through the
+       #IIP datagram in place at the start of the file - in practice this means
+       any comment datagrams stay at the start of the file */
+
+    qsort((void *)dgm_index_table->indextable, dgm_index_table->dgm_count,
+        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
+//    qsort((void *)&(dgm_index_table->indextable[iip_location+2]), dgm_index_table->dgm_count-iip_location-2,
+//        sizeof(struct mbsys_kmbes_index), (void *)mbr_kemkmall_indextable_compare);
+  }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "\n\nIndexed %ld valid EM datagrams:\n", dgm_index_table->dgm_count);
+  for (i=0; i<dgm_index_table->dgm_count; i++)
+  {
+    fprintf(stderr, "ID: %4d, ", i);
+    fprintf(stderr, "file_pos: %8.zu, ", dgm_index_table->indextable[i].file_pos);
+    fprintf(stderr, "dgm: %.4s, ", dgm_index_table->indextable[i].header.dgmType);
+    fprintf(stderr, "type: %2d, ", dgm_index_table->indextable[i].emdgm_type);
+    fprintf(stderr, "size: %6u, ", dgm_index_table->indextable[i].header.numBytesDgm);
+    fprintf(stderr, "time: %9.3f, ", dgm_index_table->indextable[i].time_d);
+    fprintf(stderr, "ping: %5d, ", dgm_index_table->indextable[i].ping_num);
+    fprintf(stderr, "rxIndex: %u/%u.\n", dgm_index_table->indextable[i].rx_index,
+                                dgm_index_table->indextable[i].rx_per_ping);
+  }
+  fprintf(stderr, "\n");
+#endif
+
+  /* set file position back to the start */
+  fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
+
+    /* print output debug statements */
+    if (verbose >= 2) {
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+        fprintf(stderr, "dbg2  Return values:\n");
+        fprintf(stderr, "dbg2       error:      %d\n", *error);
+        fprintf(stderr, "dbg2  Return status:\n");
+        fprintf(stderr, "dbg2       status:  %d\n", status);
+    }
+
+  /* return status */
+  return (status);
+
+};
+/*--------------------------------------------------------------------*/
+
+int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_kemkmall_rd_data";
+  int status = MB_SUCCESS;
+  struct mbsys_kmbes_struct *store = NULL;
+  struct mbsys_kmbes_index_table *dgm_index_table = NULL;
+  struct mbsys_kmbes_index *dgm_index = NULL;
+  size_t read_len = 0;
+  char **bufferptr = NULL;
+  char *buffer = NULL;
+  int *bufferalloc = NULL;
+  int *dgm_id = NULL;
+  int done = MB_NO;
+  int imrz, imwc, isounding;
+  int numSoundings, numBackscatterSamples;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get buffer and related vars from mbio saved values */
+  bufferptr = (char **)&mb_io_ptr->raw_data;
+  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  buffer = (char *)*bufferptr;
+
+  /* get the datagram index table */
+  dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
+  dgm_id = (int *)&mb_io_ptr->save1;
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  /* check index to see if more datagrams can be read */
+  if (*dgm_id < dgm_index_table->dgm_count) {
+    done = MB_NO;
+    *error = MB_ERROR_NO_ERROR;
+  }
+  else {
+    done = MB_YES;
+    *error = MB_ERROR_EOF;
+    status = MB_FAILURE;
+  }
+
+  /* if not done loop over reading data until a record is ready for return */
+  while (done == MB_NO) {
+    /* identify the next record in the index */
+    dgm_index = &(dgm_index_table->indextable[*dgm_id]);
+    store->time_d = dgm_index->time_d;
+    mb_get_date(verbose, store->time_d, store->time_i);
+
+    /* allocate memory to read the record if necessary */
+    read_len = (size_t)dgm_index->header.numBytesDgm;
+//fprintf(stderr, "\n----------->%s:%d READ dgm_index->header.numBytesDgm:%d\n", __FILE__, __LINE__, dgm_index->header.numBytesDgm);
+    if (*bufferalloc <= read_len) {
+      *bufferalloc = ((read_len / MBSYS_KMBES_START_BUFFER_SIZE) + 1) * MBSYS_KMBES_START_BUFFER_SIZE;
+//fprintf(stderr, "\nAlloc more buffer: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
+//*bufferalloc, bufferptr, buffer, status);
+      status = mb_reallocd(verbose, __FILE__, __LINE__, *bufferalloc, (void **)bufferptr, error);
+      if (status != MB_SUCCESS) {
+        *bufferalloc = 0;
+        done = MB_YES;
+      }
+      else {
+        buffer = (char *)*bufferptr;
+      }
+//fprintf(stderr, "Realloc done: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
+//*bufferalloc, bufferptr, buffer, status);
+    }
+
+    /* read the next datagram */
+    if (status == MB_SUCCESS) {
+//fprintf(stderr, "Reading datagram %c%c%c%c size:%d *bufferalloc:%d bufferptr:%p buffer:%p\n",
+//dgm_index->header.dgmType[0], dgm_index->header.dgmType[1],
+//dgm_index->header.dgmType[2], dgm_index->header.dgmType[3],
+//dgm_index->header.numBytesDgm, *bufferalloc, bufferptr, buffer);
+      fseek(mb_io_ptr->mbfp, dgm_index->file_pos, SEEK_SET);
+      status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
+      mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
+//fprintf(stderr, "Read %zu bytes status:%d\n", read_len, status);
+    }
+
+    /* if valid read the record type */
+    if (status == MB_SUCCESS) {
+
+      switch (dgm_index->emdgm_type) {
+
+        case IIP:
+            /* #IIP - Info Installation PU */
+          status = mbr_kemkmall_rd_iip(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case IOP:
+            /* #IOP -  Runtime datagram */
+          status = mbr_kemkmall_rd_iop(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case SPO:
+            /* #SPO - Sensor POsition data */
+          status = mbr_kemkmall_rd_spo(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case SKM:
+            /* #SKM - KM binary sensor data */
+          status = mbr_kemkmall_rd_skm(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case SVP:
+            /* #SVP - Sound Velocity Profile */
+          status = mbr_kemkmall_rd_svp(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case SVT:
+          /* #SVP - Sensor sound Velocity measured at Transducer */
+          status = mbr_kemkmall_rd_svt(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case SCL:
+            /* #SCL - Sensor CLock datagram */
+          status = mbr_kemkmall_rd_scl(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case SDE:
+          /* #SDE - Sensor DEpth data */
+          status = mbr_kemkmall_rd_sde(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case SHI:
+          /* #SHI - Sensor HeIght data */
+          status = mbr_kemkmall_rd_shi(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case SHA:
+          /* #SHA - Sensor HeAding */
+          status = mbr_kemkmall_rd_sha(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case MRZ:
+          /* #MRZ - multibeam data for raw range, depth, reflectivity, seabed image(SI) etc. */
+          /*        not done until all MRZ datagrams for a ping are read */
+          status = mbr_kemkmall_rd_mrz(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+//store = (struct mbsys_kmbes_struct *)store_ptr;
+//fprintf(stderr, "----------->%s:%d READ dgm_index->header.numBytesDgm:%d store->mrz[0].header.numBytesDgm:%d store->mrz[1].header.numBytesDgm:%d \n",
+//__FILE__, __LINE__, dgm_index->header.numBytesDgm, store->mrz[0].header.numBytesDgm, store->mrz[0].header.numBytesDgm);
+
+          /* check to see if done */
+          if (status != MB_SUCCESS) {
+            done = MB_NO;
+          } else {
+            done = MB_YES;
+            store->n_mrz_read = 0;
+            store->n_mrz_needed = dgm_index->rx_per_ping;
+            for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
+              if (dgm_index->ping_num != store->mrz[imrz].cmnPart.pingCnt) {
+                done = MB_NO;
+              } else {
+                store->n_mrz_read++;
+              }
+            }
+            store->num_soundings = 0;
+            store->num_backscatter_samples = 0;
+            store->num_pixels = 0;
+            if (done == MB_YES) {
+              for (imrz=0;imrz<dgm_index->rx_per_ping;imrz++) {
+                numSoundings = store->mrz[imrz].rxInfo.numSoundingsMaxMain + store->mrz[imrz].rxInfo.numExtraDetections;
+                numBackscatterSamples = 0;
+                for (isounding=0;isounding<numSoundings;isounding++) {
+                  numBackscatterSamples += store->mrz[imrz].sounding[isounding].SInumSamples;
+                }
+                store->num_soundings += numSoundings;
+                store->num_backscatter_samples += numBackscatterSamples;
+              }
+            }
+          }
+
+          /* if pseudosidescan is expected and XMS datagram not read, then not done yet */
+          if (done == MB_YES && store->xmb.pseudosidescan_enabled == MB_YES
+              && dgm_index->ping_num != store->xms.pingCnt) {
+            done = MB_NO;
+          }
+          break;
+
+        case MWC:
+          /* #MWC - multibeam water column datagram */
+          /*        not done until all MRZ datagrams for a ping are read */
+          status = mbr_kemkmall_rd_mwc(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+
+          /* check to see if done */
+          //done = MB_YES;
+          store->n_mwc_read = 0;
+          store->n_mwc_needed = dgm_index->rx_per_ping;
+          for (imwc=0;imwc<dgm_index->rx_per_ping;imwc++) {
+            if (dgm_index->ping_num != store->mwc[imwc].cmnPart.pingCnt) {
+              done = MB_NO;
+            } else {
+              store->n_mwc_read++;
+            }
+          }
+          break;
+
+        case CPO:
+          /* #CPO - Compatibility position sensor data */
+          status = mbr_kemkmall_rd_cpo(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case CHE:
+          /* #CHE - Compatibility heave data */
+          status = mbr_kemkmall_rd_che(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case XMB:
+          /* #XMB - Indicates these data were written by MB-System (MB-System only) */
+          status = mbr_kemkmall_rd_xmb(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case XMC:
+          /* #XMC - Comment datagram (MB-System only) */
+          status = mbr_kemkmall_rd_xmc(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        case XMS:
+          /* #XMS - MB-System multibeam pseudosidescan */
+          status = mbr_kemkmall_rd_xms(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
+          if (status != MB_SUCCESS) {
+            done = MB_NO;
+          } else {
+            if (store->n_mrz_read > 0 && store->n_mrz_read == store->n_mrz_needed
+                && store->mrz[0].cmnPart.pingCnt == store->xms.pingCnt) {
+              done = MB_YES;
+            } else {
+              done = MB_NO;
+            }
+          }
+          break;
+
+        case UNKNOWN:
+          /* Unknown datagram format */
+          status = mbr_kemkmall_rd_unknown(verbose, buffer, store_ptr, (void *)&dgm_index->header, error); // TODO: implement!
+          if (status == MB_SUCCESS)
+            done = MB_YES;
+          break;
+
+        default:
+          /* should never get here */
+          status = MB_FAILURE;
+          done = MB_YES;
+          break;
+
+      }
+    }
+
+    /* set done if read failure */
+    else {
+      done = MB_YES;
+    }
+
+    /* increment the index counter */
+    (*dgm_id)++;
+
+    /* if not done but no more data in index then done with error */
+    if (done == MB_NO && *dgm_id >= dgm_index_table->dgm_count) {
+      done = MB_YES;
+      *error = MB_ERROR_EOF;
+      status = MB_FAILURE;
+    }
+
+  }
+
+  /* get file position */
+  mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  /* return status */
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_rt_kemkmall";
+  int status = MB_SUCCESS;
+  int interp_error = MB_ERROR_NO_ERROR;
+  struct mbsys_kmbes_struct *store = NULL;
+  int *file_indexed = NULL;
+  double *pixel_size, *swath_width;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointers to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get saved values */
+  file_indexed = (int *)&mb_io_ptr->save2;
+	pixel_size = (double *)&mb_io_ptr->saved1;
+	swath_width = (double *)&mb_io_ptr->saved2;
+
+  /* if needed index the file */
+  if (*file_indexed == MB_NO) {
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "About to call mbr_kemkmall_index_data...\n");
+#endif
+    status = mbr_kemkmall_index_data(verbose, mbio_ptr, store_ptr, error);
+  }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "\nAbout to call mbr_kemkmall_rd_data...\n");
+#endif
+
+  /* read next data from file */
+  status = mbr_kemkmall_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+  /* get pointers to data structures */
+  store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  /* if this is a ping and the first time read by MB-System generate pseudosidescan */
+  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
+    && store->xmb.pseudosidescan_enabled == MB_NO) {
+		status = mbsys_kmbes_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 0, error);
+  }
+
+  /* set error and kind in mb_io_ptr */
+  mb_io_ptr->new_error = *error;
+  mb_io_ptr->new_kind = store->kind;
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "Done with mbr_kemkmall_rd_data: status:%d error:%d kind:%d\n", status, *error, store->kind);
+#endif
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  /* return status */
+  return (status);
+}
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int *error) {
@@ -7087,6 +6803,246 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
   return (status);
 
 };
+/*--------------------------------------------------------------------*/
+int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_kemkmall_wr_data";
+  int status = MB_SUCCESS;
+  struct mbsys_kmbes_struct *store = NULL;
+  size_t write_len = 0;
+  char **bufferptr = NULL;
+  char *buffer = NULL;
+  int *bufferalloc = NULL;
+  int imrz, imwc = 0;
+  size_t size = 0;
+
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get buffer and related vars from mbio saved values */
+  bufferptr = (char **)&mb_io_ptr->raw_data;
+  bufferalloc = (int *)&mb_io_ptr->structure_size;
+  buffer = (char *)*bufferptr;
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  /* write the current data record type */
+  switch (store->kind) {
+
+    case MB_DATA_INSTALLATION:
+      /* #IIP - Info Installation PU */
+      status = mbr_kemkmall_wr_iip(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      status = mbr_kemkmall_wr_xmb(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_RUN_PARAMETER:
+      /* #IOP -  Runtime datagram */
+      status = mbr_kemkmall_wr_iop(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_NAV:
+      /* #SPO - Sensor POsition data */
+      status = mbr_kemkmall_wr_spo(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_NAV1:
+      /* #SKM - KM binary sensor data */
+      status = mbr_kemkmall_wr_skm(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_VELOCITY_PROFILE:
+      /* #SVP - Sound Velocity Profile */
+      status = mbr_kemkmall_wr_svp(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_SSV:
+      /* #SVT - Sensor sound Velocity measured at Transducer */
+      status = mbr_kemkmall_wr_svt(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_CLOCK:
+      /* #SCL - Sensor CLock datagram */
+      status = mbr_kemkmall_wr_scl(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_SONARDEPTH:
+      /* #SDE - Sensor DEpth data */
+      status = mbr_kemkmall_wr_sde(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_HEIGHT:
+      /* #SHI - Sensor HeIght data */
+      status = mbr_kemkmall_wr_shi(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_HEADING:
+      /* #SHA - Sensor HeAding */
+      status = mbr_kemkmall_wr_sha(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_DATA:
+      /* #MRZ - multibeam data for raw range,
+      depth, reflectivity, seabed image(SI) etc. */
+      for (imrz=0;imrz<store->n_mrz_read;imrz++) {
+////fprintf(stderr, "************>%s:%d WRITE mbr_kemkmall_wr_data imrz:%d mrz->header.numBytesDgm:%d\n", __FILE__, __LINE__, imrz, store->mrz[imrz].header.numBytesDgm);
+        status = mbr_kemkmall_wr_mrz(verbose, bufferalloc, bufferptr, store_ptr, imrz, &size, error);
+        if (status == MB_SUCCESS)
+          status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      }
+      /* #XMS - multibeam pseudosidescan (MB-System only) */
+      status = mbr_kemkmall_wr_xms(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_WATER_COLUMN:
+      /* #MWC - multibeam water column datagram */
+      for (imwc=0;imwc< store->n_mwc_read;imwc++) {
+        status = mbr_kemkmall_wr_mwc(verbose, bufferalloc, bufferptr, store_ptr, imwc, &size, error);
+        if (status == MB_SUCCESS)
+          status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      }
+      break;
+
+    case MB_DATA_NAV2:
+      /* #CPO - Compatibility position sensor data */
+      status = mbr_kemkmall_wr_cpo(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_HEAVE:
+      /* #CHE - Compatibility heave data */
+      status = mbr_kemkmall_wr_che(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_MBSYSTEM:
+      /* #XMB - Indicates these data were written by MB-System (MB-System only) */
+      /* Always written immediately after the #IIP datagram */
+      //status = mbr_kemkmall_wr_xmb(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      //if (status == MB_SUCCESS)
+      //  status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case MB_DATA_COMMENT:
+      /* #XMC - Comment datagram (MB-System only) */
+      status = mbr_kemkmall_wr_xmc(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    case UNKNOWN:
+      /* Unknown datagram format */
+      status = mbr_kemkmall_wr_unknown(verbose, bufferalloc, bufferptr, store_ptr, &size, error); // TODO: implement!
+      if (status == MB_SUCCESS)
+        status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);
+      break;
+
+    default:
+        /* should never get here */
+        status = MB_FAILURE;
+        break;
+  }
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "Data record written: type:%d status:%d error:%d\n", store->kind, status, *error);
+#endif
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  /* return status */
+  return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_wt_kemkmall";
+  int status = MB_SUCCESS;
+  struct mbsys_kmbes_struct *store = NULL;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+    /* check for non-null pointers */
+    assert(mbio_ptr != NULL);
+    assert(store_ptr != NULL);
+
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_kmbes_struct *)store_ptr;
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "\nAbout to call mbr_kemkmall_wr_data record kind:%d\n", store->kind);
+#endif
+
+  /* write next data to file */
+  status = mbr_kemkmall_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+#ifdef MBR_KEMKMALL_DEBUG
+  fprintf(stderr, "Done with mbr_kemkmall_wr_data: status:%d error:%d\n", status, *error);
+#endif
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  /* return status */
+  return (status);
+}
 
 /*--------------------------------------------------------------------*/
 int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
