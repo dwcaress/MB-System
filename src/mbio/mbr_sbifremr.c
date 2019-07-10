@@ -38,8 +38,7 @@
 #include "mbf_sbifremr.h"
 #include "mbsys_sb.h"
 
-int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error);
+// int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -170,167 +169,6 @@ int mbr_dem_sbifremr(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_sbifremr";
-	int status = MB_SUCCESS;
-	struct mbf_sbifremr_struct *data;
-	struct mbsys_sb_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
-	data->kind = MB_DATA_DATA;
-	store = (struct mbsys_sb_struct *)store_ptr;
-
-	/* read next record from file */
-	status = mbr_sbifremr_rd_data(verbose, mbio_ptr, error);
-
-	/* set kind and error in mb_io_ptr */
-	mb_io_ptr->new_kind = data->kind;
-	mb_io_ptr->new_error = *error;
-
-	/* translate values to sea beam data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		/* type of data record */
-		store->kind = data->kind;
-
-		/* position */
-		store->lon2u = data->lon2u;
-		store->lon2b = data->lon2b;
-		store->lat2u = data->lat2u;
-		store->lat2b = data->lat2b;
-
-		/* time stamp */
-		store->year = data->year;
-		store->day = data->day;
-		store->min = data->min;
-		store->sec = data->sec;
-
-		/* depths and distances */
-		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
-			store->dist[i] = data->dist[i];
-			store->deph[i] = data->deph[i];
-		}
-
-		/* additional values */
-		store->sbtim = 0;
-		store->sbhdg = data->sbhdg;
-		store->axis = 0;
-		store->major = 0;
-		store->minor = 0;
-
-		/* comment */
-		strncpy(store->comment, data->comment, MBSYS_SB_MAXLINE);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_sbifremr";
-	int status = MB_SUCCESS;
-	struct mbf_sbifremr_struct *data;
-	struct mbsys_sb_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_sb_struct *)store_ptr;
-
-	/* second translate values from seabeam data storage structure */
-	if (store != NULL) {
-		data->kind = store->kind;
-		if (store->kind == MB_DATA_DATA) {
-			/* position */
-			data->lon2u = store->lon2u;
-			data->lon2b = store->lon2b;
-			data->lat2u = store->lat2u;
-			data->lat2b = store->lat2b;
-
-			/* time stamp */
-			data->year = store->year;
-			data->day = store->day;
-			data->min = store->min;
-			data->sec = store->sec;
-
-			/* depths and distances */
-			for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
-				data->dist[i] = store->dist[i];
-				data->deph[i] = store->deph[i];
-			}
-
-			/* additional values */
-			data->sbhdg = store->sbhdg;
-		}
-
-		/* comment */
-		else if (store->kind == MB_DATA_COMMENT) {
-			strncpy(data->comment, store->comment, MBSYS_SB_MAXLINE - 1);
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
-		fprintf(stderr, "dbg5       error:      %d\n", *error);
-		fprintf(stderr, "dbg5       status:     %d\n", status);
-	}
-
-	/* write next record to file */
-	if (data->kind == MB_DATA_DATA || data->kind == MB_DATA_COMMENT) {
-		status = mbr_sbifremr_wr_data(verbose, mbio_ptr, error);
-	}
-	else {
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-		if (verbose >= 5)
-			fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", function_name);
-	}
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -607,6 +445,82 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_rt_sbifremr";
+	int status = MB_SUCCESS;
+	struct mbf_sbifremr_struct *data;
+	struct mbsys_sb_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
+	data->kind = MB_DATA_DATA;
+	store = (struct mbsys_sb_struct *)store_ptr;
+
+	/* read next record from file */
+	status = mbr_sbifremr_rd_data(verbose, mbio_ptr, error);
+
+	/* set kind and error in mb_io_ptr */
+	mb_io_ptr->new_kind = data->kind;
+	mb_io_ptr->new_error = *error;
+
+	/* translate values to sea beam data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		/* type of data record */
+		store->kind = data->kind;
+
+		/* position */
+		store->lon2u = data->lon2u;
+		store->lon2b = data->lon2b;
+		store->lat2u = data->lat2u;
+		store->lat2b = data->lat2b;
+
+		/* time stamp */
+		store->year = data->year;
+		store->day = data->day;
+		store->min = data->min;
+		store->sec = data->sec;
+
+		/* depths and distances */
+		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
+			store->dist[i] = data->dist[i];
+			store->deph[i] = data->deph[i];
+		}
+
+		/* additional values */
+		store->sbtim = 0;
+		store->sbhdg = data->sbhdg;
+		store->axis = 0;
+		store->major = 0;
+		store->minor = 0;
+
+		/* comment */
+		strncpy(store->comment, data->comment, MBSYS_SB_MAXLINE);
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_sbifremr_wr_data";
 	int status = MB_SUCCESS;
@@ -736,6 +650,91 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
+	}
+
+	/* print output debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	char *function_name = "mbr_wt_sbifremr";
+	int status = MB_SUCCESS;
+	struct mbf_sbifremr_struct *data;
+	struct mbsys_sb_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_sb_struct *)store_ptr;
+
+	/* second translate values from seabeam data storage structure */
+	if (store != NULL) {
+		data->kind = store->kind;
+		if (store->kind == MB_DATA_DATA) {
+			/* position */
+			data->lon2u = store->lon2u;
+			data->lon2b = store->lon2b;
+			data->lat2u = store->lat2u;
+			data->lat2b = store->lat2b;
+
+			/* time stamp */
+			data->year = store->year;
+			data->day = store->day;
+			data->min = store->min;
+			data->sec = store->sec;
+
+			/* depths and distances */
+			for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
+				data->dist[i] = store->dist[i];
+				data->deph[i] = store->deph[i];
+			}
+
+			/* additional values */
+			data->sbhdg = store->sbhdg;
+		}
+
+		/* comment */
+		else if (store->kind == MB_DATA_COMMENT) {
+			strncpy(data->comment, store->comment, MBSYS_SB_MAXLINE - 1);
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
+		fprintf(stderr, "dbg5       error:      %d\n", *error);
+		fprintf(stderr, "dbg5       status:     %d\n", status);
+	}
+
+	/* write next record to file */
+	if (data->kind == MB_DATA_DATA || data->kind == MB_DATA_COMMENT) {
+		status = mbr_sbifremr_wr_data(verbose, mbio_ptr, error);
+	}
+	else {
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		if (verbose >= 5)
+			fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", function_name);
 	}
 
 	/* print output debug statements */
