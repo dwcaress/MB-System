@@ -66,13 +66,6 @@ static const int MBF_SB2100BI_LABEL_LEN = 8;
 /* define end of record label */
 static const char mbf_sb2100bi_eor[2] = {'\r', '\n'};
 
-/* int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error); */
-/* int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
-/* int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
-/* int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
-/* int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
-/* int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error); */
-
 /* text for ascii file header */
 static const char *mbf_sb2100bi_file_header_text_1 = {"\
 \nSeaBeam 2100 multibeam sonar binary data format\n\

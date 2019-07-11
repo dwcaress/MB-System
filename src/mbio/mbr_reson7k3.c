@@ -45,155 +45,6 @@
 //#define MBR_RESON7K3_DEBUG2 1
 //#define MBR_RESON7K3_DEBUG3 1
 
-int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_VerticalDepth(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_TVG(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Image(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_AdaptiveGate(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_DetectionDataSetup(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_VernierProcessingDataRaw(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SonarSourceVersion(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_WetEndVersion8k(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_RawDetection(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_VernierProcessingDataFiltered(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_InstallationParameters(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_BITESummary(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CalibratedBeam(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SystemEvents(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SystemEventMessage(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_RDRRecordingStatus(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_Subscriptions(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_RDRStorageRecording(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CalibrationStatus(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CalibratedSideScan(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SnippetBackscatteringStrength(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_MB2Status(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_TimeMessage(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_RemoteControl(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_RemoteControlAcknowledge(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_RemoteControlNotAcknowledge(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SVFiltering(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SystemLockStatus(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SoundVelocity(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_AbsorptionLoss(int verbose, char *buffer, void *store_ptr, int *error);
-int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, int *error);
-
-int mbr_reson7k3_wr_None(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_ReferencePoint(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_UncalibratedSensorOffset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CalibratedSensorOffset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Position(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CustomAttitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Altitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_MotionOverGround(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Depth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SoundVelocityProfile(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CTD(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_RollPitchHeave(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Heading(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SurveyLine(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Navigation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Attitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_PanTilt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SonarInstallationIDs(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Mystery(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SonarPipeEnvironment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_ContactOutput(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_ProcessedSideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SonarSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Configuration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_MatchFilter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_FirmwareHardwareConfiguration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_BeamGeometry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_VerticalDepth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_TVG(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Image(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_PingMotion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_AdaptiveGate(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_DetectionDataSetup(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Beamformed(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_VernierProcessingDataRaw(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SonarSourceVersion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_WetEndVersion8k(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_VernierProcessingDataFiltered(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_InstallationParameters(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_BITESummary(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CalibratedBeam(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SystemEvents(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SystemEventMessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_RDRStorageRecording(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CalibrationStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CalibratedSideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SnippetBackscatteringStrength(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_MB2Status(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_TimeMessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_RemoteControlSonarSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SVFiltering(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SystemLockStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SoundVelocity(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_AbsorptionLoss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-int mbr_reson7k3_wr_SpreadingLoss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
@@ -355,6 +206,223 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
       status = mb_reallocd(verbose, __FILE__, __LINE__, MBSYS_RESON7K_BUFFER_STARTSIZE, (void **)buffersaveptr, error);
     if (status == MB_SUCCESS)
       *bufferalloc = MBSYS_RESON7K_BUFFER_STARTSIZE;
+  }
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
+  char *function_name = "mbr_reson7k3_wr_header";
+  int status = MB_SUCCESS;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
+    fprintf(stderr, "dbg2       index:      %d\n", *index);
+    fprintf(stderr, "dbg2       header:     %p\n", (void *)header);
+  }
+
+  /* set some important values */
+  header->Version = 5;
+  header->Offset = 60;
+  header->SyncPattern = 0x0000ffff;
+
+/* print out the data to be output */
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_header(verbose, header, error);
+
+  /* insert the header */
+  mb_put_binary_short(MB_YES, header->Version, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_short(MB_YES, header->Offset, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_int(MB_YES, header->SyncPattern, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_int(MB_YES, header->Size, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_int(MB_YES, header->OptionalDataOffset, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_int(MB_YES, header->OptionalDataIdentifier, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_short(MB_YES, header->s7kTime.Year, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_short(MB_YES, header->s7kTime.Day, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_float(MB_YES, header->s7kTime.Seconds, &buffer[*index]);
+  *index += 4;
+  buffer[*index] = header->s7kTime.Hours;
+  (*index)++;
+  buffer[*index] = header->s7kTime.Minutes;
+  (*index)++;
+  mb_put_binary_short(MB_YES, header->RecordVersion, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_int(MB_YES, header->RecordType, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_int(MB_YES, header->DeviceId, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_short(MB_YES, header->Reserved, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_short(MB_YES, header->SystemEnumerator, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_int(MB_YES, header->Reserved2, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_short(MB_YES, header->Flags, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_short(MB_YES, header->Reserved3, &buffer[*index]);
+  *index += 2;
+  mb_put_binary_int(MB_YES, header->Reserved4, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_int(MB_YES, header->FragmentedTotal, &buffer[*index]);
+  *index += 4;
+  mb_put_binary_int(MB_YES, header->FragmentNumber, &buffer[*index]);
+  *index += 4;
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       index:      %d\n", *index);
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
+  char *function_name = "mbr_reson7k3_wr_FileCatalog";
+  int status = MB_SUCCESS;
+  struct mbsys_reson7k3_struct *store = NULL;
+  s7k3_header *header = NULL;
+  s7k3_FileCatalog *FileCatalog;
+  s7k3_filecatalogdata *filecatalogdata;
+  unsigned int checksum;
+  int index;
+  char *buffer;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
+    fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  FileCatalog = &(store->FileCatalog_write);
+  header = &(FileCatalog->header);
+
+/* print out the data to be output */
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+#else
+  if (verbose >= 2)
+#endif
+    mbsys_reson7k3_print_FileCatalog(verbose, FileCatalog, error);
+
+  /* figure out size of output record */
+  *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
+  *size += R7KHDRSIZE_FileCatalog;
+  *size += FileCatalog->n * R7KRDTSIZE_FileCatalog;
+//fprintf(stderr, "File %s Line %d: FileCatalog n:%d size: %d\n", __FILE__, __LINE__, FileCatalog->n, *size);
+
+  /* allocate memory to write rest of record if necessary */
+  if (*bufferalloc < *size) {
+    status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
+    if (status != MB_SUCCESS) {
+      *bufferalloc = 0;
+    }
+    else {
+      *bufferalloc = *size;
+    }
+  }
+
+  /* proceed to write if buffer allocated */
+  if (status == MB_SUCCESS) {
+    /* get buffer for writing */
+    buffer = (char *)*bufferptr;
+
+    /* insert the header */
+    index = 0;
+    status = mbr_reson7k3_wr_header(verbose, buffer, &index, header, error);
+
+    /* insert the data */
+    index = header->Offset + 4;
+    mb_put_binary_int(MB_YES, FileCatalog->size, &buffer[index]);
+    index += 4;
+    mb_put_binary_short(MB_YES, FileCatalog->version, &buffer[index]);
+    index += 2;
+    mb_put_binary_int(MB_YES, FileCatalog->n, &buffer[index]);
+    index += 4;
+    mb_put_binary_int(MB_YES, FileCatalog->reserved, &buffer[index]);
+    index += 4;
+    for (int i = 0; i < FileCatalog->n; i++) {
+      filecatalogdata = &(FileCatalog->filecatalogdata[i]);
+      mb_put_binary_int(MB_YES, filecatalogdata->size, &buffer[index]);
+      index += 4;
+      mb_put_binary_long(MB_YES, filecatalogdata->offset, &buffer[index]);
+      index += 8;
+      mb_put_binary_short(MB_YES, filecatalogdata->record_type, &buffer[index]);
+      index += 2;
+      mb_put_binary_short(MB_YES, filecatalogdata->device_id, &buffer[index]);
+      index += 2;
+      mb_put_binary_short(MB_YES, filecatalogdata->system_enumerator, &buffer[index]);
+      index += 2;
+      mb_put_binary_short(MB_YES, filecatalogdata->s7kTime.Year, &buffer[index]);
+      index += 2;
+      mb_put_binary_short(MB_YES, filecatalogdata->s7kTime.Day, &buffer[index]);
+      index += 2;
+      mb_put_binary_float(MB_YES, filecatalogdata->s7kTime.Seconds, &buffer[index]);
+      index += 4;
+      buffer[index] = filecatalogdata->s7kTime.Hours;
+      index++;
+      buffer[index] = filecatalogdata->s7kTime.Minutes;
+      index++;
+      mb_put_binary_int(MB_YES, filecatalogdata->record_count, &buffer[index]);
+      index += 4;
+      for (int j = 0;j<8;j++) {
+        mb_put_binary_short(MB_YES, filecatalogdata->reserved[j], &buffer[index]);
+        index += 2;
+      }
+    }
+
+    /* reset the header size value */
+    mb_put_binary_int(MB_YES, ((unsigned int)(index + 4)), &buffer[8]);
+
+    /* now add the checksum */
+    checksum = 0;
+    for (int i = 0; i < index; i++)
+      checksum += (unsigned char)buffer[i];
+    mb_put_binary_int(MB_YES, checksum, &buffer[index]);
+    index += 4;
+
+    /* check size */
+    if (*size != index) {
+      fprintf(stderr, "Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
+      status = MB_FAILURE;
+      *error = MB_ERROR_BAD_DATA;
+      *size = 0;
+    }
   }
 
   /* print output debug statements */
@@ -952,2998 +1020,6 @@ int mbr_reson7k3_chk_pingnumber(int verbose, int recordid, char *buffer, int *pi
 
   return (MB_SUCCESS);
 }
-/*--------------------------------------------------------------------*/
-int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_data";
-  int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
-  s7k3_header *header = NULL;
-  s7k3_RawDetection *RawDetection;
-  s7k3_SegmentedRawDetection *SegmentedRawDetection;
-  int *current_ping;
-  int *last_ping;
-  int *new_ping;
-  int *save_flag;
-  int *recordid;
-  int *recordidlast;
-  int *deviceid;
-  int *icatalog;
-  unsigned short *enumerator;
-  int *fileheaders;
-  double *last_7k_time_d;
-  char **bufferptr;
-  char *buffer;
-  int *bufferalloc;
-  char **buffersaveptr;
-  char *buffersave;
-  int *size;
-  int *nbadrec;
-  int skip;
-  int ping_record;
-  int time_j[5], time_i[7];
-  double time_d;
-  int nscan;
-  int done;
-  size_t read_len;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
-
-  /* get saved values */
-  save_flag = (int *)&mb_io_ptr->save_flag;
-  current_ping = (int *)&mb_io_ptr->save14;
-  last_ping = (int *)&mb_io_ptr->save1;
-  new_ping = (int *)&mb_io_ptr->save2;
-  recordid = (int *)&mb_io_ptr->save3;
-  recordidlast = (int *)&mb_io_ptr->save4;
-  bufferptr = (char **)&mb_io_ptr->saveptr1;
-  buffer = (char *)*bufferptr;
-  bufferalloc = (int *)&mb_io_ptr->save6;
-  buffersaveptr = (char **)&mb_io_ptr->saveptr2;
-  buffersave = (char *)*buffersaveptr;
-  size = (int *)&mb_io_ptr->save8;
-  nbadrec = (int *)&mb_io_ptr->save9;
-  deviceid = (int *)&mb_io_ptr->save10;
-  enumerator = (unsigned short *)&mb_io_ptr->save11;
-  fileheaders = (int *)&mb_io_ptr->save12;
-  last_7k_time_d = (double *)&mb_io_ptr->saved5;
-  icatalog = (int *)&mb_io_ptr->save15;
-
-  /* set file position */
-  mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-  /* loop over reading data until a record is ready for return */
-  done = MB_NO;
-  *error = MB_ERROR_NO_ERROR;
-  while (done == MB_NO) {
-
-    /* if previously read record stored use it first */
-    if (*save_flag == MB_YES) {
-      *save_flag = MB_NO;
-      mbr_reson7k3_chk_header(verbose, mbio_ptr, buffersave, recordid, deviceid, enumerator, size);
-      for (int i = 0; i < *size; i++)
-        buffer[i] = buffersave[i];
-    }
-
-#ifdef MBTRN_ENABLED
-    /* if reading from a socket ask for the entire next record
-     * - the buffer is allocated to
-     *     MBSYS_RESON7K_BUFFER_STARTSIZE = 65536 bytes (64 kB)
-     *   at stream initialization
-     *   which should be large enough for any single 7k record */
-    else if (mb_io_ptr->mbsp != NULL) {
-      read_len = (size_t)MBSYS_RESON7K_BUFFER_STARTSIZE;
-      status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
-      mbr_reson7k3_chk_header(verbose, mbio_ptr, buffer, recordid, deviceid, enumerator, size);
-    }
-#endif
-
-    /* else if reading from a file deal with possibility of corruption by
-     * first finding the next sync block, then reading the heading, and then
-     * finally reading the rest of the record */
-    else {
-
-      /* if FileCatalog has been read then set file pointer to read the next
-          record header on the sorted list of records */
-      if (store->FileCatalog_read.n > 0 && *icatalog < store->FileCatalog_read.n) {
-        fseek(mb_io_ptr->mbfp, store->FileCatalog_read.filecatalogdata[*icatalog].offset, SEEK_SET);
-        (*icatalog)++;
-      }
-
-      /* read next record header into buffer */
-      read_len = (size_t)MBSYS_RESON7K_VERSIONSYNCSIZE;
-      status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
-
-      /* check header - if not a good header read a byte
-          at a time until a good header is found */
-      skip = 0;
-      while (status == MB_SUCCESS &&
-             mbr_reson7k3_chk_header(verbose, mbio_ptr, buffer, recordid,
-                                    deviceid, enumerator, size) != MB_SUCCESS) {
-        /* get next byte */
-        for (int i = 0; i < MBSYS_RESON7K_VERSIONSYNCSIZE - 1; i++)
-          buffer[i] = buffer[i + 1];
-        read_len = (size_t)1;
-        status = mb_fileio_get(verbose, mbio_ptr, &buffer[MBSYS_RESON7K_VERSIONSYNCSIZE - 1], &read_len, error);
-        skip++;
-      }
-
-      /* report problem */
-      if (skip > 0 && verbose >= 0) {
-        if (*nbadrec == 0)
-          fprintf(stderr, "\nThe MBF_reson7k3 module skipped data between identified\n\
-data records. Something is broken, most probably the data...\n\
-However, the data may include a data record type that we\n\
-haven't seen yet, or there could be an error in the code.\n\
-If skipped data are reported multiple times, \n\
-we recommend you send a data sample and problem \n\
-description to the MB-System team \n\
-(caress@mbari.org and dale@ldeo.columbia.edu)\n\
-Have a nice day...:                              %4.4X | %d\n", store->type, store->type);
-        fprintf(stderr, "MBF_reson7k3 skipped %d bytes between records %4.4X:%d and %4.4X:%d\n", skip, *recordidlast,
-                *recordidlast, *recordid, *recordid);
-        (*nbadrec)++;
-      }
-      *recordidlast = *recordid;
-      store->type = *recordid;
-
-      /* allocate memory to read rest of record if necessary */
-      if (*bufferalloc < *size) {
-        status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
-        if (status == MB_SUCCESS)
-          status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)buffersaveptr, error);
-        if (status != MB_SUCCESS) {
-          *bufferalloc = 0;
-          done = MB_YES;
-        }
-        else {
-          *bufferalloc = *size;
-          buffer = (char *)*bufferptr;
-          buffersave = (char *)*buffersaveptr;
-        }
-      }
-
-      /* read the rest of the record */
-      if (status == MB_SUCCESS) {
-        read_len = (size_t)(*size - MBSYS_RESON7K_VERSIONSYNCSIZE);
-        status = mb_fileio_get(verbose, mbio_ptr, &buffer[MBSYS_RESON7K_VERSIONSYNCSIZE], &read_len, error);
-      }
-
-#ifndef MBR_RESON7K3_DEBUG2
-      if (skip > 0)
-        fprintf(stderr, "reson7k3 record:skip:%d recordid:%x %d deviceid:%x %d enumerator:%x %d size:%d done:%d\n", skip,
-                *recordid, *recordid, *deviceid, *deviceid, *enumerator, *enumerator, *size, done);
-#endif
-    }
-
-    /* check for ping record and ping number */
-    ping_record = MB_NO;
-    if (status == MB_SUCCESS) {
-      if (*recordid == R7KRECID_ProcessedSideScan
-          || *recordid == R7KRECID_SonarSettings
-          || *recordid == R7KRECID_MatchFilter
-          || *recordid == R7KRECID_BeamGeometry
-          || *recordid == R7KRECID_Bathymetry
-          || *recordid == R7KRECID_SideScan
-          || *recordid == R7KRECID_WaterColumn
-          || *recordid == R7KRECID_VerticalDepth
-          || *recordid == R7KRECID_TVG
-          || *recordid == R7KRECID_Image
-          || *recordid == R7KRECID_PingMotion
-          || *recordid == R7KRECID_AdaptiveGate
-          || *recordid == R7KRECID_DetectionDataSetup
-          || *recordid == R7KRECID_Beamformed
-          || *recordid == R7KRECID_VernierProcessingDataRaw
-          || *recordid == R7KRECID_RawDetection
-          || *recordid == R7KRECID_Snippet
-          || *recordid == R7KRECID_VernierProcessingDataFiltered
-          || *recordid == R7KRECID_CompressedBeamformedMagnitude
-          || *recordid == R7KRECID_CompressedWaterColumn
-          || *recordid == R7KRECID_SegmentedRawDetection
-          || *recordid == R7KRECID_CalibratedBeam
-          || *recordid == R7KRECID_CalibratedSideScan
-          || *recordid == R7KRECID_SnippetBackscatteringStrength) {
-
-        /* check for ping number */
-        ping_record = MB_YES;
-        mbr_reson7k3_chk_pingnumber(verbose, *recordid, buffer, new_ping);
-
-        /* fix lack of ping number for beam geometry records */
-        if (*recordid == R7KRECID_BeamGeometry && *new_ping <= 0)
-          *new_ping = *last_ping;
-
-        /* determine if record is continuation of the last ping
-            or a new ping - if new ping and last ping not yet
-            output then save the new record and output the
-            last ping as fully read */
-        if (*last_ping >= 0 && *new_ping >= 0 && *last_ping != *new_ping) {
-          /* good ping if bathymetry record is read */
-          if (store->read_RawDetection == MB_YES
-              || store->read_SegmentedRawDetection == MB_YES) {
-            done = MB_YES;
-            store->kind = MB_DATA_DATA;
-            *save_flag = MB_YES;
-            *current_ping = *last_ping;
-            *last_ping = -1;
-            for (int i = 0; i < *size; i++)
-              buffersave[i] = buffer[i];
-
-            /* get the time */
-            if (store->read_RawDetection == MB_YES) {
-              RawDetection = &(store->RawDetection);
-              header = &(RawDetection->header);
-            }
-            else if (store->read_SegmentedRawDetection == MB_YES) {
-              SegmentedRawDetection = &(store->SegmentedRawDetection);
-              header = &(SegmentedRawDetection->header);
-            }
-            time_j[0] = header->s7kTime.Year;
-            time_j[1] = header->s7kTime.Day;
-            time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-            time_j[3] = (int)header->s7kTime.Seconds;
-            time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
-            mb_get_itime(verbose, time_j, store->time_i);
-            mb_get_time(verbose, store->time_i, &(store->time_d));
-          }
-
-          /* not a complete record unless there is bathymetry, drop the partial ping */
-          else {
-            done = MB_NO;
-            *last_ping = -1;
-            *last_ping = *new_ping;
-            *save_flag = MB_NO;
-          }
-        }
-        else if (*last_ping >= 0 && *new_ping >= 0 && *last_ping == *new_ping) {
-          done = MB_NO;
-        }
-        else if (*last_ping == -1 && *new_ping >= 0) {
-          done = MB_NO;
-          *current_ping = -1;
-          *last_ping = *new_ping;
-          store->read_ProcessedSideScan = MB_NO;
-          store->read_SonarSettings = MB_NO;
-          store->read_MatchFilter = MB_NO;
-          store->read_BeamGeometry = MB_NO;
-          store->read_Bathymetry = MB_NO;
-          store->read_SideScan = MB_NO;
-          store->read_WaterColumn = MB_NO;
-          store->read_VerticalDepth = MB_NO;
-          store->read_TVG = MB_NO;
-          store->read_Image = MB_NO;
-          store->read_PingMotion = MB_NO;
-          store->read_DetectionDataSetup = MB_NO;
-          store->read_Beamformed = MB_NO;
-          store->read_VernierProcessingDataRaw = MB_NO;
-          store->read_RawDetection = MB_NO;
-          store->read_Snippet = MB_NO;
-          store->read_VernierProcessingDataFiltered = MB_NO;
-          store->read_CompressedBeamformedMagnitude = MB_NO;
-          store->read_CompressedWaterColumn = MB_NO;
-          store->read_SegmentedRawDetection = MB_NO;
-          store->read_CalibratedBeam = MB_NO;
-          store->read_CalibratedSideScan = MB_NO;
-          store->read_SnippetBackscatteringStrength = MB_NO;
-          store->read_RemoteControlSonarSettings = MB_NO;
-        }
-      }
-    }
-
-    /* check for ping data already read if FileCatalog encountered
-        or if no FileCatalog read at start and any non-ping record encountered */
-    if (status == MB_SUCCESS && *last_ping >= 0
-        && (*recordid == R7KRECID_FileCatalog
-            || (ping_record == MB_NO && store->FileCatalog_read.n > 0))) {
-      /* good ping if bathymetry record is read */
-      if (store->read_RawDetection == MB_YES
-          || store->read_SegmentedRawDetection == MB_YES) {
-        done = MB_YES;
-        store->kind = MB_DATA_DATA;
-        *save_flag = MB_YES;
-        *current_ping = *last_ping;
-        *last_ping = -1;
-        for (int i = 0; i < *size; i++)
-          buffersave[i] = buffer[i];
-
-        /* get the time */
-        if (store->read_RawDetection == MB_YES) {
-          RawDetection = &(store->RawDetection);
-          header = &(RawDetection->header);
-        }
-        else if (store->read_SegmentedRawDetection == MB_YES) {
-          SegmentedRawDetection = &(store->SegmentedRawDetection);
-          header = &(SegmentedRawDetection->header);
-        }
-        time_j[0] = header->s7kTime.Year;
-        time_j[1] = header->s7kTime.Day;
-        time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-        time_j[3] = (int)header->s7kTime.Seconds;
-        time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
-        mb_get_itime(verbose, time_j, store->time_i);
-        mb_get_time(verbose, store->time_i, &(store->time_d));
-      }
-
-      /* not a complete record unless there is bathymetry, drop the partial ping */
-      else {
-        done = MB_NO;
-        *last_ping = -1;
-        *last_ping = *new_ping;
-        *save_flag = MB_NO;
-      }
-    }
-
-    /* check for ping data already read in read error case */
-    else if (status == MB_FAILURE && *last_ping >= 0) {
-      status = MB_SUCCESS;
-      *error = MB_ERROR_NO_ERROR;
-      done = MB_YES;
-      *save_flag = MB_NO;
-      *last_ping = -1;
-      store->kind = MB_DATA_DATA;
-      store->time_d = *last_7k_time_d;
-      mb_get_date(verbose, store->time_d, store->time_i);
-    }
-
-#ifdef MBR_RESON7K3_DEBUG2
-    if (status == MB_SUCCESS && done == MB_NO && *save_flag == MB_NO) {
-      fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |", *recordid, *recordid, *deviceid,
-              *deviceid, *enumerator, *enumerator);
-      if (*recordid == R7KRECID_None)
-        fprintf(stderr, " R7KRECID_None %d\n", *recordid);
-      if (*recordid == R7KRECID_ReferencePoint)
-        fprintf(stderr, " R7KRECID_ReferencePoint %d\n", *recordid);
-      if (*recordid == R7KRECID_UncalibratedSensorOffset)
-        fprintf(stderr, " R7KRECID_UncalibratedSensorOffset %d\n", *recordid);
-      if (*recordid == R7KRECID_CalibratedSensorOffset)
-        fprintf(stderr, " R7KRECID_CalibratedSensorOffset %d\n", *recordid);
-      if (*recordid == R7KRECID_Position)
-        fprintf(stderr, " R7KRECID_Position %d\n", *recordid);
-      if (*recordid == R7KRECID_CustomAttitude)
-        fprintf(stderr, " R7KRECID_CustomAttitude %d\n", *recordid);
-      if (*recordid == R7KRECID_Tide)
-        fprintf(stderr, " R7KRECID_Tide %d\n", *recordid);
-      if (*recordid == R7KRECID_Altitude)
-        fprintf(stderr, " R7KRECID_Altitude %d\n", *recordid);
-      if (*recordid == R7KRECID_MotionOverGround)
-        fprintf(stderr, " R7KRECID_MotionOverGround %d\n", *recordid);
-      if (*recordid == R7KRECID_Depth)
-        fprintf(stderr, " R7KRECID_Depth %d\n", *recordid);
-      if (*recordid == R7KRECID_SoundVelocityProfile)
-        fprintf(stderr, " R7KRECID_SoundVelocityProfile %d\n", *recordid);
-      if (*recordid == R7KRECID_CTD)
-        fprintf(stderr, " R7KRECID_CTD %d\n", *recordid);
-      if (*recordid == R7KRECID_Geodesy)
-        fprintf(stderr, " R7KRECID_Geodesy %d\n", *recordid);
-      if (*recordid == R7KRECID_RollPitchHeave)
-        fprintf(stderr, " R7KRECID_RollPitchHeave %d\n", *recordid);
-      if (*recordid == R7KRECID_Heading)
-        fprintf(stderr, " R7KRECID_Heading %d\n", *recordid);
-      if (*recordid == R7KRECID_SurveyLine)
-        fprintf(stderr, " R7KRECID_SurveyLine %d\n", *recordid);
-      if (*recordid == R7KRECID_Navigation)
-        fprintf(stderr, " R7KRECID_Navigation %d\n", *recordid);
-      if (*recordid == R7KRECID_Attitude)
-        fprintf(stderr, " R7KRECID_Attitude %d\n", *recordid);
-      if (*recordid == R7KRECID_PanTilt)
-        fprintf(stderr, " R7KRECID_PanTilt %d\n", *recordid);
-      if (*recordid == R7KRECID_SonarInstallationIDs)
-        fprintf(stderr, " R7KRECID_SonarInstallationIDs %d\n", *recordid);
-      if (*recordid == R7KRECID_Mystery)
-        fprintf(stderr, " R7KRECID_Mystery %d\n", *recordid);
-      if (*recordid == R7KRECID_SonarPipeEnvironment)
-        fprintf(stderr, " R7KRECID_SonarPipeEnvironment %d\n", *recordid);
-      if (*recordid == R7KRECID_ContactOutput)
-        fprintf(stderr, " R7KRECID_ContactOutput %d\n", *recordid);
-      if (*recordid == R7KRECID_ProcessedSideScan)
-        fprintf(stderr, " R7KRECID_ProcessedSideScan %d\n", *recordid);
-      if (*recordid == R7KRECID_SonarSettings)
-        fprintf(stderr, " R7KRECID_SonarSettings %d\n", *recordid);
-      if (*recordid == R7KRECID_Configuration)
-        fprintf(stderr, " R7KRECID_Configuration %d\n", *recordid);
-      if (*recordid == R7KRECID_MatchFilter)
-        fprintf(stderr, " R7KRECID_MatchFilter %d\n", *recordid);
-      if (*recordid == R7KRECID_FirmwareHardwareConfiguration)
-        fprintf(stderr, " R7KRECID_FirmwareHardwareConfiguration %d\n", *recordid);
-      if (*recordid == R7KRECID_BeamGeometry)
-        fprintf(stderr, " R7KRECID_BeamGeometry %d\n", *recordid);
-      if (*recordid == R7KRECID_Bathymetry)
-        fprintf(stderr, " R7KRECID_Bathymetry %d\n", *recordid);
-      if (*recordid == R7KRECID_SideScan)
-        fprintf(stderr, " R7KRECID_SideScan %d\n", *recordid);
-      if (*recordid == R7KRECID_WaterColumn)
-        fprintf(stderr, " R7KRECID_WaterColumn %d\n", *recordid);
-      if (*recordid == R7KRECID_VerticalDepth)
-        fprintf(stderr, " R7KRECID_VerticalDepth %d\n", *recordid);
-      if (*recordid == R7KRECID_TVG)
-        fprintf(stderr, " R7KRECID_TVG %d\n", *recordid);
-      if (*recordid == R7KRECID_Image)
-        fprintf(stderr, " R7KRECID_Image %d\n", *recordid);
-      if (*recordid == R7KRECID_PingMotion)
-        fprintf(stderr, " R7KRECID_PingMotion %d\n", *recordid);
-      if (*recordid == R7KRECID_AdaptiveGate)
-        fprintf(stderr, " R7KRECID_AdaptiveGate %d\n", *recordid);
-      if (*recordid == R7KRECID_DetectionDataSetup)
-        fprintf(stderr, " R7KRECID_DetectionDataSetup %d\n", *recordid);
-      if (*recordid == R7KRECID_Beamformed)
-        fprintf(stderr, " R7KRECID_Beamformed %d\n", *recordid);
-      if (*recordid == R7KRECID_VernierProcessingDataRaw)
-        fprintf(stderr, " R7KRECID_VernierProcessingDataRaw %d\n", *recordid);
-      if (*recordid == R7KRECID_BITE)
-        fprintf(stderr, " R7KRECID_BITE %d\n", *recordid);
-      if (*recordid == R7KRECID_SonarSourceVersion)
-        fprintf(stderr, " R7KRECID_SonarSourceVersion %d\n", *recordid);
-      if (*recordid == R7KRECID_WetEndVersion8k)
-        fprintf(stderr, " R7KRECID_WetEndVersion8k %d\n", *recordid);
-      if (*recordid == R7KRECID_RawDetection)
-        fprintf(stderr, " R7KRECID_RawDetection %d\n", *recordid);
-      if (*recordid == R7KRECID_Snippet)
-        fprintf(stderr, " R7KRECID_Snippet %d\n", *recordid);
-      if (*recordid == R7KRECID_VernierProcessingDataFiltered)
-        fprintf(stderr, " R7KRECID_VernierProcessingDataFiltered %d\n", *recordid);
-      if (*recordid == R7KRECID_InstallationParameters)
-        fprintf(stderr, " R7KRECID_InstallationParameters %d\n", *recordid);
-      if (*recordid == R7KRECID_BITESummary)
-        fprintf(stderr, " R7KRECID_BITESummary %d\n", *recordid);
-      if (*recordid == R7KRECID_CompressedBeamformedMagnitude)
-        fprintf(stderr, " R7KRECID_CompressedBeamformedMagnitude %d\n", *recordid);
-      if (*recordid == R7KRECID_CompressedWaterColumn)
-        fprintf(stderr, " R7KRECID_CompressedWaterColumn %d\n", *recordid);
-      if (*recordid == R7KRECID_SegmentedRawDetection)
-        fprintf(stderr, " R7KRECID_SegmentedRawDetection %d\n", *recordid);
-      if (*recordid == R7KRECID_CalibratedBeam)
-        fprintf(stderr, " R7KRECID_CalibratedBeam %d\n", *recordid);
-      if (*recordid == R7KRECID_SystemEvents)
-        fprintf(stderr, " R7KRECID_SystemEvents %d\n", *recordid);
-      if (*recordid == R7KRECID_SystemEventMessage)
-        fprintf(stderr, " R7KRECID_SystemEventMessage %d\n", *recordid);
-      if (*recordid == R7KRECID_RDRRecordingStatus)
-        fprintf(stderr, " R7KRECID_RDRRecordingStatus %d\n", *recordid);
-      if (*recordid == R7KRECID_Subscriptions)
-        fprintf(stderr, " R7KRECID_Subscriptions %d\n", *recordid);
-      if (*recordid == R7KRECID_RDRStorageRecording)
-        fprintf(stderr, " R7KRECID_RDRStorageRecording %d\n", *recordid);
-      if (*recordid == R7KRECID_CalibrationStatus)
-        fprintf(stderr, " R7KRECID_CalibrationStatus %d\n", *recordid);
-      if (*recordid == R7KRECID_CalibratedSideScan)
-        fprintf(stderr, " R7KRECID_CalibratedSideScan %d\n", *recordid);
-      if (*recordid == R7KRECID_SnippetBackscatteringStrength)
-        fprintf(stderr, " R7KRECID_SnippetBackscatteringStrength %d\n", *recordid);
-      if (*recordid == R7KRECID_MB2Status)
-        fprintf(stderr, " R7KRECID_MB2Status %d\n", *recordid);
-      if (*recordid == R7KRECID_FileHeader)
-        fprintf(stderr, " R7KRECID_FileHeader %d\n", *recordid);
-      if (*recordid == R7KRECID_FileCatalog)
-        fprintf(stderr, " R7KRECID_FileCatalog %d\n", *recordid);
-      if (*recordid == R7KRECID_TimeMessage)
-        fprintf(stderr, " R7KRECID_TimeMessage %d\n", *recordid);
-      if (*recordid == R7KRECID_RemoteControl)
-        fprintf(stderr, " R7KRECID_RemoteControl %d\n", *recordid);
-      if (*recordid == R7KRECID_RemoteControlAcknowledge)
-        fprintf(stderr, " R7KRECID_RemoteControlAcknowledge %d\n", *recordid);
-      if (*recordid == R7KRECID_RemoteControlNotAcknowledge)
-        fprintf(stderr, " R7KRECID_RemoteControlNotAcknowledge %d\n", *recordid);
-      if (*recordid == R7KRECID_RemoteControlSonarSettings)
-        fprintf(stderr, " R7KRECID_RemoteControlSonarSettings %d\n", *recordid);
-      if (*recordid == R7KRECID_CommonSystemSettings)
-        fprintf(stderr, " R7KRECID_CommonSystemSettings %d\n", *recordid);
-      if (*recordid == R7KRECID_SVFiltering)
-        fprintf(stderr, " R7KRECID_SVFiltering %d\n", *recordid);
-      if (*recordid == R7KRECID_SystemLockStatus)
-        fprintf(stderr, " R7KRECID_SystemLockStatus %d\n", *recordid);
-      if (*recordid == R7KRECID_SoundVelocity)
-        fprintf(stderr, " R7KRECID_SoundVelocity %d\n", *recordid);
-      if (*recordid == R7KRECID_AbsorptionLoss)
-        fprintf(stderr, " R7KRECID_AbsorptionLoss %d\n", *recordid);
-      if (*recordid == R7KRECID_SpreadingLoss)
-        fprintf(stderr, " R7KRECID_SpreadingLoss %d\n", *recordid);
-    }
-#endif
-
-    /* set done if read failure */
-    if (status == MB_FAILURE) {
-#ifdef MBR_RESON7K3_DEBUG2
-      fprintf(stderr, "call nothing, read failure:                              %4.4X | %d\n", store->type, store->type);
-#endif
-      done = MB_YES;
-    }
-
-    /* if possible and needed parse the data record now */
-    if (status == MB_SUCCESS && done == MB_NO) {
-
-      if (*recordid == R7KRECID_ReferencePoint) {
-        status = mbr_reson7k3_rd_ReferencePoint(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_ReferencePoint++;
-        }
-      }
-      else if (*recordid == R7KRECID_UncalibratedSensorOffset) {
-        status = mbr_reson7k3_rd_UncalibratedSensorOffset(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_UncalibratedSensorOffset++;
-        }
-      }
-      else if (*recordid == R7KRECID_CalibratedSensorOffset) {
-        status = mbr_reson7k3_rd_CalibratedSensorOffset(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_CalibratedSensorOffset++;
-        }
-      }
-      else if (*recordid == R7KRECID_Position) {
-        status = mbr_reson7k3_rd_Position(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Position++;
-        }
-      }
-      else if (*recordid == R7KRECID_CustomAttitude) {
-        status = mbr_reson7k3_rd_CustomAttitude(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_CustomAttitude++;
-        }
-      }
-      else if (*recordid == R7KRECID_Tide) {
-        status = mbr_reson7k3_rd_Tide(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Tide++;
-        }
-      }
-      else if (*recordid == R7KRECID_Altitude) {
-        status = mbr_reson7k3_rd_Altitude(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Altitude++;
-        }
-      }
-      else if (*recordid == R7KRECID_MotionOverGround) {
-        status = mbr_reson7k3_rd_MotionOverGround(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_MotionOverGround++;
-        }
-      }
-      else if (*recordid == R7KRECID_Depth) {
-        status = mbr_reson7k3_rd_Depth(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Depth++;
-        }
-      }
-      else if (*recordid == R7KRECID_SoundVelocityProfile) {
-        status = mbr_reson7k3_rd_SoundVelocityProfile(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SoundVelocityProfile++;
-        }
-      }
-      else if (*recordid == R7KRECID_CTD) {
-        status = mbr_reson7k3_rd_CTD(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_CTD++;
-        }
-      }
-      else if (*recordid == R7KRECID_Geodesy) {
-        status = mbr_reson7k3_rd_Geodesy(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Geodesy++;
-        }
-      }
-      else if (*recordid == R7KRECID_RollPitchHeave) {
-        status = mbr_reson7k3_rd_RollPitchHeave(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_RollPitchHeave++;
-        }
-      }
-      else if (*recordid == R7KRECID_Heading) {
-        status = mbr_reson7k3_rd_Heading(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Heading++;
-        }
-      }
-      else if (*recordid == R7KRECID_SurveyLine) {
-        status = mbr_reson7k3_rd_SurveyLine(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SurveyLine++;
-        }
-      }
-      else if (*recordid == R7KRECID_Navigation) {
-        status = mbr_reson7k3_rd_Navigation(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Navigation++;
-        }
-      }
-      else if (*recordid == R7KRECID_Attitude) {
-        status = mbr_reson7k3_rd_Attitude(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Attitude++;
-        }
-      }
-      else if (*recordid == R7KRECID_PanTilt) {
-        status = mbr_reson7k3_rd_PanTilt(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_PanTilt++;
-        }
-      }
-      else if (*recordid == R7KRECID_SonarInstallationIDs) {
-        status = mbr_reson7k3_rd_SonarInstallationIDs(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SonarInstallationIDs++;
-        }
-      }
-      else if (*recordid == R7KRECID_Mystery) {
-        status = mbr_reson7k3_rd_Mystery(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Mystery++;
-        }
-      }
-      else if (*recordid == R7KRECID_SonarPipeEnvironment) {
-        status = mbr_reson7k3_rd_SonarPipeEnvironment(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SonarPipeEnvironment++;
-        }
-      }
-      else if (*recordid == R7KRECID_ContactOutput) {
-        status = mbr_reson7k3_rd_ContactOutput(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_ContactOutput++;
-        }
-      }
-      else if (*recordid == R7KRECID_ProcessedSideScan) {
-        status = mbr_reson7k3_rd_ProcessedSideScan(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_ProcessedSideScan++;
-          store->read_ProcessedSideScan = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_SonarSettings) {
-        status = mbr_reson7k3_rd_SonarSettings(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_SonarSettings++;
-          store->read_SonarSettings = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_Configuration) {
-        status = mbr_reson7k3_rd_Configuration(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Configuration++;
-        }
-      }
-      else if (*recordid == R7KRECID_MatchFilter) {
-        status = mbr_reson7k3_rd_MatchFilter(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_MatchFilter++;
-          store->read_MatchFilter = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_FirmwareHardwareConfiguration) {
-        status = mbr_reson7k3_rd_FirmwareHardwareConfiguration(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_FirmwareHardwareConfiguration++;
-        }
-      }
-      else if (*recordid == R7KRECID_BeamGeometry) {
-        status = mbr_reson7k3_rd_BeamGeometry(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_BeamGeometry++;
-          store->read_BeamGeometry = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_Bathymetry) {
-        status = mbr_reson7k3_rd_Bathymetry(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_Bathymetry++;
-          store->read_Bathymetry = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_SideScan) {
-        status = mbr_reson7k3_rd_SideScan(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_SideScan++;
-          store->read_SideScan = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_WaterColumn) {
-        status = mbr_reson7k3_rd_WaterColumn(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_WaterColumn++;
-          store->read_WaterColumn = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_VerticalDepth) {
-        status = mbr_reson7k3_rd_VerticalDepth(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_VerticalDepth++;
-          store->read_VerticalDepth = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_TVG) {
-        status = mbr_reson7k3_rd_TVG(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_TVG++;
-          store->read_TVG = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_Image) {
-        status = mbr_reson7k3_rd_Image(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_Image++;
-          store->read_Image = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_PingMotion) {
-        status = mbr_reson7k3_rd_PingMotion(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_PingMotion++;
-          store->read_PingMotion = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_AdaptiveGate) {
-        status = mbr_reson7k3_rd_AdaptiveGate(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_AdaptiveGate++;
-        }
-      }
-      else if (*recordid == R7KRECID_DetectionDataSetup) {
-        status = mbr_reson7k3_rd_DetectionDataSetup(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_DetectionDataSetup++;
-          store->read_DetectionDataSetup = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_Beamformed) {
-        status = mbr_reson7k3_rd_Beamformed(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_Beamformed++;
-          store->read_Beamformed = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_VernierProcessingDataRaw) {
-        status = mbr_reson7k3_rd_VernierProcessingDataRaw(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_VernierProcessingDataRaw++;
-          store->read_VernierProcessingDataRaw = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_BITE) {
-        status = mbr_reson7k3_rd_BITE(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_BITE++;
-        }
-      }
-      else if (*recordid == R7KRECID_SonarSourceVersion) {
-        status = mbr_reson7k3_rd_SonarSourceVersion(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SonarSourceVersion++;
-        }
-      }
-      else if (*recordid == R7KRECID_WetEndVersion8k) {
-        status = mbr_reson7k3_rd_WetEndVersion8k(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_WetEndVersion8k++;
-        }
-      }
-      else if (*recordid == R7KRECID_RawDetection) {
-        status = mbr_reson7k3_rd_RawDetection(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_RawDetection++;
-          store->read_RawDetection = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_Snippet) {
-      status = mbr_reson7k3_rd_Snippet(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_Snippet++;
-          store->read_Snippet = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_VernierProcessingDataFiltered) {
-        status = mbr_reson7k3_rd_VernierProcessingDataFiltered(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_VernierProcessingDataFiltered++;
-          store->read_VernierProcessingDataFiltered = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_InstallationParameters) {
-        status = mbr_reson7k3_rd_InstallationParameters(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_InstallationParameters++;
-        }
-      }
-      else if (*recordid == R7KRECID_BITESummary) {
-        status = mbr_reson7k3_rd_BITESummary(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_BITESummary++;
-        }
-      }
-      else if (*recordid == R7KRECID_CompressedBeamformedMagnitude) {
-        status = mbr_reson7k3_rd_CompressedBeamformedMagnitude(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_CompressedBeamformedMagnitude++;
-          store->read_CompressedBeamformedMagnitude = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_CompressedWaterColumn) {
-        status = mbr_reson7k3_rd_CompressedWaterColumn(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_CompressedWaterColumn++;
-          store->read_CompressedWaterColumn = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_SegmentedRawDetection) {
-        status = mbr_reson7k3_rd_SegmentedRawDetection(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_SegmentedRawDetection++;
-          store->read_SegmentedRawDetection = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_CalibratedBeam) {
-        status = mbr_reson7k3_rd_CalibratedBeam(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_CalibratedBeam++;
-          store->read_CalibratedBeam = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_SystemEvents) {
-        status = mbr_reson7k3_rd_SystemEvents(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SystemEvents++;
-        }
-      }
-      else if (*recordid == R7KRECID_SystemEventMessage) {
-        status = mbr_reson7k3_rd_SystemEventMessage(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SystemEventMessage++;
-        }
-      }
-      else if (*recordid == R7KRECID_RDRRecordingStatus) {
-        status = mbr_reson7k3_rd_RDRRecordingStatus(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_RDRRecordingStatus++;
-        }
-      }
-      else if (*recordid == R7KRECID_Subscriptions) {
-        status = mbr_reson7k3_rd_Subscriptions(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_Subscriptions++;
-        }
-      }
-      else if (*recordid == R7KRECID_RDRStorageRecording) {
-        status = mbr_reson7k3_rd_RDRStorageRecording(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_RDRStorageRecording++;
-        }
-      }
-      else if (*recordid == R7KRECID_CalibrationStatus) {
-        status = mbr_reson7k3_rd_CalibrationStatus(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_CalibrationStatus++;
-        }
-      }
-      else if (*recordid == R7KRECID_CalibratedSideScan) {
-        status = mbr_reson7k3_rd_CalibratedSideScan(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_CalibratedSideScan++;
-          store->read_CalibratedSideScan = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_SnippetBackscatteringStrength) {
-        status = mbr_reson7k3_rd_SnippetBackscatteringStrength(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_SnippetBackscatteringStrength++;
-          store->read_SnippetBackscatteringStrength = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_MB2Status) {
-        status = mbr_reson7k3_rd_MB2Status(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_MB2Status++;
-        }
-      }
-      else if (*recordid == R7KRECID_FileHeader) {
-        status = mbr_reson7k3_rd_FileHeader(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          (*fileheaders)++;
-          done = MB_YES;
-          store->nrec_FileHeader++;
-        }
-//mbsys_reson7k3_print_FileHeader(verbose, &store->FileHeader, error);
-
-        // If the FileHeader record indicates the file ends with a FileCatalog
-        // record, then jump to the end of file, read the FileCatalog, and jump
-        // back to the current location.
-        if (status == MB_SUCCESS && store->FileHeader.optionaldata == MB_YES
-            && store->FileHeader.file_catalog_size > 0
-            && store->FileHeader.file_catalog_offset > 0
-            && mb_io_ptr->mbfp != NULL) {
-          // save current file location
-          int fpos_current = ftell(mb_io_ptr->mbfp);
-
-          // move to start of FileCatalog record
-          int fstatus = fseek(mb_io_ptr->mbfp, store->FileHeader.file_catalog_offset, SEEK_SET);
-
-          // Most of the time the FileHeader.file_catalog_size value is the size
-          // of the entire FileCatalog record as per the format spec, but sometimes
-          // it is just the size of the catalog list at 48 bytes per entry.
-          // This has been documented in sample Hydrosweep data from R/V Polarstern.
-          // Check for cases where the size is an even multiple of 48 - in these
-          // cases add 82 bytes so the entire record is read
-          if (store->FileHeader.file_catalog_size % 48 == 0) {
-            store->FileHeader.file_catalog_size += MBSYS_RESON7K_RECORDHEADER_SIZE
-                                                  + R7KHDRSIZE_FileCatalog
-                                                  + MBSYS_RESON7K_RECORDTAIL_SIZE;
-          }
-
-          /* allocate memory to read record if necessary */
-          if (*bufferalloc < store->FileHeader.file_catalog_size) {
-            status = mb_reallocd(verbose, __FILE__, __LINE__, store->FileHeader.file_catalog_size, (void **)bufferptr, error);
-            if (status == MB_SUCCESS)
-              status = mb_reallocd(verbose, __FILE__, __LINE__, store->FileHeader.file_catalog_size, (void **)buffersaveptr, error);
-            if (status != MB_SUCCESS) {
-              *bufferalloc = 0;
-              done = MB_YES;
-            }
-            else {
-              *bufferalloc = store->FileHeader.file_catalog_size;
-              buffer = (char *)*bufferptr;
-              buffersave = (char *)*buffersaveptr;
-            }
-          }
-
-          // read the entire record into the buffer
-          if (status == MB_SUCCESS) {
-            read_len = (size_t)(store->FileHeader.file_catalog_size);
-            status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
-          }
-
-          // parse the FileCatalog record
-          if (status == MB_SUCCESS) {
-//mbsys_reson7k3_print_FileHeader(verbose, &store->FileHeader, error);
-            status = mbr_reson7k3_rd_FileCatalog(verbose, buffer, store_ptr, error);
-            if (status == MB_SUCCESS) {
-              store->nrec_FileCatalog = 1;
-            }
-//mbsys_reson7k3_print_FileCatalog(verbose, &store->FileCatalog_read, error);
-          }
-
-          // reset kind and type to FileHeader
-          store->kind = MB_DATA_HEADER;
-          store->type = R7KRECID_FileHeader;
-
-          // reset file position
-          fstatus = fseek(mb_io_ptr->mbfp, fpos_current, SEEK_SET);
-          *icatalog = 1;
-
-        }
-      }
-      else if (*recordid == R7KRECID_FileCatalog) {
-        //status = mbr_reson7k3_rd_FileCatalog(verbose, buffer, store_ptr, error);
-        //if (status == MB_SUCCESS) {
-        //  done = MB_YES;
-        //  store->nrec_FileCatalog = 1;
-        //}
-//mbsys_reson7k3_print_FileCatalog(verbose, &store->FileCatalog_read, error);
-      }
-      else if (*recordid == R7KRECID_TimeMessage) {
-        status = mbr_reson7k3_rd_TimeMessage(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_TimeMessage++;
-        }
-      }
-      else if (*recordid == R7KRECID_RemoteControl) {
-        status = mbr_reson7k3_rd_RemoteControl(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_RemoteControl++;
-        }
-      }
-      else if (*recordid == R7KRECID_RemoteControlAcknowledge) {
-        status = mbr_reson7k3_rd_RemoteControlAcknowledge(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_RemoteControlAcknowledge++;
-        }
-      }
-      else if (*recordid == R7KRECID_RemoteControlNotAcknowledge) {
-        status = mbr_reson7k3_rd_RemoteControlNotAcknowledge(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_RemoteControlNotAcknowledge++;
-        }
-      }
-      else if (*recordid == R7KRECID_RemoteControlSonarSettings) {
-        status = mbr_reson7k3_rd_RemoteControlSonarSettings(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          store->nrec_RemoteControlSonarSettings++;
-          store->read_RemoteControlSonarSettings = MB_YES;
-        }
-      }
-      else if (*recordid == R7KRECID_CommonSystemSettings) {
-        status = mbr_reson7k3_rd_CommonSystemSettings(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_CommonSystemSettings++;
-        }
-      }
-      else if (*recordid == R7KRECID_SVFiltering) {
-        status = mbr_reson7k3_rd_SVFiltering(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SVFiltering++;
-        }
-      }
-      else if (*recordid == R7KRECID_SystemLockStatus) {
-        status = mbr_reson7k3_rd_SystemLockStatus(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SystemLockStatus++;
-        }
-      }
-      else if (*recordid == R7KRECID_SoundVelocity) {
-        status = mbr_reson7k3_rd_SoundVelocity(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SoundVelocity++;
-        }
-      }
-      else if (*recordid == R7KRECID_AbsorptionLoss) {
-        status = mbr_reson7k3_rd_AbsorptionLoss(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_AbsorptionLoss++;
-        }
-      }
-      else if (*recordid == R7KRECID_SpreadingLoss) {
-      status = mbr_reson7k3_rd_SpreadingLoss(verbose, buffer, store_ptr, error);
-        if (status == MB_SUCCESS) {
-          done = MB_YES;
-          store->nrec_SpreadingLoss++;
-        }
-      }
-    }
-
-#ifdef MBR_RESON7K3_DEBUG2
-    if (status == MB_SUCCESS && ping_record == MB_YES) {
-      fprintf(stderr,"recordid:%d ping_record:%d last_ping:%d new_ping:%d current_ping:%d done:%d status:%d error:%d\n",
-          *recordid, ping_record,*last_ping,*new_ping,*current_ping,done,status,*error);
-      fprintf(stderr, "current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
-              *new_ping, store->read_ProcessedSideScan, store->read_SonarSettings,
-              store->read_MatchFilter, store->read_BeamGeometry,
-              store->read_Bathymetry, store->read_SideScan,
-              store->read_WaterColumn, store->read_VerticalDepth,
-              store->read_TVG, store->read_Image,
-              store->read_PingMotion, store->read_DetectionDataSetup,
-              store->read_Beamformed, store->read_VernierProcessingDataRaw,
-              store->read_RawDetection, store->read_Snippet,
-              store->read_VernierProcessingDataFiltered, store->read_CompressedBeamformedMagnitude,
-              store->read_CompressedWaterColumn, store->read_SegmentedRawDetection,
-              store->read_CalibratedBeam, store->read_CalibratedSideScan,
-              store->read_SnippetBackscatteringStrength,
-              store->read_RemoteControlSonarSettings);
-    }
-#endif
-
-    /* bail out if there is a parsing error */
-    if (status == MB_FAILURE)
-      done = MB_YES;
-#ifdef MBR_RESON7K3_DEBUG2
-    if (verbose >= 0) {
-      fprintf(stderr, "---Read record id: %4.4X  %4.4d | recordid:%x size:%d\n", store->type, store->type, *recordid, *size);
-      fprintf(stderr, "end of mbr_reson7k3_rd_data loop: done:%d kind:%d status:%d error:%d\n", done, store->kind, status, *error);
-    }
-#endif
-  }
-#ifdef MBR_RESON7K3_DEBUG2
-  if (status == MB_SUCCESS)
-    fprintf(stderr, "RESON7K3 DATA READ: type:%d status:%d error:%d\n\n", store->kind, status, *error);
-#endif
-
-  /* get file position - check file and socket, use appropriate ftell */
-  if (mb_io_ptr->mbfp != NULL) {
-       if (*save_flag == MB_YES)
-          mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp) - *size;
-      else
-          mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
-  }
-#ifdef MBTRN_ENABLED
-  else if (mb_io_ptr->mbsp != NULL) {
-      if (*save_flag == MB_YES)
-          mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp) - *size;
-      else
-          mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp);
-  } else {
-      fprintf(stderr,"ERROR - both file and socket input pointers are NULL:                              %4.4X | %d\n", store->type, store->type);
-  }
-#endif
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_rt_reson7k3";
-  int status = MB_SUCCESS;
-  int interp_status;
-  int interp_error = MB_ERROR_NO_ERROR;
-  struct mbsys_reson7k3_struct *store = NULL;
-  s7k3_Position *Position;
-  s7k3_CustomAttitude *CustomAttitude;
-  s7k3_Altitude *Altitude;
-  s7k3_Depth *Depth;
-  s7k3_RollPitchHeave *RollPitchHeave;
-  s7k3_Heading *Heading;
-  s7k3_Navigation *Navigation;
-  s7k3_Attitude *Attitude;
-  s7k3_ProcessedSideScan *ProcessedSideScan;
-  s7k3_SonarSettings *SonarSettings;
-  s7k3_BeamGeometry *BeamGeometry;
-  s7k3_Bathymetry *Bathymetry;
-  s7k3_SideScan *SideScan;
-  s7k3_Image *Image;
-  s7k3_Beamformed *Beamformed;
-  s7k3_DetectionDataSetup *DetectionDataSetup;
-  s7k3_RawDetection *RawDetection;
-  s7k3_SegmentedRawDetection *SegmentedRawDetection;
-  int *preprocess_pars_set;
-  struct mb_preprocess_struct *preprocess_pars;
-  int *platform_set;
-	struct mb_platform_struct **platform_ptr = NULL;
-  double soundspeed;
-  int *asynch_source_nav = NULL;
-  int *asynch_source_sensordepth = NULL;
-  int *asynch_source_heading = NULL;
-  int *asynch_source_attitude = NULL;
-  int *asynch_source_altitude = NULL;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* get pointers to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
-
-  /* read next data from file */
-  status = mbr_reson7k3_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-  /* get pointers to data structures */
-  Position = &store->Position;
-  CustomAttitude = &store->CustomAttitude;
-  Altitude = &store->Altitude;
-  Depth = &store->Depth;
-  RollPitchHeave = &store->RollPitchHeave;
-  Heading = &store->Heading;
-  Navigation = &store->Navigation;
-  Attitude = &store->Attitude;
-  ProcessedSideScan = &store->ProcessedSideScan;
-  SonarSettings = &store->SonarSettings;
-  BeamGeometry = &store->BeamGeometry;
-  Bathymetry = &store->Bathymetry;
-  SideScan = &store->SideScan;
-  Image = &store->Image;
-  Beamformed = &store->Beamformed;
-  DetectionDataSetup = &store->DetectionDataSetup;
-  RawDetection = &store->RawDetection;
-  SegmentedRawDetection = &store->SegmentedRawDetection;
-  preprocess_pars_set = (int *)&mb_io_ptr->save13;
-  preprocess_pars = (struct mb_preprocess_struct *)&mb_io_ptr->preprocess_pars;
-  platform_set = (int *)&mb_io_ptr->save7;
-  platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
-  asynch_source_nav = (int *)&mb_io_ptr->save16;
-  asynch_source_sensordepth = (int *)&mb_io_ptr->save17;
-  asynch_source_heading = (int *)&mb_io_ptr->save18;
-  asynch_source_attitude = (int *)&mb_io_ptr->save19;
-  asynch_source_altitude = (int *)&mb_io_ptr->save20;
-//fprintf(stderr,"asynch_source_nav:%d %d asynch_source_sensordepth:%d %d asynch_source_heading:%d %d asynch_source_attitude:%d %d asynch_source_altitude:%d %d\n",
-//*asynch_source_nav, mb_io_ptr->nfix,
-//*asynch_source_sensordepth, mb_io_ptr->nsonardepth,
-//*asynch_source_heading, mb_io_ptr->nheading,
-//*asynch_source_attitude, mb_io_ptr->nattitude,
-//*asynch_source_altitude, mb_io_ptr->naltitude);
-
-  // Use the following asynchronous data source priority order:
-  //    Position lon lat -
-  //      Navigation      1015 MB_DATA_NAV
-  //      Position        1003 MB_DATA_NAV1
-  //    Sensor depth -
-  //      Navigation      1015 MB_DATA_NAV - IF height_accuracy is reasonable
-  //      Depth           1008 MB_DATA_SONARDEPTH - IF depth_descriptor=0 ==> depth to sensor value
-  //      Position        1003 MB_DATA_NAV1 - IF height_accuracy is reasonable
-  //    Heading -
-  //      Navigation      1015 MB_DATA_NAV
-  //      Heading         1013 MB_DATA_HEADING
-  //      CustomAttitude  1004 MB_DATA_ATTITUDE2
-  //    Roll pitch heave -
-  //      Attitude        1016 MB_DATA_ATTITUDE - also includes heading
-  //      RollPitchHeave  1012 MB_DATA_ATTITUDE1
-  //      CustomAttitude  1004 MB_DATA_ATTITUDE2 - also includes heading
-  //    Altitude:
-  //      Altitude        1006 MB_DATA_ALTITUDE
-  //
-
-  // deal with buffering asynchronous data if status == MB_SUCCESS
-  if (status == MB_SUCCESS) {
-
-    // save position, sensordepth, heading if Navigation record
-    if (store->kind == MB_DATA_NAV) {
-      Navigation = &(store->Navigation);
-
-      // add position (clear old data from other sources if needed)
-      if (*asynch_source_nav != MB_DATA_NAV) {
-        *asynch_source_nav = MB_DATA_NAV;
-        mb_io_ptr->nfix = 0;
-      }
-      mb_navint_add(verbose, mbio_ptr, store->time_d,
-                    (double)(RTD * Navigation->longitude),
-                    (double)(RTD * Navigation->latitude), error);
-
-      // add heading (clear old data from other sources if needed)
-      if (*asynch_source_heading != MB_DATA_NAV) {
-        *asynch_source_heading = MB_DATA_NAV;
-        mb_io_ptr->nheading = 0;
-      }
-      mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d),
-                    (double)(RTD * Navigation->heading), error);
-
-      // add sensordepth (clear old data from other sources if needed)
-      if (*asynch_source_sensordepth != MB_DATA_NAV) {
-        *asynch_source_sensordepth = MB_DATA_NAV;
-        mb_io_ptr->nsonardepth = 0;
-      }
-      mb_depint_add(verbose, mbio_ptr, (double)(store->time_d),
-                      (double)(-Navigation->height), error);
-    }
-
-    /* save Attitude if Attitude record */
-    else if (store->kind == MB_DATA_ATTITUDE) {
-      Attitude = &(store->Attitude);
-
-      // add attitude (clear old data from other sources if needed)
-      if (*asynch_source_attitude != MB_DATA_ATTITUDE) {
-        *asynch_source_attitude = MB_DATA_ATTITUDE;
-        mb_io_ptr->nattitude = 0;
-      }
-      for (int i = 0; i < Attitude->n; i++) {
-        mb_attint_add(verbose, mbio_ptr, (double)(store->time_d + 0.001 * ((double)Attitude->delta_time[i])),
-                      (double)(Attitude->heave[i]), (double)(RTD * Attitude->roll[i]), (double)(RTD * Attitude->pitch[i]),
-                      error);
-      }
-
-      // add heading (clear old data from other sources if needed)
-      if (*asynch_source_heading != MB_DATA_ATTITUDE) {
-        *asynch_source_heading = MB_DATA_ATTITUDE;
-        mb_io_ptr->nheading = 0;
-      }
-      for (int i = 0; i < Attitude->n; i++) {
-        mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d + 0.001 * ((double)Attitude->delta_time[i])),
-                      (double)(RTD * Attitude->heading[i]), error);
-      }
-    }
-
-    // save position if Position record and no higher priority source already encountered
-    else if (store->kind == MB_DATA_NAV1) {
-      Position = &(store->Position);
-
-      // add position (clear old data from other sources if needed)
-      if (*asynch_source_nav == MB_DATA_NONE) {
-        *asynch_source_nav = MB_DATA_NAV1;
-        mb_io_ptr->nfix = 0;
-      }
-      if (*asynch_source_nav == MB_DATA_NAV1) {
-        mb_navint_add(verbose, mbio_ptr, store->time_d,
-                      (double)(RTD * Position->longitude_easting),
-                      (double)(RTD * Position->latitude_northing), error);
-      }
-    }
-
-    // save heading if Heading record and no higher priority source already encountered
-    else if (store->kind == MB_DATA_HEADING) {
-      Heading = &(store->Heading);
-
-      // add heading (clear old data from other sources if needed)
-      if (*asynch_source_heading == MB_DATA_NONE
-          || *asynch_source_heading == MB_DATA_ATTITUDE2) {
-        *asynch_source_heading = MB_DATA_HEADING;
-        mb_io_ptr->nheading = 0;
-      }
-      if (*asynch_source_heading == MB_DATA_HEADING) {
-        mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d),
-                      (double)(RTD * Heading->heading), error);
-      }
-    }
-
-    /* save attitude if RollPitchHeave record */
-    else if (store->kind == MB_DATA_ATTITUDE1) {
-      RollPitchHeave = &(store->RollPitchHeave);
-
-      // add attitude (clear old data from other sources if needed)
-      if (*asynch_source_attitude == MB_DATA_NONE
-        || *asynch_source_attitude == MB_DATA_ATTITUDE2) {
-        *asynch_source_attitude = MB_DATA_ATTITUDE1;
-        mb_io_ptr->nattitude = 0;
-      }
-      if (*asynch_source_attitude == MB_DATA_ATTITUDE1) {
-        mb_attint_add(verbose, mbio_ptr, (double)(store->time_d),
-                      (double)(RollPitchHeave->heave),
-                      (double)(RTD * RollPitchHeave->roll),
-                      (double)(RTD * RollPitchHeave->pitch), error);
-      }
-    }
-
-    /* save attitude if CustomAttitude record */
-    else if (store->kind == MB_DATA_ATTITUDE2) {
-      CustomAttitude = &(store->CustomAttitude);
-
-      // add attitude (clear old data from other sources if needed)
-      if (*asynch_source_attitude == MB_DATA_NONE) {
-        *asynch_source_attitude = MB_DATA_ATTITUDE2;
-        mb_io_ptr->nattitude = 0;
-      }
-      if (*asynch_source_attitude == MB_DATA_ATTITUDE2) {
-        for (int i = 0; i < CustomAttitude->n; i++) {
-          mb_attint_add(verbose, mbio_ptr,
-                    (double)(store->time_d + ((double)i)
-                              / ((double)CustomAttitude->frequency)),
-                    (double)(CustomAttitude->heave[i]),
-                    (double)(RTD * CustomAttitude->roll[i]),
-                    (double)(RTD * CustomAttitude->pitch[i]), error);
-        }
-      }
-
-      // add heading (clear old data from other sources if needed)
-      if (*asynch_source_heading == MB_DATA_NONE) {
-        *asynch_source_heading = MB_DATA_ATTITUDE2;
-        mb_io_ptr->nheading = 0;
-      }
-      if (*asynch_source_heading == MB_DATA_ATTITUDE2) {
-        for (int i = 0; i < CustomAttitude->n; i++) {
-          mb_hedint_add(verbose, mbio_ptr,
-                    (double)(store->time_d + ((double)i) / ((double)CustomAttitude->frequency)),
-                    (double)(RTD * CustomAttitude->heading[i]), error);
-        }
-      }
-    }
-
-    /* save sonardepth if Depth record showing depth of sensor */
-    else if (store->kind == MB_DATA_SONARDEPTH) {
-      Depth = &(store->Depth);
-
-      // add sensordepth (clear old data from other sources if needed)
-      if (*asynch_source_sensordepth == MB_DATA_NONE) {
-        *asynch_source_sensordepth = MB_DATA_SONARDEPTH;
-        mb_io_ptr->nsonardepth = 0;
-      }
-      if (*asynch_source_sensordepth == MB_DATA_SONARDEPTH) {
-        mb_depint_add(verbose, mbio_ptr, (double)(store->time_d),
-                      (double)(Depth->depth), error);
-      }
-    }
-
-    /* save altitude if Altitude record */
-    else if (store->kind == MB_DATA_ALTITUDE) {
-      Altitude = &(store->Altitude);
-
-      // add altitude (clear old data from other sources if needed)
-      if (*asynch_source_altitude == MB_DATA_NONE) {
-        *asynch_source_altitude = MB_DATA_ALTITUDE;
-        mb_io_ptr->naltitude = 0;
-      }
-      if (*asynch_source_altitude == MB_DATA_ALTITUDE) {
-        mb_altint_add(verbose, mbio_ptr, (double)(store->time_d),
-                      (double)(Altitude->altitude), error);
-      }
-    }
-
-  } // end of dealing with asynchronous data
-
-#ifdef MBR_RESON7K3_DEBUG2
-  if (verbose > 0)
-    fprintf(stderr, "Record returned: type:%d status:%d error:%d\n\n", store->kind, status, *error);
-#endif
-
-  /* if needed calculate bathymetry using preprocess function */
-  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
-      && (  (store->read_RawDetection == MB_YES
-              && RawDetection->optionaldata == MB_NO)
-            || (store->read_SegmentedRawDetection == MB_YES
-              && SegmentedRawDetection->optionaldata == MB_NO))) {
-    /* get platform model if needed */
-    if (*platform_set == MB_NO) {
-      status = mbsys_reson7k3_extract_platform(verbose, mbio_ptr, store_ptr, &store->kind, (void **)platform_ptr, error);
-      *platform_set = MB_YES;
-    }
-
-    /* set preprocess parameters if needed - have to update counts of ancilliary data arrays each time */
-    if (*preprocess_pars_set == MB_NO) {
-      preprocess_pars->target_sensor = 0;
-
-      preprocess_pars->timestamp_changed = MB_NO;
-      preprocess_pars->time_d = 0.0;
-
-      preprocess_pars->n_nav = mb_io_ptr->nfix;
-      preprocess_pars->nav_time_d = mb_io_ptr->fix_time_d;
-      preprocess_pars->nav_lon = mb_io_ptr->fix_lon;
-      preprocess_pars->nav_lat = mb_io_ptr->fix_lat;
-      preprocess_pars->nav_speed = NULL;
-
-      preprocess_pars->n_sensordepth = mb_io_ptr->nsonardepth;
-      preprocess_pars->sensordepth_time_d = mb_io_ptr->sonardepth_time_d;
-      preprocess_pars->sensordepth_sensordepth = mb_io_ptr->sonardepth_sonardepth;
-
-      preprocess_pars->n_heading = mb_io_ptr->nheading;
-      preprocess_pars->heading_time_d = mb_io_ptr->heading_time_d;
-      preprocess_pars->heading_heading = mb_io_ptr->heading_heading;
-
-      preprocess_pars->n_altitude = mb_io_ptr->naltitude;
-      preprocess_pars->altitude_time_d = mb_io_ptr->altitude_time_d;
-      preprocess_pars->altitude_altitude = mb_io_ptr->altitude_altitude;
-
-      preprocess_pars->n_attitude = mb_io_ptr->nattitude;
-      preprocess_pars->attitude_time_d = mb_io_ptr->attitude_time_d;
-      preprocess_pars->attitude_roll = mb_io_ptr->attitude_roll;
-      preprocess_pars->attitude_pitch = mb_io_ptr->attitude_pitch;
-      preprocess_pars->attitude_heave = mb_io_ptr->attitude_heave;
-
-      preprocess_pars->n_soundspeed = 1;
-      soundspeed = SonarSettings->sound_velocity;
-      preprocess_pars->soundspeed_time_d = &store->time_d;
-      preprocess_pars->soundspeed_soundspeed = &soundspeed;
-
-      preprocess_pars->no_change_survey = MB_NO;
-      preprocess_pars->multibeam_sidescan_source = MB_PR_SSSOURCE_SNIPPET;
-      preprocess_pars->modify_soundspeed = MB_NO;
-      preprocess_pars->recalculate_bathymetry = MB_YES;
-      preprocess_pars->sounding_amplitude_filter = MB_NO;
-      preprocess_pars->sounding_amplitude_threshold = 0.0;
-      preprocess_pars->sounding_altitude_filter = MB_NO;
-      preprocess_pars->sounding_target_altitude = 0.0;
-      preprocess_pars->ignore_water_column = MB_NO;
-      preprocess_pars->head1_offsets = MB_NO;
-      preprocess_pars->head1_offsets_x = 0.0;
-      preprocess_pars->head1_offsets_y = 0.0;
-      preprocess_pars->head1_offsets_z = 0.0;
-      preprocess_pars->head1_offsets_heading = 0.0;
-      preprocess_pars->head1_offsets_roll = 0.0;
-      preprocess_pars->head1_offsets_pitch = 0.0;
-      preprocess_pars->head2_offsets = MB_NO;
-      preprocess_pars->head2_offsets_x = 0.0;
-      preprocess_pars->head2_offsets_y = 0.0;
-      preprocess_pars->head2_offsets_z = 0.0;
-      preprocess_pars->head2_offsets_heading = 0.0;
-      preprocess_pars->head2_offsets_roll = 0.0;
-      preprocess_pars->head2_offsets_pitch = 0.0;
-
-      preprocess_pars->n_kluge = 0;
-    } else {
-      preprocess_pars->n_nav = mb_io_ptr->nfix;
-      preprocess_pars->n_sensordepth = mb_io_ptr->nsonardepth;
-      preprocess_pars->n_heading = mb_io_ptr->nheading;
-      preprocess_pars->n_altitude = mb_io_ptr->naltitude;
-      preprocess_pars->n_attitude = mb_io_ptr->nattitude;
-    }
-
-    status = mbsys_reson7k3_preprocess(verbose, mbio_ptr, store_ptr,
-                *platform_ptr, preprocess_pars, error);
-  }
-
-  /* set error and kind in mb_io_ptr */
-  mb_io_ptr->new_error = *error;
-  mb_io_ptr->new_kind = store->kind;
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_reson7k3_chk_pingrecord(int verbose, int recordid, int *pingrecord) {
-  char *function_name = "mbr_reson7k3_chk_pingrecord";
-
-  assert(pingrecord != NULL);
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
-    fprintf(stderr, "dbg2       recordid:      %d\n", recordid);
-  }
-
-  /* check ping number if one of the ping records */
-  switch (recordid) {
-    case R7KRECID_ProcessedSideScan:
-    case R7KRECID_SonarSettings:
-    case R7KRECID_MatchFilter:
-    case R7KRECID_BeamGeometry:
-    case R7KRECID_Bathymetry:
-    case R7KRECID_SideScan:
-    case R7KRECID_WaterColumn:
-    case R7KRECID_VerticalDepth:
-    case R7KRECID_TVG:
-    case R7KRECID_Image:
-    case R7KRECID_PingMotion:
-    case R7KRECID_AdaptiveGate:
-    case R7KRECID_DetectionDataSetup:
-    case R7KRECID_Beamformed:
-    case R7KRECID_VernierProcessingDataRaw:
-    case R7KRECID_RawDetection:
-    case R7KRECID_Snippet:
-    case R7KRECID_VernierProcessingDataFiltered:
-    case R7KRECID_CompressedBeamformedMagnitude:
-    case R7KRECID_CompressedWaterColumn:
-    case R7KRECID_SegmentedRawDetection:
-    case R7KRECID_CalibratedBeam:
-    case R7KRECID_CalibratedSideScan:
-    case R7KRECID_SnippetBackscatteringStrength:
-    case R7KRECID_RemoteControlSonarSettings:
-      *pingrecord = MB_YES;
-      break;
-    default:
-      *pingrecord = MB_NO;
-  }
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Output arguments:\n");
-    fprintf(stderr, "dbg2       pingrecord:    %d\n", *pingrecord);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:        %d\n", MB_SUCCESS);
-  }
-
-  return (MB_SUCCESS);
-}
-/*--------------------------------------------------------------------*/
-int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr, int size, void *header_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_FileCatalog_update";
-  int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
-  s7k3_header *header = NULL;
-  s7k3_FileCatalog *FileCatalog = NULL;
-  s7k3_filecatalogdata *filecatalogdata = NULL;
-  int nalloc;
-  size_t alloc_size = 0;
-
-  assert(mbio_ptr != NULL);
-  assert(store_ptr != NULL);
-  assert(size > 0);
-  assert(header_ptr != NULL);
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:     %p\n", mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:    %p\n", store_ptr);
-    fprintf(stderr, "dbg2       size:         %d\n", size);
-    fprintf(stderr, "dbg2       header_ptr:   %p\n", header_ptr);
-  }
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
-
-  /* get pointers to data structures */
-  header = (s7k3_header *)header_ptr;
-  FileCatalog = (s7k3_FileCatalog *)&store->FileCatalog_write;
-
-  /* allocate memory for data record catalog if needed */
-  if (FileCatalog->nalloc < (FileCatalog->n + 1) * sizeof(s7k3_filecatalogdata)) {
-    FileCatalog->nalloc = (FileCatalog->n + 1000) * sizeof(s7k3_filecatalogdata);
-    status = mb_reallocd(verbose, __FILE__, __LINE__, FileCatalog->nalloc, (void **)&(FileCatalog->filecatalogdata), error);
-    if (status != MB_SUCCESS) {
-      FileCatalog->nalloc = 0;
-    }
-  }
-  // Add a new entry for a data record about to be written to the output file
-  filecatalogdata = &FileCatalog->filecatalogdata[FileCatalog->n];
-  filecatalogdata->sequence = FileCatalog->n;
-  int time_j[5], time_i[7];
-  double time_d;
-  time_j[0] = header->s7kTime.Year;
-  time_j[1] = header->s7kTime.Day;
-  time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-  time_j[3] = (int)header->s7kTime.Seconds;
-  time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
-  mb_get_itime(verbose, time_j, time_i);
-  mb_get_time(verbose, time_i, &(filecatalogdata->time_d));
-  mbr_reson7k3_chk_pingrecord(verbose, header->RecordType, &filecatalogdata->pingrecord);
-  filecatalogdata->size = size;
-  filecatalogdata->offset = ftell(mb_io_ptr->mbfp);
-  filecatalogdata->record_type = header->RecordType;
-  filecatalogdata->device_id = header->DeviceId;
-  filecatalogdata->system_enumerator = header->SystemEnumerator;
-  filecatalogdata->s7kTime.Year = header->s7kTime.Year;
-  filecatalogdata->s7kTime.Day = header->s7kTime.Day;
-  filecatalogdata->s7kTime.Seconds = header->s7kTime.Seconds;
-  filecatalogdata->s7kTime.Hours = header->s7kTime.Hours;
-  filecatalogdata->s7kTime.Minutes = header->s7kTime.Minutes;
-  if (filecatalogdata->pingrecord == MB_YES)
-    filecatalogdata->record_count = 1;
-  else
-    filecatalogdata->record_count = 0;
-  for (int i=0; i<8; i++) {
-    filecatalogdata->reserved[i] = 0;
-  }
-  FileCatalog->n++;
-
-#ifdef MBR_RESON7K3_DEBUG
-fprintf(stderr, "^^>Update FileCatalog list: File %s Line %d type:%d n:%d\n", __FILE__, __LINE__, header->RecordType, FileCatalog->n);
-#endif
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_wr_data";
-  int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
-  struct mbsys_reson7k3_struct *ostore = NULL;
-  FILE *mbfp = NULL;
-  char **bufferptr = NULL;
-  char *buffer = NULL;
-  int *bufferalloc = NULL;
-  int *fileheaders = NULL;
-  int *filecatalogoffsetoffset = NULL;
-  int size = 0;
-  size_t write_len = 0;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
-  ostore = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
-  mbfp = mb_io_ptr->mbfp;
-
-  /* get saved values */
-  bufferptr = (char **)&mb_io_ptr->saveptr1;
-  buffer = (char *)*bufferptr;
-  bufferalloc = (int *)&mb_io_ptr->save6;
-  fileheaders = (int *)&mb_io_ptr->save12;
-  filecatalogoffsetoffset = (int *)&mb_io_ptr->save5;
-
-//fprintf(stderr, "%s %d Called %s  ostore->n_saved_comments: %d\n", __FILE__, __LINE__, function_name, ostore->n_saved_comments);
-
-  // The FileHeader record must be at the start of the file, but in general
-  // MB-System programs will pass in comments before the first data records
-  // are passed in from the original data file, including the FileHeader.
-  // Therefore below any comments received before the FileHeader
-  // will be buffered and then written immediately after the FileHeader
-  // as SystemEventMessage records. After the FileHeader record is written
-  // any comments will be written when received.
-  //
-  // The FileCatalog output data is stored in the FileCatalog_write
-  // structure as the file is written. The FileCatalog record is written
-  // when the file is closed, not when the input FileCatalog data are passed
-  // through. When the FileCatalog is written to the end of the file the
-  // FileHeader record is also updated with the offset to and size of the
-  // FileCatalog record. These calls are made from mbr_reson7k3_deall() rather
-  // than mbr_reson7k3_wr_data(), as only when the former is called is it
-  // clear the file is finished.
-  //
-  // When survey data are passed in with store->kind == MB_DATA_DATA, all of
-  // the ping-related records in memory associated with this ping are written
-  // in a single pass. All other types of data correspond to single data records
-  // and only a single record is written.
-
-  // write FileHeader
-  if (store->type == R7KRECID_FileHeader) {
-    // ensure FileHeader has
-#ifdef MBR_RESON7K3_DEBUG
-    fprintf(stderr, "-->R7KRECID_FileHeader:                        %4.4X | %d\n", store->type, store->type);
-#endif
-    status = mbr_reson7k3_wr_FileHeader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-    buffer = (char *)*bufferptr;
-    write_len = (size_t)size;
-    status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->FileHeader.header, error);
-    status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    (*fileheaders)++;
-
-    // Save byte offset in record to the value that will contain the byte offset
-    // in the file to the start of the FileCatalog record at the end of the file
-    // This value won't be defined until the file is finished, and so will be
-    // overwritten just before the file is closed.
-    *filecatalogoffsetoffset = store->FileHeader.header.OptionalDataOffset;
-
-//fprintf(stderr,"%s %d Writing comments after FileHeader: ostore->n_saved_comments:%d\n", __FILE__, __LINE__, ostore->n_saved_comments);
-
-    for (int i = 0; i < ostore->n_saved_comments; i++) {
-      store->type = R7KRECID_SystemEventMessage;
-      store->kind = MB_DATA_COMMENT;
-      store->SystemEventMessage.header = store->FileHeader.header;
-      store->SystemEventMessage.header.RecordType = R7KRECID_SystemEventMessage;
-      store->SystemEventMessage.serial_number = 0;
-      store->SystemEventMessage.event_id = 1;
-      store->SystemEventMessage.message_length = MIN(strlen(ostore->comments[i]) + 1, MB_PATH_MAXLINE - 1);
-      store->SystemEventMessage.event_identifier = 0;
-      if (store->SystemEventMessage.message_alloc
-          < store->SystemEventMessage.message_length) {
-        if ((status = mb_reallocd(verbose, __FILE__, __LINE__, MB_PATH_MAXLINE,
-                              (void **)&store->SystemEventMessage.message,
-                              error)) == MB_SUCCESS) {
-          store->SystemEventMessage.message_alloc = MB_PATH_MAXLINE;
-        }
-        else
-          store->SystemEventMessage.message_alloc = 0;
-      }
-      if (store->SystemEventMessage.message_alloc
-          >= store->SystemEventMessage.message_length) {
-        strncpy(store->SystemEventMessage.message, ostore->comments[i], store->SystemEventMessage.message_alloc-1);
-//fprintf(stderr,"%s %d Writing comment %d: %s\n", __FILE__, __LINE__, i, store->SystemEventMessage.message);
-        status = mbr_reson7k3_wr_SystemEventMessage(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SystemEventMessage.header, error);
-        status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-      }
-    }
-  }
-
-  /* call appropriate writing routines for ping data */
-  else if (store->kind == MB_DATA_DATA) {
-    /* Write all of the records in memory */
-
-    /* Reson 7k sonar settings (record 7000) */
-    if (store->read_SonarSettings == MB_YES) {
-      store->type = R7KRECID_SonarSettings;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_SonarSettings:                     %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_SonarSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarSettings.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-    /* Reson 7k match filter (record 7002) */
-    if (status == MB_SUCCESS && store->read_MatchFilter == MB_YES) {
-      store->type = R7KRECID_MatchFilter;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_MatchFilter:                       %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_MatchFilter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->MatchFilter.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k beam geometry (record 7004) */
-    if (status == MB_SUCCESS && store->read_BeamGeometry == MB_YES) {
-      store->type = R7KRECID_BeamGeometry;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_BeamGeometry:                    --%4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_BeamGeometry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->BeamGeometry.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k bathymetry (record 7006) */
-    if (status == MB_SUCCESS && store->read_Bathymetry == MB_YES) {
-      store->type = R7KRECID_Bathymetry;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_Bathymetry:                          %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_Bathymetry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Bathymetry.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k SideScan imagery data (record 7007) */
-    if (status == MB_SUCCESS && store->read_SideScan == MB_YES) {
-      store->type = R7KRECID_SideScan;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_SideScan:                          %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_SideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SideScan.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k WaterColumn data (record 7008) */
-    if (status == MB_SUCCESS && store->read_WaterColumn == MB_YES) {
-      store->type = R7KRECID_WaterColumn;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_WaterColumn:                       %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_WaterColumn(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->WaterColumn.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k VerticalDepth data (record 7009) */
-    if (status == MB_SUCCESS && store->read_VerticalDepth == MB_YES) {
-      store->type = R7KRECID_VerticalDepth;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_VerticalDepth:                     %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_VerticalDepth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VerticalDepth.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k TVG data (record 7010) */
-    if (status == MB_SUCCESS && store->read_TVG == MB_YES) {
-      store->type = R7KRECID_TVG;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_TVG:                               %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_TVG(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->TVG.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k Image data (record 7011) */
-    if (status == MB_SUCCESS && store->read_Image == MB_YES) {
-      store->type = R7KRECID_Image;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_Image:                             %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_Image(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Image.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k PingMotion (record 7012) */
-    if (status == MB_SUCCESS && store->read_PingMotion == MB_YES) {
-      store->type = R7KRECID_PingMotion;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_PingMotion:                        %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_PingMotion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->PingMotion.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k DetectionDataSetup (record 7017) */
-    if (status == MB_SUCCESS && store->read_DetectionDataSetup == MB_YES) {
-      store->type = R7KRECID_DetectionDataSetup;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_DetectionDataSetup:                %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_DetectionDataSetup(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->DetectionDataSetup.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k Beamformed magnitude and phase data (record 7018) */
-    if (status == MB_SUCCESS && store->read_Beamformed == MB_YES) {
-      store->type = R7KRECID_Beamformed;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_Beamformed:                        %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_Beamformed(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Beamformed.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k RawDetection (record 7027) */
-    if (status == MB_SUCCESS && store->read_RawDetection == MB_YES) {
-      store->type = R7KRECID_RawDetection;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_RawDetection:                      %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_RawDetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RawDetection.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k Snippet (record 7028) */
-    if (status == MB_SUCCESS && store->read_Snippet == MB_YES) {
-      store->type = R7KRECID_Snippet;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_Snippet:                           %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_Snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Snippet.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k CompressedBeamformedMagnitude Data (Record 7041) */
-    if (status == MB_SUCCESS && store->read_CompressedBeamformedMagnitude == MB_YES) {
-      store->type = R7KRECID_CompressedBeamformedMagnitude;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_CompressedBeamformedMagnitude:     %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_CompressedBeamformedMagnitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CompressedBeamformedMagnitude.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k CompressedWaterColumn Data (Record 7042) */
-    if (status == MB_SUCCESS && store->read_CompressedWaterColumn == MB_YES) {
-      store->type = R7KRECID_CompressedWaterColumn;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_CompressedWaterColumn:             %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_CompressedWaterColumn(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CompressedWaterColumn.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k SegmentedRawDetection Data (part of Record 7047) */
-    if (status == MB_SUCCESS && store->read_SegmentedRawDetection == MB_YES) {
-      store->type = R7KRECID_SegmentedRawDetection;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_SegmentedRawDetection:             %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_SegmentedRawDetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SegmentedRawDetection.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k CalibratedBeam Data (Record 7048) */
-    if (status == MB_SUCCESS && store->read_CalibratedBeam == MB_YES) {
-      store->type = R7KRECID_CalibratedBeam;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_CalibratedBeam:                    %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_CalibratedBeam(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedBeam.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k CalibratedSideScan Data (part of record 7057) */
-    if (status == MB_SUCCESS && store->read_CalibratedSideScan == MB_YES) {
-      store->type = R7KRECID_CalibratedSideScan;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_CalibratedSideScan:                %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_CalibratedSideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedSideScan.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k SnippetBackscatteringStrength (Record 7058) */
-    if (status == MB_SUCCESS && store->read_SnippetBackscatteringStrength == MB_YES) {
-      store->type = R7KRECID_SnippetBackscatteringStrength;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_SnippetBackscatteringStrength:     %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_SnippetBackscatteringStrength(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SnippetBackscatteringStrength.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Reson 7k RemoteControlSonarSettings settings (record 7503) */
-    if (status == MB_SUCCESS && store->read_RemoteControlSonarSettings == MB_YES) {
-      store->type = R7KRECID_RemoteControlSonarSettings;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_RemoteControlSonarSettings:      %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_RemoteControlSonarSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControlSonarSettings.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-
-    /* Processed sidescan - MB-System extension to s7k3 format (record 3199) */
-    if (status == MB_SUCCESS && store->read_ProcessedSideScan == MB_YES) {
-      store->type = R7KRECID_ProcessedSideScan;
-#ifdef MBR_RESON7K3_DEBUG
-      fprintf(stderr, "**>R7KRECID_ProcessedSideScan:                 %4.4X | %d\n", store->type, store->type);
-#endif
-      status = mbr_reson7k3_wr_ProcessedSideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->ProcessedSideScan.header, error);
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-    }
-  }
-
-  // if comment and no FileHeader already written then store the comment in the store structure
-  // associated with the output mb_io_ptr
-  else if (store->kind == MB_DATA_COMMENT && *fileheaders == 0) {
-    if (ostore->n_saved_comments < MBSYS_RESON7K_MAX_BUFFERED_COMMENTS) {
-      strncpy(ostore->comments[ostore->n_saved_comments], ostore->SystemEventMessage.message, MB_PATH_MAXLINE);
-      (ostore->n_saved_comments)++;
-//fprintf(stderr, "%s %d saved a comment %s %d\n", __FILE__, __LINE__, ostore->comments[ostore->n_saved_comments-1], ostore->n_saved_comments);
-    }
-  }
-
-  /* call appropriate writing routine for other records */
-  else {
-#ifdef MBR_RESON7K3_DEBUG
-    if (store->type ==R7KRECID_None)
-      fprintf(stderr, "-->R7KRECID_None:                              %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_ReferencePoint)
-      fprintf(stderr, "-->R7KRECID_ReferencePoint:                    %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_UncalibratedSensorOffset)
-      fprintf(stderr, "-->R7KRECID_UncalibratedSensorOffset:          %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CalibratedSensorOffset)
-      fprintf(stderr, "-->R7KRECID_CalibratedSensorOffset:            %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Position)
-      fprintf(stderr, "-->R7KRECID_Position:                          %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CustomAttitude)
-      fprintf(stderr, "-->R7KRECID_CustomAttitude:                    %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Tide)
-      fprintf(stderr, "-->R7KRECID_Tide:                              %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Altitude)
-      fprintf(stderr, "-->R7KRECID_Altitude:                          %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_MotionOverGround)
-      fprintf(stderr, "-->R7KRECID_MotionOverGround:                  %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Depth)
-      fprintf(stderr, "-->R7KRECID_Depth:                             %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SoundVelocityProfile)
-      fprintf(stderr, "-->R7KRECID_SoundVelocityProfile:              %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CTD)
-      fprintf(stderr, "-->R7KRECID_CTD:                               %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Geodesy)
-      fprintf(stderr, "-->R7KRECID_Geodesy:                           %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_RollPitchHeave)
-      fprintf(stderr, "-->R7KRECID_RollPitchHeave:                    %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Heading)
-      fprintf(stderr, "-->R7KRECID_Heading:                           %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SurveyLine)
-      fprintf(stderr, "-->R7KRECID_SurveyLine:                        %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Navigation)
-      fprintf(stderr, "-->R7KRECID_Navigation:                        %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Attitude)
-      fprintf(stderr, "-->R7KRECID_Attitude:                          %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_PanTilt)
-      fprintf(stderr, "-->R7KRECID_PanTilt:                           %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SonarInstallationIDs)
-      fprintf(stderr, "-->R7KRECID_SonarInstallationIDs:              %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SonarPipeEnvironment)
-      fprintf(stderr, "-->R7KRECID_SonarPipeEnvironment:              %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_ContactOutput)
-      fprintf(stderr, "-->R7KRECID_ContactOutput:                     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_ProcessedSideScan)
-      fprintf(stderr, "-->R7KRECID_ProcessedSideScan:                 %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SonarSettings)
-      fprintf(stderr, "-->R7KRECID_SonarSettings:                     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Configuration)
-      fprintf(stderr, "-->R7KRECID_Configuration:                     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_MatchFilter)
-      fprintf(stderr, "-->R7KRECID_MatchFilter:                       %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_FirmwareHardwareConfiguration)
-      fprintf(stderr, "-->R7KRECID_FirmwareHardwareConfiguration:     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_BeamGeometry)
-      fprintf(stderr, "-->R7KRECID_BeamGeometry:                      %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Bathymetry)
-      fprintf(stderr, "-->R7KRECID_Bathymetry:                        %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SideScan)
-      fprintf(stderr, "-->R7KRECID_SideScan:                          %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_WaterColumn)
-      fprintf(stderr, "-->R7KRECID_WaterColumn:                       %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_VerticalDepth)
-      fprintf(stderr, "-->R7KRECID_VerticalDepth:                     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_TVG)
-      fprintf(stderr, "-->R7KRECID_TVG:                               %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Image)
-      fprintf(stderr, "-->R7KRECID_Image:                             %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_PingMotion)
-      fprintf(stderr, "-->R7KRECID_PingMotion:                        %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_AdaptiveGate)
-      fprintf(stderr, "-->R7KRECID_AdaptiveGate:                      %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_DetectionDataSetup)
-      fprintf(stderr, "-->R7KRECID_DetectionDataSetup:                %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Beamformed)
-      fprintf(stderr, "-->R7KRECID_Beamformed:                        %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_VernierProcessingDataRaw)
-      fprintf(stderr, "-->R7KRECID_VernierProcessingDataRaw:          %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_BITE)
-      fprintf(stderr, "-->R7KRECID_BITE:                              %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SonarSourceVersion)
-      fprintf(stderr, "-->R7KRECID_SonarSourceVersion:                %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_WetEndVersion8k)
-      fprintf(stderr, "-->R7KRECID_WetEndVersion8k:                   %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_RawDetection)
-      fprintf(stderr, "-->R7KRECID_RawDetection:                      %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Snippet)
-      fprintf(stderr, "-->R7KRECID_Snippet:                           %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_VernierProcessingDataFiltered)
-      fprintf(stderr, "-->R7KRECID_VernierProcessingDataFiltered:     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_InstallationParameters)
-      fprintf(stderr, "-->R7KRECID_InstallationParameters:            %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_BITESummary)
-      fprintf(stderr, "-->R7KRECID_BITESummary:                       %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CompressedBeamformedMagnitude)
-      fprintf(stderr, "-->R7KRECID_CompressedBeamformedMagnitude:     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CompressedWaterColumn)
-      fprintf(stderr, "-->R7KRECID_CompressedWaterColumn:             %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SegmentedRawDetection)
-      fprintf(stderr, "-->R7KRECID_SegmentedRawDetection:             %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CalibratedBeam)
-      fprintf(stderr, "-->R7KRECID_CalibratedBeam:                    %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SystemEvents)
-      fprintf(stderr, "-->R7KRECID_SystemEvents:                      %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SystemEventMessage)
-      fprintf(stderr, "-->R7KRECID_SystemEventMessage:                %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_RDRRecordingStatus)
-      fprintf(stderr, "-->R7KRECID_RDRRecordingStatus:                %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_Subscriptions)
-      fprintf(stderr, "-->R7KRECID_Subscriptions:                     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_RDRStorageRecording)
-      fprintf(stderr, "-->R7KRECID_RDRStorageRecording:               %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CalibrationStatus)
-      fprintf(stderr, "-->R7KRECID_CalibrationStatus:                 %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CalibratedSideScan)
-      fprintf(stderr, "-->R7KRECID_CalibratedSideScan:                %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SnippetBackscatteringStrength)
-      fprintf(stderr, "-->R7KRECID_SnippetBackscatteringStrength:     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_MB2Status)
-      fprintf(stderr, "-->R7KRECID_MB2Status:                         %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_FileHeader)
-      fprintf(stderr, "-->R7KRECID_FileHeader:                        %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_FileCatalog)
-      fprintf(stderr, "-->R7KRECID_FileCatalog:                       %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_TimeMessage)
-      fprintf(stderr, "-->R7KRECID_TimeMessage:                       %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_RemoteControl)
-      fprintf(stderr, "-->R7KRECID_RemoteControl:                     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_RemoteControlAcknowledge)
-      fprintf(stderr, "-->R7KRECID_RemoteControlAcknowledge:          %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_RemoteControlNotAcknowledge)
-      fprintf(stderr, "-->R7KRECID_RemoteControlNotAcknowledge:       %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_RemoteControlSonarSettings)
-      fprintf(stderr, "-->R7KRECID_RemoteControlSonarSettings:        %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_CommonSystemSettings)
-      fprintf(stderr, "-->R7KRECID_CommonSystemSettings:              %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SVFiltering)
-      fprintf(stderr, "-->R7KRECID_SVFiltering:                       %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SystemLockStatus)
-      fprintf(stderr, "-->R7KRECID_SystemLockStatus:                  %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SoundVelocity)
-      fprintf(stderr, "-->R7KRECID_SoundVelocity:                     %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_AbsorptionLoss)
-      fprintf(stderr, "-->R7KRECID_AbsorptionLoss:                    %4.4X | %d\n", store->type, store->type);
-    if (store->type ==R7KRECID_SpreadingLoss)
-      fprintf(stderr, "-->R7KRECID_SpreadingLoss:                     %4.4X | %d\n", store->type, store->type);
-#endif
-
-    switch (store->type) {
-      case R7KRECID_ReferencePoint:
-        status = mbr_reson7k3_wr_ReferencePoint(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->ReferencePoint.header, error);
-        break;
-      case R7KRECID_UncalibratedSensorOffset:
-        status = mbr_reson7k3_wr_UncalibratedSensorOffset(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->UncalibratedSensorOffset.header, error);
-        break;
-      case R7KRECID_CalibratedSensorOffset:
-        status = mbr_reson7k3_wr_CalibratedSensorOffset(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedSensorOffset.header, error);
-        break;
-      case R7KRECID_Position:
-        status = mbr_reson7k3_wr_Position(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Position.header, error);
-        break;
-      case R7KRECID_CustomAttitude:
-        status = mbr_reson7k3_wr_CustomAttitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CustomAttitude.header, error);
-        break;
-      case R7KRECID_Tide:
-        status = mbr_reson7k3_wr_Tide(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Tide.header, error);
-        break;
-      case R7KRECID_Altitude:
-        status = mbr_reson7k3_wr_Altitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Altitude.header, error);
-        break;
-      case R7KRECID_MotionOverGround:
-        status = mbr_reson7k3_wr_MotionOverGround(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->MotionOverGround.header, error);
-        break;
-      case R7KRECID_Depth:
-        status = mbr_reson7k3_wr_Depth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Depth.header, error);
-        break;
-      case R7KRECID_SoundVelocityProfile:
-        status = mbr_reson7k3_wr_SoundVelocityProfile(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SoundVelocityProfile.header, error);
-        break;
-      case R7KRECID_CTD:
-        status = mbr_reson7k3_wr_CTD(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CTD.header, error);
-        break;
-      case R7KRECID_Geodesy:
-        status = mbr_reson7k3_wr_Geodesy(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Geodesy.header, error);
-        break;
-      case R7KRECID_RollPitchHeave:
-        status = mbr_reson7k3_wr_RollPitchHeave(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RollPitchHeave.header, error);
-        break;
-      case R7KRECID_Heading:
-        status = mbr_reson7k3_wr_Heading(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Heading.header, error);
-        break;
-      case R7KRECID_SurveyLine:
-        status = mbr_reson7k3_wr_SurveyLine(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SurveyLine.header, error);
-        break;
-      case R7KRECID_Navigation:
-        status = mbr_reson7k3_wr_Navigation(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Navigation.header, error);
-        break;
-      case R7KRECID_Attitude:
-        status = mbr_reson7k3_wr_Attitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Attitude.header, error);
-        break;
-      case R7KRECID_PanTilt:
-        status = mbr_reson7k3_wr_PanTilt(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->PanTilt.header, error);
-        break;
-      case R7KRECID_SonarInstallationIDs:
-        status = mbr_reson7k3_wr_SonarInstallationIDs(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarInstallationIDs.header, error);
-        break;
-      case R7KRECID_SonarPipeEnvironment:
-        status = mbr_reson7k3_wr_SonarPipeEnvironment(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarPipeEnvironment.header, error);
-        break;
-      case R7KRECID_ContactOutput:
-        status = mbr_reson7k3_wr_ContactOutput(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->ContactOutput.header, error);
-        break;
-      //case R7KRECID_ProcessedSidescan:
-        //status = mbr_reson7k3_wr_ProcessedSidescan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->ProcessedSidescan.header, error);
-        //break;
-      //case R7KRECID_SonarSettings:
-        //status = mbr_reson7k3_wr_SonarSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarSettings.header, error);
-        //break;
-      case R7KRECID_Configuration:
-        status = mbr_reson7k3_wr_Configuration(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Configuration.header, error);
-        break;
-      //case R7KRECID_MatchFilter:
-        //status = mbr_reson7k3_wr_MatchFilter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->MatchFilter.header, error);
-        //break;
-      case R7KRECID_FirmwareHardwareConfiguration:
-        status = mbr_reson7k3_wr_FirmwareHardwareConfiguration(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->FirmwareHardwareConfiguration.header, error);
-        break;
-      //case R7KRECID_BeamGeometry:
-        //status = mbr_reson7k3_wr_BeamGeometry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->BeamGeometry.header, error);
-        //break;
-      //case R7KRECID_Bathymetry:
-        //status = mbr_reson7k3_wr_Bathymetry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Bathymetry.header, error);
-        //break;
-      //case R7KRECID_SideScan:
-        //status = mbr_reson7k3_wr_SideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SideScan.header, error);
-        //break;
-      //case R7KRECID_WaterColumn:
-        //status = mbr_reson7k3_wr_WaterColumn(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->WaterColumn.header, error);
-        //break;
-      //case R7KRECID_VerticalDepth:
-        //status = mbr_reson7k3_wr_VerticalDepth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VerticalDepth.header, error);
-        //break;
-      //case R7KRECID_TVG:
-        //status = mbr_reson7k3_wr_TVG(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->TVG.header, error);
-        //break;
-      //case R7KRECID_Image:
-        //status = mbr_reson7k3_wr_Image(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Image.header, error);
-        //break;
-      //case R7KRECID_PingMotion:
-        //status = mbr_reson7k3_wr_PingMotion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->PingMotion.header, error);
-        //break;
-      //case R7KRECID_AdaptiveGate:
-        //status = mbr_reson7k3_wr_AdaptiveGate(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->AdaptiveGate.header, error);
-        //break;
-      //case R7KRECID_DetectionDataSetup:
-        //status = mbr_reson7k3_wr_DetectionDataSetup(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->DetectionDataSetup.header, error);
-        //break;
-      //case R7KRECID_Beamformed:
-        //status = mbr_reson7k3_wr_Beamformed(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Beamformed.header, error);
-        //break;
-      //case R7KRECID_VernierProcessingDataRaw:
-        //status = mbr_reson7k3_wr_VernierProcessingDataRaw(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VernierProcessingDataRaw.header, error);
-        //break;
-      case R7KRECID_BITE:
-        status = mbr_reson7k3_wr_BITE(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->BITE.header, error);
-        break;
-      case R7KRECID_SonarSourceVersion:
-        status = mbr_reson7k3_wr_SonarSourceVersion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarSourceVersion.header, error);
-        break;
-      case R7KRECID_WetEndVersion8k:
-        status = mbr_reson7k3_wr_WetEndVersion8k(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->WetEndVersion8k.header, error);
-        break;
-      //case R7KRECID_RawDetection:
-        //status = mbr_reson7k3_wr_RawDetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RawDetection.header, error);
-        //break;
-      //case R7KRECID_Snippet:
-        //status = mbr_reson7k3_wr_Snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Snippet.header, error);
-        //break;
-      //case R7KRECID_VernierProcessingDataFiltered:
-        //status = mbr_reson7k3_wr_VernierProcessingDataFiltered(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VernierProcessingDataFiltered.header, error);
-        //break;
-      case R7KRECID_InstallationParameters:
-        status = mbr_reson7k3_wr_InstallationParameters(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->InstallationParameters.header, error);
-        break;
-      case R7KRECID_BITESummary:
-        status = mbr_reson7k3_wr_BITESummary(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->BITESummary.header, error);
-        break;
-      //case R7KRECID_CompressedBeamformedMagnitude:
-        //status = mbr_reson7k3_wr_CompressedBeamformedMagnitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CompressedBeamformedMagnitude.header, error);
-        //break;
-      //case R7KRECID_CompressedWaterColumn:
-        //status = mbr_reson7k3_wr_CompressedWaterColumn(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CompressedWaterColumn.header, error);
-        //break;
-      //case R7KRECID_SegmentedRawDetection:
-        //status = mbr_reson7k3_wr_SegmentedRawDetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SegmentedRawDetection.header, error);
-        //break;
-      //case R7KRECID_CalibratedBeam:
-        //status = mbr_reson7k3_wr_CalibratedBeam(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedBeam.header, error);
-        //break;
-      case R7KRECID_SystemEvents:
-        status = mbr_reson7k3_wr_SystemEvents(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SystemEvents.header, error);
-        break;
-      case R7KRECID_SystemEventMessage:
-        status = mbr_reson7k3_wr_SystemEventMessage(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SystemEventMessage.header, error);
-        break;
-      case R7KRECID_RDRRecordingStatus:
-        status = mbr_reson7k3_wr_RDRRecordingStatus(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RDRRecordingStatus.header, error);
-        break;
-      case R7KRECID_Subscriptions:
-        status = mbr_reson7k3_wr_Subscriptions(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Subscriptions.header, error);
-        break;
-      case R7KRECID_RDRStorageRecording:
-        status = mbr_reson7k3_wr_RDRStorageRecording(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RDRStorageRecording.header, error);
-        break;
-      case R7KRECID_CalibrationStatus:
-        status = mbr_reson7k3_wr_CalibrationStatus(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibrationStatus.header, error);
-        break;
-      //case R7KRECID_CalibratedSideScan:
-        //status = mbr_reson7k3_wr_CalibratedSideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedSideScan.header, error);
-        //break;
-      //case R7KRECID_SnippetBackscatteringStrength:
-        //status = mbr_reson7k3_wr_SnippetBackscatteringStrength(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SnippetBackscatteringStrength.header, error);
-        //break;
-      case R7KRECID_MB2Status:
-        status = mbr_reson7k3_wr_MB2Status(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->MB2Status.header, error);
-        break;
-      //case R7KRECID_FileHeader:
-        //status = mbr_reson7k3_wr_FileHeader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->FileHeader.header, error);
-        //(*fileheaders)++;
-        //break;
-      case R7KRECID_FileCatalog:
-        // write catalog when file is closed rather than when old catalog is read
-        // - not all input files will have a catalog
-        //status = mbr_reson7k3_wr_FileCatalog(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        status = MB_SUCCESS;
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->FileCatalog.header, error);
-        break;
-      case R7KRECID_TimeMessage:
-        status = mbr_reson7k3_wr_TimeMessage(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->TimeMessage.header, error);
-        break;
-      case R7KRECID_RemoteControl:
-        status = mbr_reson7k3_wr_RemoteControl(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControl.header, error);
-        break;
-      case R7KRECID_RemoteControlAcknowledge:
-        status = mbr_reson7k3_wr_RemoteControlAcknowledge(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControlAcknowledge.header, error);
-        break;
-      case R7KRECID_RemoteControlNotAcknowledge:
-        status = mbr_reson7k3_wr_RemoteControlNotAcknowledge(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControlNotAcknowledge.header, error);
-        break;
-      //case R7KRECID_RemoteControlSonarSettings:
-        //status = mbr_reson7k3_wr_RemoteControlSonarSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        //buffer = (char *)*bufferptr;
-        //write_len = (size_t)size;
-        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControlSonarSettings.header, error);
-        //break;
-      case R7KRECID_CommonSystemSettings:
-        status = mbr_reson7k3_wr_CommonSystemSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CommonSystemSettings.header, error);
-        break;
-      case R7KRECID_SVFiltering:
-        status = mbr_reson7k3_wr_SVFiltering(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SVFiltering.header, error);
-        break;
-      case R7KRECID_SystemLockStatus:
-        status = mbr_reson7k3_wr_SystemLockStatus(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SystemLockStatus.header, error);
-        break;
-      case R7KRECID_SoundVelocity:
-        status = mbr_reson7k3_wr_SoundVelocity(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SoundVelocity.header, error);
-        break;
-      case R7KRECID_AbsorptionLoss:
-        status = mbr_reson7k3_wr_AbsorptionLoss(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->AbsorptionLoss.header, error);
-        break;
-      case R7KRECID_SpreadingLoss:
-        status = mbr_reson7k3_wr_SpreadingLoss(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-        buffer = (char *)*bufferptr;
-        write_len = (size_t)size;
-        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SpreadingLoss.header, error);
-        break;
-
-      default:
-        fprintf(stderr, "call nothing bad kind: %d type %x\n", store->kind, store->type);
-        status = MB_FAILURE;
-        *error = MB_ERROR_BAD_KIND;
-    }
-
-    // finally write the record to the output file
-    if (status == MB_SUCCESS) {
-
-      // write the record
-      buffer = (char *)*bufferptr;
-      write_len = (size_t)size;
-      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
-
-    }
-  }
-
-#ifdef MBR_RESON7K3_DEBUG2
-  fprintf(stderr, "RESON7K3 DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
-#endif
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_wt_reson7k3";
-  int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
-
-  /* write next data to file */
-  status = mbr_reson7k3_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-
-int mbr_reson7k3_FileCatalog_compare2(const void *a, const void *b) {
-  s7k3_filecatalogdata *aa = NULL;
-  s7k3_filecatalogdata *bb = NULL;
-  int result = 0;
-
-  aa = (s7k3_filecatalogdata *) a;
-  bb = (s7k3_filecatalogdata *) b;
-
-    // just do time comparison
-    if (aa->time_d < bb->time_d) {
-      result = -1;
-    }
-    else if (aa->time_d > bb->time_d) {
-      result = 1;
-    }
-    else {
-      result = 0;
-    }
-
-  return(result);
-}
-
-/*--------------------------------------------------------------------*/
-
-int mbr_reson7k3_FileCatalog_compare(const void *a, const void *b) {
-  s7k3_filecatalogdata *aa = NULL;
-  s7k3_filecatalogdata *bb = NULL;
-  int result = 0;
-
-  aa = (s7k3_filecatalogdata *) a;
-  bb = (s7k3_filecatalogdata *) b;
-
-  // compare so that index table of data records is ordered correctly
-  //  - The first record should be the 7200 FileHeader
-  //  - Any comment records 7051 SystemEventMessage should be immediately after
-  //    the FileHeader in reverse time order
-  //  - The next records in order should be
-  //      7022 SonarSourceVersion
-  //      7001 Configuration
-  //      7030 InstallationParameters
-  //  - All other data records should be in time order, excepting that all records
-  //    associated with a ping should be grouped together
-  //  - Within a ping record group, the order is:
-  //      7000 SonarSettings
-  //      7503 RemoteControlSonarSettings
-  //      7002 MatchFilter
-  //      7004 BeamGeometry
-  //      7027 RawDetection or 7047 SegmentedRawDetection
-  //      7007 SideScan
-  //      7057 R7KRECID_CalibratedSideScan
-  //      7028 Snippet
-  //      7058 R7KRECID_SnippetBackscatteringStrength
-  //      7018 Beamformed
-  //      7041 R7KRECID_CompressedBeamformedMagnitude
-  //      7048 R7KRECID_CalibratedBeam
-  //      7042 R7KRECID_CompressedWaterColumn
-  //      3199 R7KRECID_ProcessedSideScan
-  //
-  //  - records associated with pings have nonzero ping_number values
-
-  // deal with FileHeader
-  if (aa->record_type == R7KRECID_FileHeader) {
-    result = -1;
-  }
-  else if (bb->record_type == R7KRECID_FileHeader) {
-    result = 1;
-  }
-
-  // deal with comments
-  else if (aa->record_type == R7KRECID_SystemEventMessage
-    && bb->record_type == R7KRECID_SystemEventMessage) {
-    if (aa->time_d < bb->time_d)
-      result = -1;
-    else if (aa->time_d > bb->time_d)
-      result = 1;
-    else
-      result = 0;
-  }
-  else if (aa->record_type == R7KRECID_SystemEventMessage) {
-    result = -1;
-  }
-  else if (bb->record_type == R7KRECID_SystemEventMessage) {
-    result = 1;
-  }
-
-  // deal with 7022 SonarSourceVersion
-  else if (aa->record_type == R7KRECID_SonarSourceVersion
-    && bb->record_type == R7KRECID_SonarSourceVersion) {
-    if (aa->time_d < bb->time_d)
-      result = -1;
-    else if (aa->time_d > bb->time_d)
-      result = 1;
-    else
-      result = 0;
-  }
-  else if (aa->record_type == R7KRECID_SonarSourceVersion) {
-    result = -1;
-  }
-  else if (bb->record_type == R7KRECID_SonarSourceVersion) {
-    result = 1;
-  }
-
-  // deal with 7001 Configuration
-  else if (aa->record_type == R7KRECID_Configuration
-    && bb->record_type == R7KRECID_Configuration) {
-    if (aa->time_d < bb->time_d)
-      result = -1;
-    else if (aa->time_d > bb->time_d)
-      result = 1;
-    else
-      result = 0;
-  }
-  else if (aa->record_type == R7KRECID_Configuration) {
-    result = -1;
-  }
-  else if (bb->record_type == R7KRECID_Configuration) {
-    result = 1;
-  }
-
-  // deal with two ping records
-  else if (aa->pingrecord == MB_YES && bb->pingrecord == MB_YES) {
-    // case of records from different pings
-    if (aa->time_d < bb->time_d) {
-      result = -1;
-    }
-    else if (aa->time_d > bb->time_d) {
-      result = 1;
-    }
-
-    // case of records from the same ping
-    else {
-      if (aa->record_type == R7KRECID_SonarSettings)
-        result = -1;
-      else if (bb->record_type == R7KRECID_SonarSettings)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_RemoteControlSonarSettings)
-        result = -1;
-      else if (bb->record_type == R7KRECID_RemoteControlSonarSettings)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_MatchFilter)
-        result = -1;
-      else if (bb->record_type == R7KRECID_MatchFilter)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_BeamGeometry)
-        result = -1;
-      else if (bb->record_type == R7KRECID_BeamGeometry)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_RawDetection)
-        result = -1;
-      else if (bb->record_type == R7KRECID_RawDetection)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_SegmentedRawDetection)
-        result = -1;
-      else if (bb->record_type == R7KRECID_SegmentedRawDetection)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_SideScan)
-        result = -1;
-      else if (bb->record_type == R7KRECID_SideScan)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_CalibratedSideScan)
-        result = -1;
-      else if (bb->record_type == R7KRECID_CalibratedSideScan)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_Snippet)
-        result = -1;
-      else if (bb->record_type == R7KRECID_Snippet)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_SnippetBackscatteringStrength)
-        result = -1;
-      else if (bb->record_type == R7KRECID_SnippetBackscatteringStrength)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_Beamformed)
-        result = -1;
-      else if (bb->record_type == R7KRECID_Beamformed)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_CompressedBeamformedMagnitude)
-        result = -1;
-      else if (bb->record_type == R7KRECID_CompressedBeamformedMagnitude)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_CalibratedBeam)
-        result = -1;
-      else if (bb->record_type == R7KRECID_CalibratedBeam)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_CompressedWaterColumn)
-        result = -1;
-      else if (bb->record_type == R7KRECID_CompressedWaterColumn)
-        result = 1;
-
-      else if (aa->record_type == R7KRECID_ProcessedSideScan)
-        result = -1;
-      else if (bb->record_type == R7KRECID_ProcessedSideScan)
-        result = 1;
-
-      else
-        result = 0;
-    }
-  }
-
-  /* deal with all other pairs of data records - order by timestamp */
-  else if (aa->time_d < bb->time_d)
-    result = -1;
-  else if (aa->time_d > bb->time_d)
-    result = 1;
-  else
-    result = 0;
-
-  return(result);
-};
-
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
   char *function_name = "mbr_reson7k3_rd_header";
@@ -10169,6 +7245,263 @@ int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_reson7k3_chk_pingrecord(int verbose, int recordid, int *pingrecord) {
+  char *function_name = "mbr_reson7k3_chk_pingrecord";
+
+  assert(pingrecord != NULL);
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+    fprintf(stderr, "dbg2       recordid:      %d\n", recordid);
+  }
+
+  /* check ping number if one of the ping records */
+  switch (recordid) {
+    case R7KRECID_ProcessedSideScan:
+    case R7KRECID_SonarSettings:
+    case R7KRECID_MatchFilter:
+    case R7KRECID_BeamGeometry:
+    case R7KRECID_Bathymetry:
+    case R7KRECID_SideScan:
+    case R7KRECID_WaterColumn:
+    case R7KRECID_VerticalDepth:
+    case R7KRECID_TVG:
+    case R7KRECID_Image:
+    case R7KRECID_PingMotion:
+    case R7KRECID_AdaptiveGate:
+    case R7KRECID_DetectionDataSetup:
+    case R7KRECID_Beamformed:
+    case R7KRECID_VernierProcessingDataRaw:
+    case R7KRECID_RawDetection:
+    case R7KRECID_Snippet:
+    case R7KRECID_VernierProcessingDataFiltered:
+    case R7KRECID_CompressedBeamformedMagnitude:
+    case R7KRECID_CompressedWaterColumn:
+    case R7KRECID_SegmentedRawDetection:
+    case R7KRECID_CalibratedBeam:
+    case R7KRECID_CalibratedSideScan:
+    case R7KRECID_SnippetBackscatteringStrength:
+    case R7KRECID_RemoteControlSonarSettings:
+      *pingrecord = MB_YES;
+      break;
+    default:
+      *pingrecord = MB_NO;
+  }
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Output arguments:\n");
+    fprintf(stderr, "dbg2       pingrecord:    %d\n", *pingrecord);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:        %d\n", MB_SUCCESS);
+  }
+
+  return (MB_SUCCESS);
+}
+/*--------------------------------------------------------------------*/
+
+int mbr_reson7k3_FileCatalog_compare(const void *a, const void *b) {
+  s7k3_filecatalogdata *aa = NULL;
+  s7k3_filecatalogdata *bb = NULL;
+  int result = 0;
+
+  aa = (s7k3_filecatalogdata *) a;
+  bb = (s7k3_filecatalogdata *) b;
+
+  // compare so that index table of data records is ordered correctly
+  //  - The first record should be the 7200 FileHeader
+  //  - Any comment records 7051 SystemEventMessage should be immediately after
+  //    the FileHeader in reverse time order
+  //  - The next records in order should be
+  //      7022 SonarSourceVersion
+  //      7001 Configuration
+  //      7030 InstallationParameters
+  //  - All other data records should be in time order, excepting that all records
+  //    associated with a ping should be grouped together
+  //  - Within a ping record group, the order is:
+  //      7000 SonarSettings
+  //      7503 RemoteControlSonarSettings
+  //      7002 MatchFilter
+  //      7004 BeamGeometry
+  //      7027 RawDetection or 7047 SegmentedRawDetection
+  //      7007 SideScan
+  //      7057 R7KRECID_CalibratedSideScan
+  //      7028 Snippet
+  //      7058 R7KRECID_SnippetBackscatteringStrength
+  //      7018 Beamformed
+  //      7041 R7KRECID_CompressedBeamformedMagnitude
+  //      7048 R7KRECID_CalibratedBeam
+  //      7042 R7KRECID_CompressedWaterColumn
+  //      3199 R7KRECID_ProcessedSideScan
+  //
+  //  - records associated with pings have nonzero ping_number values
+
+  // deal with FileHeader
+  if (aa->record_type == R7KRECID_FileHeader) {
+    result = -1;
+  }
+  else if (bb->record_type == R7KRECID_FileHeader) {
+    result = 1;
+  }
+
+  // deal with comments
+  else if (aa->record_type == R7KRECID_SystemEventMessage
+    && bb->record_type == R7KRECID_SystemEventMessage) {
+    if (aa->time_d < bb->time_d)
+      result = -1;
+    else if (aa->time_d > bb->time_d)
+      result = 1;
+    else
+      result = 0;
+  }
+  else if (aa->record_type == R7KRECID_SystemEventMessage) {
+    result = -1;
+  }
+  else if (bb->record_type == R7KRECID_SystemEventMessage) {
+    result = 1;
+  }
+
+  // deal with 7022 SonarSourceVersion
+  else if (aa->record_type == R7KRECID_SonarSourceVersion
+    && bb->record_type == R7KRECID_SonarSourceVersion) {
+    if (aa->time_d < bb->time_d)
+      result = -1;
+    else if (aa->time_d > bb->time_d)
+      result = 1;
+    else
+      result = 0;
+  }
+  else if (aa->record_type == R7KRECID_SonarSourceVersion) {
+    result = -1;
+  }
+  else if (bb->record_type == R7KRECID_SonarSourceVersion) {
+    result = 1;
+  }
+
+  // deal with 7001 Configuration
+  else if (aa->record_type == R7KRECID_Configuration
+    && bb->record_type == R7KRECID_Configuration) {
+    if (aa->time_d < bb->time_d)
+      result = -1;
+    else if (aa->time_d > bb->time_d)
+      result = 1;
+    else
+      result = 0;
+  }
+  else if (aa->record_type == R7KRECID_Configuration) {
+    result = -1;
+  }
+  else if (bb->record_type == R7KRECID_Configuration) {
+    result = 1;
+  }
+
+  // deal with two ping records
+  else if (aa->pingrecord == MB_YES && bb->pingrecord == MB_YES) {
+    // case of records from different pings
+    if (aa->time_d < bb->time_d) {
+      result = -1;
+    }
+    else if (aa->time_d > bb->time_d) {
+      result = 1;
+    }
+
+    // case of records from the same ping
+    else {
+      if (aa->record_type == R7KRECID_SonarSettings)
+        result = -1;
+      else if (bb->record_type == R7KRECID_SonarSettings)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_RemoteControlSonarSettings)
+        result = -1;
+      else if (bb->record_type == R7KRECID_RemoteControlSonarSettings)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_MatchFilter)
+        result = -1;
+      else if (bb->record_type == R7KRECID_MatchFilter)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_BeamGeometry)
+        result = -1;
+      else if (bb->record_type == R7KRECID_BeamGeometry)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_RawDetection)
+        result = -1;
+      else if (bb->record_type == R7KRECID_RawDetection)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_SegmentedRawDetection)
+        result = -1;
+      else if (bb->record_type == R7KRECID_SegmentedRawDetection)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_SideScan)
+        result = -1;
+      else if (bb->record_type == R7KRECID_SideScan)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_CalibratedSideScan)
+        result = -1;
+      else if (bb->record_type == R7KRECID_CalibratedSideScan)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_Snippet)
+        result = -1;
+      else if (bb->record_type == R7KRECID_Snippet)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_SnippetBackscatteringStrength)
+        result = -1;
+      else if (bb->record_type == R7KRECID_SnippetBackscatteringStrength)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_Beamformed)
+        result = -1;
+      else if (bb->record_type == R7KRECID_Beamformed)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_CompressedBeamformedMagnitude)
+        result = -1;
+      else if (bb->record_type == R7KRECID_CompressedBeamformedMagnitude)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_CalibratedBeam)
+        result = -1;
+      else if (bb->record_type == R7KRECID_CalibratedBeam)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_CompressedWaterColumn)
+        result = -1;
+      else if (bb->record_type == R7KRECID_CompressedWaterColumn)
+        result = 1;
+
+      else if (aa->record_type == R7KRECID_ProcessedSideScan)
+        result = -1;
+      else if (bb->record_type == R7KRECID_ProcessedSideScan)
+        result = 1;
+
+      else
+        result = 0;
+    }
+  }
+
+  /* deal with all other pairs of data records - order by timestamp */
+  else if (aa->time_d < bb->time_d)
+    result = -1;
+  else if (aa->time_d > bb->time_d)
+    result = 1;
+  else
+    result = 0;
+
+  return(result);
+};
+/*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int *error){
   char *function_name = "mbr_reson7k3_rd_FileCatalog";
   int status = MB_SUCCESS;
@@ -11218,84 +8551,1636 @@ int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, in
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
-  char *function_name = "mbr_reson7k3_wr_header";
+int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_reson7k3_rd_data";
   int status = MB_SUCCESS;
+  struct mbsys_reson7k3_struct *store = NULL;
+  s7k3_header *header = NULL;
+  s7k3_RawDetection *RawDetection;
+  s7k3_SegmentedRawDetection *SegmentedRawDetection;
+  int *current_ping;
+  int *last_ping;
+  int *new_ping;
+  int *save_flag;
+  int *recordid;
+  int *recordidlast;
+  int *deviceid;
+  int *icatalog;
+  unsigned short *enumerator;
+  int *fileheaders;
+  double *last_7k_time_d;
+  char **bufferptr;
+  char *buffer;
+  int *bufferalloc;
+  char **buffersaveptr;
+  char *buffersave;
+  int *size;
+  int *nbadrec;
+  int skip;
+  int ping_record;
+  int time_j[5], time_i[7];
+  double time_d;
+  int nscan;
+  int done;
+  size_t read_len;
 
   /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
-    fprintf(stderr, "dbg2       index:      %d\n", *index);
-    fprintf(stderr, "dbg2       header:     %p\n", (void *)header);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* set some important values */
-  header->Version = 5;
-  header->Offset = 60;
-  header->SyncPattern = 0x0000ffff;
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-/* print out the data to be output */
-#ifdef MBR_RESON7K3_DEBUG2
-  if (verbose > 0)
-#else
-  if (verbose >= 2)
+  /* get pointer to raw data structure */
+  store = (struct mbsys_reson7k3_struct *)store_ptr;
+
+  /* get saved values */
+  save_flag = (int *)&mb_io_ptr->save_flag;
+  current_ping = (int *)&mb_io_ptr->save14;
+  last_ping = (int *)&mb_io_ptr->save1;
+  new_ping = (int *)&mb_io_ptr->save2;
+  recordid = (int *)&mb_io_ptr->save3;
+  recordidlast = (int *)&mb_io_ptr->save4;
+  bufferptr = (char **)&mb_io_ptr->saveptr1;
+  buffer = (char *)*bufferptr;
+  bufferalloc = (int *)&mb_io_ptr->save6;
+  buffersaveptr = (char **)&mb_io_ptr->saveptr2;
+  buffersave = (char *)*buffersaveptr;
+  size = (int *)&mb_io_ptr->save8;
+  nbadrec = (int *)&mb_io_ptr->save9;
+  deviceid = (int *)&mb_io_ptr->save10;
+  enumerator = (unsigned short *)&mb_io_ptr->save11;
+  fileheaders = (int *)&mb_io_ptr->save12;
+  last_7k_time_d = (double *)&mb_io_ptr->saved5;
+  icatalog = (int *)&mb_io_ptr->save15;
+
+  /* set file position */
+  mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+  /* loop over reading data until a record is ready for return */
+  done = MB_NO;
+  *error = MB_ERROR_NO_ERROR;
+  while (done == MB_NO) {
+
+    /* if previously read record stored use it first */
+    if (*save_flag == MB_YES) {
+      *save_flag = MB_NO;
+      mbr_reson7k3_chk_header(verbose, mbio_ptr, buffersave, recordid, deviceid, enumerator, size);
+      for (int i = 0; i < *size; i++)
+        buffer[i] = buffersave[i];
+    }
+
+#ifdef MBTRN_ENABLED
+    /* if reading from a socket ask for the entire next record
+     * - the buffer is allocated to
+     *     MBSYS_RESON7K_BUFFER_STARTSIZE = 65536 bytes (64 kB)
+     *   at stream initialization
+     *   which should be large enough for any single 7k record */
+    else if (mb_io_ptr->mbsp != NULL) {
+      read_len = (size_t)MBSYS_RESON7K_BUFFER_STARTSIZE;
+      status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+      mbr_reson7k3_chk_header(verbose, mbio_ptr, buffer, recordid, deviceid, enumerator, size);
+    }
 #endif
-    mbsys_reson7k3_print_header(verbose, header, error);
 
-  /* insert the header */
-  mb_put_binary_short(MB_YES, header->Version, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_short(MB_YES, header->Offset, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_int(MB_YES, header->SyncPattern, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_int(MB_YES, header->Size, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_int(MB_YES, header->OptionalDataOffset, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_int(MB_YES, header->OptionalDataIdentifier, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_short(MB_YES, header->s7kTime.Year, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_short(MB_YES, header->s7kTime.Day, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_float(MB_YES, header->s7kTime.Seconds, &buffer[*index]);
-  *index += 4;
-  buffer[*index] = header->s7kTime.Hours;
-  (*index)++;
-  buffer[*index] = header->s7kTime.Minutes;
-  (*index)++;
-  mb_put_binary_short(MB_YES, header->RecordVersion, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_int(MB_YES, header->RecordType, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_int(MB_YES, header->DeviceId, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_short(MB_YES, header->Reserved, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_short(MB_YES, header->SystemEnumerator, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_int(MB_YES, header->Reserved2, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_short(MB_YES, header->Flags, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_short(MB_YES, header->Reserved3, &buffer[*index]);
-  *index += 2;
-  mb_put_binary_int(MB_YES, header->Reserved4, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_int(MB_YES, header->FragmentedTotal, &buffer[*index]);
-  *index += 4;
-  mb_put_binary_int(MB_YES, header->FragmentNumber, &buffer[*index]);
-  *index += 4;
+    /* else if reading from a file deal with possibility of corruption by
+     * first finding the next sync block, then reading the heading, and then
+     * finally reading the rest of the record */
+    else {
+
+      /* if FileCatalog has been read then set file pointer to read the next
+          record header on the sorted list of records */
+      if (store->FileCatalog_read.n > 0 && *icatalog < store->FileCatalog_read.n) {
+        fseek(mb_io_ptr->mbfp, store->FileCatalog_read.filecatalogdata[*icatalog].offset, SEEK_SET);
+        (*icatalog)++;
+      }
+
+      /* read next record header into buffer */
+      read_len = (size_t)MBSYS_RESON7K_VERSIONSYNCSIZE;
+      status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+
+      /* check header - if not a good header read a byte
+          at a time until a good header is found */
+      skip = 0;
+      while (status == MB_SUCCESS &&
+             mbr_reson7k3_chk_header(verbose, mbio_ptr, buffer, recordid,
+                                    deviceid, enumerator, size) != MB_SUCCESS) {
+        /* get next byte */
+        for (int i = 0; i < MBSYS_RESON7K_VERSIONSYNCSIZE - 1; i++)
+          buffer[i] = buffer[i + 1];
+        read_len = (size_t)1;
+        status = mb_fileio_get(verbose, mbio_ptr, &buffer[MBSYS_RESON7K_VERSIONSYNCSIZE - 1], &read_len, error);
+        skip++;
+      }
+
+      /* report problem */
+      if (skip > 0 && verbose >= 0) {
+        if (*nbadrec == 0)
+          fprintf(stderr, "\nThe MBF_reson7k3 module skipped data between identified\n\
+data records. Something is broken, most probably the data...\n\
+However, the data may include a data record type that we\n\
+haven't seen yet, or there could be an error in the code.\n\
+If skipped data are reported multiple times, \n\
+we recommend you send a data sample and problem \n\
+description to the MB-System team \n\
+(caress@mbari.org and dale@ldeo.columbia.edu)\n\
+Have a nice day...:                              %4.4X | %d\n", store->type, store->type);
+        fprintf(stderr, "MBF_reson7k3 skipped %d bytes between records %4.4X:%d and %4.4X:%d\n", skip, *recordidlast,
+                *recordidlast, *recordid, *recordid);
+        (*nbadrec)++;
+      }
+      *recordidlast = *recordid;
+      store->type = *recordid;
+
+      /* allocate memory to read rest of record if necessary */
+      if (*bufferalloc < *size) {
+        status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
+        if (status == MB_SUCCESS)
+          status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)buffersaveptr, error);
+        if (status != MB_SUCCESS) {
+          *bufferalloc = 0;
+          done = MB_YES;
+        }
+        else {
+          *bufferalloc = *size;
+          buffer = (char *)*bufferptr;
+          buffersave = (char *)*buffersaveptr;
+        }
+      }
+
+      /* read the rest of the record */
+      if (status == MB_SUCCESS) {
+        read_len = (size_t)(*size - MBSYS_RESON7K_VERSIONSYNCSIZE);
+        status = mb_fileio_get(verbose, mbio_ptr, &buffer[MBSYS_RESON7K_VERSIONSYNCSIZE], &read_len, error);
+      }
+
+#ifndef MBR_RESON7K3_DEBUG2
+      if (skip > 0)
+        fprintf(stderr, "reson7k3 record:skip:%d recordid:%x %d deviceid:%x %d enumerator:%x %d size:%d done:%d\n", skip,
+                *recordid, *recordid, *deviceid, *deviceid, *enumerator, *enumerator, *size, done);
+#endif
+    }
+
+    /* check for ping record and ping number */
+    ping_record = MB_NO;
+    if (status == MB_SUCCESS) {
+      if (*recordid == R7KRECID_ProcessedSideScan
+          || *recordid == R7KRECID_SonarSettings
+          || *recordid == R7KRECID_MatchFilter
+          || *recordid == R7KRECID_BeamGeometry
+          || *recordid == R7KRECID_Bathymetry
+          || *recordid == R7KRECID_SideScan
+          || *recordid == R7KRECID_WaterColumn
+          || *recordid == R7KRECID_VerticalDepth
+          || *recordid == R7KRECID_TVG
+          || *recordid == R7KRECID_Image
+          || *recordid == R7KRECID_PingMotion
+          || *recordid == R7KRECID_AdaptiveGate
+          || *recordid == R7KRECID_DetectionDataSetup
+          || *recordid == R7KRECID_Beamformed
+          || *recordid == R7KRECID_VernierProcessingDataRaw
+          || *recordid == R7KRECID_RawDetection
+          || *recordid == R7KRECID_Snippet
+          || *recordid == R7KRECID_VernierProcessingDataFiltered
+          || *recordid == R7KRECID_CompressedBeamformedMagnitude
+          || *recordid == R7KRECID_CompressedWaterColumn
+          || *recordid == R7KRECID_SegmentedRawDetection
+          || *recordid == R7KRECID_CalibratedBeam
+          || *recordid == R7KRECID_CalibratedSideScan
+          || *recordid == R7KRECID_SnippetBackscatteringStrength) {
+
+        /* check for ping number */
+        ping_record = MB_YES;
+        mbr_reson7k3_chk_pingnumber(verbose, *recordid, buffer, new_ping);
+
+        /* fix lack of ping number for beam geometry records */
+        if (*recordid == R7KRECID_BeamGeometry && *new_ping <= 0)
+          *new_ping = *last_ping;
+
+        /* determine if record is continuation of the last ping
+            or a new ping - if new ping and last ping not yet
+            output then save the new record and output the
+            last ping as fully read */
+        if (*last_ping >= 0 && *new_ping >= 0 && *last_ping != *new_ping) {
+          /* good ping if bathymetry record is read */
+          if (store->read_RawDetection == MB_YES
+              || store->read_SegmentedRawDetection == MB_YES) {
+            done = MB_YES;
+            store->kind = MB_DATA_DATA;
+            *save_flag = MB_YES;
+            *current_ping = *last_ping;
+            *last_ping = -1;
+            for (int i = 0; i < *size; i++)
+              buffersave[i] = buffer[i];
+
+            /* get the time */
+            if (store->read_RawDetection == MB_YES) {
+              RawDetection = &(store->RawDetection);
+              header = &(RawDetection->header);
+            }
+            else if (store->read_SegmentedRawDetection == MB_YES) {
+              SegmentedRawDetection = &(store->SegmentedRawDetection);
+              header = &(SegmentedRawDetection->header);
+            }
+            time_j[0] = header->s7kTime.Year;
+            time_j[1] = header->s7kTime.Day;
+            time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+            time_j[3] = (int)header->s7kTime.Seconds;
+            time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+            mb_get_itime(verbose, time_j, store->time_i);
+            mb_get_time(verbose, store->time_i, &(store->time_d));
+          }
+
+          /* not a complete record unless there is bathymetry, drop the partial ping */
+          else {
+            done = MB_NO;
+            *last_ping = -1;
+            *last_ping = *new_ping;
+            *save_flag = MB_NO;
+          }
+        }
+        else if (*last_ping >= 0 && *new_ping >= 0 && *last_ping == *new_ping) {
+          done = MB_NO;
+        }
+        else if (*last_ping == -1 && *new_ping >= 0) {
+          done = MB_NO;
+          *current_ping = -1;
+          *last_ping = *new_ping;
+          store->read_ProcessedSideScan = MB_NO;
+          store->read_SonarSettings = MB_NO;
+          store->read_MatchFilter = MB_NO;
+          store->read_BeamGeometry = MB_NO;
+          store->read_Bathymetry = MB_NO;
+          store->read_SideScan = MB_NO;
+          store->read_WaterColumn = MB_NO;
+          store->read_VerticalDepth = MB_NO;
+          store->read_TVG = MB_NO;
+          store->read_Image = MB_NO;
+          store->read_PingMotion = MB_NO;
+          store->read_DetectionDataSetup = MB_NO;
+          store->read_Beamformed = MB_NO;
+          store->read_VernierProcessingDataRaw = MB_NO;
+          store->read_RawDetection = MB_NO;
+          store->read_Snippet = MB_NO;
+          store->read_VernierProcessingDataFiltered = MB_NO;
+          store->read_CompressedBeamformedMagnitude = MB_NO;
+          store->read_CompressedWaterColumn = MB_NO;
+          store->read_SegmentedRawDetection = MB_NO;
+          store->read_CalibratedBeam = MB_NO;
+          store->read_CalibratedSideScan = MB_NO;
+          store->read_SnippetBackscatteringStrength = MB_NO;
+          store->read_RemoteControlSonarSettings = MB_NO;
+        }
+      }
+    }
+
+    /* check for ping data already read if FileCatalog encountered
+        or if no FileCatalog read at start and any non-ping record encountered */
+    if (status == MB_SUCCESS && *last_ping >= 0
+        && (*recordid == R7KRECID_FileCatalog
+            || (ping_record == MB_NO && store->FileCatalog_read.n > 0))) {
+      /* good ping if bathymetry record is read */
+      if (store->read_RawDetection == MB_YES
+          || store->read_SegmentedRawDetection == MB_YES) {
+        done = MB_YES;
+        store->kind = MB_DATA_DATA;
+        *save_flag = MB_YES;
+        *current_ping = *last_ping;
+        *last_ping = -1;
+        for (int i = 0; i < *size; i++)
+          buffersave[i] = buffer[i];
+
+        /* get the time */
+        if (store->read_RawDetection == MB_YES) {
+          RawDetection = &(store->RawDetection);
+          header = &(RawDetection->header);
+        }
+        else if (store->read_SegmentedRawDetection == MB_YES) {
+          SegmentedRawDetection = &(store->SegmentedRawDetection);
+          header = &(SegmentedRawDetection->header);
+        }
+        time_j[0] = header->s7kTime.Year;
+        time_j[1] = header->s7kTime.Day;
+        time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+        time_j[3] = (int)header->s7kTime.Seconds;
+        time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+        mb_get_itime(verbose, time_j, store->time_i);
+        mb_get_time(verbose, store->time_i, &(store->time_d));
+      }
+
+      /* not a complete record unless there is bathymetry, drop the partial ping */
+      else {
+        done = MB_NO;
+        *last_ping = -1;
+        *last_ping = *new_ping;
+        *save_flag = MB_NO;
+      }
+    }
+
+    /* check for ping data already read in read error case */
+    else if (status == MB_FAILURE && *last_ping >= 0) {
+      status = MB_SUCCESS;
+      *error = MB_ERROR_NO_ERROR;
+      done = MB_YES;
+      *save_flag = MB_NO;
+      *last_ping = -1;
+      store->kind = MB_DATA_DATA;
+      store->time_d = *last_7k_time_d;
+      mb_get_date(verbose, store->time_d, store->time_i);
+    }
+
+#ifdef MBR_RESON7K3_DEBUG2
+    if (status == MB_SUCCESS && done == MB_NO && *save_flag == MB_NO) {
+      fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |", *recordid, *recordid, *deviceid,
+              *deviceid, *enumerator, *enumerator);
+      if (*recordid == R7KRECID_None)
+        fprintf(stderr, " R7KRECID_None %d\n", *recordid);
+      if (*recordid == R7KRECID_ReferencePoint)
+        fprintf(stderr, " R7KRECID_ReferencePoint %d\n", *recordid);
+      if (*recordid == R7KRECID_UncalibratedSensorOffset)
+        fprintf(stderr, " R7KRECID_UncalibratedSensorOffset %d\n", *recordid);
+      if (*recordid == R7KRECID_CalibratedSensorOffset)
+        fprintf(stderr, " R7KRECID_CalibratedSensorOffset %d\n", *recordid);
+      if (*recordid == R7KRECID_Position)
+        fprintf(stderr, " R7KRECID_Position %d\n", *recordid);
+      if (*recordid == R7KRECID_CustomAttitude)
+        fprintf(stderr, " R7KRECID_CustomAttitude %d\n", *recordid);
+      if (*recordid == R7KRECID_Tide)
+        fprintf(stderr, " R7KRECID_Tide %d\n", *recordid);
+      if (*recordid == R7KRECID_Altitude)
+        fprintf(stderr, " R7KRECID_Altitude %d\n", *recordid);
+      if (*recordid == R7KRECID_MotionOverGround)
+        fprintf(stderr, " R7KRECID_MotionOverGround %d\n", *recordid);
+      if (*recordid == R7KRECID_Depth)
+        fprintf(stderr, " R7KRECID_Depth %d\n", *recordid);
+      if (*recordid == R7KRECID_SoundVelocityProfile)
+        fprintf(stderr, " R7KRECID_SoundVelocityProfile %d\n", *recordid);
+      if (*recordid == R7KRECID_CTD)
+        fprintf(stderr, " R7KRECID_CTD %d\n", *recordid);
+      if (*recordid == R7KRECID_Geodesy)
+        fprintf(stderr, " R7KRECID_Geodesy %d\n", *recordid);
+      if (*recordid == R7KRECID_RollPitchHeave)
+        fprintf(stderr, " R7KRECID_RollPitchHeave %d\n", *recordid);
+      if (*recordid == R7KRECID_Heading)
+        fprintf(stderr, " R7KRECID_Heading %d\n", *recordid);
+      if (*recordid == R7KRECID_SurveyLine)
+        fprintf(stderr, " R7KRECID_SurveyLine %d\n", *recordid);
+      if (*recordid == R7KRECID_Navigation)
+        fprintf(stderr, " R7KRECID_Navigation %d\n", *recordid);
+      if (*recordid == R7KRECID_Attitude)
+        fprintf(stderr, " R7KRECID_Attitude %d\n", *recordid);
+      if (*recordid == R7KRECID_PanTilt)
+        fprintf(stderr, " R7KRECID_PanTilt %d\n", *recordid);
+      if (*recordid == R7KRECID_SonarInstallationIDs)
+        fprintf(stderr, " R7KRECID_SonarInstallationIDs %d\n", *recordid);
+      if (*recordid == R7KRECID_Mystery)
+        fprintf(stderr, " R7KRECID_Mystery %d\n", *recordid);
+      if (*recordid == R7KRECID_SonarPipeEnvironment)
+        fprintf(stderr, " R7KRECID_SonarPipeEnvironment %d\n", *recordid);
+      if (*recordid == R7KRECID_ContactOutput)
+        fprintf(stderr, " R7KRECID_ContactOutput %d\n", *recordid);
+      if (*recordid == R7KRECID_ProcessedSideScan)
+        fprintf(stderr, " R7KRECID_ProcessedSideScan %d\n", *recordid);
+      if (*recordid == R7KRECID_SonarSettings)
+        fprintf(stderr, " R7KRECID_SonarSettings %d\n", *recordid);
+      if (*recordid == R7KRECID_Configuration)
+        fprintf(stderr, " R7KRECID_Configuration %d\n", *recordid);
+      if (*recordid == R7KRECID_MatchFilter)
+        fprintf(stderr, " R7KRECID_MatchFilter %d\n", *recordid);
+      if (*recordid == R7KRECID_FirmwareHardwareConfiguration)
+        fprintf(stderr, " R7KRECID_FirmwareHardwareConfiguration %d\n", *recordid);
+      if (*recordid == R7KRECID_BeamGeometry)
+        fprintf(stderr, " R7KRECID_BeamGeometry %d\n", *recordid);
+      if (*recordid == R7KRECID_Bathymetry)
+        fprintf(stderr, " R7KRECID_Bathymetry %d\n", *recordid);
+      if (*recordid == R7KRECID_SideScan)
+        fprintf(stderr, " R7KRECID_SideScan %d\n", *recordid);
+      if (*recordid == R7KRECID_WaterColumn)
+        fprintf(stderr, " R7KRECID_WaterColumn %d\n", *recordid);
+      if (*recordid == R7KRECID_VerticalDepth)
+        fprintf(stderr, " R7KRECID_VerticalDepth %d\n", *recordid);
+      if (*recordid == R7KRECID_TVG)
+        fprintf(stderr, " R7KRECID_TVG %d\n", *recordid);
+      if (*recordid == R7KRECID_Image)
+        fprintf(stderr, " R7KRECID_Image %d\n", *recordid);
+      if (*recordid == R7KRECID_PingMotion)
+        fprintf(stderr, " R7KRECID_PingMotion %d\n", *recordid);
+      if (*recordid == R7KRECID_AdaptiveGate)
+        fprintf(stderr, " R7KRECID_AdaptiveGate %d\n", *recordid);
+      if (*recordid == R7KRECID_DetectionDataSetup)
+        fprintf(stderr, " R7KRECID_DetectionDataSetup %d\n", *recordid);
+      if (*recordid == R7KRECID_Beamformed)
+        fprintf(stderr, " R7KRECID_Beamformed %d\n", *recordid);
+      if (*recordid == R7KRECID_VernierProcessingDataRaw)
+        fprintf(stderr, " R7KRECID_VernierProcessingDataRaw %d\n", *recordid);
+      if (*recordid == R7KRECID_BITE)
+        fprintf(stderr, " R7KRECID_BITE %d\n", *recordid);
+      if (*recordid == R7KRECID_SonarSourceVersion)
+        fprintf(stderr, " R7KRECID_SonarSourceVersion %d\n", *recordid);
+      if (*recordid == R7KRECID_WetEndVersion8k)
+        fprintf(stderr, " R7KRECID_WetEndVersion8k %d\n", *recordid);
+      if (*recordid == R7KRECID_RawDetection)
+        fprintf(stderr, " R7KRECID_RawDetection %d\n", *recordid);
+      if (*recordid == R7KRECID_Snippet)
+        fprintf(stderr, " R7KRECID_Snippet %d\n", *recordid);
+      if (*recordid == R7KRECID_VernierProcessingDataFiltered)
+        fprintf(stderr, " R7KRECID_VernierProcessingDataFiltered %d\n", *recordid);
+      if (*recordid == R7KRECID_InstallationParameters)
+        fprintf(stderr, " R7KRECID_InstallationParameters %d\n", *recordid);
+      if (*recordid == R7KRECID_BITESummary)
+        fprintf(stderr, " R7KRECID_BITESummary %d\n", *recordid);
+      if (*recordid == R7KRECID_CompressedBeamformedMagnitude)
+        fprintf(stderr, " R7KRECID_CompressedBeamformedMagnitude %d\n", *recordid);
+      if (*recordid == R7KRECID_CompressedWaterColumn)
+        fprintf(stderr, " R7KRECID_CompressedWaterColumn %d\n", *recordid);
+      if (*recordid == R7KRECID_SegmentedRawDetection)
+        fprintf(stderr, " R7KRECID_SegmentedRawDetection %d\n", *recordid);
+      if (*recordid == R7KRECID_CalibratedBeam)
+        fprintf(stderr, " R7KRECID_CalibratedBeam %d\n", *recordid);
+      if (*recordid == R7KRECID_SystemEvents)
+        fprintf(stderr, " R7KRECID_SystemEvents %d\n", *recordid);
+      if (*recordid == R7KRECID_SystemEventMessage)
+        fprintf(stderr, " R7KRECID_SystemEventMessage %d\n", *recordid);
+      if (*recordid == R7KRECID_RDRRecordingStatus)
+        fprintf(stderr, " R7KRECID_RDRRecordingStatus %d\n", *recordid);
+      if (*recordid == R7KRECID_Subscriptions)
+        fprintf(stderr, " R7KRECID_Subscriptions %d\n", *recordid);
+      if (*recordid == R7KRECID_RDRStorageRecording)
+        fprintf(stderr, " R7KRECID_RDRStorageRecording %d\n", *recordid);
+      if (*recordid == R7KRECID_CalibrationStatus)
+        fprintf(stderr, " R7KRECID_CalibrationStatus %d\n", *recordid);
+      if (*recordid == R7KRECID_CalibratedSideScan)
+        fprintf(stderr, " R7KRECID_CalibratedSideScan %d\n", *recordid);
+      if (*recordid == R7KRECID_SnippetBackscatteringStrength)
+        fprintf(stderr, " R7KRECID_SnippetBackscatteringStrength %d\n", *recordid);
+      if (*recordid == R7KRECID_MB2Status)
+        fprintf(stderr, " R7KRECID_MB2Status %d\n", *recordid);
+      if (*recordid == R7KRECID_FileHeader)
+        fprintf(stderr, " R7KRECID_FileHeader %d\n", *recordid);
+      if (*recordid == R7KRECID_FileCatalog)
+        fprintf(stderr, " R7KRECID_FileCatalog %d\n", *recordid);
+      if (*recordid == R7KRECID_TimeMessage)
+        fprintf(stderr, " R7KRECID_TimeMessage %d\n", *recordid);
+      if (*recordid == R7KRECID_RemoteControl)
+        fprintf(stderr, " R7KRECID_RemoteControl %d\n", *recordid);
+      if (*recordid == R7KRECID_RemoteControlAcknowledge)
+        fprintf(stderr, " R7KRECID_RemoteControlAcknowledge %d\n", *recordid);
+      if (*recordid == R7KRECID_RemoteControlNotAcknowledge)
+        fprintf(stderr, " R7KRECID_RemoteControlNotAcknowledge %d\n", *recordid);
+      if (*recordid == R7KRECID_RemoteControlSonarSettings)
+        fprintf(stderr, " R7KRECID_RemoteControlSonarSettings %d\n", *recordid);
+      if (*recordid == R7KRECID_CommonSystemSettings)
+        fprintf(stderr, " R7KRECID_CommonSystemSettings %d\n", *recordid);
+      if (*recordid == R7KRECID_SVFiltering)
+        fprintf(stderr, " R7KRECID_SVFiltering %d\n", *recordid);
+      if (*recordid == R7KRECID_SystemLockStatus)
+        fprintf(stderr, " R7KRECID_SystemLockStatus %d\n", *recordid);
+      if (*recordid == R7KRECID_SoundVelocity)
+        fprintf(stderr, " R7KRECID_SoundVelocity %d\n", *recordid);
+      if (*recordid == R7KRECID_AbsorptionLoss)
+        fprintf(stderr, " R7KRECID_AbsorptionLoss %d\n", *recordid);
+      if (*recordid == R7KRECID_SpreadingLoss)
+        fprintf(stderr, " R7KRECID_SpreadingLoss %d\n", *recordid);
+    }
+#endif
+
+    /* set done if read failure */
+    if (status == MB_FAILURE) {
+#ifdef MBR_RESON7K3_DEBUG2
+      fprintf(stderr, "call nothing, read failure:                              %4.4X | %d\n", store->type, store->type);
+#endif
+      done = MB_YES;
+    }
+
+    /* if possible and needed parse the data record now */
+    if (status == MB_SUCCESS && done == MB_NO) {
+
+      if (*recordid == R7KRECID_ReferencePoint) {
+        status = mbr_reson7k3_rd_ReferencePoint(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_ReferencePoint++;
+        }
+      }
+      else if (*recordid == R7KRECID_UncalibratedSensorOffset) {
+        status = mbr_reson7k3_rd_UncalibratedSensorOffset(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_UncalibratedSensorOffset++;
+        }
+      }
+      else if (*recordid == R7KRECID_CalibratedSensorOffset) {
+        status = mbr_reson7k3_rd_CalibratedSensorOffset(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_CalibratedSensorOffset++;
+        }
+      }
+      else if (*recordid == R7KRECID_Position) {
+        status = mbr_reson7k3_rd_Position(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Position++;
+        }
+      }
+      else if (*recordid == R7KRECID_CustomAttitude) {
+        status = mbr_reson7k3_rd_CustomAttitude(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_CustomAttitude++;
+        }
+      }
+      else if (*recordid == R7KRECID_Tide) {
+        status = mbr_reson7k3_rd_Tide(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Tide++;
+        }
+      }
+      else if (*recordid == R7KRECID_Altitude) {
+        status = mbr_reson7k3_rd_Altitude(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Altitude++;
+        }
+      }
+      else if (*recordid == R7KRECID_MotionOverGround) {
+        status = mbr_reson7k3_rd_MotionOverGround(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_MotionOverGround++;
+        }
+      }
+      else if (*recordid == R7KRECID_Depth) {
+        status = mbr_reson7k3_rd_Depth(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Depth++;
+        }
+      }
+      else if (*recordid == R7KRECID_SoundVelocityProfile) {
+        status = mbr_reson7k3_rd_SoundVelocityProfile(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SoundVelocityProfile++;
+        }
+      }
+      else if (*recordid == R7KRECID_CTD) {
+        status = mbr_reson7k3_rd_CTD(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_CTD++;
+        }
+      }
+      else if (*recordid == R7KRECID_Geodesy) {
+        status = mbr_reson7k3_rd_Geodesy(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Geodesy++;
+        }
+      }
+      else if (*recordid == R7KRECID_RollPitchHeave) {
+        status = mbr_reson7k3_rd_RollPitchHeave(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_RollPitchHeave++;
+        }
+      }
+      else if (*recordid == R7KRECID_Heading) {
+        status = mbr_reson7k3_rd_Heading(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Heading++;
+        }
+      }
+      else if (*recordid == R7KRECID_SurveyLine) {
+        status = mbr_reson7k3_rd_SurveyLine(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SurveyLine++;
+        }
+      }
+      else if (*recordid == R7KRECID_Navigation) {
+        status = mbr_reson7k3_rd_Navigation(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Navigation++;
+        }
+      }
+      else if (*recordid == R7KRECID_Attitude) {
+        status = mbr_reson7k3_rd_Attitude(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Attitude++;
+        }
+      }
+      else if (*recordid == R7KRECID_PanTilt) {
+        status = mbr_reson7k3_rd_PanTilt(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_PanTilt++;
+        }
+      }
+      else if (*recordid == R7KRECID_SonarInstallationIDs) {
+        status = mbr_reson7k3_rd_SonarInstallationIDs(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SonarInstallationIDs++;
+        }
+      }
+      else if (*recordid == R7KRECID_Mystery) {
+        status = mbr_reson7k3_rd_Mystery(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Mystery++;
+        }
+      }
+      else if (*recordid == R7KRECID_SonarPipeEnvironment) {
+        status = mbr_reson7k3_rd_SonarPipeEnvironment(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SonarPipeEnvironment++;
+        }
+      }
+      else if (*recordid == R7KRECID_ContactOutput) {
+        status = mbr_reson7k3_rd_ContactOutput(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_ContactOutput++;
+        }
+      }
+      else if (*recordid == R7KRECID_ProcessedSideScan) {
+        status = mbr_reson7k3_rd_ProcessedSideScan(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_ProcessedSideScan++;
+          store->read_ProcessedSideScan = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_SonarSettings) {
+        status = mbr_reson7k3_rd_SonarSettings(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_SonarSettings++;
+          store->read_SonarSettings = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_Configuration) {
+        status = mbr_reson7k3_rd_Configuration(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Configuration++;
+        }
+      }
+      else if (*recordid == R7KRECID_MatchFilter) {
+        status = mbr_reson7k3_rd_MatchFilter(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_MatchFilter++;
+          store->read_MatchFilter = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_FirmwareHardwareConfiguration) {
+        status = mbr_reson7k3_rd_FirmwareHardwareConfiguration(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_FirmwareHardwareConfiguration++;
+        }
+      }
+      else if (*recordid == R7KRECID_BeamGeometry) {
+        status = mbr_reson7k3_rd_BeamGeometry(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_BeamGeometry++;
+          store->read_BeamGeometry = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_Bathymetry) {
+        status = mbr_reson7k3_rd_Bathymetry(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_Bathymetry++;
+          store->read_Bathymetry = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_SideScan) {
+        status = mbr_reson7k3_rd_SideScan(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_SideScan++;
+          store->read_SideScan = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_WaterColumn) {
+        status = mbr_reson7k3_rd_WaterColumn(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_WaterColumn++;
+          store->read_WaterColumn = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_VerticalDepth) {
+        status = mbr_reson7k3_rd_VerticalDepth(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_VerticalDepth++;
+          store->read_VerticalDepth = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_TVG) {
+        status = mbr_reson7k3_rd_TVG(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_TVG++;
+          store->read_TVG = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_Image) {
+        status = mbr_reson7k3_rd_Image(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_Image++;
+          store->read_Image = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_PingMotion) {
+        status = mbr_reson7k3_rd_PingMotion(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_PingMotion++;
+          store->read_PingMotion = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_AdaptiveGate) {
+        status = mbr_reson7k3_rd_AdaptiveGate(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_AdaptiveGate++;
+        }
+      }
+      else if (*recordid == R7KRECID_DetectionDataSetup) {
+        status = mbr_reson7k3_rd_DetectionDataSetup(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_DetectionDataSetup++;
+          store->read_DetectionDataSetup = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_Beamformed) {
+        status = mbr_reson7k3_rd_Beamformed(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_Beamformed++;
+          store->read_Beamformed = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_VernierProcessingDataRaw) {
+        status = mbr_reson7k3_rd_VernierProcessingDataRaw(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_VernierProcessingDataRaw++;
+          store->read_VernierProcessingDataRaw = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_BITE) {
+        status = mbr_reson7k3_rd_BITE(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_BITE++;
+        }
+      }
+      else if (*recordid == R7KRECID_SonarSourceVersion) {
+        status = mbr_reson7k3_rd_SonarSourceVersion(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SonarSourceVersion++;
+        }
+      }
+      else if (*recordid == R7KRECID_WetEndVersion8k) {
+        status = mbr_reson7k3_rd_WetEndVersion8k(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_WetEndVersion8k++;
+        }
+      }
+      else if (*recordid == R7KRECID_RawDetection) {
+        status = mbr_reson7k3_rd_RawDetection(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_RawDetection++;
+          store->read_RawDetection = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_Snippet) {
+      status = mbr_reson7k3_rd_Snippet(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_Snippet++;
+          store->read_Snippet = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_VernierProcessingDataFiltered) {
+        status = mbr_reson7k3_rd_VernierProcessingDataFiltered(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_VernierProcessingDataFiltered++;
+          store->read_VernierProcessingDataFiltered = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_InstallationParameters) {
+        status = mbr_reson7k3_rd_InstallationParameters(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_InstallationParameters++;
+        }
+      }
+      else if (*recordid == R7KRECID_BITESummary) {
+        status = mbr_reson7k3_rd_BITESummary(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_BITESummary++;
+        }
+      }
+      else if (*recordid == R7KRECID_CompressedBeamformedMagnitude) {
+        status = mbr_reson7k3_rd_CompressedBeamformedMagnitude(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_CompressedBeamformedMagnitude++;
+          store->read_CompressedBeamformedMagnitude = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_CompressedWaterColumn) {
+        status = mbr_reson7k3_rd_CompressedWaterColumn(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_CompressedWaterColumn++;
+          store->read_CompressedWaterColumn = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_SegmentedRawDetection) {
+        status = mbr_reson7k3_rd_SegmentedRawDetection(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_SegmentedRawDetection++;
+          store->read_SegmentedRawDetection = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_CalibratedBeam) {
+        status = mbr_reson7k3_rd_CalibratedBeam(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_CalibratedBeam++;
+          store->read_CalibratedBeam = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_SystemEvents) {
+        status = mbr_reson7k3_rd_SystemEvents(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SystemEvents++;
+        }
+      }
+      else if (*recordid == R7KRECID_SystemEventMessage) {
+        status = mbr_reson7k3_rd_SystemEventMessage(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SystemEventMessage++;
+        }
+      }
+      else if (*recordid == R7KRECID_RDRRecordingStatus) {
+        status = mbr_reson7k3_rd_RDRRecordingStatus(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_RDRRecordingStatus++;
+        }
+      }
+      else if (*recordid == R7KRECID_Subscriptions) {
+        status = mbr_reson7k3_rd_Subscriptions(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_Subscriptions++;
+        }
+      }
+      else if (*recordid == R7KRECID_RDRStorageRecording) {
+        status = mbr_reson7k3_rd_RDRStorageRecording(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_RDRStorageRecording++;
+        }
+      }
+      else if (*recordid == R7KRECID_CalibrationStatus) {
+        status = mbr_reson7k3_rd_CalibrationStatus(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_CalibrationStatus++;
+        }
+      }
+      else if (*recordid == R7KRECID_CalibratedSideScan) {
+        status = mbr_reson7k3_rd_CalibratedSideScan(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_CalibratedSideScan++;
+          store->read_CalibratedSideScan = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_SnippetBackscatteringStrength) {
+        status = mbr_reson7k3_rd_SnippetBackscatteringStrength(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_SnippetBackscatteringStrength++;
+          store->read_SnippetBackscatteringStrength = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_MB2Status) {
+        status = mbr_reson7k3_rd_MB2Status(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_MB2Status++;
+        }
+      }
+      else if (*recordid == R7KRECID_FileHeader) {
+        status = mbr_reson7k3_rd_FileHeader(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          (*fileheaders)++;
+          done = MB_YES;
+          store->nrec_FileHeader++;
+        }
+//mbsys_reson7k3_print_FileHeader(verbose, &store->FileHeader, error);
+
+        // If the FileHeader record indicates the file ends with a FileCatalog
+        // record, then jump to the end of file, read the FileCatalog, and jump
+        // back to the current location.
+        if (status == MB_SUCCESS && store->FileHeader.optionaldata == MB_YES
+            && store->FileHeader.file_catalog_size > 0
+            && store->FileHeader.file_catalog_offset > 0
+            && mb_io_ptr->mbfp != NULL) {
+          // save current file location
+          int fpos_current = ftell(mb_io_ptr->mbfp);
+
+          // move to start of FileCatalog record
+          int fstatus = fseek(mb_io_ptr->mbfp, store->FileHeader.file_catalog_offset, SEEK_SET);
+
+          // Most of the time the FileHeader.file_catalog_size value is the size
+          // of the entire FileCatalog record as per the format spec, but sometimes
+          // it is just the size of the catalog list at 48 bytes per entry.
+          // This has been documented in sample Hydrosweep data from R/V Polarstern.
+          // Check for cases where the size is an even multiple of 48 - in these
+          // cases add 82 bytes so the entire record is read
+          if (store->FileHeader.file_catalog_size % 48 == 0) {
+            store->FileHeader.file_catalog_size += MBSYS_RESON7K_RECORDHEADER_SIZE
+                                                  + R7KHDRSIZE_FileCatalog
+                                                  + MBSYS_RESON7K_RECORDTAIL_SIZE;
+          }
+
+          /* allocate memory to read record if necessary */
+          if (*bufferalloc < store->FileHeader.file_catalog_size) {
+            status = mb_reallocd(verbose, __FILE__, __LINE__, store->FileHeader.file_catalog_size, (void **)bufferptr, error);
+            if (status == MB_SUCCESS)
+              status = mb_reallocd(verbose, __FILE__, __LINE__, store->FileHeader.file_catalog_size, (void **)buffersaveptr, error);
+            if (status != MB_SUCCESS) {
+              *bufferalloc = 0;
+              done = MB_YES;
+            }
+            else {
+              *bufferalloc = store->FileHeader.file_catalog_size;
+              buffer = (char *)*bufferptr;
+              buffersave = (char *)*buffersaveptr;
+            }
+          }
+
+          // read the entire record into the buffer
+          if (status == MB_SUCCESS) {
+            read_len = (size_t)(store->FileHeader.file_catalog_size);
+            status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+          }
+
+          // parse the FileCatalog record
+          if (status == MB_SUCCESS) {
+//mbsys_reson7k3_print_FileHeader(verbose, &store->FileHeader, error);
+            status = mbr_reson7k3_rd_FileCatalog(verbose, buffer, store_ptr, error);
+            if (status == MB_SUCCESS) {
+              store->nrec_FileCatalog = 1;
+            }
+//mbsys_reson7k3_print_FileCatalog(verbose, &store->FileCatalog_read, error);
+          }
+
+          // reset kind and type to FileHeader
+          store->kind = MB_DATA_HEADER;
+          store->type = R7KRECID_FileHeader;
+
+          // reset file position
+          fstatus = fseek(mb_io_ptr->mbfp, fpos_current, SEEK_SET);
+          *icatalog = 1;
+
+        }
+      }
+      else if (*recordid == R7KRECID_FileCatalog) {
+        //status = mbr_reson7k3_rd_FileCatalog(verbose, buffer, store_ptr, error);
+        //if (status == MB_SUCCESS) {
+        //  done = MB_YES;
+        //  store->nrec_FileCatalog = 1;
+        //}
+//mbsys_reson7k3_print_FileCatalog(verbose, &store->FileCatalog_read, error);
+      }
+      else if (*recordid == R7KRECID_TimeMessage) {
+        status = mbr_reson7k3_rd_TimeMessage(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_TimeMessage++;
+        }
+      }
+      else if (*recordid == R7KRECID_RemoteControl) {
+        status = mbr_reson7k3_rd_RemoteControl(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_RemoteControl++;
+        }
+      }
+      else if (*recordid == R7KRECID_RemoteControlAcknowledge) {
+        status = mbr_reson7k3_rd_RemoteControlAcknowledge(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_RemoteControlAcknowledge++;
+        }
+      }
+      else if (*recordid == R7KRECID_RemoteControlNotAcknowledge) {
+        status = mbr_reson7k3_rd_RemoteControlNotAcknowledge(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_RemoteControlNotAcknowledge++;
+        }
+      }
+      else if (*recordid == R7KRECID_RemoteControlSonarSettings) {
+        status = mbr_reson7k3_rd_RemoteControlSonarSettings(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          store->nrec_RemoteControlSonarSettings++;
+          store->read_RemoteControlSonarSettings = MB_YES;
+        }
+      }
+      else if (*recordid == R7KRECID_CommonSystemSettings) {
+        status = mbr_reson7k3_rd_CommonSystemSettings(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_CommonSystemSettings++;
+        }
+      }
+      else if (*recordid == R7KRECID_SVFiltering) {
+        status = mbr_reson7k3_rd_SVFiltering(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SVFiltering++;
+        }
+      }
+      else if (*recordid == R7KRECID_SystemLockStatus) {
+        status = mbr_reson7k3_rd_SystemLockStatus(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SystemLockStatus++;
+        }
+      }
+      else if (*recordid == R7KRECID_SoundVelocity) {
+        status = mbr_reson7k3_rd_SoundVelocity(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SoundVelocity++;
+        }
+      }
+      else if (*recordid == R7KRECID_AbsorptionLoss) {
+        status = mbr_reson7k3_rd_AbsorptionLoss(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_AbsorptionLoss++;
+        }
+      }
+      else if (*recordid == R7KRECID_SpreadingLoss) {
+      status = mbr_reson7k3_rd_SpreadingLoss(verbose, buffer, store_ptr, error);
+        if (status == MB_SUCCESS) {
+          done = MB_YES;
+          store->nrec_SpreadingLoss++;
+        }
+      }
+    }
+
+#ifdef MBR_RESON7K3_DEBUG2
+    if (status == MB_SUCCESS && ping_record == MB_YES) {
+      fprintf(stderr,"recordid:%d ping_record:%d last_ping:%d new_ping:%d current_ping:%d done:%d status:%d error:%d\n",
+          *recordid, ping_record,*last_ping,*new_ping,*current_ping,done,status,*error);
+      fprintf(stderr, "current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+              *new_ping, store->read_ProcessedSideScan, store->read_SonarSettings,
+              store->read_MatchFilter, store->read_BeamGeometry,
+              store->read_Bathymetry, store->read_SideScan,
+              store->read_WaterColumn, store->read_VerticalDepth,
+              store->read_TVG, store->read_Image,
+              store->read_PingMotion, store->read_DetectionDataSetup,
+              store->read_Beamformed, store->read_VernierProcessingDataRaw,
+              store->read_RawDetection, store->read_Snippet,
+              store->read_VernierProcessingDataFiltered, store->read_CompressedBeamformedMagnitude,
+              store->read_CompressedWaterColumn, store->read_SegmentedRawDetection,
+              store->read_CalibratedBeam, store->read_CalibratedSideScan,
+              store->read_SnippetBackscatteringStrength,
+              store->read_RemoteControlSonarSettings);
+    }
+#endif
+
+    /* bail out if there is a parsing error */
+    if (status == MB_FAILURE)
+      done = MB_YES;
+#ifdef MBR_RESON7K3_DEBUG2
+    if (verbose >= 0) {
+      fprintf(stderr, "---Read record id: %4.4X  %4.4d | recordid:%x size:%d\n", store->type, store->type, *recordid, *size);
+      fprintf(stderr, "end of mbr_reson7k3_rd_data loop: done:%d kind:%d status:%d error:%d\n", done, store->kind, status, *error);
+    }
+#endif
+  }
+#ifdef MBR_RESON7K3_DEBUG2
+  if (status == MB_SUCCESS)
+    fprintf(stderr, "RESON7K3 DATA READ: type:%d status:%d error:%d\n\n", store->kind, status, *error);
+#endif
+
+  /* get file position - check file and socket, use appropriate ftell */
+  if (mb_io_ptr->mbfp != NULL) {
+       if (*save_flag == MB_YES)
+          mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp) - *size;
+      else
+          mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
+  }
+#ifdef MBTRN_ENABLED
+  else if (mb_io_ptr->mbsp != NULL) {
+      if (*save_flag == MB_YES)
+          mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp) - *size;
+      else
+          mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp);
+  } else {
+      fprintf(stderr,"ERROR - both file and socket input pointers are NULL:                              %4.4X | %d\n", store->type, store->type);
+  }
+#endif
 
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       index:      %d\n", *index);
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_rt_reson7k3";
+  int status = MB_SUCCESS;
+  int interp_status;
+  int interp_error = MB_ERROR_NO_ERROR;
+  struct mbsys_reson7k3_struct *store = NULL;
+  s7k3_Position *Position;
+  s7k3_CustomAttitude *CustomAttitude;
+  s7k3_Altitude *Altitude;
+  s7k3_Depth *Depth;
+  s7k3_RollPitchHeave *RollPitchHeave;
+  s7k3_Heading *Heading;
+  s7k3_Navigation *Navigation;
+  s7k3_Attitude *Attitude;
+  s7k3_ProcessedSideScan *ProcessedSideScan;
+  s7k3_SonarSettings *SonarSettings;
+  s7k3_BeamGeometry *BeamGeometry;
+  s7k3_Bathymetry *Bathymetry;
+  s7k3_SideScan *SideScan;
+  s7k3_Image *Image;
+  s7k3_Beamformed *Beamformed;
+  s7k3_DetectionDataSetup *DetectionDataSetup;
+  s7k3_RawDetection *RawDetection;
+  s7k3_SegmentedRawDetection *SegmentedRawDetection;
+  int *preprocess_pars_set;
+  struct mb_preprocess_struct *preprocess_pars;
+  int *platform_set;
+	struct mb_platform_struct **platform_ptr = NULL;
+  double soundspeed;
+  int *asynch_source_nav = NULL;
+  int *asynch_source_sensordepth = NULL;
+  int *asynch_source_heading = NULL;
+  int *asynch_source_attitude = NULL;
+  int *asynch_source_altitude = NULL;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointers to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_reson7k3_struct *)store_ptr;
+
+  /* read next data from file */
+  status = mbr_reson7k3_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+  /* get pointers to data structures */
+  Position = &store->Position;
+  CustomAttitude = &store->CustomAttitude;
+  Altitude = &store->Altitude;
+  Depth = &store->Depth;
+  RollPitchHeave = &store->RollPitchHeave;
+  Heading = &store->Heading;
+  Navigation = &store->Navigation;
+  Attitude = &store->Attitude;
+  ProcessedSideScan = &store->ProcessedSideScan;
+  SonarSettings = &store->SonarSettings;
+  BeamGeometry = &store->BeamGeometry;
+  Bathymetry = &store->Bathymetry;
+  SideScan = &store->SideScan;
+  Image = &store->Image;
+  Beamformed = &store->Beamformed;
+  DetectionDataSetup = &store->DetectionDataSetup;
+  RawDetection = &store->RawDetection;
+  SegmentedRawDetection = &store->SegmentedRawDetection;
+  preprocess_pars_set = (int *)&mb_io_ptr->save13;
+  preprocess_pars = (struct mb_preprocess_struct *)&mb_io_ptr->preprocess_pars;
+  platform_set = (int *)&mb_io_ptr->save7;
+  platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
+  asynch_source_nav = (int *)&mb_io_ptr->save16;
+  asynch_source_sensordepth = (int *)&mb_io_ptr->save17;
+  asynch_source_heading = (int *)&mb_io_ptr->save18;
+  asynch_source_attitude = (int *)&mb_io_ptr->save19;
+  asynch_source_altitude = (int *)&mb_io_ptr->save20;
+//fprintf(stderr,"asynch_source_nav:%d %d asynch_source_sensordepth:%d %d asynch_source_heading:%d %d asynch_source_attitude:%d %d asynch_source_altitude:%d %d\n",
+//*asynch_source_nav, mb_io_ptr->nfix,
+//*asynch_source_sensordepth, mb_io_ptr->nsonardepth,
+//*asynch_source_heading, mb_io_ptr->nheading,
+//*asynch_source_attitude, mb_io_ptr->nattitude,
+//*asynch_source_altitude, mb_io_ptr->naltitude);
+
+  // Use the following asynchronous data source priority order:
+  //    Position lon lat -
+  //      Navigation      1015 MB_DATA_NAV
+  //      Position        1003 MB_DATA_NAV1
+  //    Sensor depth -
+  //      Navigation      1015 MB_DATA_NAV - IF height_accuracy is reasonable
+  //      Depth           1008 MB_DATA_SONARDEPTH - IF depth_descriptor=0 ==> depth to sensor value
+  //      Position        1003 MB_DATA_NAV1 - IF height_accuracy is reasonable
+  //    Heading -
+  //      Navigation      1015 MB_DATA_NAV
+  //      Heading         1013 MB_DATA_HEADING
+  //      CustomAttitude  1004 MB_DATA_ATTITUDE2
+  //    Roll pitch heave -
+  //      Attitude        1016 MB_DATA_ATTITUDE - also includes heading
+  //      RollPitchHeave  1012 MB_DATA_ATTITUDE1
+  //      CustomAttitude  1004 MB_DATA_ATTITUDE2 - also includes heading
+  //    Altitude:
+  //      Altitude        1006 MB_DATA_ALTITUDE
+  //
+
+  // deal with buffering asynchronous data if status == MB_SUCCESS
+  if (status == MB_SUCCESS) {
+
+    // save position, sensordepth, heading if Navigation record
+    if (store->kind == MB_DATA_NAV) {
+      Navigation = &(store->Navigation);
+
+      // add position (clear old data from other sources if needed)
+      if (*asynch_source_nav != MB_DATA_NAV) {
+        *asynch_source_nav = MB_DATA_NAV;
+        mb_io_ptr->nfix = 0;
+      }
+      mb_navint_add(verbose, mbio_ptr, store->time_d,
+                    (double)(RTD * Navigation->longitude),
+                    (double)(RTD * Navigation->latitude), error);
+
+      // add heading (clear old data from other sources if needed)
+      if (*asynch_source_heading != MB_DATA_NAV) {
+        *asynch_source_heading = MB_DATA_NAV;
+        mb_io_ptr->nheading = 0;
+      }
+      mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d),
+                    (double)(RTD * Navigation->heading), error);
+
+      // add sensordepth (clear old data from other sources if needed)
+      if (*asynch_source_sensordepth != MB_DATA_NAV) {
+        *asynch_source_sensordepth = MB_DATA_NAV;
+        mb_io_ptr->nsonardepth = 0;
+      }
+      mb_depint_add(verbose, mbio_ptr, (double)(store->time_d),
+                      (double)(-Navigation->height), error);
+    }
+
+    /* save Attitude if Attitude record */
+    else if (store->kind == MB_DATA_ATTITUDE) {
+      Attitude = &(store->Attitude);
+
+      // add attitude (clear old data from other sources if needed)
+      if (*asynch_source_attitude != MB_DATA_ATTITUDE) {
+        *asynch_source_attitude = MB_DATA_ATTITUDE;
+        mb_io_ptr->nattitude = 0;
+      }
+      for (int i = 0; i < Attitude->n; i++) {
+        mb_attint_add(verbose, mbio_ptr, (double)(store->time_d + 0.001 * ((double)Attitude->delta_time[i])),
+                      (double)(Attitude->heave[i]), (double)(RTD * Attitude->roll[i]), (double)(RTD * Attitude->pitch[i]),
+                      error);
+      }
+
+      // add heading (clear old data from other sources if needed)
+      if (*asynch_source_heading != MB_DATA_ATTITUDE) {
+        *asynch_source_heading = MB_DATA_ATTITUDE;
+        mb_io_ptr->nheading = 0;
+      }
+      for (int i = 0; i < Attitude->n; i++) {
+        mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d + 0.001 * ((double)Attitude->delta_time[i])),
+                      (double)(RTD * Attitude->heading[i]), error);
+      }
+    }
+
+    // save position if Position record and no higher priority source already encountered
+    else if (store->kind == MB_DATA_NAV1) {
+      Position = &(store->Position);
+
+      // add position (clear old data from other sources if needed)
+      if (*asynch_source_nav == MB_DATA_NONE) {
+        *asynch_source_nav = MB_DATA_NAV1;
+        mb_io_ptr->nfix = 0;
+      }
+      if (*asynch_source_nav == MB_DATA_NAV1) {
+        mb_navint_add(verbose, mbio_ptr, store->time_d,
+                      (double)(RTD * Position->longitude_easting),
+                      (double)(RTD * Position->latitude_northing), error);
+      }
+    }
+
+    // save heading if Heading record and no higher priority source already encountered
+    else if (store->kind == MB_DATA_HEADING) {
+      Heading = &(store->Heading);
+
+      // add heading (clear old data from other sources if needed)
+      if (*asynch_source_heading == MB_DATA_NONE
+          || *asynch_source_heading == MB_DATA_ATTITUDE2) {
+        *asynch_source_heading = MB_DATA_HEADING;
+        mb_io_ptr->nheading = 0;
+      }
+      if (*asynch_source_heading == MB_DATA_HEADING) {
+        mb_hedint_add(verbose, mbio_ptr, (double)(store->time_d),
+                      (double)(RTD * Heading->heading), error);
+      }
+    }
+
+    /* save attitude if RollPitchHeave record */
+    else if (store->kind == MB_DATA_ATTITUDE1) {
+      RollPitchHeave = &(store->RollPitchHeave);
+
+      // add attitude (clear old data from other sources if needed)
+      if (*asynch_source_attitude == MB_DATA_NONE
+        || *asynch_source_attitude == MB_DATA_ATTITUDE2) {
+        *asynch_source_attitude = MB_DATA_ATTITUDE1;
+        mb_io_ptr->nattitude = 0;
+      }
+      if (*asynch_source_attitude == MB_DATA_ATTITUDE1) {
+        mb_attint_add(verbose, mbio_ptr, (double)(store->time_d),
+                      (double)(RollPitchHeave->heave),
+                      (double)(RTD * RollPitchHeave->roll),
+                      (double)(RTD * RollPitchHeave->pitch), error);
+      }
+    }
+
+    /* save attitude if CustomAttitude record */
+    else if (store->kind == MB_DATA_ATTITUDE2) {
+      CustomAttitude = &(store->CustomAttitude);
+
+      // add attitude (clear old data from other sources if needed)
+      if (*asynch_source_attitude == MB_DATA_NONE) {
+        *asynch_source_attitude = MB_DATA_ATTITUDE2;
+        mb_io_ptr->nattitude = 0;
+      }
+      if (*asynch_source_attitude == MB_DATA_ATTITUDE2) {
+        for (int i = 0; i < CustomAttitude->n; i++) {
+          mb_attint_add(verbose, mbio_ptr,
+                    (double)(store->time_d + ((double)i)
+                              / ((double)CustomAttitude->frequency)),
+                    (double)(CustomAttitude->heave[i]),
+                    (double)(RTD * CustomAttitude->roll[i]),
+                    (double)(RTD * CustomAttitude->pitch[i]), error);
+        }
+      }
+
+      // add heading (clear old data from other sources if needed)
+      if (*asynch_source_heading == MB_DATA_NONE) {
+        *asynch_source_heading = MB_DATA_ATTITUDE2;
+        mb_io_ptr->nheading = 0;
+      }
+      if (*asynch_source_heading == MB_DATA_ATTITUDE2) {
+        for (int i = 0; i < CustomAttitude->n; i++) {
+          mb_hedint_add(verbose, mbio_ptr,
+                    (double)(store->time_d + ((double)i) / ((double)CustomAttitude->frequency)),
+                    (double)(RTD * CustomAttitude->heading[i]), error);
+        }
+      }
+    }
+
+    /* save sonardepth if Depth record showing depth of sensor */
+    else if (store->kind == MB_DATA_SONARDEPTH) {
+      Depth = &(store->Depth);
+
+      // add sensordepth (clear old data from other sources if needed)
+      if (*asynch_source_sensordepth == MB_DATA_NONE) {
+        *asynch_source_sensordepth = MB_DATA_SONARDEPTH;
+        mb_io_ptr->nsonardepth = 0;
+      }
+      if (*asynch_source_sensordepth == MB_DATA_SONARDEPTH) {
+        mb_depint_add(verbose, mbio_ptr, (double)(store->time_d),
+                      (double)(Depth->depth), error);
+      }
+    }
+
+    /* save altitude if Altitude record */
+    else if (store->kind == MB_DATA_ALTITUDE) {
+      Altitude = &(store->Altitude);
+
+      // add altitude (clear old data from other sources if needed)
+      if (*asynch_source_altitude == MB_DATA_NONE) {
+        *asynch_source_altitude = MB_DATA_ALTITUDE;
+        mb_io_ptr->naltitude = 0;
+      }
+      if (*asynch_source_altitude == MB_DATA_ALTITUDE) {
+        mb_altint_add(verbose, mbio_ptr, (double)(store->time_d),
+                      (double)(Altitude->altitude), error);
+      }
+    }
+
+  } // end of dealing with asynchronous data
+
+#ifdef MBR_RESON7K3_DEBUG2
+  if (verbose > 0)
+    fprintf(stderr, "Record returned: type:%d status:%d error:%d\n\n", store->kind, status, *error);
+#endif
+
+  /* if needed calculate bathymetry using preprocess function */
+  if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
+      && (  (store->read_RawDetection == MB_YES
+              && RawDetection->optionaldata == MB_NO)
+            || (store->read_SegmentedRawDetection == MB_YES
+              && SegmentedRawDetection->optionaldata == MB_NO))) {
+    /* get platform model if needed */
+    if (*platform_set == MB_NO) {
+      status = mbsys_reson7k3_extract_platform(verbose, mbio_ptr, store_ptr, &store->kind, (void **)platform_ptr, error);
+      *platform_set = MB_YES;
+    }
+
+    /* set preprocess parameters if needed - have to update counts of ancilliary data arrays each time */
+    if (*preprocess_pars_set == MB_NO) {
+      preprocess_pars->target_sensor = 0;
+
+      preprocess_pars->timestamp_changed = MB_NO;
+      preprocess_pars->time_d = 0.0;
+
+      preprocess_pars->n_nav = mb_io_ptr->nfix;
+      preprocess_pars->nav_time_d = mb_io_ptr->fix_time_d;
+      preprocess_pars->nav_lon = mb_io_ptr->fix_lon;
+      preprocess_pars->nav_lat = mb_io_ptr->fix_lat;
+      preprocess_pars->nav_speed = NULL;
+
+      preprocess_pars->n_sensordepth = mb_io_ptr->nsonardepth;
+      preprocess_pars->sensordepth_time_d = mb_io_ptr->sonardepth_time_d;
+      preprocess_pars->sensordepth_sensordepth = mb_io_ptr->sonardepth_sonardepth;
+
+      preprocess_pars->n_heading = mb_io_ptr->nheading;
+      preprocess_pars->heading_time_d = mb_io_ptr->heading_time_d;
+      preprocess_pars->heading_heading = mb_io_ptr->heading_heading;
+
+      preprocess_pars->n_altitude = mb_io_ptr->naltitude;
+      preprocess_pars->altitude_time_d = mb_io_ptr->altitude_time_d;
+      preprocess_pars->altitude_altitude = mb_io_ptr->altitude_altitude;
+
+      preprocess_pars->n_attitude = mb_io_ptr->nattitude;
+      preprocess_pars->attitude_time_d = mb_io_ptr->attitude_time_d;
+      preprocess_pars->attitude_roll = mb_io_ptr->attitude_roll;
+      preprocess_pars->attitude_pitch = mb_io_ptr->attitude_pitch;
+      preprocess_pars->attitude_heave = mb_io_ptr->attitude_heave;
+
+      preprocess_pars->n_soundspeed = 1;
+      soundspeed = SonarSettings->sound_velocity;
+      preprocess_pars->soundspeed_time_d = &store->time_d;
+      preprocess_pars->soundspeed_soundspeed = &soundspeed;
+
+      preprocess_pars->no_change_survey = MB_NO;
+      preprocess_pars->multibeam_sidescan_source = MB_PR_SSSOURCE_SNIPPET;
+      preprocess_pars->modify_soundspeed = MB_NO;
+      preprocess_pars->recalculate_bathymetry = MB_YES;
+      preprocess_pars->sounding_amplitude_filter = MB_NO;
+      preprocess_pars->sounding_amplitude_threshold = 0.0;
+      preprocess_pars->sounding_altitude_filter = MB_NO;
+      preprocess_pars->sounding_target_altitude = 0.0;
+      preprocess_pars->ignore_water_column = MB_NO;
+      preprocess_pars->head1_offsets = MB_NO;
+      preprocess_pars->head1_offsets_x = 0.0;
+      preprocess_pars->head1_offsets_y = 0.0;
+      preprocess_pars->head1_offsets_z = 0.0;
+      preprocess_pars->head1_offsets_heading = 0.0;
+      preprocess_pars->head1_offsets_roll = 0.0;
+      preprocess_pars->head1_offsets_pitch = 0.0;
+      preprocess_pars->head2_offsets = MB_NO;
+      preprocess_pars->head2_offsets_x = 0.0;
+      preprocess_pars->head2_offsets_y = 0.0;
+      preprocess_pars->head2_offsets_z = 0.0;
+      preprocess_pars->head2_offsets_heading = 0.0;
+      preprocess_pars->head2_offsets_roll = 0.0;
+      preprocess_pars->head2_offsets_pitch = 0.0;
+
+      preprocess_pars->n_kluge = 0;
+    } else {
+      preprocess_pars->n_nav = mb_io_ptr->nfix;
+      preprocess_pars->n_sensordepth = mb_io_ptr->nsonardepth;
+      preprocess_pars->n_heading = mb_io_ptr->nheading;
+      preprocess_pars->n_altitude = mb_io_ptr->naltitude;
+      preprocess_pars->n_attitude = mb_io_ptr->nattitude;
+    }
+
+    status = mbsys_reson7k3_preprocess(verbose, mbio_ptr, store_ptr,
+                *platform_ptr, preprocess_pars, error);
+  }
+
+  /* set error and kind in mb_io_ptr */
+  mb_io_ptr->new_error = *error;
+  mb_io_ptr->new_kind = store->kind;
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr, int size, void *header_ptr, int *error) {
+  char *function_name = "mbr_reson7k3_FileCatalog_update";
+  int status = MB_SUCCESS;
+  struct mbsys_reson7k3_struct *store = NULL;
+  s7k3_header *header = NULL;
+  s7k3_FileCatalog *FileCatalog = NULL;
+  s7k3_filecatalogdata *filecatalogdata = NULL;
+  int nalloc;
+  size_t alloc_size = 0;
+
+  assert(mbio_ptr != NULL);
+  assert(store_ptr != NULL);
+  assert(size > 0);
+  assert(header_ptr != NULL);
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:     %p\n", mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:    %p\n", store_ptr);
+    fprintf(stderr, "dbg2       size:         %d\n", size);
+    fprintf(stderr, "dbg2       header_ptr:   %p\n", header_ptr);
+  }
+
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
+
+  /* get pointers to data structures */
+  header = (s7k3_header *)header_ptr;
+  FileCatalog = (s7k3_FileCatalog *)&store->FileCatalog_write;
+
+  /* allocate memory for data record catalog if needed */
+  if (FileCatalog->nalloc < (FileCatalog->n + 1) * sizeof(s7k3_filecatalogdata)) {
+    FileCatalog->nalloc = (FileCatalog->n + 1000) * sizeof(s7k3_filecatalogdata);
+    status = mb_reallocd(verbose, __FILE__, __LINE__, FileCatalog->nalloc, (void **)&(FileCatalog->filecatalogdata), error);
+    if (status != MB_SUCCESS) {
+      FileCatalog->nalloc = 0;
+    }
+  }
+  // Add a new entry for a data record about to be written to the output file
+  filecatalogdata = &FileCatalog->filecatalogdata[FileCatalog->n];
+  filecatalogdata->sequence = FileCatalog->n;
+  int time_j[5], time_i[7];
+  double time_d;
+  time_j[0] = header->s7kTime.Year;
+  time_j[1] = header->s7kTime.Day;
+  time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+  time_j[3] = (int)header->s7kTime.Seconds;
+  time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+  mb_get_itime(verbose, time_j, time_i);
+  mb_get_time(verbose, time_i, &(filecatalogdata->time_d));
+  mbr_reson7k3_chk_pingrecord(verbose, header->RecordType, &filecatalogdata->pingrecord);
+  filecatalogdata->size = size;
+  filecatalogdata->offset = ftell(mb_io_ptr->mbfp);
+  filecatalogdata->record_type = header->RecordType;
+  filecatalogdata->device_id = header->DeviceId;
+  filecatalogdata->system_enumerator = header->SystemEnumerator;
+  filecatalogdata->s7kTime.Year = header->s7kTime.Year;
+  filecatalogdata->s7kTime.Day = header->s7kTime.Day;
+  filecatalogdata->s7kTime.Seconds = header->s7kTime.Seconds;
+  filecatalogdata->s7kTime.Hours = header->s7kTime.Hours;
+  filecatalogdata->s7kTime.Minutes = header->s7kTime.Minutes;
+  if (filecatalogdata->pingrecord == MB_YES)
+    filecatalogdata->record_count = 1;
+  else
+    filecatalogdata->record_count = 0;
+  for (int i=0; i<8; i++) {
+    filecatalogdata->reserved[i] = 0;
+  }
+  FileCatalog->n++;
+
+#ifdef MBR_RESON7K3_DEBUG
+fprintf(stderr, "^^>Update FileCatalog list: File %s Line %d type:%d n:%d\n", __FILE__, __LINE__, header->RecordType, FileCatalog->n);
+#endif
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -18700,137 +17585,6 @@ int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, 
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_FileCatalog";
-  int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
-  s7k3_header *header = NULL;
-  s7k3_FileCatalog *FileCatalog;
-  s7k3_filecatalogdata *filecatalogdata;
-  unsigned int checksum;
-  int index;
-  char *buffer;
-
-  /* print input debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
-    fprintf(stderr, "dbg2       bufferptr:  %p\n", (void *)bufferptr);
-    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-  }
-
-  /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
-  FileCatalog = &(store->FileCatalog_write);
-  header = &(FileCatalog->header);
-
-/* print out the data to be output */
-#ifdef MBR_RESON7K3_DEBUG2
-  if (verbose > 0)
-#else
-  if (verbose >= 2)
-#endif
-    mbsys_reson7k3_print_FileCatalog(verbose, FileCatalog, error);
-
-  /* figure out size of output record */
-  *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
-  *size += R7KHDRSIZE_FileCatalog;
-  *size += FileCatalog->n * R7KRDTSIZE_FileCatalog;
-//fprintf(stderr, "File %s Line %d: FileCatalog n:%d size: %d\n", __FILE__, __LINE__, FileCatalog->n, *size);
-
-  /* allocate memory to write rest of record if necessary */
-  if (*bufferalloc < *size) {
-    status = mb_reallocd(verbose, __FILE__, __LINE__, *size, (void **)bufferptr, error);
-    if (status != MB_SUCCESS) {
-      *bufferalloc = 0;
-    }
-    else {
-      *bufferalloc = *size;
-    }
-  }
-
-  /* proceed to write if buffer allocated */
-  if (status == MB_SUCCESS) {
-    /* get buffer for writing */
-    buffer = (char *)*bufferptr;
-
-    /* insert the header */
-    index = 0;
-    status = mbr_reson7k3_wr_header(verbose, buffer, &index, header, error);
-
-    /* insert the data */
-    index = header->Offset + 4;
-    mb_put_binary_int(MB_YES, FileCatalog->size, &buffer[index]);
-    index += 4;
-    mb_put_binary_short(MB_YES, FileCatalog->version, &buffer[index]);
-    index += 2;
-    mb_put_binary_int(MB_YES, FileCatalog->n, &buffer[index]);
-    index += 4;
-    mb_put_binary_int(MB_YES, FileCatalog->reserved, &buffer[index]);
-    index += 4;
-    for (int i = 0; i < FileCatalog->n; i++) {
-      filecatalogdata = &(FileCatalog->filecatalogdata[i]);
-      mb_put_binary_int(MB_YES, filecatalogdata->size, &buffer[index]);
-      index += 4;
-      mb_put_binary_long(MB_YES, filecatalogdata->offset, &buffer[index]);
-      index += 8;
-      mb_put_binary_short(MB_YES, filecatalogdata->record_type, &buffer[index]);
-      index += 2;
-      mb_put_binary_short(MB_YES, filecatalogdata->device_id, &buffer[index]);
-      index += 2;
-      mb_put_binary_short(MB_YES, filecatalogdata->system_enumerator, &buffer[index]);
-      index += 2;
-      mb_put_binary_short(MB_YES, filecatalogdata->s7kTime.Year, &buffer[index]);
-      index += 2;
-      mb_put_binary_short(MB_YES, filecatalogdata->s7kTime.Day, &buffer[index]);
-      index += 2;
-      mb_put_binary_float(MB_YES, filecatalogdata->s7kTime.Seconds, &buffer[index]);
-      index += 4;
-      buffer[index] = filecatalogdata->s7kTime.Hours;
-      index++;
-      buffer[index] = filecatalogdata->s7kTime.Minutes;
-      index++;
-      mb_put_binary_int(MB_YES, filecatalogdata->record_count, &buffer[index]);
-      index += 4;
-      for (int j = 0;j<8;j++) {
-        mb_put_binary_short(MB_YES, filecatalogdata->reserved[j], &buffer[index]);
-        index += 2;
-      }
-    }
-
-    /* reset the header size value */
-    mb_put_binary_int(MB_YES, ((unsigned int)(index + 4)), &buffer[8]);
-
-    /* now add the checksum */
-    checksum = 0;
-    for (int i = 0; i < index; i++)
-      checksum += (unsigned char)buffer[i];
-    mb_put_binary_int(MB_YES, checksum, &buffer[index]);
-    index += 4;
-
-    /* check size */
-    if (*size != index) {
-      fprintf(stderr, "Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
-      status = MB_FAILURE;
-      *error = MB_ERROR_BAD_DATA;
-      *size = 0;
-    }
-  }
-
-  /* print output debug statements */
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_TimeMessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   char *function_name = "mbr_reson7k3_wr_TimeMessage";
   int status = MB_SUCCESS;
@@ -20107,6 +18861,1102 @@ int mbr_reson7k3_wr_SpreadingLoss(int verbose, int *bufferalloc, char **bufferpt
 
   return (status);
 }
+/*--------------------------------------------------------------------*/
+int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_reson7k3_wr_data";
+  int status = MB_SUCCESS;
+  struct mbsys_reson7k3_struct *store = NULL;
+  struct mbsys_reson7k3_struct *ostore = NULL;
+  FILE *mbfp = NULL;
+  char **bufferptr = NULL;
+  char *buffer = NULL;
+  int *bufferalloc = NULL;
+  int *fileheaders = NULL;
+  int *filecatalogoffsetoffset = NULL;
+  int size = 0;
+  size_t write_len = 0;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  ostore = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
+  mbfp = mb_io_ptr->mbfp;
+
+  /* get saved values */
+  bufferptr = (char **)&mb_io_ptr->saveptr1;
+  buffer = (char *)*bufferptr;
+  bufferalloc = (int *)&mb_io_ptr->save6;
+  fileheaders = (int *)&mb_io_ptr->save12;
+  filecatalogoffsetoffset = (int *)&mb_io_ptr->save5;
+
+//fprintf(stderr, "%s %d Called %s  ostore->n_saved_comments: %d\n", __FILE__, __LINE__, function_name, ostore->n_saved_comments);
+
+  // The FileHeader record must be at the start of the file, but in general
+  // MB-System programs will pass in comments before the first data records
+  // are passed in from the original data file, including the FileHeader.
+  // Therefore below any comments received before the FileHeader
+  // will be buffered and then written immediately after the FileHeader
+  // as SystemEventMessage records. After the FileHeader record is written
+  // any comments will be written when received.
+  //
+  // The FileCatalog output data is stored in the FileCatalog_write
+  // structure as the file is written. The FileCatalog record is written
+  // when the file is closed, not when the input FileCatalog data are passed
+  // through. When the FileCatalog is written to the end of the file the
+  // FileHeader record is also updated with the offset to and size of the
+  // FileCatalog record. These calls are made from mbr_reson7k3_deall() rather
+  // than mbr_reson7k3_wr_data(), as only when the former is called is it
+  // clear the file is finished.
+  //
+  // When survey data are passed in with store->kind == MB_DATA_DATA, all of
+  // the ping-related records in memory associated with this ping are written
+  // in a single pass. All other types of data correspond to single data records
+  // and only a single record is written.
+
+  // write FileHeader
+  if (store->type == R7KRECID_FileHeader) {
+    // ensure FileHeader has
+#ifdef MBR_RESON7K3_DEBUG
+    fprintf(stderr, "-->R7KRECID_FileHeader:                        %4.4X | %d\n", store->type, store->type);
+#endif
+    status = mbr_reson7k3_wr_FileHeader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+    buffer = (char *)*bufferptr;
+    write_len = (size_t)size;
+    status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->FileHeader.header, error);
+    status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    (*fileheaders)++;
+
+    // Save byte offset in record to the value that will contain the byte offset
+    // in the file to the start of the FileCatalog record at the end of the file
+    // This value won't be defined until the file is finished, and so will be
+    // overwritten just before the file is closed.
+    *filecatalogoffsetoffset = store->FileHeader.header.OptionalDataOffset;
+
+//fprintf(stderr,"%s %d Writing comments after FileHeader: ostore->n_saved_comments:%d\n", __FILE__, __LINE__, ostore->n_saved_comments);
+
+    for (int i = 0; i < ostore->n_saved_comments; i++) {
+      store->type = R7KRECID_SystemEventMessage;
+      store->kind = MB_DATA_COMMENT;
+      store->SystemEventMessage.header = store->FileHeader.header;
+      store->SystemEventMessage.header.RecordType = R7KRECID_SystemEventMessage;
+      store->SystemEventMessage.serial_number = 0;
+      store->SystemEventMessage.event_id = 1;
+      store->SystemEventMessage.message_length = MIN(strlen(ostore->comments[i]) + 1, MB_PATH_MAXLINE - 1);
+      store->SystemEventMessage.event_identifier = 0;
+      if (store->SystemEventMessage.message_alloc
+          < store->SystemEventMessage.message_length) {
+        if ((status = mb_reallocd(verbose, __FILE__, __LINE__, MB_PATH_MAXLINE,
+                              (void **)&store->SystemEventMessage.message,
+                              error)) == MB_SUCCESS) {
+          store->SystemEventMessage.message_alloc = MB_PATH_MAXLINE;
+        }
+        else
+          store->SystemEventMessage.message_alloc = 0;
+      }
+      if (store->SystemEventMessage.message_alloc
+          >= store->SystemEventMessage.message_length) {
+        strncpy(store->SystemEventMessage.message, ostore->comments[i], store->SystemEventMessage.message_alloc-1);
+//fprintf(stderr,"%s %d Writing comment %d: %s\n", __FILE__, __LINE__, i, store->SystemEventMessage.message);
+        status = mbr_reson7k3_wr_SystemEventMessage(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SystemEventMessage.header, error);
+        status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+      }
+    }
+  }
+
+  /* call appropriate writing routines for ping data */
+  else if (store->kind == MB_DATA_DATA) {
+    /* Write all of the records in memory */
+
+    /* Reson 7k sonar settings (record 7000) */
+    if (store->read_SonarSettings == MB_YES) {
+      store->type = R7KRECID_SonarSettings;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_SonarSettings:                     %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_SonarSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarSettings.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+    /* Reson 7k match filter (record 7002) */
+    if (status == MB_SUCCESS && store->read_MatchFilter == MB_YES) {
+      store->type = R7KRECID_MatchFilter;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_MatchFilter:                       %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_MatchFilter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->MatchFilter.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k beam geometry (record 7004) */
+    if (status == MB_SUCCESS && store->read_BeamGeometry == MB_YES) {
+      store->type = R7KRECID_BeamGeometry;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_BeamGeometry:                    --%4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_BeamGeometry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->BeamGeometry.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k bathymetry (record 7006) */
+    if (status == MB_SUCCESS && store->read_Bathymetry == MB_YES) {
+      store->type = R7KRECID_Bathymetry;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_Bathymetry:                          %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_Bathymetry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Bathymetry.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k SideScan imagery data (record 7007) */
+    if (status == MB_SUCCESS && store->read_SideScan == MB_YES) {
+      store->type = R7KRECID_SideScan;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_SideScan:                          %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_SideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SideScan.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k WaterColumn data (record 7008) */
+    if (status == MB_SUCCESS && store->read_WaterColumn == MB_YES) {
+      store->type = R7KRECID_WaterColumn;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_WaterColumn:                       %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_WaterColumn(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->WaterColumn.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k VerticalDepth data (record 7009) */
+    if (status == MB_SUCCESS && store->read_VerticalDepth == MB_YES) {
+      store->type = R7KRECID_VerticalDepth;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_VerticalDepth:                     %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_VerticalDepth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VerticalDepth.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k TVG data (record 7010) */
+    if (status == MB_SUCCESS && store->read_TVG == MB_YES) {
+      store->type = R7KRECID_TVG;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_TVG:                               %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_TVG(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->TVG.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k Image data (record 7011) */
+    if (status == MB_SUCCESS && store->read_Image == MB_YES) {
+      store->type = R7KRECID_Image;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_Image:                             %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_Image(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Image.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k PingMotion (record 7012) */
+    if (status == MB_SUCCESS && store->read_PingMotion == MB_YES) {
+      store->type = R7KRECID_PingMotion;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_PingMotion:                        %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_PingMotion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->PingMotion.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k DetectionDataSetup (record 7017) */
+    if (status == MB_SUCCESS && store->read_DetectionDataSetup == MB_YES) {
+      store->type = R7KRECID_DetectionDataSetup;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_DetectionDataSetup:                %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_DetectionDataSetup(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->DetectionDataSetup.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k Beamformed magnitude and phase data (record 7018) */
+    if (status == MB_SUCCESS && store->read_Beamformed == MB_YES) {
+      store->type = R7KRECID_Beamformed;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_Beamformed:                        %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_Beamformed(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Beamformed.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k RawDetection (record 7027) */
+    if (status == MB_SUCCESS && store->read_RawDetection == MB_YES) {
+      store->type = R7KRECID_RawDetection;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_RawDetection:                      %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_RawDetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RawDetection.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k Snippet (record 7028) */
+    if (status == MB_SUCCESS && store->read_Snippet == MB_YES) {
+      store->type = R7KRECID_Snippet;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_Snippet:                           %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_Snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Snippet.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k CompressedBeamformedMagnitude Data (Record 7041) */
+    if (status == MB_SUCCESS && store->read_CompressedBeamformedMagnitude == MB_YES) {
+      store->type = R7KRECID_CompressedBeamformedMagnitude;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_CompressedBeamformedMagnitude:     %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_CompressedBeamformedMagnitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CompressedBeamformedMagnitude.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k CompressedWaterColumn Data (Record 7042) */
+    if (status == MB_SUCCESS && store->read_CompressedWaterColumn == MB_YES) {
+      store->type = R7KRECID_CompressedWaterColumn;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_CompressedWaterColumn:             %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_CompressedWaterColumn(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CompressedWaterColumn.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k SegmentedRawDetection Data (part of Record 7047) */
+    if (status == MB_SUCCESS && store->read_SegmentedRawDetection == MB_YES) {
+      store->type = R7KRECID_SegmentedRawDetection;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_SegmentedRawDetection:             %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_SegmentedRawDetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SegmentedRawDetection.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k CalibratedBeam Data (Record 7048) */
+    if (status == MB_SUCCESS && store->read_CalibratedBeam == MB_YES) {
+      store->type = R7KRECID_CalibratedBeam;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_CalibratedBeam:                    %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_CalibratedBeam(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedBeam.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k CalibratedSideScan Data (part of record 7057) */
+    if (status == MB_SUCCESS && store->read_CalibratedSideScan == MB_YES) {
+      store->type = R7KRECID_CalibratedSideScan;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_CalibratedSideScan:                %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_CalibratedSideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedSideScan.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k SnippetBackscatteringStrength (Record 7058) */
+    if (status == MB_SUCCESS && store->read_SnippetBackscatteringStrength == MB_YES) {
+      store->type = R7KRECID_SnippetBackscatteringStrength;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_SnippetBackscatteringStrength:     %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_SnippetBackscatteringStrength(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SnippetBackscatteringStrength.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Reson 7k RemoteControlSonarSettings settings (record 7503) */
+    if (status == MB_SUCCESS && store->read_RemoteControlSonarSettings == MB_YES) {
+      store->type = R7KRECID_RemoteControlSonarSettings;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_RemoteControlSonarSettings:      %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_RemoteControlSonarSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControlSonarSettings.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+
+    /* Processed sidescan - MB-System extension to s7k3 format (record 3199) */
+    if (status == MB_SUCCESS && store->read_ProcessedSideScan == MB_YES) {
+      store->type = R7KRECID_ProcessedSideScan;
+#ifdef MBR_RESON7K3_DEBUG
+      fprintf(stderr, "**>R7KRECID_ProcessedSideScan:                 %4.4X | %d\n", store->type, store->type);
+#endif
+      status = mbr_reson7k3_wr_ProcessedSideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->ProcessedSideScan.header, error);
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+    }
+  }
+
+  // if comment and no FileHeader already written then store the comment in the store structure
+  // associated with the output mb_io_ptr
+  else if (store->kind == MB_DATA_COMMENT && *fileheaders == 0) {
+    if (ostore->n_saved_comments < MBSYS_RESON7K_MAX_BUFFERED_COMMENTS) {
+      strncpy(ostore->comments[ostore->n_saved_comments], ostore->SystemEventMessage.message, MB_PATH_MAXLINE);
+      (ostore->n_saved_comments)++;
+//fprintf(stderr, "%s %d saved a comment %s %d\n", __FILE__, __LINE__, ostore->comments[ostore->n_saved_comments-1], ostore->n_saved_comments);
+    }
+  }
+
+  /* call appropriate writing routine for other records */
+  else {
+#ifdef MBR_RESON7K3_DEBUG
+    if (store->type ==R7KRECID_None)
+      fprintf(stderr, "-->R7KRECID_None:                              %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_ReferencePoint)
+      fprintf(stderr, "-->R7KRECID_ReferencePoint:                    %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_UncalibratedSensorOffset)
+      fprintf(stderr, "-->R7KRECID_UncalibratedSensorOffset:          %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CalibratedSensorOffset)
+      fprintf(stderr, "-->R7KRECID_CalibratedSensorOffset:            %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Position)
+      fprintf(stderr, "-->R7KRECID_Position:                          %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CustomAttitude)
+      fprintf(stderr, "-->R7KRECID_CustomAttitude:                    %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Tide)
+      fprintf(stderr, "-->R7KRECID_Tide:                              %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Altitude)
+      fprintf(stderr, "-->R7KRECID_Altitude:                          %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_MotionOverGround)
+      fprintf(stderr, "-->R7KRECID_MotionOverGround:                  %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Depth)
+      fprintf(stderr, "-->R7KRECID_Depth:                             %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SoundVelocityProfile)
+      fprintf(stderr, "-->R7KRECID_SoundVelocityProfile:              %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CTD)
+      fprintf(stderr, "-->R7KRECID_CTD:                               %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Geodesy)
+      fprintf(stderr, "-->R7KRECID_Geodesy:                           %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_RollPitchHeave)
+      fprintf(stderr, "-->R7KRECID_RollPitchHeave:                    %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Heading)
+      fprintf(stderr, "-->R7KRECID_Heading:                           %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SurveyLine)
+      fprintf(stderr, "-->R7KRECID_SurveyLine:                        %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Navigation)
+      fprintf(stderr, "-->R7KRECID_Navigation:                        %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Attitude)
+      fprintf(stderr, "-->R7KRECID_Attitude:                          %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_PanTilt)
+      fprintf(stderr, "-->R7KRECID_PanTilt:                           %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SonarInstallationIDs)
+      fprintf(stderr, "-->R7KRECID_SonarInstallationIDs:              %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SonarPipeEnvironment)
+      fprintf(stderr, "-->R7KRECID_SonarPipeEnvironment:              %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_ContactOutput)
+      fprintf(stderr, "-->R7KRECID_ContactOutput:                     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_ProcessedSideScan)
+      fprintf(stderr, "-->R7KRECID_ProcessedSideScan:                 %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SonarSettings)
+      fprintf(stderr, "-->R7KRECID_SonarSettings:                     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Configuration)
+      fprintf(stderr, "-->R7KRECID_Configuration:                     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_MatchFilter)
+      fprintf(stderr, "-->R7KRECID_MatchFilter:                       %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_FirmwareHardwareConfiguration)
+      fprintf(stderr, "-->R7KRECID_FirmwareHardwareConfiguration:     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_BeamGeometry)
+      fprintf(stderr, "-->R7KRECID_BeamGeometry:                      %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Bathymetry)
+      fprintf(stderr, "-->R7KRECID_Bathymetry:                        %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SideScan)
+      fprintf(stderr, "-->R7KRECID_SideScan:                          %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_WaterColumn)
+      fprintf(stderr, "-->R7KRECID_WaterColumn:                       %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_VerticalDepth)
+      fprintf(stderr, "-->R7KRECID_VerticalDepth:                     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_TVG)
+      fprintf(stderr, "-->R7KRECID_TVG:                               %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Image)
+      fprintf(stderr, "-->R7KRECID_Image:                             %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_PingMotion)
+      fprintf(stderr, "-->R7KRECID_PingMotion:                        %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_AdaptiveGate)
+      fprintf(stderr, "-->R7KRECID_AdaptiveGate:                      %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_DetectionDataSetup)
+      fprintf(stderr, "-->R7KRECID_DetectionDataSetup:                %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Beamformed)
+      fprintf(stderr, "-->R7KRECID_Beamformed:                        %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_VernierProcessingDataRaw)
+      fprintf(stderr, "-->R7KRECID_VernierProcessingDataRaw:          %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_BITE)
+      fprintf(stderr, "-->R7KRECID_BITE:                              %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SonarSourceVersion)
+      fprintf(stderr, "-->R7KRECID_SonarSourceVersion:                %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_WetEndVersion8k)
+      fprintf(stderr, "-->R7KRECID_WetEndVersion8k:                   %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_RawDetection)
+      fprintf(stderr, "-->R7KRECID_RawDetection:                      %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Snippet)
+      fprintf(stderr, "-->R7KRECID_Snippet:                           %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_VernierProcessingDataFiltered)
+      fprintf(stderr, "-->R7KRECID_VernierProcessingDataFiltered:     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_InstallationParameters)
+      fprintf(stderr, "-->R7KRECID_InstallationParameters:            %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_BITESummary)
+      fprintf(stderr, "-->R7KRECID_BITESummary:                       %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CompressedBeamformedMagnitude)
+      fprintf(stderr, "-->R7KRECID_CompressedBeamformedMagnitude:     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CompressedWaterColumn)
+      fprintf(stderr, "-->R7KRECID_CompressedWaterColumn:             %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SegmentedRawDetection)
+      fprintf(stderr, "-->R7KRECID_SegmentedRawDetection:             %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CalibratedBeam)
+      fprintf(stderr, "-->R7KRECID_CalibratedBeam:                    %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SystemEvents)
+      fprintf(stderr, "-->R7KRECID_SystemEvents:                      %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SystemEventMessage)
+      fprintf(stderr, "-->R7KRECID_SystemEventMessage:                %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_RDRRecordingStatus)
+      fprintf(stderr, "-->R7KRECID_RDRRecordingStatus:                %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_Subscriptions)
+      fprintf(stderr, "-->R7KRECID_Subscriptions:                     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_RDRStorageRecording)
+      fprintf(stderr, "-->R7KRECID_RDRStorageRecording:               %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CalibrationStatus)
+      fprintf(stderr, "-->R7KRECID_CalibrationStatus:                 %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CalibratedSideScan)
+      fprintf(stderr, "-->R7KRECID_CalibratedSideScan:                %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SnippetBackscatteringStrength)
+      fprintf(stderr, "-->R7KRECID_SnippetBackscatteringStrength:     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_MB2Status)
+      fprintf(stderr, "-->R7KRECID_MB2Status:                         %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_FileHeader)
+      fprintf(stderr, "-->R7KRECID_FileHeader:                        %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_FileCatalog)
+      fprintf(stderr, "-->R7KRECID_FileCatalog:                       %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_TimeMessage)
+      fprintf(stderr, "-->R7KRECID_TimeMessage:                       %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_RemoteControl)
+      fprintf(stderr, "-->R7KRECID_RemoteControl:                     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_RemoteControlAcknowledge)
+      fprintf(stderr, "-->R7KRECID_RemoteControlAcknowledge:          %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_RemoteControlNotAcknowledge)
+      fprintf(stderr, "-->R7KRECID_RemoteControlNotAcknowledge:       %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_RemoteControlSonarSettings)
+      fprintf(stderr, "-->R7KRECID_RemoteControlSonarSettings:        %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_CommonSystemSettings)
+      fprintf(stderr, "-->R7KRECID_CommonSystemSettings:              %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SVFiltering)
+      fprintf(stderr, "-->R7KRECID_SVFiltering:                       %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SystemLockStatus)
+      fprintf(stderr, "-->R7KRECID_SystemLockStatus:                  %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SoundVelocity)
+      fprintf(stderr, "-->R7KRECID_SoundVelocity:                     %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_AbsorptionLoss)
+      fprintf(stderr, "-->R7KRECID_AbsorptionLoss:                    %4.4X | %d\n", store->type, store->type);
+    if (store->type ==R7KRECID_SpreadingLoss)
+      fprintf(stderr, "-->R7KRECID_SpreadingLoss:                     %4.4X | %d\n", store->type, store->type);
+#endif
+
+    switch (store->type) {
+      case R7KRECID_ReferencePoint:
+        status = mbr_reson7k3_wr_ReferencePoint(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->ReferencePoint.header, error);
+        break;
+      case R7KRECID_UncalibratedSensorOffset:
+        status = mbr_reson7k3_wr_UncalibratedSensorOffset(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->UncalibratedSensorOffset.header, error);
+        break;
+      case R7KRECID_CalibratedSensorOffset:
+        status = mbr_reson7k3_wr_CalibratedSensorOffset(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedSensorOffset.header, error);
+        break;
+      case R7KRECID_Position:
+        status = mbr_reson7k3_wr_Position(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Position.header, error);
+        break;
+      case R7KRECID_CustomAttitude:
+        status = mbr_reson7k3_wr_CustomAttitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CustomAttitude.header, error);
+        break;
+      case R7KRECID_Tide:
+        status = mbr_reson7k3_wr_Tide(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Tide.header, error);
+        break;
+      case R7KRECID_Altitude:
+        status = mbr_reson7k3_wr_Altitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Altitude.header, error);
+        break;
+      case R7KRECID_MotionOverGround:
+        status = mbr_reson7k3_wr_MotionOverGround(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->MotionOverGround.header, error);
+        break;
+      case R7KRECID_Depth:
+        status = mbr_reson7k3_wr_Depth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Depth.header, error);
+        break;
+      case R7KRECID_SoundVelocityProfile:
+        status = mbr_reson7k3_wr_SoundVelocityProfile(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SoundVelocityProfile.header, error);
+        break;
+      case R7KRECID_CTD:
+        status = mbr_reson7k3_wr_CTD(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CTD.header, error);
+        break;
+      case R7KRECID_Geodesy:
+        status = mbr_reson7k3_wr_Geodesy(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Geodesy.header, error);
+        break;
+      case R7KRECID_RollPitchHeave:
+        status = mbr_reson7k3_wr_RollPitchHeave(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RollPitchHeave.header, error);
+        break;
+      case R7KRECID_Heading:
+        status = mbr_reson7k3_wr_Heading(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Heading.header, error);
+        break;
+      case R7KRECID_SurveyLine:
+        status = mbr_reson7k3_wr_SurveyLine(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SurveyLine.header, error);
+        break;
+      case R7KRECID_Navigation:
+        status = mbr_reson7k3_wr_Navigation(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Navigation.header, error);
+        break;
+      case R7KRECID_Attitude:
+        status = mbr_reson7k3_wr_Attitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Attitude.header, error);
+        break;
+      case R7KRECID_PanTilt:
+        status = mbr_reson7k3_wr_PanTilt(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->PanTilt.header, error);
+        break;
+      case R7KRECID_SonarInstallationIDs:
+        status = mbr_reson7k3_wr_SonarInstallationIDs(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarInstallationIDs.header, error);
+        break;
+      case R7KRECID_SonarPipeEnvironment:
+        status = mbr_reson7k3_wr_SonarPipeEnvironment(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarPipeEnvironment.header, error);
+        break;
+      case R7KRECID_ContactOutput:
+        status = mbr_reson7k3_wr_ContactOutput(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->ContactOutput.header, error);
+        break;
+      //case R7KRECID_ProcessedSidescan:
+        //status = mbr_reson7k3_wr_ProcessedSidescan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->ProcessedSidescan.header, error);
+        //break;
+      //case R7KRECID_SonarSettings:
+        //status = mbr_reson7k3_wr_SonarSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarSettings.header, error);
+        //break;
+      case R7KRECID_Configuration:
+        status = mbr_reson7k3_wr_Configuration(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Configuration.header, error);
+        break;
+      //case R7KRECID_MatchFilter:
+        //status = mbr_reson7k3_wr_MatchFilter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->MatchFilter.header, error);
+        //break;
+      case R7KRECID_FirmwareHardwareConfiguration:
+        status = mbr_reson7k3_wr_FirmwareHardwareConfiguration(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->FirmwareHardwareConfiguration.header, error);
+        break;
+      //case R7KRECID_BeamGeometry:
+        //status = mbr_reson7k3_wr_BeamGeometry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->BeamGeometry.header, error);
+        //break;
+      //case R7KRECID_Bathymetry:
+        //status = mbr_reson7k3_wr_Bathymetry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Bathymetry.header, error);
+        //break;
+      //case R7KRECID_SideScan:
+        //status = mbr_reson7k3_wr_SideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SideScan.header, error);
+        //break;
+      //case R7KRECID_WaterColumn:
+        //status = mbr_reson7k3_wr_WaterColumn(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->WaterColumn.header, error);
+        //break;
+      //case R7KRECID_VerticalDepth:
+        //status = mbr_reson7k3_wr_VerticalDepth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VerticalDepth.header, error);
+        //break;
+      //case R7KRECID_TVG:
+        //status = mbr_reson7k3_wr_TVG(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->TVG.header, error);
+        //break;
+      //case R7KRECID_Image:
+        //status = mbr_reson7k3_wr_Image(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Image.header, error);
+        //break;
+      //case R7KRECID_PingMotion:
+        //status = mbr_reson7k3_wr_PingMotion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->PingMotion.header, error);
+        //break;
+      //case R7KRECID_AdaptiveGate:
+        //status = mbr_reson7k3_wr_AdaptiveGate(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->AdaptiveGate.header, error);
+        //break;
+      //case R7KRECID_DetectionDataSetup:
+        //status = mbr_reson7k3_wr_DetectionDataSetup(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->DetectionDataSetup.header, error);
+        //break;
+      //case R7KRECID_Beamformed:
+        //status = mbr_reson7k3_wr_Beamformed(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Beamformed.header, error);
+        //break;
+      //case R7KRECID_VernierProcessingDataRaw:
+        //status = mbr_reson7k3_wr_VernierProcessingDataRaw(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VernierProcessingDataRaw.header, error);
+        //break;
+      case R7KRECID_BITE:
+        status = mbr_reson7k3_wr_BITE(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->BITE.header, error);
+        break;
+      case R7KRECID_SonarSourceVersion:
+        status = mbr_reson7k3_wr_SonarSourceVersion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SonarSourceVersion.header, error);
+        break;
+      case R7KRECID_WetEndVersion8k:
+        status = mbr_reson7k3_wr_WetEndVersion8k(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->WetEndVersion8k.header, error);
+        break;
+      //case R7KRECID_RawDetection:
+        //status = mbr_reson7k3_wr_RawDetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RawDetection.header, error);
+        //break;
+      //case R7KRECID_Snippet:
+        //status = mbr_reson7k3_wr_Snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Snippet.header, error);
+        //break;
+      //case R7KRECID_VernierProcessingDataFiltered:
+        //status = mbr_reson7k3_wr_VernierProcessingDataFiltered(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->VernierProcessingDataFiltered.header, error);
+        //break;
+      case R7KRECID_InstallationParameters:
+        status = mbr_reson7k3_wr_InstallationParameters(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->InstallationParameters.header, error);
+        break;
+      case R7KRECID_BITESummary:
+        status = mbr_reson7k3_wr_BITESummary(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->BITESummary.header, error);
+        break;
+      //case R7KRECID_CompressedBeamformedMagnitude:
+        //status = mbr_reson7k3_wr_CompressedBeamformedMagnitude(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CompressedBeamformedMagnitude.header, error);
+        //break;
+      //case R7KRECID_CompressedWaterColumn:
+        //status = mbr_reson7k3_wr_CompressedWaterColumn(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CompressedWaterColumn.header, error);
+        //break;
+      //case R7KRECID_SegmentedRawDetection:
+        //status = mbr_reson7k3_wr_SegmentedRawDetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SegmentedRawDetection.header, error);
+        //break;
+      //case R7KRECID_CalibratedBeam:
+        //status = mbr_reson7k3_wr_CalibratedBeam(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedBeam.header, error);
+        //break;
+      case R7KRECID_SystemEvents:
+        status = mbr_reson7k3_wr_SystemEvents(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SystemEvents.header, error);
+        break;
+      case R7KRECID_SystemEventMessage:
+        status = mbr_reson7k3_wr_SystemEventMessage(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SystemEventMessage.header, error);
+        break;
+      case R7KRECID_RDRRecordingStatus:
+        status = mbr_reson7k3_wr_RDRRecordingStatus(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RDRRecordingStatus.header, error);
+        break;
+      case R7KRECID_Subscriptions:
+        status = mbr_reson7k3_wr_Subscriptions(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->Subscriptions.header, error);
+        break;
+      case R7KRECID_RDRStorageRecording:
+        status = mbr_reson7k3_wr_RDRStorageRecording(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RDRStorageRecording.header, error);
+        break;
+      case R7KRECID_CalibrationStatus:
+        status = mbr_reson7k3_wr_CalibrationStatus(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibrationStatus.header, error);
+        break;
+      //case R7KRECID_CalibratedSideScan:
+        //status = mbr_reson7k3_wr_CalibratedSideScan(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CalibratedSideScan.header, error);
+        //break;
+      //case R7KRECID_SnippetBackscatteringStrength:
+        //status = mbr_reson7k3_wr_SnippetBackscatteringStrength(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SnippetBackscatteringStrength.header, error);
+        //break;
+      case R7KRECID_MB2Status:
+        status = mbr_reson7k3_wr_MB2Status(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->MB2Status.header, error);
+        break;
+      //case R7KRECID_FileHeader:
+        //status = mbr_reson7k3_wr_FileHeader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->FileHeader.header, error);
+        //(*fileheaders)++;
+        //break;
+      case R7KRECID_FileCatalog:
+        // write catalog when file is closed rather than when old catalog is read
+        // - not all input files will have a catalog
+        //status = mbr_reson7k3_wr_FileCatalog(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        status = MB_SUCCESS;
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->FileCatalog.header, error);
+        break;
+      case R7KRECID_TimeMessage:
+        status = mbr_reson7k3_wr_TimeMessage(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->TimeMessage.header, error);
+        break;
+      case R7KRECID_RemoteControl:
+        status = mbr_reson7k3_wr_RemoteControl(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControl.header, error);
+        break;
+      case R7KRECID_RemoteControlAcknowledge:
+        status = mbr_reson7k3_wr_RemoteControlAcknowledge(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControlAcknowledge.header, error);
+        break;
+      case R7KRECID_RemoteControlNotAcknowledge:
+        status = mbr_reson7k3_wr_RemoteControlNotAcknowledge(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControlNotAcknowledge.header, error);
+        break;
+      //case R7KRECID_RemoteControlSonarSettings:
+        //status = mbr_reson7k3_wr_RemoteControlSonarSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        //buffer = (char *)*bufferptr;
+        //write_len = (size_t)size;
+        //status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->RemoteControlSonarSettings.header, error);
+        //break;
+      case R7KRECID_CommonSystemSettings:
+        status = mbr_reson7k3_wr_CommonSystemSettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->CommonSystemSettings.header, error);
+        break;
+      case R7KRECID_SVFiltering:
+        status = mbr_reson7k3_wr_SVFiltering(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SVFiltering.header, error);
+        break;
+      case R7KRECID_SystemLockStatus:
+        status = mbr_reson7k3_wr_SystemLockStatus(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SystemLockStatus.header, error);
+        break;
+      case R7KRECID_SoundVelocity:
+        status = mbr_reson7k3_wr_SoundVelocity(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SoundVelocity.header, error);
+        break;
+      case R7KRECID_AbsorptionLoss:
+        status = mbr_reson7k3_wr_AbsorptionLoss(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->AbsorptionLoss.header, error);
+        break;
+      case R7KRECID_SpreadingLoss:
+        status = mbr_reson7k3_wr_SpreadingLoss(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+        buffer = (char *)*bufferptr;
+        write_len = (size_t)size;
+        status = mbr_reson7k3_FileCatalog_update(verbose, mbio_ptr, store_ptr, write_len, &store->SpreadingLoss.header, error);
+        break;
+
+      default:
+        fprintf(stderr, "call nothing bad kind: %d type %x\n", store->kind, store->type);
+        status = MB_FAILURE;
+        *error = MB_ERROR_BAD_KIND;
+    }
+
+    // finally write the record to the output file
+    if (status == MB_SUCCESS) {
+
+      // write the record
+      buffer = (char *)*bufferptr;
+      write_len = (size_t)size;
+      status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
+
+    }
+  }
+
+#ifdef MBR_RESON7K3_DEBUG2
+  fprintf(stderr, "RESON7K3 DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
+#endif
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+  char *function_name = "mbr_wt_reson7k3";
+  int status = MB_SUCCESS;
+  struct mbsys_reson7k3_struct *store = NULL;
+
+  /* print input debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+    fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+  }
+
+  /* get pointer to mbio descriptor */
+  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* get pointer to raw data structure */
+  store = (struct mbsys_reson7k3_struct *)store_ptr;
+
+  /* write next data to file */
+  status = mbr_reson7k3_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+  /* print output debug statements */
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:  %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
+
+int mbr_reson7k3_FileCatalog_compare2(const void *a, const void *b) {
+  s7k3_filecatalogdata *aa = NULL;
+  s7k3_filecatalogdata *bb = NULL;
+  int result = 0;
+
+  aa = (s7k3_filecatalogdata *) a;
+  bb = (s7k3_filecatalogdata *) b;
+
+    // just do time comparison
+    if (aa->time_d < bb->time_d) {
+      result = -1;
+    }
+    else if (aa->time_d > bb->time_d) {
+      result = 1;
+    }
+    else {
+      result = 0;
+    }
+
+  return(result);
+}
+
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_register_reson7k3";
