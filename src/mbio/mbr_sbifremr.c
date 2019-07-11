@@ -38,8 +38,6 @@
 #include "mbf_sbifremr.h"
 #include "mbsys_sb.h"
 
-// int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,

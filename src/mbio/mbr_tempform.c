@@ -39,8 +39,6 @@
 /* turn on debug statements here */
 /* #define MBR_TEMPFORM_DEBUG 1 */
 
-// int mbr_tempform_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_tempform(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
