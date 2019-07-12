@@ -95,7 +95,6 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 	char *function_name = "mb_rt_init";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -171,7 +170,6 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 	model->xx_plot = NULL;
 	model->zz_plot = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -188,7 +186,6 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 	char *function_name = "mb_rt";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -205,7 +202,6 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->layer_depth_center), error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)modelptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -223,7 +219,6 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 	double alpha;
 	double velf;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -239,7 +234,6 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 	*depth =
 	    model->layer_depth_top[model->layer] + (velf - model->layer_vel_top[model->layer]) / model->layer_gradient[model->layer];
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -261,7 +255,6 @@ int mb_rt_quad1(int verbose, int *error) {
 	double beta;
 	double ivf;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -345,7 +338,6 @@ int mb_rt_quad1(int verbose, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -366,7 +358,6 @@ int mb_rt_quad2(int verbose, int *error) {
 	double beta;
 	double ivf;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -404,7 +395,6 @@ int mb_rt_quad2(int verbose, int *error) {
 		model->tt_left = 0.0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -425,7 +415,6 @@ int mb_rt_quad3(int verbose, int *error) {
 	double beta;
 	double ivf;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -462,7 +451,6 @@ int mb_rt_quad3(int verbose, int *error) {
 		model->tt_left = 0.0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -483,7 +471,6 @@ int mb_rt_quad4(int verbose, int *error) {
 	double beta;
 	double ivf;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -567,7 +554,6 @@ int mb_rt_quad4(int verbose, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -587,7 +573,6 @@ int mb_rt_plot_circular(int verbose, int *error) {
 	double dang;
 	double angle;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -618,7 +603,6 @@ int mb_rt_plot_circular(int verbose, int *error) {
 		model->number_plot++;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -634,7 +618,6 @@ int mb_rt_circular(int verbose, int *error) {
 	char *function_name = "mb_rt_circular";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -655,7 +638,6 @@ int mb_rt_circular(int verbose, int *error) {
 	if (model->number_plot_max > 0)
 		status = mb_rt_plot_circular(verbose, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -675,7 +657,6 @@ int mb_rt_line(int verbose, int *error) {
 	double zvel;
 	double asin_arg;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -751,7 +732,6 @@ int mb_rt_line(int verbose, int *error) {
 		model->number_plot++;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -770,7 +750,6 @@ int mb_rt_vertical(int verbose, int *error) {
 	double vf;
 	double vfvi;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -822,7 +801,6 @@ int mb_rt_vertical(int verbose, int *error) {
 		model->number_plot++;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -845,7 +823,6 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 	/* get pointer to velocity model */
 	model = (struct velocity_model *)modelptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1029,7 +1006,6 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 	if (model->number_plot_max > 0)
 		*nplot = model->number_plot;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

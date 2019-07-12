@@ -44,7 +44,6 @@ int mbr_info_mbpronav(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mbpronav";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -79,7 +78,6 @@ int mbr_info_mbpronav(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -115,7 +113,6 @@ int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mbpronav";
 	struct mbf_mbpronav_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -148,7 +145,6 @@ int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
 	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -165,7 +161,6 @@ int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_mbpronav_struct *data;
 	char *data_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -193,7 +188,6 @@ int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error) {
 	/* initialize everything to zeros */
 	mbr_zero_mbpronav(verbose, data_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -209,7 +203,6 @@ int mbr_dem_mbpronav(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mbpronav";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -224,7 +217,6 @@ int mbr_dem_mbpronav(int verbose, void *mbio_ptr, int *error) {
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -247,7 +239,6 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 	double d6, d7, d8, d9;
 	double d10, d11, d12, d13;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -340,7 +331,6 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 			mb_get_time(verbose, data->time_i, &(data->time_d));
 
 		if (status == MB_SUCCESS) {
-			/* print output debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Data read in MBIO function <%s>\n", function_name);
 				fprintf(stderr, "dbg4  Values,read:\n");
@@ -375,7 +365,6 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -392,7 +381,6 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_mbpronav_struct *data;
 	struct mbsys_singlebeam_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -469,7 +457,6 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->stbdlat = data->stbdlat;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -487,7 +474,6 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	char line[MBF_MBPRONAV_MAXLINE + 1];
 	int len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -511,7 +497,6 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		line[len + 1] = '\0';
 	}
 	else if (data->kind == MB_DATA_DATA) {
-		/* print output debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data to be written in MBIO function <%s>\n", function_name);
 			fprintf(stderr, "dbg4  Values,read:\n");
@@ -556,13 +541,11 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -579,7 +562,6 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_mbpronav_struct *data;
 	struct mbsys_singlebeam_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -621,7 +603,6 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* write next data to file */
 	const int status = mbr_mbpronav_wr_data(verbose, mbio_ptr, (void *)data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -637,7 +618,6 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mbpronav";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -677,7 +657,6 @@ int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

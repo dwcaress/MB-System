@@ -48,7 +48,6 @@ int mbr_info_mbnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mbnetcdf";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -83,7 +82,6 @@ int mbr_info_mbnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -123,7 +121,6 @@ int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mbnetcdf";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -159,7 +156,6 @@ int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -199,7 +195,6 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	double *lastrawtime;
 	int *nrawtimerepeat;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -225,7 +220,6 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	*lastrawtime = 0.0;
 	*nrawtimerepeat = 0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -240,7 +234,6 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mbnetcdf";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -254,7 +247,6 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	const int status = mbsys_netcdf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -285,7 +277,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int nc_verbose = 0;
 #endif
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -406,7 +397,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			*error = MB_ERROR_EOF;
 		}
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  NetCDF array dimensions read in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Array and variable dimensions:\n");
@@ -571,7 +561,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				*error = MB_ERROR_EOF;
 			}
 
-			/* print input debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  NetCDF global attributes read in function <%s>\n", function_name);
 				fprintf(stderr, "dbg2  Global attributes:\n");
@@ -810,7 +799,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				*error = MB_ERROR_EOF;
 			}
 
-			/* print input debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  NetCDF variable ids read in function <%s>\n", function_name);
 				fprintf(stderr, "dbg2  Variable ids:\n");
@@ -3773,7 +3761,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				*error = MB_ERROR_EOF;
 			}
 
-			/* print input debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  NetCDF variable attributes read in function <%s>\n", function_name);
 				fprintf(stderr, "dbg2  Variable attributes:\n");
@@ -4423,7 +4410,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				*error = MB_ERROR_EOF;
 			}
 
-			/* print input debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  NetCDF Global Variables read in function <%s>\n", function_name);
 				fprintf(stderr, "dbg2  Global Variables:\n");
@@ -4484,7 +4470,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		(*commentread)++;
 		(*dataread)++;
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Comment read in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Comment:\n");
@@ -4793,7 +4778,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 		}
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  NetCDF Survey Record read in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Global Variables:\n");
@@ -4911,7 +4895,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = store->kind;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4952,7 +4935,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int nc_verbose = 0;
 #endif
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5047,7 +5029,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		(*commentwrite)++;
 		(*datawrite)++;
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Comment saved in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Comment:\n");
@@ -5095,7 +5076,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbVelocityProfilNbr error: %s\n", nc_strerror(nc_status));
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  NetCDF array dimensions written in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Array and variable dimensions:\n");
@@ -5356,7 +5336,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbVelProfilTime_id error: %s\n", nc_strerror(nc_status));
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  NetCDF variable ids written in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Variable ids:\n");
@@ -5557,7 +5536,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVersion error: %s\n", nc_strerror(nc_status));
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  NetCDF global attributes written in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Global attributes:\n");
@@ -8631,7 +8609,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  NetCDF variable attributes written in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Variable attributes:\n");
@@ -9467,7 +9444,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			*error = MB_ERROR_EOF;
 		}
 
-		/* print input debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  NetCDF Survey Record written in function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Global Variables:\n");
@@ -9575,7 +9551,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		(*datawrite)++;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -9591,7 +9566,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mbnetcdf";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9631,7 +9605,6 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

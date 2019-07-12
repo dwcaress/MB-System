@@ -48,7 +48,6 @@ int mbr_info_oicgeoda(int verbose, int *system, int *beams_bath_max, int *beams_
 	char *function_name = "mbr_info_oicgeoda";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -84,7 +83,6 @@ int mbr_info_oicgeoda(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -123,7 +121,6 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -171,7 +168,6 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	data->ssalongtrack = NULL;
 	status = mbsys_oic_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -190,7 +186,6 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_oicgeoda_header_struct *header;
 	struct mbf_oicgeoda_data_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -230,7 +225,6 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status = mbsys_oic_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -264,7 +258,6 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double alpha, beta, theta, phi;
 	int index, ichan;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1152,7 +1145,6 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->client[i] = dataplus->client[i];
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1181,7 +1173,6 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	float *float_ptr;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1635,7 +1626,6 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1652,7 +1642,6 @@ int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_oicgeoda";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1692,7 +1681,6 @@ int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

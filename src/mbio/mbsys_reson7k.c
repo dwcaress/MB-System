@@ -49,7 +49,6 @@ int mbsys_reson7k_zero7kheader(int verbose, s7k_header *header, int *error) {
   int status = MB_SUCCESS;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -85,7 +84,6 @@ int mbsys_reson7k_zero7kheader(int verbose, s7k_header *header, int *error) {
   header->FragmentedTotal = 0;
   header->FragmentNumber = 0;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -156,7 +154,6 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   s7kr_reserved *reserved;
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1142,7 +1139,6 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   for (i = 0; i < R7KHDRSIZE_7kReserved; i++)
     reserved->reserved[i] = 0;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1185,7 +1181,6 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   s7kr_systemeventmessage *systemeventmessage;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1432,7 +1427,6 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
   /* deallocate memory for data structure */
   status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1461,7 +1455,6 @@ int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1505,7 +1498,6 @@ int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
   fprintf(stderr, "%s     FragmentedTotal:         %d\n", first, header->FragmentedTotal);
   fprintf(stderr, "%s     FragmentNumber:          %d\n", first, header->FragmentNumber);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1525,7 +1517,6 @@ int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *e
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1549,7 +1540,6 @@ int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *e
   fprintf(stderr, "%s     offset_z:                %f\n", first, reference->offset_z);
   fprintf(stderr, "%s     water_z:                 %f\n", first, reference->water_z);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1569,7 +1559,6 @@ int mbsys_reson7k_print_sensoruncal(int verbose, s7kr_sensoruncal *sensoruncal, 
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1595,7 +1584,6 @@ int mbsys_reson7k_print_sensoruncal(int verbose, s7kr_sensoruncal *sensoruncal, 
   fprintf(stderr, "%s     offset_pitch:            %f\n", first, sensoruncal->offset_pitch);
   fprintf(stderr, "%s     offset_yaw:              %f\n", first, sensoruncal->offset_yaw);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1615,7 +1603,6 @@ int mbsys_reson7k_print_sensorcal(int verbose, s7kr_sensorcal *sensorcal, int *e
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1640,7 +1627,6 @@ int mbsys_reson7k_print_sensorcal(int verbose, s7kr_sensorcal *sensorcal, int *e
   fprintf(stderr, "%s     offset_pitch:            %f\n", first, sensorcal->offset_pitch);
   fprintf(stderr, "%s     offset_yaw:              %f\n", first, sensorcal->offset_yaw);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1660,7 +1646,6 @@ int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *erro
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1689,7 +1674,6 @@ int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *erro
   fprintf(stderr, "%s     quality:                 %d\n", first, position->quality);
   fprintf(stderr, "%s     method:                  %d\n", first, position->method);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1710,7 +1694,6 @@ int mbsys_reson7k_print_customattitude(int verbose, s7kr_customattitude *customa
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1742,7 +1725,6 @@ int mbsys_reson7k_print_customattitude(int verbose, s7kr_customattitude *customa
             customattitude->pitchrate[i], customattitude->rollrate[i], customattitude->headingrate[i],
             customattitude->heaverate[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1762,7 +1744,6 @@ int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1793,7 +1774,6 @@ int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
   fprintf(stderr, "%s     type:                       %d\n", first, tide->type);
   fprintf(stderr, "%s     utm_zone:                   %d\n", first, tide->utm_zone);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1813,7 +1793,6 @@ int mbsys_reson7k_print_altitude(int verbose, s7kr_altitude *altitude, int *erro
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1834,7 +1813,6 @@ int mbsys_reson7k_print_altitude(int verbose, s7kr_altitude *altitude, int *erro
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     altitude:                   %f\n", first, altitude->altitude);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1855,7 +1833,6 @@ int mbsys_reson7k_print_motion(int verbose, s7kr_motion *motion, int *error) {
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1883,7 +1860,6 @@ int mbsys_reson7k_print_motion(int verbose, s7kr_motion *motion, int *error) {
     fprintf(stderr, "%s     i:%d x:%f y:%f z:%f xa:%f ya:%f za:%f\n", first, i, motion->x[i], motion->y[i], motion->z[i],
             motion->xa[i], motion->ya[i], motion->za[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1902,7 +1878,6 @@ int mbsys_reson7k_print_depth(int verbose, s7kr_depth *depth, int *error) {
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1926,7 +1901,6 @@ int mbsys_reson7k_print_depth(int verbose, s7kr_depth *depth, int *error) {
   fprintf(stderr, "%s     reserved:                    %d\n", first, depth->reserved);
   fprintf(stderr, "%s     depth:                       %f\n", first, depth->depth);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1947,7 +1921,6 @@ int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1976,7 +1949,6 @@ int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
   for (i = 0; i < svp->n; i++)
     fprintf(stderr, "%s     i:%d depth:%f sound_velocity:%f\n", first, i, svp->depth[i], svp->sound_velocity[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1997,7 +1969,6 @@ int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2034,7 +2005,6 @@ int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
             first, i, ctd->conductivity_salinity[i], ctd->temperature[i], ctd->pressure_depth[i], ctd->sound_velocity[i],
             ctd->absorption[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2054,7 +2024,6 @@ int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) 
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2099,7 +2068,6 @@ int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) 
   fprintf(stderr, "%s     custum_identifier:          %d\n", first, geodesy->custum_identifier);
   fprintf(stderr, "%s     reserved3:                  %s\n", first, geodesy->reserved3);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2119,7 +2087,6 @@ int mbsys_reson7k_print_rollpitchheave(int verbose, s7kr_rollpitchheave *rollpit
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2142,7 +2109,6 @@ int mbsys_reson7k_print_rollpitchheave(int verbose, s7kr_rollpitchheave *rollpit
   fprintf(stderr, "%s     pitch:                      %f\n", first, rollpitchheave->pitch);
   fprintf(stderr, "%s     heave:                      %f\n", first, rollpitchheave->heave);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2162,7 +2128,6 @@ int mbsys_reson7k_print_heading(int verbose, s7kr_heading *heading, int *error) 
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2183,7 +2148,6 @@ int mbsys_reson7k_print_heading(int verbose, s7kr_heading *heading, int *error) 
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     heading:                    %f\n", first, heading->heading);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2204,7 +2168,6 @@ int mbsys_reson7k_print_surveyline(int verbose, s7kr_surveyline *surveyline, int
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2231,7 +2194,6 @@ int mbsys_reson7k_print_surveyline(int verbose, s7kr_surveyline *surveyline, int
   for (i = 0; i < surveyline->n; i++)
     fprintf(stderr, "%s     i:%d latitude:%f longitude:%f\n", first, i, surveyline->latitude[i], surveyline->longitude[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2251,7 +2213,6 @@ int mbsys_reson7k_print_navigation(int verbose, s7kr_navigation *navigation, int
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2280,7 +2241,6 @@ int mbsys_reson7k_print_navigation(int verbose, s7kr_navigation *navigation, int
   fprintf(stderr, "%s     course:                     %f\n", first, navigation->course);
   fprintf(stderr, "%s     heading:                    %f\n", first, navigation->heading);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2301,7 +2261,6 @@ int mbsys_reson7k_print_attitude(int verbose, s7kr_attitude *attitude, int *erro
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2326,7 +2285,6 @@ int mbsys_reson7k_print_attitude(int verbose, s7kr_attitude *attitude, int *erro
     fprintf(stderr, "%s     i:%d delta_time:%d pitch:%f roll:%f heading:%f heave:%f\n", first, i, attitude->delta_time[i],
             attitude->pitch[i], attitude->roll[i], attitude->heading[i], attitude->heave[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2347,7 +2305,6 @@ int mbsys_reson7k_print_rec1022(int verbose, s7kr_rec1022 *rec1022, int *error) 
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2372,7 +2329,6 @@ int mbsys_reson7k_print_rec1022(int verbose, s7kr_rec1022 *rec1022, int *error) 
   }
   fprintf(stderr, "\n");
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2395,7 +2351,6 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchanne
   unsigned short *ushortptr;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2443,7 +2398,6 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchanne
       fprintf(stderr, "%s     data[%d]:                   %d\n", first, i, ushortptr[i]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2464,7 +2418,6 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2514,7 +2467,6 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   fprintf(stderr, "%s     longitude:                    %d\n", first, fsdwssheader->longitude);
   fprintf(stderr, "%s     latitude:                     %d\n", first, fsdwssheader->latitude);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2535,7 +2487,6 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose, s7k_fsdwsegyheader *fsdwsegy
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2619,7 +2570,6 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose, s7k_fsdwsegyheader *fsdwsegy
   for (i = 0; i < 7; i++)
     fprintf(stderr, "%s     unuseda[%d]:                  %d\n", first, i, fsdwsegyheader->unuseda[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2640,7 +2590,6 @@ int mbsys_reson7k_print_fsdwss(int verbose, s7kr_fsdwss *fsdwss, int *error) {
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2669,7 +2618,6 @@ int mbsys_reson7k_print_fsdwss(int verbose, s7kr_fsdwss *fsdwss, int *error) {
     mbsys_reson7k_print_fsdwssheader(verbose, &fsdwss->ssheader[i], error);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2688,7 +2636,6 @@ int mbsys_reson7k_print_fsdwsb(int verbose, s7kr_fsdwsb *fsdwsb, int *error) {
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2715,7 +2662,6 @@ int mbsys_reson7k_print_fsdwsb(int verbose, s7kr_fsdwsb *fsdwsb, int *error) {
   mbsys_reson7k_print_fsdwchannel(verbose, fsdwsb->data_format, &fsdwsb->channel, error);
   mbsys_reson7k_print_fsdwsegyheader(verbose, &fsdwsb->segyheader, error);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2735,7 +2681,6 @@ int mbsys_reson7k_print_bluefin(int verbose, s7kr_bluefin *bluefin, int *error) 
   char *first;
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2840,7 +2785,6 @@ int mbsys_reson7k_print_bluefin(int verbose, s7kr_bluefin *bluefin, int *error) 
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2860,7 +2804,6 @@ int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *p
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2892,7 +2835,6 @@ int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *p
     fprintf(stderr, "%s     pixel[%d]:  sidescan:%f alongtrack:%f\n", first, i, processedsidescan->sidescan[i],
             processedsidescan->alongtrack[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2911,7 +2853,6 @@ int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *vol
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2970,7 +2911,6 @@ int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *vol
   fprintf(stderr, "%s     spreading:                  %f\n", first, volatilesettings->spreading);
   fprintf(stderr, "%s     reserved:                   %d\n", first, volatilesettings->reserved);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2989,7 +2929,6 @@ int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error) {
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3012,7 +2951,6 @@ int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error) {
   fprintf(stderr, "%s     info_alloc:                 %d\n", first, device->info_alloc);
   fprintf(stderr, "%s     info:                       %s\n", first, device->info);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3032,7 +2970,6 @@ int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configura
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3056,7 +2993,6 @@ int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configura
   for (i = 0; i < configuration->number_devices; i++)
     mbsys_reson7k_print_device(verbose, &configuration->device[i], error);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3075,7 +3011,6 @@ int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, 
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3100,7 +3035,6 @@ int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, 
   fprintf(stderr, "%s     start_frequency:            %f\n", first, matchfilter->start_frequency);
   fprintf(stderr, "%s     end_frequency:              %f\n", first, matchfilter->end_frequency);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3121,7 +3055,6 @@ int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose,
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3145,7 +3078,6 @@ int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose,
   fprintf(stderr, "%s     info:                       \n", first);
   fprintf(stderr, "%s\n%s\n", v2firmwarehardwareconfiguration->info, first);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3165,7 +3097,6 @@ int mbsys_reson7k_print_beamgeometry(int verbose, s7kr_beamgeometry *beamgeometr
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3192,7 +3123,6 @@ int mbsys_reson7k_print_beamgeometry(int verbose, s7kr_beamgeometry *beamgeometr
             first, i, beamgeometry->angle_alongtrack[i], beamgeometry->angle_acrosstrack[i],
             beamgeometry->beamwidth_alongtrack[i], beamgeometry->beamwidth_acrosstrack[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3212,7 +3142,6 @@ int mbsys_reson7k_print_calibration(int verbose, s7kr_calibration *calibration, 
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3236,7 +3165,6 @@ int mbsys_reson7k_print_calibration(int verbose, s7kr_calibration *calibration, 
   for (i = 0; i < calibration->number_channels; i++)
     fprintf(stderr, "%s     channel[%d]:  gain:%f phase:%f\n", first, i, calibration->gain[i], calibration->phase[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3256,7 +3184,6 @@ int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3302,7 +3229,6 @@ int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int
             bathymetry->alongtrack[i], bathymetry->acrosstrack[i], bathymetry->pointing_angle[i],
             bathymetry->azimuth_angle[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3325,7 +3251,6 @@ int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, 
   int *intptr;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3394,7 +3319,6 @@ int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, 
   fprintf(stderr, "%s     heading:                    %f\n", first, backscatter->heading);
   fprintf(stderr, "%s     altitude:                   %f\n", first, backscatter->altitude);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3424,7 +3348,6 @@ int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
   int *intptramp, *intptrphase;
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3497,7 +3420,6 @@ int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3516,7 +3438,6 @@ int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticald
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3545,7 +3466,6 @@ int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticald
   fprintf(stderr, "%s     acrosstrack:                %f\n", first, verticaldepth->acrosstrack);
   fprintf(stderr, "%s     vertical_depth:             %f\n", first, verticaldepth->vertical_depth);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3566,7 +3486,6 @@ int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
   float *tvg_float;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3596,7 +3515,6 @@ int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
     fprintf(stderr, "%s     tvg[%d]:  %f\n", first, i, tvg_float[i]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3619,7 +3537,6 @@ int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
   int *intptr;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3662,7 +3579,6 @@ int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
       fprintf(stderr, "%s     image[%d]:  %u\n", first, i, intptr[i]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3682,7 +3598,6 @@ int mbsys_reson7k_print_v2pingmotion(int verbose, s7kr_v2pingmotion *v2pingmotio
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3717,7 +3632,6 @@ int mbsys_reson7k_print_v2pingmotion(int verbose, s7kr_v2pingmotion *v2pingmotio
             v2pingmotion->heave[i]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3737,7 +3651,6 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose, s7kr_v2detectionsetup *v2d
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3784,7 +3697,6 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose, s7kr_v2detectionsetup *v2d
             v2detectionsetup->user_limits_max_sample[i], v2detectionsetup->quality[i], v2detectionsetup->uncertainty[i]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3805,7 +3717,6 @@ int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamforme
   char *first;
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3843,7 +3754,6 @@ int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamforme
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3866,7 +3776,6 @@ int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
   char *first;
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3918,7 +3827,6 @@ int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3937,7 +3845,6 @@ int mbsys_reson7k_print_v27kcenterversion(int verbose, s7kr_v27kcenterversion *v
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3958,7 +3865,6 @@ int mbsys_reson7k_print_v27kcenterversion(int verbose, s7kr_v27kcenterversion *v
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     version:                    %s\n", first, v27kcenterversion->version);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3977,7 +3883,6 @@ int mbsys_reson7k_print_v28kwetendversion(int verbose, s7kr_v28kwetendversion *v
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3998,7 +3903,6 @@ int mbsys_reson7k_print_v28kwetendversion(int verbose, s7kr_v28kwetendversion *v
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     version:                    %s\n", first, v28kwetendversion->version);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4018,7 +3922,6 @@ int mbsys_reson7k_print_v2detection(int verbose, s7kr_v2detection *v2detection, 
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4055,7 +3958,6 @@ int mbsys_reson7k_print_v2detection(int verbose, s7kr_v2detection *v2detection, 
             v2detection->angle_y_error[i]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4075,7 +3977,6 @@ int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawde
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4114,7 +4015,6 @@ int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawde
             v2rawdetection->quality[i], v2rawdetection->uncertainty[i]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4135,7 +4035,6 @@ int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *e
   char *first;
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4171,7 +4070,6 @@ int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *e
               v2snippettimeseries->amplitude[j]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4192,7 +4090,6 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
   char *first;
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4229,7 +4126,6 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
               calibratedsnippettimeseries->amplitude[j]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4248,7 +4144,6 @@ int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installatio
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4307,7 +4202,6 @@ int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installatio
   fprintf(stderr, "%s     position_time_delay:        %d\n", first, installation->position_time_delay);
   fprintf(stderr, "%s     waterline_z:                %f\n", first, installation->waterline_z);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4326,7 +4220,6 @@ int mbsys_reson7k_print_systemeventmessage(int verbose, s7kr_systemeventmessage 
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4352,7 +4245,6 @@ int mbsys_reson7k_print_systemeventmessage(int verbose, s7kr_systemeventmessage 
   fprintf(stderr, "%s     message_alloc:              %d\n", first, systemeventmessage->message_alloc);
   fprintf(stderr, "%s     message:                    %s\n", first, systemeventmessage->message);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4371,7 +4263,6 @@ int mbsys_reson7k_print_subsystem(int verbose, s7kr_subsystem *subsystem, int *e
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4390,7 +4281,6 @@ int mbsys_reson7k_print_subsystem(int verbose, s7kr_subsystem *subsystem, int *e
   fprintf(stderr, "%s     device_identifier:          %d\n", first, subsystem->device_identifier);
   fprintf(stderr, "%s     system_enumerator:          %d\n", first, subsystem->system_enumerator);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4410,7 +4300,6 @@ int mbsys_reson7k_print_fileheader(int verbose, s7kr_fileheader *fileheader, int
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4445,7 +4334,6 @@ int mbsys_reson7k_print_fileheader(int verbose, s7kr_fileheader *fileheader, int
   for (i = 0; i < fileheader->number_subsystems; i++)
     mbsys_reson7k_print_subsystem(verbose, &fileheader->subsystem[i], error);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4465,7 +4353,6 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose, s7kr_remotecontrolset
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4537,7 +4424,6 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose, s7kr_remotecontrolset
   for (i = 0; i < 35; i++)
     fprintf(stderr, "%s     reserved2[i]:               %d\n", first, remotecontrolsettings->reserved2[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4557,7 +4443,6 @@ int mbsys_reson7k_print_reserved(int verbose, s7kr_reserved *reserved, int *erro
   char *first;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4579,7 +4464,6 @@ int mbsys_reson7k_print_reserved(int verbose, s7kr_reserved *reserved, int *erro
   for (i = 0; i < R7KHDRSIZE_7kReserved; i++)
     fprintf(stderr, "%s     reserved[%d]:               %u\n", first, i, reserved->reserved[i]);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4598,7 +4482,6 @@ int mbsys_reson7k_print_roll(int verbose, s7kr_roll *roll, int *error) {
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4619,7 +4502,6 @@ int mbsys_reson7k_print_roll(int verbose, s7kr_roll *roll, int *error) {
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     roll:                       %f\n", first, roll->roll);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4638,7 +4520,6 @@ int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error) {
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4659,7 +4540,6 @@ int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error) {
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     pitch:                      %f\n", first, pitch->pitch);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4678,7 +4558,6 @@ int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelo
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4699,7 +4578,6 @@ int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelo
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     soundvelocity:              %f\n", first, soundvelocity->soundvelocity);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4718,7 +4596,6 @@ int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorpt
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4739,7 +4616,6 @@ int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorpt
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     absorptionloss:             %f\n", first, absorptionloss->absorptionloss);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4758,7 +4634,6 @@ int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreading
   char *nodebug_str = "  ";
   char *first;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4779,7 +4654,6 @@ int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreading
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     spreadingloss:              %f\n", first, spreadingloss->spreadingloss);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4798,7 +4672,6 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4831,7 +4704,6 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
     *nss = 0;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4853,7 +4725,6 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4871,7 +4742,6 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
   bathymetry = (s7kr_bathymetry *)&store->bathymetry;
   *pingnumber = bathymetry->ping_number;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4889,7 +4759,6 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4907,7 +4776,6 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
   /* get sonar type */
   *sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4925,7 +4793,6 @@ int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4943,7 +4810,6 @@ int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
   /* get sidescan type */
   *ss_type = MB_SIDESCAN_LINEAR;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -5069,7 +4935,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5119,7 +4984,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
     }
   }
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "dbg2       target_sensor:                 %d\n", pars->target_sensor);
     fprintf(stderr, "dbg2       timestamp_changed:             %d\n", pars->timestamp_changed);
@@ -6205,7 +6069,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6227,7 +6090,6 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
   int ntimelag = 0;
   int isensor;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6376,7 +6238,6 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
     fprintf(stderr, "\nUnable to initialize platform offset structure\n");
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6416,7 +6277,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
   double *swath_width;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6901,7 +6761,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6970,7 +6829,6 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
   int msglen;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7245,7 +7103,6 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return value:\n");
@@ -7273,7 +7130,6 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
   double alpha, beta, theta, phi;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7378,7 +7234,6 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
     status = MB_FAILURE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -7409,7 +7264,6 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
   mb_u_char detect;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7466,7 +7320,6 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     status = MB_FAILURE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -7494,7 +7347,6 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   s7k_header *header;
   s7kr_volatilesettings *volatilesettings;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7548,7 +7400,6 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     status = MB_FAILURE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -7584,7 +7435,6 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
   char flag;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7695,7 +7545,6 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
     status = MB_FAILURE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -7730,7 +7579,6 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
   s7k_fsdwssheader *fsdwssheader;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8047,7 +7895,6 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
     *time_d = store->time_d;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -8096,7 +7943,6 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
   s7kr_rollpitchheave *rollpitchheave;
   int i, inav;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8369,7 +8215,6 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
     *time_d = store->time_d;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -8409,7 +8254,6 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
   s7kr_reference *reference;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8490,7 +8334,6 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
     /* get roll pitch and heave */
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return value:\n");
@@ -8510,7 +8353,6 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
   s7kr_svp *svp;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8557,7 +8399,6 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
     status = MB_FAILURE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -8581,7 +8422,6 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
   s7kr_svp *svp;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8625,7 +8465,6 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return value:\n");
@@ -8661,7 +8500,6 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
   int time_j[5];
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8817,7 +8655,6 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     status = MB_FAILURE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -8913,7 +8750,6 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
   double weight;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9025,7 +8861,6 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
     status = MB_FAILURE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -9130,7 +8965,6 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
   short *shortptr;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9275,7 +9109,6 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     status = MB_FAILURE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -9365,7 +9198,6 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
   int time_i[7];
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9449,7 +9281,6 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
     *nctd = 0;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -9486,7 +9317,6 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
   int status = MB_SUCCESS;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9530,7 +9360,6 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
     *nsamples = 0;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -9581,7 +9410,6 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   char *charptr, *copycharptr;
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -10015,7 +9843,6 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   /* Reson 7k file header (record 7200) */
   copy->fileheader = store->fileheader;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -10077,7 +9904,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
   int ibeam;
   int i, j, k, kk;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -10579,7 +10405,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return value:\n");

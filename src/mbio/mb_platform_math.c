@@ -119,7 +119,6 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
                                      double *target2source_offset_pitch, double *target2source_offset_heading, int *error) {
 	char *function_name = "mb_platform_math_attitude_offset";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -168,7 +167,6 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -190,7 +188,6 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
                                        double *platform_heading, int *error) {
 	char *function_name = "mb_platform_math_attitude_platform";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -235,7 +232,6 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -257,7 +253,6 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
                                      double *target_roll, double *target_pitch, double *target_heading, int *error) {
 	char *function_name = "mb_platform_math_attitude_target";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -300,7 +295,6 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -325,7 +319,6 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
                                                       double *corrected_offset_heading, int *error) {
 	char *function_name = "mb_platform_math_attitude_offset_corrected_by_nav";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -382,7 +375,6 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -403,7 +395,6 @@ int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, 
                                           double *newbeam_easting, double *newbeam_northing, double *newbeam_bath, int *error) {
 	char *function_name = "mb_platform_math_attitude_rotate_beam";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -437,7 +428,6 @@ int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, 
 
 	int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

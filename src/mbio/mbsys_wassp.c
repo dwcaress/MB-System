@@ -50,7 +50,6 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -82,7 +81,6 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
 	mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -110,7 +108,6 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -155,7 +152,6 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -183,7 +179,6 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -225,7 +220,6 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -256,7 +250,6 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -283,7 +276,6 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 	/* extract data from structure */
 	*pingnumber = corbathy->ping_number;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -311,7 +303,6 @@ int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *son
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -339,7 +330,6 @@ int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *son
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -371,7 +361,6 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	double headingx, headingy;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -582,7 +571,6 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -649,7 +637,6 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	double headingx, headingy;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -775,7 +762,6 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -805,7 +791,6 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	double alpha, beta, theta, phi;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -884,7 +869,6 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -922,7 +906,6 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -989,7 +972,6 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1025,7 +1007,6 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1085,7 +1066,6 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1121,7 +1101,6 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1178,7 +1157,6 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1210,7 +1188,6 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1318,7 +1295,6 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		*time_d = store->time_d;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1364,7 +1340,6 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	struct mbsys_wassp_mcomment_struct *mcomment;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1452,7 +1427,6 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		nvupdate->roll = roll;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1479,7 +1453,6 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	char *sys_cfg1_data_save;
 	size_t copy_len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1582,7 +1555,6 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	copy->mcomment.comment_length = store->mcomment.comment_length;
 	strncpy(copy->mcomment.comment_message, store->mcomment.comment_message, MB_COMMENT_MAXLINE);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

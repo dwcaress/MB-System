@@ -49,7 +49,6 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	char path[MB_PATH_MAXLINE], name[MB_PATH_MAXLINE];
 	char *stdout_string = "stdout";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -563,7 +562,6 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

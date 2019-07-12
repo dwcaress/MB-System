@@ -44,7 +44,6 @@ int mbr_info_dsl120pf(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_dsl120pf";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -80,7 +79,6 @@ int mbr_info_dsl120pf(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -116,7 +114,6 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_dsl120pf";
 	struct mbf_dsl120pf_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -197,7 +194,6 @@ int mbr_zero_dsl120pf(int verbose, char *data_ptr, int *error) {
 	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -214,7 +210,6 @@ int mbr_alm_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_dsl120pf_struct *data;
 	char *tag_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -262,7 +257,6 @@ int mbr_alm_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 		tag_ptr[2] = 't';
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -277,7 +271,6 @@ int mbr_alm_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_dsl120pf";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -292,7 +285,6 @@ int mbr_dem_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mbsys_dsl_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -313,7 +305,6 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 	float tmp_float;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -446,7 +437,6 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 			fprintf(stderr, "dbg5       reserved:         %d\n", data->reserved[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -463,7 +453,6 @@ int mbr_dsl120pf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp, char *ty
 	char buffer[12];
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -493,7 +482,6 @@ int mbr_dsl120pf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp, char *ty
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -516,7 +504,6 @@ int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char buffer[10000];
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -582,7 +569,6 @@ int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 			fprintf(stderr, "dbg5       bath[%d]:         %f\t%f\n", i, data->bat_port[i], data->bat_stbd[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -602,7 +588,6 @@ int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char buffer[10000];
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -671,7 +656,6 @@ int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 			fprintf(stderr, "dbg5       amp[%d]:          %f\t%f\n", i, data->amp_port[i], data->amp_stbd[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -690,7 +674,6 @@ int mbr_dsl120pf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	char *data_ptr;
 	char buffer[80];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -729,7 +712,6 @@ int mbr_dsl120pf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -751,7 +733,6 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int hdr_len;
 	int found;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -896,7 +877,6 @@ int mbr_dsl120pf_rd_data(int verbose, void *mbio_ptr, int *error) {
 			}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -913,7 +893,6 @@ int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_dsl120pf_struct *data;
 	struct mbsys_dsl_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -997,7 +976,6 @@ int mbr_rt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		strncpy(store->comment, data->comment, MBSYS_DSL_COMMENT_LENGTH - 1);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1016,7 +994,6 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char buffer[10000];
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1179,7 +1156,6 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	else
 		status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1198,7 +1174,6 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	char buffer[10000];
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1364,7 +1339,6 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	else
 		status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1383,7 +1357,6 @@ int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	char buffer[10000];
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1495,7 +1468,6 @@ int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	else
 		status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1511,7 +1483,6 @@ int mbr_dsl120pf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	char *function_name = "mbr_dsl120pf_wr_data";
 	struct mbf_dsl120pf_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1544,13 +1515,11 @@ int mbr_dsl120pf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		*error = MB_ERROR_BAD_KIND;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1568,7 +1537,6 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_dsl_struct *store;
 	char *data_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1651,7 +1619,6 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* write next data to file */
 	const int status = mbr_dsl120pf_wr_data(verbose, mbio_ptr, data_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1667,7 +1634,6 @@ int mbr_wt_dsl120pf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_dsl120pf";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1707,7 +1673,6 @@ int mbr_register_dsl120pf(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

@@ -61,7 +61,6 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	char *function_name = "mb_format_register";
 	int status;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -92,7 +91,6 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 		else
 			i = 0;
 
-		/* print output debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Old format id aliased to current value in MBIO function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Old format value:\n");
@@ -366,7 +364,6 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 		*error = MB_ERROR_BAD_FORMAT;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -424,7 +421,6 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 	char *function_name = "mb_format_info";
 	int status;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -450,7 +446,6 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		else
 			i = 0;
 
-		/* print output debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Old format id aliased to current value in MBIO function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Old format value:\n");
@@ -1017,7 +1012,6 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		*error = MB_ERROR_BAD_FORMAT;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1077,7 +1071,6 @@ int mb_format(int verbose, int *format, int *error) {
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1091,7 +1084,6 @@ int mb_format(int verbose, int *format, int *error) {
 	                        &platform_source, &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source,
 	                        &beamwidth_xtrack, &beamwidth_ltrack, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1130,7 +1122,6 @@ int mb_format_system(int verbose, int *format, int *system, int *error) {
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1147,7 +1138,6 @@ int mb_format_system(int verbose, int *format, int *system, int *error) {
 		*system = MB_SYS_NONE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1184,7 +1174,6 @@ int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *bea
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1203,7 +1192,6 @@ int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *bea
 		*pixels_ss_max = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1245,7 +1233,6 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1259,7 +1246,6 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 	                        &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source, &beamwidth_xtrack,
 	                        &beamwidth_ltrack, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1297,7 +1283,6 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1316,7 +1301,6 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 		*beam_flagging = MB_NO;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1354,7 +1338,6 @@ int mb_format_source(int verbose, int *format, int *platform_source, int *nav_so
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1376,7 +1359,6 @@ int mb_format_source(int verbose, int *format, int *platform_source, int *nav_so
 		*svp_source = MB_DATA_NONE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1420,7 +1402,6 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
 	int attitude_source;    /* data record types containing the primary attitude */
 	int svp_source;         /* data record types containing the primary svp */
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1438,7 +1419,6 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
 		*beamwidth_ltrack = 0.0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1472,7 +1452,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	int nsonar, nlow, nhigh, subsystem, size;
 	int done;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2863,7 +2842,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 		else if (*format == 52 || *format == 55)
 			i = MBF_EMOLDRAW;
 
-		/* print output debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Old format id aliased to current value in MBIO function <%s>\n", function_name);
 			fprintf(stderr, "dbg2  Old format value:\n");
@@ -2885,7 +2863,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 			strcpy(fileroot, filename);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2906,7 +2883,6 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2942,7 +2918,6 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2970,7 +2945,6 @@ int mb_datalist_close(int verbose, void **datalist_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2994,7 +2968,6 @@ int mb_datalist_close(int verbose, void **datalist_ptr, int *error) {
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)datalist_ptr, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3016,7 +2989,6 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 	char dpath[MB_PATH_MAXLINE];
 	int pstatus;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3027,7 +2999,6 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 	/* get datalist pointer */
 	datalist = (struct mb_datalist_struct *)datalist_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       datalist->open:             %d\n", datalist->open);
 		fprintf(stderr, "dbg2       datalist->fp:               %p\n", (void *)datalist->fp);
@@ -3048,7 +3019,6 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3072,7 +3042,6 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 	char ppath[MB_PATH_MAXLINE];
 	int pstatus;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3083,7 +3052,6 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 	/* get datalist pointer */
 	datalist = (struct mb_datalist_struct *)datalist_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       datalist->open:             %d\n", datalist->open);
 		fprintf(stderr, "dbg2       datalist->fp:               %p\n", (void *)datalist->fp);
@@ -3104,7 +3072,6 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3143,7 +3110,6 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 	int processedspecified = MB_NO;
 	int istart;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3154,7 +3120,6 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 	/* get datalist pointer */
 	datalist = (struct mb_datalist_struct *)datalist_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       datalist->open:             %d\n", datalist->open);
 		fprintf(stderr, "dbg2       datalist->fp:               %p\n", (void *)datalist->fp);
@@ -3374,7 +3339,6 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3400,7 +3364,6 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 	struct mb_datalist_struct *datalist;
 	int start;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3437,7 +3400,6 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3456,7 +3418,6 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 	int status = MB_SUCCESS;
 	struct mb_imagelist_struct *imagelist;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3488,7 +3449,6 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3516,7 +3476,6 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mb_imagelist_struct *imagelist;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3540,7 +3499,6 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)imagelist_ptr, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3568,7 +3526,6 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 	struct stat file_status;
 	int fstat;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3579,7 +3536,6 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 	/* get imagelist pointer */
 	imagelist = (struct mb_imagelist_struct *)imagelist_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
 		fprintf(stderr, "dbg2       imagelist->fp:               %p\n", (void *)imagelist->fp);
@@ -3802,7 +3758,6 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3853,7 +3808,6 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 	int same, isame, ndiff;
 	char *bufptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3978,7 +3932,6 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4001,7 +3954,6 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 	int lasttokenordinary;
 	int done, change;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4063,7 +4015,6 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4084,7 +4035,6 @@ int mb_get_basename(int verbose, char *path, int *error) {
 	char tmppath[MB_PATH_MAXLINE];
 	char *result;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4121,7 +4071,6 @@ int mb_get_basename(int verbose, char *path, int *error) {
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

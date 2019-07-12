@@ -56,7 +56,6 @@ int mbr_info_imagemba(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_imagemba";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -91,7 +90,6 @@ int mbr_info_imagemba(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -126,7 +124,6 @@ int mbr_info_imagemba(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_imagemba";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -140,7 +137,6 @@ int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error) {
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_image83p_struct), &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -155,7 +151,6 @@ int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_imagemba(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_imagemba";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -169,7 +164,6 @@ int mbr_dem_imagemba(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -193,7 +187,6 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int numberbytes, seconds_hundredths;
 	double degrees, minutes, dec_minutes;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -478,7 +471,6 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_kind = store->kind;
 	mb_io_ptr->new_error = *error;
 
-	/* print output debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg2  Record read in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg4  Data values:\n");
@@ -523,7 +515,6 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			        store->beamflag[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -547,7 +538,6 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int write_len = 0;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -572,7 +562,6 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       error:          %d\n", *error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg2  Record read in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg4  Data values:\n");
@@ -853,7 +842,6 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", function_name);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -868,7 +856,6 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_imagemba";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -908,7 +895,6 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

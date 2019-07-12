@@ -129,7 +129,6 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
                   double *absorption, int *error) {
 	char *function_name = "mb_absorption";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -181,7 +180,6 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -210,7 +208,6 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
                              int *error) {
 	char *function_name = "mb_potential_temperature";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -238,7 +235,6 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
 	*error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -286,7 +282,6 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
 int mb_seabird_density(int verbose, double salinity, double temperature, double pressure, double *density, int *error) {
 	char *function_name = "mb_seabird_density";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -336,7 +331,6 @@ int mb_seabird_density(int verbose, double salinity, double temperature, double 
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -361,7 +355,6 @@ int mb_seabird_density(int verbose, double salinity, double temperature, double 
 int mb_seabird_depth(int verbose, double pressure, double latitude, double *depth, int *error) {
 	char *function_name = "mb_seabird_depth";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -381,7 +374,6 @@ int mb_seabird_depth(int verbose, double pressure, double latitude, double *dept
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -397,7 +389,6 @@ int mb_seabird_depth(int verbose, double pressure, double latitude, double *dept
 /*--------------------------------------------------------------------*/
 int mb_seabird_salinity(int verbose, double conductivity, double temperature, double pressure, double *salinity, int *error) {
 	char *function_name = "mb_seabird_salinity";
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -449,7 +440,6 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 	*error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -470,7 +460,6 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 						  double *soundspeed, int *error) {
 	char *function_name = "mb_seabird_soundspeed";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -544,7 +533,6 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

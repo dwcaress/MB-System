@@ -35,7 +35,6 @@ int mb_error(int verbose, int error, char **message) {
 	char *function_name = "mb_error";
 	int status;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -60,7 +59,6 @@ int mb_error(int verbose, int error, char **message) {
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -76,7 +74,6 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 	char *function_name = "mb_notice_log_datatype";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -96,7 +93,6 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -110,7 +106,6 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 	char *function_name = "mb_notice_log_error";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -130,7 +125,6 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -144,7 +138,6 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 	char *function_name = "mb_notice_log_problem";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -164,7 +157,6 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -178,7 +170,6 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 	char *function_name = "mb_notice_get_list";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -195,7 +186,6 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 		notice_list[i] = mb_io_ptr->notice_list[i];
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -212,7 +202,6 @@ int mb_notice_message(int verbose, int notice, char **message) {
 	char *function_name = "mb_notice_message";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -230,7 +219,6 @@ int mb_notice_message(int verbose, int notice, char **message) {
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");

@@ -42,7 +42,6 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 	int buffer_status = MB_SUCCESS;
 	int buffer_error = MB_ERROR_NO_ERROR;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -91,7 +90,6 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -107,7 +105,6 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mb_fileio_close";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -124,7 +121,6 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
 		mb_io_ptr->mbfp = NULL;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -141,7 +137,6 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	int status = MB_SUCCESS;
 	size_t read_len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -206,7 +201,6 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
     }
 #endif
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -225,7 +219,6 @@ int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	int status = MB_SUCCESS;
 	size_t write_len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -249,7 +242,6 @@ int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

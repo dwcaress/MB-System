@@ -42,7 +42,6 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
                double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_put_all";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -114,7 +113,6 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr, int usevalues, int 
 			mb_io_ptr->comment_count++;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");

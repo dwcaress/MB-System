@@ -172,7 +172,6 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -257,7 +256,6 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
 	store->comment_len = 0;       /* comment length in bytes */
 	memset(store->comment, 0, MB_COMMENT_MAXLINE); /* comment string */
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -283,7 +281,6 @@ int mbsys_3ddwissl_deall(int verbose,      /* in: verbosity level set on command
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -304,7 +301,6 @@ int mbsys_3ddwissl_deall(int verbose,      /* in: verbosity level set on command
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -332,7 +328,6 @@ int mbsys_3ddwissl_dimensions(int verbose, void *mbio_ptr, /* in: verbosity leve
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -362,7 +357,6 @@ int mbsys_3ddwissl_dimensions(int verbose, void *mbio_ptr, /* in: verbosity leve
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -390,7 +384,6 @@ int mbsys_3ddwissl_pingnumber(int verbose,     /* in: verbosity level set on com
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -407,7 +400,6 @@ int mbsys_3ddwissl_pingnumber(int verbose,     /* in: verbosity level set on com
 	/* extract ping number from structure */
 	*pingnumber = store->scan_count;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -453,7 +445,6 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	double amplitude_threshold;
 	double target_altitude;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -478,7 +469,6 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	platform = (struct mb_platform_struct *)platform_ptr;
 	pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
 		fprintf(stderr, "dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
@@ -698,7 +688,6 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 	status = mbsys_3ddwissl_calculatebathymetry(verbose, mbio_ptr, store_ptr,
 					amplitude_threshold, target_altitude, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -720,7 +709,6 @@ int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -747,7 +735,6 @@ int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -795,7 +782,6 @@ int mbsys_3ddwissl_extract(int verbose,     /* in: verbosity level set on comman
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -865,7 +851,6 @@ int mbsys_3ddwissl_extract(int verbose,     /* in: verbosity level set on comman
 	else if (*kind == MB_DATA_COMMENT)
 		strncpy(comment, store->comment, MB_COMMENT_MAXLINE);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -920,7 +905,6 @@ int mbsys_3ddwissl_insert(int verbose,     /* in: verbosity level set on command
 	assert(namp == nbath);
 	assert(0 <= nss);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1012,7 +996,6 @@ int mbsys_3ddwissl_insert(int verbose,     /* in: verbosity level set on command
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 4)
 		mbsys_3ddwissl_print_store(verbose, store, error);
 	if (verbose >= 2) {
@@ -1055,7 +1038,6 @@ int mbsys_3ddwissl_ttimes(int verbose,            /* in: verbosity level set on 
 	assert(heave != NULL);
 	assert(alongtrack_offset != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1139,7 +1121,6 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1184,7 +1165,6 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1220,7 +1200,6 @@ int mbsys_3ddwissl_pulses(int verbose,     /* in: verbosity level set on command
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1304,7 +1283,6 @@ int mbsys_3ddwissl_gains(int verbose,           /* in: verbosity level set on co
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1350,7 +1328,6 @@ int mbsys_3ddwissl_gains(int verbose,           /* in: verbosity level set on co
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1391,7 +1368,6 @@ int mbsys_3ddwissl_extract_altitude(
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1446,7 +1422,6 @@ int mbsys_3ddwissl_extract_altitude(
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1489,7 +1464,6 @@ int mbsys_3ddwissl_extract_nnav(int verbose,     /* in: verbosity level set on c
 	assert(store_ptr != NULL);
 	assert(nmax > 0);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1548,7 +1522,6 @@ int mbsys_3ddwissl_extract_nnav(int verbose,     /* in: verbosity level set on c
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1598,7 +1571,6 @@ int mbsys_3ddwissl_extract_nav(int verbose, void *mbio_ptr, /* in: verbosity lev
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1641,7 +1613,6 @@ int mbsys_3ddwissl_extract_nav(int verbose, void *mbio_ptr, /* in: verbosity lev
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1698,7 +1669,6 @@ int mbsys_3ddwissl_insert_nav(int verbose, void *mbio_ptr, /* in: verbosity leve
 	assert(store_ptr != NULL);
 	assert(time_i != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1752,7 +1722,6 @@ int mbsys_3ddwissl_insert_nav(int verbose, void *mbio_ptr, /* in: verbosity leve
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1781,7 +1750,6 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1813,7 +1781,6 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1846,7 +1813,6 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
 	assert(store_ptr != NULL);
 	assert(nsvp > 0);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1876,7 +1842,6 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1907,7 +1872,6 @@ int mbsys_3ddwissl_copy(int verbose,     /* in: verbosity level set on command l
 	assert(copy_ptr != NULL);
 	assert(store_ptr != copy_ptr);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1948,7 +1912,6 @@ int mbsys_3ddwissl_copy(int verbose,     /* in: verbosity level set on command l
 	memcpy((void *)copy->pulses, (void *)store->pulses,
 		   copy->pulses_per_scan * sizeof(struct mbsys_3ddwissl_pulse_struct));
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1974,7 +1937,6 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 	char *first;
 	int ipulse, isounding;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2319,7 +2281,6 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
 		fprintf(stderr, "%s     comment:                       %s\n", first, store->comment);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2360,7 +2321,6 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 	double target_range;
 	double scaled_range_diff;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2521,7 +2481,6 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
 		store->bathymetry_calculated = MB_YES;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2594,7 +2553,6 @@ int mbsys_3ddwissl_indextablefix(int verbose, void *mbio_ptr, int num_indextable
     int done;
     int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2860,7 +2818,6 @@ if (indextable[i].time_d_corrected - nearest_minute_time_d >= 0.0
 fprintf(stderr, "\n");
 }*/
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2884,7 +2841,6 @@ int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextab
         int giindex_b_begin, giindex_b_end;
         int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3005,7 +2961,6 @@ mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size, mb_io_ptr->index
 mb_io_ptr->indextable[i].read);
 }*/
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
