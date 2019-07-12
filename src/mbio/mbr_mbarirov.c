@@ -47,7 +47,6 @@ int mbr_info_mbarirov(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mbarirov";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -57,7 +56,6 @@ int mbr_info_mbarirov(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SINGLEBEAM;
 	*beams_bath_max = 1;
@@ -82,6 +80,8 @@ int mbr_info_mbarirov(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -117,7 +117,6 @@ int mbr_info_mbarirov(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mbarirov";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 
 	/* print input debug statements */
@@ -157,7 +156,7 @@ int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -174,7 +173,6 @@ int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mbarirov";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 	char *data_ptr;
 
@@ -189,14 +187,11 @@ int mbr_alm_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mbarirov_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -223,7 +218,6 @@ int mbr_alm_mbarirov(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mbarirov";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -237,8 +231,8 @@ int mbr_dem_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -254,7 +248,6 @@ int mbr_dem_mbarirov(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_mbarirov_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 	char line[MBF_MBARIROV_MAXLINE + 1] = "";
 	int year, jday;
@@ -282,6 +275,8 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* read next record */
 	if ((line_ptr = fgets(line, MBF_MBARIROV_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
@@ -405,7 +400,6 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mbarirov";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 	struct mbsys_singlebeam_struct *store;
 
@@ -424,7 +418,7 @@ int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_mbarirov_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_mbarirov_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -469,7 +463,6 @@ int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_mbarirov_wr_data";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 	char line[MBF_MBARIROV_MAXLINE + 1] = "";
 	int time_j[6], year, jday, timetag;
@@ -529,7 +522,6 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			fprintf(stderr, "dbg4       altitude_flag:%d\n", data->altitude_flag);
 			fprintf(stderr, "dbg4       attitude_flag:%d\n", data->attitude_flag);
 			fprintf(stderr, "dbg4       error:        %d\n", *error);
-			fprintf(stderr, "dbg4       status:       %d\n", status);
 		}
 
 		mb_get_jtime(verbose, data->time_i, time_j);
@@ -541,6 +533,8 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		        data->rov_heading, data->rov_altitude, data->rov_pitch, data->rov_roll, data->position_flag, data->pressure_flag,
 		        data->heading_flag, data->altitude_flag, data->attitude_flag);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write file header if needed */
 	if (*write_count == 0) {
@@ -585,7 +579,6 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mbarirov";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 	struct mbsys_singlebeam_struct *store;
 
@@ -632,7 +625,7 @@ int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_mbarirov_wr_data(verbose, mbio_ptr, (void *)data, error);
+	const int status = mbr_mbarirov_wr_data(verbose, mbio_ptr, (void *)data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -649,7 +642,6 @@ int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mbarirov";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -662,7 +654,7 @@ int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mbarirov(
+	const int status = mbr_info_mbarirov(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

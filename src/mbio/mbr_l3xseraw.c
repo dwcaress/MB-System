@@ -54,7 +54,6 @@ int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_l3xseraw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -64,7 +63,6 @@ int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_XSE;
 	*beams_bath_max = 151;
@@ -91,6 +89,8 @@ int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
+
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -126,7 +126,6 @@ int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_l3xseraw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -139,11 +138,8 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, MBSYS_XSE_BUFFER_SIZE, (void **)&mb_io_ptr->hdr_comment, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, MBSYS_XSE_BUFFER_SIZE, (void **)&mb_io_ptr->hdr_comment, error);
 	mbsys_xse_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
@@ -160,7 +156,6 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_l3xseraw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -174,8 +169,8 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -191,7 +186,6 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -220,6 +214,8 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->svp_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -426,7 +422,6 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_tide";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -444,6 +439,8 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 
 	/* The tide frame is currently unused by MB-System */
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -458,7 +455,6 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_ship";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -488,6 +484,8 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->par_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -805,7 +803,6 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_sidescan";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -836,6 +833,8 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sid_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -1248,7 +1247,6 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_multibeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -1304,6 +1302,8 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_usec);
 	index += 4;
+
+	int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -1995,7 +1995,6 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_singlebeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -2013,6 +2012,8 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 
 	/* The singlebeam frame is currently unused by MB-System */
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2027,7 +2028,6 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_message";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -2045,6 +2045,8 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 
 	/* The message frame is currently unused by MB-System */
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2059,7 +2061,6 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_seabeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -2088,6 +2089,8 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sbm_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -2341,7 +2344,6 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_geodetic";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -2359,6 +2361,8 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 
 	/* The geodetic frame is currently unused by MB-System */
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2373,7 +2377,6 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_native";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -2391,6 +2394,8 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 
 	/* The native frame is currently unused by MB-System */
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2405,7 +2410,6 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_product";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -2423,6 +2427,8 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 
 	/* The product frame is currently unused by MB-System */
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2437,7 +2443,6 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_bathymetry";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -2455,6 +2460,8 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 
 	/* The bathymetry frame is currently unused by MB-System */
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2469,7 +2476,6 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_control";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -2487,6 +2493,8 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 
 	/* The control frame is currently unused by MB-System */
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -2501,7 +2509,6 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_comment";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -2530,6 +2537,8 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->com_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -2610,7 +2619,6 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -2654,6 +2662,8 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 	store->nav_group_heading = MB_NO;  /* boolean flag */
 	store->nav_group_log = MB_NO;      /* boolean flag */
 	store->nav_group_gps = MB_NO;      /* boolean flag */
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -2924,7 +2934,6 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_rd_data";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	FILE *mbfp;
 	static char label[4];
@@ -2988,6 +2997,9 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		store->mul_frame = MB_NO;
 		store->sid_frame = MB_NO;
 	}
+
+	int status = MB_SUCCESS;
+
 	while (done == MB_NO) {
 		/* use saved frame if available */
 		if (*frame_save == MB_YES) {
@@ -3361,7 +3373,6 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_l3xseraw";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	double time_d;
 	double lon, lat;
@@ -3382,7 +3393,7 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_l3xseraw_rd_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_l3xseraw_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/*fprintf(stderr, "read kind:%d\n", store->kind);
 	fprintf(stderr, "store->mul_frame:%d store->sid_frame:%d\n\n",
@@ -3454,7 +3465,6 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_wr_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -4113,6 +4123,8 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/* set buffer size */
 	*buffer_size = index;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -4128,7 +4140,6 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_wr_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -4527,6 +4538,8 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	/* set buffer size */
 	*buffer_size = index;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -4542,7 +4555,6 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_wr_ship";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -5038,6 +5050,8 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 	/* set buffer size */
 	*buffer_size = index;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -5053,7 +5067,6 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_wr_multibeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -6159,6 +6172,8 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	/* set buffer size */
 	*buffer_size = index;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -6174,7 +6189,6 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_wr_sidescan";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -6765,6 +6779,8 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/* set buffer size */
 	*buffer_size = index;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -6780,7 +6796,6 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_wr_seabeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -7201,6 +7216,8 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	/* set buffer size */
 	*buffer_size = index;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -7216,7 +7233,6 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_wr_comment";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int size;
@@ -7305,6 +7321,8 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 
 	*buffer_size = index;
 
+	const int status = MB_SUCCESS;
+
 	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -7321,7 +7339,6 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_l3xseraw_wr_data";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	FILE *mbfp;
 	int buffer_size;
@@ -7348,6 +7365,8 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MB_DEBUG
 	fprintf(stderr, "%s:%d | WRITE KIND: %d\n", __FILE__, __LINE__, store->kind);
 #endif
+
+	int status = MB_SUCCESS;
 
 	if (store->kind == MB_DATA_COMMENT) {
 #ifdef MB_DEBUG
@@ -7460,7 +7479,6 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_l3xseraw";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
 	/* print input debug statements */
@@ -7479,7 +7497,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* write next data to file */
-	status = mbr_l3xseraw_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_l3xseraw_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -7496,7 +7514,6 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_l3xseraw";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -7509,7 +7526,7 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_l3xseraw(
+	const int status = mbr_info_l3xseraw(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

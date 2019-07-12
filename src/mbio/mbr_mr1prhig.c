@@ -44,7 +44,6 @@ int mbr_info_mr1prhig(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mr1prhig";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -54,7 +53,6 @@ int mbr_info_mr1prhig(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_MR1;
 	*beams_bath_max = 3003;
@@ -80,6 +78,8 @@ int mbr_info_mr1prhig(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_DATA;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -115,7 +115,6 @@ int mbr_info_mr1prhig(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error) {
 	char *function_name = "mbr_zero_mr1prhig";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -190,7 +189,7 @@ int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error)
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -207,7 +206,6 @@ int mbr_zero_mr1prhig(int verbose, struct mbf_mr1prhig_struct *data, int *error)
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mr1prhig";
-	int status = MB_SUCCESS;
 	struct mbf_mr1prhig_struct *data;
 
 	/* print input debug statements */
@@ -221,14 +219,11 @@ int mbr_alm_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mr1prhig_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_mr1_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_mr1_struct), &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -254,7 +249,6 @@ int mbr_alm_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mr1prhig";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -268,8 +262,8 @@ int mbr_dem_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -285,7 +279,6 @@ int mbr_dem_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data, char **hdr_comment, int *error) {
 	char *function_name = "mbr_mr1prhig_rd_hdr";
-	int status = MB_SUCCESS;
 	int len;
 	unsigned int ulen;
 
@@ -301,10 +294,9 @@ int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data
 
 	/* set status and error */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
 
 	/* read magic number */
-	status = xdr_int(xdrs, &data->mf_magic);
+	int status = xdr_int(xdrs, &data->mf_magic);
 
 	/* read ping count */
 	if (status == MB_SUCCESS)
@@ -351,7 +343,6 @@ int mbr_mr1prhig_rd_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data
 /*--------------------------------------------------------------------*/
 int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data, int *error) {
 	char *function_name = "mbr_mr1prhig_rd_ping";
-	int status = MB_SUCCESS;
 	int dummy_count;
 	float dummy;
 
@@ -365,7 +356,7 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	}
 
 	/* read ping header */
-	status = xdr_int(xdrs, &data->sec);
+	int status = xdr_int(xdrs, &data->sec);
 	status = xdr_int(xdrs, &data->usec);
 	status = xdr_double(xdrs, &data->png_lon);
 	status = xdr_double(xdrs, &data->png_lat);
@@ -551,7 +542,6 @@ int mbr_mr1prhig_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 /*--------------------------------------------------------------------*/
 int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_mr1prhig_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_mr1prhig_struct *data;
 	XDR *xdrs;
 	int read_size;
@@ -573,6 +563,8 @@ int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* initialize everything to zeros */
 	mbr_zero_mr1prhig(verbose, data, error);
+
+	int status = MB_SUCCESS;
 
 	/* if first time through read file header */
 	if (mb_io_ptr->fileheader == MB_NO) {
@@ -628,7 +620,6 @@ int mbr_mr1prhig_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mr1prhig";
-	int status = MB_SUCCESS;
 	struct mbf_mr1prhig_struct *data;
 	struct mbsys_mr1_struct *store;
 	double xtrack, depth;
@@ -648,7 +639,7 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_mr1_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_mr1prhig_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_mr1prhig_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -764,7 +755,6 @@ int mbr_rt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data, char **hdr_comment, int *error) {
 	char *function_name = "mbr_mr1prhig_wr_hdr";
-	int status = MB_SUCCESS;
 	int len;
 	unsigned int ulen;
 
@@ -788,10 +778,9 @@ int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data
 
 	/* set status and error */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
 
 	/* write magic number */
-	status = xdr_int(xdrs, &data->mf_magic);
+	int status = xdr_int(xdrs, &data->mf_magic);
 
 	/* write ping count */
 	if (status == MB_SUCCESS) {
@@ -829,7 +818,6 @@ int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data
 /*--------------------------------------------------------------------*/
 int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data, int *error) {
 	char *function_name = "mbr_mr1prhig_wr_ping";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -893,7 +881,7 @@ int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 	}
 
 	/* write ping header */
-	status = xdr_int(xdrs, &data->sec);
+	int status = xdr_int(xdrs, &data->sec);
 	status = xdr_int(xdrs, &data->usec);
 	status = xdr_double(xdrs, &data->png_lon);
 	status = xdr_double(xdrs, &data->png_lat);
@@ -956,7 +944,6 @@ int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *dat
 /*--------------------------------------------------------------------*/
 int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct *data, int *error) {
 	char *function_name = "mbr_mr1prhig_wr_data";
-	int status = MB_SUCCESS;
 	XDR *xdrs;
 	char *tmp;
 	int lenc, lenhc, len;
@@ -975,6 +962,8 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 
 	/* get pointer to XDR structure */
 	xdrs = mb_io_ptr->xdrs;
+
+	int status = MB_SUCCESS;
 
 	/* if comment and file header not written */
 	if (mb_io_ptr->fileheader == MB_NO && data->kind == MB_DATA_COMMENT) {
@@ -1038,7 +1027,6 @@ int mbr_mr1prhig_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1prhig_struct
 /*--------------------------------------------------------------------*/
 int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mr1prhig";
-	int status = MB_SUCCESS;
 	struct mbf_mr1prhig_struct *data;
 	struct mbsys_mr1_struct *store;
 
@@ -1126,7 +1114,7 @@ int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_mr1prhig_wr_data(verbose, mbio_ptr, data, error);
+	const int status = mbr_mr1prhig_wr_data(verbose, mbio_ptr, data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1143,7 +1131,6 @@ int mbr_wt_mr1prhig(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mr1prhig";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1156,7 +1143,7 @@ int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mr1prhig(
+	const int status = mbr_info_mr1prhig(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
