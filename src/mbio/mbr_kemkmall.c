@@ -47,7 +47,6 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
            int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
            double *beamwidth_ltrack, int *error) {
   char *function_name = "mbr_info_kemkmall";
-  int status = MB_SUCCESS;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -57,7 +56,6 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
   }
 
   /* set format info parameters */
-  status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
   *system = MB_SYS_KMBES;
   *beams_bath_max = MBSYS_KMBES_MAX_NUM_BEAMS;
@@ -83,6 +81,8 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
   *svp_source = MB_DATA_VELOCITY_PROFILE;
   *beamwidth_xtrack = 1.0;
   *beamwidth_ltrack = 1.0;
+
+  const int status = MB_SUCCESS;
 
   /* print output debug statements */
   if (verbose >= 2) {
@@ -119,7 +119,6 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_alm_kemkmall";
-  int status = MB_SUCCESS;
   char **bufferptr = NULL;
   int *bufferalloc = NULL;
 
@@ -137,13 +136,10 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* set initial status */
-  status = MB_SUCCESS;
-
   /* allocate memory for data structure */
   mb_io_ptr->structure_size = 0;
   mb_io_ptr->data_structure_size = 0;
-  status = mbsys_kmbes_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+  int status = mbsys_kmbes_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
     /* allocate starting memory for data record buffer */
     bufferptr = (char **)&mb_io_ptr->raw_data;
@@ -176,7 +172,6 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_dem_kemkmall";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   int *dgm_count = NULL;
 
@@ -190,6 +185,8 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
 
   /* get pointers to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  int status = MB_SUCCESS;
 
   /* deallocate reading/writing buffer */
   if (mb_io_ptr->raw_data != NULL && mb_io_ptr->structure_size > 0) {
@@ -232,7 +229,6 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
 
 int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_kemkmall_create_dgm_index_table";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   size_t size_bytes = 0;
@@ -256,7 +252,7 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* allocate the datagram index table struct (vector struct) */
-  status = mb_mallocd(verbose, __FILE__, __LINE__,
+  int status = mb_mallocd(verbose, __FILE__, __LINE__,
              sizeof(struct mbsys_kmbes_index_table), (void **)(&dgm_index_table), error);
 
   if (status == MB_SUCCESS) {
@@ -295,7 +291,6 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
 
 int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, void *new_index_ptr, int *error) {
   char *function_name = "mbr_kemkmall_add_dgm_to_dgm_index_table";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *new_dgm_index = NULL;
   size_t dgm_count = 0;
@@ -315,6 +310,8 @@ int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, 
 
   /* get pointer to the new datagram index structure */
   new_dgm_index = (struct mbsys_kmbes_index *)new_index_ptr;
+
+  int status = MB_SUCCESS;
 
   /* reallocate the datagram index table array if needed */
   dgm_count = dgm_index_table->dgm_count;
@@ -461,7 +458,6 @@ int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
 
 int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm_type_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_hdr";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_header *header = NULL;
   mbsys_kmbes_emdgm_type *emdgm_type = NULL;
   int index = 0;
@@ -564,6 +560,8 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
     fprintf(stderr, "dbg5       time_nanosec:   %u\n", header->time_nanosec);
   }
 
+  int status = MB_SUCCESS;
+
   /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -583,7 +581,6 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
 
 int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_spo";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
@@ -669,6 +666,8 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       posDataFromSensor:           %s\n", spo->sensorData.posDataFromSensor);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -701,7 +700,6 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_skm";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
@@ -879,6 +877,8 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
 
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -910,7 +910,6 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
   char *function_name = "mbr_kemkmall_rd_svp";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
@@ -992,6 +991,8 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
     }
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -1023,7 +1024,6 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
   char *function_name = "mbr_kemkmall_rd_svt";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_svt *svt = NULL;
@@ -1113,6 +1113,8 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
     }
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -1144,7 +1146,6 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_scl";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_scl *scl = NULL;
@@ -1212,6 +1213,8 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       dataFromSensor:      %s\n", scl->sensorData.dataFromSensor);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -1243,7 +1246,6 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_sde";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_sde *sde = NULL;
@@ -1320,6 +1322,8 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       dataFromSensor:   %s\n", sde->sensorData.dataFromSensor);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -1352,7 +1356,6 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_shi";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_shi *shi = NULL;
@@ -1420,6 +1423,8 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       dataFromSensor:   %s\n", shi->sensorData.dataFromSensor);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -1453,7 +1458,6 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_sha";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_sha *sha = NULL;
@@ -1538,6 +1542,8 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
     }
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -1569,7 +1575,6 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_mrz";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -2154,6 +2159,8 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     index += 2;
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -2186,7 +2193,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_mwc";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
@@ -2347,6 +2353,8 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       soundVelocity_mPerSec:  %f\n", mwc->rxInfo.soundVelocity_mPerSec);
   }
 
+  int status = MB_SUCCESS;
+
   /* EMdgmMWCrxBeamData - receiver, specific info for each beam */
   alloc_size = (size_t)(mwc->rxInfo.numBeams * sizeof(struct mbsys_kmbes_mwc_rx_beam_data));
   if (mwc->beamData_p_alloc_size < alloc_size) {
@@ -2496,7 +2504,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_cpo";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_cpo *cpo = NULL;
@@ -2584,6 +2591,8 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       posDataFromSensor:            %s\n", cpo->sensorData.posDataFromSensor);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -2615,7 +2624,6 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_che";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_che *che = NULL;
@@ -2701,6 +2709,7 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       heave_m                         = %f\n", che->data.heave_m);
   }
 
+  int status = MB_SUCCESS;
 
   /* set kind */
   if (status == MB_SUCCESS) {
@@ -2733,7 +2742,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_iip";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
@@ -2787,6 +2795,8 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       install_txt:      %s\n", iip->install_txt);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -2818,7 +2828,6 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
   char *function_name = "mbr_kemkmall_rd_iop";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_iop *iop = NULL;
@@ -2872,6 +2881,8 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       iop->runtime_txt:           %s\n", iop->runtime_txt);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -2903,7 +2914,6 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_xmb";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xmb *xmb = NULL;
@@ -2959,6 +2969,8 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       version:        %s\n", xmb->version);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -2990,7 +3002,6 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_xmc";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
@@ -3043,6 +3054,8 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       xmc->comment:                           %s\n", xmc->comment);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -3074,7 +3087,6 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_xms";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
@@ -3145,6 +3157,8 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
                       i, xms->ss[i], xms->ss_alongtrack[i]);
   }
 
+  int status = MB_SUCCESS;
+
   /* set kind */
   if (status == MB_SUCCESS) {
     /* set kind */
@@ -3176,7 +3190,6 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
 
 int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_unknown";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
 
@@ -3192,6 +3205,8 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
   header = (struct mbsys_kmbes_header *)header_ptr;
+
+  const int status = MB_SUCCESS;
 
   /* print output debug statements */
   if (verbose >= 2) {
@@ -3214,7 +3229,6 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
 
 int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_kemkmall_index_data";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index dgm_index;
@@ -3267,7 +3281,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
 
   /* set status */
-  status = MB_SUCCESS;
+  int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
   valid_id = MB_YES;
 
@@ -3564,7 +3578,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_kemkmall_rd_data";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *dgm_index = NULL;
@@ -3600,6 +3613,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  int status = MB_SUCCESS;
 
   /* check index to see if more datagrams can be read */
   if (*dgm_id < dgm_index_table->dgm_count) {
@@ -3882,7 +3897,6 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_rt_kemkmall";
-  int status = MB_SUCCESS;
   int interp_error = MB_ERROR_NO_ERROR;
   struct mbsys_kmbes_struct *store = NULL;
   int *file_indexed = NULL;
@@ -3904,6 +3918,8 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   file_indexed = (int *)&mb_io_ptr->save2;
 	pixel_size = (double *)&mb_io_ptr->saved1;
 	swath_width = (double *)&mb_io_ptr->saved2;
+
+  int status = MB_SUCCESS;
 
   /* if needed index the file */
   if (*file_indexed == MB_NO) {
@@ -3953,7 +3969,6 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int *error) {
   char *function_name = "mbr_kemkmall_wr_header";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
@@ -3980,6 +3995,8 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
     fprintf(stderr, "dbg5       time_sec:       %u\n", header->time_sec);
     fprintf(stderr, "dbg5       time_nanosec:   %u\n", header->time_nanosec);
   }
+
+  int status = MB_SUCCESS;
 
   /* proceed to write if buffer allocated */
   if (status == MB_SUCCESS) {
@@ -4021,7 +4038,6 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
 
 int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   char *function_name = "mbr_kemkmall_wr_spo";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4073,6 +4089,8 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) spo->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -4155,7 +4173,6 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   char *function_name = "mbr_kemkmall_wr_skm";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4244,6 +4261,8 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) skm->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -4378,7 +4397,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_svp";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4430,6 +4448,8 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) svp->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -4505,7 +4525,6 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_svt";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svt *svt = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4559,6 +4578,8 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) svt->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -4639,7 +4660,6 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_scl";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_scl *scl;
   struct mbsys_kmbes_header *header = NULL;
@@ -4686,6 +4706,8 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) scl->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -4754,7 +4776,6 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   char *function_name = "mbr_kemkmall_wr_sde";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_sde *sde = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4803,6 +4824,8 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) sde->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -4877,7 +4900,6 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
   char *function_name = "mbr_kemkmall_wr_shi";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_shi *shi = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4923,6 +4945,8 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) shi->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -4991,7 +5015,6 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_sha";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_sha *sha = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5044,6 +5067,8 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) sha->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -5121,7 +5146,6 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_mrz";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5175,6 +5199,8 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   *size = (size_t) mrz->header.numBytesDgm;
 //fprintf(stderr, "************>%s:%d WRITE mbr_kemkmall_wr_mrz mrz->header.numBytesDgm:%d\n",
 //__FILE__, __LINE__, mrz->header.numBytesDgm);
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -5707,7 +5733,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_mwc";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5733,6 +5758,8 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) mwc->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -5971,7 +5998,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_cpo";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_cpo *cpo = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6023,6 +6049,8 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) cpo->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -6105,7 +6133,6 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_che";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_che *che = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6130,6 +6157,8 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) che->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -6234,7 +6263,6 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_iip";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6276,6 +6304,8 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) iip->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -6336,7 +6366,6 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_iop";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_iop *iop = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6378,6 +6407,8 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) iop->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -6437,7 +6468,6 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_xmb";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xmb *xmb = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
@@ -6493,6 +6523,8 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) xmb->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -6551,7 +6583,6 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_xmc";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6595,6 +6626,8 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
       fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xmc->unused[i]);
     fprintf(stderr, "dbg5       comment:        %s\n", xmc->comment);
   }
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -6651,7 +6684,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_xms";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6699,6 +6731,8 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* size of output record */
   *size = (size_t) xms->header.numBytesDgm;
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -6769,7 +6803,6 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
   char *function_name = "mbr_kemkmall_wr_unknown";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
 
   /* print input debug statements */
@@ -6784,6 +6817,8 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
 
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  const int status = MB_SUCCESS;
 
   /* print output debug statements */
   if (verbose >= 2) {
@@ -6806,7 +6841,6 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_kemkmall_wr_data";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
   size_t write_len = 0;
   char **bufferptr = NULL;
@@ -6835,6 +6869,8 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
   /* get pointer to raw data structure */
   store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  int status = MB_SUCCESS;
 
   /* write the current data record type */
   switch (store->kind) {
@@ -6998,7 +7034,6 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_wt_kemkmall";
-  int status = MB_SUCCESS;
   struct mbsys_kmbes_struct *store = NULL;
 
   /* print input debug statements */
@@ -7025,7 +7060,7 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
   /* write next data to file */
-  status = mbr_kemkmall_wr_data(verbose, mbio_ptr, store_ptr, error);
+  const int status = mbr_kemkmall_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "Done with mbr_kemkmall_wr_data: status:%d error:%d\n", status, *error);
@@ -7047,7 +7082,6 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_register_kemkmall";
-  int status = MB_SUCCESS;
 
   /* print input debug statements */
   if (verbose >= 2) {
@@ -7060,7 +7094,7 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* set format info parameters */
-  status = mbr_info_kemkmall(
+  const int status = mbr_info_kemkmall(
       verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
       mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
       &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
