@@ -51,7 +51,6 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hysweep1";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -61,7 +60,6 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HYSWEEP;
 	*beams_bath_max = 512;
@@ -87,6 +85,8 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 1.0;
 	*beamwidth_ltrack = 1.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -122,7 +122,6 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hysweep1";
-	int status = MB_SUCCESS;
 	int *file_header_read;
 	int *file_header_written;
 	int *line_saved;
@@ -141,13 +140,10 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mbsys_hysweep_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_hysweep_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* set saved values */
 	file_header_read = (int *)&mb_io_ptr->save1;
@@ -178,7 +174,6 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hysweep1";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -192,7 +187,7 @@ int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_hysweep_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_hysweep_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -208,7 +203,6 @@ int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
 	char *function_name = "mbr_hysweep1_rd_line";
-	int status = MB_SUCCESS;
 	char *result;
 
 	/* print input debug statements */
@@ -218,6 +212,8 @@ int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* read the next line */
 	result = fgets(line, MBSYS_HYSWEEP_MAXLINE, mbfp);
@@ -250,7 +246,6 @@ int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_hysweep1_rd_data";
-	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
@@ -326,6 +321,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
@@ -2003,7 +2000,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hysweep1";
-	int status = MB_SUCCESS;
 	int interp_status;
 	int interp_error = MB_ERROR_NO_ERROR;
 	struct mbsys_hysweep_struct *store;
@@ -2027,7 +2023,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* read next data from file */
-	status = mbr_hysweep1_rd_data(verbose, mbio_ptr, store_ptr, error);
+	int status = mbr_hysweep1_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
 	store = (struct mbsys_hysweep_struct *)store_ptr;
@@ -2379,7 +2375,6 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_hysweep1_wr_data";
-	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
@@ -2675,6 +2670,8 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		mb_proj_init(verbose, store->PRJ_proj4_command, &(mb_io_ptr->pjptr), error);
 		mb_io_ptr->projection_initialized = MB_YES;
 	}
+
+	int status = MB_SUCCESS;
 
 	/* call appropriate writing routines for ping data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
@@ -3160,7 +3157,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hysweep1";
-	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
 	/* print input debug statements */
@@ -3179,7 +3175,7 @@ int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* write next data to file */
-	status = mbr_hysweep1_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_hysweep1_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -3196,7 +3192,6 @@ int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hysweep1";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -3209,7 +3204,7 @@ int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hysweep1(
+	const int status = mbr_info_hysweep1(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

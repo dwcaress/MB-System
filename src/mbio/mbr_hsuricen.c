@@ -44,7 +44,6 @@ int mbr_info_hsuricen(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hsuricen";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -54,7 +53,6 @@ int mbr_info_hsuricen(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HSDS;
 	*beams_bath_max = 59;
@@ -79,6 +77,8 @@ int mbr_info_hsuricen(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -114,7 +114,6 @@ int mbr_info_hsuricen(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsuricen(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hsuricen";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -127,14 +126,11 @@ int mbr_alm_hsuricen(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_hsuricen_struct);
 	mb_io_ptr->data_structure_size = sizeof(struct mbf_hsuricen_data_struct);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -150,7 +146,6 @@ int mbr_alm_hsuricen(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsuricen(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hsuricen";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -164,8 +159,8 @@ int mbr_dem_hsuricen(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -181,7 +176,6 @@ int mbr_dem_hsuricen(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hsuricen";
-	int status = MB_SUCCESS;
 	struct mbf_hsuricen_struct *dataplus;
 	struct mbf_hsuricen_data_struct *data;
 	struct mbsys_hsds_struct *store;
@@ -212,8 +206,10 @@ int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record from file */
-	if ((status = fread(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
-		mb_io_ptr->file_bytes += status;
+	int status = MB_SUCCESS;
+	const size_t num_bytes = fread(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp);
+	if (num_bytes == mb_io_ptr->data_structure_size) {
+		mb_io_ptr->file_bytes += num_bytes;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 	}
@@ -393,7 +389,6 @@ int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hsuricen";
-	int status = MB_SUCCESS;
 	struct mbf_hsuricen_struct *dataplus;
 	struct mbf_hsuricen_data_struct *data;
 	struct mbsys_hsds_struct *store;
@@ -428,7 +423,6 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       new_kind:       %d\n", mb_io_ptr->new_kind);
 		fprintf(stderr, "dbg5       new_error:      %d\n", mb_io_ptr->new_error);
 		fprintf(stderr, "dbg5       error:          %d\n", *error);
-		fprintf(stderr, "dbg5       status:         %d\n", status);
 	}
 
 	/* first set some plausible amounts for some of the
@@ -496,7 +490,6 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       kind:       %d\n", dataplus->kind);
 		fprintf(stderr, "dbg5       error:      %d\n", *error);
-		fprintf(stderr, "dbg5       status:     %d\n", status);
 	}
 
 /* byte swap the data if necessary */
@@ -520,9 +513,12 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 #endif
 
+	int status = MB_SUCCESS;
+
 	/* write next record to file */
 	if (dataplus->kind == MB_DATA_DATA || dataplus->kind == MB_DATA_COMMENT) {
-		if ((status = fwrite(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp)) == mb_io_ptr->data_structure_size) {
+		const size_t num_bytes = fwrite(data, 1, mb_io_ptr->data_structure_size, mb_io_ptr->mbfp);
+		if (num_bytes == mb_io_ptr->data_structure_size) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
@@ -553,7 +549,6 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_hsuricen(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hsuricen";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -566,7 +561,7 @@ int mbr_register_hsuricen(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsuricen(
+	const int status = mbr_info_hsuricen(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

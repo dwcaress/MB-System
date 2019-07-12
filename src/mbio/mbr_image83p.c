@@ -55,7 +55,6 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_image83p";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -65,7 +64,6 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_IMAGE83P;
 	*beams_bath_max = 480;
@@ -90,6 +88,8 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.75;
 	*beamwidth_ltrack = 0.75;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -125,7 +125,6 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_image83p(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_image83p";
-	int status;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -138,11 +137,8 @@ int mbr_alm_image83p(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_image83p_struct), &mb_io_ptr->store_data, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_image83p_struct), &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -158,7 +154,6 @@ int mbr_alm_image83p(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_image83p";
-	int status;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -172,7 +167,7 @@ int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -188,7 +183,6 @@ int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_image83p";
-	int status;
 	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
 	int done;
@@ -223,6 +217,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	done = MB_NO;
 	for (int i = 0; i < MBF_IMAGE83P_BUFFER_SIZE; i++)
 		buffer[i] = 0;
+	int status = MB_SUCCESS;
 	if ((status = fread(buffer, 1, 6, mb_io_ptr->mbfp)) == 6) {
 		/* check for valid header */
 		if (strncmp(buffer, "83P", 3) == 0) {
@@ -574,7 +569,6 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_image83p";
-	int status = MB_SUCCESS;
 	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
 	int swap = MB_NO;
@@ -608,7 +602,6 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       new_kind:       %d\n", mb_io_ptr->new_kind);
 		fprintf(stderr, "dbg5       new_error:      %d\n", mb_io_ptr->new_error);
 		fprintf(stderr, "dbg5       error:          %d\n", *error);
-		fprintf(stderr, "dbg5       status:         %d\n", status);
 	}
 
 	/* print output debug statements */
@@ -655,6 +648,8 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			        store->angles_forward[i], store->bath[i], store->bathacrosstrack[i], store->bathalongtrack[i],
 			        store->beamflag[i]);
 	}
+
+	int status = MB_SUCCESS;
 
 	/*  translate values from image83p data storage structure */
 	if (store != NULL) {
@@ -889,7 +884,6 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_image83p(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_image83p";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -902,7 +896,7 @@ int mbr_register_image83p(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_image83p(
+	const int status = mbr_info_image83p(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

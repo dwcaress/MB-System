@@ -80,7 +80,6 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hsunknwn";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -90,7 +89,6 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HSDS;
 	*beams_bath_max = 59;
@@ -115,6 +113,8 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -150,7 +150,6 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hsunknwn";
-	int status;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -163,11 +162,8 @@ int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -183,7 +179,6 @@ int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hsunknwn";
-	int status;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -197,8 +192,8 @@ int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -214,7 +209,6 @@ int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hsunknwn";
-	int status;
 	struct mbsys_hsds_struct *store;
 	char line[MB_PATH_MAXLINE];
 	char *result;
@@ -239,8 +233,10 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read first line of next record from file */
-	if ((status = fread(line, 1, LINE1SIZE, mb_io_ptr->mbfp)) == LINE1SIZE) {
-		mb_io_ptr->file_bytes += status;
+	int status = MB_SUCCESS;
+        const size_t num_bytes = fread(line, 1, LINE1SIZE, mb_io_ptr->mbfp);
+	if (num_bytes == LINE1SIZE) {
+		mb_io_ptr->file_bytes += num_bytes;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 
@@ -413,7 +409,6 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hsunknwn";
-	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 	double value;
 
@@ -440,7 +435,6 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       new_kind:       %d\n", mb_io_ptr->new_kind);
 		fprintf(stderr, "dbg5       new_error:      %d\n", mb_io_ptr->new_error);
 		fprintf(stderr, "dbg5       error:          %d\n", *error);
-		fprintf(stderr, "dbg5       status:         %d\n", status);
 	}
 
 	/* print debug statements */
@@ -468,6 +462,8 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       comment: %s\n", store->comment);
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write comment record to file */
 	if (store->kind == MB_DATA_COMMENT) {
@@ -539,7 +535,6 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hsunknwn";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -552,7 +547,7 @@ int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsunknwn(
+	const int status = mbr_info_hsunknwn(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

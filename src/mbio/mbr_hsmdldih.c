@@ -43,7 +43,6 @@ int mbr_info_hsmdldih(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hsmdldih";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -53,7 +52,6 @@ int mbr_info_hsmdldih(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HSMD;
 	*beams_bath_max = 79;
@@ -78,6 +76,8 @@ int mbr_info_hsmdldih(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 1.7;
 	*beamwidth_ltrack = 1.7;
+
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -113,7 +113,6 @@ int mbr_info_hsmdldih(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_hsmdldih";
-	int status = MB_SUCCESS;
 	struct mbf_hsmdldih_struct *data;
 
 	/* print input debug statements */
@@ -197,7 +196,7 @@ int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -214,7 +213,6 @@ int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hsmdldih";
-	int status = MB_SUCCESS;
 	struct mbf_hsmdldih_struct *data;
 	char *data_ptr;
 	double *FirstReftime; /* time from the first header */
@@ -237,14 +235,11 @@ int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_hsmdldih_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsmd_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsmd_struct), &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -286,7 +281,6 @@ int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hsmdldih";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -300,8 +294,8 @@ int mbr_dem_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -317,7 +311,6 @@ int mbr_dem_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_hsmdldih_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_hsmdldih_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -365,6 +358,8 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* Start reading an HSMD Header structure */
 	/* read the first four bytes */
@@ -1082,7 +1077,6 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hsmdldih";
-	int status = MB_SUCCESS;
 	struct mbf_hsmdldih_struct *data;
 	struct mbsys_hsmd_struct *store;
 	int time_i[7];
@@ -1104,7 +1098,7 @@ int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* read next (record of) data from file */
-	status = mbr_hsmdldih_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_hsmdldih_rd_data(verbose, mbio_ptr, error);
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1249,7 +1243,6 @@ int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
 	char *function_name = "mbr_hsmdldih_wr_data";
-	int status = MB_SUCCESS;
 	struct mbf_hsmdldih_struct *data;
 	FILE *mbfp;
 	XDR *xdrs; /* xdr i/o pointer */
@@ -1274,6 +1267,8 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	/* make sure transid is correct */
 	if (data->transid == MBF_HSMDLDIH_RAW)
 		data->transid = MBF_HSMDLDIH_BAT;
+
+	int status = MB_SUCCESS;
 
 	/* Start writing an HSMD Header structure */
 	for (int i = 0; i < 4; i++)
@@ -1563,7 +1558,6 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hsmdldih";
-	int status = MB_SUCCESS;
 	struct mbf_hsmdldih_struct *data;
 	char *data_ptr;
 	struct mbsys_hsmd_struct *store;
@@ -1670,7 +1664,7 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_hsmdldih_wr_data(verbose, mbio_ptr, data_ptr, error);
+	const int status = mbr_hsmdldih_wr_data(verbose, mbio_ptr, data_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1687,7 +1681,6 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hsmdldih";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1700,7 +1693,7 @@ int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsmdldih(
+	const int status = mbr_info_hsmdldih(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

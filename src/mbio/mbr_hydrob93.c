@@ -47,7 +47,6 @@ int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hydrob93";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -57,7 +56,6 @@ int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SINGLEBEAM;
 	*beams_bath_max = 1;
@@ -82,6 +80,8 @@ int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 5.0;
 	*beamwidth_ltrack = 5.0;
+
+	int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -117,7 +117,6 @@ int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hydrob93";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -130,13 +129,10 @@ int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status =
+	const int status =
 	    mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), (void **)&mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
@@ -159,7 +155,6 @@ int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hydrob93";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -173,7 +168,7 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -189,7 +184,6 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hydrob93";
-	int status = MB_SUCCESS;
 	struct mbsys_singlebeam_struct *store = NULL;
 	char line[MBF_HYDROB93_RECORD_LENGTH] = "";
 	int ilongitude, ilatitude, idepth;
@@ -212,10 +206,13 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
+	int status = MB_SUCCESS;
+
 	/* read next record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	if ((status = fread(line, 1, MBF_HYDROB93_RECORD_LENGTH, mb_io_ptr->mbfp)) == MBF_HYDROB93_RECORD_LENGTH) {
-		mb_io_ptr->file_bytes += status;
+	const size_t num_bytes = fread(line, 1, MBF_HYDROB93_RECORD_LENGTH, mb_io_ptr->mbfp);
+	if (num_bytes == MBF_HYDROB93_RECORD_LENGTH) {
+		mb_io_ptr->file_bytes += num_bytes;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 	}
@@ -306,7 +303,6 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hydrob93";
-	int status = MB_SUCCESS;
 	struct mbsys_singlebeam_struct *store = NULL;
 	char line[MBF_HYDROB93_RECORD_LENGTH] = "";
 	int ilongitude, ilatitude, idepth;
@@ -338,7 +334,6 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg4       bath:         %f\n", store->bath);
 			fprintf(stderr, "dbg4       flag:         %d\n", store->flag);
 			fprintf(stderr, "dbg4       error:        %d\n", *error);
-			fprintf(stderr, "dbg4       status:       %d\n", status);
 		}
 
 		/* put data into buffer */
@@ -357,7 +352,9 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_put_binary_short(MB_YES, (short)itype, (void *)&line[12]);
 	}
 
-	if ((status = fwrite(line, 1, MBF_HYDROB93_RECORD_LENGTH, mb_io_ptr->mbfp)) == MBF_HYDROB93_RECORD_LENGTH) {
+	int status = MB_SUCCESS;
+	const size_t num_bytes = fwrite(line, 1, MBF_HYDROB93_RECORD_LENGTH, mb_io_ptr->mbfp);
+	if (num_bytes == MBF_HYDROB93_RECORD_LENGTH) {
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 	}
@@ -387,7 +384,6 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hydrob93";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -400,7 +396,7 @@ int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hydrob93(
+	const int status = mbr_info_hydrob93(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
