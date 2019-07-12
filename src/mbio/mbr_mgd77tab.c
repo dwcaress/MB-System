@@ -702,8 +702,6 @@ int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	int status = MB_SUCCESS;
-	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SINGLEBEAM;
 	*beams_bath_max = 1;
 	*beams_amp_max = 0;
@@ -728,6 +726,8 @@ int mbr_info_mgd77tab(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {

@@ -186,7 +186,6 @@ int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mgd77txt";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -196,7 +195,6 @@ int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SINGLEBEAM;
 	*beams_bath_max = 1;
@@ -222,6 +220,8 @@ int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -257,7 +257,6 @@ int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_zero_mgd77txt(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mgd77txt";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -309,7 +308,7 @@ int mbr_zero_mgd77txt(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print output debug statements */
@@ -326,7 +325,6 @@ int mbr_zero_mgd77txt(int verbose, char *data_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mgd77txt";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -342,7 +340,7 @@ int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mgd77txt_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
@@ -370,7 +368,6 @@ int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mgd77txt";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -384,7 +381,7 @@ int mbr_dem_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
@@ -401,7 +398,6 @@ int mbr_dem_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_mgd77txt_rd_data";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -424,6 +420,8 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* read next record */
 	char line[MB_COMMENT_MAXLINE] = "";
@@ -693,7 +691,6 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mgd77txt";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -710,7 +707,7 @@ int mbr_rt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_mgd77txt_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_mgd77txt_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -768,7 +765,6 @@ int mbr_rt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
 	char *function_name = "mbr_mgd77txt_wr_data";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -911,8 +907,9 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		line[shift] = '\0';
 	}
 
-	int write_status;
-	if ((write_status = fputs(line, mb_io_ptr->mbfp)) > 0) {
+	const int write_status = fputs(line, mb_io_ptr->mbfp);
+	int status = MB_SUCCESS;
+	if (write_status > 0) {
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 	}
@@ -941,7 +938,6 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_wt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mgd77txt";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -998,7 +994,7 @@ int mbr_wt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mbr_mgd77txt_wr_data(verbose, mbio_ptr, (void *)data, error);
+	const int status = mbr_mgd77txt_wr_data(verbose, mbio_ptr, (void *)data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -1015,7 +1011,6 @@ int mbr_wt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mgd77txt";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -1028,7 +1023,7 @@ int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mgd77txt(
+	const int status = mbr_info_mgd77txt(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

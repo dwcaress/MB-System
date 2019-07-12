@@ -44,7 +44,6 @@ int mbr_info_mr1prvr2(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mr1prvr2";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -54,7 +53,6 @@ int mbr_info_mr1prvr2(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_MR1;
 	*beams_bath_max = MBSYS_MR1V2001_BEAMS;
@@ -80,6 +78,8 @@ int mbr_info_mr1prvr2(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -115,7 +115,6 @@ int mbr_info_mr1prvr2(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mr1prvr2";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -128,13 +127,10 @@ int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mbsys_mr1v2001_alloc(verbose, mbio_ptr, (void **)&mb_io_ptr->store_data, error);
+	const int status = mbsys_mr1v2001_alloc(verbose, mbio_ptr, (void **)&mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -158,7 +154,6 @@ int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mr1prvr2";
-	int status = MB_SUCCESS;
 	struct mbsys_mr1v2001_struct *store;
 
 	/* print input debug statements */
@@ -176,7 +171,7 @@ int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	if (store->bsbuffersize > 0 && store->bsbuffer != NULL)
 		free(store->bsbuffer);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -192,7 +187,6 @@ int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_mr1prvr2_rd_data";
-	int status = MB_SUCCESS;
 	struct mbsys_mr1v2001_struct *store;
 	char *store_ptr;
 	char *xdrs;
@@ -215,6 +209,8 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 	store = (struct mbsys_mr1v2001_struct *)mb_io_ptr->store_data;
 	store_ptr = (char *)store;
 	xdrs = mb_io_ptr->xdrs;
+
+	int status = MB_SUCCESS;
 
 	/* if first time through read file header */
 	if (mb_io_ptr->fileheader == MB_NO) {
@@ -482,7 +478,6 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mr1prvr2";
-	int status = MB_SUCCESS;
 	struct mbsys_mr1v2001_struct *store;
 
 	/* print input debug statements */
@@ -499,7 +494,7 @@ int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_mr1prvr2_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_mr1prvr2_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -519,7 +514,6 @@ int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
 	char *function_name = "mbr_mr1prvr2_wr_data";
-	int status = MB_SUCCESS;
 	struct mbsys_mr1v2001_struct *store;
 	char *xdrs;
 	int bs_status = BS_SUCCESS;
@@ -673,6 +667,8 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr, "\n");
 	}
 
+	int status = MB_SUCCESS;
+
 	/* if comment and file header not written */
 	if (mb_io_ptr->fileheader == MB_NO && store->kind == MB_DATA_COMMENT) {
 		/* add comment to string mb_io_ptr->hdr_comment
@@ -736,7 +732,6 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mr1prvr2";
-	int status = MB_SUCCESS;
 	struct mbsys_mr1v2001_struct *store;
 
 	/* print input debug statements */
@@ -755,7 +750,7 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* write next data to file */
-	status = mbr_mr1prvr2_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_mr1prvr2_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -773,7 +768,6 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mr1prvr2";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -786,7 +780,7 @@ int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mr1prvr2(
+	const int status = mbr_info_mr1prvr2(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

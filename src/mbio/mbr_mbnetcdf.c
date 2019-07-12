@@ -47,7 +47,6 @@ int mbr_info_mbnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mbnetcdf";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -57,7 +56,6 @@ int mbr_info_mbnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_NETCDF;
 	*beams_bath_max = 0;
@@ -82,6 +80,8 @@ int mbr_info_mbnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -122,7 +122,6 @@ int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mbnetcdf";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -132,7 +131,6 @@ int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_NETCDF;
 	*beams_bath_max = 256;
@@ -158,6 +156,8 @@ int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
+
+	const int status = MB_SUCCESS;
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -193,7 +193,6 @@ int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_mbnetcdf";
-	int status = MB_SUCCESS;
 	int *dataread;
 	int *commentread;
 	int *recread;
@@ -211,11 +210,8 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mbsys_netcdf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_netcdf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* initialize values in structure */
 	dataread = (int *)&mb_io_ptr->save1;
@@ -243,7 +239,6 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mbnetcdf";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -257,7 +252,7 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_netcdf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_netcdf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* print output debug statements */
 	if (verbose >= 2) {
@@ -273,7 +268,6 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_mbnetcdf";
-	int status = MB_SUCCESS;
 	struct mbsys_netcdf_struct *store;
 	int *dataread;
 	int *commentread;
@@ -311,6 +305,8 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* if first read then set everything up */
 	if (*dataread == MB_NO) {
@@ -404,6 +400,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen mbVelocityProfilNbr error: %s\n", nc_strerror(nc_status));
 		}
+
 		if (nc_status != NC_NOERR) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
@@ -4928,7 +4925,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_mbnetcdf";
-	int status = MB_SUCCESS;
 	struct mbsys_netcdf_struct *store;
 	struct mbsys_netcdf_struct *storelocal;
 	int *datawrite;
@@ -4975,6 +4971,8 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	if (mb_io_ptr->format == MBF_MBNCDFXT)
 		extended = MB_YES;
+
+	int status = MB_SUCCESS;
 
 	/* if comment and nothing written yet save it */
 	if (store->kind == MB_DATA_COMMENT && *recwrite == 0) {
@@ -9592,7 +9590,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mbnetcdf";
-	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -9605,7 +9602,7 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mbnetcdf(
+	const int status = mbr_info_mbnetcdf(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
