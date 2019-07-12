@@ -47,7 +47,6 @@ int mbr_info_hsds2lam(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hsds2lam";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -84,7 +83,6 @@ int mbr_info_hsds2lam(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -119,7 +117,6 @@ int mbr_info_hsds2lam(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hsds2lam";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -135,7 +132,6 @@ int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->data_structure_size = 0;
 	const int status = mbsys_atlas_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -150,7 +146,6 @@ int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hsds2lam";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -164,7 +159,6 @@ int mbr_dem_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	const int status = mbsys_atlas_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -184,7 +178,6 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int telegram_id;
 	int nskip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -513,7 +506,6 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -529,7 +521,6 @@ int mbr_rt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_rt_hsds2lam";
 	struct mbsys_atlas_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -551,7 +542,6 @@ int mbr_rt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = store->kind;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -570,7 +560,6 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int strlength;
 	int telegram_id;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -875,7 +864,6 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -891,7 +879,6 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbr_wt_hsds2lam";
 	struct mbsys_atlas_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -909,7 +896,6 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* write next data to file */
 	const int status = mbr_hsds2lam_wr_data(verbose, mbio_ptr, store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -924,7 +910,6 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hsds2lam";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -964,7 +949,6 @@ int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

@@ -45,7 +45,6 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -70,7 +69,6 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	store->ssstbd.trace = NULL;
 	store->comment.comment[0] = 0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -88,7 +86,6 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -115,7 +112,6 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	}
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -135,7 +131,6 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -177,7 +172,6 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -202,7 +196,6 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 	struct mbsys_jstar_channel_struct *ssstbd;
 	int kind;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -233,7 +226,6 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 		*pingnumber = mb_io_ptr->ping_count;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -278,7 +270,6 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 	int jaltitude = 0;
 	int jattitude = 0;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -306,7 +297,6 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 	platform = (struct mb_platform_struct *)platform_ptr;
 	pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
 		fprintf(stderr, "dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
@@ -552,7 +542,6 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 	else {
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -581,7 +570,6 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	double weight;
 	int istart, jstart;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -843,7 +831,6 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -896,7 +883,6 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	int shortspersample;
 	int nsamples, trace_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1170,7 +1156,6 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		strcpy(store->comment.comment, comment);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1189,7 +1174,6 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1233,7 +1217,6 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1261,7 +1244,6 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1306,7 +1288,6 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1334,7 +1315,6 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ssport;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1398,7 +1378,6 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1423,7 +1402,6 @@ int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, do
 	struct mbsys_jstar_channel_struct *ssstbd;
 	int kind;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1485,7 +1463,6 @@ int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, do
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1507,7 +1484,6 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mbsys_jstar_channel_struct *ssport;
 	int time_j[5];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1671,7 +1647,6 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1715,7 +1690,6 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	struct mbsys_jstar_channel_struct *ssstbd;
 	int time_j[5];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1866,7 +1840,6 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		ssstbd->pitch = 32768 * pitch / 180.0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1886,7 +1859,6 @@ int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store
 	struct mbsys_jstar_channel_struct *ssport;
 	struct mbsys_jstar_channel_struct *ssstbd;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1933,7 +1905,6 @@ int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store
 		*error = MB_ERROR_BAD_KIND;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1959,7 +1930,6 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mbsys_jstar_channel_struct *ssstbd;
 	double weight;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2043,7 +2013,6 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 		*error = MB_ERROR_BAD_KIND;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2077,7 +2046,6 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 	double weight;
 	size_t data_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2175,7 +2143,6 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 		*error = MB_ERROR_BAD_KIND;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2201,7 +2168,6 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 	double longitude, latitude;
 	int time_i[7], time_j[5];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2340,7 +2306,6 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2429,7 +2394,6 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 	unsigned short *ushortptr;
 	double weight;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2540,7 +2504,6 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2637,7 +2600,6 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	int data_size;
 	short *shortptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2772,7 +2734,6 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2857,7 +2818,6 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 	struct mbsys_jstar_pressure_struct *pressure;
 	double g, x, p;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2896,7 +2856,6 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 		*soundspeed = 1000.0 * pressure->soundspeed;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2936,7 +2895,6 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 	int shortspersample;
 	int trace_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3027,7 +2985,6 @@ int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *c
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

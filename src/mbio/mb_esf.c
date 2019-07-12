@@ -46,7 +46,6 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
 	int mbp_edit_mode;
 	char mbp_editfile[MB_PATH_MAXLINE];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -69,7 +68,6 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
 	/* assume success */
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -101,7 +99,6 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
 	int status = MB_SUCCESS;
 	int found;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -135,7 +132,6 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
 		*error = MB_ERROR_NO_DATA_LOADED;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -184,7 +180,6 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 
 	int nedit;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -403,7 +398,6 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -439,7 +433,6 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
 	char *function_name = "mb_esf_fixtimestamps";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -460,7 +453,6 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -492,7 +484,6 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 	int ibeam;
 	int j;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -665,7 +656,6 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			esf->startnextsearch = esf->nedit - 1;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -689,7 +679,6 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 	char *function_name = "mb_esf_save";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -724,7 +713,6 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -746,7 +734,6 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 	char *function_name = "mb_ess_save";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -781,7 +768,6 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -803,7 +789,6 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
 	char *function_name = "mb_esf_close";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -830,7 +815,6 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
 		esf->essfp = NULL;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");

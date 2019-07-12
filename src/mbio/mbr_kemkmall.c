@@ -48,7 +48,6 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
            double *beamwidth_ltrack, int *error) {
   char *function_name = "mbr_info_kemkmall";
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -84,7 +83,6 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
 
   const int status = MB_SUCCESS;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -122,7 +120,6 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
   char **bufferptr = NULL;
   int *bufferalloc = NULL;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -157,7 +154,6 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->saveptr1 = NULL;
   mb_io_ptr->save1 = 0;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -175,7 +171,6 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   int *dgm_count = NULL;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -213,7 +208,6 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
   /* deallocate memory for data descriptor */
   status = mbsys_kmbes_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -233,7 +227,6 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   size_t size_bytes = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -275,7 +268,6 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   mb_io_ptr->save1 = 0;     // most recently read entry in index table, after indexing
   mb_io_ptr->save2 = MB_NO; // file has been indexed
 
-    /* print output debug statements */
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
         fprintf(stderr, "dbg2  Return values:\n");
@@ -296,7 +288,6 @@ int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, 
   size_t dgm_count = 0;
   size_t new_num_alloc = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -336,7 +327,6 @@ int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, 
     dgm_index_table->dgm_count++;
   }
 
-    /* print output debug statements */
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
         fprintf(stderr, "dbg2  Return values:\n");
@@ -462,7 +452,6 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
   mbsys_kmbes_emdgm_type *emdgm_type = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -562,7 +551,6 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
 
   int status = MB_SUCCESS;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -587,7 +575,6 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   size_t numBytesRawSensorData = 0;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -677,7 +664,6 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -706,7 +692,6 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -888,7 +873,6 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -916,7 +900,6 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1002,7 +985,6 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1030,7 +1012,6 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1124,7 +1105,6 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1152,7 +1132,6 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   size_t numBytesRawSensorData = 0;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1224,7 +1203,6 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1252,7 +1230,6 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   size_t numBytesRawSensorData = 0;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1333,7 +1310,6 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1362,7 +1338,6 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   size_t numBytesRawSensorData = 0;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1434,7 +1409,6 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1464,7 +1438,6 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1553,7 +1526,6 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1584,7 +1556,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   int index_EMdgmMbody, index_pingInfo, index_txSectorInfo = 0;
   int index_rxInfo, index_extraDetClassInfo, index_sounding, index_SIsample = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2170,7 +2141,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2202,7 +2172,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
   int i, j, k;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2481,7 +2450,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2511,7 +2479,6 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
 
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2602,7 +2569,6 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2630,7 +2596,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
 
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2720,7 +2685,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2748,7 +2712,6 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   size_t numBytesRawSensorData = 0;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2806,7 +2769,6 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2834,7 +2796,6 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   size_t numBytesRawSensorData = 0;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2892,7 +2853,6 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2921,7 +2881,6 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2980,7 +2939,6 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3009,7 +2967,6 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3065,7 +3022,6 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3094,7 +3050,6 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3168,7 +3123,6 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     store->kind = MB_DATA_NONE;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3193,7 +3147,6 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3208,7 +3161,6 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
 
   const int status = MB_SUCCESS;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3246,7 +3198,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int time_i[7];
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3561,7 +3512,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   /* set file position back to the start */
   fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
 
-    /* print output debug statements */
     if (verbose >= 2) {
         fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
         fprintf(stderr, "dbg2  Return values:\n");
@@ -3590,7 +3540,6 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int imrz, imwc, isounding;
   int numSoundings, numBackscatterSamples;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3882,7 +3831,6 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   /* get file position */
   mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3902,7 +3850,6 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int *file_indexed = NULL;
   double *pixel_size, *swath_width;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3953,7 +3900,6 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   fprintf(stderr, "Done with mbr_kemkmall_rd_data: status:%d error:%d kind:%d\n", status, *error, store->kind);
 #endif
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3973,7 +3919,6 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4021,7 +3966,6 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
     mb_put_binary_int(MB_YES, header->time_nanosec, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4045,7 +3989,6 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4151,7 +4094,6 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, spo->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4180,7 +4122,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4375,7 +4316,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, skm->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4404,7 +4344,6 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4503,7 +4442,6 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, svp->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4532,7 +4470,6 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4638,7 +4575,6 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, svt->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4667,7 +4603,6 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4754,7 +4689,6 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, scl->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4783,7 +4717,6 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4878,7 +4811,6 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, sde->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -4907,7 +4839,6 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4993,7 +4924,6 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, shi->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -5022,7 +4952,6 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5124,7 +5053,6 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, sha->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -5155,7 +5083,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5711,7 +5638,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     index += 4;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -5740,7 +5666,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i, k;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5976,7 +5901,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6005,7 +5929,6 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6111,7 +6034,6 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, cpo->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6140,7 +6062,6 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6241,7 +6162,6 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, che->header.numBytesDgm, &buffer[index]);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6270,7 +6190,6 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6343,7 +6262,6 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
     // index += 4;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6373,7 +6291,6 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   char *buffer = NULL;
   int index = 0;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6446,7 +6363,6 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
     // index += 4;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6477,7 +6393,6 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6560,7 +6475,6 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
     // index += 4;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6591,7 +6505,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6661,7 +6574,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
     // index += 4;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6692,7 +6604,6 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6780,7 +6691,6 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
     // index += 4;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6805,7 +6715,6 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
   char *function_name = "mbr_kemkmall_wr_unknown";
   struct mbsys_kmbes_struct *store = NULL;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6820,7 +6729,6 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
 
   const int status = MB_SUCCESS;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -6850,7 +6758,6 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   size_t size = 0;
 
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7018,7 +6925,6 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   fprintf(stderr, "Data record written: type:%d status:%d error:%d\n", store->kind, status, *error);
 #endif
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -7036,7 +6942,6 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   char *function_name = "mbr_wt_kemkmall";
   struct mbsys_kmbes_struct *store = NULL;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7066,7 +6971,6 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   fprintf(stderr, "Done with mbr_kemkmall_wr_data: status:%d error:%d\n", status, *error);
 #endif
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -7083,7 +6987,6 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_register_kemkmall";
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7134,7 +7037,6 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_ctd = NULL;
   mb_io_ptr->mb_io_ancilliarysensor = NULL;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");

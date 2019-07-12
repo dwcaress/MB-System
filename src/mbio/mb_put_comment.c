@@ -35,7 +35,6 @@
 int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error) {
 	char *function_name = "mb_put_comment";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -60,7 +59,6 @@ int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error) {
 	/* write the data */
 	status &= mb_write_ping(verbose, mbio_ptr, mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");

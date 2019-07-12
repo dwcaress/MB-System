@@ -53,7 +53,6 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	char *function_name = "mbsys_simrad3_alloc";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -71,7 +70,6 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	if (status == MB_SUCCESS)
 		memset(*store_ptr, 0, sizeof(struct mbsys_simrad3_struct));
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -90,7 +88,6 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -105,7 +102,6 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -123,7 +119,6 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -146,7 +141,6 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 			memset(store->extraparameters, 0, sizeof(struct mbsys_simrad3_extraparameters_struct));
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -165,7 +159,6 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_watercolumn_struct *wc;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -228,7 +221,6 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -247,7 +239,6 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_attitude_struct *attitude;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -303,7 +294,6 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 		/* heading status (0=inactive) */
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -322,7 +312,6 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_netattitude_struct *netattitude;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -379,7 +368,6 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -397,7 +385,6 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_heading_struct *heading;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -445,7 +432,6 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 		/* heading status (0=inactive) */
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -463,7 +449,6 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ssv_struct *ssv;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -508,7 +493,6 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -526,7 +510,6 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_tilt_struct *tilt;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -572,7 +555,6 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -590,7 +572,6 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_extraparameters_struct *extraparameters;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -637,7 +618,6 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -655,7 +635,6 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -746,7 +725,6 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -765,7 +743,6 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -798,7 +775,6 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -820,7 +796,6 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -838,7 +813,6 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 	*pingnumber = ping->png_count;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -856,7 +830,6 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -874,7 +847,6 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -892,7 +864,6 @@ int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -910,7 +881,6 @@ int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LOGARITHMIC;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -963,7 +933,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 	int interp_status = MB_SUCCESS;
 	int jnav, jsensordepth, jheading, jaltitude, jattitude;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -988,7 +957,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 	platform = (struct mb_platform_struct *)platform_ptr;
 	pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
 		fprintf(stderr, "dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
@@ -1409,7 +1377,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		status = mbsys_simrad3_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 1, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1445,7 +1412,6 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	double attitude_offset_pitch;
 	int isensor;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2086,7 +2052,6 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr, "\nUnable to initialize platform offset structure\n");
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2117,7 +2082,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	double reflscale;
 	double pixel_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2313,7 +2277,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2369,7 +2332,6 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	struct mbsys_simrad3_ping_struct *ping;
 	double reflscale;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2546,7 +2508,6 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 		strncpy(store->par_com, comment, MBSYS_SIMRAD3_COMMENT_LENGTH);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2570,7 +2531,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	double soundspeed;
 	double offset_y;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2683,7 +2643,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2712,7 +2671,6 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2770,7 +2728,6 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2796,7 +2753,6 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2854,7 +2810,6 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2881,7 +2836,6 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2934,7 +2888,6 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2964,7 +2917,6 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	double xtrack_min;
 	int found;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3035,7 +2987,6 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3064,7 +3015,6 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 	int atime_i[7];
 	int inav;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3285,7 +3235,6 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3326,7 +3275,6 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3455,7 +3403,6 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3499,7 +3446,6 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3615,7 +3561,6 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -3633,7 +3578,6 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3679,7 +3623,6 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3701,7 +3644,6 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3732,7 +3674,6 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -3765,7 +3706,6 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	struct mbsys_simrad3_tilt_struct *tilt_copy;
 	char *tilt_save;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3885,7 +3825,6 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 		*tilt_copy = *tilt_store;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3923,7 +3862,6 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	int ss_ok;
 	int first, last, k1, k2;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4150,7 +4088,6 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");

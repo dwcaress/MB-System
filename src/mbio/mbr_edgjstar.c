@@ -48,7 +48,6 @@ int mbr_info_edgjstar(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_edgjstar";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -84,7 +83,6 @@ int mbr_info_edgjstar(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -124,7 +122,6 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_edgjstr2";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -160,7 +157,6 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -195,7 +191,6 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_edgjstar";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -212,7 +207,6 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -227,7 +221,6 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_edgjstar";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -241,7 +234,6 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data structure */
 	const int status = mbsys_jstar_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -286,7 +278,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char **nap, *nargv[25], *string;
 	int nargc;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2299,7 +2290,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     sysinfo:                     \n%s\n", sysinfo->sysinfo);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2328,7 +2318,6 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int shortspersample;
 	int trace_size;
 
-	/* print input debug statements */
 	if (verbose >= 3) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3911,7 +3900,6 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3927,7 +3915,6 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_edgjstar";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3974,7 +3961,6 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_ctd = &mbsys_jstar_ctd;
 	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copyrecord;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -4034,7 +4020,6 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_edgjstr2";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4081,7 +4066,6 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_ctd = &mbsys_jstar_ctd;
 	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copyrecord;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

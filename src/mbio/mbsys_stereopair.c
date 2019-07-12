@@ -40,7 +40,6 @@ int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -60,7 +59,6 @@ int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	/* initialize data record */
 	memset(*store_ptr, 0, sizeof(struct mbsys_stereopair_struct));
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -78,7 +76,6 @@ int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -97,7 +94,6 @@ int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -116,7 +112,6 @@ int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -148,7 +143,6 @@ int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -169,7 +163,6 @@ int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -186,7 +179,6 @@ int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 	/* extract data from structure */
 	*pingnumber = 0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -204,7 +196,6 @@ int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -222,7 +213,6 @@ int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_CAMERA;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -240,7 +230,6 @@ int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -258,7 +247,6 @@ int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LINEAR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -280,7 +268,6 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -441,7 +428,6 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -498,7 +484,6 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -618,7 +603,6 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		store->comment_len += 4 - (store->comment_len % 4);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -638,7 +622,6 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -703,7 +686,6 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -731,7 +713,6 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -784,7 +765,6 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -810,7 +790,6 @@ int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -860,7 +839,6 @@ int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -886,7 +864,6 @@ int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -933,7 +910,6 @@ int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -955,7 +931,6 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1050,7 +1025,6 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 		mb_get_date(verbose, *time_d, time_i);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1086,7 +1060,6 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1188,7 +1161,6 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 		mb_get_date(verbose, store->time_d, time_i);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1222,7 +1194,6 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1299,7 +1270,6 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		store->roll = roll;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1317,7 +1287,6 @@ int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_struct *copy;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1338,7 +1307,6 @@ int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 	    sub-structures copied separately */
 	*copy = *store;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

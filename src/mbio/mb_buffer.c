@@ -53,7 +53,6 @@
 int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 	char *function_name = "mb_buffer_init";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -69,7 +68,6 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 	for (int i = 0; i < MB_BUFFER_MAX; i++)
 		buff->buffer[i] = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -85,7 +83,6 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 	char *function_name = "mb_buffer_close";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -112,7 +109,6 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 	/* deallocate memory for data structure */
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)buff_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -127,7 +123,6 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *nload, int *nbuff, int *error) {
 	char *function_name = "mb_buffer_load";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -238,7 +233,6 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 		*error = MB_ERROR_NO_DATA_LOADED;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -255,7 +249,6 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr, int nhold, int *ndump, int *nbuff, int *error) {
 	char *function_name = "mb_buffer_dump";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -372,7 +365,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	/* set return value */
 	*nbuff = buff->nbuffer;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -389,7 +381,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int *ndump, int *nbuff, int *error) {
 	char *function_name = "mb_buffer_clear";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -493,7 +484,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 	/* set return value */
 	*nbuff = buff->nbuffer;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -513,7 +503,6 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
                             double *ss, double *ssacrosstrack, double *ssalongtrack, int *error) {
 	char *function_name = "mb_buffer_get_next_data";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -554,7 +543,6 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 		                           ssalongtrack, comment, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -607,7 +595,6 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
                            double *pitch, double *heave, int *error) {
 	char *function_name = "mb_buffer_get_next_nav";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -645,7 +632,6 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
 		                               draft, roll, pitch, heave, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -684,7 +670,6 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_buffer_extract";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -720,7 +705,6 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 		               beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -778,7 +762,6 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, i
                           double *pitch, double *heave, int *error) {
 	char *function_name = "mb_buffer_extract_nav";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -813,7 +796,6 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, i
 		                        pitch, heave, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -852,7 +834,6 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
                      double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mb_buffer_insert";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -912,7 +893,6 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 		                   ssalongtrack, comment, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -929,7 +909,6 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
                          int *error) {
 	char *function_name = "mb_buffer_insert_nav";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -972,7 +951,6 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 		                       heave, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -987,7 +965,6 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *kind, int *error) {
 	char *function_name = "mb_buffer_get_kind";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1012,7 +989,6 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 		*kind = buff->buffer_kind[id];
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1028,7 +1004,6 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void **store_ptr, int *error) {
 	char *function_name = "mb_buffer_get_ptr";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1053,7 +1028,6 @@ int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void 
 		*store_ptr = buff->buffer[id];
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

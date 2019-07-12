@@ -48,7 +48,6 @@ int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max, int *beams_
 	char *function_name = "mbr_info_swplssxi";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -84,7 +83,6 @@ int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = SWPLS_TYPE_M_BEAM_WIDTH;
 	*beamwidth_ltrack = SWPLS_TYPE_M_BEAM_WIDTH;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -131,7 +129,6 @@ int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	int *deviceid;
 	int *projection_file_created;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -182,7 +179,6 @@ int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -201,7 +197,6 @@ int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	char *buffer;
 	int *bufferalloc;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -222,7 +217,6 @@ int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	status = mbsys_swathplus_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -249,7 +243,6 @@ int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	size_t read_len;
 	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -408,7 +401,6 @@ int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -426,7 +418,6 @@ int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_swathplus_struct *store;
 	swpls_projection *projection;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -501,7 +492,6 @@ int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = store->kind;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -520,7 +510,6 @@ int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int *header_rec_written;
 	int *projection_rec_written;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -583,7 +572,6 @@ int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* write next data to file */
 	status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -600,7 +588,6 @@ int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_swplssxi";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -651,7 +638,6 @@ int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_ctd = NULL;
 	mb_io_ptr->mb_io_ancilliarysensor = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

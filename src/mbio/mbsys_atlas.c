@@ -49,7 +49,6 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -270,7 +269,6 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 		store->comment[i] = '\0';
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -288,7 +286,6 @@ int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -303,7 +300,6 @@ int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -320,7 +316,6 @@ int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -352,7 +347,6 @@ int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -378,7 +372,6 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	double pixel_size;
 	double range, tt, ttmin, ssdepth;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -513,7 +506,6 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -569,7 +561,6 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	double xtrackmin;
 	int centerpixel;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -675,7 +666,6 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		strncpy(store->comment, comment, MBSYS_ATLAS_COMMENT_LENGTH);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -695,7 +685,6 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mbsys_atlas_struct *store;
 	double *angle_table;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -780,7 +769,6 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -809,7 +797,6 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mbsys_atlas_struct *store;
 	int detect;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -861,7 +848,6 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -890,7 +876,6 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	double xtrack_min;
 	int found;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -958,7 +943,6 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -980,7 +964,6 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1063,7 +1046,6 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1103,7 +1085,6 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1158,7 +1139,6 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		store->start_heave = heave;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1176,7 +1156,6 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	struct mbsys_atlas_struct *store;
 	struct mbsys_atlas_struct *copy;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1196,7 +1175,6 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	/* copy the main structure */
 	*copy = *store;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1213,7 +1191,6 @@ int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1242,7 +1219,6 @@ int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

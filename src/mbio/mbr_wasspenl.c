@@ -48,7 +48,6 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
 	char *function_name = "mbr_info_wasspenl";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -83,7 +82,6 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 4.0;
 	*beamwidth_ltrack = 4.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -122,7 +120,6 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	char *buffer;
 	int *bufferalloc;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -153,7 +150,6 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 			*bufferalloc = MBSYS_WASSP_BUFFER_STARTSIZE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -172,7 +168,6 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	char *buffer;
 	int *bufferalloc;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -193,7 +188,6 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	status = mbsys_wassp_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -212,7 +206,6 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -329,7 +322,6 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       genbathy->checksum:                   %u\n", genbathy->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -348,7 +340,6 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 	struct mbsys_wassp_corbathy_struct *corbathy;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -458,7 +449,6 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       corbathy->checksum:                   %u\n", corbathy->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -478,7 +468,6 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 	int index;
 	size_t rawdata_len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -576,7 +565,6 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       rawsonar->checksum:                   %u\n", rawsonar->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -595,7 +583,6 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 	struct mbsys_wassp_gen_sens_struct *gen_sens;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -643,7 +630,6 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       gen_sens->checksum:                   %u\n", gen_sens->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -663,7 +649,6 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 	struct mbsys_wassp_nvupdate_struct *nvupdate;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -726,7 +711,6 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       nvupdate->checksum:                   %u\n", nvupdate->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -746,7 +730,6 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 	struct mbsys_wassp_wcd_navi_struct *wcd_navi;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -828,7 +811,6 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       wcd_navi->checksum:                   %u\n", wcd_navi->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -848,7 +830,6 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 	struct mbsys_wassp_sensprop_struct *sensprop;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -953,7 +934,6 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       sensprop->checksum:                   %u\n", sensprop->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -973,7 +953,6 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 	struct mbsys_wassp_sys_prop_struct *sys_prop;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1039,7 +1018,6 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       sys_prop->checksum:                   %u\n", sys_prop->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1060,7 +1038,6 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 	int index;
 	unsigned int size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1105,7 +1082,6 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1125,7 +1101,6 @@ int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *er
 	struct mbsys_wassp_mcomment_struct *mcomment;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1161,7 +1136,6 @@ int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *er
 		fprintf(stderr, "dbg5       mcomment->checksum:                   %u\n", mcomment->checksum);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1182,7 +1156,6 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 	int index;
 	unsigned int size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1227,7 +1200,6 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1264,7 +1236,6 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int reset_beamflags;
 	int done;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1471,7 +1442,6 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1488,7 +1458,6 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1518,7 +1487,6 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	fprintf(stderr, "Done with mbr_wasspenl_rd_data: status:%d error:%d record kind:%d\n\n", status, *error, store->kind);
 #endif
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1538,7 +1506,6 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	char *buffer;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1661,7 +1628,6 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1681,7 +1647,6 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	char *buffer;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1811,7 +1776,6 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1832,7 +1796,6 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 	int index;
 	size_t rawdata_len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1943,7 +1906,6 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1963,7 +1925,6 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 	char *buffer;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2031,7 +1992,6 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2052,7 +2012,6 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 	char *buffer;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2135,7 +2094,6 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2156,7 +2114,6 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 	char *buffer;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2246,7 +2203,6 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2267,7 +2223,6 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 	char *buffer;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2384,7 +2339,6 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2405,7 +2359,6 @@ int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, vo
 	char *buffer;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2491,7 +2444,6 @@ int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2511,7 +2463,6 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	char *buffer;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2554,7 +2505,6 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 		memcpy(buffer, sys_cfg1->sys_cfg1_data, (size_t)sys_cfg1->sys_cfg1_len);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2575,7 +2525,6 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 	char *buffer;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2633,7 +2582,6 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 		index += 4;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2653,7 +2601,6 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 	struct mbsys_wassp_unknown1_struct *unknown1;
 	char *buffer;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2696,7 +2643,6 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 		memcpy(buffer, unknown1->unknown1_data, (size_t)unknown1->unknown1_len);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2718,7 +2664,6 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int size;
 	size_t write_len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2829,7 +2774,6 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr, "WASSPENL DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
 #endif
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2846,7 +2790,6 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2872,7 +2815,6 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	fprintf(stderr, "Done with mbr_wasspenl_wr_data: status:%d error:%d\n", status, *error);
 #endif
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2889,7 +2831,6 @@ int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_wasspenl";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2939,7 +2880,6 @@ int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_ctd = NULL;
 	mb_io_ptr->mb_io_ancilliarysensor = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

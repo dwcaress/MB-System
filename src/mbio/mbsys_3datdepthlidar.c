@@ -198,7 +198,6 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -290,7 +289,6 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
 	store->sdp_time_d = 0.0;
 	store->sdp_sensordepth = 0.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -316,7 +314,6 @@ int mbsys_3datdepthlidar_deall(int verbose,      /* in: verbosity level set on c
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -336,7 +333,6 @@ int mbsys_3datdepthlidar_deall(int verbose,      /* in: verbosity level set on c
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -364,7 +360,6 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -399,7 +394,6 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -427,7 +421,6 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
 	/* check for non-null data */
 	assert(mbio_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -444,7 +437,6 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
 	/* extract ping number from structure */
 	*pingnumber = store->current_scan;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -481,7 +473,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	// int	jaltitude = 0;
 	int jattitude = 0;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -506,7 +497,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	platform = (struct mb_platform_struct *)platform_ptr;
 	pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
 		fprintf(stderr, "dbg2       timestamp_changed:          %d\n", pars->timestamp_changed);
@@ -687,7 +677,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	/* calculate the bathymetry using the newly inserted values */
 	status = mbsys_3datdepthlidar_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -732,7 +721,6 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -801,7 +789,6 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 	else if (*kind == MB_DATA_COMMENT)
 		strncpy(comment, store->comment, MB_COMMENT_MAXLINE);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -853,7 +840,6 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 	assert(namp == nbath);
 	assert(0 <= nss);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -927,7 +913,6 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 4)
 		mbsys_3datdepthlidar_print_store(verbose, store, error);
 	if (verbose >= 2) {
@@ -970,7 +955,6 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
 	assert(heave != NULL);
 	assert(alongtrack_offset != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1059,7 +1043,6 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1109,7 +1092,6 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1145,7 +1127,6 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1234,7 +1215,6 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1280,7 +1260,6 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1319,7 +1298,6 @@ int mbsys_3datdepthlidar_extract_altitude(
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1369,7 +1347,6 @@ int mbsys_3datdepthlidar_extract_altitude(
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1412,7 +1389,6 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
 	assert(store_ptr != NULL);
 	assert(nmax > 0);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1471,7 +1447,6 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1521,7 +1496,6 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1564,7 +1538,6 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1622,7 +1595,6 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
 	assert(store_ptr != NULL);
 	assert(time_i != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1691,7 +1663,6 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1720,7 +1691,6 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 	assert(mbio_ptr != NULL);
 	assert(store_ptr != NULL);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1752,7 +1722,6 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1785,7 +1754,6 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 	assert(store_ptr != NULL);
 	assert(nsvp > 0);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1815,7 +1783,6 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1845,7 +1812,6 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
 	assert(copy_ptr != NULL);
 	assert(store_ptr != copy_ptr);
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1884,7 +1850,6 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
 	/* copy pulses */
 	memcpy((void *)copy->pulses, (void *)store->pulses, npulses * sizeof(struct mbsys_3datdepthlidar_pulse_struct));
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1909,7 +1874,6 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 	char *first;
 	int npulses;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2008,7 +1972,6 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 		fprintf(stderr, "%s     comment:                       %s\n", first, store->comment);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2034,7 +1997,6 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 	double mtodeglon, mtodeglat;
 	double xx;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2107,7 +2069,6 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 		store->bathymetry_calculated = MB_YES;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

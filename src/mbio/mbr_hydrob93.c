@@ -48,7 +48,6 @@ int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hydrob93";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -83,7 +82,6 @@ int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -118,7 +116,6 @@ int mbr_info_hydrob93(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hydrob93";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -141,7 +138,6 @@ int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	/* set number of header records read to zero */
 	mb_io_ptr->save1 = 0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -156,7 +152,6 @@ int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hydrob93";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -170,7 +165,6 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -189,7 +183,6 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int ilongitude, ilatitude, idepth;
 	short itype;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -253,7 +246,6 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->kind = MB_DATA_RAW_LINE;
 
 		if (status == MB_SUCCESS) {
-			/* print output debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Data read in MBIO function <%s>\n", function_name);
 				fprintf(stderr, "dbg4  Values read:\n");
@@ -289,7 +281,6 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = store->kind;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -308,7 +299,6 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int ilongitude, ilatitude, idepth;
 	short itype;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -325,7 +315,6 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* handle the data */
 	if (store->kind == MB_DATA_DATA) {
-		/* print output debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data to be written in MBIO function <%s>\n", function_name);
 			fprintf(stderr, "dbg4  Values,read:\n");
@@ -363,13 +352,11 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		*error = MB_ERROR_WRITE_FAIL;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -385,7 +372,6 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hydrob93";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -425,7 +411,6 @@ int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

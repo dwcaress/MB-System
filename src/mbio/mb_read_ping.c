@@ -41,7 +41,6 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 	int beams_amp;
 	int pixels_ss;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -86,7 +85,6 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 		mb_io_ptr->pixels_ss_max = MAX(mb_io_ptr->pixels_ss_max, pixels_ss);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

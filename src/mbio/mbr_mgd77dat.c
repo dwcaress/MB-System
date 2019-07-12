@@ -43,7 +43,6 @@ int mbr_info_mgd77dat(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_mgd77dat";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -78,7 +77,6 @@ int mbr_info_mgd77dat(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -114,7 +112,6 @@ int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_mgd77dat";
 	struct mbf_mgd77dat_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -167,7 +164,6 @@ int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error) {
 	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -184,7 +180,6 @@ int mbr_alm_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_mgd77dat_struct *data;
 	char *data_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -212,7 +207,6 @@ int mbr_alm_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 	/* initialize everything to zeros */
 	mbr_zero_mgd77dat(verbose, data_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -227,7 +221,6 @@ int mbr_alm_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_mgd77dat";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -242,7 +235,6 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -266,7 +258,6 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int itmp;
 	double dtmp;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -576,7 +567,6 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* shift += 1; */
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -593,7 +583,6 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_mgd77dat_struct *data;
 	struct mbsys_singlebeam_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -654,7 +643,6 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->comment[i] = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -674,7 +662,6 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	int write_len;
 	int shift;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -826,13 +813,11 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -849,7 +834,6 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbf_mgd77dat_struct *data;
 	struct mbsys_singlebeam_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -906,7 +890,6 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* write next data to file */
 	const int status = mbr_mgd77dat_wr_data(verbose, mbio_ptr, (void *)data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -922,7 +905,6 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_mgd77dat";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -962,7 +944,6 @@ int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

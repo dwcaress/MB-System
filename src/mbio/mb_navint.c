@@ -42,7 +42,6 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	char *function_name = "mb_navint_add";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -56,7 +55,6 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Current nav fix values:\n");
 		for (int i = 0; i < mb_io_ptr->nfix; i++)
@@ -99,7 +97,6 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	/* assume success */
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -130,7 +127,6 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 	int ifix = 0;
 	int ifix0, ifix1;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -144,7 +140,6 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Current nav fix values:\n");
 		for (int i = 0; i < mb_io_ptr->nfix; i++)
@@ -255,7 +250,6 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 #endif
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -285,7 +279,6 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 	int ifix = 0;
 	int ifix0, ifix1;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -299,7 +292,6 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Current nav fix values:\n");
 		for (int i = 0; i < mb_io_ptr->nfix; i++)
@@ -405,7 +397,6 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 #endif
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -427,7 +418,6 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	char *function_name = "mb_attint_add";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -481,7 +471,6 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	/* assume success */
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -502,7 +491,6 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	int status = MB_SUCCESS;
 	int shift;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -557,7 +545,6 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	/* assume success */
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -578,7 +565,6 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
 	double factor;
 	int ifix;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -654,7 +640,6 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
 #endif
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -676,7 +661,6 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	char *function_name = "mb_hedint_add";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -721,7 +705,6 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	/* assume success */
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -741,7 +724,6 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	int status = MB_SUCCESS;
 	int shift;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -789,7 +771,6 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	/* assume success */
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -811,7 +792,6 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 	int ifix;
 	double heading1, heading2;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -883,7 +863,6 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 #endif
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -903,7 +882,6 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 	char *function_name = "mb_depint_add";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -949,7 +927,6 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 	/* assume success */
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -970,7 +947,6 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 	double factor;
 	int ifix;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1035,7 +1011,6 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 #endif
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1055,7 +1030,6 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 	char *function_name = "mb_altint_add";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1100,7 +1074,6 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 	/* assume success */
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1121,7 +1094,6 @@ int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitud
 	double factor;
 	int ifix;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1184,7 +1156,6 @@ int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitud
 #endif
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1224,7 +1195,6 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 	double *n_lat;
 	double *n_speed;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1594,7 +1564,6 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1632,7 +1601,6 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 	double *n_time_d;
 	double *n_sensordepth;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1784,7 +1752,6 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1819,7 +1786,6 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 	double *n_time_d;
 	double *n_altitude;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1959,7 +1925,6 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1994,7 +1959,6 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 	double *n_time_d;
 	double *n_heading;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2145,7 +2109,6 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2183,7 +2146,6 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 	double *n_pitch;
 	double *n_heave;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2349,7 +2311,6 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2386,7 +2347,6 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 	double *n_time_d;
 	double *n_soundspeed;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2526,7 +2486,6 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2562,7 +2521,6 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 	double *n_time_d;
 	double *n_timeshift;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2702,7 +2660,6 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2730,7 +2687,6 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 	int interp_error = MB_ERROR_NO_ERROR;
 	int j;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2762,7 +2718,6 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2784,7 +2739,6 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 	double dtime, dtol, filterweight, weight;
 	int nhalffilter;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2821,7 +2775,6 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&data_value_filtered, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");

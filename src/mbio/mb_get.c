@@ -47,7 +47,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 	double headingx, headingy;
 	double denom;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -637,7 +636,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 		mb_io_ptr->error_save = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

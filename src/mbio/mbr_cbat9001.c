@@ -46,7 +46,6 @@ int mbr_info_cbat9001(int verbose, int *system, int *beams_bath_max, int *beams_
 	char *function_name = "mbr_info_cbat9001";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -80,7 +79,6 @@ int mbr_info_cbat9001(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -117,7 +115,6 @@ int mbr_zero_cbat9001(int verbose, void *data_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -240,7 +237,6 @@ int mbr_zero_cbat9001(int verbose, void *data_ptr, int *error) {
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -256,7 +252,6 @@ int mbr_alm_cbat9001(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_cbat9001";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -279,7 +274,6 @@ int mbr_alm_cbat9001(int verbose, void *mbio_ptr, int *error) {
 	/* initialize everything to zeros */
 	mbr_zero_cbat9001(verbose, mb_io_ptr->raw_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -295,7 +289,6 @@ int mbr_dem_cbat9001(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_cbat9001";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -310,7 +303,6 @@ int mbr_dem_cbat9001(int verbose, void *mbio_ptr, int *error) {
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -327,7 +319,6 @@ int mbr_cbat9001_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat90
 	int status = MB_SUCCESS;
 	char line[RESON_COMMENT_SIZE + 3];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -358,7 +349,6 @@ int mbr_cbat9001_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat90
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -376,7 +366,6 @@ int mbr_cbat9001_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 	char line[RESON_PARAMETER_SIZE + 3];
 	short *short_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -515,7 +504,6 @@ int mbr_cbat9001_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		fprintf(stderr, "dbg5       xducer_serial_num:%d\n", data->transducer_serial_number);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -534,7 +522,6 @@ int mbr_cbat9001_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 	short *short_ptr;
 	int *int_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -630,7 +617,6 @@ int mbr_cbat9001_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		fprintf(stderr, "dbg5       other_quality:    %d\n", data->other_quality);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -650,7 +636,6 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 	short *short_ptr2;
 	int *int_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -727,7 +712,6 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -747,7 +731,6 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 	short *short_ptr2;
 	int *int_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -824,7 +807,6 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 			fprintf(stderr, "dbg5       depth: %d     vel: %d\n", data->svp_depth[i], data->svp_vel[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -845,7 +827,6 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 	short *short_ptr;
 	int *int_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -987,7 +968,6 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 			        data->quality[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1011,7 +991,6 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char label[2];
 	char label_save[2];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1153,7 +1132,6 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1174,7 +1152,6 @@ int mbr_rt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double time_d;
 	double lon, lat, heading, speed;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1331,7 +1308,6 @@ int mbr_rt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1351,7 +1327,6 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 	short label;
 	int len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1408,7 +1383,6 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1428,7 +1402,6 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 	short label;
 	short *short_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1587,7 +1560,6 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1608,7 +1580,6 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	short *short_ptr;
 	int *int_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1724,7 +1695,6 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1748,7 +1718,6 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	short *short_ptr2;
 	int *int_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1860,7 +1829,6 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1883,7 +1851,6 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 	short *short_ptr;
 	int *int_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2045,7 +2012,6 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2063,7 +2029,6 @@ int mbr_cbat9001_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mbf_cbat9001_struct *data;
 	FILE *mbfp;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2099,13 +2064,11 @@ int mbr_cbat9001_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		*error = MB_ERROR_BAD_KIND;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2124,7 +2087,6 @@ int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *data_ptr;
 	struct mbsys_reson_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2248,7 +2210,6 @@ int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* write next data to file */
 	status = mbr_cbat9001_wr_data(verbose, mbio_ptr, data_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2265,7 +2226,6 @@ int mbr_register_cbat9001(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_cbat9001";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2305,7 +2265,6 @@ int mbr_register_cbat9001(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

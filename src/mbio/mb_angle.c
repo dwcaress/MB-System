@@ -191,7 +191,6 @@
 int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error) {
 	char *function_name = "mb_takeoff_to_rollpitch";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -215,7 +214,6 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -232,7 +230,6 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *theta, double *phi, int *error) {
 	char *function_name = "mb_rollpitch_to_takeoff";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -262,7 +259,6 @@ int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *thet
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -279,7 +275,6 @@ int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *thet
 int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, double *phi, int *error) {
 	char *function_name = "mb_xyz_to_takeoff";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -317,7 +312,6 @@ int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, 
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -336,7 +330,6 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
              double vru_pitch, double vru_roll, double *lever_x, double *lever_y, double *lever_z, int *error) {
 	char *function_name = "mb_lever";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -436,7 +429,6 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -492,7 +484,6 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
                 double *beamAzimuth, double *beamDepression, int *error) {
 	char *function_name = "mb_beaudoin";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -652,7 +643,6 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -671,7 +661,6 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotate, mb_3D_vector *final, int *error) {
 	char *function_name = "mb_beaudoin_unrotate";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -701,7 +690,6 @@ int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotat
 	*error = MB_ERROR_NO_ERROR;
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

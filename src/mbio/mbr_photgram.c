@@ -138,7 +138,6 @@ int mbr_info_photgram(int verbose, int *system, int *beams_bath_max, int *beams_
 	char *function_name = "mbr_info_photgram";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -173,7 +172,6 @@ int mbr_info_photgram(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -209,7 +207,6 @@ int mbr_alm_photgram(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_photgram";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -228,7 +225,6 @@ int mbr_alm_photgram(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->data_structure_size = 0;
 	status = mbsys_stereopair_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -244,7 +240,6 @@ int mbr_dem_photgram(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_photgram";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -258,7 +253,6 @@ int mbr_dem_photgram(int verbose, void *mbio_ptr, int *error) {
 	/* deallocate memory for data descriptor */
 	status = mbsys_stereopair_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -285,7 +279,6 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int index;
 	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -565,7 +558,6 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -582,7 +574,6 @@ int mbr_rt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -612,7 +603,6 @@ int mbr_rt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	fprintf(stderr, "Done with mbr_photgram_rd_data: status:%d error:%d record kind:%d\n", status, *error, store->kind);
 #endif
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -637,7 +627,6 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int swap = MB_YES;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -852,7 +841,6 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr, "PHOTGRAM DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
 #endif
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -869,7 +857,6 @@ int mbr_wt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -895,7 +882,6 @@ int mbr_wt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	fprintf(stderr, "Done with mbr_photgram_wr_data: status:%d error:%d\n", status, *error);
 #endif
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -912,7 +898,6 @@ int mbr_register_photgram(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_photgram";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -962,7 +947,6 @@ int mbr_register_photgram(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_ctd = NULL;
 	mb_io_ptr->mb_io_ancilliarysensor = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

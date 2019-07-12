@@ -57,7 +57,6 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	int nscan;
 	char *stdin_string = "stdin";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -624,7 +623,6 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -675,7 +673,6 @@ int mb_input_init(int verbose, char *file, int format,
 	int nscan;
 	char *stdin_string = "stdin";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1085,7 +1082,6 @@ int mb_input_init(int verbose, char *file, int format,
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

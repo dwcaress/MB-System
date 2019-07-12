@@ -40,7 +40,6 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	struct mbsys_navnetcdf_struct *store;
 	char c;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -344,7 +343,6 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		store->mbHistComment = NULL;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -362,7 +360,6 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -394,7 +391,6 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -412,7 +408,6 @@ int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -446,7 +441,6 @@ int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -470,7 +464,6 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -574,7 +567,6 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -614,7 +606,6 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -671,7 +662,6 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 		strcpy(store->comment, comment);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -690,7 +680,6 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -738,7 +727,6 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -766,7 +754,6 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -811,7 +798,6 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -837,7 +823,6 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -880,7 +865,6 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -901,7 +885,6 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -943,7 +926,6 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -962,7 +944,6 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1048,7 +1029,6 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1088,7 +1068,6 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1141,7 +1120,6 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 		/* get roll pitch and heave */
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1159,7 +1137,6 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 	struct mbsys_navnetcdf_struct *store;
 	struct mbsys_navnetcdf_struct *copy;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1517,7 +1494,6 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 			copy->comment[i] = store->comment[i];
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

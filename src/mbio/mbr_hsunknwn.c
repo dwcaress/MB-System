@@ -81,7 +81,6 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_hsunknwn";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -116,7 +115,6 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -151,7 +149,6 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
 int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_alm_hsunknwn";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -165,7 +162,6 @@ int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -180,7 +176,6 @@ int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_hsunknwn";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -195,7 +190,6 @@ int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -214,7 +208,6 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *result;
 	double value;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -395,7 +388,6 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -412,7 +404,6 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_hsds_struct *store;
 	double value;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -520,7 +511,6 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", function_name);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -536,7 +526,6 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_hsunknwn";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -576,7 +565,6 @@ int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

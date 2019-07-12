@@ -51,7 +51,6 @@ int mbr_info_em12ifrm(int verbose, int *system, int *beams_bath_max, int *beams_
                       double *beamwidth_ltrack, int *error) {
 	char *function_name = "mbr_info_em12ifrm";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -87,7 +86,6 @@ int mbr_info_em12ifrm(int verbose, int *system, int *beams_bath_max, int *beams_
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -123,7 +121,6 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 	char *function_name = "mbr_zero_em12ifrm";
 	struct mbf_em12ifrm_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -258,7 +255,6 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -282,7 +278,6 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	double *pixel_size;
 	double *swath_width;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -393,7 +388,6 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -408,7 +402,6 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_dem_em12ifrm";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -423,7 +416,6 @@ int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status &= mbsys_simrad_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -468,7 +460,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int latdeg, londeg;
 	double latmin, lonmin;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -948,7 +939,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->new_kind = data->kind;
 	mb_io_ptr->new_error = *error;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -973,7 +963,6 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double plon, plat, pspeed;
 	double *pixel_size, *swath_width;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1191,7 +1180,6 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1210,7 +1198,6 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1356,7 +1343,6 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* write next data to file */
 	/*status = mbr_em12ifrm_wr_data(verbose,mbio_ptr,data_ptr,error);*/
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1378,7 +1364,6 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	char char_value;
 	int len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1560,7 +1545,6 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", function_name);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1576,7 +1560,6 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	char *function_name = "mbr_register_em12ifrm";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1617,7 +1600,6 @@ int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");

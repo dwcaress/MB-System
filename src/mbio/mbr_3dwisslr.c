@@ -47,7 +47,6 @@ int mbr_info_3dwisslr(int verbose, int *system, int *beams_bath_max, int *beams_
   char *function_name = "mbr_info_3dwisslr";
   int status = MB_SUCCESS;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -83,7 +82,6 @@ int mbr_info_3dwisslr(int verbose, int *system, int *beams_bath_max, int *beams_
   *beamwidth_xtrack = 0.02;
   *beamwidth_ltrack = 0.02;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -121,7 +119,6 @@ int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   int *file_header_readwritten;
   int *file_indexed;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -152,7 +149,6 @@ int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   file_indexed = (int *)&mb_io_ptr->save2;
     *file_indexed = MB_NO;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -168,7 +164,6 @@ int mbr_dem_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_dem_3dwisslr";
   int status = MB_SUCCESS;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -200,7 +195,6 @@ int mbr_dem_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   /* deallocate memory  */
   status = mbsys_3ddwissl_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -218,7 +212,6 @@ int mbr_3dwisslr_fixtimestamps(int verbose, void *mbio_ptr,
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -245,7 +238,6 @@ int mbr_3dwisslr_fixtimestamps(int verbose, void *mbio_ptr,
     /* correct timestamps in the file's internal index table using information
      * supplied in the external index table */
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -292,7 +284,6 @@ int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   double last_A_time_d, last_B_time_d = 0.0;
 #endif
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -639,7 +630,6 @@ mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size);
 #endif
     }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -667,7 +657,6 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int time_j[5];
   int found;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1145,7 +1134,6 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   if (verbose >= 3 && status == MB_SUCCESS)
     mbsys_3ddwissl_print_store(verbose, store_ptr, error);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1163,7 +1151,6 @@ int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   struct mbsys_3ddwissl_struct *store;
   int *file_indexed;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1206,7 +1193,6 @@ int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   mb_io_ptr->new_error = *error;
   mb_io_ptr->new_kind = store->kind;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1230,7 +1216,6 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   size_t write_len;
   size_t index;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1253,7 +1238,6 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   /* set file position */
   mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
 
-  /* print output debug statements */
   if (verbose >= 4) {
     fprintf(stderr, "\ndbg4  Data record kind in MBIO function <%s>\n", function_name);
     fprintf(stderr, "dbg4       kind:       %d\n", store->kind);
@@ -1742,7 +1726,6 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 //__FILE__, __FUNCTION__, __LINE__, write_len, store->pulse_count, store->time_d);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1759,7 +1742,6 @@ int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1779,7 +1761,6 @@ int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   /* write next data to file */
   status = mbr_3dwisslr_wr_data(verbose, mbio_ptr, store_ptr, error);
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1795,7 +1776,6 @@ int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   char *function_name = "mbr_register_3dwisslr";
   int status = MB_SUCCESS;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1842,7 +1822,6 @@ int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_indextablefix = mbsys_3ddwissl_indextablefix;
   mb_io_ptr->mb_io_indextableapply = mbsys_3ddwissl_indextableapply;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
     fprintf(stderr, "dbg2  Return values:\n");

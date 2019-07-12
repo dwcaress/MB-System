@@ -40,7 +40,6 @@ int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -67,7 +66,6 @@ int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 
 	/* initialize everything else */
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -85,7 +83,6 @@ int mbsys_templatesystem_deall(int verbose, void *mbio_ptr, void **store_ptr, in
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -102,7 +99,6 @@ int mbsys_templatesystem_deall(int verbose, void *mbio_ptr, void **store_ptr, in
 	/* deallocate memory for data structure */
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -121,7 +117,6 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -153,7 +148,6 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 		*nss = 0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -174,7 +168,6 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *p
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -191,7 +184,6 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *p
 	/* extract data from structure */
 	*pingnumber = store->ping_number;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -209,7 +201,6 @@ int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -227,7 +218,6 @@ int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	/* get sonar type */
 	*sonartype = MB_SONARTYPE_MULTIBEAM;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -245,7 +235,6 @@ int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_p
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -263,7 +252,6 @@ int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_p
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LINEAR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -284,7 +272,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -478,7 +465,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -534,7 +520,6 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -648,7 +633,6 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 		strncpy(store->comment, comment, MB_COMMENT_MAXLINE);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -669,7 +653,6 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 	double heave_use, roll, pitch;
 	double alpha, beta, theta, phi;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -733,7 +716,6 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -761,7 +743,6 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -813,7 +794,6 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -839,7 +819,6 @@ int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -889,7 +868,6 @@ int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -918,7 +896,6 @@ int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *sto
 	double xtrackmin;
 	int altitude_found;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -965,7 +942,6 @@ int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *sto
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -987,7 +963,6 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1087,7 +1062,6 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 		*time_d = store->time_d;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1124,7 +1098,6 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 	struct mbsys_templatesystem_struct *store;
 	int inav;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1232,7 +1205,6 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 		time_d[0] = store->time_d;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1266,7 +1238,6 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1353,7 +1324,6 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 		store->roll = roll;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1371,7 +1341,6 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1417,7 +1386,6 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1440,7 +1408,6 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 	struct mbsys_templatesystem_struct *store;
 	s7kr_svp *svp;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1470,7 +1437,6 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1488,7 +1454,6 @@ int mbsys_templatesystem_copy(int verbose, void *mbio_ptr, void *store_ptr, void
 	struct mbsys_templatesystem_struct *store;
 	struct mbsys_templatesystem_struct *copy;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1509,7 +1474,6 @@ int mbsys_templatesystem_copy(int verbose, void *mbio_ptr, void *store_ptr, void
 	    sub-structures copied separately */
 	*copy = *store;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
