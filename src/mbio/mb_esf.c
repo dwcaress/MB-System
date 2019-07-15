@@ -41,7 +41,7 @@ void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, int (*cmp)(
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
 int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *error) {
-	char *function_name = "mb_esf_check";
+	static const char function_name[] = "mb_esf_check";
 	int status = MB_SUCCESS;
 	int mbp_edit_mode;
 	char mbp_editfile[MB_PATH_MAXLINE];
@@ -95,7 +95,7 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
         done. */
 int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
                 int *error) {
-	char *function_name = "mb_esf_load";
+	static const char function_name[] = "mb_esf_load";
 	int status = MB_SUCCESS;
 	int found;
 
@@ -162,7 +162,7 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
             to any existing esf file. Any
             existing esf file will be backed up first. */
 int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error) {
-	char *function_name = "mb_esf_open";
+	static const char function_name[] = "mb_esf_open";
 	int status = MB_SUCCESS;
 	char command[MB_PATH_MAXLINE];
 	FILE *esffp;
@@ -430,7 +430,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
         being extracted from one version of a dataset and applied to
         another. */
 int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, double tolerance, int *error) {
-	char *function_name = "mb_esf_fixtimestamps";
+	static const char function_name[] = "mb_esf_fixtimestamps";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -474,7 +474,7 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
     are saved to that file.  */
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int pingmultiplicity, int nbath, char *beamflag,
                  int *error) {
-	char *function_name = "mb_esf_apply";
+	static const char function_name[] = "mb_esf_apply";
 	int status = MB_SUCCESS;
 	int firstedit, lastedit;
 	int apply, action;
@@ -676,7 +676,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_save saves one edit event to an esf file. */
 int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error) {
-	char *function_name = "mb_esf_save";
+	static const char function_name[] = "mb_esf_save";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -731,7 +731,7 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 /*--------------------------------------------------------------------*/
 /* 	function mb_ess_save saves one edit event to an edit save stream file. */
 int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error) {
-	char *function_name = "mb_ess_save";
+	static const char function_name[] = "mb_ess_save";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -786,7 +786,7 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_close deallocates memory in the esf structure. */
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
-	char *function_name = "mb_esf_close";
+	static const char function_name[] = "mb_esf_close";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

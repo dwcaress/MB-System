@@ -39,7 +39,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_hysweep_alloc";
+	static const char function_name[] = "mbsys_hysweep_alloc";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
@@ -611,7 +611,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_hysweep_deall";
+	static const char function_name[] = "mbsys_hysweep_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -705,7 +705,7 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-	char *function_name = "mbsys_hysweep_dimensions";
+	static const char function_name[] = "mbsys_hysweep_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -759,7 +759,7 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	char *function_name = "mbsys_hysweep_pingnumber";
+	static const char function_name[] = "mbsys_hysweep_pingnumber";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -792,7 +792,7 @@ int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	char *function_name = "mbsys_hysweep_sonartype";
+	static const char function_name[] = "mbsys_hysweep_sonartype";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -908,7 +908,7 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	char *function_name = "mbsys_hysweep_sidescantype";
+	static const char function_name[] = "mbsys_hysweep_sidescantype";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -947,7 +947,7 @@ int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-	char *function_name = "mbsys_hysweep_extract_platform";
+	static const char function_name[] = "mbsys_hysweep_extract_platform";
 	int status = MB_SUCCESS;
 	struct mb_platform_struct *platform;
 	struct mbsys_hysweep_struct *store;
@@ -1288,7 +1288,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_hysweep_extract";
+	static const char function_name[] = "mbsys_hysweep_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -1569,7 +1569,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_hysweep_insert";
+	static const char function_name[] = "mbsys_hysweep_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -1729,7 +1729,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	char *function_name = "mbsys_hysweep_ttimes";
+	static const char function_name[] = "mbsys_hysweep_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
@@ -1846,7 +1846,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_hysweep_detects";
+	static const char function_name[] = "mbsys_hysweep_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -1918,7 +1918,7 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error) {
-	char *function_name = "mbsys_hysweep_gains";
+	static const char function_name[] = "mbsys_hysweep_gains";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -1992,7 +1992,7 @@ int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitudev, int *error) {
-	char *function_name = "mbsys_hysweep_extract_altitude";
+	static const char function_name[] = "mbsys_hysweep_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	double xtrackmin;
@@ -2079,7 +2079,7 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_hysweep_extract_nav";
+	static const char function_name[] = "mbsys_hysweep_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -2260,7 +2260,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-	char *function_name = "mbsys_hysweep_insert_nav";
+	static const char function_name[] = "mbsys_hysweep_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 
@@ -2357,7 +2357,7 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_hysweep_copy";
+	static const char function_name[] = "mbsys_hysweep_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_struct *copy;
@@ -2456,7 +2456,7 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-	char *function_name = "mbsys_hysweep_makess";
+	static const char function_name[] = "mbsys_hysweep_makess";
 	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	int nbathsort;

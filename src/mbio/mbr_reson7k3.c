@@ -51,7 +51,7 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-  char *function_name = "mbr_info_reson7k3";
+  static const char function_name[] = "mbr_info_reson7k3";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -120,7 +120,7 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_alm_reson7k3";
+  static const char function_name[] = "mbr_alm_reson7k3";
   int status = MB_SUCCESS;
   int *current_ping;
   int *last_ping;
@@ -217,7 +217,7 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
-  char *function_name = "mbr_reson7k3_wr_header";
+  static const char function_name[] = "mbr_reson7k3_wr_header";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -301,7 +301,7 @@ int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *h
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_FileCatalog";
+  static const char function_name[] = "mbr_reson7k3_wr_FileCatalog";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -430,7 +430,7 @@ int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_dem_reson7k3";
+  static const char function_name[] = "mbr_dem_reson7k3";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   char **bufferptr = NULL;
@@ -555,7 +555,7 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid,
                             int *deviceid, unsigned short *enumerator, int *size) {
-  char *function_name = "mbr_reson7k3_chk_label";
+  static const char function_name[] = "mbr_reson7k3_chk_label";
   int status = MB_SUCCESS;
   unsigned short version;
   unsigned short offset;
@@ -851,7 +851,7 @@ int mbr_reson7k3_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_chk_pingnumber(int verbose, int recordid, char *buffer, int *ping_number) {
-  char *function_name = "mbr_reson7k3_chk_pingnumber";
+  static const char function_name[] = "mbr_reson7k3_chk_pingnumber";
   unsigned short offset;
   int index;
 
@@ -1008,7 +1008,7 @@ int mbr_reson7k3_chk_pingnumber(int verbose, int recordid, char *buffer, int *pi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
-  char *function_name = "mbr_reson7k3_rd_header";
+  static const char function_name[] = "mbr_reson7k3_rd_header";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -1082,7 +1082,7 @@ int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *h
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_ReferencePoint";
+  static const char function_name[] = "mbr_reson7k3_rd_ReferencePoint";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1164,7 +1164,7 @@ int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_UncalibratedSensorOffset";
+  static const char function_name[] = "mbr_reson7k3_rd_UncalibratedSensorOffset";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1250,7 +1250,7 @@ int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_CalibratedSensorOffset";
+  static const char function_name[] = "mbr_reson7k3_rd_CalibratedSensorOffset";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1336,7 +1336,7 @@ int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Position";
+  static const char function_name[] = "mbr_reson7k3_rd_Position";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1430,7 +1430,7 @@ int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_CustomAttitude";
+  static const char function_name[] = "mbr_reson7k3_rd_CustomAttitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1581,7 +1581,7 @@ int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Tide";
+  static const char function_name[] = "mbr_reson7k3_rd_Tide";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1677,7 +1677,7 @@ int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Altitude";
+  static const char function_name[] = "mbr_reson7k3_rd_Altitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1753,7 +1753,7 @@ int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_MotionOverGround";
+  static const char function_name[] = "mbr_reson7k3_rd_MotionOverGround";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1888,7 +1888,7 @@ int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Depth";
+  static const char function_name[] = "mbr_reson7k3_rd_Depth";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -1970,7 +1970,7 @@ int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_SoundVelocityProfile";
+  static const char function_name[] = "mbr_reson7k3_rd_SoundVelocityProfile";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2079,7 +2079,7 @@ int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_CTD";
+  static const char function_name[] = "mbr_reson7k3_rd_CTD";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2212,7 +2212,7 @@ int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Geodesy";
+  static const char function_name[] = "mbr_reson7k3_rd_Geodesy";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2348,7 +2348,7 @@ int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_RollPitchHeave";
+  static const char function_name[] = "mbr_reson7k3_rd_RollPitchHeave";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2428,7 +2428,7 @@ int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Heading";
+  static const char function_name[] = "mbr_reson7k3_rd_Heading";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2504,7 +2504,7 @@ int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_SurveyLine";
+  static const char function_name[] = "mbr_reson7k3_rd_SurveyLine";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2611,7 +2611,7 @@ int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Navigation";
+  static const char function_name[] = "mbr_reson7k3_rd_Navigation";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2703,7 +2703,7 @@ int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Attitude";
+  static const char function_name[] = "mbr_reson7k3_rd_Attitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2816,7 +2816,7 @@ int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *er
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_PanTilt";
+  static const char function_name[] = "mbr_reson7k3_rd_PanTilt";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2856,7 +2856,7 @@ int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *err
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_SonarInstallationIDs";
+  static const char function_name[] = "mbr_reson7k3_rd_SonarInstallationIDs";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2896,7 +2896,7 @@ int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Mystery";
+  static const char function_name[] = "mbr_reson7k3_rd_Mystery";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -2974,7 +2974,7 @@ int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_SonarPipeEnvironment";
+  static const char function_name[] = "mbr_reson7k3_rd_SonarPipeEnvironment";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3014,7 +3014,7 @@ int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_ContactOutput";
+  static const char function_name[] = "mbr_reson7k3_rd_ContactOutput";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3053,7 +3053,7 @@ int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_ProcessedSideScan";
+  static const char function_name[] = "mbr_reson7k3_rd_ProcessedSideScan";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3158,7 +3158,7 @@ int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_SonarSettings";
+  static const char function_name[] = "mbr_reson7k3_rd_SonarSettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3310,7 +3310,7 @@ int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Configuration";
+  static const char function_name[] = "mbr_reson7k3_rd_Configuration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3425,7 +3425,7 @@ int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_MatchFilter";
+  static const char function_name[] = "mbr_reson7k3_rd_MatchFilter";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3519,7 +3519,7 @@ int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_FirmwareHardwareConfiguration";
+  static const char function_name[] = "mbr_reson7k3_rd_FirmwareHardwareConfiguration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3617,7 +3617,7 @@ int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_BeamGeometry";
+  static const char function_name[] = "mbr_reson7k3_rd_BeamGeometry";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3713,7 +3713,7 @@ int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Bathymetry";
+  static const char function_name[] = "mbr_reson7k3_rd_Bathymetry";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -3896,7 +3896,7 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_SideScan";
+  static const char function_name[] = "mbr_reson7k3_rd_SideScan";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -4077,7 +4077,7 @@ int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_WaterColumn";
+  static const char function_name[] = "mbr_reson7k3_rd_WaterColumn";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -4291,7 +4291,7 @@ int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_VerticalDepth(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_VerticalDepth";
+  static const char function_name[] = "mbr_reson7k3_rd_VerticalDepth";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -4383,7 +4383,7 @@ int mbr_reson7k3_rd_VerticalDepth(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_TVG(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_TVG";
+  static const char function_name[] = "mbr_reson7k3_rd_TVG";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -4484,7 +4484,7 @@ int mbr_reson7k3_rd_TVG(int verbose, char *buffer, void *store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Image(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Image";
+  static const char function_name[] = "mbr_reson7k3_rd_Image";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -4622,7 +4622,7 @@ int mbr_reson7k3_rd_Image(int verbose, char *buffer, void *store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_PingMotion";
+  static const char function_name[] = "mbr_reson7k3_rd_PingMotion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -4769,7 +4769,7 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_AdaptiveGate(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_AdaptiveGate";
+  static const char function_name[] = "mbr_reson7k3_rd_AdaptiveGate";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -4809,7 +4809,7 @@ int mbr_reson7k3_rd_AdaptiveGate(int verbose, char *buffer, void *store_ptr, int
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_DetectionDataSetup(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_DetectionDataSetup";
+  static const char function_name[] = "mbr_reson7k3_rd_DetectionDataSetup";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -4951,7 +4951,7 @@ int mbr_reson7k3_rd_DetectionDataSetup(int verbose, char *buffer, void *store_pt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Beamformed";
+  static const char function_name[] = "mbr_reson7k3_rd_Beamformed";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5072,7 +5072,7 @@ int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_VernierProcessingDataRaw(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_VernierProcessingDataRaw";
+  static const char function_name[] = "mbr_reson7k3_rd_VernierProcessingDataRaw";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5112,7 +5112,7 @@ int mbr_reson7k3_rd_VernierProcessingDataRaw(int verbose, char *buffer, void *st
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_BITE";
+  static const char function_name[] = "mbr_reson7k3_rd_BITE";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5284,7 +5284,7 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarSourceVersion(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_SonarSourceVersion";
+  static const char function_name[] = "mbr_reson7k3_rd_SonarSourceVersion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5362,7 +5362,7 @@ int mbr_reson7k3_rd_SonarSourceVersion(int verbose, char *buffer, void *store_pt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_WetEndVersion8k(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_WetEndVersion8k";
+  static const char function_name[] = "mbr_reson7k3_rd_WetEndVersion8k";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5440,7 +5440,7 @@ int mbr_reson7k3_rd_WetEndVersion8k(int verbose, char *buffer, void *store_ptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RawDetection(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_RawDetection";
+  static const char function_name[] = "mbr_reson7k3_rd_RawDetection";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5627,7 +5627,7 @@ int mbr_reson7k3_rd_RawDetection(int verbose, char *buffer, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_Snippet";
+  static const char function_name[] = "mbr_reson7k3_rd_Snippet";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5809,7 +5809,7 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_VernierProcessingDataFiltered(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_VernierProcessingDataFiltered";
+  static const char function_name[] = "mbr_reson7k3_rd_VernierProcessingDataFiltered";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5849,7 +5849,7 @@ int mbr_reson7k3_rd_VernierProcessingDataFiltered(int verbose, char *buffer, voi
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_InstallationParameters(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_InstallationParameters";
+  static const char function_name[] = "mbr_reson7k3_rd_InstallationParameters";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -5997,7 +5997,7 @@ int mbr_reson7k3_rd_InstallationParameters(int verbose, char *buffer, void *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_BITESummary(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_BITESummary";
+  static const char function_name[] = "mbr_reson7k3_rd_BITESummary";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6037,7 +6037,7 @@ int mbr_reson7k3_rd_BITESummary(int verbose, char *buffer, void *store_ptr, int 
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_CompressedBeamformedMagnitude";
+  static const char function_name[] = "mbr_reson7k3_rd_CompressedBeamformedMagnitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6077,7 +6077,7 @@ int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, voi
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_CompressedWaterColumn";
+  static const char function_name[] = "mbr_reson7k3_rd_CompressedWaterColumn";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6301,7 +6301,7 @@ char *first = "TEST";
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_SegmentedRawDetection";
+  static const char function_name[] = "mbr_reson7k3_rd_SegmentedRawDetection";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6517,7 +6517,7 @@ int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibratedBeam(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_CalibratedBeam";
+  static const char function_name[] = "mbr_reson7k3_rd_CalibratedBeam";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6557,7 +6557,7 @@ int mbr_reson7k3_rd_CalibratedBeam(int verbose, char *buffer, void *store_ptr, i
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SystemEvents(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_SystemEvents";
+  static const char function_name[] = "mbr_reson7k3_rd_SystemEvents";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6597,7 +6597,7 @@ int mbr_reson7k3_rd_SystemEvents(int verbose, char *buffer, void *store_ptr, int
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SystemEventMessage(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_SystemEventMessage";
+  static const char function_name[] = "mbr_reson7k3_rd_SystemEventMessage";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6699,7 +6699,7 @@ int mbr_reson7k3_rd_SystemEventMessage(int verbose, char *buffer, void *store_pt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RDRRecordingStatus(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_RDRRecordingStatus";
+  static const char function_name[] = "mbr_reson7k3_rd_RDRRecordingStatus";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6739,7 +6739,7 @@ int mbr_reson7k3_rd_RDRRecordingStatus(int verbose, char *buffer, void *store_pt
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Subscriptions(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_Subscriptions";
+  static const char function_name[] = "mbr_reson7k3_rd_Subscriptions";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6779,7 +6779,7 @@ int mbr_reson7k3_rd_Subscriptions(int verbose, char *buffer, void *store_ptr, in
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RDRStorageRecording(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_RDRStorageRecording";
+  static const char function_name[] = "mbr_reson7k3_rd_RDRStorageRecording";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6819,7 +6819,7 @@ int mbr_reson7k3_rd_RDRStorageRecording(int verbose, char *buffer, void *store_p
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibrationStatus(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_CalibrationStatus";
+  static const char function_name[] = "mbr_reson7k3_rd_CalibrationStatus";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6859,7 +6859,7 @@ int mbr_reson7k3_rd_CalibrationStatus(int verbose, char *buffer, void *store_ptr
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibratedSideScan(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_CalibratedSideScan";
+  static const char function_name[] = "mbr_reson7k3_rd_CalibratedSideScan";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6899,7 +6899,7 @@ int mbr_reson7k3_rd_CalibratedSideScan(int verbose, char *buffer, void *store_pt
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SnippetBackscatteringStrength(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_SnippetBackscatteringStrength";
+  static const char function_name[] = "mbr_reson7k3_rd_SnippetBackscatteringStrength";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6939,7 +6939,7 @@ int mbr_reson7k3_rd_SnippetBackscatteringStrength(int verbose, char *buffer, voi
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_MB2Status(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_MB2Status";
+  static const char function_name[] = "mbr_reson7k3_rd_MB2Status";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -6979,7 +6979,7 @@ int mbr_reson7k3_rd_MB2Status(int verbose, char *buffer, void *store_ptr, int *e
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_FileHeader";
+  static const char function_name[] = "mbr_reson7k3_rd_FileHeader";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -7108,7 +7108,7 @@ int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_chk_pingrecord(int verbose, int recordid, int *pingrecord) {
-  char *function_name = "mbr_reson7k3_chk_pingrecord";
+  static const char function_name[] = "mbr_reson7k3_chk_pingrecord";
 
   assert(pingrecord != NULL);
 
@@ -7363,7 +7363,7 @@ int mbr_reson7k3_FileCatalog_compare(const void *a, const void *b) {
 };
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_FileCatalog";
+  static const char function_name[] = "mbr_reson7k3_rd_FileCatalog";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -7508,7 +7508,7 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_TimeMessage(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_TimeMessage";
+  static const char function_name[] = "mbr_reson7k3_rd_TimeMessage";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -7548,7 +7548,7 @@ int mbr_reson7k3_rd_TimeMessage(int verbose, char *buffer, void *store_ptr, int 
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RemoteControl(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_RemoteControl";
+  static const char function_name[] = "mbr_reson7k3_rd_RemoteControl";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -7588,7 +7588,7 @@ int mbr_reson7k3_rd_RemoteControl(int verbose, char *buffer, void *store_ptr, in
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RemoteControlAcknowledge(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_RemoteControlAcknowledge";
+  static const char function_name[] = "mbr_reson7k3_rd_RemoteControlAcknowledge";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -7628,7 +7628,7 @@ int mbr_reson7k3_rd_RemoteControlAcknowledge(int verbose, char *buffer, void *st
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RemoteControlNotAcknowledge(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_RemoteControlNotAcknowledge";
+  static const char function_name[] = "mbr_reson7k3_rd_RemoteControlNotAcknowledge";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -7668,7 +7668,7 @@ int mbr_reson7k3_rd_RemoteControlNotAcknowledge(int verbose, char *buffer, void 
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_RemoteControlSonarSettings";
+  static const char function_name[] = "mbr_reson7k3_rd_RemoteControlSonarSettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -7883,7 +7883,7 @@ int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_CommonSystemSettings";
+  static const char function_name[] = "mbr_reson7k3_rd_CommonSystemSettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -8079,7 +8079,7 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SVFiltering(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_SVFiltering";
+  static const char function_name[] = "mbr_reson7k3_rd_SVFiltering";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -8119,7 +8119,7 @@ int mbr_reson7k3_rd_SVFiltering(int verbose, char *buffer, void *store_ptr, int 
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SystemLockStatus(int verbose, char *buffer, void *store_ptr, int *error){
-  char *function_name = "mbr_reson7k3_rd_SystemLockStatus";
+  static const char function_name[] = "mbr_reson7k3_rd_SystemLockStatus";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -8159,7 +8159,7 @@ int mbr_reson7k3_rd_SystemLockStatus(int verbose, char *buffer, void *store_ptr,
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SoundVelocity(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_SoundVelocity";
+  static const char function_name[] = "mbr_reson7k3_rd_SoundVelocity";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -8235,7 +8235,7 @@ int mbr_reson7k3_rd_SoundVelocity(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_AbsorptionLoss(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_AbsorptionLoss";
+  static const char function_name[] = "mbr_reson7k3_rd_AbsorptionLoss";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -8311,7 +8311,7 @@ int mbr_reson7k3_rd_AbsorptionLoss(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_SpreadingLoss";
+  static const char function_name[] = "mbr_reson7k3_rd_SpreadingLoss";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   struct mbsys_reson7k3_struct *ostore = NULL;
@@ -8388,7 +8388,7 @@ int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_rd_data";
+  static const char function_name[] = "mbr_reson7k3_rd_data";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -9543,7 +9543,7 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_rt_reson7k3";
+  static const char function_name[] = "mbr_rt_reson7k3";
   int status = MB_SUCCESS;
   int interp_status;
   int interp_error = MB_ERROR_NO_ERROR;
@@ -9930,7 +9930,7 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr, int size, void *header_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_FileCatalog_update";
+  static const char function_name[] = "mbr_reson7k3_FileCatalog_update";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10020,7 +10020,7 @@ fprintf(stderr, "^^>Update FileCatalog list: File %s Line %d type:%d n:%d\n", __
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_ReferencePoint(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_ReferencePoint";
+  static const char function_name[] = "mbr_reson7k3_wr_ReferencePoint";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10118,7 +10118,7 @@ int mbr_reson7k3_wr_ReferencePoint(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_UncalibratedSensorOffset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_UncalibratedSensorOffset";
+  static const char function_name[] = "mbr_reson7k3_wr_UncalibratedSensorOffset";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10221,7 +10221,7 @@ int mbr_reson7k3_wr_UncalibratedSensorOffset(int verbose, int *bufferalloc, char
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CalibratedSensorOffset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CalibratedSensorOffset";
+  static const char function_name[] = "mbr_reson7k3_wr_CalibratedSensorOffset";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10324,7 +10324,7 @@ int mbr_reson7k3_wr_CalibratedSensorOffset(int verbose, int *bufferalloc, char *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Position(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Position";
+  static const char function_name[] = "mbr_reson7k3_wr_Position";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10435,7 +10435,7 @@ int mbr_reson7k3_wr_Position(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CustomAttitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CustomAttitude";
+  static const char function_name[] = "mbr_reson7k3_wr_CustomAttitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10591,7 +10591,7 @@ int mbr_reson7k3_wr_CustomAttitude(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Tide";
+  static const char function_name[] = "mbr_reson7k3_wr_Tide";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10704,7 +10704,7 @@ int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Altitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Altitude";
+  static const char function_name[] = "mbr_reson7k3_wr_Altitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10797,7 +10797,7 @@ int mbr_reson7k3_wr_Altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_MotionOverGround(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_MotionOverGround";
+  static const char function_name[] = "mbr_reson7k3_wr_MotionOverGround";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -10929,7 +10929,7 @@ int mbr_reson7k3_wr_MotionOverGround(int verbose, int *bufferalloc, char **buffe
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Depth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Depth";
+  static const char function_name[] = "mbr_reson7k3_wr_Depth";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11028,7 +11028,7 @@ int mbr_reson7k3_wr_Depth(int verbose, int *bufferalloc, char **bufferptr, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SoundVelocityProfile(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SoundVelocityProfile";
+  static const char function_name[] = "mbr_reson7k3_wr_SoundVelocityProfile";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11139,7 +11139,7 @@ int mbr_reson7k3_wr_SoundVelocityProfile(int verbose, int *bufferalloc, char **b
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CTD(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CTD";
+  static const char function_name[] = "mbr_reson7k3_wr_CTD";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11268,7 +11268,7 @@ int mbr_reson7k3_wr_CTD(int verbose, int *bufferalloc, char **bufferptr, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Geodesy";
+  static const char function_name[] = "mbr_reson7k3_wr_Geodesy";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11419,7 +11419,7 @@ int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RollPitchHeave(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_RollPitchHeave";
+  static const char function_name[] = "mbr_reson7k3_wr_RollPitchHeave";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11514,7 +11514,7 @@ int mbr_reson7k3_wr_RollPitchHeave(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Heading(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Heading";
+  static const char function_name[] = "mbr_reson7k3_wr_Heading";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11605,7 +11605,7 @@ int mbr_reson7k3_wr_Heading(int verbose, int *bufferalloc, char **bufferptr, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SurveyLine(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SurveyLine";
+  static const char function_name[] = "mbr_reson7k3_wr_SurveyLine";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11711,7 +11711,7 @@ int mbr_reson7k3_wr_SurveyLine(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Navigation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Navigation";
+  static const char function_name[] = "mbr_reson7k3_wr_Navigation";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11818,7 +11818,7 @@ int mbr_reson7k3_wr_Navigation(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Attitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Attitude";
+  static const char function_name[] = "mbr_reson7k3_wr_Attitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -11922,7 +11922,7 @@ int mbr_reson7k3_wr_Attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_PanTilt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_PanTilt";
+  static const char function_name[] = "mbr_reson7k3_wr_PanTilt";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12011,7 +12011,7 @@ int mbr_reson7k3_wr_PanTilt(int verbose, int *bufferalloc, char **bufferptr, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SonarInstallationIDs(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SonarInstallationIDs";
+  static const char function_name[] = "mbr_reson7k3_wr_SonarInstallationIDs";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12100,7 +12100,7 @@ int mbr_reson7k3_wr_SonarInstallationIDs(int verbose, int *bufferalloc, char **b
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Mystery(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Mystery";
+  static const char function_name[] = "mbr_reson7k3_wr_Mystery";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12193,7 +12193,7 @@ int mbr_reson7k3_wr_Mystery(int verbose, int *bufferalloc, char **bufferptr, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SonarPipeEnvironment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SonarPipeEnvironment";
+  static const char function_name[] = "mbr_reson7k3_wr_SonarPipeEnvironment";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12283,7 +12283,7 @@ int mbr_reson7k3_wr_SonarPipeEnvironment(int verbose, int *bufferalloc, char **b
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_ContactOutput(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_ContactOutput";
+  static const char function_name[] = "mbr_reson7k3_wr_ContactOutput";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12372,7 +12372,7 @@ int mbr_reson7k3_wr_ContactOutput(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_ProcessedSideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_ProcessedSideScan";
+  static const char function_name[] = "mbr_reson7k3_wr_ProcessedSideScan";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12493,7 +12493,7 @@ int mbr_reson7k3_wr_ProcessedSideScan(int verbose, int *bufferalloc, char **buff
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SonarSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
-  char *function_name = "mbr_reson7k3_wr_SonarSettings";
+  static const char function_name[] = "mbr_reson7k3_wr_SonarSettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12662,7 +12662,7 @@ int mbr_reson7k3_wr_SonarSettings(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Configuration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Configuration";
+  static const char function_name[] = "mbr_reson7k3_wr_Configuration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12785,7 +12785,7 @@ int mbr_reson7k3_wr_Configuration(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_MatchFilter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_MatchFilter";
+  static const char function_name[] = "mbr_reson7k3_wr_MatchFilter";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12897,7 +12897,7 @@ int mbr_reson7k3_wr_MatchFilter(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_FirmwareHardwareConfiguration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                                     int *error) {
-  char *function_name = "mbr_reson7k3_wr_FirmwareHardwareConfiguration";
+  static const char function_name[] = "mbr_reson7k3_wr_FirmwareHardwareConfiguration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -12999,7 +12999,7 @@ int mbr_reson7k3_wr_FirmwareHardwareConfiguration(int verbose, int *bufferalloc,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_BeamGeometry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_BeamGeometry";
+  static const char function_name[] = "mbr_reson7k3_wr_BeamGeometry";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -13113,7 +13113,7 @@ int mbr_reson7k3_wr_BeamGeometry(int verbose, int *bufferalloc, char **bufferptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Bathymetry";
+  static const char function_name[] = "mbr_reson7k3_wr_Bathymetry";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -13291,7 +13291,7 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SideScan";
+  static const char function_name[] = "mbr_reson7k3_wr_SideScan";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -13494,7 +13494,7 @@ int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_WaterColumn";
+  static const char function_name[] = "mbr_reson7k3_wr_WaterColumn";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -13710,7 +13710,7 @@ int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_VerticalDepth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_VerticalDepth";
+  static const char function_name[] = "mbr_reson7k3_wr_VerticalDepth";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -13819,7 +13819,7 @@ int mbr_reson7k3_wr_VerticalDepth(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_TVG(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_TVG";
+  static const char function_name[] = "mbr_reson7k3_wr_TVG";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -13927,7 +13927,7 @@ int mbr_reson7k3_wr_TVG(int verbose, int *bufferalloc, char **bufferptr, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Image(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Image";
+  static const char function_name[] = "mbr_reson7k3_wr_Image";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -14083,7 +14083,7 @@ int mbr_reson7k3_wr_Image(int verbose, int *bufferalloc, char **bufferptr, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_PingMotion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_PingMotion";
+  static const char function_name[] = "mbr_reson7k3_wr_PingMotion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -14216,7 +14216,7 @@ int mbr_reson7k3_wr_PingMotion(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_AdaptiveGate(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_AdaptiveGate";
+  static const char function_name[] = "mbr_reson7k3_wr_AdaptiveGate";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -14306,7 +14306,7 @@ int mbr_reson7k3_wr_AdaptiveGate(int verbose, int *bufferalloc, char **bufferptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_DetectionDataSetup(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_DetectionDataSetup";
+  static const char function_name[] = "mbr_reson7k3_wr_DetectionDataSetup";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -14458,7 +14458,7 @@ int mbr_reson7k3_wr_DetectionDataSetup(int verbose, int *bufferalloc, char **buf
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Beamformed(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Beamformed";
+  static const char function_name[] = "mbr_reson7k3_wr_Beamformed";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -14574,7 +14574,7 @@ int mbr_reson7k3_wr_Beamformed(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_VernierProcessingDataRaw(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_VernierProcessingDataRaw";
+  static const char function_name[] = "mbr_reson7k3_wr_VernierProcessingDataRaw";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -14663,7 +14663,7 @@ int mbr_reson7k3_wr_VernierProcessingDataRaw(int verbose, int *bufferalloc, char
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_BITE";
+  static const char function_name[] = "mbr_reson7k3_wr_BITE";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -14842,7 +14842,7 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SonarSourceVersion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SonarSourceVersion";
+  static const char function_name[] = "mbr_reson7k3_wr_SonarSourceVersion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -14935,7 +14935,7 @@ int mbr_reson7k3_wr_SonarSourceVersion(int verbose, int *bufferalloc, char **buf
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_WetEndVersion8k(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_WetEndVersion8k";
+  static const char function_name[] = "mbr_reson7k3_wr_WetEndVersion8k";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -15028,7 +15028,7 @@ int mbr_reson7k3_wr_WetEndVersion8k(int verbose, int *bufferalloc, char **buffer
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_RawDetection";
+  static const char function_name[] = "mbr_reson7k3_wr_RawDetection";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -15230,7 +15230,7 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Snippet";
+  static const char function_name[] = "mbr_reson7k3_wr_Snippet";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -15419,7 +15419,7 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_VernierProcessingDataFiltered(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_VernierProcessingDataFiltered";
+  static const char function_name[] = "mbr_reson7k3_wr_VernierProcessingDataFiltered";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -15509,7 +15509,7 @@ int mbr_reson7k3_wr_VernierProcessingDataFiltered(int verbose, int *bufferalloc,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_InstallationParameters(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_InstallationParameters";
+  static const char function_name[] = "mbr_reson7k3_wr_InstallationParameters";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -15674,7 +15674,7 @@ int mbr_reson7k3_wr_InstallationParameters(int verbose, int *bufferalloc, char *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_BITESummary(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_BITESummary";
+  static const char function_name[] = "mbr_reson7k3_wr_BITESummary";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -15763,7 +15763,7 @@ int mbr_reson7k3_wr_BITESummary(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CompressedBeamformedMagnitude";
+  static const char function_name[] = "mbr_reson7k3_wr_CompressedBeamformedMagnitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -15853,7 +15853,7 @@ int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CompressedWaterColumn";
+  static const char function_name[] = "mbr_reson7k3_wr_CompressedWaterColumn";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -15996,7 +15996,7 @@ int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SegmentedRawDetection";
+  static const char function_name[] = "mbr_reson7k3_wr_SegmentedRawDetection";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16227,7 +16227,7 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CalibratedBeam(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CalibratedBeam";
+  static const char function_name[] = "mbr_reson7k3_wr_CalibratedBeam";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16317,7 +16317,7 @@ int mbr_reson7k3_wr_CalibratedBeam(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SystemEvents(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SystemEvents";
+  static const char function_name[] = "mbr_reson7k3_wr_SystemEvents";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16407,7 +16407,7 @@ int mbr_reson7k3_wr_SystemEvents(int verbose, int *bufferalloc, char **bufferptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SystemEventMessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SystemEventMessage";
+  static const char function_name[] = "mbr_reson7k3_wr_SystemEventMessage";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16513,7 +16513,7 @@ int mbr_reson7k3_wr_SystemEventMessage(int verbose, int *bufferalloc, char **buf
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_RDRRecordingStatus";
+  static const char function_name[] = "mbr_reson7k3_wr_RDRRecordingStatus";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16603,7 +16603,7 @@ int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **buf
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_Subscriptions";
+  static const char function_name[] = "mbr_reson7k3_wr_Subscriptions";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16693,7 +16693,7 @@ int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RDRStorageRecording(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_RDRStorageRecording";
+  static const char function_name[] = "mbr_reson7k3_wr_RDRStorageRecording";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16782,7 +16782,7 @@ int mbr_reson7k3_wr_RDRStorageRecording(int verbose, int *bufferalloc, char **bu
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CalibrationStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CalibrationStatus";
+  static const char function_name[] = "mbr_reson7k3_wr_CalibrationStatus";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16871,7 +16871,7 @@ int mbr_reson7k3_wr_CalibrationStatus(int verbose, int *bufferalloc, char **buff
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CalibratedSideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CalibratedSideScan";
+  static const char function_name[] = "mbr_reson7k3_wr_CalibratedSideScan";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -16961,7 +16961,7 @@ int mbr_reson7k3_wr_CalibratedSideScan(int verbose, int *bufferalloc, char **buf
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SnippetBackscatteringStrength(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SnippetBackscatteringStrength";
+  static const char function_name[] = "mbr_reson7k3_wr_SnippetBackscatteringStrength";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -17051,7 +17051,7 @@ int mbr_reson7k3_wr_SnippetBackscatteringStrength(int verbose, int *bufferalloc,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_MB2Status(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_MB2Status";
+  static const char function_name[] = "mbr_reson7k3_wr_MB2Status";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -17140,7 +17140,7 @@ int mbr_reson7k3_wr_MB2Status(int verbose, int *bufferalloc, char **bufferptr, v
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_FileHeader";
+  static const char function_name[] = "mbr_reson7k3_wr_FileHeader";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -17294,7 +17294,7 @@ int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_TimeMessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_TimeMessage";
+  static const char function_name[] = "mbr_reson7k3_wr_TimeMessage";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -17383,7 +17383,7 @@ int mbr_reson7k3_wr_TimeMessage(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_RemoteControl";
+  static const char function_name[] = "mbr_reson7k3_wr_RemoteControl";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -17472,7 +17472,7 @@ int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_RemoteControlAcknowledge";
+  static const char function_name[] = "mbr_reson7k3_wr_RemoteControlAcknowledge";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -17561,7 +17561,7 @@ int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_RemoteControlNotAcknowledge";
+  static const char function_name[] = "mbr_reson7k3_wr_RemoteControlNotAcknowledge";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -17651,7 +17651,7 @@ int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, c
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControlSonarSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
-  char *function_name = "mbr_reson7k3_wr_RemoteControlSonarSettings";
+  static const char function_name[] = "mbr_reson7k3_wr_RemoteControlSonarSettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -17883,7 +17883,7 @@ int mbr_reson7k3_wr_RemoteControlSonarSettings(int verbose, int *bufferalloc, ch
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_CommonSystemSettings";
+  static const char function_name[] = "mbr_reson7k3_wr_CommonSystemSettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -18092,7 +18092,7 @@ int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **b
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SVFiltering(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SVFiltering";
+  static const char function_name[] = "mbr_reson7k3_wr_SVFiltering";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -18181,7 +18181,7 @@ int mbr_reson7k3_wr_SVFiltering(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SystemLockStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SystemLockStatus";
+  static const char function_name[] = "mbr_reson7k3_wr_SystemLockStatus";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -18270,7 +18270,7 @@ int mbr_reson7k3_wr_SystemLockStatus(int verbose, int *bufferalloc, char **buffe
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SoundVelocity(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SoundVelocity";
+  static const char function_name[] = "mbr_reson7k3_wr_SoundVelocity";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -18363,7 +18363,7 @@ int mbr_reson7k3_wr_SoundVelocity(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_AbsorptionLoss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_AbsorptionLoss";
+  static const char function_name[] = "mbr_reson7k3_wr_AbsorptionLoss";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -18456,7 +18456,7 @@ int mbr_reson7k3_wr_AbsorptionLoss(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SpreadingLoss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  char *function_name = "mbr_reson7k3_wr_SpreadingLoss";
+  static const char function_name[] = "mbr_reson7k3_wr_SpreadingLoss";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
@@ -18549,7 +18549,7 @@ int mbr_reson7k3_wr_SpreadingLoss(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_reson7k3_wr_data";
+  static const char function_name[] = "mbr_reson7k3_wr_data";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
   struct mbsys_reson7k3_struct *ostore = NULL;
@@ -19584,7 +19584,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_wt_reson7k3";
+  static const char function_name[] = "mbr_wt_reson7k3";
   int status = MB_SUCCESS;
   struct mbsys_reson7k3_struct *store = NULL;
 
@@ -19641,7 +19641,7 @@ int mbr_reson7k3_FileCatalog_compare2(const void *a, const void *b) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7k3(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_register_reson7k3";
+  static const char function_name[] = "mbr_register_reson7k3";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {

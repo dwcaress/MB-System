@@ -44,7 +44,7 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_cbat8101";
+	static const char function_name[] = "mbr_info_cbat8101";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -112,7 +112,7 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
-	char *function_name = "mbr_zero_cbat8101";
+	static const char function_name[] = "mbr_zero_cbat8101";
 	struct mbf_cbat8101_struct *data;
 
 	if (verbose >= 2) {
@@ -249,7 +249,7 @@ int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_cbat8101";
+	static const char function_name[] = "mbr_alm_cbat8101";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -282,7 +282,7 @@ int mbr_alm_cbat8101(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_cbat8101";
+	static const char function_name[] = "mbr_dem_cbat8101";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -310,7 +310,7 @@ int mbr_dem_cbat8101(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
-	char *function_name = "mbr_cbat8101_rd_comment";
+	static const char function_name[] = "mbr_cbat8101_rd_comment";
 	char line[RESON_COMMENT_SIZE + 3];
 
 	if (verbose >= 2) {
@@ -355,7 +355,7 @@ int mbr_cbat8101_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat81
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
-	char *function_name = "mbr_cbat8101_rd_parameter";
+	static const char function_name[] = "mbr_cbat8101_rd_parameter";
 	char line[RESON_PARAMETER_SIZE + 3];
 	short *short_ptr;
 
@@ -509,7 +509,7 @@ int mbr_cbat8101_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
-	char *function_name = "mbr_cbat8101_rd_nav";
+	static const char function_name[] = "mbr_cbat8101_rd_nav";
 	char line[RESON_NAV_SIZE + 3];
 	short *short_ptr;
 	int *int_ptr;
@@ -621,7 +621,7 @@ int mbr_cbat8101_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
-	char *function_name = "mbr_cbat8101_rd_svp";
+	static const char function_name[] = "mbr_cbat8101_rd_svp";
 	char line[RESON_SVP_SIZE + 3];
 	short *short_ptr;
 	short *short_ptr2;
@@ -715,7 +715,7 @@ int mbr_cbat8101_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
-	char *function_name = "mbr_cbat8101_rd_svp";
+	static const char function_name[] = "mbr_cbat8101_rd_svp";
 	char line[RESON_SHORT_SVP_SIZE + 3];
 	short *short_ptr;
 	short *short_ptr2;
@@ -809,7 +809,7 @@ int mbr_cbat8101_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
-	char *function_name = "mbr_cbat8101_rd_bath";
+	static const char function_name[] = "mbr_cbat8101_rd_bath";
 	char line[RESON_BATH_8101_SIZE + 3];
 	char *beamarray;
 	unsigned char *char_ptr;
@@ -969,7 +969,7 @@ int mbr_cbat8101_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
-	char *function_name = "mbr_cbat8101_rd_heading";
+	static const char function_name[] = "mbr_cbat8101_rd_heading";
 	char line[RESON_HEADING_SIZE + 3];
 	short *short_ptr;
 
@@ -1038,7 +1038,7 @@ int mbr_cbat8101_rd_heading(int verbose, FILE *mbfp, int swap, struct mbf_cbat81
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbf_cbat8101_struct *data, int *error) {
-	char *function_name = "mbr_cbat8101_rd_attitude";
+	static const char function_name[] = "mbr_cbat8101_rd_attitude";
 	char line[RESON_ATTITUDE_SIZE + 3];
 	short *short_ptr;
 
@@ -1115,7 +1115,7 @@ int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbf_cbat8
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_rd_data";
+	static const char function_name[] = "mbr_cbat8101_rd_data";
 	struct mbf_cbat8101_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -1291,7 +1291,7 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_cbat8101";
+	static const char function_name[] = "mbr_rt_cbat8101";
 	struct mbf_cbat8101_struct *data;
 	struct mbsys_reson_struct *store;
 	int time_i[7];
@@ -1466,7 +1466,7 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_wr_comment";
+	static const char function_name[] = "mbr_cbat8101_wr_comment";
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_COMMENT_SIZE + 3];
 	short label;
@@ -1540,7 +1540,7 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_wr_parameter";
+	static const char function_name[] = "mbr_cbat8101_wr_parameter";
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_PARAMETER_SIZE + 3];
 	short label;
@@ -1716,7 +1716,7 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_wr_nav";
+	static const char function_name[] = "mbr_cbat8101_wr_nav";
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_NAV_SIZE + 3];
 	short label;
@@ -1851,7 +1851,7 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_wr_svp";
+	static const char function_name[] = "mbr_cbat8101_wr_svp";
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_SVP_SIZE + 3];
 	short label;
@@ -1983,7 +1983,7 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_wr_bath";
+	static const char function_name[] = "mbr_cbat8101_wr_bath";
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_BATH_8101_SIZE + 3];
 	char *beamarray;
@@ -2165,7 +2165,7 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_wr_heading";
+	static const char function_name[] = "mbr_cbat8101_wr_heading";
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_HEADING_SIZE + 3];
 	short label;
@@ -2256,7 +2256,7 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_wr_attitude";
+	static const char function_name[] = "mbr_cbat8101_wr_attitude";
 	struct mbf_cbat8101_struct *data;
 	char line[RESON_ATTITUDE_SIZE + 3];
 	short label;
@@ -2357,7 +2357,7 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat8101_wr_data";
+	static const char function_name[] = "mbr_cbat8101_wr_data";
 	struct mbf_cbat8101_struct *data;
 	FILE *mbfp;
 
@@ -2421,7 +2421,7 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_cbat8101";
+	static const char function_name[] = "mbr_wt_cbat8101";
 	struct mbf_cbat8101_struct *data;
 	char *data_ptr;
 	struct mbsys_reson_struct *store;
@@ -2562,7 +2562,7 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_cbat8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_cbat8101";
+	static const char function_name[] = "mbr_register_cbat8101";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

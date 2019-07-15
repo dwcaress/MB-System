@@ -32,7 +32,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message) {
-	char *function_name = "mb_error";
+	static const char function_name[] = "mb_error";
 	int status;
 
 	if (verbose >= 2) {
@@ -71,7 +71,7 @@ int mb_error(int verbose, int error, char **message) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
-	char *function_name = "mb_notice_log_datatype";
+	static const char function_name[] = "mb_notice_log_datatype";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -103,7 +103,7 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
-	char *function_name = "mb_notice_log_error";
+	static const char function_name[] = "mb_notice_log_error";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -135,7 +135,7 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
-	char *function_name = "mb_notice_log_problem";
+	static const char function_name[] = "mb_notice_log_problem";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -167,7 +167,7 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
-	char *function_name = "mb_notice_get_list";
+	static const char function_name[] = "mb_notice_get_list";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -199,7 +199,7 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_message(int verbose, int notice, char **message) {
-	char *function_name = "mb_notice_message";
+	static const char function_name[] = "mb_notice_message";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

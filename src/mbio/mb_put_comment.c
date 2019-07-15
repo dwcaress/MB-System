@@ -33,7 +33,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_put_comment(int verbose, void *mbio_ptr, char *comment, int *error) {
-	char *function_name = "mb_put_comment";
+	static const char function_name[] = "mb_put_comment";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

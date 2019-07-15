@@ -46,7 +46,7 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hsldeoih";
+	static const char function_name[] = "mbr_info_hsldeoih";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -114,7 +114,7 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
-	char *function_name = "mbr_zero_hsldeoih";
+	static const char function_name[] = "mbr_zero_hsldeoih";
 	struct mbf_hsldeoih_struct *data;
 
 	if (verbose >= 2) {
@@ -254,7 +254,7 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsldeoih";
+	static const char function_name[] = "mbr_alm_hsldeoih";
 	struct mbf_hsldeoih_struct *data;
 	char *data_ptr;
 
@@ -294,7 +294,7 @@ int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsldeoih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsldeoih";
+	static const char function_name[] = "mbr_dem_hsldeoih";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -322,7 +322,7 @@ int mbr_dem_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_nav_source";
+	static const char function_name[] = "mbr_hsldeoih_rd_nav_source";
 	struct mbf_hsldeoih_nav_source_struct read_data;
 	int read_size;
 
@@ -411,7 +411,7 @@ int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_mean_velocity";
+	static const char function_name[] = "mbr_hsldeoih_rd_mean_velocity";
 	struct mbf_hsldeoih_mean_velocity_struct read_data;
 	int read_size;
 
@@ -504,7 +504,7 @@ int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_velocity_profile";
+	static const char function_name[] = "mbr_hsldeoih_rd_velocity_profile";
 	struct mbf_hsldeoih_velocity_profile_struct read_data;
 	int read_size;
 
@@ -599,7 +599,7 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_standby";
+	static const char function_name[] = "mbr_hsldeoih_rd_standby";
 	struct mbf_hsldeoih_standby_struct read_data;
 	int read_size;
 
@@ -699,7 +699,7 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_survey";
+	static const char function_name[] = "mbr_hsldeoih_rd_survey";
 	struct mbf_hsldeoih_survey_struct read_data;
 	int read_size;
 	int need_back, gain_ok;
@@ -1020,7 +1020,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_calibrate";
+	static const char function_name[] = "mbr_hsldeoih_rd_calibrate";
 	struct mbf_hsldeoih_calibrate_struct read_data;
 	int read_size;
 	int need_back, gain_ok;
@@ -1335,7 +1335,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_comment";
+	static const char function_name[] = "mbr_hsldeoih_rd_comment";
 	struct mbf_hsldeoih_comment_struct read_data;
 	int read_size;
 
@@ -1382,7 +1382,7 @@ int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_data";
+	static const char function_name[] = "mbr_hsldeoih_rd_data";
 	struct mbf_hsldeoih_struct *data = NULL;
 	char *data_ptr = NULL;
 	FILE *mbfp = NULL;
@@ -1579,7 +1579,7 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsldeoih";
+	static const char function_name[] = "mbr_rt_hsldeoih";
 	struct mbf_hsldeoih_struct *data;
 	struct mbsys_hsds_struct *store;
 
@@ -1719,7 +1719,7 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_nav_source";
+	static const char function_name[] = "mbr_hsldeoih_wr_nav_source";
 	struct mbf_hsldeoih_nav_source_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -1817,7 +1817,7 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_mean_velocity";
+	static const char function_name[] = "mbr_hsldeoih_wr_mean_velocity";
 	struct mbf_hsldeoih_mean_velocity_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -1919,7 +1919,7 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_velocity_profile";
+	static const char function_name[] = "mbr_hsldeoih_wr_velocity_profile";
 	struct mbf_hsldeoih_velocity_profile_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2017,7 +2017,7 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_standby";
+	static const char function_name[] = "mbr_hsldeoih_wr_standby";
 	struct mbf_hsldeoih_standby_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2127,7 +2127,7 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_survey";
+	static const char function_name[] = "mbr_hsldeoih_wr_survey";
 	struct mbf_hsldeoih_survey_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2400,7 +2400,7 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_calibrate";
+	static const char function_name[] = "mbr_hsldeoih_wr_calibrate";
 	struct mbf_hsldeoih_calibrate_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2673,7 +2673,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_comment";
+	static const char function_name[] = "mbr_hsldeoih_wr_comment";
 	struct mbf_hsldeoih_comment_struct write_data;
 	int write_size;
 	short int write_size_short;
@@ -2731,7 +2731,7 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_data";
+	static const char function_name[] = "mbr_hsldeoih_wr_data";
 	struct mbf_hsldeoih_struct *data;
 	FILE *mbfp;
 	unsigned int label;
@@ -2842,7 +2842,7 @@ int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsldeoih";
+	static const char function_name[] = "mbr_wt_hsldeoih";
 	struct mbf_hsldeoih_struct *data;
 	char *data_ptr;
 	struct mbsys_hsds_struct *store;
@@ -2983,7 +2983,7 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hsldeoih";
+	static const char function_name[] = "mbr_register_hsldeoih";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

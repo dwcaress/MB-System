@@ -34,7 +34,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error) {
-	char *function_name = "mb_close";
+	static const char function_name[] = "mb_close";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

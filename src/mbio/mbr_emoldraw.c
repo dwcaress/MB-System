@@ -46,7 +46,7 @@ int mbr_info_emoldraw(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_emoldraw";
+	static const char function_name[] = "mbr_info_emoldraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -116,7 +116,7 @@ int mbr_info_emoldraw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_emoldraw";
+	static const char function_name[] = "mbr_alm_emoldraw";
 	int *wrapper;
 	double *pixel_size;
 	double *swath_width;
@@ -165,7 +165,7 @@ int mbr_alm_emoldraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_emoldraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_emoldraw";
+	static const char function_name[] = "mbr_dem_emoldraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -192,7 +192,7 @@ int mbr_dem_emoldraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type) {
-	char *function_name = "mbr_emoldraw_chk_label";
+	static const char function_name[] = "mbr_emoldraw_chk_label";
 	char *startid;
 
 	if (verbose >= 2) {
@@ -238,7 +238,7 @@ int mbr_emoldraw_chk_label(int verbose, void *mbio_ptr, short type) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_rd_start";
+	static const char function_name[] = "mbr_emoldraw_rd_start";
 	char line[EM_START_SIZE];
 
 	if (verbose >= 2) {
@@ -329,7 +329,7 @@ int mbr_emoldraw_rd_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_rd_stop";
+	static const char function_name[] = "mbr_emoldraw_rd_stop";
 	char line[EM_STOP_SIZE];
 
 	if (verbose >= 2) {
@@ -420,7 +420,7 @@ int mbr_emoldraw_rd_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_rd_parameter";
+	static const char function_name[] = "mbr_emoldraw_rd_parameter";
 	char line[EM_PARAMETER_SIZE];
 
 	if (verbose >= 2) {
@@ -517,7 +517,7 @@ int mbr_emoldraw_rd_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_rd_pos";
+	static const char function_name[] = "mbr_emoldraw_rd_pos";
 	char line[EM_POS_SIZE];
 	int degree;
 	double minute;
@@ -611,7 +611,7 @@ int mbr_emoldraw_rd_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_rd_svp";
+	static const char function_name[] = "mbr_emoldraw_rd_svp";
 	char line[EM_SVP_SIZE];
 	short short_val;
 
@@ -679,7 +679,7 @@ int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_rd_em1000bath";
+	static const char function_name[] = "mbr_emoldraw_rd_em1000bath";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_1000_BATH_SIZE];
 	char beamarray[11];
@@ -804,7 +804,7 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int swath_id, int *error) {
-	char *function_name = "mbr_emoldraw_rd_em12bath";
+	static const char function_name[] = "mbr_emoldraw_rd_em12bath";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_12S_BATH_SIZE];
 	char beamarray[11];
@@ -930,7 +930,7 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_rd_em121bath";
+	static const char function_name[] = "mbr_emoldraw_rd_em121bath";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_121_BATH_SIZE];
 	char beamarray[11];
@@ -1066,7 +1066,7 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int swath_id, int first, int *more,
                        int *error) {
-	char *function_name = "mbr_emoldraw_rd_ss";
+	static const char function_name[] = "mbr_emoldraw_rd_ss";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_SS_SIZE];
 	int num_datagrams;
@@ -1229,7 +1229,7 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int swath_id, int first, int *more,
                         int *error) {
-	char *function_name = "mbr_emoldraw_rd_ssp";
+	static const char function_name[] = "mbr_emoldraw_rd_ssp";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_SSP_SIZE];
 	char *char_ptr;
@@ -1397,7 +1397,7 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_emoldraw_rd_data";
+	static const char function_name[] = "mbr_emoldraw_rd_data";
 	struct mbsys_simrad_struct *store;
 	FILE *mbfp;
 	int done;
@@ -2159,7 +2159,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_emoldraw";
+	static const char function_name[] = "mbr_rt_emoldraw";
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	int ntime_i[7];
@@ -2258,7 +2258,7 @@ int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_start";
+	static const char function_name[] = "mbr_emoldraw_wr_start";
 	char line[EM_START_SIZE];
 	short int label;
 	int write_len;
@@ -2387,7 +2387,7 @@ int mbr_emoldraw_wr_start(int verbose, FILE *mbfp, struct mbsys_simrad_struct *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_stop";
+	static const char function_name[] = "mbr_emoldraw_wr_stop";
 	char line[EM_STOP_SIZE];
 	short int label;
 	int write_len;
@@ -2515,7 +2515,7 @@ int mbr_emoldraw_wr_stop(int verbose, FILE *mbfp, struct mbsys_simrad_struct *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_parameter";
+	static const char function_name[] = "mbr_emoldraw_wr_parameter";
 	char line[EM_PARAMETER_SIZE];
 	short int label;
 	int write_len;
@@ -2643,7 +2643,7 @@ int mbr_emoldraw_wr_parameter(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_pos";
+	static const char function_name[] = "mbr_emoldraw_wr_pos";
 	char line[EM_POS_SIZE];
 	short int label;
 	int write_len;
@@ -2792,7 +2792,7 @@ int mbr_emoldraw_wr_pos(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_svp";
+	static const char function_name[] = "mbr_emoldraw_wr_svp";
 	char line[EM_SVP_SIZE];
 	short int label;
 	int write_len;
@@ -2896,7 +2896,7 @@ int mbr_emoldraw_wr_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_em1000bath";
+	static const char function_name[] = "mbr_emoldraw_wr_em1000bath";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_1000_BATH_SIZE];
 	char beamarray[11];
@@ -3033,7 +3033,7 @@ int mbr_emoldraw_wr_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_em12bath";
+	static const char function_name[] = "mbr_emoldraw_wr_em12bath";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_12S_BATH_SIZE];
 	char beamarray[11];
@@ -3175,7 +3175,7 @@ int mbr_emoldraw_wr_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_em121bath";
+	static const char function_name[] = "mbr_emoldraw_wr_em121bath";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_121_BATH_SIZE];
 	char beamarray[11];
@@ -3329,7 +3329,7 @@ int mbr_emoldraw_wr_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_ss";
+	static const char function_name[] = "mbr_emoldraw_wr_ss";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_SS_SIZE];
 	short int label;
@@ -3566,7 +3566,7 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *store, int *error) {
-	char *function_name = "mbr_emoldraw_wr_ssp";
+	static const char function_name[] = "mbr_emoldraw_wr_ssp";
 	struct mbsys_simrad_survey_struct *ping;
 	char line[EM_SSP_SIZE];
 	short int label;
@@ -3812,7 +3812,7 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_emoldraw_wr_data";
+	static const char function_name[] = "mbr_emoldraw_wr_data";
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	FILE *mbfp;
@@ -3944,7 +3944,7 @@ int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_emoldraw";
+	static const char function_name[] = "mbr_wt_emoldraw";
 	struct mbsys_simrad_struct *store;
 
 	if (verbose >= 2) {
@@ -3977,7 +3977,7 @@ int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_emoldraw";
+	static const char function_name[] = "mbr_register_emoldraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

@@ -34,7 +34,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error) {
-	char *function_name = "mb_read_ping";
+	static const char function_name[] = "mb_read_ping";
 	int status;
 	int localkind;
 	int beams_bath;

@@ -38,7 +38,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_sb2000_alloc";
+	static const char function_name[] = "mbsys_sb2000_alloc";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -66,7 +66,7 @@ int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2000_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_sb2000_deall";
+	static const char function_name[] = "mbsys_sb2000_deall";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -92,7 +92,7 @@ int mbsys_sb2000_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbsys_sb2000_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                             int *error) {
-	char *function_name = "mbsys_sb2000_dimensions";
+	static const char function_name[] = "mbsys_sb2000_dimensions";
 	struct mbsys_sb2000_struct *store;
 
 	if (verbose >= 2) {
@@ -147,7 +147,7 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                          double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                          double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_sb2000_extract";
+	static const char function_name[] = "mbsys_sb2000_extract";
 	struct mbsys_sb2000_struct *store;
 	unsigned short *short_ptr;
 	int time_j[5];
@@ -324,7 +324,7 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
                         double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                         double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                         double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_sb2000_insert";
+	static const char function_name[] = "mbsys_sb2000_insert";
 	struct mbsys_sb2000_struct *store;
 	int time_j[5];
 	unsigned short *short_ptr;
@@ -475,7 +475,7 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                         double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                         double *ssv, int *error) {
-	char *function_name = "mbsys_sb2000_ttimes";
+	static const char function_name[] = "mbsys_sb2000_ttimes";
 	struct mbsys_sb2000_struct *store;
 
 	if (verbose >= 2) {
@@ -566,7 +566,7 @@ int mbsys_sb2000_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_sb2000_detects";
+	static const char function_name[] = "mbsys_sb2000_detects";
 	struct mbsys_sb2000_struct *store;
 
 	if (verbose >= 2) {
@@ -641,7 +641,7 @@ int mbsys_sb2000_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                   double *altitude, int *error) {
-	char *function_name = "mbsys_sb2000_extract_altitude";
+	static const char function_name[] = "mbsys_sb2000_extract_altitude";
 	struct mbsys_sb2000_struct *store;
 	double bath_best;
 	double xtrack_min;
@@ -729,7 +729,7 @@ int mbsys_sb2000_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 int mbsys_sb2000_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                              double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                              double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_sb2000_extract_nav";
+	static const char function_name[] = "mbsys_sb2000_extract_nav";
 	struct mbsys_sb2000_struct *store;
 	int time_j[5];
 
@@ -858,7 +858,7 @@ int mbsys_sb2000_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_sb2000_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                             double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                             int *error) {
-	char *function_name = "mbsys_sb2000_insert_nav";
+	static const char function_name[] = "mbsys_sb2000_insert_nav";
 	struct mbsys_sb2000_struct *store;
 	int time_j[5];
 
@@ -934,7 +934,7 @@ int mbsys_sb2000_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2000_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_sb2000_copy";
+	static const char function_name[] = "mbsys_sb2000_copy";
 	struct mbsys_sb2000_struct *store;
 	struct mbsys_sb2000_struct *copy;
 

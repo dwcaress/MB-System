@@ -37,7 +37,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_platform_init(int verbose, void **platform_ptr, int *error) {
-  char *function_name = "mb_platform_init";
+  static const char function_name[] = "mb_platform_init";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -124,7 +124,7 @@ int mb_platform_init(int verbose, void **platform_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, char *organization, char *documentation_url,
                         double start_time_d, double end_time_d, int *error) {
-  char *function_name = "mb_platform_setinfo";
+  static const char function_name[] = "mb_platform_setinfo";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -198,7 +198,7 @@ int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, c
 int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longname model, mb_longname manufacturer,
                            mb_longname serialnumber, int capability1, int capability2, int num_offsets, int num_time_latency,
                            int *error) {
-  char *function_name = "mb_platform_add_sensor";
+  static const char function_name[] = "mb_platform_add_sensor";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -329,7 +329,7 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
                                   double position_offset_x, double position_offset_y, double position_offset_z,
                                   int attitude_offset_mode, double attitude_offset_heading, double attitude_offset_roll,
                                   double attitude_offset_pitch, int *error) {
-  char *function_name = "mb_platform_set_sensor_offset";
+  static const char function_name[] = "mb_platform_set_sensor_offset";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -415,7 +415,7 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
 int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isensor, int time_latency_mode,
                                        double time_latency_static, int num_time_latency, double *time_latency_time_d,
                                        double *time_latency_value, int *error) {
-  char *function_name = "mb_platform_set_sensor_timelatency";
+  static const char function_name[] = "mb_platform_set_sensor_timelatency";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -494,7 +494,7 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_type, int sensor, int *error) {
-  char *function_name = "mb_platform_set_source_sensor";
+  static const char function_name[] = "mb_platform_set_source_sensor";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -671,7 +671,7 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
 /*--------------------------------------------------------------------*/
 
 int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
-  char *function_name = "mb_platform_deall";
+  static const char function_name[] = "mb_platform_deall";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -745,7 +745,7 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 
 int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int *error) {
-  char *function_name = "mb_platform_read";
+  static const char function_name[] = "mb_platform_read";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1113,7 +1113,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int *error) {
-  char *function_name = "mb_platform_write";
+  static const char function_name[] = "mb_platform_write";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1505,7 +1505,7 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 /*--------------------------------------------------------------------*/
 int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading, double roll,
                       double pitch, double *lever_x, double *lever_y, double *lever_z, int *error) {
-  char *function_name = "mb_platform_lever";
+  static const char function_name[] = "mb_platform_lever";
 
   /* reset error */
   *error = MB_ERROR_NO_ERROR;
@@ -1632,7 +1632,7 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double navlon, double navlat,
                          double sensordepth, double heading, double roll, double pitch, double *targetlon, double *targetlat,
                          double *targetdepth, int *error) {
-  char *function_name = "mb_platform_position";
+  static const char function_name[] = "mb_platform_position";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1703,7 +1703,7 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
 /*--------------------------------------------------------------------*/
 int mb_platform_orientation(int verbose, void *platform_ptr, double heading, double roll, double pitch, double *platform_heading,
                             double *platform_roll, double *platform_pitch, int *error) {
-  char *function_name = "mb_platform_orientation";
+  static const char function_name[] = "mb_platform_orientation";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1781,7 +1781,7 @@ int mb_platform_orientation(int verbose, void *platform_ptr, double heading, dou
 int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
                                    double *target_hdg_offset, double *target_roll_offset, double *target_pitch_offset,
                                    int *error) {
-  char *function_name = "mb_platform_orientation_offset";
+  static const char function_name[] = "mb_platform_orientation_offset";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1858,7 +1858,7 @@ int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetse
 int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading,
                                    double roll, double pitch, double *target_heading, double *target_roll, double *target_pitch,
                                    int *error) {
-  char *function_name = "mb_platform_orientation";
+  static const char function_name[] = "mb_platform_orientation";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1944,7 +1944,7 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_print(int verbose, void *platform_ptr, int *error) {
-  char *function_name = "mb_platform_print";
+  static const char function_name[] = "mb_platform_print";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

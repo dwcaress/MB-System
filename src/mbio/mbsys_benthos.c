@@ -40,7 +40,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_benthos_alloc";
+	static const char function_name[] = "mbsys_benthos_alloc";
 	int status = MB_SUCCESS;
 
 	struct mbsys_benthos_struct *store;
@@ -152,7 +152,7 @@ int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_benthos_deall";
+	static const char function_name[] = "mbsys_benthos_deall";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -179,7 +179,7 @@ int mbsys_benthos_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-	char *function_name = "mbsys_benthos_dimensions";
+	static const char function_name[] = "mbsys_benthos_dimensions";
 	int status = MB_SUCCESS;
 
 	struct mbsys_benthos_struct *store;
@@ -236,7 +236,7 @@ int mbsys_benthos_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_benthos_extract";
+	static const char function_name[] = "mbsys_benthos_extract";
 	int status = MB_SUCCESS;
 
 	struct mbsys_benthos_struct *store;
@@ -430,7 +430,7 @@ int mbsys_benthos_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_benthos_insert";
+	static const char function_name[] = "mbsys_benthos_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_benthos_struct *store;
 
@@ -503,7 +503,7 @@ int mbsys_benthos_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_benthos_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	char *function_name = "mbsys_benthos_ttimes";
+	static const char function_name[] = "mbsys_benthos_ttimes";
 	int status = MB_SUCCESS;
 
 	struct mbsys_benthos_struct *store;
@@ -580,7 +580,7 @@ int mbsys_benthos_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error) {
-	char *function_name = "mbsys_benthos_extract_altitude";
+	static const char function_name[] = "mbsys_benthos_extract_altitude";
 	int status = MB_SUCCESS;
 
 	struct mbsys_benthos_struct *store;
@@ -646,7 +646,7 @@ int mbsys_benthos_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_benthos_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_benthos_extract_nav";
+	static const char function_name[] = "mbsys_benthos_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_benthos_struct *store;
 
@@ -816,7 +816,7 @@ int mbsys_benthos_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_benthos_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-	char *function_name = "mbsys_benthos_insert_nav";
+	static const char function_name[] = "mbsys_benthos_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_benthos_struct *store;
 
@@ -866,7 +866,7 @@ int mbsys_benthos_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 }
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_benthos_copy";
+	static const char function_name[] = "mbsys_benthos_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_benthos_struct *store;
 	struct mbsys_benthos_struct *copy;
@@ -903,7 +903,7 @@ int mbsys_benthos_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int *error) {
-	char *function_name = "mbsys_benthos_makess";
+	static const char function_name[] = "mbsys_benthos_makess";
 	int status = MB_SUCCESS;
 	struct mbsys_benthos_struct *store;
 	double ss[MBSYS_BENTHOS_MAXPIXELS];

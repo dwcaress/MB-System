@@ -35,7 +35,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mb_fileio_open";
+	static const char function_name[] = "mb_fileio_open";
 	int status = MB_SUCCESS;
 	int fileiobuffer;
 	size_t fileiobufferbytes;
@@ -102,7 +102,7 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mb_fileio_close";
+	static const char function_name[] = "mb_fileio_close";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -133,7 +133,7 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error) {
-	char *function_name = "mb_fileio_get";
+	static const char function_name[] = "mb_fileio_get";
 	int status = MB_SUCCESS;
 	size_t read_len;
 
@@ -215,7 +215,7 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 }
 /*--------------------------------------------------------------------*/
 int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error) {
-	char *function_name = "mb_fileio_put";
+	static const char function_name[] = "mb_fileio_put";
 	int status = MB_SUCCESS;
 	size_t write_len;
 

@@ -34,7 +34,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mb_alloc";
+	static const char function_name[] = "mb_alloc";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -69,7 +69,7 @@ int mb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mb_deall";
+	static const char function_name[] = "mb_deall";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -104,7 +104,7 @@ int mb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mb_get_store";
+	static const char function_name[] = "mb_get_store";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -134,7 +134,7 @@ int mb_get_store(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	char *function_name = "mb_dimensions";
+	static const char function_name[] = "mb_dimensions";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -173,7 +173,7 @@ int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *
 }
 /*--------------------------------------------------------------------*/
 int mb_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	char *function_name = "mb_pingnumber";
+	static const char function_name[] = "mb_pingnumber";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -209,7 +209,7 @@ int mb_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *er
 }
 /*--------------------------------------------------------------------*/
 int mb_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error) {
-	char *function_name = "mb_segynumber";
+	static const char function_name[] = "mb_segynumber";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -249,7 +249,7 @@ int mb_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, i
 }
 /*--------------------------------------------------------------------*/
 int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error) {
-	char *function_name = "mb_beamwidths";
+	static const char function_name[] = "mb_beamwidths";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -281,7 +281,7 @@ int mb_beamwidths(int verbose, void *mbio_ptr, double *beamwidth_xtrack, double 
 }
 /*--------------------------------------------------------------------*/
 int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	char *function_name = "mb_sonartype";
+	static const char function_name[] = "mb_sonartype";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -369,7 +369,7 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, i
 }
 /*--------------------------------------------------------------------*/
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	char *function_name = "mb_sidescantype";
+	static const char function_name[] = "mb_sidescantype";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -410,7 +410,7 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, 
 }
 /*--------------------------------------------------------------------*/
 int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	char *function_name = "mb_preprocess";
+	static const char function_name[] = "mb_preprocess";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -448,7 +448,7 @@ int mb_preprocess(int verbose, void *mbio_ptr, void *store_ptr, void *platform_p
 }
 /*--------------------------------------------------------------------*/
 int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-	char *function_name = "mb_extract_platform";
+	static const char function_name[] = "mb_extract_platform";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -563,7 +563,7 @@ int mb_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mb_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead, int *error) {
-	char *function_name = "mb_sensorhead";
+	static const char function_name[] = "mb_sensorhead";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -614,7 +614,7 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time
                double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag, double *bath,
                double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mb_extract";
+	static const char function_name[] = "mb_extract";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -718,7 +718,7 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
               double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath, double *amp,
               double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack, double *ssalongtrack,
               char *comment, int *error) {
-	char *function_name = "mb_insert";
+	static const char function_name[] = "mb_insert";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -809,7 +809,7 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int time_i
 int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                    double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch, double *heave,
                    int *error) {
-	char *function_name = "mb_extract_nav";
+	static const char function_name[] = "mb_extract_nav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -894,7 +894,7 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i, double *time_d,
                     double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                     double *heave, int *error) {
-	char *function_name = "mb_extract_nnav";
+	static const char function_name[] = "mb_extract_nnav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1021,7 +1021,7 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int 
 /*--------------------------------------------------------------------*/
 int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                   double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
-	char *function_name = "mb_insert_nav";
+	static const char function_name[] = "mb_insert_nav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1083,7 +1083,7 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], d
 /*--------------------------------------------------------------------*/
 int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth, double *altitude,
                         int *error) {
-	char *function_name = "mb_extract_altitude";
+	static const char function_name[] = "mb_extract_altitude";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1121,7 +1121,7 @@ int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude, int *error) {
-	char *function_name = "mb_insert_altitude";
+	static const char function_name[] = "mb_insert_altitude";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1159,7 +1159,7 @@ int mb_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double tran
 /*--------------------------------------------------------------------*/
 int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                    int *error) {
-	char *function_name = "mb_extract_svp";
+	static const char function_name[] = "mb_extract_svp";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1198,7 +1198,7 @@ int mb_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int 
 }
 /*--------------------------------------------------------------------*/
 int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	char *function_name = "mb_insert_svp";
+	static const char function_name[] = "mb_insert_svp";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1407,7 +1407,7 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double
 int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
               double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft, double *ssv,
               int *error) {
-	char *function_name = "mb_ttimes";
+	static const char function_name[] = "mb_ttimes";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1454,7 +1454,7 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 }
 /*--------------------------------------------------------------------*/
 int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mb_detects";
+	static const char function_name[] = "mb_detects";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1497,7 +1497,7 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbe
 }
 /*--------------------------------------------------------------------*/
 int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
-	char *function_name = "mb_pulses";
+	static const char function_name[] = "mb_pulses";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1541,7 +1541,7 @@ int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbea
 /*--------------------------------------------------------------------*/
 int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
              double *receive_gain, int *error) {
-	char *function_name = "mb_gains";
+	static const char function_name[] = "mb_gains";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1585,7 +1585,7 @@ int mb_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *tr
 /*--------------------------------------------------------------------*/
 int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *sample_interval,
                                int *num_samples_port, int *num_samples_stbd, int *error) {
-	char *function_name = "mb_io_extract_rawsssdimensions";
+	static const char function_name[] = "mb_io_extract_rawsssdimensions";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1627,7 +1627,7 @@ int mb_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *sidescan_type, double *sample_interval,
                      double *beamwidth_xtrack, double *beamwidth_ltrack, int *num_samples_port, double *rawss_port,
                      int *num_samples_stbd, double *rawss_stbd, int *error) {
-	char *function_name = "mb_extract_rawss";
+	static const char function_name[] = "mb_extract_rawss";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1677,7 +1677,7 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int sidescan_type, double sample_interval,
                     double beamwidth_xtrack, double beamwidth_ltrack, int num_samples_port, double *rawss_port,
                     int num_samples_stbd, double *rawss_stbd, int *error) {
-	char *function_name = "mb_insert_rawss";
+	static const char function_name[] = "mb_insert_rawss";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1725,7 +1725,7 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 }
 /*--------------------------------------------------------------------*/
 int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr, int *error) {
-	char *function_name = "mb_extract_segytraceheader";
+	static const char function_name[] = "mb_extract_segytraceheader";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1830,7 +1830,7 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind, void *segytraceheader_ptr,
                     float *segydata, int *error) {
-	char *function_name = "mb_extract_segy";
+	static const char function_name[] = "mb_extract_segy";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1940,7 +1940,7 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *samplefor
 /*--------------------------------------------------------------------*/
 int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void *segytraceheader_ptr, float *segydata,
                    int *error) {
-	char *function_name = "mb_insert_segy";
+	static const char function_name[] = "mb_insert_segy";
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
@@ -2047,7 +2047,7 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void 
 /*--------------------------------------------------------------------*/
 int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
            double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
-	char *function_name = "mb_ctd";
+	static const char function_name[] = "mb_ctd";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2100,7 +2100,7 @@ int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, d
 int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsensor, double *time_d, double *sensor1,
                         double *sensor2, double *sensor3, double *sensor4, double *sensor5, double *sensor6, double *sensor7,
                         double *sensor8, int *error) {
-	char *function_name = "mb_ancilliarysensor";
+	static const char function_name[] = "mb_ancilliarysensor";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2154,7 +2154,7 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mb_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mb_copy_record";
+	static const char function_name[] = "mb_copy_record";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2190,7 +2190,7 @@ int mb_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, 
 }
 /*--------------------------------------------------------------------*/
 int mb_indextable(int verbose, void *mbio_ptr, int *num_indextable, void **indextable_ptr, int *error) {
-	char *function_name = "mb_indextable";
+	static const char function_name[] = "mb_indextable";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2224,7 +2224,7 @@ int mb_indextable(int verbose, void *mbio_ptr, int *num_indextable, void **index
 }
 /*--------------------------------------------------------------------*/
 int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int *error) {
-	char *function_name = "mb_indextablefix";
+	static const char function_name[] = "mb_indextablefix";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2264,7 +2264,7 @@ int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *inde
 }
 /*--------------------------------------------------------------------*/
 int mb_indextableapply(int verbose, void *mbio_ptr, int num_indextable, void *indextable_ptr, int n_file, int *error) {
-	char *function_name = "mb_indextableapply";
+	static const char function_name[] = "mb_indextableapply";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

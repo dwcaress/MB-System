@@ -46,7 +46,7 @@ int mbr_info_edgjstar(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_edgjstar";
+	static const char function_name[] = "mbr_info_edgjstar";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -120,7 +120,7 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_edgjstr2";
+	static const char function_name[] = "mbr_info_edgjstr2";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -189,7 +189,7 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_edgjstar";
+	static const char function_name[] = "mbr_alm_edgjstar";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -219,7 +219,7 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_edgjstar";
+	static const char function_name[] = "mbr_dem_edgjstar";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -246,7 +246,7 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_edgjstar";
+	static const char function_name[] = "mbr_rt_edgjstar";
 	struct mbsys_jstar_message_struct message;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -2302,7 +2302,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_edgjstar";
+	static const char function_name[] = "mbr_wt_edgjstar";
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ss;
@@ -3913,7 +3913,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_edgjstar";
+	static const char function_name[] = "mbr_register_edgjstar";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -4017,7 +4017,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_edgjstr2";
+	static const char function_name[] = "mbr_register_edgjstr2";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

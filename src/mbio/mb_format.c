@@ -58,7 +58,7 @@ void cvt_to_nix_path(char *path);
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
-	char *function_name = "mb_format_register";
+	static const char function_name[] = "mb_format_register";
 	int status;
 
 	if (verbose >= 2) {
@@ -418,7 +418,7 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
                    int *variable_beams, int *traveltime, int *beam_flagging, int *platform_source, int *nav_source,
                    int *sensordepth_source, int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                    double *beamwidth_ltrack, int *error) {
-	char *function_name = "mb_format_info";
+	static const char function_name[] = "mb_format_info";
 	int status;
 
 	if (verbose >= 2) {
@@ -1045,7 +1045,7 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 }
 /*--------------------------------------------------------------------*/
 int mb_format(int verbose, int *format, int *error) {
-	char *function_name = "mb_format";
+	static const char function_name[] = "mb_format";
 	int status;
 
 	/* format parameters */
@@ -1097,7 +1097,7 @@ int mb_format(int verbose, int *format, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error) {
-	char *function_name = "mb_format_system";
+	static const char function_name[] = "mb_format_system";
 	int status;
 
 	/* format parameters */
@@ -1152,7 +1152,7 @@ int mb_format_system(int verbose, int *format, int *system, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, int *error) {
-	char *function_name = "mb_format_dimensions";
+	static const char function_name[] = "mb_format_dimensions";
 	int status;
 
 	/* format parameters */
@@ -1208,7 +1208,7 @@ int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *bea
 }
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error) {
-	char *function_name = "mb_format_description";
+	static const char function_name[] = "mb_format_description";
 	int status;
 
 	/* format parameters */
@@ -1260,7 +1260,7 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mb_format_flags(int verbose, int *format, int *variable_beams, int *traveltime, int *beam_flagging, int *error) {
-	char *function_name = "mb_format_flags";
+	static const char function_name[] = "mb_format_flags";
 	int status;
 
 	/* format parameters */
@@ -1318,7 +1318,7 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 /*--------------------------------------------------------------------*/
 int mb_format_source(int verbose, int *format, int *platform_source, int *nav_source, int *sensordepth_source,
                      int *heading_source, int *attitude_source, int *svp_source, int *error) {
-	char *function_name = "mb_format_source";
+	static const char function_name[] = "mb_format_source";
 	int status;
 
 	/* format parameters */
@@ -1378,7 +1378,7 @@ int mb_format_source(int verbose, int *format, int *platform_source, int *nav_so
 }
 /*--------------------------------------------------------------------*/
 int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error) {
-	char *function_name = "mb_format_beamwidth";
+	static const char function_name[] = "mb_format_beamwidth";
 	int status;
 
 	/* format parameters */
@@ -1434,7 +1434,7 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
 }
 /*--------------------------------------------------------------------*/
 int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int *error) {
-	char *function_name = "mb_get_format";
+	static const char function_name[] = "mb_get_format";
 	int status = MB_SUCCESS;
 	int found = MB_NO;
 	char *suffix;
@@ -2879,7 +2879,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 /*--------------------------------------------------------------------*/
 int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_processed, int *error) {
 	/* local variables */
-	char *function_name = "mb_datalist_open";
+	static const char function_name[] = "mb_datalist_open";
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 
@@ -2941,7 +2941,7 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
 /*--------------------------------------------------------------------*/
 int mb_datalist_close(int verbose, void **datalist_ptr, int *error) {
 	/* local variables */
-	char *function_name = "mb_datalist_close";
+	static const char function_name[] = "mb_datalist_close";
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 
@@ -2982,7 +2982,7 @@ int mb_datalist_close(int verbose, void **datalist_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format, double *weight, int *error) {
 	/* local variables */
-	char *function_name = "mb_datalist_readorg";
+	static const char function_name[] = "mb_datalist_readorg";
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 	char ppath[MB_PATH_MAXLINE];
@@ -3036,7 +3036,7 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 /*--------------------------------------------------------------------*/
 int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, int *format, double *weight, int *error) {
 	/* local variables */
-	char *function_name = "mb_datalist_read";
+	static const char function_name[] = "mb_datalist_read";
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 	char ppath[MB_PATH_MAXLINE];
@@ -3091,7 +3091,7 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, char *dpath, int *format,
                       double *weight, int *error) {
 	/* local variables */
-	char *function_name = "mb_datalist_read2";
+	static const char function_name[] = "mb_datalist_read2";
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 	struct mb_datalist_struct *datalist2;
@@ -3359,7 +3359,7 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 /*--------------------------------------------------------------------*/
 int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recursion, int *error) {
 	/* local variables */
-	char *function_name = "mb_datalist_recursion";
+	static const char function_name[] = "mb_datalist_recursion";
 	int status = MB_SUCCESS;
 	struct mb_datalist_struct *datalist;
 	int start;
@@ -3414,7 +3414,7 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 /*--------------------------------------------------------------------*/
 int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error) {
 	/* local variables */
-	char *function_name = "mb_imagelist_open";
+	static const char function_name[] = "mb_imagelist_open";
 	int status = MB_SUCCESS;
 	struct mb_imagelist_struct *imagelist;
 
@@ -3472,7 +3472,7 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 /*--------------------------------------------------------------------*/
 int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 	/* local variables */
-	char *function_name = "mb_imagelist_close";
+	static const char function_name[] = "mb_imagelist_close";
 	int status = MB_SUCCESS;
 	struct mb_imagelist_struct *imagelist;
 
@@ -3514,7 +3514,7 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *path0, char *path1, char *dpath,
                       double *time_d, double *dtime_d, int *error) {
 	/* local variables */
-	char *function_name = "mb_imagelist_read";
+	static const char function_name[] = "mb_imagelist_read";
 	int status = MB_SUCCESS;
 	struct mb_imagelist_struct *imagelist;
 	struct mb_imagelist_struct *imagelist2;
@@ -3799,7 +3799,7 @@ void cvt_to_nix_path(char *path) {
 /*--------------------------------------------------------------------*/
 int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 	/* local variables */
-	char *function_name = "mb_get_relative_path";
+	static const char function_name[] = "mb_get_relative_path";
 	int status = MB_SUCCESS;
 	char relativepath[MB_PATH_MAXLINE] = {""};
 	char pwd[MB_PATH_MAXLINE] = {""};
@@ -3946,7 +3946,7 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_get_shortest_path(int verbose, char *path, int *error) {
 	/* local variables */
-	char *function_name = "mb_get_shortest_path";
+	static const char function_name[] = "mb_get_shortest_path";
 	int status = MB_SUCCESS;
 	char tmppath[MB_PATH_MAXLINE];
 	char lasttoken[MB_PATH_MAXLINE];
@@ -4030,7 +4030,7 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 
 int mb_get_basename(int verbose, char *path, int *error) {
 	/* local variables */
-	char *function_name = "mb_get_basename";
+	static const char function_name[] = "mb_get_basename";
 	int status = MB_SUCCESS;
 	char tmppath[MB_PATH_MAXLINE];
 	char *result;

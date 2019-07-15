@@ -49,7 +49,7 @@ int mbr_info_em12ifrm(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_em12ifrm";
+	static const char function_name[] = "mbr_info_em12ifrm";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -118,7 +118,7 @@ int mbr_info_em12ifrm(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_em12ifrm";
+	static const char function_name[] = "mbr_zero_em12ifrm";
 	struct mbf_em12ifrm_struct *data;
 
 	if (verbose >= 2) {
@@ -267,7 +267,7 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_em12ifrm";
+	static const char function_name[] = "mbr_alm_em12ifrm";
 	struct stat imgfile_status, navfile_status;
 	int imgfile_stat, navfile_stat;
 	char path[MB_PATH_MAXLINE];
@@ -400,7 +400,7 @@ int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_em12ifrm";
+	static const char function_name[] = "mbr_dem_em12ifrm";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -428,7 +428,7 @@ int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 }
 
 int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_em12ifrm_rd_data";
+	static const char function_name[] = "mbr_em12ifrm_rd_data";
 	struct mbf_em12ifrm_struct *data;
 	int *save_data;
 	int *nav_available;
@@ -951,7 +951,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_em12ifrm";
+	static const char function_name[] = "mbr_rt_em12ifrm";
 	struct mbf_em12ifrm_struct *data;
 	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
@@ -1192,7 +1192,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_em12ifrm";
+	static const char function_name[] = "mbr_wt_em12ifrm";
 	struct mbf_em12ifrm_struct *data;
 	char *data_ptr;
 	struct mbsys_simrad_struct *store;
@@ -1356,7 +1356,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
-	char *function_name = "mbr_em12ifrm_wr_data";
+	static const char function_name[] = "mbr_em12ifrm_wr_data";
 	struct mbf_em12ifrm_struct *data;
 	char line[MBF_EM12IFRM_RECORD_SIZE] = "";
 	int shift;
@@ -1558,7 +1558,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_em12ifrm";
+	static const char function_name[] = "mbr_register_em12ifrm";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

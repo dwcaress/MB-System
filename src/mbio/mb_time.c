@@ -35,7 +35,7 @@ int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 /* 	function mb_get_time returns the number of seconds from
  * 	1/1/70 00:00:00 calculated from (yy/mm/dd/hr/mi/sc). */
 int mb_get_time(int verbose, int time_i[7], double *time_d) {
-	char *function_name = "mb_get_time";
+	static const char function_name[] = "mb_get_time";
 	int yearday;
 	int leapday;
 
@@ -81,7 +81,7 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
  * 	from the number of seconds after 1/1/70 00:00:0 */
 int mb_get_date(int verbose, double time_d, int time_i[7]) {
 
-	char *function_name = "mb_get_date";
+	static const char function_name[] = "mb_get_date";
 	int daytotal;
 	int yearday;
 	int leapday;
@@ -142,7 +142,7 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
  * 	from the number of seconds after 1/1/70 00:00:0 */
 int mb_get_date_string(int verbose, double time_d, char *string) {
 
-	char *function_name = "mb_get_date_string";
+	static const char function_name[] = "mb_get_date_string";
 	int time_i[7];
 
 	if (verbose >= 2) {
@@ -175,7 +175,7 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
 /* 	function mb_get_jtime returns the day of year calculated
  *	from (yy/mm/dd/hr/mi/sc). */
 int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
-	char *function_name = "mb_get_jtime";
+	static const char function_name[] = "mb_get_jtime";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -223,7 +223,7 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
  *	day of the year.
  */
 int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
-	char *function_name = "mb_get_itime";
+	static const char function_name[] = "mb_get_itime";
 	int leapday;
 
 	if (verbose >= 2) {
@@ -287,7 +287,7 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
  *      data can have timestamps dating prior to 1962.
  */
 int mb_fix_y2k(int verbose, int year_short, int *year_long) {
-	char *function_name = "mb_fix_y2k";
+	static const char function_name[] = "mb_fix_y2k";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -332,7 +332,7 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
  *          year_short = year_long % 100;
  */
 int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
-	char *function_name = "mb_unfix_y2k";
+	static const char function_name[] = "mb_unfix_y2k";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

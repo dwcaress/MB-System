@@ -43,7 +43,7 @@ int mbr_info_hsldedmb(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hsldedmb";
+	static const char function_name[] = "mbr_info_hsldedmb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -111,7 +111,7 @@ int mbr_info_hsldedmb(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldedmb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsldedmb";
+	static const char function_name[] = "mbr_alm_hsldedmb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -141,7 +141,7 @@ int mbr_alm_hsldedmb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsldedmb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsldedmb";
+	static const char function_name[] = "mbr_dem_hsldedmb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -169,7 +169,7 @@ int mbr_dem_hsldedmb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsldedmb";
+	static const char function_name[] = "mbr_rt_hsldedmb";
 	struct mbf_hsldedmb_struct *dataplus;
 	struct mbf_hsldedmb_data_struct *data;
 	struct mbsys_hsds_struct *store;
@@ -372,7 +372,7 @@ int mbr_rt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsldedmb";
+	static const char function_name[] = "mbr_wt_hsldedmb";
 	struct mbf_hsldedmb_struct *dataplus;
 	struct mbf_hsldedmb_data_struct *data;
 	struct mbsys_hsds_struct *store;
@@ -517,7 +517,7 @@ int mbr_wt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldedmb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hsldedmb";
+	static const char function_name[] = "mbr_register_hsldedmb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

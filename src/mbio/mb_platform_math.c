@@ -117,7 +117,7 @@ int mb_platform_math_attitude_offset(int verbose, double target_offset_roll, dou
                                      double target_offset_heading, double source_offset_roll, double source_offset_pitch,
                                      double source_offset_heading, double *target2source_offset_roll,
                                      double *target2source_offset_pitch, double *target2source_offset_heading, int *error) {
-	char *function_name = "mb_platform_math_attitude_offset";
+	static const char function_name[] = "mb_platform_math_attitude_offset";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -186,7 +186,7 @@ int mb_platform_math_attitude_platform(int verbose, double nav_attitude_roll, do
                                        double nav_attitude_heading, double attitude_offset_roll, double attitude_offset_pitch,
                                        double attitude_offset_heading, double *platform_roll, double *platform_pitch,
                                        double *platform_heading, int *error) {
-	char *function_name = "mb_platform_math_attitude_platform";
+	static const char function_name[] = "mb_platform_math_attitude_platform";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -251,7 +251,7 @@ int mb_platform_math_attitude_target(int verbose, double source_attitude_roll, d
                                      double source_attitude_heading, double target_offset_to_source_roll,
                                      double target_offset_to_source_pitch, double target_offset_to_source_heading,
                                      double *target_roll, double *target_pitch, double *target_heading, int *error) {
-	char *function_name = "mb_platform_math_attitude_target";
+	static const char function_name[] = "mb_platform_math_attitude_target";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -317,7 +317,7 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
                                                       double updated_attitude_pitch, double updated_attitude_heading,
                                                       double *corrected_offset_roll, double *corrected_offset_pitch,
                                                       double *corrected_offset_heading, int *error) {
-	char *function_name = "mb_platform_math_attitude_offset_corrected_by_nav";
+	static const char function_name[] = "mb_platform_math_attitude_offset_corrected_by_nav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -393,7 +393,7 @@ int mb_platform_math_attitude_offset_corrected_by_nav(int verbose, double prev_a
 int mb_platform_math_attitude_rotate_beam(int verbose, double beam_acrosstrack, double beam_alongtrack, double beam_bath,
                                           double attitude_roll, double attitude_pitch, double attitude_heading,
                                           double *newbeam_easting, double *newbeam_northing, double *newbeam_bath, int *error) {
-	char *function_name = "mb_platform_math_attitude_rotate_beam";
+	static const char function_name[] = "mb_platform_math_attitude_rotate_beam";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

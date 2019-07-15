@@ -42,7 +42,7 @@ int mbr_info_hsmdldih(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hsmdldih";
+	static const char function_name[] = "mbr_info_hsmdldih";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -110,7 +110,7 @@ int mbr_info_hsmdldih(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_hsmdldih";
+	static const char function_name[] = "mbr_zero_hsmdldih";
 	struct mbf_hsmdldih_struct *data;
 
 	if (verbose >= 2) {
@@ -208,7 +208,7 @@ int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsmdldih";
+	static const char function_name[] = "mbr_alm_hsmdldih";
 	struct mbf_hsmdldih_struct *data;
 	char *data_ptr;
 	double *FirstReftime; /* time from the first header */
@@ -274,7 +274,7 @@ int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsmdldih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsmdldih";
+	static const char function_name[] = "mbr_dem_hsmdldih";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -302,7 +302,7 @@ int mbr_dem_hsmdldih(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_hsmdldih_rd_data";
+	static const char function_name[] = "mbr_hsmdldih_rd_data";
 	struct mbf_hsmdldih_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -1066,7 +1066,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsmdldih";
+	static const char function_name[] = "mbr_rt_hsmdldih";
 	struct mbf_hsmdldih_struct *data;
 	struct mbsys_hsmd_struct *store;
 	int time_i[7];
@@ -1230,7 +1230,7 @@ int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
-	char *function_name = "mbr_hsmdldih_wr_data";
+	static const char function_name[] = "mbr_hsmdldih_wr_data";
 	struct mbf_hsmdldih_struct *data;
 	FILE *mbfp;
 	XDR *xdrs; /* xdr i/o pointer */
@@ -1543,7 +1543,7 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsmdldih";
+	static const char function_name[] = "mbr_wt_hsmdldih";
 	struct mbf_hsmdldih_struct *data;
 	char *data_ptr;
 	struct mbsys_hsmd_struct *store;
@@ -1664,7 +1664,7 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hsmdldih";
+	static const char function_name[] = "mbr_register_hsmdldih";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

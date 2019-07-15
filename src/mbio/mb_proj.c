@@ -51,7 +51,7 @@ char *GMT_runtime_bindir_win32(char *result);
 
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
-	char *function_name = "mb_proj_init";
+	static const char function_name[] = "mb_proj_init";
 	int status = MB_SUCCESS;
 	char pj_init_args[MB_PATH_MAXLINE];
 	projPJ pj;
@@ -130,7 +130,7 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_free(int verbose, void **pjptr, int *error) {
-	char *function_name = "mb_proj_free";
+	static const char function_name[] = "mb_proj_free";
 	int status = MB_SUCCESS;
 	projPJ pj;
 
@@ -165,7 +165,7 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *easting, double *northing, int *error) {
-	char *function_name = "mb_proj_forward";
+	static const char function_name[] = "mb_proj_forward";
 	int status = MB_SUCCESS;
 	projPJ pj;
 	projUV pjxy;
@@ -208,7 +208,7 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, double *lon, double *lat, int *error) {
-	char *function_name = "mb_proj_inverse";
+	static const char function_name[] = "mb_proj_inverse";
 	int status = MB_SUCCESS;
 	projPJ pj;
 	projUV pjxy;
@@ -251,7 +251,7 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, double *x, double *y, double *z, int *error) {
-	char *function_name = "mb_proj_transform";
+	static const char function_name[] = "mb_proj_transform";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

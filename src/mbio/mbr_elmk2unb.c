@@ -44,7 +44,7 @@ int mbr_info_elmk2unb(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_elmk2unb";
+	static const char function_name[] = "mbr_info_elmk2unb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -113,7 +113,7 @@ int mbr_info_elmk2unb(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error) {
-	char *function_name = "mbr_zero_elmk2unb";
+	static const char function_name[] = "mbr_zero_elmk2unb";
 	struct mbf_elmk2unb_struct *data;
 
 	if (verbose >= 2) {
@@ -254,7 +254,7 @@ int mbr_zero_elmk2unb(int verbose, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_elmk2unb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_elmk2unb";
+	static const char function_name[] = "mbr_alm_elmk2unb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -287,7 +287,7 @@ int mbr_alm_elmk2unb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_elmk2unb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_elmk2unb";
+	static const char function_name[] = "mbr_dem_elmk2unb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -315,7 +315,7 @@ int mbr_dem_elmk2unb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error) {
-	char *function_name = "mbr_elmk2unb_rd_comment";
+	static const char function_name[] = "mbr_elmk2unb_rd_comment";
 	char line[ELACMK2_COMMENT_SIZE + 3];
 
 	if (verbose >= 2) {
@@ -359,7 +359,7 @@ int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error) {
-	char *function_name = "mbr_elmk2unb_rd_parameter";
+	static const char function_name[] = "mbr_elmk2unb_rd_parameter";
 	char line[ELACMK2_PARAMETER_SIZE + 3];
 	short int *short_ptr;
 
@@ -536,7 +536,7 @@ int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp, struct mbf_elmk2unb_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error) {
-	char *function_name = "mbr_elmk2unb_rd_pos";
+	static const char function_name[] = "mbr_elmk2unb_rd_pos";
 	char line[ELACMK2_POS_SIZE + 3];
 	short int *short_ptr;
 	int *int_ptr;
@@ -650,7 +650,7 @@ int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error) {
-	char *function_name = "mbr_elmk2unb_rd_svp";
+	static const char function_name[] = "mbr_elmk2unb_rd_svp";
 	char line[ELACMK2_SVP_SIZE + 3];
 	short int *short_ptr;
 	short int *short_ptr2;
@@ -741,7 +741,7 @@ int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *data, int *error) {
-	char *function_name = "mbr_elmk2unb_rd_bathgen";
+	static const char function_name[] = "mbr_elmk2unb_rd_bathgen";
 	char line[ELACMK2_COMMENT_SIZE];
 	short int *short_ptr;
 	int *int_ptr;
@@ -934,7 +934,7 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_rd_data";
+	static const char function_name[] = "mbr_elmk2unb_rd_data";
 	struct mbf_elmk2unb_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -1045,7 +1045,7 @@ int mbr_elmk2unb_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_elmk2unb";
+	static const char function_name[] = "mbr_rt_elmk2unb";
 	struct mbf_elmk2unb_struct *data;
 	struct mbsys_elacmk2_struct *store;
 	int time_i[7];
@@ -1240,7 +1240,7 @@ int mbr_rt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_wr_comment";
+	static const char function_name[] = "mbr_elmk2unb_wr_comment";
 	struct mbf_elmk2unb_struct *data;
 	char line[ELACMK2_COMMENT_SIZE + 3];
 	short int label;
@@ -1314,7 +1314,7 @@ int mbr_elmk2unb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_wr_parameter";
+	static const char function_name[] = "mbr_elmk2unb_wr_parameter";
 	struct mbf_elmk2unb_struct *data;
 	char line[ELACMK2_PARAMETER_SIZE + 3];
 	short int label;
@@ -1514,7 +1514,7 @@ int mbr_elmk2unb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_wr_pos";
+	static const char function_name[] = "mbr_elmk2unb_wr_pos";
 	struct mbf_elmk2unb_struct *data;
 	char line[ELACMK2_POS_SIZE + 3];
 	short int label;
@@ -1647,7 +1647,7 @@ int mbr_elmk2unb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_wr_svp";
+	static const char function_name[] = "mbr_elmk2unb_wr_svp";
 	struct mbf_elmk2unb_struct *data;
 	char line[ELACMK2_SVP_SIZE + 3];
 	short int label;
@@ -1764,7 +1764,7 @@ int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_wr_bathgen";
+	static const char function_name[] = "mbr_elmk2unb_wr_bathgen";
 	struct mbf_elmk2unb_struct *data;
 	char line[ELACMK2_COMMENT_SIZE];
 	short int label;
@@ -1981,7 +1981,7 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_elmk2unb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_elmk2unb_wr_data";
+	static const char function_name[] = "mbr_elmk2unb_wr_data";
 	struct mbf_elmk2unb_struct *data;
 	FILE *mbfp;
 
@@ -2039,7 +2039,7 @@ int mbr_elmk2unb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_elmk2unb";
+	static const char function_name[] = "mbr_wt_elmk2unb";
 	struct mbf_elmk2unb_struct *data;
 	char *data_ptr;
 	struct mbsys_elacmk2_struct *store;
@@ -2186,7 +2186,7 @@ int mbr_wt_elmk2unb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_elmk2unb";
+	static const char function_name[] = "mbr_register_elmk2unb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

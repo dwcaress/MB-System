@@ -37,7 +37,7 @@
     reading. The file headers are returned */
 int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct mb_segyasciiheader_struct *segyasciiheader,
                       struct mb_segyfileheader_struct *segyfileheader, int *error) {
-	char *function_name = "mb_segy_read_init";
+	static const char function_name[] = "mb_segy_read_init";
 	int status = MB_SUCCESS;
 	struct mb_segyio_struct *mb_segyio_ptr;
 	struct mb_segyasciiheader_struct *asciiheader;
@@ -253,7 +253,7 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
     writing. The file headers are inserted. */
 int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_struct *asciiheader,
                        struct mb_segyfileheader_struct *fileheader, void **mbsegyio_ptr, int *error) {
-	char *function_name = "mb_segy_write_init";
+	static const char function_name[] = "mb_segy_write_init";
 	int status = MB_SUCCESS;
 	struct mb_segyio_struct *mb_segyio_ptr;
 	char *buffer;
@@ -448,7 +448,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 /* 	function mb_segy_close closes a segy file that was opened
     for either reading or writing. */
 int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
-	char *function_name = "mb_segy_close";
+	static const char function_name[] = "mb_segy_close";
 	int status = MB_SUCCESS;
 	struct mb_segyio_struct *mb_segyio_ptr;
 
@@ -492,7 +492,7 @@ int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
     additional memory can be allocated if necessary */
 int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheader_struct *traceheaderptr, float **traceptr,
                        int *error) {
-	char *function_name = "mb_segy_read_trace";
+	static const char function_name[] = "mb_segy_read_trace";
 	int status = MB_SUCCESS;
 	struct mb_segyio_struct *mb_segyio_ptr;
 	struct mb_segyfileheader_struct *fileheader;
@@ -849,7 +849,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
     in as a pointer */
 int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheader_struct *traceheader, float *trace,
                         int *error) {
-	char *function_name = "mb_segy_write_trace";
+	static const char function_name[] = "mb_segy_write_trace";
 	int status = MB_SUCCESS;
 	struct mb_segyio_struct *mb_segyio_ptr;
 	struct mb_segyasciiheader_struct *asciiheader;

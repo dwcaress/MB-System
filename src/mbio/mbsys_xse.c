@@ -41,7 +41,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_xse_alloc";
+	static const char function_name[] = "mbsys_xse_alloc";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -433,7 +433,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_xse_deall";
+	static const char function_name[] = "mbsys_xse_deall";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -458,7 +458,7 @@ int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	char *function_name = "mbsys_xse_dimensions";
+	static const char function_name[] = "mbsys_xse_dimensions";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -525,7 +525,7 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
                       double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_xse_extract";
+	static const char function_name[] = "mbsys_xse_extract";
 	struct mbsys_xse_struct *store;
 	double xtrackmin, xtrackmax;
 	int ixtrackmin, ixtrackmax;
@@ -764,7 +764,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_xse_insert";
+	static const char function_name[] = "mbsys_xse_insert";
 	struct mbsys_xse_struct *store;
 	double maxoffset, xtrackmin, xtrackmax;
 	int imaxoffset, ixtrackmin, ixtrackmax;
@@ -961,7 +961,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                      double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                      double *ssv, int *error) {
-	char *function_name = "mbsys_xse_ttimes";
+	static const char function_name[] = "mbsys_xse_ttimes";
 	struct mbsys_xse_struct *store;
 	double xtrackmin, xtrackmax;
 	int ixtrackmin, ixtrackmax;
@@ -1099,7 +1099,7 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_xse_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_xse_detects";
+	static const char function_name[] = "mbsys_xse_detects";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -1189,7 +1189,7 @@ int mbsys_xse_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 /*--------------------------------------------------------------------*/
 int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                double *altitude, int *error) {
-	char *function_name = "mbsys_xse_extract_altitude";
+	static const char function_name[] = "mbsys_xse_extract_altitude";
 	struct mbsys_xse_struct *store;
 	double bath_best;
 	double xtrack_min;
@@ -1285,7 +1285,7 @@ int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                           double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                           double *heave, int *error) {
-	char *function_name = "mbsys_xse_extract_nav";
+	static const char function_name[] = "mbsys_xse_extract_nav";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -1466,7 +1466,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                          double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
-	char *function_name = "mbsys_xse_insert_nav";
+	static const char function_name[] = "mbsys_xse_insert_nav";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -1574,7 +1574,7 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 /*--------------------------------------------------------------------*/
 int mbsys_xse_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                           int *error) {
-	char *function_name = "mbsys_xse_extract_svp";
+	static const char function_name[] = "mbsys_xse_extract_svp";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -1640,7 +1640,7 @@ int mbsys_xse_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 }
 /*--------------------------------------------------------------------*/
 int mbsys_xse_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	char *function_name = "mbsys_xse_insert_svp";
+	static const char function_name[] = "mbsys_xse_insert_svp";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -1686,7 +1686,7 @@ int mbsys_xse_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_xse_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_xse_copy";
+	static const char function_name[] = "mbsys_xse_copy";
 	struct mbsys_xse_struct *store;
 	struct mbsys_xse_struct *copy;
 

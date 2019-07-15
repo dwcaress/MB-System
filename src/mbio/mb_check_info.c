@@ -41,7 +41,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error) {
-	char *function_name = "mb_check_info";
+	static const char function_name[] = "mb_check_info";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -231,7 +231,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 }
 /*--------------------------------------------------------------------*/
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip, int *error) {
-	char *function_name = "mb_get_info";
+	static const char function_name[] = "mb_get_info";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -567,7 +567,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 }
 /*--------------------------------------------------------------------*/
 int mb_make_info(int verbose, int force, char *file, int format, int *error) {
-	char *function_name = "mb_make_info";
+	static const char function_name[] = "mb_make_info";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -660,7 +660,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_get_fbt(int verbose, char *file, int *format, int *error) {
-	char *function_name = "mb_get_fbt";
+	static const char function_name[] = "mb_get_fbt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -707,7 +707,7 @@ int mb_get_fbt(int verbose, char *file, int *format, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_get_fnv(int verbose, char *file, int *format, int *error) {
-	char *function_name = "mb_get_fnv";
+	static const char function_name[] = "mb_get_fnv";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -754,7 +754,7 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_get_ffa(int verbose, char *file, int *format, int *error) {
-	char *function_name = "mb_get_ffa";
+	static const char function_name[] = "mb_get_ffa";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -804,7 +804,7 @@ int mb_get_ffa(int verbose, char *file, int *format, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_get_ffs(int verbose, char *file, int *format, int *error) {
-	char *function_name = "mb_get_ffs";
+	static const char function_name[] = "mb_get_ffs";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -857,7 +857,7 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
                    double *bath, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                    double *ssalongtrack, int *ibeamport, int *ibeamcntr, int *ibeamstbd, int *ipixelport, int *ipixelcntr,
                    int *ipixelstbd, int *error) {
-	char *function_name = "mb_swathbounds";
+	static const char function_name[] = "mb_swathbounds";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -985,7 +985,7 @@ int mb_swathbounds(int verbose, int checkgood, double navlon, double navlat, dou
 
 /*--------------------------------------------------------------------*/
 int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
-	char *function_name = "mb_info_init";
+	static const char function_name[] = "mb_info_init";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1085,7 +1085,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_info_struct *mb_info, int lonflip, int *error) {
-	char *function_name = "mb_get_info_datalist";
+	static const char function_name[] = "mb_get_info_datalist";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

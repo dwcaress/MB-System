@@ -40,7 +40,7 @@
 /*--------------------------------------------------------------------*/
 int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *beams_bath, int *beams_amp, int *pixels_ss,
                   int *error) {
-	char *function_name = "mb_write_init";
+	static const char function_name[] = "mb_write_init";
 	int status_save;
 	int error_save;
 	int sapi_status;

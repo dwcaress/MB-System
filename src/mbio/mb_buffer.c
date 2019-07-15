@@ -51,7 +51,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
-	char *function_name = "mb_buffer_init";
+	static const char function_name[] = "mb_buffer_init";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -81,7 +81,7 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
-	char *function_name = "mb_buffer_close";
+	static const char function_name[] = "mb_buffer_close";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -121,7 +121,7 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *nload, int *nbuff, int *error) {
-	char *function_name = "mb_buffer_load";
+	static const char function_name[] = "mb_buffer_load";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -247,7 +247,7 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr, int nhold, int *ndump, int *nbuff, int *error) {
-	char *function_name = "mb_buffer_dump";
+	static const char function_name[] = "mb_buffer_dump";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -379,7 +379,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int *ndump, int *nbuff, int *error) {
-	char *function_name = "mb_buffer_clear";
+	static const char function_name[] = "mb_buffer_clear";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -501,7 +501,7 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
                             double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                             char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                             double *ss, double *ssacrosstrack, double *ssalongtrack, int *error) {
-	char *function_name = "mb_buffer_get_next_data";
+	static const char function_name[] = "mb_buffer_get_next_data";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -593,7 +593,7 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int start, int *id, int time_i[7], double *time_d,
                            double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                            double *pitch, double *heave, int *error) {
-	char *function_name = "mb_buffer_get_next_nav";
+	static const char function_name[] = "mb_buffer_get_next_nav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -668,7 +668,7 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
                       double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                       char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mb_buffer_extract";
+	static const char function_name[] = "mb_buffer_extract";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -760,7 +760,7 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *kind, int time_i[7], double *time_d,
                           double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                           double *pitch, double *heave, int *error) {
-	char *function_name = "mb_buffer_extract_nav";
+	static const char function_name[] = "mb_buffer_extract_nav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -832,7 +832,7 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mb_buffer_insert";
+	static const char function_name[] = "mb_buffer_insert";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -907,7 +907,7 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, int time_i[7], double time_d, double navlon,
                          double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                          int *error) {
-	char *function_name = "mb_buffer_insert_nav";
+	static const char function_name[] = "mb_buffer_insert_nav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -963,7 +963,7 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *kind, int *error) {
-	char *function_name = "mb_buffer_get_kind";
+	static const char function_name[] = "mb_buffer_get_kind";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1002,7 +1002,7 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void **store_ptr, int *error) {
-	char *function_name = "mb_buffer_get_ptr";
+	static const char function_name[] = "mb_buffer_get_ptr";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

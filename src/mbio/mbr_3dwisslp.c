@@ -41,7 +41,7 @@ int mbr_info_3dwisslp(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-  char *function_name = "mbr_info_3dwisslp";
+  static const char function_name[] = "mbr_info_3dwisslp";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -111,7 +111,7 @@ int mbr_info_3dwisslp(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_3dwisslp(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_alm_3dwisslp";
+  static const char function_name[] = "mbr_alm_3dwisslp";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -152,7 +152,7 @@ int mbr_alm_3dwisslp(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_3dwisslp(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_dem_3dwisslp";
+  static const char function_name[] = "mbr_dem_3dwisslp";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -191,7 +191,7 @@ int mbr_dem_3dwisslp(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_3dwisslp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_3dwisslp_rd_data";
+  static const char function_name[] = "mbr_3dwisslp_rd_data";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -754,7 +754,7 @@ __FILE__, __FUNCTION__, __LINE__, (mb_u_char)buffer[0], (mb_u_char)buffer[1], st
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_3dwisslp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_rt_3dwisslp";
+  static const char function_name[] = "mbr_rt_3dwisslp";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -802,7 +802,7 @@ int mbr_rt_3dwisslp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_3dwisslp_wr_data";
+  static const char function_name[] = "mbr_3dwisslp_wr_data";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1418,7 +1418,7 @@ int mbr_3dwisslp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_3dwisslp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_wt_3dwisslp";
+  static const char function_name[] = "mbr_wt_3dwisslp";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1451,7 +1451,7 @@ int mbr_wt_3dwisslp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_3dwisslp(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_register_3dwisslp";
+  static const char function_name[] = "mbr_register_3dwisslp";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

@@ -372,7 +372,7 @@ int mbr_info_sb2100b1(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_sb2100b1";
+	static const char function_name[] = "mbr_info_sb2100b1";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -445,7 +445,7 @@ int mbr_info_sb2100b2(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_sb2100b2";
+	static const char function_name[] = "mbr_info_sb2100b2";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -515,7 +515,7 @@ int mbr_info_sb2100b2(int verbose, int *system, int *beams_bath_max, int *beams_
 
 /*--------------------------------------------------------------------*/
 int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
-	char *function_name = "mbr_zero_sb2100bi";
+	static const char function_name[] = "mbr_zero_sb2100bi";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 
@@ -628,7 +628,7 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_sb2100bi";
+	static const char function_name[] = "mbr_alm_sb2100bi";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 
@@ -671,7 +671,7 @@ int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_sb2100bi";
+	static const char function_name[] = "mbr_dem_sb2100bi";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -699,7 +699,7 @@ int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_fh";
+	static const char function_name[] = "mbr_sb2100bi_rd_fh";
 	int status = MB_SUCCESS;
 	int nread;
 	int nlast;
@@ -747,7 +747,7 @@ int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_pr";
+	static const char function_name[] = "mbr_sb2100bi_rd_pr";
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -874,7 +874,7 @@ int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_tr";
+	static const char function_name[] = "mbr_sb2100bi_rd_tr";
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -949,7 +949,7 @@ int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_dh";
+	static const char function_name[] = "mbr_sb2100bi_rd_dh";
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -1118,7 +1118,7 @@ int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_br";
+	static const char function_name[] = "mbr_sb2100bi_rd_br";
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -1227,7 +1227,7 @@ int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_sr";
+	static const char function_name[] = "mbr_sb2100bi_rd_sr";
 	int status = MB_SUCCESS;
 	int read_length;
 	unsigned int checksum_read;
@@ -1319,7 +1319,7 @@ int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_data";
+	static const char function_name[] = "mbr_sb2100bi_rd_data";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 	FILE *mbfp;
@@ -1504,7 +1504,7 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_sb2100bi";
+	static const char function_name[] = "mbr_rt_sb2100bi";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 
@@ -1558,7 +1558,7 @@ int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_fh";
+	static const char function_name[] = "mbr_sb2100bi_wr_fh";
 	int status = MB_SUCCESS;
 	int record_length;
 	char record_length_str[8];
@@ -1634,7 +1634,7 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_pr";
+	static const char function_name[] = "mbr_sb2100bi_wr_pr";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -1769,7 +1769,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_tr";
+	static const char function_name[] = "mbr_sb2100bi_wr_tr";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -1859,7 +1859,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_dh";
+	static const char function_name[] = "mbr_sb2100bi_wr_dh";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -2036,7 +2036,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_br";
+	static const char function_name[] = "mbr_sb2100bi_wr_br";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -2151,7 +2151,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_sr";
+	static const char function_name[] = "mbr_sb2100bi_wr_sr";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -2249,7 +2249,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_data";
+	static const char function_name[] = "mbr_sb2100bi_wr_data";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 	FILE *mbfp;
@@ -2308,7 +2308,7 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_sb2100bi";
+	static const char function_name[] = "mbr_wt_sb2100bi";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 
@@ -2345,7 +2345,7 @@ int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_sb2100b1";
+	static const char function_name[] = "mbr_register_sb2100b1";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -2439,7 +2439,7 @@ int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b2(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_sb2100b2";
+	static const char function_name[] = "mbr_register_sb2100b2";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

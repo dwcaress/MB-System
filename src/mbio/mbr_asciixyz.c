@@ -62,7 +62,7 @@ int mbr_info_asciixyz(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_asciixyz";
+	static const char function_name[] = "mbr_info_asciixyz";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -130,7 +130,7 @@ int mbr_info_asciixyz(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_asciixyz";
+	static const char function_name[] = "mbr_alm_asciixyz";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -167,7 +167,7 @@ int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_asciixyz";
+	static const char function_name[] = "mbr_dem_asciixyz";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -194,7 +194,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_asciixyz";
+	static const char function_name[] = "mbr_rt_asciixyz";
 	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE + 1] = "";
 	char flag;
@@ -334,7 +334,7 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_asciixyz";
+	static const char function_name[] = "mbr_wt_asciixyz";
 	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE + 1] = "";
 	char flag;
@@ -424,7 +424,7 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_asciiyxz(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_asciiyxz";
+	static const char function_name[] = "mbr_register_asciiyxz";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -519,7 +519,7 @@ int mbr_info_asciiyxz(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_asciiyxz";
+	static const char function_name[] = "mbr_info_asciiyxz";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -587,7 +587,7 @@ int mbr_info_asciiyxz(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyt(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_asciixyt";
+	static const char function_name[] = "mbr_register_asciixyt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -682,7 +682,7 @@ int mbr_info_asciixyt(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_asciixyt";
+	static const char function_name[] = "mbr_info_asciixyt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -750,7 +750,7 @@ int mbr_info_asciixyt(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_asciiyxt(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_asciiyxt";
+	static const char function_name[] = "mbr_register_asciiyxt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -845,7 +845,7 @@ int mbr_info_asciiyxt(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_asciiyxt";
+	static const char function_name[] = "mbr_info_asciiyxt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -913,7 +913,7 @@ int mbr_info_asciiyxt(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_asciixyz";
+	static const char function_name[] = "mbr_register_asciixyz";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

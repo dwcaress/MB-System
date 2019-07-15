@@ -38,7 +38,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_gsf_alloc";
+	static const char function_name[] = "mbsys_gsf_alloc";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -68,7 +68,7 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_gsf_deall";
+	static const char function_name[] = "mbsys_gsf_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfRecords *records;
@@ -99,7 +99,7 @@ int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	char *function_name = "mbsys_gsf_dimensions";
+	static const char function_name[] = "mbsys_gsf_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -170,7 +170,7 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	char *function_name = "mbsys_gsf_sonartype";
+	static const char function_name[] = "mbsys_gsf_sonartype";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -288,7 +288,7 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonar
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	char *function_name = "mbsys_gsf_sidescantype";
+	static const char function_name[] = "mbsys_gsf_sidescantype";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -336,7 +336,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
                       double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_gsf_extract";
+	static const char function_name[] = "mbsys_gsf_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -652,7 +652,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_gsf_insert";
+	static const char function_name[] = "mbsys_gsf_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -846,7 +846,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                      double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                      double *ssv, int *error) {
-	char *function_name = "mbsys_gsf_ttimes";
+	static const char function_name[] = "mbsys_gsf_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1094,7 +1094,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_gsf_detects";
+	static const char function_name[] = "mbsys_gsf_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1174,7 +1174,7 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                double *altitude, int *error) {
-	char *function_name = "mbsys_gsf_extract_altitude";
+	static const char function_name[] = "mbsys_gsf_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1290,7 +1290,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
                               int *error) {
-	char *function_name = "mbsys_gsf_insert_altitude";
+	static const char function_name[] = "mbsys_gsf_insert_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1363,7 +1363,7 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                           double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                           double *heave, int *error) {
-	char *function_name = "mbsys_gsf_extract_nav";
+	static const char function_name[] = "mbsys_gsf_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1517,7 +1517,7 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                          double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
-	char *function_name = "mbsys_gsf_insert_nav";
+	static const char function_name[] = "mbsys_gsf_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1623,7 +1623,7 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                           int *error) {
-	char *function_name = "mbsys_gsf_extract_svp";
+	static const char function_name[] = "mbsys_gsf_extract_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1694,7 +1694,7 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	char *function_name = "mbsys_gsf_insert_svp";
+	static const char function_name[] = "mbsys_gsf_insert_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1751,7 +1751,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_gsf_copy";
+	static const char function_name[] = "mbsys_gsf_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	struct mbsys_gsf_struct *copy;
@@ -1790,7 +1790,7 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_ping, int *error) {
-	char *function_name = "mbsys_gsf_setscalefactors";
+	static const char function_name[] = "mbsys_gsf_setscalefactors";
 	int status = MB_SUCCESS;
 
 	const double GSF_DEPTH_ASSUMED_HIGHEST_PRECISION = 10000;

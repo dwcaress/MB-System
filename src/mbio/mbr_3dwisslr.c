@@ -44,7 +44,7 @@ int mbr_info_3dwisslr(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-  char *function_name = "mbr_info_3dwisslr";
+  static const char function_name[] = "mbr_info_3dwisslr";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -114,7 +114,7 @@ int mbr_info_3dwisslr(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_alm_3dwisslr";
+  static const char function_name[] = "mbr_alm_3dwisslr";
   int status = MB_SUCCESS;
   int *file_header_readwritten;
   int *file_indexed;
@@ -161,7 +161,7 @@ int mbr_alm_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_3dwisslr(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_dem_3dwisslr";
+  static const char function_name[] = "mbr_dem_3dwisslr";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
@@ -208,7 +208,7 @@ int mbr_dem_3dwisslr(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_3dwisslr_fixtimestamps(int verbose, void *mbio_ptr,
                                 int num_indextable, struct mb_io_indextable_struct *indextable, int n_file, int *error) {
-  char *function_name = "mbr_3dwisslr_fixtimestamps";
+  static const char function_name[] = "mbr_3dwisslr_fixtimestamps";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
 
@@ -266,7 +266,7 @@ int mbr_3dwisslr_indextable_compare(const void *a, const void *b) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_3dwisslr_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_3dwisslr_index_data";
+  static const char function_name[] = "mbr_3dwisslr_index_data";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
   int *file_indexed;
@@ -643,7 +643,7 @@ mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size);
 
 /*--------------------------------------------------------------------*/
 int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_3dwisslr_rd_data";
+  static const char function_name[] = "mbr_3dwisslr_rd_data";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
   struct mbsys_3ddwissl_calibration_v1s1_struct *calibration_v1s1;
@@ -1146,7 +1146,7 @@ int mbr_3dwisslr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_rt_3dwisslr";
+  static const char function_name[] = "mbr_rt_3dwisslr";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
   int *file_indexed;
@@ -1205,7 +1205,7 @@ int mbr_rt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_3dwisslr_wr_data";
+  static const char function_name[] = "mbr_3dwisslr_wr_data";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
   struct mbsys_3ddwissl_pulse_struct *pulse;
@@ -1738,7 +1738,7 @@ int mbr_3dwisslr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_wt_3dwisslr";
+  static const char function_name[] = "mbr_wt_3dwisslr";
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_struct *store;
 
@@ -1773,7 +1773,7 @@ int mbr_wt_3dwisslr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_3dwisslr(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_register_3dwisslr";
+  static const char function_name[] = "mbr_register_3dwisslr";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {

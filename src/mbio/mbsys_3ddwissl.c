@@ -164,7 +164,7 @@ int mbsys_3ddwissl_alloc(int verbose,      /* in: verbosity level set on command
                                void **store_ptr, /* in: see mbsys_3ddwissl.h:/^struct mbsys_3ddwissl_struct/ */
                                int *error        /* out: see mb_status.h:/MB_ERROR/ */
                                ) {
-	char *function_name = "mbsys_3ddwissl_alloc";
+	static const char function_name[] = "mbsys_3ddwissl_alloc";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -273,7 +273,7 @@ int mbsys_3ddwissl_deall(int verbose,      /* in: verbosity level set on command
                                void **store_ptr, /* in: see mbsys_3ddwissl.h:/^struct mbsys_3ddwissl_struct/ */
                                int *error        /* out: see mb_status.h:/error values/ */
                                ) {
-	char *function_name = "mbsys_3ddwissl_deall";
+	static const char function_name[] = "mbsys_3ddwissl_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -320,7 +320,7 @@ int mbsys_3ddwissl_dimensions(int verbose, void *mbio_ptr, /* in: verbosity leve
                                     int *nss,        /* out: number of sidescan samples 0..MBSYS_SWPLS_MAX_BEAMS */
                                     int *error       /* out: see mb_status.h:/error values/ */
                                     ) {
-	char *function_name = "mbsys_3ddwissl_dimensions";
+	static const char function_name[] = "mbsys_3ddwissl_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -377,7 +377,7 @@ int mbsys_3ddwissl_pingnumber(int verbose,     /* in: verbosity level set on com
                                     unsigned int *pingnumber, /* out: ping number */
                                     int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                     ) {
-	char *function_name = "mbsys_3ddwissl_pingnumber";
+	static const char function_name[] = "mbsys_3ddwissl_pingnumber";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -416,7 +416,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
                                     void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                                     void *store_ptr, /* in: see mbsys_3ddwissl.h:/^struct mbsys_3ddwissl_struct/ */
                                     void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	char *function_name = "mbsys_3ddwissl_preprocess";
+	static const char function_name[] = "mbsys_3ddwissl_preprocess";
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
 	struct mb_platform_struct *platform;
@@ -701,7 +701,7 @@ int mbsys_3ddwissl_preprocess(int verbose,     /* in: verbosity level set on com
 /*--------------------------------------------------------------------*/
 int mbsys_3ddwissl_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 							  int *sensorhead, int *error) {
-	char *function_name = "mbsys_3ddwissl_sensorhead";
+	static const char function_name[] = "mbsys_3ddwissl_sensorhead";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -771,7 +771,7 @@ int mbsys_3ddwissl_extract(int verbose,     /* in: verbosity level set on comman
                                  char *comment,           /* out: comment string (not supported by SWATHplus SXP) */
                                  int *error               /* out: see mb_status.h:/MB_ERROR/ */
                                  ) {
-	char *function_name = "mbsys_3ddwissl_extract";
+	static const char function_name[] = "mbsys_3ddwissl_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
@@ -887,7 +887,7 @@ int mbsys_3ddwissl_insert(int verbose,     /* in: verbosity level set on command
                                 char *comment,           /* in: comment string (not supported by SWATHplus SXP) */
                                 int *error               /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	char *function_name = "mbsys_3ddwissl_insert";
+	static const char function_name[] = "mbsys_3ddwissl_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
@@ -1024,7 +1024,7 @@ int mbsys_3ddwissl_ttimes(int verbose,            /* in: verbosity level set on 
                                 double *ssv,               /* out: sound velocity at head (m/s) */
                                 int *error                 /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	char *function_name = "mbsys_3ddwissl_ttimes";
+	static const char function_name[] = "mbsys_3ddwissl_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -1113,7 +1113,7 @@ int mbsys_3ddwissl_detects(int verbose,     /* in: verbosity level set on comman
                                                    see mb_status.h:/Bottom detect flags/ */
                                  int *error /* out: see mb_status.h:/MB_ERROR/ */
                                  ) {
-	char *function_name = "mbsys_3ddwissl_detects";
+	static const char function_name[] = "mbsys_3ddwissl_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -1192,7 +1192,7 @@ int mbsys_3ddwissl_pulses(int verbose,     /* in: verbosity level set on command
                                 int *pulses,     /* out: array[nbeams] pulse type; see mb_status.h:/Source pulse/ */
                                 int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	char *function_name = "mbsys_3ddwissl_pulses";
+	static const char function_name[] = "mbsys_3ddwissl_pulses";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -1275,7 +1275,7 @@ int mbsys_3ddwissl_gains(int verbose,           /* in: verbosity level set on co
                                double *receive_gain,  /* out: receive gain (dB) */
                                int *error             /* out: see mb_status.h:/MB_ERROR/ */
                                ) {
-	char *function_name = "mbsys_3ddwissl_gains";
+	static const char function_name[] = "mbsys_3ddwissl_gains";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -1356,7 +1356,7 @@ int mbsys_3ddwissl_extract_altitude(
     double *altitude,         /* out: transducer altitude above seafloor (m) */
     int *error                /* out: see mb_status.h:/MB_ERROR/ */
     ) {
-	char *function_name = "mbsys_3ddwissl_extract_altitude";
+	static const char function_name[] = "mbsys_3ddwissl_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
@@ -1454,7 +1454,7 @@ int mbsys_3ddwissl_extract_nnav(int verbose,     /* in: verbosity level set on c
                                       double *heave,   /* out: array[n] heave (m) */
                                       int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                       ) {
-	char *function_name = "mbsys_3ddwissl_extract_nnav";
+	static const char function_name[] = "mbsys_3ddwissl_extract_nnav";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 	int inav;
@@ -1563,7 +1563,7 @@ int mbsys_3ddwissl_extract_nav(int verbose, void *mbio_ptr, /* in: verbosity lev
                                      double *heave,   /* out: heave (degrees) */
                                      int *error       /* out: see mb_status.h:MB_ERROR */
                                      ) {
-	char *function_name = "mbsys_3ddwissl_extract_nav";
+	static const char function_name[] = "mbsys_3ddwissl_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -1659,7 +1659,7 @@ int mbsys_3ddwissl_insert_nav(int verbose, void *mbio_ptr, /* in: verbosity leve
                                     double heave,                /* in: heave (m) */
                                     int *error                   /* out: see mb_status.h:MB_ERROR */
                                     ) {
-	char *function_name = "mbsys_3ddwissl_insert_nav";
+	static const char function_name[] = "mbsys_3ddwissl_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 	double dlon, dlat, dheading, dsensordepth, droll, dpitch;
@@ -1742,7 +1742,7 @@ int mbsys_3ddwissl_extract_svp(int verbose,      /* in: verbosity level set on c
                                      double *velocity, /* out: array[nsvp] velocity (m) */
                                      int *error        /* out: see: mb_status.h:MB_ERROR */
                                      ) {
-	char *function_name = "mbsys_3ddwissl_extract_svp";
+	static const char function_name[] = "mbsys_3ddwissl_extract_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -1804,7 +1804,7 @@ int mbsys_3ddwissl_insert_svp(int verbose,      /* in: verbosity level set on co
                                     double *velocity, /* in: array[nsvp] sound velocity records (m/s) */
                                     int *error        /* out: see mb_status.h:MB_ERROR */
                                     ) {
-	char *function_name = "mbsys_3ddwissl_insert_svp";
+	static const char function_name[] = "mbsys_3ddwissl_insert_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 
@@ -1859,7 +1859,7 @@ int mbsys_3ddwissl_copy(int verbose,     /* in: verbosity level set on command l
                               void *copy_ptr,  /* out: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
                               int *error       /* out: see mb_status.h:MB_ERROR */
                               ) {
-	char *function_name = "mbsys_3ddwissl_copy";
+	static const char function_name[] = "mbsys_3ddwissl_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_struct *copy;
@@ -1927,7 +1927,7 @@ int mbsys_3ddwissl_print_store(int verbose,     /* in: verbosity level set on co
                                      void *store_ptr, /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
                                      int *error       /* out: see mb_status.h:MB_ERROR */
                                      ) {
-	char *function_name = "mbsys_3ddwissl_print_store";
+	static const char function_name[] = "mbsys_3ddwissl_print_store";
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
 	struct mbsys_3ddwissl_sounding_struct *sounding;
@@ -2299,7 +2299,7 @@ int mbsys_3ddwissl_calculatebathymetry(int verbose,     /* in: verbosity level s
  											 double target_altitude, /* used to prioritize picks close to a desired standoff */
                                              int *error       /* out: see mb_status.h:MB_ERROR */
                                              ) {
-	char *function_name = "mbsys_3ddwissl_calculatebathymetry";
+	static const char function_name[] = "mbsys_3ddwissl_calculatebathymetry";
 	struct mbsys_3ddwissl_struct *store;
 	struct mbsys_3ddwissl_pulse_struct *pulse;
 	struct mbsys_3ddwissl_sounding_struct *sounding;
@@ -2542,7 +2542,7 @@ int mbsys_3ddwissl_wissl_indextable_compare2(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 int mbsys_3ddwissl_indextablefix(int verbose, void *mbio_ptr, int num_indextable,
                                  void *indextable_ptr, int *error) {
-	char *function_name = "mbsys_3ddwissl_fixwissltimestamps";
+	static const char function_name[] = "mbsys_3ddwissl_fixwissltimestamps";
 	int status = MB_SUCCESS;
     struct mb_io_indextable_struct *indextable;
 	struct mbsys_3ddwissl_struct *store;
@@ -2833,7 +2833,7 @@ fprintf(stderr, "\n");
 /*--------------------------------------------------------------------*/
 int mbsys_3ddwissl_indextableapply(int verbose, void *mbio_ptr, int num_indextable,
                                    void *indextable_ptr, int n_file, int *error) {
-	char *function_name = "mbsys_3ddwissl_indextableapply";
+	static const char function_name[] = "mbsys_3ddwissl_indextableapply";
 	int status = MB_SUCCESS;
         struct mb_io_indextable_struct *indextable;
         int giindex, iindex;

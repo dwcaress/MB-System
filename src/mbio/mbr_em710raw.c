@@ -75,7 +75,7 @@ int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_em710raw";
+	static const char function_name[] = "mbr_info_em710raw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -143,7 +143,7 @@ int mbr_info_em710raw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_em710raw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_em710raw";
+	static const char function_name[] = "mbr_alm_em710raw";
 	int *databyteswapped;
 	double *pixel_size;
 	double *swath_width;
@@ -183,7 +183,7 @@ int mbr_alm_em710raw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_em710raw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_em710raw";
+	static const char function_name[] = "mbr_dem_em710raw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -210,7 +210,7 @@ int mbr_dem_em710raw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type, short *sonar) {
-	char *function_name = "mbr_em710raw_chk_label";
+	static const char function_name[] = "mbr_em710raw_chk_label";
 	mb_u_char startbyte;
 	mb_u_char typebyte;
 	short *sonar_save;
@@ -363,7 +363,7 @@ int mbr_em710raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                            int *goodend, int *error) {
-	char *function_name = "mbr_em710raw_rd_status";
+	static const char function_name[] = "mbr_em710raw_rd_status";
 	char line[EM3_PU_STATUS_SIZE];
 	short short_val;
 	size_t read_len;
@@ -517,7 +517,7 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_start(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short type, short sonar,
                           int *version, int *num_sonars, int *goodend, int *error) {
-	char *function_name = "mbr_em710raw_rd_start";
+	static const char function_name[] = "mbr_em710raw_rd_start";
 	char line[MBSYS_SIMRAD3_BUFFER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1121,7 +1121,7 @@ file will return error */
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar,
                                   int *goodend, int *error) {
-	char *function_name = "mbr_em710raw_rd_run_parameter";
+	static const char function_name[] = "mbr_em710raw_rd_run_parameter";
 	char line[EM3_RUN_PARAMETER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1242,7 +1242,7 @@ int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                           int *error) {
-	char *function_name = "mbr_em710raw_rd_clock";
+	static const char function_name[] = "mbr_em710raw_rd_clock";
 	char line[EM3_CLOCK_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1320,7 +1320,7 @@ int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                          int *error) {
-	char *function_name = "mbr_em710raw_rd_tide";
+	static const char function_name[] = "mbr_em710raw_rd_tide";
 	char line[EM3_TIDE_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1399,7 +1399,7 @@ int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                            int *error) {
-	char *function_name = "mbr_em710raw_rd_height";
+	static const char function_name[] = "mbr_em710raw_rd_height";
 	char line[EM3_HEIGHT_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1475,7 +1475,7 @@ int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                             int *error) {
-	char *function_name = "mbr_em710raw_rd_heading";
+	static const char function_name[] = "mbr_em710raw_rd_heading";
 	struct mbsys_simrad3_heading_struct *heading;
 	char line[EM3_HEADING_HEADER_SIZE];
 	short short_val;
@@ -1591,7 +1591,7 @@ int mbr_em710raw_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
-	char *function_name = "mbr_em710raw_rd_ssv";
+	static const char function_name[] = "mbr_em710raw_rd_ssv";
 	struct mbsys_simrad3_ssv_struct *ssv;
 	char line[EM3_SSV_HEADER_SIZE];
 	short short_val;
@@ -1703,7 +1703,7 @@ int mbr_em710raw_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                          int *error) {
-	char *function_name = "mbr_em710raw_rd_tilt";
+	static const char function_name[] = "mbr_em710raw_rd_tilt";
 	struct mbsys_simrad3_tilt_struct *tilt;
 	char line[EM3_TILT_HEADER_SIZE];
 	short short_val;
@@ -1815,7 +1815,7 @@ int mbr_em710raw_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar,
                                     int *goodend, int *error) {
-	char *function_name = "mbr_em710raw_rd_extraparameters";
+	static const char function_name[] = "mbr_em710raw_rd_extraparameters";
 	struct mbsys_simrad3_extraparameters_struct *extraparameters;
 	char line[EM3_EXTRAPARAMETERS_HEADER_SIZE];
 	short short_val;
@@ -1969,7 +1969,7 @@ int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                              int *error) {
-	char *function_name = "mbr_em710raw_rd_attitude";
+	static const char function_name[] = "mbr_em710raw_rd_attitude";
 	struct mbsys_simrad3_attitude_struct *attitude;
 	char line[EM3_ATTITUDE_HEADER_SIZE];
 	short short_val;
@@ -2104,7 +2104,7 @@ int mbr_em710raw_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar,
                                 int *goodend, int *error) {
-	char *function_name = "mbr_em710raw_rd_netattitude";
+	static const char function_name[] = "mbr_em710raw_rd_netattitude";
 	struct mbsys_simrad3_netattitude_struct *netattitude;
 	char line[MBSYS_SIMRAD3_BUFFER_SIZE];
 	short short_val;
@@ -2261,7 +2261,7 @@ int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
-	char *function_name = "mbr_em710raw_rd_pos";
+	static const char function_name[] = "mbr_em710raw_rd_pos";
 	char line[MBSYS_SIMRAD3_COMMENT_LENGTH];
 	short short_val;
 	size_t read_len;
@@ -2422,7 +2422,7 @@ int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
-	char *function_name = "mbr_em710raw_rd_svp";
+	static const char function_name[] = "mbr_em710raw_rd_svp";
 	char line[EM3_SVP_HEADER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -2537,7 +2537,7 @@ int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                          int *error) {
-	char *function_name = "mbr_em710raw_rd_svp2";
+	static const char function_name[] = "mbr_em710raw_rd_svp2";
 	char line[EM3_SVP2_HEADER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -2650,7 +2650,7 @@ int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int version,
                           int *goodend, int *error) {
-	char *function_name = "mbr_em710raw_rd_bath2";
+	static const char function_name[] = "mbr_em710raw_rd_bath2";
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_BATH2_HEADER_SIZE];
 	short short_val;
@@ -2848,7 +2848,7 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                              int *error) {
-	char *function_name = "mbr_em710raw_rd_rawbeam4";
+	static const char function_name[] = "mbr_em710raw_rd_rawbeam4";
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_RAWBEAM4_HEADER_SIZE];
 	short short_val;
@@ -3084,7 +3084,7 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                             int *error) {
-	char *function_name = "mbr_em710raw_rd_quality";
+	static const char function_name[] = "mbr_em710raw_rd_quality";
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_QUALITY_HEADER_SIZE];
 	short short_val;
@@ -3244,7 +3244,7 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                         int *error) {
-	char *function_name = "mbr_em710raw_rd_ss2";
+	static const char function_name[] = "mbr_em710raw_rd_ss2";
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_SS2_HEADER_SIZE];
 	short short_val;
@@ -3508,7 +3508,7 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, short sonar, int *goodend,
                        int *error) {
-	char *function_name = "mbr_em710raw_rd_wc";
+	static const char function_name[] = "mbr_em710raw_rd_wc";
 	struct mbsys_simrad3_watercolumn_struct *wc;
 	char line[EM3_WC_HEADER_SIZE];
 	short short_val;
@@ -3705,7 +3705,7 @@ int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_em710raw_rd_data";
+	static const char function_name[] = "mbr_em710raw_rd_data";
 	struct mbsys_simrad3_struct *store;
 	FILE *mbfp;
 	int swap = -1;
@@ -4277,7 +4277,7 @@ Have a nice day...\n");
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_em710raw";
+	static const char function_name[] = "mbr_rt_em710raw";
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_attitude_struct *attitude;
 	struct mbsys_simrad3_netattitude_struct *netattitude;
@@ -4955,7 +4955,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_start";
+	static const char function_name[] = "mbr_em710raw_wr_start";
 	char line[MBSYS_SIMRAD3_BUFFER_SIZE], *buff;
 	int buff_len;
 	size_t write_len;
@@ -5538,7 +5538,7 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_status(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_status";
+	static const char function_name[] = "mbr_em710raw_wr_status";
 	char line[EM3_PU_STATUS_SIZE];
 	short label;
 	char *labelchar;
@@ -5700,7 +5700,7 @@ int mbr_em710raw_wr_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_run_parameter(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_run_parameter";
+	static const char function_name[] = "mbr_em710raw_wr_run_parameter";
 	char line[EM3_RUN_PARAMETER_SIZE];
 	short label;
 	char *labelchar;
@@ -5844,7 +5844,7 @@ int mbr_em710raw_wr_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_clock";
+	static const char function_name[] = "mbr_em710raw_wr_clock";
 	char line[EM3_CLOCK_SIZE];
 	short label;
 	char *labelchar;
@@ -5954,7 +5954,7 @@ int mbr_em710raw_wr_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_tide";
+	static const char function_name[] = "mbr_em710raw_wr_tide";
 	char line[EM3_TIDE_SIZE];
 	short label;
 	char *labelchar;
@@ -6058,7 +6058,7 @@ int mbr_em710raw_wr_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_height(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_height";
+	static const char function_name[] = "mbr_em710raw_wr_height";
 	char line[EM3_HEIGHT_SIZE];
 	short label;
 	char *labelchar;
@@ -6166,7 +6166,7 @@ int mbr_em710raw_wr_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_heading";
+	static const char function_name[] = "mbr_em710raw_wr_heading";
 	struct mbsys_simrad3_heading_struct *heading;
 	char line[EM3_HEADING_HEADER_SIZE];
 	short label;
@@ -6311,7 +6311,7 @@ int mbr_em710raw_wr_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_ssv";
+	static const char function_name[] = "mbr_em710raw_wr_ssv";
 	struct mbsys_simrad3_ssv_struct *ssv;
 	char line[EM3_SSV_HEADER_SIZE];
 	short label;
@@ -6454,7 +6454,7 @@ int mbr_em710raw_wr_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_tilt";
+	static const char function_name[] = "mbr_em710raw_wr_tilt";
 	struct mbsys_simrad3_tilt_struct *tilt;
 	char line[EM3_TILT_HEADER_SIZE];
 	short label;
@@ -6597,7 +6597,7 @@ int mbr_em710raw_wr_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_extraparameters(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_extraparameters";
+	static const char function_name[] = "mbr_em710raw_wr_extraparameters";
 	struct mbsys_simrad3_extraparameters_struct *extraparameters;
 	char line[EM3_EXTRAPARAMETERS_HEADER_SIZE];
 	short label;
@@ -6744,7 +6744,7 @@ int mbr_em710raw_wr_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_attitude";
+	static const char function_name[] = "mbr_em710raw_wr_attitude";
 	struct mbsys_simrad3_attitude_struct *attitude;
 	char line[EM3_ATTITUDE_HEADER_SIZE];
 	short label;
@@ -6894,7 +6894,7 @@ int mbr_em710raw_wr_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_netattitude(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_netattitude";
+	static const char function_name[] = "mbr_em710raw_wr_netattitude";
 	struct mbsys_simrad3_netattitude_struct *netattitude;
 	char line[EM3_NETATTITUDE_SLICE_SIZE + MBSYS_SIMRAD3_BUFFER_SIZE];
 	short label;
@@ -7058,7 +7058,7 @@ int mbr_em710raw_wr_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_pos";
+	static const char function_name[] = "mbr_em710raw_wr_pos";
 	char line[EM3_POS_HEADER_SIZE];
 	short label;
 	char *labelchar;
@@ -7202,7 +7202,7 @@ int mbr_em710raw_wr_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_svp";
+	static const char function_name[] = "mbr_em710raw_wr_svp";
 	char line[EM3_SVP_HEADER_SIZE];
 	short label;
 	char *labelchar;
@@ -7347,7 +7347,7 @@ int mbr_em710raw_wr_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_svp2";
+	static const char function_name[] = "mbr_em710raw_wr_svp2";
 	char line[EM3_SVP2_HEADER_SIZE];
 	short label;
 	char *labelchar;
@@ -7492,7 +7492,7 @@ int mbr_em710raw_wr_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_bath2";
+	static const char function_name[] = "mbr_em710raw_wr_bath2";
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_BATH2_HEADER_SIZE];
 	short label;
@@ -7656,7 +7656,7 @@ int mbr_em710raw_wr_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_rawbeam4";
+	static const char function_name[] = "mbr_em710raw_wr_rawbeam4";
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_RAWBEAM4_HEADER_SIZE];
 	short label;
@@ -7858,7 +7858,7 @@ int mbr_em710raw_wr_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_quality";
+	static const char function_name[] = "mbr_em710raw_wr_quality";
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_QUALITY_HEADER_SIZE];
 	short label;
@@ -8002,7 +8002,7 @@ int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_ss2";
+	static const char function_name[] = "mbr_em710raw_wr_ss2";
 	struct mbsys_simrad3_ping_struct *ping;
 	char line[EM3_SS2_HEADER_SIZE];
 	short label;
@@ -8187,7 +8187,7 @@ int mbr_em710raw_wr_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	char *function_name = "mbr_em710raw_wr_wc";
+	static const char function_name[] = "mbr_em710raw_wr_wc";
 	struct mbsys_simrad3_watercolumn_struct *wc;
 	char line[EM3_WC_HEADER_SIZE];
 	short label;
@@ -8400,7 +8400,7 @@ int mbr_em710raw_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_em710raw_wr_data";
+	static const char function_name[] = "mbr_em710raw_wr_data";
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	FILE *mbfp;
@@ -8694,7 +8694,7 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_em710raw";
+	static const char function_name[] = "mbr_wt_em710raw";
 	struct mbsys_simrad3_struct *store;
 
 	if (verbose >= 2) {
@@ -8727,7 +8727,7 @@ int mbr_wt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_em710raw";
+	static const char function_name[] = "mbr_register_em710raw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

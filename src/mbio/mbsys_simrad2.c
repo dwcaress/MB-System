@@ -44,7 +44,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_alloc";
+	static const char function_name[] = "mbsys_simrad2_alloc";
 	struct mbsys_simrad2_struct *store;
 
 	if (verbose >= 2) {
@@ -353,7 +353,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_survey_alloc";
+	static const char function_name[] = "mbsys_simrad2_survey_alloc";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 
@@ -1017,7 +1017,7 @@ int mbsys_simrad2_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbsys_wc_survey_alloc";
+	static const char function_name[] = "mbsys_wc_survey_alloc";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_watercolumn_struct *wc;
 
@@ -1098,7 +1098,7 @@ int mbsys_simrad2_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_extraparameters_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_extraparameters_alloc";
+	static const char function_name[] = "mbsys_simrad2_extraparameters_alloc";
 	struct mbsys_simrad2_struct *store;
 
 	if (verbose >= 2) {
@@ -1138,7 +1138,7 @@ int mbsys_simrad2_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_attitude_alloc";
+	static const char function_name[] = "mbsys_simrad2_attitude_alloc";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_attitude_struct *attitude;
 
@@ -1211,7 +1211,7 @@ int mbsys_simrad2_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_heading_alloc";
+	static const char function_name[] = "mbsys_simrad2_heading_alloc";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_heading_struct *heading;
 
@@ -1276,7 +1276,7 @@ int mbsys_simrad2_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_ssv_alloc";
+	static const char function_name[] = "mbsys_simrad2_ssv_alloc";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ssv_struct *ssv;
 
@@ -1338,7 +1338,7 @@ int mbsys_simrad2_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_tilt_alloc";
+	static const char function_name[] = "mbsys_simrad2_tilt_alloc";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_tilt_struct *tilt;
 
@@ -1401,7 +1401,7 @@ int mbsys_simrad2_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_deall";
+	static const char function_name[] = "mbsys_simrad2_deall";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 
@@ -1469,7 +1469,7 @@ int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_zero_ss";
+	static const char function_name[] = "mbsys_simrad2_zero_ss";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 
@@ -1565,7 +1565,7 @@ int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-	char *function_name = "mbsys_simrad2_dimensions";
+	static const char function_name[] = "mbsys_simrad2_dimensions";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 
@@ -1627,7 +1627,7 @@ int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	char *function_name = "mbsys_simrad2_pingnumber";
+	static const char function_name[] = "mbsys_simrad2_pingnumber";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 
@@ -1663,7 +1663,7 @@ int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	char *function_name = "mbsys_simrad2_sonartype";
+	static const char function_name[] = "mbsys_simrad2_sonartype";
 	struct mbsys_simrad2_struct *store;
 
 	if (verbose >= 2) {
@@ -1698,7 +1698,7 @@ int mbsys_simrad2_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	char *function_name = "mbsys_simrad2_sidescantype";
+	static const char function_name[] = "mbsys_simrad2_sidescantype";
 	struct mbsys_simrad2_struct *store;
 
 	if (verbose >= 2) {
@@ -1736,7 +1736,7 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_preprocess";
+	static const char function_name[] = "mbsys_simrad2_preprocess";
 	struct mbsys_simrad2_struct *store = NULL;
 	struct mbsys_simrad2_ping_struct *ping = NULL;
 	struct mb_platform_struct *platform = NULL;
@@ -1928,7 +1928,7 @@ int mbsys_simrad2_preprocess(int verbose,     /* in: verbosity level set on comm
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_extract_platform";
+	static const char function_name[] = "mbsys_simrad2_extract_platform";
 	struct mb_platform_struct *platform;
 	struct mbsys_simrad2_struct *store;
 	int sensor_multibeam;
@@ -2454,7 +2454,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_simrad2_extract";
+	static const char function_name[] = "mbsys_simrad2_extract";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	double depthscale, depthoffset;
@@ -2809,7 +2809,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_simrad2_insert";
+	static const char function_name[] = "mbsys_simrad2_insert";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	struct mbsys_simrad2_ping_struct *ping2;
@@ -3209,7 +3209,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	char *function_name = "mbsys_simrad2_ttimes";
+	static const char function_name[] = "mbsys_simrad2_ttimes";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	struct mbsys_simrad2_ping_struct *ping2;
@@ -3391,7 +3391,7 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_simrad2_detects";
+	static const char function_name[] = "mbsys_simrad2_detects";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	struct mbsys_simrad2_ping_struct *ping2;
@@ -3501,7 +3501,7 @@ int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
-	char *function_name = "mbsys_simrad2_pulses";
+	static const char function_name[] = "mbsys_simrad2_pulses";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	struct mbsys_simrad2_ping_struct *ping2;
@@ -3603,7 +3603,7 @@ int mbsys_simrad2_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error) {
-	char *function_name = "mbsys_simrad2_gains";
+	static const char function_name[] = "mbsys_simrad2_gains";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_survey_struct *ping;
 
@@ -3682,7 +3682,7 @@ int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error) {
-	char *function_name = "mbsys_simrad2_extract_altitude";
+	static const char function_name[] = "mbsys_simrad2_extract_altitude";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	double depthscale, dacrscale;
@@ -3782,7 +3782,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
                                double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
                                double *roll, double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_simrad2_extract_nnav";
+	static const char function_name[] = "mbsys_simrad2_extract_nnav";
 	int interp_error = MB_ERROR_NO_ERROR;
 	struct mbsys_simrad2_struct *store = NULL;
 	struct mbsys_simrad2_ping_struct *ping = NULL;
@@ -3999,7 +3999,7 @@ int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_simrad2_extract_nav";
+	static const char function_name[] = "mbsys_simrad2_extract_nav";
 	struct mbsys_simrad2_struct *store = NULL;
 	struct mbsys_simrad2_ping_struct *ping = NULL;
 
@@ -4216,7 +4216,7 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-	char *function_name = "mbsys_simrad2_insert_nav";
+	static const char function_name[] = "mbsys_simrad2_insert_nav";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 
@@ -4352,7 +4352,7 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
-	char *function_name = "mbsys_simrad2_extract_svp";
+	static const char function_name[] = "mbsys_simrad2_extract_svp";
 	struct mbsys_simrad2_struct *store;
 
 	if (verbose >= 2) {
@@ -4419,7 +4419,7 @@ int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
-	char *function_name = "mbsys_simrad2_insert_svp";
+	static const char function_name[] = "mbsys_simrad2_insert_svp";
 	struct mbsys_simrad2_struct *store;
 
 	if (verbose >= 2) {
@@ -4466,7 +4466,7 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_simrad2_copy";
+	static const char function_name[] = "mbsys_simrad2_copy";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_struct *copy;
 	struct mbsys_simrad2_ping_struct *ping_store;
@@ -4623,7 +4623,7 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-	char *function_name = "mbsys_simrad2_makess";
+	static const char function_name[] = "mbsys_simrad2_makess";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	double ss[MBSYS_SIMRAD2_MAXPIXELS];

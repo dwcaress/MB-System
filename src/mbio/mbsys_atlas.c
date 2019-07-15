@@ -45,7 +45,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_atlas_alloc";
+	static const char function_name[] = "mbsys_atlas_alloc";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
@@ -282,7 +282,7 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_atlas_deall";
+	static const char function_name[] = "mbsys_atlas_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
@@ -312,7 +312,7 @@ int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	char *function_name = "mbsys_atlas_dimensions";
+	static const char function_name[] = "mbsys_atlas_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
@@ -366,7 +366,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_atlas_extract";
+	static const char function_name[] = "mbsys_atlas_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 	double pixel_size;
@@ -555,7 +555,7 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_atlas_insert";
+	static const char function_name[] = "mbsys_atlas_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 	double xtrackmin;
@@ -680,7 +680,7 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                        double *ssv, int *error) {
-	char *function_name = "mbsys_atlas_ttimes";
+	static const char function_name[] = "mbsys_atlas_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 	double *angle_table;
@@ -792,7 +792,7 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_atlas_detects";
+	static const char function_name[] = "mbsys_atlas_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 	int detect;
@@ -869,7 +869,7 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                  double *altitude, int *error) {
-	char *function_name = "mbsys_atlas_extract_altitude";
+	static const char function_name[] = "mbsys_atlas_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 	double bath_best;
@@ -960,7 +960,7 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                             double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_atlas_extract_nav";
+	static const char function_name[] = "mbsys_atlas_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
@@ -1081,7 +1081,7 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                            int *error) {
-	char *function_name = "mbsys_atlas_insert_nav";
+	static const char function_name[] = "mbsys_atlas_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 
@@ -1151,7 +1151,7 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_atlas_copy";
+	static const char function_name[] = "mbsys_atlas_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 	struct mbsys_atlas_struct *copy;
@@ -1187,7 +1187,7 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbsys_atlas_ttcorr";
+	static const char function_name[] = "mbsys_atlas_ttcorr";
 	int status = MB_SUCCESS;
 	struct mbsys_atlas_struct *store;
 

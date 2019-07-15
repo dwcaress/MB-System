@@ -38,7 +38,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
-	char *function_name = "mb_pr_checkstatus";
+	static const char function_name[] = "mb_pr_checkstatus";
 	int ifilemodtime = 0;
 	int ofilemodtime = 0;
 	int pfilemodtime = 0;
@@ -160,7 +160,7 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_struct *process, int *error) {
-	char *function_name = "mb_pr_readpar";
+	static const char function_name[] = "mb_pr_readpar";
 	char parfile[MBP_FILENAMESIZE];
 	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	char *lastslash;
@@ -1312,7 +1312,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, int *error) {
-	char *function_name = "mb_pr_writepar";
+	static const char function_name[] = "mb_pr_writepar";
 	char parfile[MBP_FILENAMESIZE];
 	char pwd[MBP_FILENAMESIZE];
 	char relative_path[MBP_FILENAMESIZE];
@@ -1754,7 +1754,7 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
-	char *function_name = "mb_pr_bathmode";
+	static const char function_name[] = "mb_pr_bathmode";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1792,7 +1792,7 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *error) {
-	char *function_name = "mb_pr_default_output";
+	static const char function_name[] = "mb_pr_default_output";
 	char fileroot[MBP_FILENAMESIZE];
 	int format;
 
@@ -1855,7 +1855,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *error) {
-	char *function_name = "mb_pr_get_output";
+	static const char function_name[] = "mb_pr_get_output";
 	char fileroot[MBP_FILENAMESIZE];
 	int tformat;
 
@@ -1911,7 +1911,7 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, int *error) {
-	char *function_name = "mb_pr_check";
+	static const char function_name[] = "mb_pr_check";
 	char ofile[MBP_FILENAMESIZE];
 	int format;
 	char line[MB_PATH_MAXLINE];
@@ -2130,7 +2130,7 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *mbp_ofile, int *error) {
-	char *function_name = "mb_pr_update_ofile";
+	static const char function_name[] = "mb_pr_update_ofile";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2170,7 +2170,7 @@ int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *m
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int mbp_format, int *error) {
-	char *function_name = "mb_pr_update_format";
+	static const char function_name[] = "mb_pr_update_format";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2205,7 +2205,7 @@ int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int m
 /*--------------------------------------------------------------------*/
 int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double mbp_rollbias, double mbp_rollbias_port,
                           double mbp_rollbias_stbd, int *error) {
-	char *function_name = "mb_pr_update_rollbias";
+	static const char function_name[] = "mb_pr_update_rollbias";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2246,7 +2246,7 @@ int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, double mbp_pitchbias, int *error) {
-	char *function_name = "mb_pr_update_pitchbias";
+	static const char function_name[] = "mb_pr_update_pitchbias";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2284,7 +2284,7 @@ int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, doub
 /*--------------------------------------------------------------------*/
 int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_draft, double mbp_draft_offset,
                        double mbp_draft_mult, int *error) {
-	char *function_name = "mb_pr_update_draft";
+	static const char function_name[] = "mb_pr_update_draft";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2325,7 +2325,7 @@ int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_d
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_heave, double mbp_heave_mult, int *error) {
-	char *function_name = "mb_pr_update_heave";
+	static const char function_name[] = "mb_pr_update_heave";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2366,7 +2366,7 @@ int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_h
 int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_vru_offsetx, double mbp_vru_offsety,
                        double mbp_vru_offsetz, double mbp_sonar_offsetx, double mbp_sonar_offsety, double mbp_sonar_offsetz,
                        int *error) {
-	char *function_name = "mb_pr_update_lever";
+	static const char function_name[] = "mb_pr_update_lever";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2413,7 +2413,7 @@ int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_v
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tidefile, int mbp_tide_format, int *error) {
-	char *function_name = "mb_pr_update_tide";
+	static const char function_name[] = "mb_pr_update_tide";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2453,7 +2453,7 @@ int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tide
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult, int *error) {
-	char *function_name = "mb_pr_update_tt";
+	static const char function_name[] = "mb_pr_update_tt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2490,7 +2490,7 @@ int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, int *error) {
-	char *function_name = "mb_pr_update_ssv";
+	static const char function_name[] = "mb_pr_update_ssv";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2528,7 +2528,7 @@ int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, 
 /*--------------------------------------------------------------------*/
 int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfile, int mbp_angle_mode, int mbp_corrected,
                      int *error) {
-	char *function_name = "mb_pr_update_svp";
+	static const char function_name[] = "mb_pr_update_svp";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2570,7 +2570,7 @@ int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfil
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_staticfile, int *error) {
-	char *function_name = "mb_pr_update_static";
+	static const char function_name[] = "mb_pr_update_static";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2606,7 +2606,7 @@ int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_
 /*--------------------------------------------------------------------*/
 int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_navadjfile, int mbp_navadj_algorithm,
                         int *error) {
-	char *function_name = "mb_pr_update_navadj";
+	static const char function_name[] = "mb_pr_update_navadj";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2646,7 +2646,7 @@ int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_
 /*--------------------------------------------------------------------*/
 int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *mbp_attitudefile, int mbp_attitude_format,
                           int *error) {
-	char *function_name = "mb_pr_update_attitude";
+	static const char function_name[] = "mb_pr_update_attitude";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2687,7 +2687,7 @@ int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *
 /*--------------------------------------------------------------------*/
 int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, char *mbp_sonardepthfile, int mbp_sonardepth_format,
                             int *error) {
-	char *function_name = "mb_pr_update_sonardepth";
+	static const char function_name[] = "mb_pr_update_sonardepth";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2729,7 +2729,7 @@ int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, ch
 int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfile, int mbp_nav_format, int mbp_nav_heading,
                      int mbp_nav_speed, int mbp_nav_draft, int mbp_nav_attitude, int mbp_nav_algorithm, double mbp_nav_timeshift,
                      int *error) {
-	char *function_name = "mb_pr_update_nav";
+	static const char function_name[] = "mb_pr_update_nav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2780,7 +2780,7 @@ int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfil
 int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp_nav_offsetx, double mbp_nav_offsety,
                           double mbp_nav_offsetz, double mbp_nav_shiftlon, double mbp_nav_shiftlat, double mbp_nav_shiftx,
                           double mbp_nav_shifty, int *error) {
-	char *function_name = "mb_pr_update_navshift";
+	static const char function_name[] = "mb_pr_update_navshift";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2826,7 +2826,7 @@ int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double mbp_headingbias, int *error) {
-	char *function_name = "mb_pr_update_heading";
+	static const char function_name[] = "mb_pr_update_heading";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2861,7 +2861,7 @@ int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double m
 /*--------------------------------------------------------------------*/
 int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_kind, int *mbp_cut_mode, double *mbp_cut_min,
                          double *mbp_cut_max, int *error) {
-	char *function_name = "mb_pr_update_datacut";
+	static const char function_name[] = "mb_pr_update_datacut";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2905,7 +2905,7 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_editfile, int *error) {
-	char *function_name = "mb_pr_update_edit";
+	static const char function_name[] = "mb_pr_update_edit";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2942,7 +2942,7 @@ int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_edit
 int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mbp_ampcorrfile, int mbp_ampcorr_type,
                          int mbp_ampcorr_symmetry, double mbp_ampcorr_angle, int mbp_ampcorr_slope, char *mbp_ampsscorr_topofile,
                          int *error) {
-	char *function_name = "mb_pr_update_ampcorr";
+	static const char function_name[] = "mb_pr_update_ampcorr";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2990,7 +2990,7 @@ int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mb
 int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_sscorrfile, int mbp_sscorr_type,
                         int mbp_sscorr_symmetry, double mbp_sscorr_angle, int mbp_sscorr_slope, char *mbp_ampsscorr_topofile,
                         int *error) {
-	char *function_name = "mb_pr_update_sscorr";
+	static const char function_name[] = "mb_pr_update_sscorr";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3037,7 +3037,7 @@ int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_
 /*--------------------------------------------------------------------*/
 int mb_pr_update_ssrecalc(int verbose, char *file, int mbp_ssrecalc_mode, double mbp_ssrecalc_pixelsize,
                           double mbp_ssrecalc_swathwidth, int mbp_ssrecalc_interpolate, int *error) {
-	char *function_name = "mb_pr_update_ssrecalc";
+	static const char function_name[] = "mb_pr_update_ssrecalc";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3080,7 +3080,7 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
                           int mbp_meta_tidecorrected, int mbp_meta_batheditmanual, int mbp_meta_batheditauto,
                           double mbp_meta_rollbias, double mbp_meta_pitchbias, double mbp_meta_headingbias, double mbp_meta_draft,
                           int *error) {
-	char *function_name = "mb_pr_update_metadata";
+	static const char function_name[] = "mb_pr_update_metadata";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3151,7 +3151,7 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
 int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge002, int mbp_kluge003, int mbp_kluge004,
                         int mbp_kluge005, int mbp_kluge006, int mbp_kluge007, int mbp_kluge008, int mbp_kluge009,
                         int mbp_kluge010, int *error) {
-	char *function_name = "mb_pr_update_kluges";
+	static const char function_name[] = "mb_pr_update_kluges";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3201,7 +3201,7 @@ int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp_ofile, int *error) {
-	char *function_name = "mb_pr_get_ofile";
+	static const char function_name[] = "mb_pr_get_ofile";
 	char parfile[MBP_FILENAMESIZE];
 	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	FILE *fp;
@@ -3255,7 +3255,7 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mbp_format, int *error) {
-	char *function_name = "mb_pr_get_format";
+	static const char function_name[] = "mb_pr_get_format";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3287,7 +3287,7 @@ int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mb
 /*--------------------------------------------------------------------*/
 int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *mbp_rollbias, double *mbp_rollbias_port,
                        double *mbp_rollbias_stbd, int *error) {
-	char *function_name = "mb_pr_get_rollbias";
+	static const char function_name[] = "mb_pr_get_rollbias";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3322,7 +3322,7 @@ int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double *mbp_pitchbias, int *error) {
-	char *function_name = "mb_pr_get_pitchbias";
+	static const char function_name[] = "mb_pr_get_pitchbias";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3354,7 +3354,7 @@ int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double
 /*--------------------------------------------------------------------*/
 int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_draft, double *mbp_draft_offset,
                     double *mbp_draft_mult, int *error) {
-	char *function_name = "mb_pr_get_draft";
+	static const char function_name[] = "mb_pr_get_draft";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3389,7 +3389,7 @@ int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_dr
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_heave, double *mbp_heave_mult, int *error) {
-	char *function_name = "mb_pr_get_heave";
+	static const char function_name[] = "mb_pr_get_heave";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3424,7 +3424,7 @@ int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_he
 int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vru_offsetx, double *mbp_vru_offsety,
                     double *mbp_vru_offsetz, double *mbp_sonar_offsetx, double *mbp_sonar_offsety, double *mbp_sonar_offsetz,
                     int *error) {
-	char *function_name = "mb_pr_get_lever";
+	static const char function_name[] = "mb_pr_get_lever";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3465,7 +3465,7 @@ int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vr
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefile, int *mbp_tide_format, int *error) {
-	char *function_name = "mb_pr_get_tide";
+	static const char function_name[] = "mb_pr_get_tide";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3499,7 +3499,7 @@ int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefi
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult, int *error) {
-	char *function_name = "mb_pr_get_tt";
+	static const char function_name[] = "mb_pr_get_tt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3530,7 +3530,7 @@ int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult,
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, int *error) {
-	char *function_name = "mb_pr_get_ssv";
+	static const char function_name[] = "mb_pr_get_ssv";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3562,7 +3562,7 @@ int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, i
 /*--------------------------------------------------------------------*/
 int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile, int *mbp_angle_mode, int *mbp_corrected,
                   int *error) {
-	char *function_name = "mb_pr_get_svp";
+	static const char function_name[] = "mb_pr_get_svp";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3598,7 +3598,7 @@ int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile,
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_staticfile, int *error) {
-	char *function_name = "mb_pr_get_static";
+	static const char function_name[] = "mb_pr_get_static";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3630,7 +3630,7 @@ int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_st
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_navadjfile, int *mbp_navadj_algorithm, int *error) {
-	char *function_name = "mb_pr_get_navadj";
+	static const char function_name[] = "mb_pr_get_navadj";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3668,7 +3668,7 @@ int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_na
 /*--------------------------------------------------------------------*/
 int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mbp_attitudefile, int *mbp_attitude_format,
                        int *error) {
-	char *function_name = "mb_pr_get_attitude";
+	static const char function_name[] = "mb_pr_get_attitude";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3703,7 +3703,7 @@ int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mb
 /*--------------------------------------------------------------------*/
 int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char *mbp_sonardepthfile, int *mbp_sonardepth_format,
                          int *error) {
-	char *function_name = "mb_pr_get_sonardepth";
+	static const char function_name[] = "mb_pr_get_sonardepth";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3739,7 +3739,7 @@ int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char
 int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile, int *mbp_nav_format, int *mbp_nav_heading,
                   int *mbp_nav_speed, int *mbp_nav_draft, int *mbp_nav_attitude, int *mbp_nav_algorithm,
                   double *mbp_nav_timeshift, int *error) {
-	char *function_name = "mb_pr_get_nav";
+	static const char function_name[] = "mb_pr_get_nav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3787,7 +3787,7 @@ int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile,
 int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_nav_offsetx, double *mbp_nav_offsety,
                        double *mbp_nav_offsetz, double *mbp_nav_shiftlon, double *mbp_nav_shiftlat, double *mbp_nav_shiftx,
                        double *mbp_nav_shifty, int *error) {
-	char *function_name = "mb_pr_get_navshift";
+	static const char function_name[] = "mb_pr_get_navshift";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3829,7 +3829,7 @@ int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_
 	return (status);
 } /*--------------------------------------------------------------------*/
 int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mbp_headingbias, int *error) {
-	char *function_name = "mb_pr_get_heading";
+	static const char function_name[] = "mb_pr_get_heading";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3862,7 +3862,7 @@ int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mb
 /*--------------------------------------------------------------------*/
 int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_kind, int *mbp_cut_mode, double *mbp_cut_min,
                       double *mbp_cut_max, int *error) {
-	char *function_name = "mb_pr_update_datacut";
+	static const char function_name[] = "mb_pr_update_datacut";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3903,7 +3903,7 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfile, int *error) {
-	char *function_name = "mb_pr_get_edit";
+	static const char function_name[] = "mb_pr_get_edit";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3937,7 +3937,7 @@ int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfi
 int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_ampcorrfile, int *mbp_ampcorr_type,
                       int *mbp_ampcorr_symmetry, double *mbp_ampcorr_angle, int *mbp_ampcorr_slope, char *mbp_ampsscorr_topofile,
                       int *error) {
-	char *function_name = "mb_pr_get_ampcorr";
+	static const char function_name[] = "mb_pr_get_ampcorr";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -3982,7 +3982,7 @@ int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_
 int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_sscorrfile, int *mbp_sscorr_type,
                      int *mbp_sscorr_symmetry, double *mbp_sscorr_angle, int *mbp_sscorr_slope, char *mbp_ampsscorr_topofile,
                      int *error) {
-	char *function_name = "mb_pr_get_sscorr";
+	static const char function_name[] = "mb_pr_get_sscorr";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -4026,7 +4026,7 @@ int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_ss
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ssrecalc(int verbose, char *file, int *mbp_ssrecalc_mode, double *mbp_ssrecalc_pixelsize,
                        double *mbp_ssrecalc_swathwidth, int *mbp_ssrecalc_interpolate, int *error) {
-	char *function_name = "mb_pr_get_ssrecalc";
+	static const char function_name[] = "mb_pr_get_ssrecalc";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -4066,7 +4066,7 @@ int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp
                        int *mbp_meta_tidecorrected, int *mbp_meta_batheditmanual, int *mbp_meta_batheditauto,
                        double *mbp_meta_rollbias, double *mbp_meta_pitchbias, double *mbp_meta_headingbias,
                        double *mbp_meta_draft, int *error) {
-	char *function_name = "mb_pr_get_metadata";
+	static const char function_name[] = "mb_pr_get_metadata";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -4131,7 +4131,7 @@ int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp
 int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge002, int *mbp_kluge003, int *mbp_kluge004,
                      int *mbp_kluge005, int *mbp_kluge006, int *mbp_kluge007, int *mbp_kluge008, int *mbp_kluge009,
                      int *mbp_kluge010, int *error) {
-	char *function_name = "mb_pr_get_kluges";
+	static const char function_name[] = "mb_pr_get_kluges";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -4180,7 +4180,7 @@ int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge0
 int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack,
                             int *ndepths, double *depths, double *depthacrosstrack, int *nslopes, double *slopes,
                             double *slopeacrosstrack, double *depthsmooth, int *error) {
-	char *function_name = "mb_pr_set_bathyslopenew";
+	static const char function_name[] = "mb_pr_set_bathyslopenew";
 	double dxtrack;
 	double weight;
 	int j1, j2;
@@ -4275,7 +4275,7 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths,
                          double *depths, double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack,
                          double *depthsmooth, int *error) {
-	char *function_name = "mb_pr_set_bathyslope";
+	static const char function_name[] = "mb_pr_set_bathyslope";
 	int first, next, last;
 	int nbathgood;
 	double depthsum;
@@ -4423,7 +4423,7 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 /*--------------------------------------------------------------------*/
 int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
                          double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
-	char *function_name = "get_bathyslope";
+	static const char function_name[] = "get_bathyslope";
 	int found_depth, found_slope;
 	int idepth, islope;
 
@@ -4515,7 +4515,7 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y, int *error) {
-	char *function_name = "mb_pr_point_in_quad";
+	static const char function_name[] = "mb_pr_point_in_quad";
 	int inside = MB_YES;
 	double ax, ay, bx, by;
 	double z1, z2, z3, z4, z;
@@ -4584,7 +4584,7 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 /*--------------------------------------------------------------------*/
 
 int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int *error) {
-	char *function_name = "mb_pr_lockswathfile";
+	static const char function_name[] = "mb_pr_lockswathfile";
 	mb_path lockfile;
 	FILE *fp;
 
@@ -4664,7 +4664,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 
 int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
                    int *error) {
-	char *function_name = "mb_pr_lockinfo";
+	static const char function_name[] = "mb_pr_lockinfo";
 	mb_path lockfile;
 	FILE *fp;
 	mb_path line;
@@ -4746,7 +4746,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, int *error) {
-	char *function_name = "mb_pr_unlockswathfile";
+	static const char function_name[] = "mb_pr_unlockswathfile";
 	mb_path lockfile;
 	int locked;
 	mb_path lock_program;
