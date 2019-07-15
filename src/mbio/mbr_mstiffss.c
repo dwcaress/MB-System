@@ -42,7 +42,7 @@ int mbr_info_mstiffss(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_mstiffss";
+	static const char function_name[] = "mbr_info_mstiffss";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -110,7 +110,7 @@ int mbr_info_mstiffss(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_mstiffss";
+	static const char function_name[] = "mbr_alm_mstiffss";
 	int *n_read;
 	int *n_nav_use;
 
@@ -147,7 +147,7 @@ int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_mstiffss";
+	static const char function_name[] = "mbr_dem_mstiffss";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -175,7 +175,7 @@ int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_mstiffss";
+	static const char function_name[] = "mbr_rt_mstiffss";
 	struct mbf_mstiffss_struct *data;
 	struct mbsys_mstiff_struct *store;
 	char buffer[MBF_MSTIFFSS_BUFFERSIZE];
@@ -1026,7 +1026,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_mstiffss";
+	static const char function_name[] = "mbr_wt_mstiffss";
 	struct mbf_mstiffss_struct *data;
 	struct mbsys_mstiff_struct *store;
 
@@ -1062,7 +1062,7 @@ int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_mstiffss";
+	static const char function_name[] = "mbr_register_mstiffss";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

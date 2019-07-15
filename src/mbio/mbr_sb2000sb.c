@@ -68,7 +68,7 @@ int mbr_info_sb2000sb(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_sb2000sb";
+	static const char function_name[] = "mbr_info_sb2000sb";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -136,7 +136,7 @@ int mbr_info_sb2000sb(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2000sb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_sb2000sb";
+	static const char function_name[] = "mbr_alm_sb2000sb";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -168,7 +168,7 @@ int mbr_alm_sb2000sb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_sb2000sb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_sb2000sb";
+	static const char function_name[] = "mbr_dem_sb2000sb";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -197,7 +197,7 @@ int mbr_dem_sb2000sb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_sb2000sb";
+	static const char function_name[] = "mbr_rt_sb2000sb";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2000_struct *store;
 	int read_status;
@@ -527,7 +527,7 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_sb2000sb";
+	static const char function_name[] = "mbr_wt_sb2000sb";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2000_struct *store;
 	char buffer[2 * MBSYS_SB2000_PIXELS + 4];
@@ -775,7 +775,7 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2000sb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_sb2000sb";
+	static const char function_name[] = "mbr_register_sb2000sb";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

@@ -38,7 +38,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_sb2100_alloc";
+	static const char function_name[] = "mbsys_sb2100_alloc";
 	struct mbsys_sb2100_struct *store;
 
 	if (verbose >= 2) {
@@ -73,7 +73,7 @@ int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_sb2100_deall";
+	static const char function_name[] = "mbsys_sb2100_deall";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -99,7 +99,7 @@ int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                             int *error) {
-	char *function_name = "mbsys_sb2100_dimensions";
+	static const char function_name[] = "mbsys_sb2100_dimensions";
 	struct mbsys_sb2100_struct *store;
 
 	if (verbose >= 2) {
@@ -154,7 +154,7 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                          double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                          double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_sb2100_extract";
+	static const char function_name[] = "mbsys_sb2100_extract";
 	struct mbsys_sb2100_struct *store;
 	int time_j[5];
 	double gain_db;
@@ -340,7 +340,7 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
                         double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                         double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                         double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_sb2100_insert";
+	static const char function_name[] = "mbsys_sb2100_insert";
 	struct mbsys_sb2100_struct *store;
 	int time_j[5];
 	int set_pixel_size;
@@ -489,7 +489,7 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                         double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                         double *ssv, int *error) {
-	char *function_name = "mbsys_sb2100_ttimes";
+	static const char function_name[] = "mbsys_sb2100_ttimes";
 	struct mbsys_sb2100_struct *store;
 
 	if (verbose >= 2) {
@@ -583,7 +583,7 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_sb2100_detects";
+	static const char function_name[] = "mbsys_sb2100_detects";
 	struct mbsys_sb2100_struct *store;
 
 	if (verbose >= 2) {
@@ -663,7 +663,7 @@ int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                        double *receive_gain, int *error) {
-	char *function_name = "mbsys_sb2100_gains";
+	static const char function_name[] = "mbsys_sb2100_gains";
 	struct mbsys_sb2100_struct *store;
 
 	if (verbose >= 2) {
@@ -738,7 +738,7 @@ int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                   double *altitude, int *error) {
-	char *function_name = "mbsys_sb2100_extract_altitude";
+	static const char function_name[] = "mbsys_sb2100_extract_altitude";
 	struct mbsys_sb2100_struct *store;
 	double bath_best;
 	double xtrack_min;
@@ -826,7 +826,7 @@ int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                              double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                              double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_sb2100_extract_nav";
+	static const char function_name[] = "mbsys_sb2100_extract_nav";
 	struct mbsys_sb2100_struct *store;
 	int time_j[5];
 
@@ -954,7 +954,7 @@ int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_sb2100_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                             double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                             int *error) {
-	char *function_name = "mbsys_sb2100_insert_nav";
+	static const char function_name[] = "mbsys_sb2100_insert_nav";
 	struct mbsys_sb2100_struct *store;
 	int time_j[5];
 
@@ -1035,7 +1035,7 @@ int mbsys_sb2100_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                              int *error) {
-	char *function_name = "mbsys_sb2100_extract_svp";
+	static const char function_name[] = "mbsys_sb2100_extract_svp";
 	struct mbsys_sb2100_struct *store;
 
 	if (verbose >= 2) {
@@ -1101,7 +1101,7 @@ int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	char *function_name = "mbsys_sb2100_insert_svp";
+	static const char function_name[] = "mbsys_sb2100_insert_svp";
 	struct mbsys_sb2100_struct *store;
 
 	if (verbose >= 2) {
@@ -1147,7 +1147,7 @@ int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_sb2100_copy";
+	static const char function_name[] = "mbsys_sb2100_copy";
 	struct mbsys_sb2100_struct *store;
 	struct mbsys_sb2100_struct *copy;
 

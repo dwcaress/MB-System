@@ -127,7 +127,7 @@
  */
 int mb_absorption(int verbose, double frequency, double temperature, double salinity, double depth, double ph, double soundspeed,
                   double *absorption, int *error) {
-	char *function_name = "mb_absorption";
+	static const char function_name[] = "mb_absorption";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -206,7 +206,7 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
  */
 int mb_potential_temperature(int verbose, double temperature, double salinity, double pressure, double *potential_temperature,
                              int *error) {
-	char *function_name = "mb_potential_temperature";
+	static const char function_name[] = "mb_potential_temperature";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -280,7 +280,7 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
  *
  */
 int mb_seabird_density(int verbose, double salinity, double temperature, double pressure, double *density, int *error) {
-	char *function_name = "mb_seabird_density";
+	static const char function_name[] = "mb_seabird_density";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -353,7 +353,7 @@ int mb_seabird_density(int verbose, double salinity, double temperature, double 
  *
  */
 int mb_seabird_depth(int verbose, double pressure, double latitude, double *depth, int *error) {
-	char *function_name = "mb_seabird_depth";
+	static const char function_name[] = "mb_seabird_depth";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -388,7 +388,7 @@ int mb_seabird_depth(int verbose, double pressure, double latitude, double *dept
 }
 /*--------------------------------------------------------------------*/
 int mb_seabird_salinity(int verbose, double conductivity, double temperature, double pressure, double *salinity, int *error) {
-	char *function_name = "mb_seabird_salinity";
+	static const char function_name[] = "mb_seabird_salinity";
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -458,7 +458,7 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 						  double temperature, double pressure,
 						  double *soundspeed, int *error) {
-	char *function_name = "mb_seabird_soundspeed";
+	static const char function_name[] = "mb_seabird_soundspeed";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

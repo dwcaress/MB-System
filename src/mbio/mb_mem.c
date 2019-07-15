@@ -46,7 +46,7 @@ static int mb_alloc_overflow = MB_NO;
 
 /*--------------------------------------------------------------------*/
 int mb_mem_debug_on(int verbose, int *error) {
-	char *function_name = "mb_mem_debug_on";
+	static const char function_name[] = "mb_mem_debug_on";
 
 	/* turn debug output on */
 	mb_mem_debug = MB_YES;
@@ -80,7 +80,7 @@ int mb_mem_debug_on(int verbose, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mb_mem_debug_off(int verbose, int *error) {
-	char *function_name = "mb_mem_debug_off";
+	static const char function_name[] = "mb_mem_debug_off";
 
 	/* turn debug output off */
 	mb_mem_debug = MB_NO;
@@ -114,7 +114,7 @@ int mb_mem_debug_off(int verbose, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
-	char *function_name = "mb_malloc";
+	static const char function_name[] = "mb_malloc";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -186,7 +186,7 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size, void **ptr, int *error) {
-	char *function_name = "mb_mallocd";
+	static const char function_name[] = "mb_mallocd";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -262,7 +262,7 @@ int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size,
 }
 /*--------------------------------------------------------------------*/
 int mb_realloc(int verbose, size_t size, void **ptr, int *error) {
-	char *function_name = "mb_realloc";
+	static const char function_name[] = "mb_realloc";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -362,7 +362,7 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size, void **ptr, int *error) {
-	char *function_name = "mb_reallocd";
+	static const char function_name[] = "mb_reallocd";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -471,7 +471,7 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
 }
 /*--------------------------------------------------------------------*/
 int mb_free(int verbose, void **ptr, int *error) {
-	char *function_name = "mb_free";
+	static const char function_name[] = "mb_free";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -548,7 +548,7 @@ int mb_free(int verbose, void **ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, int *error) {
-	char *function_name = "mb_freed";
+	static const char function_name[] = "mb_freed";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -627,7 +627,7 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mb_memory_clear(int verbose, int *error) {
-	char *function_name = "mb_memory_clear";
+	static const char function_name[] = "mb_memory_clear";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -669,7 +669,7 @@ int mb_memory_clear(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_memory_status(int verbose, int *nalloc, int *nallocmax, int *overflow, size_t *allocsize, int *error) {
-	char *function_name = "mb_memory_status";
+	static const char function_name[] = "mb_memory_status";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -705,7 +705,7 @@ int mb_memory_status(int verbose, int *nalloc, int *nallocmax, int *overflow, si
 }
 /*--------------------------------------------------------------------*/
 int mb_memory_list(int verbose, int *error) {
-	char *function_name = "mb_memory_list";
+	static const char function_name[] = "mb_memory_list";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -749,7 +749,7 @@ int mb_memory_list(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void **handle, int *error) {
-	char *function_name = "mb_register_array";
+	static const char function_name[] = "mb_register_array";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -837,7 +837,7 @@ int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void *
 }
 /*--------------------------------------------------------------------*/
 int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, int *error) {
-	char *function_name = "mb_update_arrays";
+	static const char function_name[] = "mb_update_arrays";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1130,7 +1130,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 }
 /*--------------------------------------------------------------------*/
 int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
-	char *function_name = "mb_update_arrayptr";
+	static const char function_name[] = "mb_update_arrayptr";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1170,7 +1170,7 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_list_arrays(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mb_list_arrays";
+	static const char function_name[] = "mb_list_arrays";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1203,7 +1203,7 @@ int mb_list_arrays(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mb_deall_ioarrays";
+	static const char function_name[] = "mb_deall_ioarrays";
 
 	if (verbose >= 2 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

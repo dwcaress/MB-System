@@ -33,7 +33,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mb_write_ping";
+	static const char function_name[] = "mb_write_ping";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

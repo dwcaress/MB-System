@@ -190,7 +190,7 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
                                void **store_ptr, /* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
                                int *error        /* out: see mb_status.h:/MB_ERROR/ */
                                ) {
-	char *function_name = "mbsys_3datdepthlidar_alloc";
+	static const char function_name[] = "mbsys_3datdepthlidar_alloc";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -306,7 +306,7 @@ int mbsys_3datdepthlidar_deall(int verbose,      /* in: verbosity level set on c
                                void **store_ptr, /* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
                                int *error        /* out: see mb_status.h:/error values/ */
                                ) {
-	char *function_name = "mbsys_3datdepthlidar_deall";
+	static const char function_name[] = "mbsys_3datdepthlidar_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -352,7 +352,7 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
                                     int *nss,        /* out: number of sidescan samples 0..MBSYS_SWPLS_MAX_BEAMS */
                                     int *error       /* out: see mb_status.h:/error values/ */
                                     ) {
-	char *function_name = "mbsys_3datdepthlidar_dimensions";
+	static const char function_name[] = "mbsys_3datdepthlidar_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -414,7 +414,7 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
                                     unsigned int *pingnumber, /* out: swathplus ping number */
                                     int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                     ) {
-	char *function_name = "mbsys_3datdepthlidar_pingnumber";
+	static const char function_name[] = "mbsys_3datdepthlidar_pingnumber";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -453,7 +453,7 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
                                     void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                                     void *store_ptr, /* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
                                     void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	char *function_name = "mbsys_3datdepthlidar_preprocess";
+	static const char function_name[] = "mbsys_3datdepthlidar_preprocess";
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	struct mb_platform_struct *platform;
@@ -712,7 +712,7 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
                                  char *comment,           /* out: comment string (not supported by SWATHplus SXP) */
                                  int *error               /* out: see mb_status.h:/MB_ERROR/ */
                                  ) {
-	char *function_name = "mbsys_3datdepthlidar_extract";
+	static const char function_name[] = "mbsys_3datdepthlidar_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
@@ -825,7 +825,7 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
                                 char *comment,           /* in: comment string (not supported by SWATHplus SXP) */
                                 int *error               /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	char *function_name = "mbsys_3datdepthlidar_insert";
+	static const char function_name[] = "mbsys_3datdepthlidar_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
@@ -941,7 +941,7 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
                                 double *ssv,               /* out: sound velocity at head (m/s) */
                                 int *error                 /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	char *function_name = "mbsys_3datdepthlidar_ttimes";
+	static const char function_name[] = "mbsys_3datdepthlidar_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1035,7 +1035,7 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
                                                    see mb_status.h:/Bottom detect flags/ */
                                  int *error /* out: see mb_status.h:/MB_ERROR/ */
                                  ) {
-	char *function_name = "mbsys_3datdepthlidar_detects";
+	static const char function_name[] = "mbsys_3datdepthlidar_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1119,7 +1119,7 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
                                 int *pulses,     /* out: array[nbeams] pulse type; see mb_status.h:/Source pulse/ */
                                 int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	char *function_name = "mbsys_3datdepthlidar_pulses";
+	static const char function_name[] = "mbsys_3datdepthlidar_pulses";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1207,7 +1207,7 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
                                double *receive_gain,  /* out: receive gain (dB) */
                                int *error             /* out: see mb_status.h:/MB_ERROR/ */
                                ) {
-	char *function_name = "mbsys_3datdepthlidar_gains";
+	static const char function_name[] = "mbsys_3datdepthlidar_gains";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1288,7 +1288,7 @@ int mbsys_3datdepthlidar_extract_altitude(
     double *altitude,         /* out: transducer altitude above seafloor (m) */
     int *error                /* out: see mb_status.h:/MB_ERROR/ */
     ) {
-	char *function_name = "mbsys_3datdepthlidar_extract_altitude";
+	static const char function_name[] = "mbsys_3datdepthlidar_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
@@ -1379,7 +1379,7 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
                                       double *heave,   /* out: array[n] heave (m) */
                                       int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                       ) {
-	char *function_name = "mbsys_3datdepthlidar_extract_nnav";
+	static const char function_name[] = "mbsys_3datdepthlidar_extract_nnav";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	int inav;
@@ -1488,7 +1488,7 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
                                      double *heave,   /* out: heave (degrees) */
                                      int *error       /* out: see mb_status.h:MB_ERROR */
                                      ) {
-	char *function_name = "mbsys_3datdepthlidar_extract_nav";
+	static const char function_name[] = "mbsys_3datdepthlidar_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1584,7 +1584,7 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
                                     double heave,                /* in: heave (m) */
                                     int *error                   /* out: see mb_status.h:MB_ERROR */
                                     ) {
-	char *function_name = "mbsys_3datdepthlidar_insert_nav";
+	static const char function_name[] = "mbsys_3datdepthlidar_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
@@ -1683,7 +1683,7 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
                                      double *velocity, /* out: array[nsvp] velocity (m) */
                                      int *error        /* out: see: mb_status.h:MB_ERROR */
                                      ) {
-	char *function_name = "mbsys_3datdepthlidar_extract_svp";
+	static const char function_name[] = "mbsys_3datdepthlidar_extract_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1745,7 +1745,7 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
                                     double *velocity, /* in: array[nsvp] sound velocity records (m/s) */
                                     int *error        /* out: see mb_status.h:MB_ERROR */
                                     ) {
-	char *function_name = "mbsys_3datdepthlidar_insert_svp";
+	static const char function_name[] = "mbsys_3datdepthlidar_insert_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1800,7 +1800,7 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
                               void *copy_ptr,  /* out: see mbsys_3datdepthlidar.h:mbsys_3datdepthlidar_struct */
                               int *error       /* out: see mb_status.h:MB_ERROR */
                               ) {
-	char *function_name = "mbsys_3datdepthlidar_copy";
+	static const char function_name[] = "mbsys_3datdepthlidar_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_struct *copy;
@@ -1865,7 +1865,7 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
                                      void *store_ptr, /* in: see mbsys_3datdepthlidar.h:mbsys_3datdepthlidar_struct */
                                      int *error       /* out: see mb_status.h:MB_ERROR */
                                      ) {
-	char *function_name = "mbsys_3datdepthlidar_print_store";
+	static const char function_name[] = "mbsys_3datdepthlidar_print_store";
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	int status;
@@ -1988,7 +1988,7 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
                                              void *store_ptr, /* in: see mbsys_3datdepthlidar.h:mbsys_3datdepthlidar_struct */
                                              int *error       /* out: see mb_status.h:MB_ERROR */
                                              ) {
-	char *function_name = "mbsys_3datdepthlidar_calculatebathymetry";
+	static const char function_name[] = "mbsys_3datdepthlidar_calculatebathymetry";
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	int status;

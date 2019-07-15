@@ -43,7 +43,7 @@ int mbr_info_cbat9001(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_cbat9001";
+	static const char function_name[] = "mbr_info_cbat9001";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -111,7 +111,7 @@ int mbr_info_cbat9001(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_cbat9001(int verbose, void *data_ptr, int *error) {
-	char *function_name = "mbr_zero_cbat9001";
+	static const char function_name[] = "mbr_zero_cbat9001";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 
@@ -249,7 +249,7 @@ int mbr_zero_cbat9001(int verbose, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_cbat9001(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_cbat9001";
+	static const char function_name[] = "mbr_alm_cbat9001";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -286,7 +286,7 @@ int mbr_alm_cbat9001(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_cbat9001(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_cbat9001";
+	static const char function_name[] = "mbr_dem_cbat9001";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -315,7 +315,7 @@ int mbr_dem_cbat9001(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_struct *data, int *error) {
-	char *function_name = "mbr_cbat9001_rd_comment";
+	static const char function_name[] = "mbr_cbat9001_rd_comment";
 	int status = MB_SUCCESS;
 	char line[RESON_COMMENT_SIZE + 3];
 
@@ -361,7 +361,7 @@ int mbr_cbat9001_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat90
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_struct *data, int *error) {
-	char *function_name = "mbr_cbat9001_rd_parameter";
+	static const char function_name[] = "mbr_cbat9001_rd_parameter";
 	int status = MB_SUCCESS;
 	char line[RESON_PARAMETER_SIZE + 3];
 	short *short_ptr;
@@ -516,7 +516,7 @@ int mbr_cbat9001_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_struct *data, int *error) {
-	char *function_name = "mbr_cbat9001_rd_nav";
+	static const char function_name[] = "mbr_cbat9001_rd_nav";
 	int status = MB_SUCCESS;
 	char line[RESON_NAV_SIZE + 3];
 	short *short_ptr;
@@ -629,7 +629,7 @@ int mbr_cbat9001_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_struct *data, int *error) {
-	char *function_name = "mbr_cbat9001_rd_svp";
+	static const char function_name[] = "mbr_cbat9001_rd_svp";
 	int status = MB_SUCCESS;
 	char line[RESON_SVP_SIZE + 3];
 	short *short_ptr;
@@ -724,7 +724,7 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_struct *data, int *error) {
-	char *function_name = "mbr_cbat9001_rd_svp";
+	static const char function_name[] = "mbr_cbat9001_rd_svp";
 	int status = MB_SUCCESS;
 	char line[RESON_SHORT_SVP_SIZE + 3];
 	short *short_ptr;
@@ -819,7 +819,7 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_struct *data, int *error) {
-	char *function_name = "mbr_cbat9001_rd_bath";
+	static const char function_name[] = "mbr_cbat9001_rd_bath";
 	int status = MB_SUCCESS;
 	char line[RESON_BATH_9001_SIZE + 3];
 	char *beamarray;
@@ -980,7 +980,7 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_cbat9001_rd_data";
+	static const char function_name[] = "mbr_cbat9001_rd_data";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	char *data_ptr;
@@ -1144,7 +1144,7 @@ int mbr_cbat9001_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_cbat9001";
+	static const char function_name[] = "mbr_rt_cbat9001";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	struct mbsys_reson_struct *store;
@@ -1320,7 +1320,7 @@ int mbr_rt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat9001_wr_comment";
+	static const char function_name[] = "mbr_cbat9001_wr_comment";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	char line[RESON_COMMENT_SIZE + 3];
@@ -1395,7 +1395,7 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat9001_wr_parameter";
+	static const char function_name[] = "mbr_cbat9001_wr_parameter";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	char line[RESON_PARAMETER_SIZE + 3];
@@ -1572,7 +1572,7 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat9001_wr_nav";
+	static const char function_name[] = "mbr_cbat9001_wr_nav";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	char line[RESON_NAV_SIZE + 3];
@@ -1707,7 +1707,7 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat9001_wr_svp";
+	static const char function_name[] = "mbr_cbat9001_wr_svp";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	char line[RESON_SVP_SIZE + 3];
@@ -1841,7 +1841,7 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat9001_wr_bath";
+	static const char function_name[] = "mbr_cbat9001_wr_bath";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	char line[RESON_BATH_9001_SIZE + 3];
@@ -2024,7 +2024,7 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat9001_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_cbat9001_wr_data";
+	static const char function_name[] = "mbr_cbat9001_wr_data";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	FILE *mbfp;
@@ -2081,7 +2081,7 @@ int mbr_cbat9001_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_cbat9001";
+	static const char function_name[] = "mbr_wt_cbat9001";
 	int status = MB_SUCCESS;
 	struct mbf_cbat9001_struct *data;
 	char *data_ptr;
@@ -2223,7 +2223,7 @@ int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_cbat9001(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_cbat9001";
+	static const char function_name[] = "mbr_register_cbat9001";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

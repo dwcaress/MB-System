@@ -48,7 +48,7 @@ static double wrap_pi(double theta);
 
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_swathplus_alloc";
+	static const char function_name[] = "mbsys_swathplus_alloc";
 	struct mbsys_swathplus_struct *store;
 
 	if (verbose >= 2) {
@@ -119,7 +119,7 @@ int mbsys_swathplus_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 } /* mbsys_swathplus_alloc */
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_swathplus_deall";
+	static const char function_name[] = "mbsys_swathplus_deall";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	swpls_sxiping *sxi_ping;
@@ -179,7 +179,7 @@ int mbsys_swathplus_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                int *error) {
-	char *function_name = "mbsys_swathplus_dimensions";
+	static const char function_name[] = "mbsys_swathplus_dimensions";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	swpls_sxiping *sxi_ping;
@@ -243,7 +243,7 @@ int mbsys_swathplus_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 } /* mbsys_swathplus_dimensions */
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	char *function_name = "mbsys_swathplus_pingnumber";
+	static const char function_name[] = "mbsys_swathplus_pingnumber";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	swpls_sxiping *sxi_ping;
@@ -294,7 +294,7 @@ int mbsys_swathplus_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnu
 } /* mbsys_swathplus_pingnumber */
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	char *function_name = "mbsys_swathplus_sonartype";
+	static const char function_name[] = "mbsys_swathplus_sonartype";
 	struct mbsys_swathplus_struct *store;
 
 	if (verbose >= 2) {
@@ -329,7 +329,7 @@ int mbsys_swathplus_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int 
 } /* mbsys_swathplus_sonartype */
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	char *function_name = "mbsys_swathplus_sidescantype";
+	static const char function_name[] = "mbsys_swathplus_sidescantype";
 	struct mbsys_swathplus_struct *store;
 
 	if (verbose >= 2) {
@@ -367,7 +367,7 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                             char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                             double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_swathplus_extract";
+	static const char function_name[] = "mbsys_swathplus_extract";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	swpls_sxiping *sxi_ping;
@@ -617,7 +617,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
                            double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_swathplus_insert";
+	static const char function_name[] = "mbsys_swathplus_insert";
 	struct mbsys_swathplus_struct *store;
 	swpls_header *header;
 	swpls_sxpping *sxp_ping;
@@ -814,7 +814,7 @@ int mbsys_swathplus_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                            double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                            double *ssv, int *error) {
-	char *function_name = "mbsys_swathplus_ttimes";
+	static const char function_name[] = "mbsys_swathplus_ttimes";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	swpls_point *points;
@@ -940,7 +940,7 @@ int mbsys_swathplus_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 } /* mbsys_swathplus_ttimes */
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_swathplus_detects";
+	static const char function_name[] = "mbsys_swathplus_detects";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	int type;
@@ -1020,7 +1020,7 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                           double *receive_gain, int *error) {
-	char *function_name = "mbsys_swathplus_gains";
+	static const char function_name[] = "mbsys_swathplus_gains";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	int type;
@@ -1097,7 +1097,7 @@ int mbsys_swathplus_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                      double *altitude, int *error) {
-	char *function_name = "mbsys_swathplus_extract_altitude";
+	static const char function_name[] = "mbsys_swathplus_extract_altitude";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	int n;
@@ -1187,7 +1187,7 @@ int mbsys_swathplus_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 int mbsys_swathplus_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                 double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                 double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_swathplus_extract_nav";
+	static const char function_name[] = "mbsys_swathplus_extract_nav";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	int type;
@@ -1307,7 +1307,7 @@ int mbsys_swathplus_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                                double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                                int *error) {
-	char *function_name = "mbsys_swathplus_insert_nav";
+	static const char function_name[] = "mbsys_swathplus_insert_nav";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *sxp_ping;
 	int kind, type;
@@ -1443,7 +1443,7 @@ int mbsys_swathplus_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 } /* mbsys_swathplus_insert_nav */
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_swathplus_copy";
+	static const char function_name[] = "mbsys_swathplus_copy";
 	struct mbsys_swathplus_struct *store;
 	struct mbsys_swathplus_struct *copy;
 	size_t points_alloc_save;
@@ -1638,7 +1638,7 @@ int mbsys_swathplus_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 } /* mbsys_swathplus_copy */
 /*-------------------------------------------------------------------*/
 int swpls_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, int *size, int *error) {
-	char *function_name = "swpls_chk_header";
+	static const char function_name[] = "swpls_chk_header";
 	int index;
 
 	if (verbose >= 2) {
@@ -1691,7 +1691,7 @@ int swpls_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, i
 } /* swpls_chk_header */
 /* --------------------------------------------------------------------*/
 int swpls_rd_sxpheader(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_sxpheader";
+	static const char function_name[] = "swpls_rd_sxpheader";
 	struct mbsys_swathplus_struct *store;
 	swpls_header *header;
 	int index;
@@ -1740,7 +1740,7 @@ int swpls_rd_sxpheader(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_sxpheader */
 /*--------------------------------------------------------------------*/
 int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, int *error) {
-	char *function_name = "swpls_rd_sxpping";
+	static const char function_name[] = "swpls_rd_sxpping";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *ping;
 	int index;
@@ -1925,7 +1925,7 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 } /* swpls_rd_sxpping */
 /*--------------------------------------------------------------------*/
 int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_projection";
+	static const char function_name[] = "swpls_rd_projection";
 	struct mbsys_swathplus_struct *store;
 	swpls_projection *projection;
 	int index;
@@ -2006,7 +2006,7 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 } /* swpls_rd_projection */
 /*--------------------------------------------------------------------*/
 int swpls_rd_comment(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_comment";
+	static const char function_name[] = "swpls_rd_comment";
 	struct mbsys_swathplus_struct *store;
 	swpls_comment *comment;
 	int index;
@@ -2076,7 +2076,7 @@ int swpls_rd_comment(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_comment */
 /*--------------------------------------------------------------------*/
 int swpls_rd_sxiheader(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_sxiheader";
+	static const char function_name[] = "swpls_rd_sxiheader";
 	struct mbsys_swathplus_struct *store;
 	swpls_header *header;
 	int index;
@@ -2125,7 +2125,7 @@ int swpls_rd_sxiheader(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_sxiheader */
 /*--------------------------------------------------------------------*/
 int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_sxiping";
+	static const char function_name[] = "swpls_rd_sxiping";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxiping *ping;
 	short short_val;
@@ -2246,7 +2246,7 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_sxiping */
 /*--------------------------------------------------------------------*/
 int swpls_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_attitude";
+	static const char function_name[] = "swpls_rd_attitude";
 	struct mbsys_swathplus_struct *store;
 	swpls_attitude *attitude;
 	int index;
@@ -2307,7 +2307,7 @@ int swpls_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_attitude */
 /*--------------------------------------------------------------------*/
 int swpls_rd_posll(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_posll";
+	static const char function_name[] = "swpls_rd_posll";
 	struct mbsys_swathplus_struct *store;
 	swpls_posll *posll;
 	int index;
@@ -2364,7 +2364,7 @@ int swpls_rd_posll(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_posll */
 /*--------------------------------------------------------------------*/
 int swpls_rd_posen(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_posen";
+	static const char function_name[] = "swpls_rd_posen";
 	struct mbsys_swathplus_struct *store;
 	swpls_posen *posen;
 	int index;
@@ -2421,7 +2421,7 @@ int swpls_rd_posen(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_posen */
 /*--------------------------------------------------------------------*/
 int swpls_rd_ssv(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_ssv";
+	static const char function_name[] = "swpls_rd_ssv";
 	struct mbsys_swathplus_struct *store;
 	swpls_ssv *ssv;
 	int index;
@@ -2476,7 +2476,7 @@ int swpls_rd_ssv(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_ssv */
 /*--------------------------------------------------------------------*/
 int swpls_rd_tide(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_tide";
+	static const char function_name[] = "swpls_rd_tide";
 	struct mbsys_swathplus_struct *store;
 	swpls_tide *tide;
 	int index;
@@ -2531,7 +2531,7 @@ int swpls_rd_tide(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_tide */
 /*--------------------------------------------------------------------*/
 int swpls_rd_echosounder(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_echosounder";
+	static const char function_name[] = "swpls_rd_echosounder";
 	struct mbsys_swathplus_struct *store;
 	swpls_echosounder *echosounder;
 	int index;
@@ -2586,7 +2586,7 @@ int swpls_rd_echosounder(int verbose, char *buffer, void *store_ptr, int *error)
 } /* swpls_rd_echosounder */
 /*--------------------------------------------------------------------*/
 int swpls_rd_agds(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_agds";
+	static const char function_name[] = "swpls_rd_agds";
 	struct mbsys_swathplus_struct *store;
 	swpls_agds *agds;
 	int index;
@@ -2643,7 +2643,7 @@ int swpls_rd_agds(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_agds */
 /*--------------------------------------------------------------------*/
 int swpls_rd_pos_offset(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_pos_offset";
+	static const char function_name[] = "swpls_rd_pos_offset";
 	struct mbsys_swathplus_struct *store;
 	swpls_pos_offset *pos_offset;
 	int index;
@@ -2704,7 +2704,7 @@ int swpls_rd_pos_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 } /* swpls_rd_pos_offset */
 /*--------------------------------------------------------------------*/
 int swpls_rd_imu_offset(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_imu_offset";
+	static const char function_name[] = "swpls_rd_imu_offset";
 	struct mbsys_swathplus_struct *store;
 	swpls_imu_offset *imu_offset;
 	int index;
@@ -2765,7 +2765,7 @@ int swpls_rd_imu_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 } /* swpls_rd_imu_offset */
 /*--------------------------------------------------------------------*/
 int swpls_rd_txer_offset(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_txer_offset";
+	static const char function_name[] = "swpls_rd_txer_offset";
 	struct mbsys_swathplus_struct *store;
 	swpls_txer_offset *txer_offset;
 	int index;
@@ -2834,7 +2834,7 @@ int swpls_rd_txer_offset(int verbose, char *buffer, void *store_ptr, int *error)
 } /* swpls_rd_txer_offset */
 /*--------------------------------------------------------------------*/
 int swpls_rd_wl_offset(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "swpls_rd_wl_offset";
+	static const char function_name[] = "swpls_rd_wl_offset";
 	struct mbsys_swathplus_struct *store;
 	swpls_wl_offset *wl_offset;
 	int index;
@@ -2889,7 +2889,7 @@ int swpls_rd_wl_offset(int verbose, char *buffer, void *store_ptr, int *error) {
 } /* swpls_rd_wl_offset */
 /*--------------------------------------------------------------------*/
 int swpls_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "swpls_wr_data";
+	static const char function_name[] = "swpls_wr_data";
 	struct mbsys_swathplus_struct *store;
 	FILE *mbfp;
 	char **bufferptr;
@@ -3048,7 +3048,7 @@ int swpls_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 } /* swpls_wr_data */
 /*-------------------------------------------------------------------*/
 int swpls_wr_sxpheader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_sxpheader";
+	static const char function_name[] = "swpls_wr_sxpheader";
 	struct mbsys_swathplus_struct *store;
 	swpls_header *header;
 	char *buffer;
@@ -3120,7 +3120,7 @@ int swpls_wr_sxpheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 } /* swpls_wr_sxpheader */
 /*---------------------------------------------------------------------*/
 int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_sxpping";
+	static const char function_name[] = "swpls_wr_sxpping";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxpping *ping;
 	char *buffer;
@@ -3291,7 +3291,7 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 } /* swpls_wr_sxpping */
 /*------------------------------------------------------------*/
 int swpls_wr_projection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_projection";
+	static const char function_name[] = "swpls_wr_projection";
 	struct mbsys_swathplus_struct *store;
 	swpls_projection *projection;
 	char *buffer;
@@ -3372,7 +3372,7 @@ int swpls_wr_projection(int verbose, int *bufferalloc, char **bufferptr, void *s
 } /* swpls_wr_projection */
 /*------------------------------------------------------------*/
 int swpls_wr_comment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_comment";
+	static const char function_name[] = "swpls_wr_comment";
 	struct mbsys_swathplus_struct *store;
 	swpls_comment *comment;
 	char *buffer;
@@ -3453,7 +3453,7 @@ int swpls_wr_comment(int verbose, int *bufferalloc, char **bufferptr, void *stor
 } /* swpls_wr_comment */
 /*-------------------------------------------------------------------*/
 int swpls_wr_sxiheader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_sxiheader";
+	static const char function_name[] = "swpls_wr_sxiheader";
 	struct mbsys_swathplus_struct *store;
 	swpls_header *header;
 	char *buffer;
@@ -3525,7 +3525,7 @@ int swpls_wr_sxiheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 } /* swpls_wr_sxiheader */
 /*-------------------------------------------------------------------*/
 int swpls_wr_sxiping(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_sxiping";
+	static const char function_name[] = "swpls_wr_sxiping";
 	struct mbsys_swathplus_struct *store;
 	swpls_sxiping *ping;
 	char *buffer;
@@ -3629,7 +3629,7 @@ int swpls_wr_sxiping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 } /* swpls_wr_sxiping */
 /*-------------------------------------------------------------------*/
 int swpls_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_attitude";
+	static const char function_name[] = "swpls_wr_attitude";
 	struct mbsys_swathplus_struct *store;
 	swpls_attitude *attitude;
 	char *buffer;
@@ -3711,7 +3711,7 @@ int swpls_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *sto
 } /* swpls_wr_attitude */
 /*-------------------------------------------------------------------*/
 int swpls_wr_posll(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_posll";
+	static const char function_name[] = "swpls_wr_posll";
 	struct mbsys_swathplus_struct *store;
 	swpls_posll *posll;
 	char *buffer;
@@ -3789,7 +3789,7 @@ int swpls_wr_posll(int verbose, int *bufferalloc, char **bufferptr, void *store_
 } /* swpls_wr_posll */
 /*-------------------------------------------------------------------*/
 int swpls_wr_posen(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_posen";
+	static const char function_name[] = "swpls_wr_posen";
 	struct mbsys_swathplus_struct *store;
 	swpls_posen *posen;
 	char *buffer;
@@ -3867,7 +3867,7 @@ int swpls_wr_posen(int verbose, int *bufferalloc, char **bufferptr, void *store_
 } /* swpls_wr_posen */
 /*-------------------------------------------------------------------*/
 int swpls_wr_ssv(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_ssv";
+	static const char function_name[] = "swpls_wr_ssv";
 	struct mbsys_swathplus_struct *store;
 	swpls_ssv *ssv;
 	char *buffer;
@@ -3943,7 +3943,7 @@ int swpls_wr_ssv(int verbose, int *bufferalloc, char **bufferptr, void *store_pt
 } /* swpls_wr_ssv */
 /*-------------------------------------------------------------------*/
 int swpls_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_tide";
+	static const char function_name[] = "swpls_wr_tide";
 	struct mbsys_swathplus_struct *store;
 	swpls_tide *tide;
 	char *buffer;
@@ -4019,7 +4019,7 @@ int swpls_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 } /* swpls_wr_tide */
 /*-------------------------------------------------------------------*/
 int swpls_wr_echosounder(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_echosounder";
+	static const char function_name[] = "swpls_wr_echosounder";
 	struct mbsys_swathplus_struct *store;
 	swpls_echosounder *echosounder;
 	char *buffer;
@@ -4094,7 +4094,7 @@ int swpls_wr_echosounder(int verbose, int *bufferalloc, char **bufferptr, void *
 } /* swpls_wr_echosounder */
 /*-------------------------------------------------------------------*/
 int swpls_wr_agds(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_agds";
+	static const char function_name[] = "swpls_wr_agds";
 	struct mbsys_swathplus_struct *store;
 	swpls_agds *agds;
 	char *buffer;
@@ -4172,7 +4172,7 @@ int swpls_wr_agds(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 } /* swpls_wr_agds */
 /*-------------------------------------------------------------------*/
 int swpls_wr_pos_offset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_pos_offset";
+	static const char function_name[] = "swpls_wr_pos_offset";
 	struct mbsys_swathplus_struct *store;
 	swpls_pos_offset *pos_offset;
 	char *buffer;
@@ -4254,7 +4254,7 @@ int swpls_wr_pos_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 } /* swpls_wr_pos_offset */
 /*-------------------------------------------------------------------*/
 int swpls_wr_imu_offset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_imu_offset";
+	static const char function_name[] = "swpls_wr_imu_offset";
 	struct mbsys_swathplus_struct *store;
 	swpls_imu_offset *imu_offset;
 	char *buffer;
@@ -4336,7 +4336,7 @@ int swpls_wr_imu_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 } /* swpls_wr_imu_offset */
 /*-------------------------------------------------------------------*/
 int swpls_wr_txer_offset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_txer_offset";
+	static const char function_name[] = "swpls_wr_txer_offset";
 	struct mbsys_swathplus_struct *store;
 	swpls_txer_offset *txer_offset;
 	char *buffer;
@@ -4426,7 +4426,7 @@ int swpls_wr_txer_offset(int verbose, int *bufferalloc, char **bufferptr, void *
 } /* swpls_wr_txer_offset */
 /*-------------------------------------------------------------------*/
 int swpls_wr_wl_offset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "swpls_wr_wl_offset";
+	static const char function_name[] = "swpls_wr_wl_offset";
 	struct mbsys_swathplus_struct *store;
 	swpls_wl_offset *wl_offset;
 	char *buffer;
@@ -4502,7 +4502,7 @@ int swpls_wr_wl_offset(int verbose, int *bufferalloc, char **bufferptr, void *st
 } /* swpls_wr_wl_offset */
 /*----------------------------------------------------------------------*/
 int swpls_pr_sxpheader(int verbose, FILE *fout, swpls_header *header, int *error) {
-	char *function_name = "swpls_pr_sxpheader";
+	static const char function_name[] = "swpls_pr_sxpheader";
 	char starter[5];
 
 	if (verbose >= 2) {
@@ -4537,7 +4537,7 @@ int swpls_pr_sxpheader(int verbose, FILE *fout, swpls_header *header, int *error
 } /* swpls_pr_sxpheader */
 /*----------------------------------------------------------------------*/
 int swpls_pr_sxpping(int verbose, FILE *fout, swpls_sxpping *ping, int *error) {
-	char *function_name = "swpls_pr_sxpping";
+	static const char function_name[] = "swpls_pr_sxpping";
 	swpls_point *points;
 	char starter[5];
 	int size;
@@ -4621,7 +4621,7 @@ int swpls_pr_sxpping(int verbose, FILE *fout, swpls_sxpping *ping, int *error) {
 } /* swpls_pr_sxpping */
 /*----------------------------------------------------------------------*/
 int swpls_pr_projection(int verbose, FILE *fout, swpls_projection *projection, int *error) {
-	char *function_name = "swpls_pr_projection";
+	static const char function_name[] = "swpls_pr_projection";
 	char starter[5];
 	time_t tm;
 	int size;
@@ -4662,7 +4662,7 @@ int swpls_pr_projection(int verbose, FILE *fout, swpls_projection *projection, i
 } /* swpls_pr_projection */
 /*----------------------------------------------------------------------*/
 int swpls_pr_comment(int verbose, FILE *fout, swpls_comment *comment, int *error) {
-	char *function_name = "swpls_pr_comment";
+	static const char function_name[] = "swpls_pr_comment";
 	char starter[5];
 	time_t tm;
 	int size;
@@ -4704,7 +4704,7 @@ int swpls_pr_comment(int verbose, FILE *fout, swpls_comment *comment, int *error
 } /* swpls_pr_comment */
 /*----------------------------------------------------------------------*/
 int swpls_pr_sxiheader(int verbose, FILE *fout, swpls_header *header, int *error) {
-	char *function_name = "swpls_pr_sxiheader";
+	static const char function_name[] = "swpls_pr_sxiheader";
 	char starter[5];
 
 	if (verbose >= 2) {
@@ -4739,7 +4739,7 @@ int swpls_pr_sxiheader(int verbose, FILE *fout, swpls_header *header, int *error
 } /* swpls_pr_sxiheader */
 /*----------------------------------------------------------------------*/
 int swpls_pr_sxiping(int verbose, FILE *fout, swpls_sxiping *ping, int *error) {
-	char *function_name = "swpls_pr_sxiping";
+	static const char function_name[] = "swpls_pr_sxiping";
 	char starter[5];
 	int size;
 	time_t tm;
@@ -4795,7 +4795,7 @@ int swpls_pr_sxiping(int verbose, FILE *fout, swpls_sxiping *ping, int *error) {
 } /* swpls_pr_sxiping */
 /*----------------------------------------------------------------------*/
 int swpls_pr_attitude(int verbose, FILE *fout, swpls_attitude *attitude, int *error) {
-	char *function_name = "swpls_pr_attitude";
+	static const char function_name[] = "swpls_pr_attitude";
 	char starter[5];
 	time_t tm;
 
@@ -4837,7 +4837,7 @@ int swpls_pr_attitude(int verbose, FILE *fout, swpls_attitude *attitude, int *er
 } /* swpls_pr_attitude */
 /*----------------------------------------------------------------------*/
 int swpls_pr_posll(int verbose, FILE *fout, swpls_posll *posll, int *error) {
-	char *function_name = "swpls_pr_posll";
+	static const char function_name[] = "swpls_pr_posll";
 	char starter[5];
 	time_t tm;
 
@@ -4878,7 +4878,7 @@ int swpls_pr_posll(int verbose, FILE *fout, swpls_posll *posll, int *error) {
 } /* swpls_pr_posll */
 /*----------------------------------------------------------------------*/
 int swpls_pr_posen(int verbose, FILE *fout, swpls_posen *posen, int *error) {
-	char *function_name = "swpls_pr_posen";
+	static const char function_name[] = "swpls_pr_posen";
 	char starter[5];
 	time_t tm;
 
@@ -4920,7 +4920,7 @@ int swpls_pr_posen(int verbose, FILE *fout, swpls_posen *posen, int *error) {
 } /* swpls_pr_posen */
 /*----------------------------------------------------------------------*/
 int swpls_pr_ssv(int verbose, FILE *fout, swpls_ssv *ssv, int *error) {
-	char *function_name = "swpls_pr_ssv";
+	static const char function_name[] = "swpls_pr_ssv";
 	char starter[5];
 	time_t tm;
 
@@ -4960,7 +4960,7 @@ int swpls_pr_ssv(int verbose, FILE *fout, swpls_ssv *ssv, int *error) {
 } /* swpls_pr_ssv */
 /*----------------------------------------------------------------------*/
 int swpls_pr_tide(int verbose, FILE *fout, swpls_tide *tide, int *error) {
-	char *function_name = "swpls_pr_tide";
+	static const char function_name[] = "swpls_pr_tide";
 	char starter[5];
 	time_t tm;
 
@@ -5000,7 +5000,7 @@ int swpls_pr_tide(int verbose, FILE *fout, swpls_tide *tide, int *error) {
 } /* swpls_pr_tide */
 /*----------------------------------------------------------------------*/
 int swpls_pr_echosounder(int verbose, FILE *fout, swpls_echosounder *echosounder, int *error) {
-	char *function_name = "swpls_pr_echosounder";
+	static const char function_name[] = "swpls_pr_echosounder";
 	char starter[5];
 	time_t tm;
 
@@ -5041,7 +5041,7 @@ int swpls_pr_echosounder(int verbose, FILE *fout, swpls_echosounder *echosounder
 } /* swpls_pr_echosounder */
 /*----------------------------------------------------------------------*/
 int swpls_pr_agds(int verbose, FILE *fout, swpls_agds *agds, int *error) {
-	char *function_name = "swpls_pr_agds";
+	static const char function_name[] = "swpls_pr_agds";
 	char starter[5];
 	time_t tm;
 
@@ -5082,7 +5082,7 @@ int swpls_pr_agds(int verbose, FILE *fout, swpls_agds *agds, int *error) {
 } /* swpls_pr_agds */
 /*----------------------------------------------------------------------*/
 int swpls_pr_pos_offset(int verbose, FILE *fout, swpls_pos_offset *pos_offset, int *error) {
-	char *function_name = "swpls_pr_pos_offset";
+	static const char function_name[] = "swpls_pr_pos_offset";
 	char starter[5];
 	time_t tm;
 
@@ -5125,7 +5125,7 @@ int swpls_pr_pos_offset(int verbose, FILE *fout, swpls_pos_offset *pos_offset, i
 } /* swpls_pr_pos_offset */
 /*----------------------------------------------------------------------*/
 int swpls_pr_imu_offset(int verbose, FILE *fout, swpls_imu_offset *imu_offset, int *error) {
-	char *function_name = "swpls_pr_imu_offset";
+	static const char function_name[] = "swpls_pr_imu_offset";
 	char starter[5];
 	time_t tm;
 
@@ -5168,7 +5168,7 @@ int swpls_pr_imu_offset(int verbose, FILE *fout, swpls_imu_offset *imu_offset, i
 } /* swpls_pr_imu_offset */
 /*----------------------------------------------------------------------*/
 int swpls_pr_txer_offset(int verbose, FILE *fout, swpls_txer_offset *txer_offset, int *error) {
-	char *function_name = "swpls_pr_txer_offset";
+	static const char function_name[] = "swpls_pr_txer_offset";
 	char starter[5];
 	time_t tm;
 
@@ -5216,7 +5216,7 @@ int swpls_pr_txer_offset(int verbose, FILE *fout, swpls_txer_offset *txer_offset
 } /* swpls_pr_txer_offset */
 /*----------------------------------------------------------------------*/
 int swpls_pr_wl_offset(int verbose, FILE *fout, swpls_wl_offset *wl_offset, int *error) {
-	char *function_name = "swpls_pr_wl_offset";
+	static const char function_name[] = "swpls_pr_wl_offset";
 	char starter[5];
 	time_t tm;
 
@@ -5260,7 +5260,7 @@ int swpls_pr_wl_offset(int verbose, FILE *fout, swpls_wl_offset *wl_offset, int 
  * heave - heave component of ping
  */
 static int get_sxp_heave(int verbose, swpls_sxpping *sxp_ping, double *heave, int *error) {
-	char *function_name = "get_sxp_heave";
+	static const char function_name[] = "get_sxp_heave";
 	swpls_vector txoffset;
 	swpls_matrix vtow;
 
@@ -5306,7 +5306,7 @@ static int get_sxp_heave(int verbose, swpls_sxpping *sxp_ping, double *heave, in
  * sxp_ping - SWATHplus processed ping
  */
 static int set_sxp_height(int verbose, double heave, swpls_sxpping *sxp_ping, int *error) {
-	char *function_name = "set_sxp_height";
+	static const char function_name[] = "set_sxp_height";
 	swpls_vector txoffset;
 	swpls_matrix vtow;
 
@@ -5385,7 +5385,7 @@ static int set_sxp_height(int verbose, double heave, swpls_sxpping *sxp_ping, in
  * m - transformation matrix to (re)initialize
  */
 int swpls_init_transform(int verbose, swpls_matrix *m, int *error) {
-	char *function_name = "swpls_init_transform";
+	static const char function_name[] = "swpls_init_transform";
 
 	*error = MB_ERROR_NO_ERROR;
 
@@ -5415,7 +5415,7 @@ int swpls_init_transform(int verbose, swpls_matrix *m, int *error) {
  * dz - translate along z-axis (positive forward)
  */
 int swpls_concat_translate(int verbose, swpls_matrix *m, double dx, double dy, double dz, int *error) {
-	char *function_name = "swpls_concat_translation";
+	static const char function_name[] = "swpls_concat_translation";
 	swpls_matrix translate;
 
 	*error = MB_ERROR_NO_ERROR;
@@ -5456,7 +5456,7 @@ int swpls_concat_translate(int verbose, swpls_matrix *m, double dx, double dy, d
  * pitch - angle of declination in radians (positive nose down)
  */
 int swpls_concat_rotate_x(int verbose, swpls_matrix *m, double pitch, int *error) {
-	char *function_name = "swpls_concat_rotate_x";
+	static const char function_name[] = "swpls_concat_rotate_x";
 	double sinp, cosp;
 	swpls_matrix rotate;
 
@@ -5497,7 +5497,7 @@ int swpls_concat_rotate_x(int verbose, swpls_matrix *m, double pitch, int *error
  * heading - angle of heading in radians (positive to right)
  */
 int swpls_concat_rotate_y(int verbose, swpls_matrix *m, double heading, int *error) {
-	char *function_name = "swpls_concat_rotate_y";
+	static const char function_name[] = "swpls_concat_rotate_y";
 	double sint, cost;
 	swpls_matrix rotate;
 
@@ -5538,7 +5538,7 @@ int swpls_concat_rotate_y(int verbose, swpls_matrix *m, double heading, int *err
  * bank - angle of bank in radians (positive starboard up)
  */
 int swpls_concat_rotate_z(int verbose, swpls_matrix *m, double bank, int *error) {
-	char *function_name = "swpls_concat_rotate_z";
+	static const char function_name[] = "swpls_concat_rotate_z";
 	double sint, cost;
 	swpls_matrix rotate;
 
@@ -5580,7 +5580,7 @@ int swpls_concat_rotate_z(int verbose, swpls_matrix *m, double bank, int *error)
  * p - vector to modify
  */
 int swpls_transform(int verbose, const swpls_matrix *m, swpls_vector *p, int *error) {
-	char *function_name = "swpls_transform";
+	static const char function_name[] = "swpls_transform";
 	double x, y, z;
 
 	*error = MB_ERROR_NO_ERROR;
@@ -5625,7 +5625,7 @@ int swpls_transform(int verbose, const swpls_matrix *m, swpls_vector *p, int *er
  * q - output quaternion
  */
 int swpls_angles_to_quat(int verbose, const swpls_angles *orientation, swpls_quaternion *q, int *error) {
-	char *function_name = "swpls_angles_to_quat";
+	static const char function_name[] = "swpls_angles_to_quat";
 	double sp, sb, sh;
 	double cp, cb, ch;
 
@@ -5670,7 +5670,7 @@ int swpls_angles_to_quat(int verbose, const swpls_angles *orientation, swpls_qua
  * orientation - output orienation in Euler angle format
  */
 int swpls_quat_to_angles(int verbose, const swpls_quaternion *q, swpls_angles *orientation, int *error) {
-	char *function_name = "swpls_quat_to_angles";
+	static const char function_name[] = "swpls_quat_to_angles";
 	double sp;
 
 	*error = MB_ERROR_NO_ERROR;
@@ -5717,7 +5717,7 @@ int swpls_quat_to_angles(int verbose, const swpls_quaternion *q, swpls_angles *o
  * q - iterpolated orientation quaternion coresponding to t
  */
 int swpls_slerp(int verbose, const swpls_quaternion *q0, const swpls_quaternion *q1, double t, swpls_quaternion *q, int *error) {
-	char *function_name = "swpls_slerp";
+	static const char function_name[] = "swpls_slerp";
 	double q1w, q1x, q1y, q1z;
 	double k0, k1;
 	double omega, cosOmega, sinOmega, oneOverSinOmega;
@@ -5812,7 +5812,7 @@ static double wrap_pi(double theta) {
  * m - transformation matrix to reset
  */
 static int set_identity(int verbose, swpls_matrix *m, int *error) {
-	char *function_name = "set_identity";
+	static const char function_name[] = "set_identity";
 
 	*error = MB_ERROR_NO_ERROR;
 
@@ -5858,7 +5858,7 @@ static int set_identity(int verbose, swpls_matrix *m, int *error) {
  * b - transformation matrix b
  */
 static int concat_transform(int verbose, swpls_matrix *a, swpls_matrix *b, int *error) {
-	char *function_name = "concat_transform";
+	static const char function_name[] = "concat_transform";
 	swpls_matrix r;
 
 	*error = MB_ERROR_NO_ERROR;

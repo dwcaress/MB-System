@@ -47,7 +47,7 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_swplssxp";
+	static const char function_name[] = "mbr_info_swplssxp";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -117,7 +117,7 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
 } /* mbr_info_swplssxp */
 /*--------------------------------------------------------------------*/
 int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_swplssxp";
+	static const char function_name[] = "mbr_alm_swplssxp";
 	int status = MB_SUCCESS;
 	int *recordid;
 	int *recordidlast;
@@ -185,7 +185,7 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 } /* mbr_alm_swplssxp */
 /*--------------------------------------------------------------------*/
 int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_swplssxp";
+	static const char function_name[] = "mbr_dem_swplssxp";
 	int status = MB_SUCCESS;
 	char **bufferptr;
 	char *buffer;
@@ -223,7 +223,7 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 } /* mbr_dem_swplssxp */
 /*--------------------------------------------------------------------*/
 int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_swplssxp_rd_data";
+	static const char function_name[] = "mbr_swplssxp_rd_data";
 	int status = MB_SUCCESS;
 	struct mbsys_swathplus_struct *store;
 	char **bufferptr;
@@ -371,7 +371,7 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 } /* mbr_swplssxp_rd_data */
 /*--------------------------------------------------------------------*/
 int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_swplssxp";
+	static const char function_name[] = "mbr_rt_swplssxp";
 	int status = MB_SUCCESS;
 	struct mbsys_swathplus_struct *store;
 	swpls_header *header;
@@ -456,7 +456,7 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 } /* mbr_rt_swplssxp */
 /*--------------------------------------------------------------------*/
 int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_swplssxp";
+	static const char function_name[] = "mbr_wt_swplssxp";
 	int status = MB_SUCCESS;
 	struct mbsys_swathplus_struct *store;
 	int *header_rec_written;
@@ -526,7 +526,7 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_swplssxp";
+	static const char function_name[] = "mbr_register_swplssxp";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

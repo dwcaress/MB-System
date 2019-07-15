@@ -38,7 +38,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_mr1b_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_mr1b_alloc";
+	static const char function_name[] = "mbsys_mr1b_alloc";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -67,7 +67,7 @@ int mbsys_mr1b_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_mr1b_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_mr1b_deall";
+	static const char function_name[] = "mbsys_mr1b_deall";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -93,7 +93,7 @@ int mbsys_mr1b_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_mr1b_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	char *function_name = "mbsys_mr1b_dimensions";
+	static const char function_name[] = "mbsys_mr1b_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 
@@ -149,7 +149,7 @@ int mbsys_mr1b_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                        double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_mr1b_extract";
+	static const char function_name[] = "mbsys_mr1b_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 	int beam_center, pixel_center;
@@ -388,7 +388,7 @@ int mbsys_mr1b_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
                       double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                       double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                       double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_mr1b_insert";
+	static const char function_name[] = "mbsys_mr1b_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 	int beam_center, pixel_center;
@@ -540,7 +540,7 @@ int mbsys_mr1b_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 int mbsys_mr1b_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                       double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                       double *ssv, int *error) {
-	char *function_name = "mbsys_mr1b_ttimes";
+	static const char function_name[] = "mbsys_mr1b_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 	int beam_center;
@@ -676,7 +676,7 @@ int mbsys_mr1b_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 }
 /*--------------------------------------------------------------------*/
 int mbsys_mr1b_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_mr1b_detects";
+	static const char function_name[] = "mbsys_mr1b_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 
@@ -750,7 +750,7 @@ int mbsys_mr1b_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_mr1b_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                 double *altitude, int *error) {
-	char *function_name = "mbsys_mr1b_extract_altitude";
+	static const char function_name[] = "mbsys_mr1b_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 
@@ -814,7 +814,7 @@ int mbsys_mr1b_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_mr1b_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                            double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                            double *heave, int *error) {
-	char *function_name = "mbsys_mr1b_extract_nav";
+	static const char function_name[] = "mbsys_mr1b_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 
@@ -936,7 +936,7 @@ int mbsys_mr1b_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_mr1b_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                           double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                           int *error) {
-	char *function_name = "mbsys_mr1b_insert_nav";
+	static const char function_name[] = "mbsys_mr1b_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 
@@ -1008,7 +1008,7 @@ int mbsys_mr1b_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 }
 /*--------------------------------------------------------------------*/
 int mbsys_mr1b_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_mr1b_copy";
+	static const char function_name[] = "mbsys_mr1b_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_mr1b_struct *store;
 	struct mbsys_mr1b_struct *copy;

@@ -43,7 +43,7 @@ int mbr_info_dsl120sf(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_dsl120sf";
+	static const char function_name[] = "mbr_info_dsl120sf";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -111,7 +111,7 @@ int mbr_info_dsl120sf(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_dsl120sf";
+	static const char function_name[] = "mbr_zero_dsl120sf";
 	struct mbf_dsl120sf_struct *data;
 
 	if (verbose >= 2) {
@@ -206,7 +206,7 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_dsl120sf";
+	static const char function_name[] = "mbr_alm_dsl120sf";
 	struct mbf_dsl120sf_struct *data;
 
 	if (verbose >= 2) {
@@ -243,7 +243,7 @@ int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_dsl120sf(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_dsl120sf";
+	static const char function_name[] = "mbr_dem_dsl120sf";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -271,7 +271,7 @@ int mbr_dem_dsl120sf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	char *function_name = "mbr_dsl120sf_rd_header";
+	static const char function_name[] = "mbr_dsl120sf_rd_header";
 	struct mbf_dsl120sf_struct *data;
 	char *data_ptr;
 	char buffer[124];
@@ -417,7 +417,7 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp, char *type, int *len, int *hdr_len, int *error) {
-	char *function_name = "mbr_dsl120sf_rd_dataheader";
+	static const char function_name[] = "mbr_dsl120sf_rd_dataheader";
 	char buffer[12];
 	int index;
 
@@ -465,7 +465,7 @@ int mbr_dsl120sf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp, char *ty
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	char *function_name = "mbr_dsl120sf_rd_bath";
+	static const char function_name[] = "mbr_dsl120sf_rd_bath";
 	struct mbf_dsl120sf_struct *data;
 	int read_bytes;
 	char *data_ptr;
@@ -549,7 +549,7 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	char *function_name = "mbr_dsl120sf_rd_amp";
+	static const char function_name[] = "mbr_dsl120sf_rd_amp";
 	struct mbf_dsl120sf_struct *data;
 	int read_bytes;
 	char *data_ptr;
@@ -636,7 +636,7 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	char *function_name = "mbr_dsl120sf_rd_comment";
+	static const char function_name[] = "mbr_dsl120sf_rd_comment";
 	struct mbf_dsl120sf_struct *data;
 	int read_bytes;
 	char *data_ptr;
@@ -692,7 +692,7 @@ int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dsl120sf_rd_data";
+	static const char function_name[] = "mbr_dsl120sf_rd_data";
 	struct mbf_dsl120sf_struct *data;
 	char *data_ptr;
 	char tag[5];
@@ -793,7 +793,7 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_dsl120sf";
+	static const char function_name[] = "mbr_rt_dsl120sf";
 	struct mbf_dsl120sf_struct *data;
 	struct mbsys_dsl_struct *store;
 
@@ -892,7 +892,7 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	char *function_name = "mbr_dsl120sf_wr_bathamp";
+	static const char function_name[] = "mbr_dsl120sf_wr_bathamp";
 	struct mbf_dsl120sf_struct *data;
 	char *data_ptr;
 	char buffer[17000];
@@ -1116,7 +1116,7 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	char *function_name = "mbr_dsl120sf_wr_comment";
+	static const char function_name[] = "mbr_dsl120sf_wr_comment";
 	struct mbf_dsl120sf_struct *data;
 	char *data_ptr;
 	char buffer[10000];
@@ -1246,7 +1246,7 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
-	char *function_name = "mbr_dsl120sf_wr_data";
+	static const char function_name[] = "mbr_dsl120sf_wr_data";
 	struct mbf_dsl120sf_struct *data;
 
 	if (verbose >= 2) {
@@ -1293,7 +1293,7 @@ int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_dsl120sf";
+	static const char function_name[] = "mbr_wt_dsl120sf";
 	struct mbf_dsl120sf_struct *data;
 	struct mbsys_dsl_struct *store;
 	char *data_ptr;
@@ -1393,7 +1393,7 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_dsl120sf";
+	static const char function_name[] = "mbr_register_dsl120sf";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

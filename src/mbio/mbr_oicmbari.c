@@ -45,7 +45,7 @@ int mbr_info_oicmbari(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_oicmbari";
+	static const char function_name[] = "mbr_info_oicmbari";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -114,7 +114,7 @@ int mbr_info_oicmbari(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_oicmbari(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_oicmbari";
+	static const char function_name[] = "mbr_alm_oicmbari";
 	int status = MB_SUCCESS;
 	struct mbf_oicmbari_struct *dataplus;
 	struct mbf_oicmbari_header_struct *header;
@@ -180,7 +180,7 @@ int mbr_alm_oicmbari(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_oicmbari(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_oicmbari";
+	static const char function_name[] = "mbr_dem_oicmbari";
 	int status = MB_SUCCESS;
 	struct mbf_oicmbari_struct *dataplus;
 	struct mbf_oicmbari_header_struct *header;
@@ -239,7 +239,7 @@ int mbr_dem_oicmbari(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_oicmbari";
+	static const char function_name[] = "mbr_rt_oicmbari";
 	int status = MB_SUCCESS;
 	struct mbf_oicmbari_struct *dataplus;
 	struct mbf_oicmbari_header_struct *header;
@@ -950,7 +950,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_oicmbari";
+	static const char function_name[] = "mbr_wt_oicmbari";
 	int status = MB_SUCCESS;
 	struct mbf_oicmbari_struct *dataplus;
 	struct mbf_oicmbari_header_struct *header;
@@ -1573,7 +1573,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_oicmbari(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_oicmbari";
+	static const char function_name[] = "mbr_register_oicmbari";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

@@ -39,7 +39,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_reson8k_alloc";
+	static const char function_name[] = "mbsys_reson8k_alloc";
 	struct mbsys_reson8k_struct *store;
 
 	if (verbose >= 2) {
@@ -216,7 +216,7 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_reson8k_deall";
+	static const char function_name[] = "mbsys_reson8k_deall";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -242,7 +242,7 @@ int mbsys_reson8k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-	char *function_name = "mbsys_reson8k_dimensions";
+	static const char function_name[] = "mbsys_reson8k_dimensions";
 	struct mbsys_reson8k_struct *store;
 
 	if (verbose >= 2) {
@@ -298,7 +298,7 @@ int mbsys_reson8k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_reson8k_extract";
+	static const char function_name[] = "mbsys_reson8k_extract";
 	struct mbsys_reson8k_struct *store;
 
 	if (verbose >= 2) {
@@ -495,7 +495,7 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_reson8k_insert";
+	static const char function_name[] = "mbsys_reson8k_insert";
 	struct mbsys_reson8k_struct *store;
 
 	if (verbose >= 2) {
@@ -617,7 +617,7 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	char *function_name = "mbsys_reson8k_ttimes";
+	static const char function_name[] = "mbsys_reson8k_ttimes";
 	struct mbsys_reson8k_struct *store;
 	double ttscale, angscale;
 	double heave_use;
@@ -717,7 +717,7 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_reson8k_detects";
+	static const char function_name[] = "mbsys_reson8k_detects";
 	struct mbsys_reson8k_struct *store;
 	int detect;
 
@@ -806,7 +806,7 @@ int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error) {
-	char *function_name = "mbsys_reson8k_extract_altitude";
+	static const char function_name[] = "mbsys_reson8k_extract_altitude";
 	struct mbsys_reson8k_struct *store;
 	double bath_best;
 	double xtrack_min;
@@ -894,7 +894,7 @@ int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_reson8k_extract_nav";
+	static const char function_name[] = "mbsys_reson8k_extract_nav";
 	struct mbsys_reson8k_struct *store;
 
 	if (verbose >= 2) {
@@ -1065,7 +1065,7 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_reson8k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-	char *function_name = "mbsys_reson8k_insert_nav";
+	static const char function_name[] = "mbsys_reson8k_insert_nav";
 	struct mbsys_reson8k_struct *store;
 
 	if (verbose >= 2) {
@@ -1155,7 +1155,7 @@ int mbsys_reson8k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
-	char *function_name = "mbsys_reson8k_extract_svp";
+	static const char function_name[] = "mbsys_reson8k_extract_svp";
 	struct mbsys_reson8k_struct *store;
 
 	if (verbose >= 2) {
@@ -1222,7 +1222,7 @@ int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
-	char *function_name = "mbsys_reson8k_insert_svp";
+	static const char function_name[] = "mbsys_reson8k_insert_svp";
 	struct mbsys_reson8k_struct *store;
 
 	if (verbose >= 2) {
@@ -1268,7 +1268,7 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_reson8k_copy";
+	static const char function_name[] = "mbsys_reson8k_copy";
 	struct mbsys_reson8k_struct *store;
 	struct mbsys_reson8k_struct *copy;
 
@@ -1306,7 +1306,7 @@ int mbsys_reson8k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int *error) {
-	char *function_name = "mbsys_reson8k_makess";
+	static const char function_name[] = "mbsys_reson8k_makess";
 	struct mbsys_reson8k_struct *store;
 	double ss[MBSYS_RESON8K_MAXPIXELS];
 	int ss_cnt[MBSYS_RESON8K_MAXPIXELS];

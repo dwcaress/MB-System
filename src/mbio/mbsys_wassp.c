@@ -36,7 +36,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	const char *function_name = "mbsys_wassp_alloc";
+	const static const char function_name[] = "mbsys_wassp_alloc";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -93,7 +93,7 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_wassp_deall";
+	static const char function_name[] = "mbsys_wassp_deall";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -165,7 +165,7 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	char *function_name = "mbsys_wassp_dimensions";
+	static const char function_name[] = "mbsys_wassp_dimensions";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -237,7 +237,7 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 }
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	char *function_name = "mbsys_wassp_pingnumber";
+	static const char function_name[] = "mbsys_wassp_pingnumber";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -291,7 +291,7 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 }
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	char *function_name = "mbsys_wassp_sonartype";
+	static const char function_name[] = "mbsys_wassp_sonartype";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -349,7 +349,7 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_wassp_extract";
+	static const char function_name[] = "mbsys_wassp_extract";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -627,7 +627,7 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_wassp_insert";
+	static const char function_name[] = "mbsys_wassp_insert";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -782,7 +782,7 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                        double *ssv, int *error) {
-	char *function_name = "mbsys_wassp_ttimes";
+	static const char function_name[] = "mbsys_wassp_ttimes";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -899,7 +899,7 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_wassp_detects";
+	static const char function_name[] = "mbsys_wassp_detects";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1001,7 +1001,7 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                       double *receive_gain, int *error) {
-	char *function_name = "mbsys_wassp_gains";
+	static const char function_name[] = "mbsys_wassp_gains";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1096,7 +1096,7 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                  double *altitude, int *error) {
-	char *function_name = "mbsys_wassp_extract_altitude";
+	static const char function_name[] = "mbsys_wassp_extract_altitude";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1184,7 +1184,7 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                             double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_wassp_extract_nav";
+	static const char function_name[] = "mbsys_wassp_extract_nav";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1337,7 +1337,7 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                            int *error) {
-	char *function_name = "mbsys_wassp_insert_nav";
+	static const char function_name[] = "mbsys_wassp_insert_nav";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1451,7 +1451,7 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 }
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_wassp_copy";
+	static const char function_name[] = "mbsys_wassp_copy";
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_struct *copy;
 	size_t rawdata_alloc_save;

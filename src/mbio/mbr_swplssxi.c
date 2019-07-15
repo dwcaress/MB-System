@@ -45,7 +45,7 @@ int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_swplssxi";
+	static const char function_name[] = "mbr_info_swplssxi";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -114,7 +114,7 @@ int mbr_info_swplssxi(int verbose, int *system, int *beams_bath_max, int *beams_
 } /* mbr_info_swplssxi */
 /*--------------------------------------------------------------------*/
 int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_swplssxi";
+	static const char function_name[] = "mbr_alm_swplssxi";
 	int status = MB_SUCCESS;
 	int *current_ping;
 	int *last_ping;
@@ -191,7 +191,7 @@ int mbr_alm_swplssxi(int verbose, void *mbio_ptr, int *error) {
 } /* mbr_alm_swplssxi */
 /*--------------------------------------------------------------------*/
 int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_swplssxi";
+	static const char function_name[] = "mbr_dem_swplssxi";
 	int status = MB_SUCCESS;
 	char **bufferptr;
 	char *buffer;
@@ -229,7 +229,7 @@ int mbr_dem_swplssxi(int verbose, void *mbio_ptr, int *error) {
 } /* mbr_dem_swplssxi */
 /*--------------------------------------------------------------------*/
 int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_swplssxi_rd_data";
+	static const char function_name[] = "mbr_swplssxi_rd_data";
 	int status = MB_SUCCESS;
 	struct mbsys_swathplus_struct *store;
 	char **bufferptr;
@@ -413,7 +413,7 @@ int mbr_swplssxi_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 } /* mbr_swplssxi_rd_data */
 /*--------------------------------------------------------------------*/
 int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_swplssxi";
+	static const char function_name[] = "mbr_rt_swplssxi";
 	int status = MB_SUCCESS;
 	struct mbsys_swathplus_struct *store;
 	swpls_projection *projection;
@@ -504,7 +504,7 @@ int mbr_rt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 } /* mbr_rt_swplssxi */
 /*--------------------------------------------------------------------*/
 int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_swplssxi";
+	static const char function_name[] = "mbr_wt_swplssxi";
 	int status = MB_SUCCESS;
 	struct mbsys_swathplus_struct *store;
 	int *header_rec_written;
@@ -585,7 +585,7 @@ int mbr_wt_swplssxi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_swplssxi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_swplssxi";
+	static const char function_name[] = "mbr_register_swplssxi";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

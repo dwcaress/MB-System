@@ -43,7 +43,7 @@ int mbr_info_hsuricen(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hsuricen";
+	static const char function_name[] = "mbr_info_hsuricen";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -111,7 +111,7 @@ int mbr_info_hsuricen(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsuricen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsuricen";
+	static const char function_name[] = "mbr_alm_hsuricen";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -141,7 +141,7 @@ int mbr_alm_hsuricen(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsuricen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsuricen";
+	static const char function_name[] = "mbr_dem_hsuricen";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -169,7 +169,7 @@ int mbr_dem_hsuricen(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsuricen";
+	static const char function_name[] = "mbr_rt_hsuricen";
 	struct mbf_hsuricen_struct *dataplus;
 	struct mbf_hsuricen_data_struct *data;
 	struct mbsys_hsds_struct *store;
@@ -380,7 +380,7 @@ int mbr_rt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsuricen";
+	static const char function_name[] = "mbr_wt_hsuricen";
 	struct mbf_hsuricen_struct *dataplus;
 	struct mbf_hsuricen_data_struct *data;
 	struct mbsys_hsds_struct *store;
@@ -538,7 +538,7 @@ int mbr_wt_hsuricen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsuricen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hsuricen";
+	static const char function_name[] = "mbr_register_hsuricen";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

@@ -43,7 +43,7 @@ int mbr_info_mr1bldeo(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_mr1bldeo";
+	static const char function_name[] = "mbr_info_mr1bldeo";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -111,7 +111,7 @@ int mbr_info_mr1bldeo(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_mr1bldeo(int verbose, struct mbf_mr1bldeo_struct *data, int *error) {
-	char *function_name = "mbr_zero_mr1bldeo";
+	static const char function_name[] = "mbr_zero_mr1bldeo";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -205,7 +205,7 @@ int mbr_zero_mr1bldeo(int verbose, struct mbf_mr1bldeo_struct *data, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1bldeo(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_mr1bldeo";
+	static const char function_name[] = "mbr_alm_mr1bldeo";
 	struct mbf_mr1bldeo_struct *data;
 
 	if (verbose >= 2) {
@@ -246,7 +246,7 @@ int mbr_alm_mr1bldeo(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_mr1bldeo(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_mr1bldeo";
+	static const char function_name[] = "mbr_dem_mr1bldeo";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -274,7 +274,7 @@ int mbr_dem_mr1bldeo(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data, char **hdr_comment, int *error) {
-	char *function_name = "mbr_mr1bldeo_rd_hdr";
+	static const char function_name[] = "mbr_mr1bldeo_rd_hdr";
 	int len;
 	unsigned int ulen;
 
@@ -336,7 +336,7 @@ int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data, int *error) {
-	char *function_name = "mbr_mr1bldeo_rd_ping";
+	static const char function_name[] = "mbr_mr1bldeo_rd_ping";
 	int dummy_count;
 	float dummy;
 
@@ -543,7 +543,7 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1bldeo_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_mr1bldeo_rd_data";
+	static const char function_name[] = "mbr_mr1bldeo_rd_data";
 	struct mbf_mr1bldeo_struct *data;
 	XDR *xdrs;
 	int read_size;
@@ -619,7 +619,7 @@ int mbr_mr1bldeo_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_mr1bldeo";
+	static const char function_name[] = "mbr_rt_mr1bldeo";
 	struct mbf_mr1bldeo_struct *data;
 	struct mbsys_mr1b_struct *store;
 
@@ -727,7 +727,7 @@ int mbr_rt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data, char **hdr_comment, int *error) {
-	char *function_name = "mbr_mr1bldeo_wr_hdr";
+	static const char function_name[] = "mbr_mr1bldeo_wr_hdr";
 	int len;
 	unsigned int ulen;
 
@@ -788,7 +788,7 @@ int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1bldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data, int *error) {
-	char *function_name = "mbr_mr1bldeo_wr_ping";
+	static const char function_name[] = "mbr_mr1bldeo_wr_ping";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -920,7 +920,7 @@ int mbr_mr1bldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct *data, int *error) {
-	char *function_name = "mbr_mr1bldeo_wr_data";
+	static const char function_name[] = "mbr_mr1bldeo_wr_data";
 	XDR *xdrs;
 	char *tmp;
 	int lenc, lenhc, len;
@@ -1000,7 +1000,7 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_mr1bldeo";
+	static const char function_name[] = "mbr_wt_mr1bldeo";
 	struct mbf_mr1bldeo_struct *data;
 	struct mbsys_mr1b_struct *store;
 
@@ -1107,7 +1107,7 @@ int mbr_wt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1bldeo(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_mr1bldeo";
+	static const char function_name[] = "mbr_register_mr1bldeo";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

@@ -36,7 +36,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
            double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
            int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mb_get";
+	static const char function_name[] = "mb_get";
 	int status;
 	char *store_ptr;
 	int done;

@@ -189,7 +189,7 @@
 
 /*--------------------------------------------------------------------*/
 int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error) {
-	char *function_name = "mb_takeoff_to_rollpitch";
+	static const char function_name[] = "mb_takeoff_to_rollpitch";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -228,7 +228,7 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 }
 /*--------------------------------------------------------------------*/
 int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *theta, double *phi, int *error) {
-	char *function_name = "mb_rollpitch_to_takeoff";
+	static const char function_name[] = "mb_rollpitch_to_takeoff";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -273,7 +273,7 @@ int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *thet
 }
 /*--------------------------------------------------------------------*/
 int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, double *phi, int *error) {
-	char *function_name = "mb_xyz_to_takeoff";
+	static const char function_name[] = "mb_xyz_to_takeoff";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -328,7 +328,7 @@ int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, 
 int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double sonar_offset_z, double nav_offset_x,
              double nav_offset_y, double nav_offset_z, double vru_offset_x, double vru_offset_y, double vru_offset_z,
              double vru_pitch, double vru_roll, double *lever_x, double *lever_y, double *lever_z, int *error) {
-	char *function_name = "mb_lever";
+	static const char function_name[] = "mb_lever";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -482,7 +482,7 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_orientation, double tx_steer,
                 mb_3D_orientation rx_align, mb_3D_orientation rx_orientation, double rx_steer, double reference_heading,
                 double *beamAzimuth, double *beamDepression, int *error) {
-	char *function_name = "mb_beaudoin";
+	static const char function_name[] = "mb_beaudoin";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -659,7 +659,7 @@ int mb_beaudoin(int verbose, mb_3D_orientation tx_align, mb_3D_orientation tx_or
 /*--------------------------------------------------------------------*/
 
 int mb_beaudoin_unrotate(int verbose, mb_3D_vector orig, mb_3D_orientation rotate, mb_3D_vector *final, int *error) {
-	char *function_name = "mb_beaudoin_unrotate";
+	static const char function_name[] = "mb_beaudoin_unrotate";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

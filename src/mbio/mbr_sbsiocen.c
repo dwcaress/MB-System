@@ -43,7 +43,7 @@ int mbr_info_sbsiocen(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_sbsiocen";
+	static const char function_name[] = "mbr_info_sbsiocen";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -111,7 +111,7 @@ int mbr_info_sbsiocen(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_sbsiocen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_sbsiocen";
+	static const char function_name[] = "mbr_alm_sbsiocen";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -145,7 +145,7 @@ int mbr_alm_sbsiocen(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_sbsiocen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_sbsiocen";
+	static const char function_name[] = "mbr_dem_sbsiocen";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -174,7 +174,7 @@ int mbr_dem_sbsiocen(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sbsiocen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_sbsiocen";
+	static const char function_name[] = "mbr_rt_sbsiocen";
 	int status = MB_SUCCESS;
 	struct mbf_sbsiocen_struct *dataplus;
 	struct mbf_sbsiocen_data_struct *data;
@@ -304,7 +304,7 @@ int mbr_rt_sbsiocen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_sbsiocen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_sbsiocen";
+	static const char function_name[] = "mbr_wt_sbsiocen";
 	int status = MB_SUCCESS;
 	struct mbf_sbsiocen_struct *dataplus;
 	struct mbf_sbsiocen_data_struct *data;
@@ -433,7 +433,7 @@ int mbr_wt_sbsiocen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsiocen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_sbsiocen";
+	static const char function_name[] = "mbr_register_sbsiocen";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

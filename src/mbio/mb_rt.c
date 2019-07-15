@@ -92,7 +92,7 @@ static struct velocity_model *model = NULL;
 
 /*--------------------------------------------------------------------------*/
 int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, void **modelptr, int *error) {
-	char *function_name = "mb_rt_init";
+	static const char function_name[] = "mb_rt_init";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -183,7 +183,7 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_deall(int verbose, void **modelptr, int *error) {
-	char *function_name = "mb_rt";
+	static const char function_name[] = "mb_rt";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -214,7 +214,7 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, double *depth, int *error) {
-	char *function_name = "mb_rt_get_depth";
+	static const char function_name[] = "mb_rt_get_depth";
 	int status = MB_SUCCESS;
 	double alpha;
 	double velf;
@@ -247,7 +247,7 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad1(int verbose, int *error) {
-	char *function_name = "mb_rt_quad1";
+	static const char function_name[] = "mb_rt_quad1";
 	int status = MB_SUCCESS;
 	double vi;
 	double ip;
@@ -350,7 +350,7 @@ int mb_rt_quad1(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad2(int verbose, int *error) {
-	char *function_name = "mb_rt_quad2";
+	static const char function_name[] = "mb_rt_quad2";
 	int status = MB_SUCCESS;
 	double vi;
 	double ip;
@@ -407,7 +407,7 @@ int mb_rt_quad2(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad3(int verbose, int *error) {
-	char *function_name = "mb_rt_quad3";
+	static const char function_name[] = "mb_rt_quad3";
 	int status = MB_SUCCESS;
 	double vi;
 	double ip;
@@ -463,7 +463,7 @@ int mb_rt_quad3(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad4(int verbose, int *error) {
-	char *function_name = "mb_rt_quad4";
+	static const char function_name[] = "mb_rt_quad4";
 	int status = MB_SUCCESS;
 	double vi;
 	double ip;
@@ -566,7 +566,7 @@ int mb_rt_quad4(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_plot_circular(int verbose, int *error) {
-	char *function_name = "mb_rt_plot_circular";
+	static const char function_name[] = "mb_rt_plot_circular";
 	int status = MB_SUCCESS;
 	double ai;
 	double af;
@@ -615,7 +615,7 @@ int mb_rt_plot_circular(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_circular(int verbose, int *error) {
-	char *function_name = "mb_rt_circular";
+	static const char function_name[] = "mb_rt_circular";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -650,7 +650,7 @@ int mb_rt_circular(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_line(int verbose, int *error) {
-	char *function_name = "mb_rt_line";
+	static const char function_name[] = "mb_rt_line";
 	int status = MB_SUCCESS;
 	double theta;
 	double xvel;
@@ -744,7 +744,7 @@ int mb_rt_line(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_vertical(int verbose, int *error) {
-	char *function_name = "mb_rt_vertical";
+	static const char function_name[] = "mb_rt_vertical";
 	int status = MB_SUCCESS;
 	double vi;
 	double vf;
@@ -815,7 +815,7 @@ int mb_rt_vertical(int verbose, int *error) {
 int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle, double end_time, int ssv_mode,
           double surface_vel, double null_angle, int nplot_max, int *nplot, double *xplot, double *zplot, double *x, double *z,
           double *travel_time, int *ray_stat, int *error) {
-	char *function_name = "mb_rt";
+	static const char function_name[] = "mb_rt";
 	int status = MB_SUCCESS;
 	double diff_angle;
 	double vel_ratio;

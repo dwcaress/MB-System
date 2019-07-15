@@ -42,7 +42,7 @@ int mbr_info_hir2rnav(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hir2rnav";
+	static const char function_name[] = "mbr_info_hir2rnav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -110,7 +110,7 @@ int mbr_info_hir2rnav(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hir2rnav(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hir2rnav";
+	static const char function_name[] = "mbr_alm_hir2rnav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -142,7 +142,7 @@ int mbr_alm_hir2rnav(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hir2rnav(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hir2rnav";
+	static const char function_name[] = "mbr_dem_hir2rnav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -169,7 +169,7 @@ int mbr_dem_hir2rnav(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hir2rnav";
+	static const char function_name[] = "mbr_rt_hir2rnav";
 	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE] = "";
 	char *line_ptr;
@@ -300,7 +300,7 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hir2rnav";
+	static const char function_name[] = "mbr_wt_hir2rnav";
 	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE] = "";
 	int *write_count;
@@ -400,7 +400,7 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hir2rnav(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hir2rnav";
+	static const char function_name[] = "mbr_register_hir2rnav";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

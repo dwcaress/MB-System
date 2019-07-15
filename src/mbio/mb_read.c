@@ -37,7 +37,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
             int *nss, char *beamflag, double *bath, double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
             double *sslat, char *comment, int *error) {
 
-	char *function_name = "mb_read";
+	static const char function_name[] = "mb_read";
 	int status = MB_SUCCESS;
 	char *store_ptr;
 	int done;

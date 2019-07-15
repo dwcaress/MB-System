@@ -46,7 +46,7 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
            int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
            int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
            double *beamwidth_ltrack, int *error) {
-  char *function_name = "mbr_info_kemkmall";
+  static const char function_name[] = "mbr_info_kemkmall";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -116,7 +116,7 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_alm_kemkmall";
+  static const char function_name[] = "mbr_alm_kemkmall";
   char **bufferptr = NULL;
   int *bufferalloc = NULL;
 
@@ -167,7 +167,7 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_dem_kemkmall";
+  static const char function_name[] = "mbr_dem_kemkmall";
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   int *dgm_count = NULL;
 
@@ -222,7 +222,7 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_create_dgm_index_table";
+  static const char function_name[] = "mbr_kemkmall_create_dgm_index_table";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   size_t size_bytes = 0;
@@ -282,7 +282,7 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, void *new_index_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_add_dgm_to_dgm_index_table";
+  static const char function_name[] = "mbr_kemkmall_add_dgm_to_dgm_index_table";
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *new_dgm_index = NULL;
   size_t dgm_count = 0;
@@ -447,7 +447,7 @@ int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm_type_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_hdr";
+  static const char function_name[] = "mbr_kemkmall_rd_hdr";
   struct mbsys_kmbes_header *header = NULL;
   mbsys_kmbes_emdgm_type *emdgm_type = NULL;
   int index = 0;
@@ -568,7 +568,7 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_spo";
+  static const char function_name[] = "mbr_kemkmall_rd_spo";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
@@ -685,7 +685,7 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
 
 
 int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_skm";
+  static const char function_name[] = "mbr_kemkmall_rd_skm";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
@@ -893,7 +893,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  char *function_name = "mbr_kemkmall_rd_svp";
+  static const char function_name[] = "mbr_kemkmall_rd_svp";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
@@ -1005,7 +1005,7 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  char *function_name = "mbr_kemkmall_rd_svt";
+  static const char function_name[] = "mbr_kemkmall_rd_svt";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_svt *svt = NULL;
@@ -1125,7 +1125,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_scl";
+  static const char function_name[] = "mbr_kemkmall_rd_scl";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_scl *scl = NULL;
@@ -1223,7 +1223,7 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_sde";
+  static const char function_name[] = "mbr_kemkmall_rd_sde";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_sde *sde = NULL;
@@ -1331,7 +1331,7 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_shi";
+  static const char function_name[] = "mbr_kemkmall_rd_shi";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_shi *shi = NULL;
@@ -1431,7 +1431,7 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_sha";
+  static const char function_name[] = "mbr_kemkmall_rd_sha";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_sha *sha = NULL;
@@ -1546,7 +1546,7 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_mrz";
+  static const char function_name[] = "mbr_kemkmall_rd_mrz";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -2162,7 +2162,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_mwc";
+  static const char function_name[] = "mbr_kemkmall_rd_mwc";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
@@ -2471,7 +2471,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_cpo";
+  static const char function_name[] = "mbr_kemkmall_rd_cpo";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_cpo *cpo = NULL;
@@ -2589,7 +2589,7 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_che";
+  static const char function_name[] = "mbr_kemkmall_rd_che";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_che *che = NULL;
@@ -2705,7 +2705,7 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_iip";
+  static const char function_name[] = "mbr_kemkmall_rd_iip";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
@@ -2789,7 +2789,7 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  char *function_name = "mbr_kemkmall_rd_iop";
+  static const char function_name[] = "mbr_kemkmall_rd_iop";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_iop *iop = NULL;
@@ -2873,7 +2873,7 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_xmb";
+  static const char function_name[] = "mbr_kemkmall_rd_xmb";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xmb *xmb = NULL;
@@ -2959,7 +2959,7 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_xmc";
+  static const char function_name[] = "mbr_kemkmall_rd_xmc";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
@@ -3042,7 +3042,7 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_xms";
+  static const char function_name[] = "mbr_kemkmall_rd_xms";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
@@ -3143,7 +3143,7 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_unknown";
+  static const char function_name[] = "mbr_kemkmall_rd_unknown";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
 
@@ -3180,7 +3180,7 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_index_data";
+  static const char function_name[] = "mbr_kemkmall_index_data";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index dgm_index;
@@ -3527,7 +3527,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_rd_data";
+  static const char function_name[] = "mbr_kemkmall_rd_data";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *dgm_index = NULL;
@@ -3844,7 +3844,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_rt_kemkmall";
+  static const char function_name[] = "mbr_rt_kemkmall";
   int interp_error = MB_ERROR_NO_ERROR;
   struct mbsys_kmbes_struct *store = NULL;
   int *file_indexed = NULL;
@@ -3914,7 +3914,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_wr_header";
+  static const char function_name[] = "mbr_kemkmall_wr_header";
   struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
@@ -3981,7 +3981,7 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  char *function_name = "mbr_kemkmall_wr_spo";
+  static const char function_name[] = "mbr_kemkmall_wr_spo";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4114,7 +4114,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  char *function_name = "mbr_kemkmall_wr_skm";
+  static const char function_name[] = "mbr_kemkmall_wr_skm";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4336,7 +4336,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_svp";
+  static const char function_name[] = "mbr_kemkmall_wr_svp";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4462,7 +4462,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_svt";
+  static const char function_name[] = "mbr_kemkmall_wr_svt";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svt *svt = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4595,7 +4595,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_scl";
+  static const char function_name[] = "mbr_kemkmall_wr_scl";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_scl *scl;
   struct mbsys_kmbes_header *header = NULL;
@@ -4709,7 +4709,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  char *function_name = "mbr_kemkmall_wr_sde";
+  static const char function_name[] = "mbr_kemkmall_wr_sde";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_sde *sde = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4831,7 +4831,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  char *function_name = "mbr_kemkmall_wr_shi";
+  static const char function_name[] = "mbr_kemkmall_wr_shi";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_shi *shi = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4944,7 +4944,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_sha";
+  static const char function_name[] = "mbr_kemkmall_wr_sha";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_sha *sha = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5073,7 +5073,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_mrz";
+  static const char function_name[] = "mbr_kemkmall_wr_mrz";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5658,7 +5658,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_mwc";
+  static const char function_name[] = "mbr_kemkmall_wr_mwc";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5921,7 +5921,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_cpo";
+  static const char function_name[] = "mbr_kemkmall_wr_cpo";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_cpo *cpo = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6054,7 +6054,7 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_che";
+  static const char function_name[] = "mbr_kemkmall_wr_che";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_che *che = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6182,7 +6182,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_iip";
+  static const char function_name[] = "mbr_kemkmall_wr_iip";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6283,7 +6283,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_iop";
+  static const char function_name[] = "mbr_kemkmall_wr_iop";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_iop *iop = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6383,7 +6383,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_xmb";
+  static const char function_name[] = "mbr_kemkmall_wr_xmb";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xmb *xmb = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
@@ -6496,7 +6496,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_xmc";
+  static const char function_name[] = "mbr_kemkmall_wr_xmc";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6595,7 +6595,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_xms";
+  static const char function_name[] = "mbr_kemkmall_wr_xms";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6712,7 +6712,7 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  char *function_name = "mbr_kemkmall_wr_unknown";
+  static const char function_name[] = "mbr_kemkmall_wr_unknown";
   struct mbsys_kmbes_struct *store = NULL;
 
   if (verbose >= 2) {
@@ -6748,7 +6748,7 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
 };
 /*--------------------------------------------------------------------*/
 int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_kemkmall_wr_data";
+  static const char function_name[] = "mbr_kemkmall_wr_data";
   struct mbsys_kmbes_struct *store = NULL;
   size_t write_len = 0;
   char **bufferptr = NULL;
@@ -6939,7 +6939,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  char *function_name = "mbr_wt_kemkmall";
+  static const char function_name[] = "mbr_wt_kemkmall";
   struct mbsys_kmbes_struct *store = NULL;
 
   if (verbose >= 2) {
@@ -6985,7 +6985,7 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
-  char *function_name = "mbr_register_kemkmall";
+  static const char function_name[] = "mbr_register_kemkmall";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

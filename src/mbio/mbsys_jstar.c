@@ -41,7 +41,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_jstar_alloc";
+	static const char function_name[] = "mbsys_jstar_alloc";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 
@@ -82,7 +82,7 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_jstar_deall";
+	static const char function_name[] = "mbsys_jstar_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 
@@ -124,7 +124,7 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	char *function_name = "mbsys_jstar_dimensions";
+	static const char function_name[] = "mbsys_jstar_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -188,7 +188,7 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 }
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	char *function_name = "mbsys_jstar_pingnumber";
+	static const char function_name[] = "mbsys_jstar_pingnumber";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -242,7 +242,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
                            void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                            void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                            void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	char *function_name = "mbsys_jstar_preprocess";
+	static const char function_name[] = "mbsys_jstar_preprocess";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -557,7 +557,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_jstar_extract";
+	static const char function_name[] = "mbsys_jstar_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -871,7 +871,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_jstar_insert";
+	static const char function_name[] = "mbsys_jstar_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -1170,7 +1170,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                        double *ssv, int *error) {
-	char *function_name = "mbsys_jstar_ttimes";
+	static const char function_name[] = "mbsys_jstar_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 
@@ -1240,7 +1240,7 @@ int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_jstar_detects";
+	static const char function_name[] = "mbsys_jstar_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 
@@ -1309,7 +1309,7 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                  double *altitude, int *error) {
-	char *function_name = "mbsys_jstar_extract_altitude";
+	static const char function_name[] = "mbsys_jstar_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -1394,7 +1394,7 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
                                 int *error) {
-	char *function_name = "mbsys_jstar_insert_altitude";
+	static const char function_name[] = "mbsys_jstar_insert_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -1477,7 +1477,7 @@ int mbsys_jstar_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, do
 int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                             double *pitch, double *heave, int *error) {
-	char *function_name = "mbsys_jstar_extract_nav";
+	static const char function_name[] = "mbsys_jstar_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -1682,7 +1682,7 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                            int *error) {
-	char *function_name = "mbsys_jstar_insert_nav";
+	static const char function_name[] = "mbsys_jstar_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -1853,7 +1853,7 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *sample_interval,
                                         int *num_samples_port, int *num_samples_stbd, int *error) {
-	char *function_name = "mbsys_jstar_extract_rawssdimensions";
+	static const char function_name[] = "mbsys_jstar_extract_rawssdimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *ssport;
@@ -1923,7 +1923,7 @@ int mbsys_jstar_extract_rawssdimensions(int verbose, void *mbio_ptr, void *store
 int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *sidescan_type,
                               double *sample_interval, double *beamwidth_xtrack, double *beamwidth_ltrack, int *num_samples_port,
                               double *rawss_port, int *num_samples_stbd, double *rawss_stbd, int *error) {
-	char *function_name = "mbsys_jstar_extract_rawss";
+	static const char function_name[] = "mbsys_jstar_extract_rawss";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *ssport;
@@ -2038,7 +2038,7 @@ int mbsys_jstar_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int kind, int sidescan_type, double sample_interval,
                              double beamwidth_xtrack, double beamwidth_ltrack, int num_samples_port, double *rawss_port,
                              int num_samples_stbd, double *rawss_stbd, int *error) {
-	char *function_name = "mbsys_jstar_insert_rawss";
+	static const char function_name[] = "mbsys_jstar_insert_rawss";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *ssport;
@@ -2156,7 +2156,7 @@ int mbsys_jstar_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr, int k
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr,
                                         int *error) {
-	char *function_name = "mbsys_jstar_extract_segytraceheader";
+	static const char function_name[] = "mbsys_jstar_extract_segytraceheader";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -2385,7 +2385,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind, void *segyheader_ptr,
                              float *segydata, int *error) {
-	char *function_name = "mbsys_jstar_extract_segy";
+	static const char function_name[] = "mbsys_jstar_extract_segy";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -2586,7 +2586,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void *segyheader_ptr, float *segydata,
                             int *error) {
-	char *function_name = "mbsys_jstar_insert_segy";
+	static const char function_name[] = "mbsys_jstar_insert_segy";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -2812,7 +2812,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int ki
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
                     double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
-	char *function_name = "mbsys_jstar_ctd";
+	static const char function_name[] = "mbsys_jstar_ctd";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_pressure_struct *pressure;
@@ -2882,7 +2882,7 @@ int mbsys_jstar_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_copyrecord(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_jstar_copyrecord";
+	static const char function_name[] = "mbsys_jstar_copyrecord";
 	int status = MB_SUCCESS;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_struct *copy;

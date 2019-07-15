@@ -38,7 +38,7 @@
 
 /*--------------------------------------------------------------------------*/
 int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double ypn, double *y2, int *error) {
-	char *function_name = "mb_spline_init";
+	static const char function_name[] = "mb_spline_init";
 	int status = MB_SUCCESS;
 	double p, qn, sig, un, *u;
 
@@ -105,7 +105,7 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 }
 /*--------------------------------------------------------------------*/
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_spline_interp";
+	static const char function_name[] = "mb_spline_interp";
 	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b, a;
@@ -163,7 +163,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_linear_interp";
+	static const char function_name[] = "mb_linear_interp";
 	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
@@ -234,7 +234,7 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_linear_interp_longitude";
+	static const char function_name[] = "mb_linear_interp_longitude";
 	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
@@ -314,7 +314,7 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_linear_interp_latitude";
+	static const char function_name[] = "mb_linear_interp_latitude";
 	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
@@ -390,7 +390,7 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_linear_interp_heading";
+	static const char function_name[] = "mb_linear_interp_heading";
 	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;

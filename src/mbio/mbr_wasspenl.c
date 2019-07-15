@@ -45,7 +45,7 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_wasspenl";
+	static const char function_name[] = "mbr_info_wasspenl";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -114,7 +114,7 @@ int mbr_info_wasspenl(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_wasspenl";
+	static const char function_name[] = "mbr_alm_wasspenl";
 	int status = MB_SUCCESS;
 	char **bufferptr;
 	char *buffer;
@@ -162,7 +162,7 @@ int mbr_alm_wasspenl(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_wasspenl";
+	static const char function_name[] = "mbr_dem_wasspenl";
 	int status = MB_SUCCESS;
 	char **bufferptr;
 	char *buffer;
@@ -200,7 +200,7 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_genbathy";
+	static const char function_name[] = "mbr_wasspenl_rd_genbathy";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
@@ -334,7 +334,7 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_corbathy";
+	static const char function_name[] = "mbr_wasspenl_rd_corbathy";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -461,7 +461,7 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_rawsonar";
+	static const char function_name[] = "mbr_wasspenl_rd_rawsonar";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_rawsonar_struct *rawsonar;
@@ -577,7 +577,7 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_gen_sens";
+	static const char function_name[] = "mbr_wasspenl_rd_gen_sens";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_gen_sens_struct *gen_sens;
@@ -643,7 +643,7 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_nvupdate";
+	static const char function_name[] = "mbr_wasspenl_rd_nvupdate";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_nvupdate_struct *nvupdate;
@@ -724,7 +724,7 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_wcd_navi";
+	static const char function_name[] = "mbr_wasspenl_rd_wcd_navi";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_wcd_navi_struct *wcd_navi;
@@ -824,7 +824,7 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_sensprop";
+	static const char function_name[] = "mbr_wasspenl_rd_sensprop";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_sensprop_struct *sensprop;
@@ -947,7 +947,7 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_sys_prop";
+	static const char function_name[] = "mbr_wasspenl_rd_sys_prop";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_sys_prop_struct *sys_prop;
@@ -1031,7 +1031,7 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_sys_cfg1";
+	static const char function_name[] = "mbr_wasspenl_rd_sys_cfg1";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
@@ -1095,7 +1095,7 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_mcomment";
+	static const char function_name[] = "mbr_wasspenl_rd_mcomment";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_mcomment_struct *mcomment;
@@ -1149,7 +1149,7 @@ int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_unknown1";
+	static const char function_name[] = "mbr_wasspenl_rd_unknown1";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_unknown1_struct *unknown1;
@@ -1212,7 +1212,7 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_rd_data";
+	static const char function_name[] = "mbr_wasspenl_rd_data";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
@@ -1454,7 +1454,7 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_wasspenl";
+	static const char function_name[] = "mbr_rt_wasspenl";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 
@@ -1499,7 +1499,7 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_genbathy";
+	static const char function_name[] = "mbr_wasspenl_wr_genbathy";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
@@ -1640,7 +1640,7 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_corbathy";
+	static const char function_name[] = "mbr_wasspenl_wr_corbathy";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1788,7 +1788,7 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_rawsonar";
+	static const char function_name[] = "mbr_wasspenl_wr_rawsonar";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_rawsonar_struct *rawsonar;
@@ -1918,7 +1918,7 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_gen_sens";
+	static const char function_name[] = "mbr_wasspenl_wr_gen_sens";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_gen_sens_struct *gen_sens;
@@ -2005,7 +2005,7 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_nvupdate";
+	static const char function_name[] = "mbr_wasspenl_wr_nvupdate";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_nvupdate_struct *nvupdate;
@@ -2107,7 +2107,7 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_wcd_navi";
+	static const char function_name[] = "mbr_wasspenl_wr_wcd_navi";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_wcd_navi_struct *wcd_navi;
@@ -2216,7 +2216,7 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_sensprop";
+	static const char function_name[] = "mbr_wasspenl_wr_sensprop";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_sensprop_struct *sensprop;
@@ -2352,7 +2352,7 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_sys_prop";
+	static const char function_name[] = "mbr_wasspenl_wr_sys_prop";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_sys_prop_struct *sys_prop;
@@ -2457,7 +2457,7 @@ int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_sys_cfg1";
+	static const char function_name[] = "mbr_wasspenl_wr_sys_cfg1";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
@@ -2518,7 +2518,7 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_mcomment";
+	static const char function_name[] = "mbr_wasspenl_wr_mcomment";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_mcomment_struct *mcomment;
@@ -2595,7 +2595,7 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-	char *function_name = "mbr_wasspenl_wr_unknown1";
+	static const char function_name[] = "mbr_wasspenl_wr_unknown1";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_unknown1_struct *unknown1;
@@ -2655,7 +2655,7 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wasspenl_wr_data";
+	static const char function_name[] = "mbr_wasspenl_wr_data";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	char **bufferptr;
@@ -2786,7 +2786,7 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_wasspenl";
+	static const char function_name[] = "mbr_wt_wasspenl";
 	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 
@@ -2828,7 +2828,7 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_wasspenl(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_wasspenl";
+	static const char function_name[] = "mbr_register_wasspenl";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

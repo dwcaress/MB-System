@@ -54,7 +54,7 @@ int mbr_info_imagemba(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_imagemba";
+	static const char function_name[] = "mbr_info_imagemba";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -122,7 +122,7 @@ int mbr_info_imagemba(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_imagemba";
+	static const char function_name[] = "mbr_alm_imagemba";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -149,7 +149,7 @@ int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_imagemba(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_imagemba";
+	static const char function_name[] = "mbr_dem_imagemba";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -176,7 +176,7 @@ int mbr_dem_imagemba(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_imagemba";
+	static const char function_name[] = "mbr_rt_imagemba";
 	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGEMBA_BUFFER_SIZE] = "";
 	int done;
@@ -527,7 +527,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_imagemba";
+	static const char function_name[] = "mbr_wt_imagemba";
 	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGEMBA_BUFFER_SIZE] = "";
 	int swap = MB_NO;
@@ -854,7 +854,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_imagemba";
+	static const char function_name[] = "mbr_register_imagemba";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

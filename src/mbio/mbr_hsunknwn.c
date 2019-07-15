@@ -79,7 +79,7 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hsunknwn";
+	static const char function_name[] = "mbr_info_hsunknwn";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -147,7 +147,7 @@ int mbr_info_hsunknwn(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsunknwn";
+	static const char function_name[] = "mbr_alm_hsunknwn";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -174,7 +174,7 @@ int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsunknwn";
+	static const char function_name[] = "mbr_dem_hsunknwn";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -202,7 +202,7 @@ int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsunknwn";
+	static const char function_name[] = "mbr_rt_hsunknwn";
 	struct mbsys_hsds_struct *store;
 	char line[MB_PATH_MAXLINE];
 	char *result;
@@ -400,7 +400,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsunknwn";
+	static const char function_name[] = "mbr_wt_hsunknwn";
 	struct mbsys_hsds_struct *store;
 	double value;
 
@@ -524,7 +524,7 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hsunknwn";
+	static const char function_name[] = "mbr_register_hsunknwn";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

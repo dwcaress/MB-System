@@ -39,7 +39,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_hsds_alloc";
+	static const char function_name[] = "mbsys_hsds_alloc";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -69,7 +69,7 @@ int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	char *function_name = "mbsys_hsds_deall";
+	static const char function_name[] = "mbsys_hsds_deall";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -95,7 +95,7 @@ int mbsys_hsds_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	char *function_name = "mbsys_hsds_dimensions";
+	static const char function_name[] = "mbsys_hsds_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 
@@ -149,7 +149,7 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                        double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_hsds_extract";
+	static const char function_name[] = "mbsys_hsds_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 
@@ -317,7 +317,7 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
                       double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                       double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                       double *ssalongtrack, char *comment, int *error) {
-	char *function_name = "mbsys_hsds_insert";
+	static const char function_name[] = "mbsys_hsds_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 	double scalefactor;
@@ -449,7 +449,7 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 int mbsys_hsds_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                       double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                       double *ssv, int *error) {
-	char *function_name = "mbsys_hsds_ttimes";
+	static const char function_name[] = "mbsys_hsds_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 
@@ -544,7 +544,7 @@ int mbsys_hsds_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	char *function_name = "mbsys_hsds_detects";
+	static const char function_name[] = "mbsys_hsds_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 
@@ -618,7 +618,7 @@ int mbsys_hsds_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                 double *altitude, int *error) {
-	char *function_name = "mbsys_hsds_extract_altitude";
+	static const char function_name[] = "mbsys_hsds_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 	double bath_best;
@@ -706,7 +706,7 @@ int mbsys_hsds_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_hsds_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                            double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                            double *heave, int *error) {
-	char *function_name = "mbsys_hsds_extract_nav";
+	static const char function_name[] = "mbsys_hsds_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 
@@ -833,7 +833,7 @@ int mbsys_hsds_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_hsds_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                           double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                           int *error) {
-	char *function_name = "mbsys_hsds_insert_nav";
+	static const char function_name[] = "mbsys_hsds_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 
@@ -911,7 +911,7 @@ int mbsys_hsds_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                            int *error) {
-	char *function_name = "mbsys_hsds_extract_svp";
+	static const char function_name[] = "mbsys_hsds_extract_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 
@@ -976,7 +976,7 @@ int mbsys_hsds_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	char *function_name = "mbsys_hsds_insert_svp";
+	static const char function_name[] = "mbsys_hsds_insert_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 
@@ -1021,7 +1021,7 @@ int mbsys_hsds_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	char *function_name = "mbsys_hsds_copy";
+	static const char function_name[] = "mbsys_hsds_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_hsds_struct *store;
 	struct mbsys_hsds_struct *copy;

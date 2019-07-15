@@ -43,7 +43,7 @@ int mbr_info_sburicen(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_sburicen";
+	static const char function_name[] = "mbr_info_sburicen";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -111,7 +111,7 @@ int mbr_info_sburicen(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_sburicen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_sburicen";
+	static const char function_name[] = "mbr_alm_sburicen";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -145,7 +145,7 @@ int mbr_alm_sburicen(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_sburicen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_sburicen";
+	static const char function_name[] = "mbr_dem_sburicen";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -174,7 +174,7 @@ int mbr_dem_sburicen(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_sburicen";
+	static const char function_name[] = "mbr_rt_sburicen";
 	int status = MB_SUCCESS;
 	struct mbf_sburicen_struct *dataplus;
 	struct mbf_sburicen_data_struct *data;
@@ -306,7 +306,7 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_sburicen";
+	static const char function_name[] = "mbr_wt_sburicen";
 	int status = MB_SUCCESS;
 	struct mbf_sburicen_struct *dataplus;
 	struct mbf_sburicen_data_struct *data;
@@ -438,7 +438,7 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sburicen(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_sburicen";
+	static const char function_name[] = "mbr_register_sburicen";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

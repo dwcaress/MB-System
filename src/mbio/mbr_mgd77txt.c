@@ -185,7 +185,7 @@ int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_mgd77txt";
+	static const char function_name[] = "mbr_info_mgd77txt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -254,7 +254,7 @@ int mbr_info_mgd77txt(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_mgd77txt(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_mgd77txt";
+	static const char function_name[] = "mbr_zero_mgd77txt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -320,7 +320,7 @@ int mbr_zero_mgd77txt(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_mgd77txt";
+	static const char function_name[] = "mbr_alm_mgd77txt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -361,7 +361,7 @@ int mbr_alm_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_mgd77txt(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_mgd77txt";
+	static const char function_name[] = "mbr_dem_mgd77txt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -389,7 +389,7 @@ int mbr_dem_mgd77txt(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_mgd77txt_rd_data";
+	static const char function_name[] = "mbr_mgd77txt_rd_data";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -680,7 +680,7 @@ int mbr_mgd77txt_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_mgd77txt";
+	static const char function_name[] = "mbr_rt_mgd77txt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -752,7 +752,7 @@ int mbr_rt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_mgd77txt_wr_data";
+	static const char function_name[] = "mbr_mgd77txt_wr_data";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -922,7 +922,7 @@ int mbr_mgd77txt_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_mgd77txt";
+	static const char function_name[] = "mbr_wt_mgd77txt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -993,7 +993,7 @@ int mbr_wt_mgd77txt(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77txt(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_mgd77txt";
+	static const char function_name[] = "mbr_register_mgd77txt";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

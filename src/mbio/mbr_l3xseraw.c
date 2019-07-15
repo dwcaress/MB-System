@@ -53,7 +53,7 @@ int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_l3xseraw";
+	static const char function_name[] = "mbr_info_l3xseraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -123,7 +123,7 @@ int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_l3xseraw";
+	static const char function_name[] = "mbr_alm_l3xseraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -151,7 +151,7 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_l3xseraw";
+	static const char function_name[] = "mbr_dem_l3xseraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -179,7 +179,7 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_svp";
+	static const char function_name[] = "mbr_l3xseraw_rd_svp";
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -413,7 +413,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_tide";
+	static const char function_name[] = "mbr_l3xseraw_rd_tide";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -444,7 +444,7 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_ship";
+	static const char function_name[] = "mbr_l3xseraw_rd_ship";
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -790,7 +790,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_sidescan";
+	static const char function_name[] = "mbr_l3xseraw_rd_sidescan";
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -1232,7 +1232,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_multibeam";
+	static const char function_name[] = "mbr_l3xseraw_rd_multibeam";
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -1978,7 +1978,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_singlebeam";
+	static const char function_name[] = "mbr_l3xseraw_rd_singlebeam";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -2009,7 +2009,7 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_message";
+	static const char function_name[] = "mbr_l3xseraw_rd_message";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -2040,7 +2040,7 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_seabeam";
+	static const char function_name[] = "mbr_l3xseraw_rd_seabeam";
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -2321,7 +2321,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_geodetic";
+	static const char function_name[] = "mbr_l3xseraw_rd_geodetic";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -2352,7 +2352,7 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_native";
+	static const char function_name[] = "mbr_l3xseraw_rd_native";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -2383,7 +2383,7 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_product";
+	static const char function_name[] = "mbr_l3xseraw_rd_product";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -2414,7 +2414,7 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_bathymetry";
+	static const char function_name[] = "mbr_l3xseraw_rd_bathymetry";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -2445,7 +2445,7 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_control";
+	static const char function_name[] = "mbr_l3xseraw_rd_control";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -2476,7 +2476,7 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_comment";
+	static const char function_name[] = "mbr_l3xseraw_rd_comment";
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -2584,7 +2584,7 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_nav";
+	static const char function_name[] = "mbr_l3xseraw_rd_nav";
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -2897,7 +2897,7 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_data";
+	static const char function_name[] = "mbr_l3xseraw_rd_data";
 	struct mbsys_xse_struct *store;
 	FILE *mbfp;
 	static char label[4];
@@ -3334,7 +3334,7 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_l3xseraw";
+	static const char function_name[] = "mbr_rt_l3xseraw";
 	struct mbsys_xse_struct *store;
 	double time_d;
 	double lon, lat;
@@ -3424,7 +3424,7 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_nav";
+	static const char function_name[] = "mbr_l3xseraw_wr_nav";
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -4097,7 +4097,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_svp";
+	static const char function_name[] = "mbr_l3xseraw_wr_svp";
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -4510,7 +4510,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_ship";
+	static const char function_name[] = "mbr_l3xseraw_wr_ship";
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -5020,7 +5020,7 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_multibeam";
+	static const char function_name[] = "mbr_l3xseraw_wr_multibeam";
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -6140,7 +6140,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_sidescan";
+	static const char function_name[] = "mbr_l3xseraw_wr_sidescan";
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -6745,7 +6745,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_seabeam";
+	static const char function_name[] = "mbr_l3xseraw_wr_seabeam";
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -7180,7 +7180,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_comment";
+	static const char function_name[] = "mbr_l3xseraw_wr_comment";
 	struct mbsys_xse_struct *store;
 	int index;
 	int size;
@@ -7284,7 +7284,7 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_data";
+	static const char function_name[] = "mbr_l3xseraw_wr_data";
 	struct mbsys_xse_struct *store;
 	FILE *mbfp;
 	int buffer_size;
@@ -7421,7 +7421,7 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_l3xseraw";
+	static const char function_name[] = "mbr_wt_l3xseraw";
 	struct mbsys_xse_struct *store;
 
 	if (verbose >= 2) {
@@ -7454,7 +7454,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_l3xseraw";
+	static const char function_name[] = "mbr_register_l3xseraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

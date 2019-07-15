@@ -44,7 +44,7 @@ int mbr_info_bchrxunb(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_bchrxunb";
+	static const char function_name[] = "mbr_info_bchrxunb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -113,7 +113,7 @@ int mbr_info_bchrxunb(int verbose, int *system, int *beams_bath_max, int *beams_
 
 /*--------------------------------------------------------------------*/
 int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
-	char *function_name = "mbr_zero_bchrxunb";
+	static const char function_name[] = "mbr_zero_bchrxunb";
 	struct mbf_bchrxunb_struct *data;
 
 	if (verbose >= 2) {
@@ -254,7 +254,7 @@ int mbr_zero_bchrxunb(int verbose, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_bchrxunb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_bchrxunb";
+	static const char function_name[] = "mbr_alm_bchrxunb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -287,7 +287,7 @@ int mbr_alm_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_bchrxunb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_bchrxunb";
+	static const char function_name[] = "mbr_dem_bchrxunb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -315,7 +315,7 @@ int mbr_dem_bchrxunb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrxunb_rd_comment";
+	static const char function_name[] = "mbr_bchrxunb_rd_comment";
 	char line[ELAC_COMMENT_SIZE + 3];
 
 	if (verbose >= 2) {
@@ -359,7 +359,7 @@ int mbr_bchrxunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrxunb_rd_parameter";
+	static const char function_name[] = "mbr_bchrxunb_rd_parameter";
 	char line[ELAC_XPARAMETER_SIZE + 3];
 	short int *short_ptr;
 
@@ -536,7 +536,7 @@ int mbr_bchrxunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrxunb_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrxunb_rd_pos";
+	static const char function_name[] = "mbr_bchrxunb_rd_pos";
 	char line[ELAC_POS_SIZE + 3];
 	short int *short_ptr;
 	int *int_ptr;
@@ -650,7 +650,7 @@ int mbr_bchrxunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrxunb_rd_svp";
+	static const char function_name[] = "mbr_bchrxunb_rd_svp";
 	char line[ELAC_SVP_SIZE + 3];
 	short int *short_ptr;
 	short int *short_ptr2;
@@ -741,7 +741,7 @@ int mbr_bchrxunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrxunb_rd_bath56";
+	static const char function_name[] = "mbr_bchrxunb_rd_bath56";
 	char line[ELAC_XBATH56_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -907,7 +907,7 @@ int mbr_bchrxunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrxunb_rd_bath40";
+	static const char function_name[] = "mbr_bchrxunb_rd_bath40";
 	char line[ELAC_XBATH40_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -1073,7 +1073,7 @@ int mbr_bchrxunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *data, int *error) {
-	char *function_name = "mbr_bchrxunb_rd_bath32";
+	static const char function_name[] = "mbr_bchrxunb_rd_bath32";
 	char line[ELAC_XBATH32_SIZE + 3];
 	char *profile;
 	char *beam;
@@ -1239,7 +1239,7 @@ int mbr_bchrxunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrxunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_rd_data";
+	static const char function_name[] = "mbr_bchrxunb_rd_data";
 	struct mbf_bchrxunb_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -1364,7 +1364,7 @@ int mbr_bchrxunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_bchrxunb";
+	static const char function_name[] = "mbr_rt_bchrxunb";
 	struct mbf_bchrxunb_struct *data;
 	struct mbsys_elac_struct *store;
 	int time_i[7];
@@ -1548,7 +1548,7 @@ int mbr_rt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_wr_comment";
+	static const char function_name[] = "mbr_bchrxunb_wr_comment";
 	struct mbf_bchrxunb_struct *data;
 	char line[ELAC_COMMENT_SIZE + 3];
 	short int label;
@@ -1622,7 +1622,7 @@ int mbr_bchrxunb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_wr_parameter";
+	static const char function_name[] = "mbr_bchrxunb_wr_parameter";
 	struct mbf_bchrxunb_struct *data;
 	char line[ELAC_XPARAMETER_SIZE + 3];
 	short int label;
@@ -1822,7 +1822,7 @@ int mbr_bchrxunb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_wr_pos";
+	static const char function_name[] = "mbr_bchrxunb_wr_pos";
 	struct mbf_bchrxunb_struct *data;
 	char line[ELAC_POS_SIZE + 3];
 	short int label;
@@ -1955,7 +1955,7 @@ int mbr_bchrxunb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_wr_svp";
+	static const char function_name[] = "mbr_bchrxunb_wr_svp";
 	struct mbf_bchrxunb_struct *data;
 	char line[ELAC_SVP_SIZE + 3];
 	short int label;
@@ -2072,7 +2072,7 @@ int mbr_bchrxunb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_wr_bath56";
+	static const char function_name[] = "mbr_bchrxunb_wr_bath56";
 	struct mbf_bchrxunb_struct *data;
 	char line[ELAC_XBATH56_SIZE + 3];
 	char *profile;
@@ -2259,7 +2259,7 @@ int mbr_bchrxunb_wr_bath56(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_wr_bath40";
+	static const char function_name[] = "mbr_bchrxunb_wr_bath40";
 	struct mbf_bchrxunb_struct *data;
 	char line[ELAC_XBATH40_SIZE + 3];
 	char *profile;
@@ -2446,7 +2446,7 @@ int mbr_bchrxunb_wr_bath40(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_wr_bath32";
+	static const char function_name[] = "mbr_bchrxunb_wr_bath32";
 	struct mbf_bchrxunb_struct *data;
 	char line[ELAC_XBATH32_SIZE + 3];
 	char *profile;
@@ -2633,7 +2633,7 @@ int mbr_bchrxunb_wr_bath32(int verbose, FILE *mbfp, void *data_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrxunb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_bchrxunb_wr_data";
+	static const char function_name[] = "mbr_bchrxunb_wr_data";
 	struct mbf_bchrxunb_struct *data;
 	FILE *mbfp;
 
@@ -2696,7 +2696,7 @@ int mbr_bchrxunb_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_bchrxunb";
+	static const char function_name[] = "mbr_wt_bchrxunb";
 	struct mbf_bchrxunb_struct *data;
 	char *data_ptr;
 	struct mbsys_elac_struct *store;
@@ -2846,7 +2846,7 @@ int mbr_wt_bchrxunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_bchrxunb(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_bchrxunb";
+	static const char function_name[] = "mbr_register_bchrxunb";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

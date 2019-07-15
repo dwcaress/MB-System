@@ -45,7 +45,7 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header *header, int *error) {
-  char *function_name = "mbsys_reson7k_zero7kheader";
+  static const char function_name[] = "mbsys_reson7k_zero7kheader";
   int i;
 
   if (verbose >= 2) {
@@ -98,7 +98,7 @@ int mbsys_reson7k_zero7kheader(int verbose, s7k_header *header, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-  char *function_name = "mbsys_reson7k_alloc";
+  static const char function_name[] = "mbsys_reson7k_alloc";
   struct mbsys_reson7k_struct *store;
   s7kr_reference *reference;
   s7kr_sensoruncal *sensoruncal;
@@ -1152,7 +1152,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-  char *function_name = "mbsys_reson7k_deall";
+  static const char function_name[] = "mbsys_reson7k_deall";
   struct mbsys_reson7k_struct *store;
   s7kr_customattitude *customattitude;
   s7kr_motion *motion;
@@ -1449,7 +1449,7 @@ int mbsys_reson7k_checkheader(s7k_header header) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
-  char *function_name = "mbsys_reson7k_print_header";
+  static const char function_name[] = "mbsys_reson7k_print_header";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1513,7 +1513,7 @@ int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *error) {
-  char *function_name = "mbsys_reson7k_print_reference";
+  static const char function_name[] = "mbsys_reson7k_print_reference";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1556,7 +1556,7 @@ int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *e
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_sensoruncal(int verbose, s7kr_sensoruncal *sensoruncal, int *error) {
-  char *function_name = "mbsys_reson7k_print_sensoruncal";
+  static const char function_name[] = "mbsys_reson7k_print_sensoruncal";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1601,7 +1601,7 @@ int mbsys_reson7k_print_sensoruncal(int verbose, s7kr_sensoruncal *sensoruncal, 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_sensorcal(int verbose, s7kr_sensorcal *sensorcal, int *error) {
-  char *function_name = "mbsys_reson7k_print_sensorcal";
+  static const char function_name[] = "mbsys_reson7k_print_sensorcal";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1645,7 +1645,7 @@ int mbsys_reson7k_print_sensorcal(int verbose, s7kr_sensorcal *sensorcal, int *e
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *error) {
-  char *function_name = "mbsys_reson7k_print_position";
+  static const char function_name[] = "mbsys_reson7k_print_position";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1693,7 +1693,7 @@ int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_customattitude(int verbose, s7kr_customattitude *customattitude, int *error) {
-  char *function_name = "mbsys_reson7k_print_customattitude";
+  static const char function_name[] = "mbsys_reson7k_print_customattitude";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1745,7 +1745,7 @@ int mbsys_reson7k_print_customattitude(int verbose, s7kr_customattitude *customa
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
-  char *function_name = "mbsys_reson7k_print_tide";
+  static const char function_name[] = "mbsys_reson7k_print_tide";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1795,7 +1795,7 @@ int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_altitude(int verbose, s7kr_altitude *altitude, int *error) {
-  char *function_name = "mbsys_reson7k_print_altitude";
+  static const char function_name[] = "mbsys_reson7k_print_altitude";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1835,7 +1835,7 @@ int mbsys_reson7k_print_altitude(int verbose, s7kr_altitude *altitude, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_motion(int verbose, s7kr_motion *motion, int *error) {
-  char *function_name = "mbsys_reson7k_print_motion";
+  static const char function_name[] = "mbsys_reson7k_print_motion";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1882,7 +1882,7 @@ int mbsys_reson7k_print_motion(int verbose, s7kr_motion *motion, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_depth(int verbose, s7kr_depth *depth, int *error) {
-  char *function_name = "mbsys_reson7k_print_depth";
+  static const char function_name[] = "mbsys_reson7k_print_depth";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1925,7 +1925,7 @@ int mbsys_reson7k_print_depth(int verbose, s7kr_depth *depth, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
-  char *function_name = "mbsys_reson7k_print_svp";
+  static const char function_name[] = "mbsys_reson7k_print_svp";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1974,7 +1974,7 @@ int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
-  char *function_name = "mbsys_reson7k_print_ctd";
+  static const char function_name[] = "mbsys_reson7k_print_ctd";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2031,7 +2031,7 @@ int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) {
-  char *function_name = "mbsys_reson7k_print_geodesy";
+  static const char function_name[] = "mbsys_reson7k_print_geodesy";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2095,7 +2095,7 @@ int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_rollpitchheave(int verbose, s7kr_rollpitchheave *rollpitchheave, int *error) {
-  char *function_name = "mbsys_reson7k_print_rollpitchheave";
+  static const char function_name[] = "mbsys_reson7k_print_rollpitchheave";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2137,7 +2137,7 @@ int mbsys_reson7k_print_rollpitchheave(int verbose, s7kr_rollpitchheave *rollpit
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_heading(int verbose, s7kr_heading *heading, int *error) {
-  char *function_name = "mbsys_reson7k_print_heading";
+  static const char function_name[] = "mbsys_reson7k_print_heading";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2177,7 +2177,7 @@ int mbsys_reson7k_print_heading(int verbose, s7kr_heading *heading, int *error) 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_surveyline(int verbose, s7kr_surveyline *surveyline, int *error) {
-  char *function_name = "mbsys_reson7k_print_surveyline";
+  static const char function_name[] = "mbsys_reson7k_print_surveyline";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2224,7 +2224,7 @@ int mbsys_reson7k_print_surveyline(int verbose, s7kr_surveyline *surveyline, int
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_navigation(int verbose, s7kr_navigation *navigation, int *error) {
-  char *function_name = "mbsys_reson7k_print_navigation";
+  static const char function_name[] = "mbsys_reson7k_print_navigation";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2272,7 +2272,7 @@ int mbsys_reson7k_print_navigation(int verbose, s7kr_navigation *navigation, int
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_attitude(int verbose, s7kr_attitude *attitude, int *error) {
-  char *function_name = "mbsys_reson7k_print_attitude";
+  static const char function_name[] = "mbsys_reson7k_print_attitude";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2317,7 +2317,7 @@ int mbsys_reson7k_print_attitude(int verbose, s7kr_attitude *attitude, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_rec1022(int verbose, s7kr_rec1022 *rec1022, int *error) {
-  char *function_name = "mbsys_reson7k_print_rec1022";
+  static const char function_name[] = "mbsys_reson7k_print_rec1022";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2362,7 +2362,7 @@ int mbsys_reson7k_print_rec1022(int verbose, s7kr_rec1022 *rec1022, int *error) 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchannel *fsdwchannel, int *error) {
-  char *function_name = "mbsys_reson7k_print_fsdwchannel";
+  static const char function_name[] = "mbsys_reson7k_print_fsdwchannel";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2432,7 +2432,7 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchanne
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader, int *error) {
-  char *function_name = "mbsys_reson7k_print_fsdwssheader";
+  static const char function_name[] = "mbsys_reson7k_print_fsdwssheader";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2502,7 +2502,7 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwsegyheader(int verbose, s7k_fsdwsegyheader *fsdwsegyheader, int *error) {
-  char *function_name = "mbsys_reson7k_print_fsdwsegyheader";
+  static const char function_name[] = "mbsys_reson7k_print_fsdwsegyheader";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2606,7 +2606,7 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose, s7k_fsdwsegyheader *fsdwsegy
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwss(int verbose, s7kr_fsdwss *fsdwss, int *error) {
-  char *function_name = "mbsys_reson7k_print_fsdwss";
+  static const char function_name[] = "mbsys_reson7k_print_fsdwss";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2654,7 +2654,7 @@ int mbsys_reson7k_print_fsdwss(int verbose, s7kr_fsdwss *fsdwss, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwsb(int verbose, s7kr_fsdwsb *fsdwsb, int *error) {
-  char *function_name = "mbsys_reson7k_print_fsdwsb";
+  static const char function_name[] = "mbsys_reson7k_print_fsdwsb";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2699,7 +2699,7 @@ int mbsys_reson7k_print_fsdwsb(int verbose, s7kr_fsdwsb *fsdwsb, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_bluefin(int verbose, s7kr_bluefin *bluefin, int *error) {
-  char *function_name = "mbsys_reson7k_print_bluefin";
+  static const char function_name[] = "mbsys_reson7k_print_bluefin";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2823,7 +2823,7 @@ int mbsys_reson7k_print_bluefin(int verbose, s7kr_bluefin *bluefin, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *processedsidescan, int *error) {
-  char *function_name = "mbsys_reson7k_print_processedsidescan";
+  static const char function_name[] = "mbsys_reson7k_print_processedsidescan";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2874,7 +2874,7 @@ int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *p
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *volatilesettings, int *error) {
-  char *function_name = "mbsys_reson7k_print_volatilesettings";
+  static const char function_name[] = "mbsys_reson7k_print_volatilesettings";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2951,7 +2951,7 @@ int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *vol
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error) {
-  char *function_name = "mbsys_reson7k_print_device";
+  static const char function_name[] = "mbsys_reson7k_print_device";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2992,7 +2992,7 @@ int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configuration, int *error) {
-  char *function_name = "mbsys_reson7k_print_configuration";
+  static const char function_name[] = "mbsys_reson7k_print_configuration";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3035,7 +3035,7 @@ int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configura
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, int *error) {
-  char *function_name = "mbsys_reson7k_print_matchfilter";
+  static const char function_name[] = "mbsys_reson7k_print_matchfilter";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3080,7 +3080,7 @@ int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, 
 int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose,
                                                         s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration,
                                                         int *error) {
-  char *function_name = "mbsys_reson7k_print_v2firmwarehardwareconfiguration";
+  static const char function_name[] = "mbsys_reson7k_print_v2firmwarehardwareconfiguration";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3122,7 +3122,7 @@ int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_beamgeometry(int verbose, s7kr_beamgeometry *beamgeometry, int *error) {
-  char *function_name = "mbsys_reson7k_print_beamgeometry";
+  static const char function_name[] = "mbsys_reson7k_print_beamgeometry";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3168,7 +3168,7 @@ int mbsys_reson7k_print_beamgeometry(int verbose, s7kr_beamgeometry *beamgeometr
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_calibration(int verbose, s7kr_calibration *calibration, int *error) {
-  char *function_name = "mbsys_reson7k_print_calibration";
+  static const char function_name[] = "mbsys_reson7k_print_calibration";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3211,7 +3211,7 @@ int mbsys_reson7k_print_calibration(int verbose, s7kr_calibration *calibration, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int *error) {
-  char *function_name = "mbsys_reson7k_print_bathymetry";
+  static const char function_name[] = "mbsys_reson7k_print_bathymetry";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3276,7 +3276,7 @@ int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, int *error) {
-  char *function_name = "mbsys_reson7k_print_backscatter";
+  static const char function_name[] = "mbsys_reson7k_print_backscatter";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3367,7 +3367,7 @@ int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
-  char *function_name = "mbsys_reson7k_print_beam";
+  static const char function_name[] = "mbsys_reson7k_print_beam";
   s7kr_snippet *snippet;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
@@ -3469,7 +3469,7 @@ int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticaldepth, int *error) {
-  char *function_name = "mbsys_reson7k_print_verticaldepth";
+  static const char function_name[] = "mbsys_reson7k_print_verticaldepth";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3516,7 +3516,7 @@ int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticald
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
-  char *function_name = "mbsys_reson7k_print_tvg";
+  static const char function_name[] = "mbsys_reson7k_print_tvg";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3566,7 +3566,7 @@ int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
-  char *function_name = "mbsys_reson7k_print_image";
+  static const char function_name[] = "mbsys_reson7k_print_image";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3631,7 +3631,7 @@ int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2pingmotion(int verbose, s7kr_v2pingmotion *v2pingmotion, int *error) {
-  char *function_name = "mbsys_reson7k_print_v2pingmotion";
+  static const char function_name[] = "mbsys_reson7k_print_v2pingmotion";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3685,7 +3685,7 @@ int mbsys_reson7k_print_v2pingmotion(int verbose, s7kr_v2pingmotion *v2pingmotio
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2detectionsetup(int verbose, s7kr_v2detectionsetup *v2detectionsetup, int *error) {
-  char *function_name = "mbsys_reson7k_print_v2detectionsetup";
+  static const char function_name[] = "mbsys_reson7k_print_v2detectionsetup";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3751,7 +3751,7 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose, s7kr_v2detectionsetup *v2d
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamformed, int *error) {
-  char *function_name = "mbsys_reson7k_print_v2beamformed";
+  static const char function_name[] = "mbsys_reson7k_print_v2beamformed";
   s7kr_v2amplitudephase *v2amplitudephase;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
@@ -3809,7 +3809,7 @@ int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamforme
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
-  char *function_name = "mbsys_reson7k_print_v2bite";
+  static const char function_name[] = "mbsys_reson7k_print_v2bite";
   s7kr_v2bitereport *v2bitereport;
   s7kr_v2bitefield *v2bitefield;
   s7k_time *s7ktime;
@@ -3883,7 +3883,7 @@ int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v27kcenterversion(int verbose, s7kr_v27kcenterversion *v27kcenterversion, int *error) {
-  char *function_name = "mbsys_reson7k_print_v27kcenterversion";
+  static const char function_name[] = "mbsys_reson7k_print_v27kcenterversion";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3922,7 +3922,7 @@ int mbsys_reson7k_print_v27kcenterversion(int verbose, s7kr_v27kcenterversion *v
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v28kwetendversion(int verbose, s7kr_v28kwetendversion *v28kwetendversion, int *error) {
-  char *function_name = "mbsys_reson7k_print_v28kwetendversion";
+  static const char function_name[] = "mbsys_reson7k_print_v28kwetendversion";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -3961,7 +3961,7 @@ int mbsys_reson7k_print_v28kwetendversion(int verbose, s7kr_v28kwetendversion *v
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2detection(int verbose, s7kr_v2detection *v2detection, int *error) {
-  char *function_name = "mbsys_reson7k_print_v2detection";
+  static const char function_name[] = "mbsys_reson7k_print_v2detection";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4017,7 +4017,7 @@ int mbsys_reson7k_print_v2detection(int verbose, s7kr_v2detection *v2detection, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawdetection, int *error) {
-  char *function_name = "mbsys_reson7k_print_v2rawdetection";
+  static const char function_name[] = "mbsys_reson7k_print_v2rawdetection";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4075,7 +4075,7 @@ int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawde
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *error) {
-  char *function_name = "mbsys_reson7k_print_v2snippet";
+  static const char function_name[] = "mbsys_reson7k_print_v2snippet";
   s7kr_v2snippettimeseries *v2snippettimeseries;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
@@ -4131,7 +4131,7 @@ int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *calibratedsnippet, int *error) {
-  char *function_name = "mbsys_reson7k_print_calibratedsnippet";
+  static const char function_name[] = "mbsys_reson7k_print_calibratedsnippet";
   s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
@@ -4188,7 +4188,7 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installation, int *error) {
-  char *function_name = "mbsys_reson7k_print_installation";
+  static const char function_name[] = "mbsys_reson7k_print_installation";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4265,7 +4265,7 @@ int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installatio
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_systemeventmessage(int verbose, s7kr_systemeventmessage *systemeventmessage, int *error) {
-  char *function_name = "mbsys_reson7k_print_systemeventmessage";
+  static const char function_name[] = "mbsys_reson7k_print_systemeventmessage";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4309,7 +4309,7 @@ int mbsys_reson7k_print_systemeventmessage(int verbose, s7kr_systemeventmessage 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_subsystem(int verbose, s7kr_subsystem *subsystem, int *error) {
-  char *function_name = "mbsys_reson7k_print_subsystem";
+  static const char function_name[] = "mbsys_reson7k_print_subsystem";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4346,7 +4346,7 @@ int mbsys_reson7k_print_subsystem(int verbose, s7kr_subsystem *subsystem, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fileheader(int verbose, s7kr_fileheader *fileheader, int *error) {
-  char *function_name = "mbsys_reson7k_print_fileheader";
+  static const char function_name[] = "mbsys_reson7k_print_fileheader";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4400,7 +4400,7 @@ int mbsys_reson7k_print_fileheader(int verbose, s7kr_fileheader *fileheader, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_remotecontrolsettings(int verbose, s7kr_remotecontrolsettings *remotecontrolsettings, int *error) {
-  char *function_name = "mbsys_reson7k_print_remotecontrolsettings";
+  static const char function_name[] = "mbsys_reson7k_print_remotecontrolsettings";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4491,7 +4491,7 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose, s7kr_remotecontrolset
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_reserved(int verbose, s7kr_reserved *reserved, int *error) {
-  char *function_name = "mbsys_reson7k_print_reserved";
+  static const char function_name[] = "mbsys_reson7k_print_reserved";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4532,7 +4532,7 @@ int mbsys_reson7k_print_reserved(int verbose, s7kr_reserved *reserved, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_roll(int verbose, s7kr_roll *roll, int *error) {
-  char *function_name = "mbsys_reson7k_print_roll";
+  static const char function_name[] = "mbsys_reson7k_print_roll";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4571,7 +4571,7 @@ int mbsys_reson7k_print_roll(int verbose, s7kr_roll *roll, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error) {
-  char *function_name = "mbsys_reson7k_print_pitch";
+  static const char function_name[] = "mbsys_reson7k_print_pitch";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4610,7 +4610,7 @@ int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelocity, int *error) {
-  char *function_name = "mbsys_reson7k_print_soundvelocity";
+  static const char function_name[] = "mbsys_reson7k_print_soundvelocity";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4649,7 +4649,7 @@ int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelo
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorptionloss, int *error) {
-  char *function_name = "mbsys_reson7k_print_absorptionloss";
+  static const char function_name[] = "mbsys_reson7k_print_absorptionloss";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4688,7 +4688,7 @@ int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorpt
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreadingloss, int *error) {
-  char *function_name = "mbsys_reson7k_print_spreadingloss";
+  static const char function_name[] = "mbsys_reson7k_print_spreadingloss";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -4728,7 +4728,7 @@ int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreading
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-  char *function_name = "mbsys_reson7k_dimensions";
+  static const char function_name[] = "mbsys_reson7k_dimensions";
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
 
@@ -4782,7 +4782,7 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-  char *function_name = "mbsys_reson7k_pingnumber";
+  static const char function_name[] = "mbsys_reson7k_pingnumber";
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
 
@@ -4818,7 +4818,7 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-  char *function_name = "mbsys_reson7k_sonartype";
+  static const char function_name[] = "mbsys_reson7k_sonartype";
   struct mbsys_reson7k_struct *store;
 
   if (verbose >= 2) {
@@ -4853,7 +4853,7 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-  char *function_name = "mbsys_reson7k_sidescantype";
+  static const char function_name[] = "mbsys_reson7k_sidescantype";
   struct mbsys_reson7k_struct *store;
 
   if (verbose >= 2) {
@@ -4891,7 +4891,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-  char *function_name = "mbsys_reson7k_preprocess";
+  static const char function_name[] = "mbsys_reson7k_preprocess";
   struct mbsys_reson7k_struct *store;
   struct mb_platform_struct *platform;
   struct mb_preprocess_struct *pars;
@@ -6146,7 +6146,7 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-  char *function_name = "mbsys_reson7k_extract_platform";
+  static const char function_name[] = "mbsys_reson7k_extract_platform";
   struct mb_platform_struct *platform;
   struct mbsys_reson7k_struct *store;
   s7kr_installation *installation;
@@ -6322,7 +6322,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-  char *function_name = "mbsys_reson7k_extract";
+  static const char function_name[] = "mbsys_reson7k_extract";
   struct mbsys_reson7k_struct *store;
   s7kr_bluefin *bluefin;
   s7kr_processedsidescan *processedsidescan;
@@ -6878,7 +6878,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-  char *function_name = "mbsys_reson7k_insert";
+  static const char function_name[] = "mbsys_reson7k_insert";
   struct mbsys_reson7k_struct *store;
   s7kr_bluefin *bluefin;
   s7kr_processedsidescan *processedsidescan;
@@ -7186,7 +7186,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-  char *function_name = "mbsys_reson7k_ttimes";
+  static const char function_name[] = "mbsys_reson7k_ttimes";
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_depth *depth;
@@ -7327,7 +7327,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-  char *function_name = "mbsys_reson7k_detects";
+  static const char function_name[] = "mbsys_reson7k_detects";
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   mb_u_char detect;
@@ -7412,7 +7412,7 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error) {
-  char *function_name = "mbsys_reson7k_gains";
+  static const char function_name[] = "mbsys_reson7k_gains";
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_volatilesettings *volatilesettings;
@@ -7493,7 +7493,7 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitudev, int *error) {
-  char *function_name = "mbsys_reson7k_extract_altitude";
+  static const char function_name[] = "mbsys_reson7k_extract_altitude";
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_depth *depth;
@@ -7635,7 +7635,7 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-  char *function_name = "mbsys_reson7k_extract_nav";
+  static const char function_name[] = "mbsys_reson7k_extract_nav";
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_bluefin *bluefin;
@@ -8004,7 +8004,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
                                double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
                                double *roll, double *pitch, double *heave, int *error) {
-  char *function_name = "mbsys_reson7k_extract_nnav";
+  static const char function_name[] = "mbsys_reson7k_extract_nnav";
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_bluefin *bluefin;
@@ -8319,7 +8319,7 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-  char *function_name = "mbsys_reson7k_insert_nav";
+  static const char function_name[] = "mbsys_reson7k_insert_nav";
   struct mbsys_reson7k_struct *store;
   s7kr_bathymetry *bathymetry;
   s7kr_position *position;
@@ -8423,7 +8423,7 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
-  char *function_name = "mbsys_reson7k_extract_svp";
+  static const char function_name[] = "mbsys_reson7k_extract_svp";
   struct mbsys_reson7k_struct *store;
   s7kr_svp *svp;
   int i;
@@ -8493,7 +8493,7 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
-  char *function_name = "mbsys_reson7k_insert_svp";
+  static const char function_name[] = "mbsys_reson7k_insert_svp";
   struct mbsys_reson7k_struct *store;
   s7kr_svp *svp;
   int i;
@@ -8556,7 +8556,7 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void *segytraceheader_ptr,
                                           int *error) {
-  char *function_name = "mbsys_reson7k_extract_segytraceheader";
+  static const char function_name[] = "mbsys_reson7k_extract_segytraceheader";
   struct mbsys_reson7k_struct *store;
   struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
   s7k_header *header;
@@ -8816,7 +8816,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *sampleformat, int *kind, void *segyheader_ptr,
                                float *segydata, int *error) {
-  char *function_name = "mbsys_reson7k_extract_segy";
+  static const char function_name[] = "mbsys_reson7k_extract_segy";
   struct mbsys_reson7k_struct *store;
   struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
   s7k_header *header;
@@ -9023,7 +9023,7 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void *segyheader_ptr, float *segydata,
                               int *error) {
-  char *function_name = "mbsys_reson7k_insert_segy";
+  static const char function_name[] = "mbsys_reson7k_insert_segy";
   struct mbsys_reson7k_struct *store;
   struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
   s7k_header *header;
@@ -9268,7 +9268,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
                       double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
-  char *function_name = "mbsys_reson7k_ctd";
+  static const char function_name[] = "mbsys_reson7k_ctd";
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_bluefin *bluefin;
@@ -9391,7 +9391,7 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsamples, double *time_d,
                                    double *sensor1, double *sensor2, double *sensor3, double *sensor4, double *sensor5,
                                    double *sensor6, double *sensor7, double *sensor8, int *error) {
-  char *function_name = "mbsys_reson7k_ancilliarysensor";
+  static const char function_name[] = "mbsys_reson7k_ancilliarysensor";
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_bluefin *bluefin;
@@ -9473,7 +9473,7 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-  char *function_name = "mbsys_reson7k_copy";
+  static const char function_name[] = "mbsys_reson7k_copy";
   struct mbsys_reson7k_struct *store;
   struct mbsys_reson7k_struct *copy;
   s7kr_attitude *attitude;
@@ -9942,7 +9942,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-  char *function_name = "mbsys_reson7k_makess";
+  static const char function_name[] = "mbsys_reson7k_makess";
   struct mbsys_reson7k_struct *store;
   s7kr_reference *reference;
   s7kr_volatilesettings *volatilesettings;

@@ -41,7 +41,7 @@
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                  double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
                  int *beams_amp, int *pixels_ss, int *error) {
-	char *function_name = "mb_read_init";
+	static const char function_name[] = "mb_read_init";
 	int status;
 	int status_save;
 	int error_save;
@@ -661,7 +661,7 @@ int mb_input_init(int verbose, char *file, int format,
                 int (*input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error),
                 int (*input_close)(int verbose, void *mbio_ptr, int *error),
                 int *error) {
-	char *function_name = "mb_input_init";
+	static const char function_name[] = "mb_input_init";
 	int status;
 	int status_save;
 	int error_save;

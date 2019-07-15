@@ -157,7 +157,7 @@ int mbr_info_hs10jams(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hs10jams";
+	static const char function_name[] = "mbr_info_hs10jams";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -225,7 +225,7 @@ int mbr_info_hs10jams(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hs10jams(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hs10jams";
+	static const char function_name[] = "mbr_alm_hs10jams";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -254,7 +254,7 @@ int mbr_alm_hs10jams(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hs10jams(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hs10jams";
+	static const char function_name[] = "mbr_dem_hs10jams";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -281,7 +281,7 @@ int mbr_dem_hs10jams(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hs10jams";
+	static const char function_name[] = "mbr_rt_hs10jams";
 	struct mbsys_hs10_struct *store;
 	char line[MBF_HS10JAMS_MAXLINE];
 	char *line_ptr;
@@ -431,7 +431,7 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hs10jams";
+	static const char function_name[] = "mbr_wt_hs10jams";
 	struct mbsys_hs10_struct *store;
 	char line[MBF_HS10JAMS_MAXLINE];
 	int shift;
@@ -534,7 +534,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hs10jams(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hs10jams";
+	static const char function_name[] = "mbr_register_hs10jams";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

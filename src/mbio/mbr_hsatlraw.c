@@ -42,7 +42,7 @@ static const int ZERO_SOME = 1;
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hsatlraw";
+	static const char function_name[] = "mbr_register_hsatlraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -139,7 +139,7 @@ int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hsatlraw";
+	static const char function_name[] = "mbr_info_hsatlraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -207,7 +207,7 @@ int mbr_info_hsatlraw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsatlraw";
+	static const char function_name[] = "mbr_alm_hsatlraw";
 	struct mbf_hsatlraw_struct *data;
 	char *data_ptr;
 
@@ -246,7 +246,7 @@ int mbr_alm_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsatlraw";
+	static const char function_name[] = "mbr_dem_hsatlraw";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -274,7 +274,7 @@ int mbr_dem_hsatlraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
-	char *function_name = "mbr_zero_hsatlraw";
+	static const char function_name[] = "mbr_zero_hsatlraw";
 	struct mbf_hsatlraw_struct *data;
 
 	if (verbose >= 2) {
@@ -409,7 +409,7 @@ int mbr_zero_hsatlraw(int verbose, void *data_ptr, int mode, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsatlraw";
+	static const char function_name[] = "mbr_rt_hsatlraw";
 	struct mbf_hsatlraw_struct *data;
 	struct mbsys_hsds_struct *store;
 	double xx, rr, zz, tt;
@@ -573,7 +573,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsatlraw";
+	static const char function_name[] = "mbr_wt_hsatlraw";
 	struct mbf_hsatlraw_struct *data;
 	char *data_ptr;
 	struct mbsys_hsds_struct *store;
@@ -713,7 +713,7 @@ int mbr_wt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_data";
+	static const char function_name[] = "mbr_hsatlraw_rd_data";
 	struct mbf_hsatlraw_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -887,7 +887,7 @@ int mbr_hsatlraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_label";
+	static const char function_name[] = "mbr_hsatlraw_rd_label";
 	int icmp;
 
 	if (verbose >= 2) {
@@ -939,7 +939,7 @@ int mbr_hsatlraw_rd_label(int verbose, FILE *mbfp, char *line, int *type, int *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line, int *error) {
-	char *function_name = "mbr_hsatlraw_read_line";
+	static const char function_name[] = "mbr_hsatlraw_read_line";
 	int nchars;
 	int done;
 	char *result;
@@ -1010,7 +1010,7 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ergnhydi";
+	static const char function_name[] = "mbr_hsatlraw_rd_ergnhydi";
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	if (verbose >= 2) {
@@ -1080,7 +1080,7 @@ int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ergnpara";
+	static const char function_name[] = "mbr_hsatlraw_rd_ergnpara";
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	if (verbose >= 2) {
@@ -1156,7 +1156,7 @@ int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ergnposi";
+	static const char function_name[] = "mbr_hsatlraw_rd_ergnposi";
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	if (verbose >= 2) {
@@ -1224,7 +1224,7 @@ int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ergneich";
+	static const char function_name[] = "mbr_hsatlraw_rd_ergneich";
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1363,7 +1363,7 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ergnmess";
+	static const char function_name[] = "mbr_hsatlraw_rd_ergnmess";
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1504,7 +1504,7 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ergnslzt";
+	static const char function_name[] = "mbr_hsatlraw_rd_ergnslzt";
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1616,7 +1616,7 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ergnctds";
+	static const char function_name[] = "mbr_hsatlraw_rd_ergnctds";
 	char line[MBF_HSATLRAW_MAXLINE];
 	int nlines;
 	int numvals;
@@ -1705,7 +1705,7 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ergnampl";
+	static const char function_name[] = "mbr_hsatlraw_rd_ergnampl";
 	char line[MBF_HSATLRAW_MAXLINE];
 	int numvals;
 
@@ -1869,7 +1869,7 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct *data, int shift, int *error) {
-	char *function_name = "mbr_hsatlraw_rd_ldeocmnt";
+	static const char function_name[] = "mbr_hsatlraw_rd_ldeocmnt";
 	char line[MBF_HSATLRAW_MAXLINE];
 	int nchars;
 
@@ -1912,7 +1912,7 @@ int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_data";
+	static const char function_name[] = "mbr_hsatlraw_wr_data";
 	struct mbf_hsatlraw_struct *data;
 	FILE *mbfp;
 
@@ -1983,7 +1983,7 @@ int mbr_hsatlraw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_label";
+	static const char function_name[] = "mbr_hsatlraw_wr_label";
 	char line[MBF_HSATLRAW_MAXLINE];
 
 	if (verbose >= 2) {
@@ -2010,7 +2010,7 @@ int mbr_hsatlraw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
-	char *function_name = "mbr_hsatlraw_write_line";
+	static const char function_name[] = "mbr_hsatlraw_write_line";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2044,7 +2044,7 @@ int mbr_hsatlraw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_rawline";
+	static const char function_name[] = "mbr_hsatlraw_wr_rawline";
 	struct mbf_hsatlraw_struct *data;
 
 	if (verbose >= 2) {
@@ -2089,7 +2089,7 @@ int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ergnhydi";
+	static const char function_name[] = "mbr_hsatlraw_wr_ergnhydi";
 	struct mbf_hsatlraw_struct *data;
 
 	if (verbose >= 2) {
@@ -2166,7 +2166,7 @@ int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ergnpara";
+	static const char function_name[] = "mbr_hsatlraw_wr_ergnpara";
 	struct mbf_hsatlraw_struct *data;
 
 	if (verbose >= 2) {
@@ -2249,7 +2249,7 @@ int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ergnposi";
+	static const char function_name[] = "mbr_hsatlraw_wr_ergnposi";
 	struct mbf_hsatlraw_struct *data;
 
 	if (verbose >= 2) {
@@ -2324,7 +2324,7 @@ int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ergneich";
+	static const char function_name[] = "mbr_hsatlraw_wr_ergneich";
 	struct mbf_hsatlraw_struct *data;
 
 	if (verbose >= 2) {
@@ -2438,7 +2438,7 @@ int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ergnmess";
+	static const char function_name[] = "mbr_hsatlraw_wr_ergnmess";
 	struct mbf_hsatlraw_struct *data;
 
 	if (verbose >= 2) {
@@ -2552,7 +2552,7 @@ int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ergnslzt";
+	static const char function_name[] = "mbr_hsatlraw_wr_ergnslzt";
 	struct mbf_hsatlraw_struct *data;
 	int datacheck;
 
@@ -2671,7 +2671,7 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ergnctds";
+	static const char function_name[] = "mbr_hsatlraw_wr_ergnctds";
 	struct mbf_hsatlraw_struct *data;
 	int nline, nrem;
 
@@ -2762,7 +2762,7 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ergnampl";
+	static const char function_name[] = "mbr_hsatlraw_wr_ergnampl";
 	struct mbf_hsatlraw_struct *data;
 	int datacheck;
 
@@ -2921,7 +2921,7 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsatlraw_wr_ldeocmnt";
+	static const char function_name[] = "mbr_hsatlraw_wr_ldeocmnt";
 	struct mbf_hsatlraw_struct *data;
 
 	if (verbose >= 2) {

@@ -45,7 +45,7 @@ int mbr_info_oicgeoda(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_oicgeoda";
+	static const char function_name[] = "mbr_info_oicgeoda";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -115,7 +115,7 @@ int mbr_info_oicgeoda(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_oicgeoda";
+	static const char function_name[] = "mbr_alm_oicgeoda";
 	int status = MB_SUCCESS;
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
@@ -180,7 +180,7 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_oicgeoda";
+	static const char function_name[] = "mbr_dem_oicgeoda";
 	int status = MB_SUCCESS;
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
@@ -237,7 +237,7 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_oicgeoda";
+	static const char function_name[] = "mbr_rt_oicgeoda";
 	int status = MB_SUCCESS;
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
@@ -1157,7 +1157,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_oicgeoda";
+	static const char function_name[] = "mbr_wt_oicgeoda";
 	int status = MB_SUCCESS;
 	struct mbf_oicgeoda_struct *dataplus;
 	struct mbf_oicgeoda_header_struct *header;
@@ -1639,7 +1639,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_oicgeoda";
+	static const char function_name[] = "mbr_register_oicgeoda";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

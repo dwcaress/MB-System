@@ -41,7 +41,7 @@ const double C7 = 0.0023;
 
 /*--------------------------------------------------------------------*/
 int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtodeglat) {
-	char *function_name = "mb_coor_scale";
+	static const char function_name[] = "mb_coor_scale";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -76,7 +76,7 @@ int mb_coor_scale(int verbose, double latitude, double *mtodeglon, double *mtode
 }
 /*--------------------------------------------------------------------*/
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude) {
-	char *function_name = "mb_apply_lonflip";
+	static const char function_name[] = "mb_apply_lonflip";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

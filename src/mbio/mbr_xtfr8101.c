@@ -44,7 +44,7 @@ int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_xtfr8101";
+	static const char function_name[] = "mbr_info_xtfr8101";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -115,7 +115,7 @@ int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_xtfr8101";
+	static const char function_name[] = "mbr_zero_xtfr8101";
 	int status = MB_SUCCESS;
 	struct mbf_xtfr8101_struct *data;
 
@@ -152,7 +152,7 @@ int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_xtfr8101";
+	static const char function_name[] = "mbr_alm_xtfr8101";
 	int status = MB_SUCCESS;
 	int *fileheaderread;
 	double *pixel_size;
@@ -200,7 +200,7 @@ int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_xtfr8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_xtfr8101";
+	static const char function_name[] = "mbr_dem_xtfr8101";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -229,7 +229,7 @@ int mbr_dem_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_xtfr8101_rd_data";
+	static const char function_name[] = "mbr_xtfr8101_rd_data";
 	int status = MB_SUCCESS;
 	struct mbf_xtfr8101_struct *data;
 	char line[MBF_XTFR8101_MAXLINE];
@@ -1631,7 +1631,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_xtfr8101";
+	static const char function_name[] = "mbr_rt_xtfr8101";
 	int status = MB_SUCCESS;
 	struct mbf_xtfr8101_struct *data;
 	struct mbsys_reson8k_struct *store;
@@ -1976,7 +1976,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_xtfr8101";
+	static const char function_name[] = "mbr_wt_xtfr8101";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -2007,7 +2007,7 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_xtfr8101";
+	static const char function_name[] = "mbr_register_xtfr8101";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {

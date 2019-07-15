@@ -45,7 +45,7 @@ int mbr_info_hsds2lam(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hsds2lam";
+	static const char function_name[] = "mbr_info_hsds2lam";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -115,7 +115,7 @@ int mbr_info_hsds2lam(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsds2lam";
+	static const char function_name[] = "mbr_alm_hsds2lam";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -144,7 +144,7 @@ int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hsds2lam(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsds2lam";
+	static const char function_name[] = "mbr_dem_hsds2lam";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -171,7 +171,7 @@ int mbr_dem_hsds2lam(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_hsds2lam_rd_data";
+	static const char function_name[] = "mbr_hsds2lam_rd_data";
 	struct mbsys_atlas_struct *store;
 	int xdr_status;
 	int strlength;
@@ -518,7 +518,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsds2lam";
+	static const char function_name[] = "mbr_rt_hsds2lam";
 	struct mbsys_atlas_struct *store;
 
 	if (verbose >= 2) {
@@ -554,7 +554,7 @@ int mbr_rt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_hsds2lam_wr_data";
+	static const char function_name[] = "mbr_hsds2lam_wr_data";
 	struct mbsys_atlas_struct *store;
 	int xdr_status;
 	int strlength;
@@ -876,7 +876,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsds2lam";
+	static const char function_name[] = "mbr_wt_hsds2lam";
 	struct mbsys_atlas_struct *store;
 
 	if (verbose >= 2) {
@@ -908,7 +908,7 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hsds2lam";
+	static const char function_name[] = "mbr_register_hsds2lam";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

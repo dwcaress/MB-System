@@ -39,7 +39,7 @@
 /* 	function mb_navint_add adds a nav fix to the internal
         list used for interpolation/extrapolation. */
 int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting, double lat_northing, int *error) {
-	char *function_name = "mb_navint_add";
+	static const char function_name[] = "mb_navint_add";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -117,7 +117,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
         nav fix from the internal list. */
 int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading, double rawspeed, double *lon, double *lat,
                      double *speed, int *error) {
-	char *function_name = "mb_navint_interp";
+	static const char function_name[] = "mb_navint_interp";
 	int status = MB_SUCCESS;
 	double mtodeglon = 0.0;
 	double mtodeglat = 0.0;
@@ -271,7 +271,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
         rather than in geographic lon lat. */
 int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double heading, double rawspeed, double *easting,
                         double *northing, double *speed, int *error) {
-	char *function_name = "mb_navintprj_interp";
+	static const char function_name[] = "mb_navintprj_interp";
 	int status = MB_SUCCESS;
 	double dx, dy, dt, dd;
 	double factor, headingx, headingy;
@@ -415,7 +415,7 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 /* 	function mb_attint_add adds a attitude fix to the internal
         list used for interpolation/extrapolation. */
 int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, double roll, double pitch, int *error) {
-	char *function_name = "mb_attint_add";
+	static const char function_name[] = "mb_attint_add";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -487,7 +487,7 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
         list used for interpolation/extrapolation. */
 int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, double *heave, double *roll, double *pitch,
                    int *error) {
-	char *function_name = "mb_attint_nadd";
+	static const char function_name[] = "mb_attint_nadd";
 	int status = MB_SUCCESS;
 	int shift;
 
@@ -560,7 +560,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 /* 	function mb_attint_interp interpolates or extrapolates a
         attitude fix from the internal list. */
 int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, double *roll, double *pitch, int *error) {
-	char *function_name = "mb_attint_interp";
+	static const char function_name[] = "mb_attint_interp";
 	int status = MB_SUCCESS;
 	double factor;
 	int ifix;
@@ -658,7 +658,7 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
 /* 	function mb_hedint_add adds a heading fix to the internal
         list used for interpolation/extrapolation. */
 int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, int *error) {
-	char *function_name = "mb_hedint_add";
+	static const char function_name[] = "mb_hedint_add";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -720,7 +720,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 /* 	function mb_hedint_nadd adds multiple heading fixes to the internal
         list used for interpolation/extrapolation. */
 int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, double *heading, int *error) {
-	char *function_name = "mb_hedint_nadd";
+	static const char function_name[] = "mb_hedint_nadd";
 	int status = MB_SUCCESS;
 	int shift;
 
@@ -786,7 +786,7 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 /* 	function mb_hedint_interp interpolates or extrapolates a
         heading fix from the internal list. */
 int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading, int *error) {
-	char *function_name = "mb_hedint_interp";
+	static const char function_name[] = "mb_hedint_interp";
 	int status = MB_SUCCESS;
 	double factor;
 	int ifix;
@@ -879,7 +879,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 /* 	function mb_depint_add adds a sonar depth fix to the internal
         list used for interpolation/extrapolation. */
 int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth, int *error) {
-	char *function_name = "mb_depint_add";
+	static const char function_name[] = "mb_depint_add";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -942,7 +942,7 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 /* 	function mb_depint_interp interpolates or extrapolates a
         sonar depth fix from the internal list. */
 int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonardepth, int *error) {
-	char *function_name = "mb_depint_interp";
+	static const char function_name[] = "mb_depint_interp";
 	int status = MB_SUCCESS;
 	double factor;
 	int ifix;
@@ -1027,7 +1027,7 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 /* 	function mb_altint_add adds a heading fix to the internal
         list used for interpolation/extrapolation. */
 int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, int *error) {
-	char *function_name = "mb_altint_add";
+	static const char function_name[] = "mb_altint_add";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
@@ -1089,7 +1089,7 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 /* 	function mb_altint_interp interpolates or extrapolates a
         altitude fix from the internal list. */
 int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitude, int *error) {
-	char *function_name = "mb_altint_interp";
+	static const char function_name[] = "mb_altint_interp";
 	int status = MB_SUCCESS;
 	double factor;
 	int ifix;
@@ -1174,7 +1174,7 @@ int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitud
 int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int merge_nav_lonflip, int *merge_nav_num,
                    int *merge_nav_alloc, double **merge_nav_time_d, double **merge_nav_lon, double **merge_nav_lat,
                    double **merge_nav_speed, int *error) {
-	char *function_name = "mb_loadnavdata";
+	static const char function_name[] = "mb_loadnavdata";
 	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result, *bufftmp;
 	int nrecord;
@@ -1587,7 +1587,7 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_sensordepth_format, int *merge_sensordepth_num,
                            int *merge_sensordepth_alloc, double **merge_sensordepth_time_d,
                            double **merge_sensordepth_sensordepth, int *error) {
-	char *function_name = "mb_loadsensordepthdata";
+	static const char function_name[] = "mb_loadsensordepthdata";
 	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
@@ -1772,7 +1772,7 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 
 int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitude_format, int *merge_altitude_num,
                         int *merge_altitude_alloc, double **merge_altitude_time_d, double **merge_altitude_altitude, int *error) {
-	char *function_name = "mb_loadaltitudedata";
+	static const char function_name[] = "mb_loadaltitudedata";
 	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
@@ -1945,7 +1945,7 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 
 int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_format, int *merge_heading_num,
                        int *merge_heading_alloc, double **merge_heading_time_d, double **merge_heading_heading, int *error) {
-	char *function_name = "mb_loadheadingdata";
+	static const char function_name[] = "mb_loadheadingdata";
 	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
@@ -2130,7 +2130,7 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitude_format, int *merge_attitude_num,
                         int *merge_attitude_alloc, double **merge_attitude_time_d, double **merge_attitude_roll,
                         double **merge_attitude_pitch, double **merge_attitude_heave, int *error) {
-	char *function_name = "mb_loadattitudedata";
+	static const char function_name[] = "mb_loadattitudedata";
 	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
@@ -2333,7 +2333,7 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_soundspeed_format, int *merge_soundspeed_num,
                           int *merge_soundspeed_alloc, double **merge_soundspeed_time_d, double **merge_soundspeed_soundspeed,
                           int *error) {
-	char *function_name = "mb_loadsoundspeeddata";
+	static const char function_name[] = "mb_loadsoundspeeddata";
 	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
@@ -2507,7 +2507,7 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_timeshift_format, int *merge_timeshift_num,
                          int *merge_timeshift_alloc, double **merge_timeshift_time_d, double **merge_timeshift_timeshift,
                          int *error) {
-	char *function_name = "mb_loadtimeshiftdata";
+	static const char function_name[] = "mb_loadtimeshiftdata";
 	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
@@ -2680,7 +2680,7 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 
 int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int time_latency_mode, double time_latency_static,
                           int time_latency_num, double *time_latency_time_d, double *time_latency_value, int *error) {
-	char *function_name = "mb_apply_time_latency";
+	static const char function_name[] = "mb_apply_time_latency";
 	int status = MB_SUCCESS;
 	int interp_status;
 	double time_latency;
@@ -2733,7 +2733,7 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 /*--------------------------------------------------------------------*/
 
 int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double *data_value, double filter_length, int *error) {
-	char *function_name = "mb_apply_time_filter";
+	static const char function_name[] = "mb_apply_time_filter";
 	int status = MB_SUCCESS;
 	double *data_value_filtered = NULL;
 	double dtime, dtol, filterweight, weight;

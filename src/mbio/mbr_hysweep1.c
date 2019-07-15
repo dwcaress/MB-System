@@ -50,7 +50,7 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hysweep1";
+	static const char function_name[] = "mbr_info_hysweep1";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -119,7 +119,7 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hysweep1";
+	static const char function_name[] = "mbr_alm_hysweep1";
 	int *file_header_read;
 	int *file_header_written;
 	int *line_saved;
@@ -169,7 +169,7 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hysweep1";
+	static const char function_name[] = "mbr_dem_hysweep1";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -196,7 +196,7 @@ int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
-	char *function_name = "mbr_hysweep1_rd_line";
+	static const char function_name[] = "mbr_hysweep1_rd_line";
 	char *result;
 
 	if (verbose >= 2) {
@@ -237,7 +237,7 @@ int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_hysweep1_rd_data";
+	static const char function_name[] = "mbr_hysweep1_rd_data";
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
@@ -1989,7 +1989,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hysweep1";
+	static const char function_name[] = "mbr_rt_hysweep1";
 	int interp_status;
 	int interp_error = MB_ERROR_NO_ERROR;
 	struct mbsys_hysweep_struct *store;
@@ -2362,7 +2362,7 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_hysweep1_wr_data";
+	static const char function_name[] = "mbr_hysweep1_wr_data";
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
@@ -3142,7 +3142,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hysweep1";
+	static const char function_name[] = "mbr_wt_hysweep1";
 	struct mbsys_hysweep_struct *store;
 
 	if (verbose >= 2) {
@@ -3175,7 +3175,7 @@ int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hysweep1";
+	static const char function_name[] = "mbr_register_hysweep1";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);

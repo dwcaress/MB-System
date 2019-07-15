@@ -38,7 +38,7 @@ static const char *HOME = "HOME";
 /*--------------------------------------------------------------------*/
 int mb_version(int verbose, char *version_string, int *version_id, int *version_major, int *version_minor, int *version_archive,
                int *error) {
-	char *function_name = "mb_version";
+	static const char function_name[] = "mb_version";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -79,7 +79,7 @@ int mb_version(int verbose, char *version_string, int *version_id, int *version_
 /*--------------------------------------------------------------------*/
 int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bounds[4], int *btime_i, int *etime_i,
                 double *speedmin, double *timegap) {
-	char *function_name = "mb_defaults";
+	static const char function_name[] = "mb_defaults";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -170,7 +170,7 @@ int mb_defaults(int verbose, int *format, int *pings, int *lonflip, double bound
 }
 /*--------------------------------------------------------------------*/
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
-	char *function_name = "mbenv";
+	static const char function_name[] = "mbenv";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -230,7 +230,7 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject) {
 }
 /*--------------------------------------------------------------------*/
 int mb_lonflip(int verbose, int *lonflip) {
-	char *function_name = "mb_lonflip";
+	static const char function_name[] = "mb_lonflip";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -278,7 +278,7 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
                        int *slope_colortable, int *slope_colortable_mode, int *secondary_colortable,
                        int *secondary_colortable_mode, double *illuminate_magnitude, double *illuminate_elevation,
                        double *illuminate_azimuth, double *slope_magnitude) {
-	char *function_name = "mb_mbview_defaults";
+	static const char function_name[] = "mb_mbview_defaults";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -363,7 +363,7 @@ int mb_mbview_defaults(int verbose, int *primary_colortable, int *primary_colort
 }
 /*--------------------------------------------------------------------*/
 int mb_fbtversion(int verbose, int *fbtversion) {
-	char *function_name = "mb_fbtversion";
+	static const char function_name[] = "mb_fbtversion";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -408,7 +408,7 @@ int mb_fbtversion(int verbose, int *fbtversion) {
 }
 /*--------------------------------------------------------------------*/
 int mb_uselockfiles(int verbose, int *uselockfiles) {
-	char *function_name = "mb_uselockfiles";
+	static const char function_name[] = "mb_uselockfiles";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -464,7 +464,7 @@ int mb_uselockfiles(int verbose, int *uselockfiles) {
 }
 /*--------------------------------------------------------------------*/
 int mb_fileiobuffer(int verbose, int *fileiobuffer) {
-	char *function_name = "mb_fileiobuffer";
+	static const char function_name[] = "mb_fileiobuffer";
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
