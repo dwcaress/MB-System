@@ -51,7 +51,6 @@
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_alloc";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -64,7 +63,7 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad3_struct), (void **)store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad3_struct), (void **)store_ptr, error);
 
 	/* initialize everything to zero */
 	if (status == MB_SUCCESS)
@@ -85,7 +84,6 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_survey_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
 	if (verbose >= 2) {
@@ -101,6 +99,8 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -116,7 +116,6 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_extraparameters_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
 	if (verbose >= 2) {
@@ -132,6 +131,8 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory for data structure if needed */
 	if (store->extraparameters == NULL) {
@@ -155,7 +156,6 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_wc_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_watercolumn_struct *wc;
 
@@ -172,6 +172,8 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory for data structure if needed */
 	if (store->wc == NULL)
@@ -235,7 +237,6 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_attitude_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_attitude_struct *attitude;
 
@@ -252,6 +253,8 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory for data structure if needed */
 	if (store->attitude == NULL)
@@ -308,7 +311,6 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_netattitude_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_netattitude_struct *netattitude;
 
@@ -325,6 +327,8 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory for data structure if needed */
 	if (store->netattitude == NULL)
@@ -381,7 +385,6 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_heading_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_heading_struct *heading;
 
@@ -398,6 +401,8 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory for data structure if needed */
 	if (store->heading == NULL)
@@ -445,7 +450,6 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_ssv_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ssv_struct *ssv;
 
@@ -462,6 +466,8 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory for data structure if needed */
 	if (store->ssv == NULL)
@@ -506,7 +512,6 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_tilt_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_tilt_struct *tilt;
 
@@ -523,6 +528,8 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* allocate memory for data structure if needed */
 	if (store->tilt == NULL)
@@ -568,7 +575,6 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_deall";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_extraparameters_struct *extraparameters;
 
@@ -582,6 +588,8 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *)*store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* deallocate memory for extraparameters data structure */
 	if (store->extraparameters != NULL) {
@@ -631,7 +639,6 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_zero_ss";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -722,7 +729,7 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	if (verbose >= 2) {
@@ -739,7 +746,6 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
 	char *function_name = "mbsys_simrad3_dimensions";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -775,6 +781,8 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*nss = 0;
 	}
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -792,7 +800,6 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mbsys_simrad3_pingnumber";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -813,6 +820,8 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 	*pingnumber = ping->png_count;
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -827,7 +836,6 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mbsys_simrad3_sonartype";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
 	if (verbose >= 2) {
@@ -847,6 +855,8 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -861,7 +871,6 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
 	char *function_name = "mbsys_simrad3_sidescantype";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
 	if (verbose >= 2) {
@@ -881,6 +890,8 @@ int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LOGARITHMIC;
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -898,7 +909,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_preprocess";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store = NULL;
 	struct mbsys_simrad3_ping_struct *ping = NULL;
 	struct mb_platform_struct *platform = NULL;
@@ -984,6 +994,8 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 		for (int i = 0; i < pars->n_kluge; i++)
 			fprintf(stderr, "dbg2       kluge_id[%d]:                    %d\n", i, pars->kluge_id[i]);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* deal with a survey record */
 	if (store->kind == MB_DATA_DATA) {
@@ -1390,7 +1402,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_extract_platform";
-	int status = MB_SUCCESS;
 	struct mb_platform_struct *platform;
 	struct mbsys_simrad3_struct *store;
 	int sensor_multibeam;
@@ -1425,6 +1436,8 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	store = (struct mbsys_simrad3_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* if needed allocate a new platform structure */
 	if (*platform_ptr == NULL) {
@@ -2076,7 +2089,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_simrad3_extract";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double reflscale;
@@ -2313,6 +2325,9 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2327,7 +2342,6 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_simrad3_insert";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double reflscale;
@@ -2383,6 +2397,8 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
 	/* set data kind */
 	store->kind = kind;
+
+	int status = MB_SUCCESS;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -2523,7 +2539,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
 	char *function_name = "mbsys_simrad3_ttimes";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	int time_i[7];
@@ -2553,6 +2568,8 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -2667,7 +2684,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_simrad3_detects";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -2688,6 +2704,8 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -2749,7 +2767,6 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
 	char *function_name = "mbsys_simrad3_pulses";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -2770,6 +2787,8 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -2832,7 +2851,6 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error) {
 	char *function_name = "mbsys_simrad3_gains";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -2852,6 +2870,8 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -2910,7 +2930,6 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error) {
 	char *function_name = "mbsys_simrad3_extract_altitude";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double altitude_best;
@@ -2933,6 +2952,8 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -3005,7 +3026,6 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
                                double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
                                double *roll, double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_simrad3_extract_nnav";
-	int status = MB_SUCCESS;
 	int interp_error = MB_ERROR_NO_ERROR;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
@@ -3032,6 +3052,8 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from ping structure */
 	if (*kind == MB_DATA_DATA) {
@@ -3271,7 +3293,6 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_simrad3_extract_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -3291,6 +3312,8 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from ping structure */
 	if (*kind == MB_DATA_DATA) {
@@ -3442,7 +3465,6 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
 	char *function_name = "mbsys_simrad3_insert_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 
@@ -3561,6 +3583,8 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -3575,7 +3599,6 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
 	char *function_name = "mbsys_simrad3_extract_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
 	if (verbose >= 2) {
@@ -3594,6 +3617,8 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_VELOCITY_PROFILE) {
@@ -3641,7 +3666,6 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
 	char *function_name = "mbsys_simrad3_insert_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 
 	if (verbose >= 2) {
@@ -3674,6 +3698,8 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -3687,7 +3713,6 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_simrad3_copy";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_struct *copy;
 	struct mbsys_simrad3_attitude_struct *attitude_store;
@@ -3721,6 +3746,8 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	/* get data structure pointers */
 	store = (struct mbsys_simrad3_struct *)store_ptr;
 	copy = (struct mbsys_simrad3_struct *)copy_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* check if attitude data needs to be copied */
 	if (store->attitude != NULL) {
@@ -3839,7 +3866,6 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
 	char *function_name = "mbsys_simrad3_makess";
-	int status = MB_SUCCESS;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double ss[MBSYS_SIMRAD3_MAXPIXELS];
@@ -4087,6 +4113,8 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 				fprintf(stderr, "dbg2       pixel:%4d  ss:%8d  ltrack:%8d\n", i, ping->png_ss[i], ping->png_ssalongtrack[i]);
 		}
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);

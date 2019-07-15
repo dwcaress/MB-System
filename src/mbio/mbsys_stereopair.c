@@ -37,7 +37,6 @@
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_stereopair_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -51,7 +50,7 @@ int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_stereopair_struct), (void **)store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_stereopair_struct), (void **)store_ptr, error);
 
 	/* get data structure pointer */
 	store = (struct mbsys_stereopair_struct *)*store_ptr;
@@ -73,7 +72,6 @@ int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_stereopair_deall";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -86,6 +84,8 @@ int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 
 	/* get data structure pointer */
 	store = (struct mbsys_stereopair_struct *)*store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* deallocate any arrays or structures contained within the store data structure */
 	if (store->num_soundings_alloc > 0 && store->soundings != NULL)
@@ -109,7 +109,6 @@ int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                 int *error) {
 	char *function_name = "mbsys_stereopair_dimensions";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -143,6 +142,8 @@ int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 		*nss = 0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -160,7 +161,6 @@ int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mbsys_stereopair_pingnumber";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -179,6 +179,8 @@ int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 	/* extract data from structure */
 	*pingnumber = 0;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -193,7 +195,6 @@ int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mbsys_stereopair_sonartype";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -213,6 +214,8 @@ int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_CAMERA;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -227,7 +230,6 @@ int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
 	char *function_name = "mbsys_stereopair_sidescantype";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -247,6 +249,8 @@ int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LINEAR;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -264,7 +268,6 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
                              char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                              double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_stereopair_extract";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
 
@@ -466,6 +469,9 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -480,7 +486,6 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
                             double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                             double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_stereopair_insert";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
 
@@ -537,6 +542,8 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 
 	/* set data kind */
 	store->kind = kind;
+
+	int status = MB_SUCCESS;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -618,7 +625,6 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                             double *ssv, int *error) {
 	char *function_name = "mbsys_stereopair_ttimes";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_sounding_struct *sounding;
 
@@ -644,6 +650,8 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -710,7 +718,6 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_stereopair_detects";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -730,6 +737,8 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -787,7 +796,6 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                            double *receive_gain, int *error) {
 	char *function_name = "mbsys_stereopair_gains";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -806,6 +814,8 @@ int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -861,7 +871,6 @@ int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                       double *altitude, int *error) {
 	char *function_name = "mbsys_stereopair_extract_altitude";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -880,6 +889,8 @@ int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -928,7 +939,6 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
                                  double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                  double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_stereopair_extract_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -947,6 +957,8 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from survey record */
 	if (*kind == MB_DATA_DATA) {
@@ -1057,7 +1069,6 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
                                   double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
                                   double *roll, double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_stereopair_extract_nnav";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -1077,6 +1088,8 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from survey record */
 	if (*kind == MB_DATA_DATA) {
@@ -1191,7 +1204,6 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
                                 double navlat, double speed, double heading, double draft, double roll, double pitch,
                                 double heave, int *error) {
 	char *function_name = "mbsys_stereopair_insert_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 
 	if (verbose >= 2) {
@@ -1270,6 +1282,8 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 		store->roll = roll;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1283,7 +1297,6 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_stereopair_copy";
-	int status = MB_SUCCESS;
 	struct mbsys_stereopair_struct *store;
 	struct mbsys_stereopair_struct *copy;
 
@@ -1306,6 +1319,8 @@ int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 	/* copy the data - for many formats memory must be allocated and
 	    sub-structures copied separately */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);

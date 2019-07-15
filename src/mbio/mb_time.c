@@ -36,7 +36,6 @@ int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
  * 	1/1/70 00:00:00 calculated from (yy/mm/dd/hr/mi/sc). */
 int mb_get_time(int verbose, int time_i[7], double *time_d) {
 	char *function_name = "mb_get_time";
-	int status;
 	int yearday;
 	int leapday;
 
@@ -64,7 +63,7 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
 	          time_i[4] * MB_SECINMINUTE + time_i[5] + 0.000001 * time_i[6];
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -83,7 +82,6 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
 int mb_get_date(int verbose, double time_d, int time_i[7]) {
 
 	char *function_name = "mb_get_date";
-	int status;
 	int daytotal;
 	int yearday;
 	int leapday;
@@ -119,7 +117,7 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
 	time_i[2] = yearday - yday[time_i[1] - 1] - leapday;
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\nMBIO function <%s> completed\n", function_name);
@@ -145,7 +143,6 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
 int mb_get_date_string(int verbose, double time_d, char *string) {
 
 	char *function_name = "mb_get_date_string";
-	int status;
 	int time_i[7];
 
 	if (verbose >= 2) {
@@ -161,7 +158,7 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
 	        time_i[6]);
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\nMBIO function <%s> completed\n", function_name);
@@ -179,7 +176,6 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
  *	from (yy/mm/dd/hr/mi/sc). */
 int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
 	char *function_name = "mb_get_jtime";
-	int status;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -204,7 +200,7 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
 	time_j[4] = time_i[6];
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -228,7 +224,6 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
  */
 int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
 	char *function_name = "mb_get_itime";
-	int status;
 	int leapday;
 
 	if (verbose >= 2) {
@@ -261,7 +256,7 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
 	time_i[2] = time_j[1] - yday[time_i[1] - 1] - leapday;
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -293,7 +288,6 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
  */
 int mb_fix_y2k(int verbose, int year_short, int *year_long) {
 	char *function_name = "mb_fix_y2k";
-	int status;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -309,7 +303,7 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
 		*year_long = year_short + 2000;
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -339,7 +333,6 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
  */
 int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
 	char *function_name = "mb_unfix_y2k";
-	int status;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -352,7 +345,7 @@ int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
 	*year_short = year_long % 100;
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);

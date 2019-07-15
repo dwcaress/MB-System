@@ -37,7 +37,6 @@
 /*--------------------------------------------------------------------*/
 int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_oic_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -51,7 +50,7 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_oic_struct), (void **)store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_oic_struct), (void **)store_ptr, error);
 
 	/* get pointer to data structure */
 	store = (struct mbsys_oic_struct *)*store_ptr;
@@ -150,7 +149,6 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_oic_deall";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -163,6 +161,8 @@ int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 
 	/* get pointer to data structure */
 	store = (struct mbsys_oic_struct *)*store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* deallocate memory for data structures */
 	for (int i = 0; i < store->num_chan; i++)
@@ -194,7 +194,6 @@ int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mbsys_oic_dimensions";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -228,6 +227,8 @@ int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nss = 0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -248,7 +249,6 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_oic_extract";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -399,6 +399,9 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -413,7 +416,6 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_oic_insert";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -467,6 +469,8 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 
 	/* set data kind */
 	store->kind = kind;
+
+	int status = MB_SUCCESS;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -582,7 +586,6 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
                      double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                      double *ssv, int *error) {
 	char *function_name = "mbsys_oic_ttimes";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 	double alpha, beta;
 
@@ -608,6 +611,8 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -676,7 +681,6 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 /*--------------------------------------------------------------------*/
 int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_oic_detects";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -696,6 +700,8 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -750,7 +756,6 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                double *altitude, int *error) {
 	char *function_name = "mbsys_oic_extract_altitude";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -769,6 +774,8 @@ int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -807,7 +814,6 @@ int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
                               int *error) {
 	char *function_name = "mbsys_oic_insert_altitude";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -825,6 +831,8 @@ int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 
 	/* get data structure pointer */
 	store = (struct mbsys_oic_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* insert data into structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -861,7 +869,6 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                           double *heave, int *error) {
 	char *function_name = "mbsys_oic_extract_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -880,6 +887,8 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -987,7 +996,6 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                          double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
 	char *function_name = "mbsys_oic_insert_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 
 	if (verbose >= 2) {
@@ -1047,6 +1055,8 @@ int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 		store->fish_pitch = pitch;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1060,7 +1070,6 @@ int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 /*--------------------------------------------------------------------*/
 int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_oic_copy";
-	int status = MB_SUCCESS;
 	struct mbsys_oic_struct *store;
 	struct mbsys_oic_struct *copy;
 
@@ -1079,6 +1088,8 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_oic_struct *)store_ptr;
 	copy = (struct mbsys_oic_struct *)copy_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* copy the basic header data */
 	if (store != NULL && copy != NULL) {

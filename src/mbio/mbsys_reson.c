@@ -40,7 +40,6 @@
 /*--------------------------------------------------------------------*/
 int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_reson_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 
 	if (verbose >= 2) {
@@ -54,7 +53,7 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson_struct), store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson_struct), store_ptr, error);
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson_struct *)*store_ptr;
@@ -179,7 +178,6 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbsys_reson_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_reson_deall";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -190,7 +188,7 @@ int mbsys_reson_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	}
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -205,7 +203,6 @@ int mbsys_reson_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbsys_reson_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mbsys_reson_dimensions";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 
 	if (verbose >= 2) {
@@ -239,6 +236,8 @@ int mbsys_reson_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nss = 0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -259,7 +258,6 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_reson_extract";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 	double depthscale, dacrscale, daloscale, reflscale;
 
@@ -461,6 +459,9 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			fprintf(stderr, "dbg2       beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -475,7 +476,6 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_reson_insert";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 	double depthscale, dacrscale, daloscale, reflscale;
 
@@ -597,6 +597,8 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		strncpy(store->comment, comment, 199);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -612,7 +614,6 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                        double *ssv, int *error) {
 	char *function_name = "mbsys_reson_ttimes";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 	double ttscale, angscale;
 	double heave_use;
@@ -641,6 +642,8 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -727,7 +730,6 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_reson_detects";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 
 	if (verbose >= 2) {
@@ -747,6 +749,8 @@ int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -801,7 +805,6 @@ int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                  double *altitude, int *error) {
 	char *function_name = "mbsys_reson_extract_altitude";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 	double depthscale;
 	double dacrscale;
@@ -824,6 +827,8 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -892,7 +897,6 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                             double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_reson_extract_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 
 	if (verbose >= 2) {
@@ -911,6 +915,8 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -1073,7 +1079,6 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                            int *error) {
 	char *function_name = "mbsys_reson_insert_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 
 	if (verbose >= 2) {
@@ -1162,6 +1167,8 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		store->heave = heave * 200.0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1176,7 +1183,6 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 int mbsys_reson_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                             int *error) {
 	char *function_name = "mbsys_reson_extract_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 
 	if (verbose >= 2) {
@@ -1195,6 +1201,8 @@ int mbsys_reson_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1241,7 +1249,6 @@ int mbsys_reson_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
 /*--------------------------------------------------------------------*/
 int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
 	char *function_name = "mbsys_reson_insert_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 
 	if (verbose >= 2) {
@@ -1273,6 +1280,8 @@ int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1286,7 +1295,6 @@ int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 /*--------------------------------------------------------------------*/
 int mbsys_reson_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_reson_copy";
-	int status = MB_SUCCESS;
 	struct mbsys_reson_struct *store;
 	struct mbsys_reson_struct *copy;
 
@@ -1308,6 +1316,8 @@ int mbsys_reson_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 
 	/* copy the data */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
