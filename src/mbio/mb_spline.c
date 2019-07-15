@@ -39,7 +39,6 @@
 /*--------------------------------------------------------------------------*/
 int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double ypn, double *y2, int *error) {
 	static const char function_name[] = "mb_spline_init";
-	int status = MB_SUCCESS;
 	double p, qn, sig, un, *u;
 
 	if (verbose >= 2) {
@@ -53,6 +52,8 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 		fprintf(stderr, "dbg2       ypn:              %f\n", ypn);
 		fprintf(stderr, "dbg2       y2:               %p\n", y2);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n > 2 */
 	if (n < 3) {
@@ -106,7 +107,6 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 /*--------------------------------------------------------------------*/
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, double x, double *y, int *i, int *error) {
 	static const char function_name[] = "mb_spline_interp";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b, a;
 
@@ -120,6 +120,8 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -164,7 +166,6 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 /*--------------------------------------------------------------------*/
 int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
 	static const char function_name[] = "mb_linear_interp";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
 
@@ -177,6 +178,8 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -235,7 +238,6 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
 	static const char function_name[] = "mb_linear_interp_longitude";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
 	double yahi, yalo;
@@ -249,6 +251,8 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -315,7 +319,6 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
 	static const char function_name[] = "mb_linear_interp_latitude";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
 	double yahi, yalo;
@@ -329,6 +332,8 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -391,7 +396,6 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
 	static const char function_name[] = "mb_linear_interp_heading";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
 	double yahi, yalo;
@@ -405,6 +409,8 @@ int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double 
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {

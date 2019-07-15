@@ -59,7 +59,6 @@ void cvt_to_nix_path(char *path);
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	static const char function_name[] = "mb_format_register";
-	int status;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -105,6 +104,8 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 
 	/* set format value */
 	mb_io_ptr->format = *format;
+
+	int status = MB_SUCCESS;;
 
 	/* look for a corresponding format */
 	if (*format == MBF_SBSIOMRG) {
