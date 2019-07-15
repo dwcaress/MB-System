@@ -51,19 +51,17 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	*store_ptr = mb_io_ptr->store_data;
 
 	/* reset status */
-	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg2  About to read ping in function <%s>\n", function_name);
 		fprintf(stderr, "dbg2       ping_count:    %d\n", mb_io_ptr->ping_count);
-		fprintf(stderr, "dbg2       status:        %d\n", status);
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 	}
 
 	/* get next ping */
-	status = mb_read_ping(verbose, mbio_ptr, *store_ptr, kind, error);
+	int status = mb_read_ping(verbose, mbio_ptr, *store_ptr, kind, error);
 
 	/* if io arrays have been reallocated, update the
 	    pointers of arrays passed into this function,

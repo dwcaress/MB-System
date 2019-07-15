@@ -42,7 +42,6 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
                  double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
                  int *beams_amp, int *pixels_ss, int *error) {
 	static const char function_name[] = "mb_read_init";
-	int status;
 	int status_save;
 	int error_save;
 	int sapi_status;
@@ -88,7 +87,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	}
 
 	/* allocate memory for mbio descriptor */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
 	struct mb_io_struct *mb_io_ptr = NULL;
 	if (status == MB_SUCCESS) {
 		memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));
@@ -662,7 +661,6 @@ int mb_input_init(int verbose, char *file, int format,
                 int (*input_close)(int verbose, void *mbio_ptr, int *error),
                 int *error) {
 	static const char function_name[] = "mb_input_init";
-	int status;
 	int status_save;
 	int error_save;
 	char path[MB_PATH_MAXLINE];
@@ -707,7 +705,7 @@ int mb_input_init(int verbose, char *file, int format,
 	}
 
 	/* allocate memory for mbio descriptor */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
 	struct mb_io_struct *mb_io_ptr = NULL;
 	if (status == MB_SUCCESS) {
 		memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));

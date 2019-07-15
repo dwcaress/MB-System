@@ -40,7 +40,6 @@
         list used for interpolation/extrapolation. */
 int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting, double lat_northing, int *error) {
 	static const char function_name[] = "mb_navint_add";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -95,7 +94,7 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -118,7 +117,6 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading, double rawspeed, double *lon, double *lat,
                      double *speed, int *error) {
 	static const char function_name[] = "mb_navint_interp";
-	int status = MB_SUCCESS;
 	double mtodeglon = 0.0;
 	double mtodeglat = 0.0;
 	double dx, dy, dt, dd;
@@ -193,6 +191,8 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 
 	/* get speed in m/s */
 	speed_mps = *speed / 3.6;
+
+	int status = MB_SUCCESS;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nfix > 1 && (time_d >= mb_io_ptr->fix_time_d[0]) && (time_d <= mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1])) {
@@ -272,7 +272,6 @@ int mb_navint_interp(int verbose, void *mbio_ptr, double time_d, double heading,
 int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double heading, double rawspeed, double *easting,
                         double *northing, double *speed, int *error) {
 	static const char function_name[] = "mb_navintprj_interp";
-	int status = MB_SUCCESS;
 	double dx, dy, dt, dd;
 	double factor, headingx, headingy;
 	double speed_mps;
@@ -340,6 +339,8 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
 
 	/* get speed in m/s */
 	speed_mps = *speed / 3.6;
+
+	int status = MB_SUCCESS;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nfix > 1 && (time_d >= mb_io_ptr->fix_time_d[0]) && (time_d <= mb_io_ptr->fix_time_d[mb_io_ptr->nfix - 1])) {
@@ -416,7 +417,6 @@ int mb_navint_prjinterp(int verbose, void *mbio_ptr, double time_d, double headi
         list used for interpolation/extrapolation. */
 int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, double roll, double pitch, int *error) {
 	static const char function_name[] = "mb_attint_add";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -469,7 +469,7 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -488,7 +488,6 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, double *heave, double *roll, double *pitch,
                    int *error) {
 	static const char function_name[] = "mb_attint_nadd";
-	int status = MB_SUCCESS;
 	int shift;
 
 	if (verbose >= 2) {
@@ -543,7 +542,7 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -561,7 +560,6 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
         attitude fix from the internal list. */
 int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, double *roll, double *pitch, int *error) {
 	static const char function_name[] = "mb_attint_interp";
-	int status = MB_SUCCESS;
 	double factor;
 	int ifix;
 
@@ -575,6 +573,8 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nattitude > 1 && (mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude - 1] >= time_d) &&
@@ -659,7 +659,6 @@ int mb_attint_interp(int verbose, void *mbio_ptr, double time_d, double *heave, 
         list used for interpolation/extrapolation. */
 int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, int *error) {
 	static const char function_name[] = "mb_hedint_add";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -703,7 +702,7 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -721,7 +720,6 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
         list used for interpolation/extrapolation. */
 int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, double *heading, int *error) {
 	static const char function_name[] = "mb_hedint_nadd";
-	int status = MB_SUCCESS;
 	int shift;
 
 	if (verbose >= 2) {
@@ -769,7 +767,7 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -787,7 +785,6 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
         heading fix from the internal list. */
 int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading, int *error) {
 	static const char function_name[] = "mb_hedint_interp";
-	int status = MB_SUCCESS;
 	double factor;
 	int ifix;
 	double heading1, heading2;
@@ -802,6 +799,8 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nheading > 1 && (mb_io_ptr->heading_time_d[mb_io_ptr->nheading - 1] >= time_d) &&
@@ -880,7 +879,6 @@ int mb_hedint_interp(int verbose, void *mbio_ptr, double time_d, double *heading
         list used for interpolation/extrapolation. */
 int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth, int *error) {
 	static const char function_name[] = "mb_depint_add";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -925,7 +923,7 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -943,7 +941,6 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
         sonar depth fix from the internal list. */
 int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonardepth, int *error) {
 	static const char function_name[] = "mb_depint_interp";
-	int status = MB_SUCCESS;
 	double factor;
 	int ifix;
 
@@ -957,6 +954,8 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->nsonardepth > 1 && (mb_io_ptr->sonardepth_time_d[mb_io_ptr->nsonardepth - 1] >= time_d) &&
@@ -1028,7 +1027,6 @@ int mb_depint_interp(int verbose, void *mbio_ptr, double time_d, double *sonarde
         list used for interpolation/extrapolation. */
 int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, int *error) {
 	static const char function_name[] = "mb_altint_add";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -1072,7 +1070,7 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -1090,7 +1088,6 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
         altitude fix from the internal list. */
 int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitude, int *error) {
 	static const char function_name[] = "mb_altint_interp";
-	int status = MB_SUCCESS;
 	double factor;
 	int ifix;
 
@@ -1104,6 +1101,8 @@ int mb_altint_interp(int verbose, void *mbio_ptr, double time_d, double *altitud
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* interpolate if possible */
 	if (mb_io_ptr->naltitude > 1 && (mb_io_ptr->altitude_time_d[mb_io_ptr->naltitude - 1] >= time_d) &&
@@ -1175,7 +1174,6 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
                    int *merge_nav_alloc, double **merge_nav_time_d, double **merge_nav_lon, double **merge_nav_lat,
                    double **merge_nav_speed, int *error) {
 	static const char function_name[] = "mb_loadnavdata";
-	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result, *bufftmp;
 	int nrecord;
 	int nchar, nget;
@@ -1221,6 +1219,8 @@ int mb_loadnavdata(int verbose, char *merge_nav_file, int merge_nav_format, int 
 		nchar = 96;
 	else
 		nchar = MBP_FILENAMESIZE - 1;
+
+	int status = MB_SUCCESS;
 
 	/* count the records */
 	*error = MB_ERROR_NO_ERROR;
@@ -1588,7 +1588,6 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
                            int *merge_sensordepth_alloc, double **merge_sensordepth_time_d,
                            double **merge_sensordepth_sensordepth, int *error) {
 	static const char function_name[] = "mb_loadsensordepthdata";
-	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
 	int nchar, nget;
@@ -1619,6 +1618,8 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 
 	/* set max number of characters to be read at a time */
 	nchar = MBP_FILENAMESIZE - 1;
+
+	int status = MB_SUCCESS;
 
 	/* count the records */
 	*error = MB_ERROR_NO_ERROR;
@@ -1773,7 +1774,6 @@ int mb_loadsensordepthdata(int verbose, char *merge_sensordepth_file, int merge_
 int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitude_format, int *merge_altitude_num,
                         int *merge_altitude_alloc, double **merge_altitude_time_d, double **merge_altitude_altitude, int *error) {
 	static const char function_name[] = "mb_loadaltitudedata";
-	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
 	int nchar, nget;
@@ -1804,6 +1804,8 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 
 	/* set max number of characters to be read at a time */
 	nchar = MBP_FILENAMESIZE - 1;
+
+	int status = MB_SUCCESS;
 
 	/* count the records */
 	*error = MB_ERROR_NO_ERROR;
@@ -1946,7 +1948,6 @@ int mb_loadaltitudedata(int verbose, char *merge_altitude_file, int merge_altitu
 int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_format, int *merge_heading_num,
                        int *merge_heading_alloc, double **merge_heading_time_d, double **merge_heading_heading, int *error) {
 	static const char function_name[] = "mb_loadheadingdata";
-	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
 	int nchar, nget;
@@ -1977,6 +1978,8 @@ int mb_loadheadingdata(int verbose, char *merge_heading_file, int merge_heading_
 
 	/* set max number of characters to be read at a time */
 	nchar = MBP_FILENAMESIZE - 1;
+
+	int status = MB_SUCCESS;
 
 	/* count the records */
 	*error = MB_ERROR_NO_ERROR;
@@ -2131,7 +2134,6 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
                         int *merge_attitude_alloc, double **merge_attitude_time_d, double **merge_attitude_roll,
                         double **merge_attitude_pitch, double **merge_attitude_heave, int *error) {
 	static const char function_name[] = "mb_loadattitudedata";
-	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
 	int nchar, nget;
@@ -2168,6 +2170,8 @@ int mb_loadattitudedata(int verbose, char *merge_attitude_file, int merge_attitu
 
 	/* set max number of characters to be read at a time */
 	nchar = MBP_FILENAMESIZE - 1;
+
+	int status = MB_SUCCESS;
 
 	/* count the records */
 	*error = MB_ERROR_NO_ERROR;
@@ -2334,7 +2338,6 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
                           int *merge_soundspeed_alloc, double **merge_soundspeed_time_d, double **merge_soundspeed_soundspeed,
                           int *error) {
 	static const char function_name[] = "mb_loadsoundspeeddata";
-	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
 	int nchar, nget;
@@ -2365,6 +2368,8 @@ int mb_loadsoundspeeddata(int verbose, char *merge_soundspeed_file, int merge_so
 
 	/* set max number of characters to be read at a time */
 	nchar = MBP_FILENAMESIZE - 1;
+
+	int status = MB_SUCCESS;
 
 	/* count the records */
 	*error = MB_ERROR_NO_ERROR;
@@ -2508,7 +2513,6 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
                          int *merge_timeshift_alloc, double **merge_timeshift_time_d, double **merge_timeshift_timeshift,
                          int *error) {
 	static const char function_name[] = "mb_loadtimeshiftdata";
-	int status = MB_SUCCESS;
 	char buffer[MBP_FILENAMESIZE], *result;
 	int nrecord;
 	int nchar, nget;
@@ -2539,6 +2543,8 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 
 	/* set max number of characters to be read at a time */
 	nchar = MBP_FILENAMESIZE - 1;
+
+	int status = MB_SUCCESS;
 
 	/* count the records */
 	*error = MB_ERROR_NO_ERROR;
@@ -2681,7 +2687,6 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int time_latency_mode, double time_latency_static,
                           int time_latency_num, double *time_latency_time_d, double *time_latency_value, int *error) {
 	static const char function_name[] = "mb_apply_time_latency";
-	int status = MB_SUCCESS;
 	int interp_status;
 	double time_latency;
 	int interp_error = MB_ERROR_NO_ERROR;
@@ -2718,6 +2723,8 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2734,7 +2741,6 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 
 int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double *data_value, double filter_length, int *error) {
 	static const char function_name[] = "mb_apply_time_filter";
-	int status = MB_SUCCESS;
 	double *data_value_filtered = NULL;
 	double dtime, dtol, filterweight, weight;
 	int nhalffilter;
@@ -2751,7 +2757,7 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 
 	/* apply a Gaussian time domain filter to the time series provided */
 	const size_t size = data_num * sizeof(double);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&data_value_filtered, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&data_value_filtered, error);
 	if (status == MB_SUCCESS) {
 		dtime = (data_time_d[data_num - 1] - data_time_d[0]) / data_num;
 		nhalffilter = (int)(4.0 * filter_length / dtime);

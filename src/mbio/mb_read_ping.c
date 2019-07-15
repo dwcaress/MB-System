@@ -35,7 +35,6 @@
 /*--------------------------------------------------------------------*/
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error) {
 	static const char function_name[] = "mb_read_ping";
-	int status;
 	int localkind;
 	int beams_bath;
 	int beams_amp;
@@ -50,6 +49,8 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* call the appropriate mbr_ read and translate routine */
 	if (mb_io_ptr->mb_io_read_ping != NULL) {

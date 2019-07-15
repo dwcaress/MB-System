@@ -38,7 +38,6 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
             double *sslat, char *comment, int *error) {
 
 	static const char function_name[] = "mb_read";
-	int status = MB_SUCCESS;
 	char *store_ptr;
 	int done;
 	int reset_last;
@@ -86,6 +85,8 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 		mb_io_ptr->ss_alongtrack[i] = 0.0;
 		mb_io_ptr->ss_num[i] = 0;
 	}
+
+	int status = MB_SUCCESS;
 
 	/* read the data */
 	done = MB_NO;

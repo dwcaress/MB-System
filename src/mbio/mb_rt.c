@@ -93,7 +93,6 @@ static struct velocity_model *model = NULL;
 /*--------------------------------------------------------------------------*/
 int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, void **modelptr, int *error) {
 	static const char function_name[] = "mb_rt_init";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -107,7 +106,7 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 	}
 
 	/* allocate memory for model structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct velocity_model), (void **)modelptr, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct velocity_model), (void **)modelptr, error);
 
 	/* set variables and allocate memory for velocity model */
 	model = (struct velocity_model *)*modelptr;
@@ -184,7 +183,6 @@ int mb_rt_init(int verbose, int number_node, double *depth, double *velocity, vo
 /*--------------------------------------------------------------------------*/
 int mb_rt_deall(int verbose, void **modelptr, int *error) {
 	static const char function_name[] = "mb_rt";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -195,7 +193,7 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 
 	/* deallocate memory for velocity model */
 	model = (struct velocity_model *)*modelptr;
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->depth), error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->depth), error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->velocity), error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->layer_mode), error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(model->layer_gradient), error);
@@ -215,7 +213,6 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 /*--------------------------------------------------------------------------*/
 int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, double *depth, int *error) {
 	static const char function_name[] = "mb_rt_get_depth";
-	int status = MB_SUCCESS;
 	double alpha;
 	double velf;
 
@@ -234,6 +231,8 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 	*depth =
 	    model->layer_depth_top[model->layer] + (velf - model->layer_vel_top[model->layer]) / model->layer_gradient[model->layer];
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -248,7 +247,6 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad1(int verbose, int *error) {
 	static const char function_name[] = "mb_rt_quad1";
-	int status = MB_SUCCESS;
 	double vi;
 	double ip;
 	double ipvi;
@@ -270,6 +268,8 @@ int mb_rt_quad1(int verbose, int *error) {
 	ip = 1.0 / model->pp;
 	ipvi = ip / vi;
 	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
+
+	int status = MB_SUCCESS;
 
 	/* Check if ray turns in layer */
 	if (model->zc + model->radius < model->layer_depth_bottom[model->layer]) {
@@ -351,7 +351,6 @@ int mb_rt_quad1(int verbose, int *error) {
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad2(int verbose, int *error) {
 	static const char function_name[] = "mb_rt_quad2";
-	int status = MB_SUCCESS;
 	double vi;
 	double ip;
 	double ipvi;
@@ -395,6 +394,8 @@ int mb_rt_quad2(int verbose, int *error) {
 		model->tt_left = 0.0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -408,7 +409,6 @@ int mb_rt_quad2(int verbose, int *error) {
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad3(int verbose, int *error) {
 	static const char function_name[] = "mb_rt_quad3";
-	int status = MB_SUCCESS;
 	double vi;
 	double ip;
 	double ipvi;
@@ -451,6 +451,8 @@ int mb_rt_quad3(int verbose, int *error) {
 		model->tt_left = 0.0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -464,7 +466,6 @@ int mb_rt_quad3(int verbose, int *error) {
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad4(int verbose, int *error) {
 	static const char function_name[] = "mb_rt_quad4";
-	int status = MB_SUCCESS;
 	double vi;
 	double ip;
 	double ipvi;
@@ -486,6 +487,8 @@ int mb_rt_quad4(int verbose, int *error) {
 	ip = 1.0 / model->pp;
 	ipvi = ip / vi;
 	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
+
+	int status = MB_SUCCESS;
 
 	/* Check if ray turns in layer */
 	if (model->zc - model->radius > model->layer_depth_top[model->layer]) {
@@ -567,7 +570,6 @@ int mb_rt_quad4(int verbose, int *error) {
 /*--------------------------------------------------------------------------*/
 int mb_rt_plot_circular(int verbose, int *error) {
 	static const char function_name[] = "mb_rt_plot_circular";
-	int status = MB_SUCCESS;
 	double ai;
 	double af;
 	double dang;
@@ -603,6 +605,8 @@ int mb_rt_plot_circular(int verbose, int *error) {
 		model->number_plot++;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -616,13 +620,14 @@ int mb_rt_plot_circular(int verbose, int *error) {
 /*--------------------------------------------------------------------------*/
 int mb_rt_circular(int verbose, int *error) {
 	static const char function_name[] = "mb_rt_circular";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* decide which case to use */
 	if (model->turned == MB_NO && model->layer_gradient[model->layer] > 0.0)
@@ -651,7 +656,6 @@ int mb_rt_circular(int verbose, int *error) {
 /*--------------------------------------------------------------------------*/
 int mb_rt_line(int verbose, int *error) {
 	static const char function_name[] = "mb_rt_line";
-	int status = MB_SUCCESS;
 	double theta;
 	double xvel;
 	double zvel;
@@ -732,6 +736,8 @@ int mb_rt_line(int verbose, int *error) {
 		model->number_plot++;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -745,7 +751,6 @@ int mb_rt_line(int verbose, int *error) {
 /*--------------------------------------------------------------------------*/
 int mb_rt_vertical(int verbose, int *error) {
 	static const char function_name[] = "mb_rt_vertical";
-	int status = MB_SUCCESS;
 	double vi;
 	double vf;
 	double vfvi;
@@ -801,6 +806,8 @@ int mb_rt_vertical(int verbose, int *error) {
 		model->number_plot++;
 	}
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -816,7 +823,6 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
           double surface_vel, double null_angle, int nplot_max, int *nplot, double *xplot, double *zplot, double *x, double *z,
           double *travel_time, int *ray_stat, int *error) {
 	static const char function_name[] = "mb_rt";
-	int status = MB_SUCCESS;
 	double diff_angle;
 	double vel_ratio;
 
@@ -860,6 +866,9 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		fprintf(stderr, "Ray source depth not within model!!\n");
 		fprintf(stderr, "Raytracing terminated with error!!\n");
 	}
+
+	int status = MB_SUCCESS;
+
 	if (model->layer == -1) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_PARAMETER;

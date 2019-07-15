@@ -37,7 +37,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
            int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	static const char function_name[] = "mb_get";
-	int status;
 	char *store_ptr;
 	int done;
 	int reset_last;
@@ -85,6 +84,8 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 		mb_io_ptr->ss_alongtrack[i] = 0.0;
 		mb_io_ptr->ss_num[i] = 0;
 	}
+
+	int status = MB_SUCCESS;
 
 	/* read the data */
 	done = MB_NO;
