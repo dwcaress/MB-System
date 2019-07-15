@@ -44,7 +44,6 @@
 /*--------------------------------------------------------------------*/
 int mbsys_sb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_sb_alloc";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -57,7 +56,7 @@ int mbsys_sb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -73,7 +72,6 @@ int mbsys_sb_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbsys_sb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_sb_deall";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -84,7 +82,7 @@ int mbsys_sb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -99,7 +97,6 @@ int mbsys_sb_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbsys_sb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mbsys_sb_dimensions";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 
 	if (verbose >= 2) {
@@ -133,6 +130,8 @@ int mbsys_sb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*nss = 0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -153,7 +152,6 @@ int mbsys_sb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
                      double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                      double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_sb_extract";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 	int time_j[5];
 	int id;
@@ -291,6 +289,9 @@ int mbsys_sb_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		for (int i = 0; i < *nbath; i++)
 			fprintf(stderr, "dbg2       beam:%2d  flag:%3d  bath:%f  bathdist:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 	}
+
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -305,7 +306,6 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
                     double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                     double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_sb_insert";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 	int time_j[5];
 	int id;
@@ -426,6 +426,8 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int 
 		fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", store->comment);
 	}
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -441,7 +443,6 @@ int mbsys_sb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
                     double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                     double *ssv, int *error) {
 	char *function_name = "mbsys_sb_ttimes";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 
 	if (verbose >= 2) {
@@ -466,6 +467,8 @@ int mbsys_sb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -531,7 +534,6 @@ int mbsys_sb_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int
 /*--------------------------------------------------------------------*/
 int mbsys_sb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_sb_detects";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 
 	if (verbose >= 2) {
@@ -551,6 +553,8 @@ int mbsys_sb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -605,7 +609,6 @@ int mbsys_sb_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 int mbsys_sb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth, double *altitude,
                               int *error) {
 	char *function_name = "mbsys_sb_extract_altitude";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 	double bath_best;
 	double xtrack_min;
@@ -626,6 +629,8 @@ int mbsys_sb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int 
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -692,7 +697,6 @@ int mbsys_sb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                          double *heave, int *error) {
 	char *function_name = "mbsys_sb_extract_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 	int time_j[5];
 
@@ -712,6 +716,8 @@ int mbsys_sb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -818,7 +824,6 @@ int mbsys_sb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 int mbsys_sb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                         double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
 	char *function_name = "mbsys_sb_insert_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 	int time_j[5];
 
@@ -878,6 +883,8 @@ int mbsys_sb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i
 		/* get roll pitch and heave */
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -891,7 +898,6 @@ int mbsys_sb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i
 /*--------------------------------------------------------------------*/
 int mbsys_sb_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_sb_copy";
-	int status = MB_SUCCESS;
 	struct mbsys_sb_struct *store;
 	struct mbsys_sb_struct *copy;
 
@@ -913,6 +919,8 @@ int mbsys_sb_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, 
 
 	/* copy the data */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);

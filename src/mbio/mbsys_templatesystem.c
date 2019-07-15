@@ -37,7 +37,6 @@
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_templatesystem_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -66,6 +65,8 @@ int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 
 	/* initialize everything else */
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -80,7 +81,6 @@ int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_templatesystem_deall";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -97,7 +97,7 @@ int mbsys_templatesystem_deall(int verbose, void *mbio_ptr, void **store_ptr, in
 	/* deallocate any arrays or structures contained within the store data structure */
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
@@ -114,7 +114,6 @@ int mbsys_templatesystem_deall(int verbose, void *mbio_ptr, void **store_ptr, in
 int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                     int *error) {
 	char *function_name = "mbsys_templatesystem_dimensions";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -148,6 +147,8 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 		*nss = 0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -165,7 +166,6 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mbsys_templatesystem_pingnumber";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -184,6 +184,8 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *p
 	/* extract data from structure */
 	*pingnumber = store->ping_number;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -198,7 +200,6 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *p
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mbsys_templatesystem_sonartype";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -218,6 +219,8 @@ int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	/* get sonar type */
 	*sonartype = MB_SONARTYPE_MULTIBEAM;
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -232,7 +235,6 @@ int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
 	char *function_name = "mbsys_templatesystem_sidescantype";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -252,6 +254,8 @@ int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_p
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LINEAR;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -269,7 +273,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
                                  char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                                  double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_templatesystem_extract";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -503,6 +506,9 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -517,7 +523,6 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
                                 char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                                 double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_templatesystem_insert";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -633,6 +638,8 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 		strncpy(store->comment, comment, MB_COMMENT_MAXLINE);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -648,7 +655,6 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
                                 double *angles, double *angles_forward, double *angles_null, double *heave,
                                 double *alongtrack_offset, double *draft, double *ssv, int *error) {
 	char *function_name = "mbsys_templatesystem_ttimes";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 	double heave_use, roll, pitch;
 	double alpha, beta, theta, phi;
@@ -675,6 +681,8 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -740,7 +748,6 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_templatesystem_detects";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -760,6 +767,8 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -816,7 +825,6 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain,
                                double *pulse_length, double *receive_gain, int *error) {
 	char *function_name = "mbsys_templatesystem_gains";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -835,6 +843,8 @@ int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -890,7 +900,6 @@ int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                           double *altitudev, int *error) {
 	char *function_name = "mbsys_templatesystem_extract_altitude";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 	double heave, roll, pitch;
 	double xtrackmin;
@@ -912,6 +921,8 @@ int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *sto
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -960,7 +971,6 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
                                      double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                      double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_templatesystem_extract_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -979,6 +989,8 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from survey record */
 	if (*kind == MB_DATA_DATA) {
@@ -1094,7 +1106,6 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
                                       double *time_d, double *navlon, double *navlat, double *speed, double *heading,
                                       double *draft, double *roll, double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_templatesystem_extract_nnav";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 	int inav;
 
@@ -1115,6 +1126,8 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from survey record */
 	if (*kind == MB_DATA_DATA) {
@@ -1235,7 +1248,6 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
                                     double navlat, double speed, double heading, double draft, double roll, double pitch,
                                     double heave, int *error) {
 	char *function_name = "mbsys_templatesystem_insert_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -1324,6 +1336,8 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 		store->roll = roll;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1338,7 +1352,6 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth,
                                      double *velocity, int *error) {
 	char *function_name = "mbsys_templatesystem_extract_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 
 	if (verbose >= 2) {
@@ -1357,6 +1370,8 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1404,7 +1419,6 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                                     int *error) {
 	char *function_name = "mbsys_templatesystem_insert_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 	s7kr_svp *svp;
 
@@ -1424,6 +1438,8 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 
 	/* get data structure pointer */
 	store = (struct mbsys_templatesystem_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1450,7 +1466,6 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_templatesystem_copy";
-	int status = MB_SUCCESS;
 	struct mbsys_templatesystem_struct *store;
 	struct mbsys_templatesystem_struct *copy;
 
@@ -1473,6 +1488,8 @@ int mbsys_templatesystem_copy(int verbose, void *mbio_ptr, void *store_ptr, void
 	/* copy the data - for many formats memory must be allocated and
 	    sub-structures copied separately */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);

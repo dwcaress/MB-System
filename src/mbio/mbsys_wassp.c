@@ -37,7 +37,6 @@
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	const char *function_name = "mbsys_wassp_alloc";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -61,7 +60,7 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_wassp_struct), (void **)store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_wassp_struct), (void **)store_ptr, error);
 
 	/* initialize allocated structure to zero */
 	if (status == MB_SUCCESS) {
@@ -95,7 +94,6 @@ int mbsys_wassp_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	char *function_name = "mbsys_wassp_deall";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -128,6 +126,8 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
 	sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
 	mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+
+	int status = MB_SUCCESS;
 
 	/* deallocate any arrays or structures contained within the store data structure */
 	if (rawsonar->rawdata_alloc > 0) {
@@ -166,7 +166,6 @@ int mbsys_wassp_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
 	char *function_name = "mbsys_wassp_dimensions";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -220,6 +219,8 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nss = 0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -237,7 +238,6 @@ int mbsys_wassp_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
 	char *function_name = "mbsys_wassp_pingnumber";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -276,6 +276,8 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 	/* extract data from structure */
 	*pingnumber = corbathy->ping_number;
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -290,7 +292,6 @@ int mbsys_wassp_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
 	char *function_name = "mbsys_wassp_sonartype";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -330,6 +331,8 @@ int mbsys_wassp_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *son
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -347,7 +350,6 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_wassp_extract";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -609,6 +611,9 @@ int mbsys_wassp_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
+
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -623,7 +628,6 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
 	char *function_name = "mbsys_wassp_insert";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -762,6 +766,8 @@ int mbsys_wassp_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -777,7 +783,6 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                        double *ssv, int *error) {
 	char *function_name = "mbsys_wassp_ttimes";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -823,6 +828,8 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -893,7 +900,6 @@ int mbsys_wassp_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
 	char *function_name = "mbsys_wassp_detects";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -933,6 +939,8 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -994,7 +1002,6 @@ int mbsys_wassp_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                       double *receive_gain, int *error) {
 	char *function_name = "mbsys_wassp_gains";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1033,6 +1040,8 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -1088,7 +1097,6 @@ int mbsys_wassp_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                  double *altitude, int *error) {
 	char *function_name = "mbsys_wassp_extract_altitude";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1127,6 +1135,8 @@ int mbsys_wassp_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -1175,7 +1185,6 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                             double *pitch, double *heave, int *error) {
 	char *function_name = "mbsys_wassp_extract_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1214,6 +1223,8 @@ int mbsys_wassp_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from survey record */
 	if (*kind == MB_DATA_DATA) {
@@ -1327,7 +1338,6 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                            int *error) {
 	char *function_name = "mbsys_wassp_insert_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_genbathy_struct *genbathy;
 	struct mbsys_wassp_corbathy_struct *corbathy;
@@ -1427,6 +1437,8 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		nvupdate->roll = roll;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1440,7 +1452,6 @@ int mbsys_wassp_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 /*--------------------------------------------------------------------*/
 int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
 	char *function_name = "mbsys_wassp_copy";
-	int status = MB_SUCCESS;
 	struct mbsys_wassp_struct *store;
 	struct mbsys_wassp_struct *copy;
 	size_t rawdata_alloc_save;
@@ -1491,6 +1502,9 @@ int mbsys_wassp_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	copy->rawsonar = store->rawsonar;
 	copy->rawsonar.rawdata_alloc = rawdata_alloc_save;
 	copy->rawsonar.rawdata = rawdata_save;
+
+	int status = MB_SUCCESS;
+
 	if (status == MB_SUCCESS && copy->rawsonar.rawdata_alloc < store->rawsonar.rawdata_alloc) {
 		status =
 		    mb_reallocd(verbose, __FILE__, __LINE__, store->rawsonar.rawdata_alloc, (void **)&(copy->rawsonar.rawdata), error);
