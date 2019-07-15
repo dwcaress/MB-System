@@ -4209,13 +4209,12 @@ int main(int argc, char **argv) {
 int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int use_bath, int use_amp, int use_ss, int dump_mode,
                int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
                int *beam_exclude_percent, int *pixel_start, int *pixel_end, int *n_list, char *list, int *error) {
-	char *function_name = "set_output";
 	int status = MB_SUCCESS;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBLIST function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBLIST function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
@@ -4350,7 +4349,7 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBCOPY function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBCOPY function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2       beam_start:    %d\n", *beam_start);
@@ -4370,13 +4369,12 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
 /*--------------------------------------------------------------------*/
 int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths, double *depths,
                    double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack, int *error) {
-	char *function_name = "set_bathyslope";
 	int status = MB_SUCCESS;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       nbath:           %d\n", nbath);
@@ -4412,7 +4410,7 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndepths:         %d\n", *ndepths);
 		fprintf(stderr, "dbg2       depths:\n");
@@ -4433,7 +4431,6 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 /*--------------------------------------------------------------------*/
 int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
                    double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
-	char *function_name = "get_bathyslope";
 	int status = MB_SUCCESS;
 	int found_depth, found_slope;
 	int idepth, islope;
@@ -4441,7 +4438,7 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       ndepths:         %d\n", ndepths);
@@ -4502,7 +4499,7 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       depth:           %f\n", *depth);
 		fprintf(stderr, "dbg2       slope:           %f\n", *slope);
@@ -4517,13 +4514,12 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, FILE *output, double value, int width, int precision, int ascii, int *invert, int *flipsign,
                      int *error) {
-	char *function_name = "printsimplevalue";
 	int status = MB_SUCCESS;
 	char format[24];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       value:           %f\n", value);
@@ -4564,7 +4560,7 @@ int printsimplevalue(int verbose, FILE *output, double value, int width, int pre
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -4577,12 +4573,11 @@ int printsimplevalue(int verbose, FILE *output, double value, int width, int pre
 }
 /*--------------------------------------------------------------------*/
 int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error) {
-	char *function_name = "printNaN";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
@@ -4606,7 +4601,7 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -4625,14 +4620,13 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
                int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop, double *bsn, double *bso, int *tx,
                int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples, int *start_sample, int *range,
                double *depression, double *bs, double *ss_pixels, int *error) {
-	char *function_name = "mb_get_raw";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
@@ -4684,7 +4678,7 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
 		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
@@ -4728,7 +4722,6 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
                        double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
                        double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
                        int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error) {
-	char *function_name = "mb_get_raw_simrad2";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store_ptr;
@@ -4737,7 +4730,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
@@ -4780,7 +4773,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
 		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
@@ -4823,7 +4816,6 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
                        double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
                        double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
                        int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error) {
-	char *function_name = "mb_get_raw_simrad3";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store_ptr;
@@ -4832,7 +4824,7 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
@@ -4875,7 +4867,7 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
 		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
