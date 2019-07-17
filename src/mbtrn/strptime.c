@@ -1,4 +1,12 @@
-// https://stackoverflow.com/questions/667250/strptime-in-windows 
+/*
+https://stackoverflow.com/questions/667250/strptime-in-windows 
+
+License:  Creative Commons Attribution-Share Alike 
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Author: kshepherd https://stackoverflow.com/users/1474230/kshepherd 
+*/
+
 #ifdef _MSC_VER
 const char * strp_weekdays[] = 
     { "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"};
