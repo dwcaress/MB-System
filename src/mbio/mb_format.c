@@ -2879,10 +2879,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 }
 /*--------------------------------------------------------------------*/
 int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_processed, int *error) {
-	/* local variables */
 	static const char function_name[] = "mb_datalist_open";
-	int status = MB_SUCCESS;
-	struct mb_datalist_struct *datalist;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -2892,6 +2889,9 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
 		fprintf(stderr, "dbg2       path:          %s\n", path);
 		fprintf(stderr, "dbg2       look_processed:%d\n", look_processed);
 	}
+
+	int status = MB_SUCCESS;
+	struct mb_datalist_struct *datalist = NULL;
 
 	/* allocate memory for datalist structure */
 	if ((status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_datalist_struct), datalist_ptr, error)) ==
@@ -2923,7 +2923,7 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       datalist_ptr:         %p\n", (void *)*datalist_ptr);
-		if (*datalist_ptr != NULL) {
+		if (datalist != NULL) {
 			fprintf(stderr, "dbg2       datalist->open:       %d\n", datalist->open);
 			fprintf(stderr, "dbg2       datalist->fp:         %p\n", (void *)datalist->fp);
 			fprintf(stderr, "dbg2       datalist->recursion:  %d\n", datalist->recursion);
