@@ -1789,12 +1789,11 @@ int main(int argc, char **argv) {
 /*--------------------------------------------------------------------*/
 int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
 	/* local variables */
-	char *function_name = "mbclean_save_edit";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
 		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
@@ -1825,7 +1824,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

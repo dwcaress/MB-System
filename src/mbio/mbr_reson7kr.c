@@ -47,11 +47,10 @@ int mbr_info_reson7kr(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-  static const char function_name[] = "mbr_info_reson7kr";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
   }
@@ -85,7 +84,7 @@ int mbr_info_reson7kr(int verbose, int *system, int *beams_bath_max, int *beams_
   *beamwidth_ltrack = 1.0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       system:             %d\n", *system);
     fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -116,7 +115,6 @@ int mbr_info_reson7kr(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error) {
-  static const char function_name[] = "mbr_alm_reson7kr";
   int status = MB_SUCCESS;
   int *current_ping;
   int *last_ping;
@@ -137,7 +135,7 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error) {
   double *swath_width;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -196,7 +194,7 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error) {
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -207,7 +205,6 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error) {
-  static const char function_name[] = "mbr_dem_reson7kr";
   int status = MB_SUCCESS;
   char **bufferptr;
   char *buffer;
@@ -216,7 +213,7 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error) {
   char *buffersave;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -239,7 +236,7 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error) {
   *bufferalloc = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -251,7 +248,6 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, int *deviceid, unsigned short *enumerator,
                             int *size) {
-  static const char function_name[] = "mbr_reson7kr_chk_label";
   int status = MB_SUCCESS;
   unsigned short version;
   unsigned short offset;
@@ -259,7 +255,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
   unsigned short reserved;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:      %p\n", (void *)mbio_ptr);
@@ -468,7 +464,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Output arguments:\n");
     fprintf(stderr, "dbg2       recordid:      %d\n", *recordid);
     fprintf(stderr, "dbg2       deviceid:      %d\n", *deviceid);
@@ -482,13 +478,12 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, int *ping_number) {
-  static const char function_name[] = "mbr_reson7kr_chk_pingnumber";
   int status = MB_SUCCESS;
   unsigned short offset;
   int index;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
     fprintf(stderr, "dbg2       recordid:      %d\n", recordid);
@@ -590,7 +585,7 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, int *pi
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Output arguments:\n");
     fprintf(stderr, "dbg2       ping_number:   %d\n", *ping_number);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -601,12 +596,11 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, int *pi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *header, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_header";
   int status = MB_SUCCESS;
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -716,7 +710,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
   /* mbsys_reson7k_print_header(verbose, header, error); */
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       index:      %d\n", *index);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -728,7 +722,6 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_reference";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -737,7 +730,7 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -799,7 +792,7 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
     mbsys_reson7k_print_reference(verbose, reference, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -810,7 +803,6 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_sensoruncal";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -819,7 +811,7 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -885,7 +877,7 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
     mbsys_reson7k_print_sensoruncal(verbose, sensoruncal, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -896,7 +888,6 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_sensorcal";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -905,7 +896,7 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -971,7 +962,7 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
     mbsys_reson7k_print_sensorcal(verbose, sensorcal, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -982,7 +973,6 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_position";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -991,7 +981,7 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1063,7 +1053,7 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
     mbsys_reson7k_print_position(verbose, position, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1074,7 +1064,6 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_customattitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -1085,7 +1074,7 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1215,7 +1204,7 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
     mbsys_reson7k_print_customattitude(verbose, customattitude, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1226,7 +1215,6 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_tide";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -1235,7 +1223,7 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1311,7 +1299,7 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
     mbsys_reson7k_print_tide(verbose, tide, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1322,7 +1310,6 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_altitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -1331,7 +1318,7 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1387,7 +1374,7 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
     mbsys_reson7k_print_altitude(verbose, altitude, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1398,7 +1385,6 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_motion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -1409,7 +1395,7 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1523,7 +1509,7 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
     mbsys_reson7k_print_motion(verbose, motion, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1534,7 +1520,6 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_depth";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -1543,7 +1528,7 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1605,7 +1590,7 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
     mbsys_reson7k_print_depth(verbose, depth, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1616,7 +1601,6 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_svp";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -1627,7 +1611,7 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error) 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1715,7 +1699,7 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error) 
     mbsys_reson7k_print_svp(verbose, svp, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1726,7 +1710,6 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_ctd";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -1737,7 +1720,7 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error) 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1849,7 +1832,7 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error) 
     mbsys_reson7k_print_ctd(verbose, ctd, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1860,7 +1843,6 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_geodesy";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -1870,7 +1852,7 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1986,7 +1968,7 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
     mbsys_reson7k_print_geodesy(verbose, geodesy, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1997,7 +1979,6 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_rollpitchheave";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -2006,7 +1987,7 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2066,7 +2047,7 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
     mbsys_reson7k_print_rollpitchheave(verbose, rollpitchheave, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2077,7 +2058,6 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_heading";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -2086,7 +2066,7 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2142,7 +2122,7 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
     mbsys_reson7k_print_heading(verbose, heading, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2153,7 +2133,6 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_surveyline";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -2164,7 +2143,7 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2250,7 +2229,7 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
     mbsys_reson7k_print_surveyline(verbose, surveyline, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2261,7 +2240,6 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_navigation";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -2270,7 +2248,7 @@ int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2342,7 +2320,7 @@ int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *
     mbsys_reson7k_print_navigation(verbose, navigation, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2353,7 +2331,6 @@ int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_attitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -2364,7 +2341,7 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2455,7 +2432,7 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
     mbsys_reson7k_print_attitude(verbose, attitude, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2466,7 +2443,6 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_rec1022";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -2476,7 +2452,7 @@ int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *err
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2534,7 +2510,7 @@ int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *err
     mbsys_reson7k_print_rec1022(verbose, rec1022, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2546,14 +2522,13 @@ int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int *index, s7k_fsdwchannel *fsdwchannel,
                                 int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_fsdwchannel";
   int status = MB_SUCCESS;
   int data_size;
   short *shortptr;
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       data_format:%d\n", data_format);
@@ -2654,7 +2629,7 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
   /*mbsys_reson7k_print_fsdwchannel(verbose, data_format, fsdwchannel, error);*/
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       index:      %d\n", *index);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -2666,12 +2641,11 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdwssheader *fsdwssheader, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_fsdwssheader";
   int status = MB_SUCCESS;
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:         %p\n", (void *)buffer);
@@ -2751,7 +2725,7 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdw
   /*mbsys_reson7k_print_fsdwssheader(verbose, fsdwssheader, error);*/
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       index:      %d\n", *index);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -2763,12 +2737,11 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdw
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fsdwsegyheader *fsdwsegyheader, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_fsdwsegyheader";
   int status = MB_SUCCESS;
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:         %p\n", (void *)buffer);
@@ -2920,7 +2893,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   /*mbsys_reson7k_print_fsdwsegyheader(verbose, fsdwsegyheader, error);*/
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       index:      %d\n", *index);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -2932,7 +2905,6 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_fsdwsslo";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -2947,7 +2919,7 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -3026,7 +2998,7 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 
 /* figure out offset between 7k timestamp and Edgetech timestamp */
 #ifdef MBR_RESON7KR_DEBUG2
-    fprintf(stderr, "%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n", function_name,
+    fprintf(stderr, "%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n", __func__,
             edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
 #endif
 
@@ -3225,7 +3197,7 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
   }*/
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3236,7 +3208,6 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_fsdwsshi";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -3250,7 +3221,7 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -3328,7 +3299,7 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 
 /* figure out offset between 7k timestamp and Edgetech timestamp */
 #ifdef MBR_RESON7KR_DEBUG2
-    fprintf(stderr, "%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n", function_name,
+    fprintf(stderr, "%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n", __func__,
             edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
 #endif
 
@@ -3390,7 +3361,7 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
     mbsys_reson7k_print_fsdwss(verbose, fsdwsshi, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3401,7 +3372,6 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_fsdwsb";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -3417,7 +3387,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 #endif
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -3488,7 +3458,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 
 /* figure out offset between 7k timestamp and Edgetech timestamp */
 #ifdef MBR_RESON7KR_DEBUG2
-    fprintf(stderr, "%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n", function_name,
+    fprintf(stderr, "%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n", __func__,
             edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
 #endif
 
@@ -3554,7 +3524,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
     mbsys_reson7k_print_fsdwsb(verbose, fsdwsb, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3565,7 +3535,6 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_bluefin";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -3579,7 +3548,7 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
   int time_i[7];
 #endif
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -3975,7 +3944,7 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
     mbsys_reson7k_print_bluefin(verbose, bluefin, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3986,7 +3955,6 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_processedsidescan";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -3996,7 +3964,7 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4080,7 +4048,7 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
     mbsys_reson7k_print_processedsidescan(verbose, processedsidescan, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4091,7 +4059,6 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_volatilesonarsettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -4100,7 +4067,7 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4232,7 +4199,7 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
     mbsys_reson7k_print_volatilesettings(verbose, volatilesettings, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4243,7 +4210,6 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_configuration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -4255,7 +4221,7 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4346,7 +4312,7 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
     mbsys_reson7k_print_configuration(verbose, configuration, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4357,7 +4323,6 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_matchfilter";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -4366,7 +4331,7 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4430,7 +4395,7 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
     mbsys_reson7k_print_matchfilter(verbose, matchfilter, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4441,7 +4406,6 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v2firmwarehardwareconfiguration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -4452,7 +4416,7 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
   int j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4528,7 +4492,7 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
     mbsys_reson7k_print_v2firmwarehardwareconfiguration(verbose, v2firmwarehardwareconfiguration, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4539,7 +4503,6 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_beamgeometry";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -4549,7 +4512,7 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4625,7 +4588,7 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
     mbsys_reson7k_print_beamgeometry(verbose, beamgeometry, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4636,7 +4599,6 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_calibration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -4646,7 +4608,7 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4714,7 +4676,7 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
     mbsys_reson7k_print_calibration(verbose, calibration, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4725,7 +4687,6 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_bathymetry";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -4736,7 +4697,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4930,7 +4891,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
     mbsys_reson7k_print_bathymetry(verbose, bathymetry, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4941,7 +4902,6 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_backscatter";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -4954,7 +4914,7 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -5119,7 +5079,7 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
     mbsys_reson7k_print_backscatter(verbose, backscatter, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5130,7 +5090,6 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_beam";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -5154,7 +5113,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -5334,7 +5293,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
     mbsys_reson7k_print_beam(verbose, beam, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5345,7 +5304,6 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_verticaldepth";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -5354,7 +5312,7 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -5426,7 +5384,7 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
     mbsys_reson7k_print_verticaldepth(verbose, verticaldepth, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5437,7 +5395,6 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_tvg";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -5448,7 +5405,7 @@ int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error) 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -5528,7 +5485,7 @@ int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error) 
     mbsys_reson7k_print_tvg(verbose, tvg, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5539,7 +5496,6 @@ int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_image";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -5553,7 +5509,7 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -5657,7 +5613,7 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
     mbsys_reson7k_print_image(verbose, image, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5668,7 +5624,6 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v2pingmotion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -5678,7 +5633,7 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -5805,7 +5760,7 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
     mbsys_reson7k_print_v2pingmotion(verbose, v2pingmotion, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5816,7 +5771,6 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v2detectionsetup";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -5826,7 +5780,7 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -5943,7 +5897,7 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
     mbsys_reson7k_print_v2detectionsetup(verbose, v2detectionsetup, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5954,7 +5908,6 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v2beamformed";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -5965,7 +5918,7 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6065,7 +6018,7 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
     mbsys_reson7k_print_v2beamformed(verbose, v2beamformed, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6076,7 +6029,6 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v2bite";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -6089,7 +6041,7 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
   int i, j, k;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6236,7 +6188,7 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
     mbsys_reson7k_print_v2bite(verbose, v2bite, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6247,7 +6199,6 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v27kcenterversion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -6257,7 +6208,7 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6315,7 +6266,7 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
     mbsys_reson7k_print_v27kcenterversion(verbose, v27kcenterversion, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6326,7 +6277,6 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v28kwetendversion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -6336,7 +6286,7 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6394,7 +6344,7 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
     mbsys_reson7k_print_v28kwetendversion(verbose, v28kwetendversion, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6405,7 +6355,6 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v2detection";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -6415,7 +6364,7 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6509,7 +6458,7 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
     mbsys_reson7k_print_v2detection(verbose, v2detection, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6520,7 +6469,6 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v2rawdetection";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -6532,7 +6480,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6640,7 +6588,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
     mbsys_reson7k_print_v2rawdetection(verbose, v2rawdetection, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6651,7 +6599,6 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_v2snippet";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -6662,7 +6609,7 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6769,7 +6716,7 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
     mbsys_reson7k_print_v2snippet(verbose, v2snippet, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6780,7 +6727,6 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_calibratedsnippet";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -6791,7 +6737,7 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6900,7 +6846,7 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
     mbsys_reson7k_print_calibratedsnippet(verbose, calibratedsnippet, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6911,7 +6857,6 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_installation";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -6921,7 +6866,7 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7049,7 +6994,7 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
     mbsys_reson7k_print_installation(verbose, installation, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7060,7 +7005,6 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_fileheader";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7071,7 +7015,7 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7167,7 +7111,7 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
     mbsys_reson7k_print_fileheader(verbose, fileheader, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7178,7 +7122,6 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_systemeventmessage";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7189,7 +7132,7 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7270,7 +7213,7 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
     mbsys_reson7k_print_systemeventmessage(verbose, systemeventmessage, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7281,7 +7224,6 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_remotecontrolsettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7291,7 +7233,7 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7452,7 +7394,7 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
     mbsys_reson7k_print_remotecontrolsettings(verbose, remotecontrolsettings, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7463,7 +7405,6 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_reserved";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7473,7 +7414,7 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7531,7 +7472,7 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
     mbsys_reson7k_print_reserved(verbose, reserved, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7542,7 +7483,6 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_roll";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7551,7 +7491,7 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7607,7 +7547,7 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
     mbsys_reson7k_print_roll(verbose, roll, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7618,7 +7558,6 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_pitch";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7627,7 +7566,7 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7683,7 +7622,7 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
     mbsys_reson7k_print_pitch(verbose, pitch, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7694,7 +7633,6 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_soundvelocity";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7703,7 +7641,7 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7759,7 +7697,7 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
     mbsys_reson7k_print_soundvelocity(verbose, soundvelocity, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7770,7 +7708,6 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_absorptionloss";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7779,7 +7716,7 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7835,7 +7772,7 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
     mbsys_reson7k_print_absorptionloss(verbose, absorptionloss, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7846,7 +7783,6 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_spreadingloss";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7855,7 +7791,7 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7911,7 +7847,7 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
     mbsys_reson7k_print_spreadingloss(verbose, spreadingloss, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7922,7 +7858,6 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_rd_data";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -7969,7 +7904,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -9137,7 +9072,7 @@ store->read_beam,store->read_verticaldepth,store->read_tvg,store->read_image);
 #endif
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -9148,7 +9083,6 @@ store->read_beam,store->read_verticaldepth,store->read_tvg,store->read_image);
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_rt_reson7kr";
   int status = MB_SUCCESS;
   int interp_status;
   int interp_error = MB_ERROR_NO_ERROR;
@@ -9183,7 +9117,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -9632,7 +9566,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   mb_io_ptr->new_kind = store->kind;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -9643,12 +9577,11 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index, s7k_header *header, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_header";
   int status = MB_SUCCESS;
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -9723,7 +9656,7 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index, s7k_header *he
   *index += 4;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       index:      %d\n", *index);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -9735,7 +9668,6 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index, s7k_header *he
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_reference";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -9746,7 +9678,7 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -9821,7 +9753,7 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -9834,7 +9766,6 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_sensoruncal";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -9845,7 +9776,7 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -9925,7 +9856,7 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -9938,7 +9869,6 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_sensorcal";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -9949,7 +9879,7 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10029,7 +9959,7 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10042,7 +9972,6 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_position";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -10053,7 +9982,7 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10139,7 +10068,7 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10152,7 +10081,6 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_customattitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -10163,7 +10091,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10296,7 +10224,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10309,7 +10237,6 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_tide";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -10320,7 +10247,7 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10410,7 +10337,7 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10423,7 +10350,6 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_altitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -10434,7 +10360,7 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10504,7 +10430,7 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10517,7 +10443,6 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_motion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -10528,7 +10453,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10637,7 +10562,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10650,7 +10575,6 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_depth";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -10661,7 +10585,7 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10737,7 +10661,7 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10750,7 +10674,6 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_svp";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -10761,7 +10684,7 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10849,7 +10772,7 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10862,7 +10785,6 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_ctd";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -10873,7 +10795,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -10979,7 +10901,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -10992,7 +10914,6 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_geodesy";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -11003,7 +10924,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -11133,7 +11054,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -11144,7 +11065,6 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_rollpitchheave";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -11155,7 +11075,7 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -11229,7 +11149,7 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -11240,7 +11160,6 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_heading";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -11251,7 +11170,7 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -11321,7 +11240,7 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -11332,7 +11251,6 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_surveyline";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -11343,7 +11261,7 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -11428,7 +11346,7 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -11439,7 +11357,6 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_navigation";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -11450,7 +11367,7 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -11536,7 +11453,7 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -11547,7 +11464,6 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_attitude";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -11558,7 +11474,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -11641,7 +11557,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -11652,7 +11568,6 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_rec1022";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -11663,7 +11578,7 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -11735,7 +11650,7 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -11747,13 +11662,12 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int *index, s7k_fsdwchannel *fsdwchannel,
                                 int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_fsdwchannel";
   int status = MB_SUCCESS;
   short *shortptr;
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       data_format:%d\n", data_format);
@@ -11843,7 +11757,7 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       index:      %d\n", *index);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -11855,12 +11769,11 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdwssheader *fsdwssheader, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_fsdwssheader";
   int status = MB_SUCCESS;
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:         %p\n", (void *)buffer);
@@ -11940,7 +11853,7 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdw
   *index += 4;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       index:      %d\n", *index);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -11952,12 +11865,11 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdw
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fsdwsegyheader *fsdwsegyheader, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_fsdwsegyheader";
   int status = MB_SUCCESS;
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:         %p\n", (void *)buffer);
@@ -12109,7 +12021,7 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       index:      %d\n", *index);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -12121,7 +12033,6 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_fsdwsslo";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -12136,7 +12047,7 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -12248,7 +12159,7 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -12261,7 +12172,6 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_fsdwsshi";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -12274,7 +12184,7 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -12384,7 +12294,7 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -12397,7 +12307,6 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_fsdwsb";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -12410,7 +12319,7 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -12519,7 +12428,7 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -12532,7 +12441,6 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_bluefin";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -12543,7 +12451,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -12766,7 +12674,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -12779,7 +12687,6 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_processedsidescan";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -12790,7 +12697,7 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -12891,7 +12798,7 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -12905,7 +12812,6 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_volatilesonarsettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -12916,7 +12822,7 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -13062,7 +12968,7 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -13075,7 +12981,6 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_configuration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -13087,7 +12992,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -13184,7 +13089,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -13197,7 +13102,6 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_matchfilter";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -13208,7 +13112,7 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -13286,7 +13190,7 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -13300,7 +13204,6 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                                     int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v2firmwarehardwareconfiguration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -13311,7 +13214,7 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -13390,7 +13293,7 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -13403,7 +13306,6 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_beamgeometry";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -13414,7 +13316,7 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -13505,7 +13407,7 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -13518,7 +13420,6 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_calibration";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -13529,7 +13430,7 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -13612,7 +13513,7 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -13625,7 +13526,6 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_bathymetry";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -13636,7 +13536,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -13791,7 +13691,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -13804,7 +13704,6 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_backscatter";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -13818,7 +13717,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -14001,7 +13900,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -14014,7 +13913,6 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_beam";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -14038,7 +13936,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -14217,7 +14115,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -14230,7 +14128,6 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_verticaldepth";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -14241,7 +14138,7 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -14327,7 +14224,7 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -14340,7 +14237,6 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_tvg";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -14351,7 +14247,7 @@ int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -14436,7 +14332,7 @@ int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -14449,7 +14345,6 @@ int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_image";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -14464,7 +14359,7 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -14583,7 +14478,7 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -14596,7 +14491,6 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v2pingmotion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -14607,7 +14501,7 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -14719,7 +14613,7 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -14730,7 +14624,6 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v2detectionsetup";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -14741,7 +14634,7 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -14868,7 +14761,7 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -14879,7 +14772,6 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v2beamformed";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -14891,7 +14783,7 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -14985,7 +14877,7 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -14996,7 +14888,6 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v2bite";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -15010,7 +14901,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
   int i, j, k;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -15163,7 +15054,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -15174,7 +15065,6 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v27kcenterversion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -15185,7 +15075,7 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -15257,7 +15147,7 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -15268,7 +15158,6 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v28kwetendversion";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -15279,7 +15168,7 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -15351,7 +15240,7 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -15362,7 +15251,6 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v2detection";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -15373,7 +15261,7 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -15485,7 +15373,7 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -15498,7 +15386,6 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v2rawdetection";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -15509,7 +15396,7 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -15623,7 +15510,7 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -15636,7 +15523,6 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_v2snippet";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -15648,7 +15534,7 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -15764,7 +15650,7 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -15777,7 +15663,6 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_calibratedsnippet";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -15789,7 +15674,7 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
   int i, j;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -15905,7 +15790,7 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -15917,7 +15802,6 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
   return (status);
 } /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_installation";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -15928,7 +15812,7 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -16070,7 +15954,7 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -16083,7 +15967,6 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_fileheader";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -16095,7 +15978,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -16236,7 +16119,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -16249,7 +16132,6 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_systemeventmessage";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -16260,7 +16142,7 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -16343,7 +16225,7 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -16357,7 +16239,6 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_remotecontrolsettings";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -16368,7 +16249,7 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -16540,7 +16421,7 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -16553,7 +16434,6 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_reserved";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -16564,7 +16444,7 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -16636,7 +16516,7 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -16649,7 +16529,6 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_roll";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -16660,7 +16539,7 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -16730,7 +16609,7 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -16743,7 +16622,6 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_pitch";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -16754,7 +16632,7 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -16824,7 +16702,7 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -16837,7 +16715,6 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_soundvelocity";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -16848,7 +16725,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -16918,7 +16795,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -16931,7 +16808,6 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_absorptionloss";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -16942,7 +16818,7 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -17012,7 +16888,7 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -17025,7 +16901,6 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_spreadingloss";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   s7k_header *header;
@@ -17036,7 +16911,7 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -17106,7 +16981,7 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
     fprintf(stderr, "dbg2       size:       %d\n", *size);
@@ -17119,7 +16994,6 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_reson7kr_wr_data";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
   FILE *mbfp;
@@ -17131,7 +17005,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   size_t write_len;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -17733,7 +17607,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -17744,12 +17618,11 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_wt_reson7kr";
   int status = MB_SUCCESS;
   struct mbsys_reson7k_struct *store;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -17766,7 +17639,7 @@ int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   status = mbr_reson7kr_wr_data(verbose, mbio_ptr, store_ptr, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -17778,11 +17651,10 @@ int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error) {
-  static const char function_name[] = "mbr_register_reson7kr";
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
   }
@@ -17833,7 +17705,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_ancilliarysensor = &mbsys_reson7k_ancilliarysensor;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
     fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

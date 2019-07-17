@@ -32,10 +32,8 @@
 
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message) {
-	static const char function_name[] = "mb_error";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 		fprintf(stderr, "dbg2       error:   %d\n", error);
@@ -61,7 +59,7 @@ int mb_error(int verbose, int error, char **message) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       message: %s\n", *message);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -72,10 +70,8 @@ int mb_error(int verbose, int error, char **message) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
-	static const char function_name[] = "mb_notice_log_datatype";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -96,7 +92,7 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -105,10 +101,8 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr, int data_id) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
-	static const char function_name[] = "mb_notice_log_error";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -129,7 +123,7 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -138,10 +132,8 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
-	static const char function_name[] = "mb_notice_log_problem";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -162,7 +154,7 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -171,10 +163,8 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
-	static const char function_name[] = "mb_notice_get_list";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:       %p\n", (void *)mbio_ptr);
@@ -192,7 +182,7 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		for (int i = 0; i < MB_NOTICE_MAX; i++)
 			fprintf(stderr, "dbg2       notice_list[%2.2d]: %d\n", i, notice_list[i]);
@@ -204,10 +194,8 @@ int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list) {
 }
 /*--------------------------------------------------------------------*/
 int mb_notice_message(int verbose, int notice, char **message) {
-	static const char function_name[] = "mb_notice_message";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       notice:     %d\n", notice);
@@ -226,7 +214,7 @@ int mb_notice_message(int verbose, int notice, char **message) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       message: %s\n", *message);
 		fprintf(stderr, "dbg2  Return status:\n");

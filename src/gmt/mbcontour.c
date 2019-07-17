@@ -1279,7 +1279,6 @@ int GMT_mbcontour(void *V_API, int mode, void *args) {
 
 /*--------------------------------------------------------------------------*/
 int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int *error) {
-	char *function_name = "mbcontour_ping_copy";
 	int status = MB_SUCCESS;
 
 	struct ping *ping1;
@@ -1288,7 +1287,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       one:        %d\n", one);
@@ -1338,7 +1337,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBCONTOUR function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

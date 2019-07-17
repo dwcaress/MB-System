@@ -67,7 +67,6 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
                             double col_int, double tick_int, double label_int, int decimation, double smoothing,
                             double zoffsetwidth, struct mbna_project *project, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_new_project";
 	int status = MB_SUCCESS;
 	char *slashptr, *nameptr;
 	char *result;
@@ -75,7 +74,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       projectpath:        %s\n", projectpath);
@@ -212,7 +211,7 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -224,7 +223,6 @@ int mbnavadjust_new_project(int verbose, char *projectpath, double section_lengt
 /*--------------------------------------------------------------------*/
 int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project *project, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_read_project";
 	int status = MB_SUCCESS;
 	char *slashptr, *nameptr;
 	struct stat statbuf;
@@ -250,7 +248,7 @@ int mbnavadjust_read_project(int verbose, char *projectpath, struct mbna_project
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       projectname:        %s\n", projectpath);
@@ -1218,7 +1216,7 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1230,14 +1228,13 @@ fprintf(stderr,"Project version %d previous to 3.08: Adding sensordepth values t
 /*--------------------------------------------------------------------*/
 int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_close_project";
 	int status = MB_SUCCESS;
 	struct mbna_file *file;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       project:            %p\n", project);
 	}
@@ -1289,7 +1286,7 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1301,7 +1298,6 @@ int mbnavadjust_close_project(int verbose, struct mbna_project *project, int *er
 /*--------------------------------------------------------------------*/
 int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_write_project";
 	int status = MB_SUCCESS;
 	FILE *hfp;
 	struct mbna_file *file, *file_1, *file_2;
@@ -1336,7 +1332,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       project:            %p\n", project);
 	}
@@ -2079,7 +2075,7 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2091,7 +2087,6 @@ int mbnavadjust_write_project(int verbose, struct mbna_project *project, int *er
 /*--------------------------------------------------------------------*/
 int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int crossing_id, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_crossing_overlap";
 	int status = MB_SUCCESS;
 	struct mbna_file *file;
 	struct mbna_crossing *crossing;
@@ -2113,7 +2108,7 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       project:              %p\n", project);
@@ -2191,7 +2186,7 @@ int mbnavadjust_crossing_overlap(int verbose, struct mbna_project *project, int 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       crossing->overlap: %d\n", crossing->overlap);
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
@@ -2207,7 +2202,6 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
                                        double offset_y, double *lonmin, double *lonmax, double *latmin, double *latmax,
                                        int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_crossing_overlapbounds";
 	int status = MB_SUCCESS;
 	struct mbna_file *file;
 	struct mbna_crossing *crossing;
@@ -2225,7 +2219,7 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       project:              %p\n", project);
@@ -2301,7 +2295,7 @@ int mbnavadjust_crossing_overlapbounds(int verbose, struct mbna_project *project
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       lonmin:      %.10f\n", *lonmin);
 		fprintf(stderr, "dbg2       lonmax:      %.10f\n", *lonmax);
@@ -2320,7 +2314,6 @@ int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, i
                                     double offset_x, double offset_y, int *isnav1_focus, int *isnav2_focus,
                                     double *lon_focus, double *lat_focus, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_crossing_focuspoint";
 	int status = MB_SUCCESS;
 	struct mbna_file *file;
 	struct mbna_crossing *crossing;
@@ -2334,7 +2327,7 @@ int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, i
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       project:              %p\n", project);
@@ -2374,7 +2367,7 @@ int mbnavadjust_crossing_focuspoint(int verbose, struct mbna_project *project, i
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       lon_focus:   %.10f\n", *lon_focus);
 		fprintf(stderr, "dbg2       lat_focus:   %.10f\n", *lat_focus);
@@ -2391,12 +2384,11 @@ int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
                              void *plot, void *newpen, void *setline,
                              void *justify_string, void *plot_string, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_set_plot_functions";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       project:          %p\n", project);
@@ -2416,7 +2408,7 @@ int mbnavadjust_set_plot_functions(int verbose, struct mbna_project *project,
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2431,7 +2423,6 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
                              int file_id, int section_id,
                              void **swathraw_ptr, void **swath_ptr, int num_pings, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_section_load";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *imb_io_ptr;
 	struct mbna_swathraw *swathraw;
@@ -2492,7 +2483,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       project:          %p\n", project);
@@ -2717,7 +2708,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2732,7 +2723,6 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
 int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *project, int *error) {
 
 	/* local variables */
-	char *function_name = "mbnavadjust_section_load";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *imb_io_ptr;
 	struct mbna_file *file;
@@ -2788,7 +2778,7 @@ int mbnavadjust_fix_section_sensordepth(int verbose, struct mbna_project *projec
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       project:          %p\n", project);
@@ -2886,7 +2876,7 @@ time_d, section->snav_time_d[isnav], (section->snav_time_d[isnav]-time_d));
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2900,7 +2890,6 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
                                   int file_id, void *swathraw_ptr, void *swath_ptr,
                                   double zoffset, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_section_translate";
 	int status = MB_SUCCESS;
 	struct mbna_swathraw *swathraw;
 	struct mbna_pingraw *pingraw;
@@ -2913,7 +2902,7 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       project:          %p\n", project);
@@ -2990,7 +2979,7 @@ int mbnavadjust_section_translate(int verbose, struct mbna_project *project,
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3004,12 +2993,11 @@ int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
                                 int fileid, int sectionid, struct swath *swath,
                                 struct mbna_contour_vector *contour, int *error) {
 	/* local variables */
-	char *function_name = "mbnavadjust_section_contour";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       project:          %p\n", project);
@@ -3039,7 +3027,7 @@ int mbnavadjust_section_contour(int verbose, struct mbna_project *project,
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBnavadjust function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

@@ -190,7 +190,6 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
                                void **store_ptr, /* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
                                int *error        /* out: see mb_status.h:/MB_ERROR/ */
                                ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_alloc";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -199,7 +198,7 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -290,7 +289,7 @@ int mbsys_3datdepthlidar_alloc(int verbose,      /* in: verbosity level set on c
 	store->sdp_sensordepth = 0.0;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", *store_ptr);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -306,7 +305,6 @@ int mbsys_3datdepthlidar_deall(int verbose,      /* in: verbosity level set on c
                                void **store_ptr, /* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
                                int *error        /* out: see mb_status.h:/error values/ */
                                ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -315,7 +313,7 @@ int mbsys_3datdepthlidar_deall(int verbose,      /* in: verbosity level set on c
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -334,7 +332,7 @@ int mbsys_3datdepthlidar_deall(int verbose,      /* in: verbosity level set on c
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -352,7 +350,6 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
                                     int *nss,        /* out: number of sidescan samples 0..MBSYS_SWPLS_MAX_BEAMS */
                                     int *error       /* out: see mb_status.h:/error values/ */
                                     ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -361,7 +358,7 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -395,7 +392,7 @@ int mbsys_3datdepthlidar_dimensions(int verbose, void *mbio_ptr, /* in: verbosit
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
@@ -414,7 +411,6 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
                                     unsigned int *pingnumber, /* out: swathplus ping number */
                                     int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                     ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_pingnumber";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -422,7 +418,7 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
 	assert(mbio_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -438,7 +434,7 @@ int mbsys_3datdepthlidar_pingnumber(int verbose,     /* in: verbosity level set 
 	*pingnumber = store->current_scan;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pingnumber: %u\n", *pingnumber);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -453,7 +449,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
                                     void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                                     void *store_ptr, /* in: see mbsys_3datdepthlidar.h:/^struct mbsys_3datdepthlidar_struct/ */
                                     void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	static const char function_name[] = "mbsys_3datdepthlidar_preprocess";
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	struct mb_platform_struct *platform;
@@ -474,7 +469,7 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	int jattitude = 0;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
@@ -678,7 +673,7 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	status = mbsys_3datdepthlidar_calculatebathymetry(verbose, mbio_ptr, store_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -712,7 +707,6 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
                                  char *comment,           /* out: comment string (not supported by SWATHplus SXP) */
                                  int *error               /* out: see mb_status.h:/MB_ERROR/ */
                                  ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
@@ -722,7 +716,7 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -790,7 +784,7 @@ int mbsys_3datdepthlidar_extract(int verbose,     /* in: verbosity level set on 
 		strncpy(comment, store->comment, MB_COMMENT_MAXLINE);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -825,7 +819,6 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
                                 char *comment,           /* in: comment string (not supported by SWATHplus SXP) */
                                 int *error               /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
@@ -841,7 +834,7 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 	assert(0 <= nss);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -916,7 +909,7 @@ int mbsys_3datdepthlidar_insert(int verbose,     /* in: verbosity level set on c
 	if (verbose >= 4)
 		mbsys_3datdepthlidar_print_store(verbose, store, error);
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -941,7 +934,6 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
                                 double *ssv,               /* out: sound velocity at head (m/s) */
                                 int *error                 /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -956,7 +948,7 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
 	assert(alongtrack_offset != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1015,7 +1007,7 @@ int mbsys_3datdepthlidar_ttimes(int verbose,            /* in: verbosity level s
 
 	/* print output debu statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -1035,7 +1027,6 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
                                                    see mb_status.h:/Bottom detect flags/ */
                                  int *error /* out: see mb_status.h:/MB_ERROR/ */
                                  ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1044,7 +1035,7 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1093,7 +1084,7 @@ int mbsys_3datdepthlidar_detects(int verbose,     /* in: verbosity level set on 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1119,7 +1110,6 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
                                 int *pulses,     /* out: array[nbeams] pulse type; see mb_status.h:/Source pulse/ */
                                 int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                 ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_pulses";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1128,7 +1118,7 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1180,7 +1170,7 @@ int mbsys_3datdepthlidar_pulses(int verbose,     /* in: verbosity level set on c
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1207,7 +1197,6 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
                                double *receive_gain,  /* out: receive gain (dB) */
                                int *error             /* out: see mb_status.h:/MB_ERROR/ */
                                ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_gains";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1216,7 +1205,7 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1261,7 +1250,7 @@ int mbsys_3datdepthlidar_gains(int verbose,           /* in: verbosity level set
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1288,7 +1277,6 @@ int mbsys_3datdepthlidar_extract_altitude(
     double *altitude,         /* out: transducer altitude above seafloor (m) */
     int *error                /* out: see mb_status.h:/MB_ERROR/ */
     ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
@@ -1299,7 +1287,7 @@ int mbsys_3datdepthlidar_extract_altitude(
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1348,7 +1336,7 @@ int mbsys_3datdepthlidar_extract_altitude(
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       transducer_depth:  %f\n", *transducer_depth);
@@ -1379,7 +1367,6 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
                                       double *heave,   /* out: array[n] heave (m) */
                                       int *error       /* out: see mb_status.h:/MB_ERROR/ */
                                       ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_extract_nnav";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	int inav;
@@ -1390,7 +1377,7 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
 	assert(nmax > 0);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1448,7 +1435,7 @@ int mbsys_3datdepthlidar_extract_nnav(int verbose,     /* in: verbosity level se
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       n:          %d\n", *n);
@@ -1488,7 +1475,6 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
                                      double *heave,   /* out: heave (degrees) */
                                      int *error       /* out: see mb_status.h:MB_ERROR */
                                      ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1497,7 +1483,7 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1539,7 +1525,7 @@ int mbsys_3datdepthlidar_extract_nav(int verbose, void *mbio_ptr, /* in: verbosi
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1584,7 +1570,6 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
                                     double heave,                /* in: heave (m) */
                                     int *error                   /* out: see mb_status.h:MB_ERROR */
                                     ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
@@ -1596,7 +1581,7 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
 	assert(time_i != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1664,7 +1649,7 @@ int mbsys_3datdepthlidar_insert_nav(int verbose, void *mbio_ptr, /* in: verbosit
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1683,7 +1668,6 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
                                      double *velocity, /* out: array[nsvp] velocity (m) */
                                      int *error        /* out: see: mb_status.h:MB_ERROR */
                                      ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_extract_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1692,7 +1676,7 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -1723,7 +1707,7 @@ int mbsys_3datdepthlidar_extract_svp(int verbose,      /* in: verbosity level se
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
@@ -1745,7 +1729,6 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
                                     double *velocity, /* in: array[nsvp] sound velocity records (m/s) */
                                     int *error        /* out: see mb_status.h:MB_ERROR */
                                     ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_insert_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 
@@ -1755,7 +1738,7 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 	assert(nsvp > 0);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1784,7 +1767,7 @@ int mbsys_3datdepthlidar_insert_svp(int verbose,      /* in: verbosity level set
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1800,7 +1783,6 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
                               void *copy_ptr,  /* out: see mbsys_3datdepthlidar.h:mbsys_3datdepthlidar_struct */
                               int *error       /* out: see mb_status.h:MB_ERROR */
                               ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_struct *copy;
@@ -1813,7 +1795,7 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
 	assert(store_ptr != copy_ptr);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -1851,7 +1833,7 @@ int mbsys_3datdepthlidar_copy(int verbose,     /* in: verbosity level set on com
 	memcpy((void *)copy->pulses, (void *)store->pulses, npulses * sizeof(struct mbsys_3datdepthlidar_pulse_struct));
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1865,7 +1847,6 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
                                      void *store_ptr, /* in: see mbsys_3datdepthlidar.h:mbsys_3datdepthlidar_struct */
                                      int *error       /* out: see mb_status.h:MB_ERROR */
                                      ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_print_store";
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	int status;
@@ -1875,7 +1856,7 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 	int npulses;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2         store:    %p\n", store_ptr);
@@ -1896,7 +1877,7 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 		first = debug_str;
 	else {
 		first = nodebug_str;
-		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+		fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
 	}
 	fprintf(stderr, "%s struct mbsys_3datdepthlidar contents:\n", first);
 	fprintf(stderr, "%s     kind:                          %d\n", first, store->kind);
@@ -1973,7 +1954,7 @@ int mbsys_3datdepthlidar_print_store(int verbose,     /* in: verbosity level set
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1988,7 +1969,6 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
                                              void *store_ptr, /* in: see mbsys_3datdepthlidar.h:mbsys_3datdepthlidar_struct */
                                              int *error       /* out: see mb_status.h:MB_ERROR */
                                              ) {
-	static const char function_name[] = "mbsys_3datdepthlidar_calculatebathymetry";
 	struct mbsys_3datdepthlidar_struct *store;
 	struct mbsys_3datdepthlidar_pulse_struct *pulse;
 	int status;
@@ -1998,7 +1978,7 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 	double xx;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2         store:    %p\n", store_ptr);
@@ -2070,7 +2050,7 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

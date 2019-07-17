@@ -38,11 +38,10 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	static const char function_name[] = "mbsys_gsf_alloc";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -56,7 +55,7 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	memset(*store_ptr, 0, sizeof(struct mbsys_gsf_struct));
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)*store_ptr);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -68,13 +67,12 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	static const char function_name[] = "mbsys_gsf_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfRecords *records;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -88,7 +86,7 @@ int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -99,7 +97,6 @@ int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	static const char function_name[] = "mbsys_gsf_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -108,7 +105,7 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	gsfTimeSeriesIntensity *snippet;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -155,7 +152,7 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
@@ -170,7 +167,6 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	static const char function_name[] = "mbsys_gsf_sonartype";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -178,7 +174,7 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonar
 	gsfSwathBathyPing *mb_ping;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -275,7 +271,7 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonar
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       sensor_id:  %d\n", mb_ping->sensor_id);
 		fprintf(stderr, "dbg2       sonartype:  %d\n", *sonartype);
@@ -288,7 +284,6 @@ int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonar
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	static const char function_name[] = "mbsys_gsf_sidescantype";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -296,7 +291,7 @@ int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss
 	gsfSwathBathyPing *mb_ping;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -321,7 +316,7 @@ int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ss_type:    %d\n", *ss_type);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -336,7 +331,6 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
                       double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	static const char function_name[] = "mbsys_gsf_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -348,7 +342,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	int gsfstatus;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -557,7 +551,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 		/* print debug statements */
 		if (verbose >= 5) {
-			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -596,7 +590,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
 			fprintf(stderr, "dbg4       comment:    %s\n", comment);
@@ -604,7 +598,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -652,7 +646,6 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
-	static const char function_name[] = "mbsys_gsf_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -661,7 +654,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	int anyunflagged;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -833,7 +826,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -846,7 +839,6 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                      double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                      double *ssv, int *error) {
-	static const char function_name[] = "mbsys_gsf_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -855,7 +847,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	double alpha, beta;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1072,7 +1064,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1094,7 +1086,6 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	static const char function_name[] = "mbsys_gsf_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1102,7 +1093,7 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	gsfSwathBathyPing *mb_ping;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1154,7 +1145,7 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1174,7 +1165,6 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                double *altitude, int *error) {
-	static const char function_name[] = "mbsys_gsf_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1184,7 +1174,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	double xtrack_min;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1275,7 +1265,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       transducer_depth:  %f\n", *transducer_depth);
@@ -1290,7 +1280,6 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
                               int *error) {
-	static const char function_name[] = "mbsys_gsf_insert_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1298,7 +1287,7 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 	gsfSwathBathyPing *mb_ping;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:            %p\n", (void *)mbio_ptr);
@@ -1350,7 +1339,7 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1363,7 +1352,6 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                           double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                           double *heave, int *error) {
-	static const char function_name[] = "mbsys_gsf_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1371,7 +1359,7 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	gsfSwathBathyPing *mb_ping;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1444,7 +1432,7 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 
 		/* print debug statements */
 		if (verbose >= 5) {
-			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -1484,7 +1472,7 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1517,7 +1505,6 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                          double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
-	static const char function_name[] = "mbsys_gsf_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1525,7 +1512,7 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 	gsfSwathBathyPing *mb_ping;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1611,7 +1598,7 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1623,7 +1610,6 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                           int *error) {
-	static const char function_name[] = "mbsys_gsf_extract_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1631,7 +1617,7 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	gsfSVP *svp;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1679,7 +1665,7 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
@@ -1694,7 +1680,6 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	static const char function_name[] = "mbsys_gsf_insert_svp";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	gsfDataID *dataID;
@@ -1702,7 +1687,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 	gsfSVP *svp;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1740,7 +1725,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1751,13 +1736,12 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	static const char function_name[] = "mbsys_gsf_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_gsf_struct *store;
 	struct mbsys_gsf_struct *copy;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1779,7 +1763,7 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 	copy->dataID = store->dataID;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1790,7 +1774,6 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_ping, int *error) {
-	static const char function_name[] = "mbsys_gsf_setscalefactors";
 	int status = MB_SUCCESS;
 
 	const double GSF_DEPTH_ASSUMED_HIGHEST_PRECISION = 10000;
@@ -1830,7 +1813,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 	double multiplier, offset, multiplier_min, multiplier_max;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       reset_all:   %d\n", reset_all);
@@ -2162,7 +2145,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 	}
 
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  GSF Scale Factors Calculated in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  GSF Scale Factors Calculated in MBIO function <%s>\n", __func__);
 		for (int i = 1; i <= GSF_MAX_PING_ARRAY_SUBRECORDS; i++) {
 			fprintf(stderr, "dbg4       Scale Factors %2d of %2d: compressionFlag:%5x offset:%10f multiplier:%10f\n", i,
 			        GSF_MAX_PING_ARRAY_SUBRECORDS, mb_ping->scaleFactors.scaleTable[i - 1].compressionFlag,
@@ -2171,7 +2154,7 @@ int mbsys_gsf_setscalefactors(int verbose, int reset_all, gsfSwathBathyPing *mb_
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

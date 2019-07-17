@@ -46,10 +46,8 @@ int mbr_info_edgjstar(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	static const char function_name[] = "mbr_info_edgjstar";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -84,7 +82,7 @@ int mbr_info_edgjstar(int verbose, int *system, int *beams_bath_max, int *beams_
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -120,10 +118,8 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	static const char function_name[] = "mbr_info_edgjstr2";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -158,7 +154,7 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -189,10 +185,8 @@ int mbr_info_edgjstr2(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_alm_edgjstar";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -208,7 +202,7 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -219,10 +213,8 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_dem_edgjstar";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -235,7 +227,7 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	const int status = mbsys_jstar_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -246,7 +238,6 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_rt_edgjstar";
 	struct mbsys_jstar_message_struct message;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
@@ -279,7 +270,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int nargc;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1795,7 +1786,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_COMMENT) {
-		fprintf(stderr, "\ndbg5  New comment read by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New comment read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == 0)
@@ -1822,7 +1813,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
 		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
-		fprintf(stderr, "\ndbg5  New subbottom data record read by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New subbottom data record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d (subbottom)\n", store->subsystem);
 		fprintf(stderr, "\ndbg5  Channel:\n");
@@ -1922,7 +1913,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 && (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2)) {
-		fprintf(stderr, "\ndbg5  New sidescan data record read by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New sidescan data record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2125,7 +2116,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_ATTITUDE) {
-		fprintf(stderr, "\ndbg5  New roll pitch data record read by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New roll pitch data record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2168,7 +2159,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     reserve2:                    %d\n", pitchroll->reserve2);
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_DVL) {
-		fprintf(stderr, "\ndbg5  New dvl data record read by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New dvl data record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2218,7 +2209,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_CTD) {
 		pressure = (struct mbsys_jstar_pressure_struct *)&(store->pressure);
-		fprintf(stderr, "\ndbg5  New pressure data record read by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New pressure data record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5     start_marker:                %d\n", pressure->message.start_marker);
 		fprintf(stderr, "dbg5     version:                     %d\n", pressure->message.version);
 		fprintf(stderr, "dbg5     session:                     %d\n", pressure->message.session);
@@ -2247,7 +2238,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	else if (status == MB_SUCCESS && verbose >= 5 &&
 	         (store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT)) {
 		nmea = (struct mbsys_jstar_nmea_struct *)&(store->nmea);
-		fprintf(stderr, "\ndbg5  New NMEA data record read by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New NMEA data record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5     start_marker:                %d\n", nmea->message.start_marker);
 		fprintf(stderr, "dbg5     version:                     %d\n", nmea->message.version);
 		fprintf(stderr, "dbg5     session:                     %d\n", nmea->message.session);
@@ -2269,7 +2260,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 	else if (status == MB_SUCCESS && verbose >= 5 && (store->kind == MB_DATA_HEADER)) {
 		sysinfo = (struct mbsys_jstar_sysinfo_struct *)&(store->sysinfo);
-		fprintf(stderr, "\ndbg5  New sysinfo data record read by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New sysinfo data record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5     start_marker:                %d\n", sysinfo->message.start_marker);
 		fprintf(stderr, "dbg5     version:                     %d\n", sysinfo->message.version);
 		fprintf(stderr, "dbg5     session:                     %d\n", sysinfo->message.session);
@@ -2291,7 +2282,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2302,7 +2293,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_wt_edgjstar";
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ss;
@@ -2319,7 +2309,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int trace_size;
 
 	if (verbose >= 3) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -2334,7 +2324,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* print debug statements */
 	if (verbose >= 5 && store->kind == MB_DATA_COMMENT) {
-		fprintf(stderr, "\ndbg5  New comment to be written by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New comment to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == 0)
@@ -2361,7 +2351,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 	else if (verbose >= 5 && store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
 		sbp = (struct mbsys_jstar_channel_struct *)&(store->sbp);
-		fprintf(stderr, "\ndbg5  New subbottom data record to be written by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New subbottom data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d (subbottom)\n", store->subsystem);
 		fprintf(stderr, "\ndbg5  Channel:\n");
@@ -2461,7 +2451,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 	else if (verbose >= 5 && (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2)) {
-		fprintf(stderr, "\ndbg5  New sidescan data record to be written by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New sidescan data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2664,7 +2654,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 	else if (verbose >= 5 && store->kind == MB_DATA_ATTITUDE) {
-		fprintf(stderr, "\ndbg5  New roll pitch data record to be written by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New roll pitch data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2707,7 +2697,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5     reserve2:                    %d\n", pitchroll->reserve2);
 	}
 	else if (verbose >= 5 && store->kind == MB_DATA_DVL) {
-		fprintf(stderr, "\ndbg5  New dvl data record to be written by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New dvl data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
 		fprintf(stderr, "dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -2757,7 +2747,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 	else if (verbose >= 5 && store->kind == MB_DATA_CTD) {
 		pressure = (struct mbsys_jstar_pressure_struct *)&(store->pressure);
-		fprintf(stderr, "\ndbg5  New pressure data record to be written by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New pressure data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5     start_marker:                %d\n", pressure->message.start_marker);
 		fprintf(stderr, "dbg5     version:                     %d\n", pressure->message.version);
 		fprintf(stderr, "dbg5     session:                     %d\n", pressure->message.session);
@@ -2786,7 +2776,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	else if (verbose >= 5 &&
 	         (store->kind == MB_DATA_NMEA_RMC || store->kind == MB_DATA_NMEA_DBT || store->kind == MB_DATA_NMEA_DPT)) {
 		nmea = (struct mbsys_jstar_nmea_struct *)&(store->nmea);
-		fprintf(stderr, "\ndbg5  New NMEA data record to be written by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New NMEA data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5     start_marker:                %d\n", nmea->message.start_marker);
 		fprintf(stderr, "dbg5     version:                     %d\n", nmea->message.version);
 		fprintf(stderr, "dbg5     session:                     %d\n", nmea->message.session);
@@ -2808,7 +2798,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 	else if (verbose >= 5 && (store->kind == MB_DATA_HEADER)) {
 		sysinfo = (struct mbsys_jstar_sysinfo_struct *)&(store->sysinfo);
-		fprintf(stderr, "\ndbg5  New sysinfo data record to be written by MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New sysinfo data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5     start_marker:                %d\n", sysinfo->message.start_marker);
 		fprintf(stderr, "dbg5     version:                     %d\n", sysinfo->message.version);
 		fprintf(stderr, "dbg5     session:                     %d\n", sysinfo->message.session);
@@ -3901,7 +3891,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3913,10 +3903,8 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_register_edgjstar";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -3962,7 +3950,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copyrecord;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);
@@ -4017,11 +4005,10 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_register_edgjstr2";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -4067,7 +4054,7 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copyrecord;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

@@ -36,8 +36,6 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
             double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
             int *nss, char *beamflag, double *bath, double *amp, double *bathlon, double *bathlat, double *ss, double *sslon,
             double *sslat, char *comment, int *error) {
-
-	static const char function_name[] = "mb_read";
 	char *store_ptr;
 	int done;
 	int reset_last;
@@ -48,7 +46,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 	double denom;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -94,7 +92,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 
 		/* print debug statements */
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  About to read ping in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  About to read ping in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2       need_new_ping: %d\n", mb_io_ptr->need_new_ping);
 			fprintf(stderr, "dbg2       ping_count:    %d\n", mb_io_ptr->ping_count);
 			fprintf(stderr, "dbg2       pings_read:    %d\n", mb_io_ptr->pings_read);
@@ -194,7 +192,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 
 		/* print debug statements */
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  New ping read in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  New ping read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2       need_new_ping: %d\n", mb_io_ptr->need_new_ping);
 			fprintf(stderr, "dbg2       ping_count:    %d\n", mb_io_ptr->ping_count);
 			fprintf(stderr, "dbg2       comment_count: %d\n", mb_io_ptr->comment_count);
@@ -238,7 +236,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  New ping checked by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  New ping checked by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
 			fprintf(stderr, "dbg4       ping_count:    %d\n", mb_io_ptr->ping_count);
 			fprintf(stderr, "dbg4       comment_count: %d\n", mb_io_ptr->comment_count);
@@ -356,7 +354,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 		/* print debug statements */
 		if (verbose >= 4 && mb_io_ptr->new_kind == MB_DATA_DATA &&
 		    (status == MB_SUCCESS || (*error<MB_ERROR_NO_ERROR && * error> MB_ERROR_COMMENT && mb_io_ptr->pings_read == 1))) {
-			fprintf(stderr, "\ndbg4  New ping binned by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  New ping binned by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Current binned ping values:\n");
 			fprintf(stderr, "dbg4       pings_binned: %d\n", mb_io_ptr->pings_binned);
 			fprintf(stderr, "dbg4       time_d:       %f\n", mb_io_ptr->time_d);
@@ -453,7 +451,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  End of reading loop in MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  End of reading loop in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Current status values:\n");
 			fprintf(stderr, "dbg4       done:          %d\n", done);
 			fprintf(stderr, "dbg4       need_new_ping: %d\n", mb_io_ptr->need_new_ping);
@@ -548,7 +546,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  Distance and Speed Calculated in MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Distance and Speed Calculated in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Speed and Distance Related Values:\n");
 			fprintf(stderr, "dbg4       binned speed: %f\n", mb_io_ptr->speed);
 			fprintf(stderr, "dbg4       pings_binned: %d\n", mb_io_ptr->pings_binned);
@@ -644,7 +642,7 @@ int mb_read(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], d
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}

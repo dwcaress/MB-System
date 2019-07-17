@@ -46,11 +46,10 @@ int mbr_info_nvnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	static const char function_name[] = "mbr_info_nvnetcdf";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -83,7 +82,7 @@ int mbr_info_nvnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_ltrack = 0.0;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -114,7 +113,6 @@ int mbr_info_nvnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_alm_nvnetcdf";
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 	int *dataread;
@@ -122,7 +120,7 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	int *recread;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -149,7 +147,7 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	*recread = 0;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -160,11 +158,10 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_dem_nvnetcdf";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -177,7 +174,7 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	status = mbsys_navnetcdf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -188,7 +185,6 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_rt_nvnetcdf";
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 	int *dataread;
@@ -204,7 +200,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -256,7 +252,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  NetCDF array dimensions read in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  NetCDF array dimensions read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Array and variable dimensions:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -362,7 +358,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			if (verbose >= 2) {
-				fprintf(stderr, "\ndbg2  NetCDF global attributes read in function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg2  NetCDF global attributes read in function <%s>\n", __func__);
 				fprintf(stderr, "dbg2  Global attributes:\n");
 				fprintf(stderr, "dbg2       status:                  %d\n", status);
 				fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -459,7 +455,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			if (verbose >= 2) {
-				fprintf(stderr, "\ndbg2  NetCDF variable ids read in function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg2  NetCDF variable ids read in function <%s>\n", __func__);
 				fprintf(stderr, "dbg2  Variable ids:\n");
 				fprintf(stderr, "dbg2       status:                  %d\n", status);
 				fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -510,7 +506,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_MEMORY_FAIL;
 				if (verbose >= 2) {
-					fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+					fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 					fprintf(stderr, "dbg2  Return values:\n");
 					fprintf(stderr, "dbg2       error:      %d\n", *error);
 					fprintf(stderr, "dbg2  Return status:\n");
@@ -1217,7 +1213,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			if (verbose >= 2) {
-				fprintf(stderr, "\ndbg2  NetCDF variable attributes read in function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg2  NetCDF variable attributes read in function <%s>\n", __func__);
 				fprintf(stderr, "dbg2  Variable attributes:\n");
 				fprintf(stderr, "dbg2       status:				%d\n", status);
 				fprintf(stderr, "dbg2       error:				%d\n", *error);
@@ -1457,7 +1453,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			if (verbose >= 2) {
-				fprintf(stderr, "\ndbg2  NetCDF Global Variables read in function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg2  NetCDF Global Variables read in function <%s>\n", __func__);
 				fprintf(stderr, "dbg2  Global Variables:\n");
 				fprintf(stderr, "dbg2       status:                  %d\n", status);
 				fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -1491,7 +1487,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		(*dataread)++;
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  Comment read in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  Comment read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Comment:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -1593,7 +1589,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		(*dataread)++;
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  NetCDF Survey Record read in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  NetCDF Survey Record read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Global Variables:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -1627,7 +1623,7 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_kind = store->kind;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1638,7 +1634,6 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_wt_nvnetcdf";
 	int status = MB_SUCCESS;
 	struct mbsys_navnetcdf_struct *store;
 	struct mbsys_navnetcdf_struct *storelocal;
@@ -1662,7 +1657,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1754,7 +1749,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		(*datawrite)++;
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  Comment saved in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  Comment saved in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Comment:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -1782,7 +1777,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "nc_def_dim mbPositionNbr error: %s\n", nc_strerror(nc_status));
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  NetCDF array dimensions written in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  NetCDF array dimensions written in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Array and variable dimensions:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -1867,7 +1862,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "nc_def_var mbPFlag_id error: %s\n", nc_strerror(nc_status));
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  NetCDF variable ids written in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  NetCDF variable ids written in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Variable ids:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -1989,7 +1984,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "nc_put_att mbVersion error: %s\n", nc_strerror(nc_status));
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  NetCDF global attributes written in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  NetCDF global attributes written in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Global attributes:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -2839,7 +2834,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  NetCDF variable attributes written in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  NetCDF variable attributes written in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Variable attributes:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -3148,7 +3143,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  NetCDF Survey Record written in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg2  NetCDF Survey Record written in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2  Global Variables:\n");
 			fprintf(stderr, "dbg2       status:                  %d\n", status);
 			fprintf(stderr, "dbg2       error:                   %d\n", *error);
@@ -3172,7 +3167,7 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3184,11 +3179,10 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_register_nvnetcdf";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -3227,7 +3221,7 @@ int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

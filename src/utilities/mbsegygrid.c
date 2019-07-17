@@ -968,7 +968,6 @@ int main(int argc, char **argv) {
 int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
                     double *timesweep, double *timedelay, double *startlon, double *startlat, double *endlon, double *endlat,
                     int *error) {
-	char *function_name = "get_segy_limits";
 	int status = MB_SUCCESS;
 	char sinffile[MB_PATH_MAXLINE] = "";
 	char command[MB_PATH_MAXLINE] = "";
@@ -991,7 +990,7 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
 		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
 		fprintf(outfp, "dbg2       segyfile:   %s\n", segyfile);
@@ -1075,7 +1074,7 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
 		fprintf(outfp, "dbg2       tracemode:  %d\n", *tracemode);
 		fprintf(outfp, "dbg2       tracestart: %d\n", *tracestart);

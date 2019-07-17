@@ -1851,7 +1851,6 @@ int main(int argc, char **argv) {
 int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error) {
 
 	/* local variables */
-	char *function_name = "mbtrnpreprocess_openlog";
 	int status = MB_SUCCESS;
 
 	/* time, user, host variables */
@@ -1866,7 +1865,7 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       log_directory:      %s\n", log_directory);
@@ -1913,7 +1912,7 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
 		fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
@@ -1931,13 +1930,12 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
 int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error) {
 
 	/* local variables */
-	char *function_name = "mbtrnpreprocess_closelog";
 	int status = MB_SUCCESS;
     char *log_message = "Closing mbtrnpreprocess log file";
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
@@ -1953,7 +1951,7 @@ int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
@@ -1970,7 +1968,6 @@ int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error) {
 int mbtrnpreprocess_postlog(int verbose, FILE *logfp, char *log_message, int *error) {
 
 	/* local variables */
-	char *function_name = "mbtrnpreprocess_postlog";
 	int status = MB_SUCCESS;
 
 	/* time, user, host variables */
@@ -1982,7 +1979,7 @@ int mbtrnpreprocess_postlog(int verbose, FILE *logfp, char *log_message, int *er
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
@@ -2010,7 +2007,7 @@ int mbtrnpreprocess_postlog(int verbose, FILE *logfp, char *log_message, int *er
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2037,13 +2034,12 @@ int mbtrnpreprocess_logparameters(int verbose,
                                 int *error)
 {
 	/* local variables */
-	char *function_name = "mbtrnpreprocess_logparameters";
 	int status = MB_SUCCESS;
     mb_path log_message;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
 		fprintf(stderr, "dbg2       logfp:                        %p\n", logfp);
@@ -2094,7 +2090,7 @@ int mbtrnpreprocess_logparameters(int verbose,
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2120,13 +2116,12 @@ int mbtrnpreprocess_logstatistics(int verbose,
                                 int *error)
 {
 	/* local variables */
-	char *function_name = "mbtrnpreprocess_logstatistics";
 	int status = MB_SUCCESS;
     mb_path log_message;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
 		fprintf(stderr, "dbg2       logfp:                        %p\n", logfp);
@@ -2176,7 +2171,7 @@ int mbtrnpreprocess_logstatistics(int verbose,
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2463,13 +2458,12 @@ int mbtrnpreprocess_init_debug(int verbose)
 int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int *error) {
 
 	/* local variables */
-	char *function_name = "mbtrnpreprocess_input_open";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr,&mbio_ptr);
@@ -2524,7 +2518,7 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
 
     /* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2540,13 +2534,12 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
 int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error) {
 
 	/* local variables */
-	char *function_name = "mbtrnpreprocess_input_read";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -2569,7 +2562,7 @@ int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *b
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2585,13 +2578,12 @@ int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *b
 int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error) {
 
 	/* local variables */
-	char *function_name = "mbtrnpreprocess_input_close";
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
@@ -2609,7 +2601,7 @@ int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:              %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

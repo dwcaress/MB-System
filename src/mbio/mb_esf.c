@@ -41,10 +41,8 @@ void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, int (*cmp)(
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
 int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *error) {
-	static const char function_name[] = "mb_esf_check";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       swathfile:   %s\n", swathfile);
@@ -68,7 +66,7 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
 	status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       esfile:      %s\n", esffile);
 		fprintf(stderr, "dbg2       found:       %d\n", *found);
@@ -94,11 +92,10 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
         done. */
 int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
                 int *error) {
-	static const char function_name[] = "mb_esf_load";
 	int found;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
 		fprintf(stderr, "dbg2       program_name:  %s\n", program_name);
@@ -131,7 +128,7 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       esfile:      %s\n", esffile);
 		fprintf(stderr, "dbg2       nedit:       %d\n", esf->nedit);
@@ -160,7 +157,6 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
             to any existing esf file. Any
             existing esf file will be backed up first. */
 int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error) {
-	static const char function_name[] = "mb_esf_open";
 	int status = MB_SUCCESS;
 	char command[MB_PATH_MAXLINE];
 	FILE *esffp;
@@ -179,7 +175,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 	int nedit;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
 		fprintf(stderr, "dbg2       program_name:  %s\n", program_name);
@@ -397,7 +393,7 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       nedit:       %d\n", esf->nedit);
 		fprintf(stderr, "dbg2       mode:        %d\n", esf->mode);
@@ -428,11 +424,10 @@ int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int ou
         being extracted from one version of a dataset and applied to
         another. */
 int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, double tolerance, int *error) {
-	static const char function_name[] = "mb_esf_fixtimestamps";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       nedit:            %d\n", esf->nedit);
@@ -452,7 +447,7 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		for (int i = 0; i < esf->nedit; i++)
 			fprintf(stderr, "dbg2       edit event: %d %.6f %5d %3d %3d\n", i, esf->edit[i].time_d, esf->edit[i].beam,
@@ -472,7 +467,6 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
     are saved to that file.  */
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int pingmultiplicity, int nbath, char *beamflag,
                  int *error) {
-	static const char function_name[] = "mb_esf_apply";
 	int firstedit, lastedit;
 	int apply, action;
 	int beamoffset, beamoffsetmax;
@@ -482,7 +476,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 	int j;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       esf:              %p\n", esf);
@@ -656,7 +650,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       time_d:           %f\n", time_d);
 		fprintf(stderr, "dbg2       pingmultiplicity: %d\n", pingmultiplicity);
@@ -675,10 +669,8 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_save saves one edit event to an esf file. */
 int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error) {
-	static const char function_name[] = "mb_esf_save";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       esf->nedit:       %d\n", esf->nedit);
@@ -714,7 +706,7 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       esf->nedit:       %d\n", esf->nedit);
 		fprintf(stderr, "dbg2       esf->edit:        %p\n", (void *)esf->edit);
@@ -731,10 +723,8 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 /*--------------------------------------------------------------------*/
 /* 	function mb_ess_save saves one edit event to an edit save stream file. */
 int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error) {
-	static const char function_name[] = "mb_ess_save";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       esf->nedit:       %d\n", esf->nedit);
@@ -770,7 +760,7 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       esf->nedit:       %d\n", esf->nedit);
 		fprintf(stderr, "dbg2       esf->edit:        %p\n", (void *)esf->edit);
@@ -787,10 +777,8 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_close deallocates memory in the esf structure. */
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
-	static const char function_name[] = "mb_esf_close";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       esf->nedit:       %d\n", esf->nedit);
@@ -818,7 +806,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       esf->nedit:       %d\n", esf->nedit);
 		fprintf(stderr, "dbg2       esf->edit:        %p\n", (void *)esf->edit);

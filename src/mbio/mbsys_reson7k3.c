@@ -43,10 +43,9 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_zero7kheader(int verbose, s7k3_header *header, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_zero7kheader";
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       header:     %p\n", (void *)header);
@@ -58,7 +57,7 @@ int mbsys_reson7k3_zero7kheader(int verbose, s7k3_header *header, int *error) {
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -70,11 +69,10 @@ int mbsys_reson7k3_zero7kheader(int verbose, s7k3_header *header, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_alloc";
   struct mbsys_reson7k3_struct *store;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -97,7 +95,7 @@ int mbsys_reson7k3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
   store->type = R7KRECID_None;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)*store_ptr);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -109,7 +107,6 @@ int mbsys_reson7k3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_deall";
   struct mbsys_reson7k3_struct *store;
   s7k3_time *time;
   s7k3_header *header;
@@ -209,7 +206,7 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
   s7k3_SpreadingLoss *SpreadingLoss;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -521,7 +518,7 @@ int mbsys_reson7k3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
   status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -541,13 +538,12 @@ int mbsys_reson7k3_checkheader(s7k3_header header) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_header(int verbose, s7k3_header *header, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_header";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       header:     %p\n", (void *)header);
@@ -558,7 +554,7 @@ int mbsys_reson7k3_print_header(int verbose, s7k3_header *header, int *error) {
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     Version:                 %d\n", first, header->Version);
@@ -587,7 +583,7 @@ int mbsys_reson7k3_print_header(int verbose, s7k3_header *header, int *error) {
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -599,13 +595,12 @@ int mbsys_reson7k3_print_header(int verbose, s7k3_header *header, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_ReferencePoint(int verbose, s7k3_ReferencePoint *ReferencePoint, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_ReferencePoint";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       ReferencePoint:  %p\n", (void *)ReferencePoint);
@@ -619,7 +614,7 @@ int mbsys_reson7k3_print_ReferencePoint(int verbose, s7k3_ReferencePoint *Refere
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     offset_x:                %f\n", first, ReferencePoint->offset_x);
@@ -630,7 +625,7 @@ int mbsys_reson7k3_print_ReferencePoint(int verbose, s7k3_ReferencePoint *Refere
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -642,13 +637,12 @@ int mbsys_reson7k3_print_ReferencePoint(int verbose, s7k3_ReferencePoint *Refere
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_UncalibratedSensorOffset(int verbose, s7k3_UncalibratedSensorOffset *UncalibratedSensorOffset, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_UncalibratedSensorOffset";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       UncalibratedSensorOffset:  %p\n", (void *)UncalibratedSensorOffset);
@@ -662,7 +656,7 @@ int mbsys_reson7k3_print_UncalibratedSensorOffset(int verbose, s7k3_Uncalibrated
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     offset_x:                %f\n", first, UncalibratedSensorOffset->offset_x);
@@ -675,7 +669,7 @@ int mbsys_reson7k3_print_UncalibratedSensorOffset(int verbose, s7k3_Uncalibrated
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -687,13 +681,12 @@ int mbsys_reson7k3_print_UncalibratedSensorOffset(int verbose, s7k3_Uncalibrated
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_CalibratedSensorOffset(int verbose, s7k3_CalibratedSensorOffset *CalibratedSensorOffset, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_CalibratedSensorOffset";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       CalibratedSensorOffset:    %p\n", (void *)CalibratedSensorOffset);
@@ -719,7 +712,7 @@ int mbsys_reson7k3_print_CalibratedSensorOffset(int verbose, s7k3_CalibratedSens
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -731,13 +724,12 @@ int mbsys_reson7k3_print_CalibratedSensorOffset(int verbose, s7k3_CalibratedSens
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Position(int verbose, s7k3_Position *Position, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Position";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Position:     %p\n", (void *)Position);
@@ -751,7 +743,7 @@ int mbsys_reson7k3_print_Position(int verbose, s7k3_Position *Position, int *err
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     datum:                   %d\n", first, Position->datum);
@@ -768,7 +760,7 @@ int mbsys_reson7k3_print_Position(int verbose, s7k3_Position *Position, int *err
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -780,13 +772,12 @@ int mbsys_reson7k3_print_Position(int verbose, s7k3_Position *Position, int *err
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_CustomAttitude(int verbose, s7k3_CustomAttitude *CustomAttitude, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_CustomAttitude";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
     fprintf(stderr, "dbg2       CustomAttitude:%p\n", (void *)CustomAttitude);
@@ -800,7 +791,7 @@ int mbsys_reson7k3_print_CustomAttitude(int verbose, s7k3_CustomAttitude *Custom
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     bitfield:                   %d\n", first, CustomAttitude->fieldmask);
@@ -819,7 +810,7 @@ int mbsys_reson7k3_print_CustomAttitude(int verbose, s7k3_CustomAttitude *Custom
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -831,13 +822,12 @@ int mbsys_reson7k3_print_CustomAttitude(int verbose, s7k3_CustomAttitude *Custom
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Tide(int verbose, s7k3_Tide *Tide, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Tide";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Tide:         %p\n", (void *)Tide);
@@ -851,7 +841,7 @@ int mbsys_reson7k3_print_Tide(int verbose, s7k3_Tide *Tide, int *error) {
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     tide:                       %f\n", first, Tide->tide);
@@ -869,7 +859,7 @@ int mbsys_reson7k3_print_Tide(int verbose, s7k3_Tide *Tide, int *error) {
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -881,13 +871,12 @@ int mbsys_reson7k3_print_Tide(int verbose, s7k3_Tide *Tide, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Altitude(int verbose, s7k3_Altitude *Altitude, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Altitude";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Altitude:     %p\n", (void *)Altitude);
@@ -901,7 +890,7 @@ int mbsys_reson7k3_print_Altitude(int verbose, s7k3_Altitude *Altitude, int *err
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     Altitude:                   %f\n", first, Altitude->altitude);
@@ -909,7 +898,7 @@ int mbsys_reson7k3_print_Altitude(int verbose, s7k3_Altitude *Altitude, int *err
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -921,13 +910,12 @@ int mbsys_reson7k3_print_Altitude(int verbose, s7k3_Altitude *Altitude, int *err
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_MotionOverGround(int verbose, s7k3_MotionOverGround *MotionOverGround, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_MotionOverGround";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       MotionOverGround:       %p\n", (void *)MotionOverGround);
@@ -941,7 +929,7 @@ int mbsys_reson7k3_print_MotionOverGround(int verbose, s7k3_MotionOverGround *Mo
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     bitfield:                   %d\n", first, MotionOverGround->flags);
@@ -956,7 +944,7 @@ int mbsys_reson7k3_print_MotionOverGround(int verbose, s7k3_MotionOverGround *Mo
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -967,13 +955,12 @@ int mbsys_reson7k3_print_MotionOverGround(int verbose, s7k3_MotionOverGround *Mo
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Depth(int verbose, s7k3_Depth *Depth, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Depth";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Depth:        %p\n", (void *)Depth);
@@ -987,7 +974,7 @@ int mbsys_reson7k3_print_Depth(int verbose, s7k3_Depth *Depth, int *error) {
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     descriptor:                  %d\n", first, Depth->descriptor);
@@ -998,7 +985,7 @@ int mbsys_reson7k3_print_Depth(int verbose, s7k3_Depth *Depth, int *error) {
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1010,13 +997,12 @@ int mbsys_reson7k3_print_Depth(int verbose, s7k3_Depth *Depth, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SoundVelocityProfile(int verbose, s7k3_SoundVelocityProfile *SoundVelocityProfile, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SoundVelocityProfile";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       SoundVelocityProfile:          %p\n", (void *)SoundVelocityProfile);
@@ -1030,7 +1016,7 @@ int mbsys_reson7k3_print_SoundVelocityProfile(int verbose, s7k3_SoundVelocityPro
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     position_flag:              %d\n", first, SoundVelocityProfile->position_flag);
@@ -1046,7 +1032,7 @@ int mbsys_reson7k3_print_SoundVelocityProfile(int verbose, s7k3_SoundVelocityPro
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1058,13 +1044,12 @@ int mbsys_reson7k3_print_SoundVelocityProfile(int verbose, s7k3_SoundVelocityPro
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_CTD(int verbose, s7k3_CTD *CTD, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_CTD";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       CTD:          %p\n", (void *)CTD);
@@ -1078,7 +1063,7 @@ int mbsys_reson7k3_print_CTD(int verbose, s7k3_CTD *CTD, int *error) {
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     frequency:                  %f\n", first, CTD->frequency);
@@ -1102,7 +1087,7 @@ int mbsys_reson7k3_print_CTD(int verbose, s7k3_CTD *CTD, int *error) {
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1114,13 +1099,12 @@ int mbsys_reson7k3_print_CTD(int verbose, s7k3_CTD *CTD, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Geodesy(int verbose, s7k3_Geodesy *Geodesy, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Geodesy";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Geodesy:      %p\n", (void *)Geodesy);
@@ -1134,7 +1118,7 @@ int mbsys_reson7k3_print_Geodesy(int verbose, s7k3_Geodesy *Geodesy, int *error)
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     spheroid:                   %s\n", first, Geodesy->spheroid);
@@ -1166,7 +1150,7 @@ int mbsys_reson7k3_print_Geodesy(int verbose, s7k3_Geodesy *Geodesy, int *error)
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1178,13 +1162,12 @@ int mbsys_reson7k3_print_Geodesy(int verbose, s7k3_Geodesy *Geodesy, int *error)
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_RollPitchHeave(int verbose, s7k3_RollPitchHeave *RollPitchHeave, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_RollPitchHeave";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       RollPitchHeave: %p\n", (void *)RollPitchHeave);
@@ -1198,7 +1181,7 @@ int mbsys_reson7k3_print_RollPitchHeave(int verbose, s7k3_RollPitchHeave *RollPi
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     roll:                       %f\n", first, RollPitchHeave->roll);
@@ -1208,7 +1191,7 @@ int mbsys_reson7k3_print_RollPitchHeave(int verbose, s7k3_RollPitchHeave *RollPi
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1220,13 +1203,12 @@ int mbsys_reson7k3_print_RollPitchHeave(int verbose, s7k3_RollPitchHeave *RollPi
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Heading(int verbose, s7k3_Heading *Heading, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Heading";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Heading:      %p\n", (void *)Heading);
@@ -1240,7 +1222,7 @@ int mbsys_reson7k3_print_Heading(int verbose, s7k3_Heading *Heading, int *error)
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     Heading:                    %f\n", first, Heading->heading);
@@ -1248,7 +1230,7 @@ int mbsys_reson7k3_print_Heading(int verbose, s7k3_Heading *Heading, int *error)
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1260,13 +1242,12 @@ int mbsys_reson7k3_print_Heading(int verbose, s7k3_Heading *Heading, int *error)
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SurveyLine(int verbose, s7k3_SurveyLine *SurveyLine, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SurveyLine";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       SurveyLine:   %p\n", (void *)SurveyLine);
@@ -1280,7 +1261,7 @@ int mbsys_reson7k3_print_SurveyLine(int verbose, s7k3_SurveyLine *SurveyLine, in
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     n:                          %d\n", first, SurveyLine->n);
@@ -1294,7 +1275,7 @@ int mbsys_reson7k3_print_SurveyLine(int verbose, s7k3_SurveyLine *SurveyLine, in
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1306,13 +1287,12 @@ int mbsys_reson7k3_print_SurveyLine(int verbose, s7k3_SurveyLine *SurveyLine, in
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Navigation(int verbose, s7k3_Navigation *Navigation, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Navigation";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Navigation:   %p\n", (void *)Navigation);
@@ -1326,7 +1306,7 @@ int mbsys_reson7k3_print_Navigation(int verbose, s7k3_Navigation *Navigation, in
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     vertical_reference:         %d\n", first, Navigation->vertical_reference);
@@ -1342,7 +1322,7 @@ int mbsys_reson7k3_print_Navigation(int verbose, s7k3_Navigation *Navigation, in
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1354,13 +1334,12 @@ int mbsys_reson7k3_print_Navigation(int verbose, s7k3_Navigation *Navigation, in
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Attitude(int verbose, s7k3_Attitude *Attitude, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Attitude";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Attitude:     %p\n", (void *)Attitude);
@@ -1374,7 +1353,7 @@ int mbsys_reson7k3_print_Attitude(int verbose, s7k3_Attitude *Attitude, int *err
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     n:                          %d\n", first, Attitude->n);
@@ -1386,7 +1365,7 @@ int mbsys_reson7k3_print_Attitude(int verbose, s7k3_Attitude *Attitude, int *err
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1398,13 +1377,12 @@ int mbsys_reson7k3_print_Attitude(int verbose, s7k3_Attitude *Attitude, int *err
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_PanTilt(int verbose, s7k3_PanTilt *PanTilt, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_PanTilt";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
     fprintf(stderr, "dbg2       Navigation:   %p\n", (void *)PanTilt);
@@ -1418,7 +1396,7 @@ int mbsys_reson7k3_print_PanTilt(int verbose, s7k3_PanTilt *PanTilt, int *error)
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     pan:                    %f\n", first, PanTilt->pan);
@@ -1427,7 +1405,7 @@ int mbsys_reson7k3_print_PanTilt(int verbose, s7k3_PanTilt *PanTilt, int *error)
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1471,13 +1449,12 @@ int mbsys_reson7k3_print_ContactOutput(int verbose, s7k3_ContactOutput *ContactO
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_ProcessedSideScan(int verbose, s7k3_ProcessedSideScan *ProcessedSideScan, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_ProcessedSideScan";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       ProcessedSideScan: %p\n", (void *)ProcessedSideScan);
@@ -1491,7 +1468,7 @@ int mbsys_reson7k3_print_ProcessedSideScan(int verbose, s7k3_ProcessedSideScan *
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, ProcessedSideScan->serial_number);
@@ -1510,7 +1487,7 @@ int mbsys_reson7k3_print_ProcessedSideScan(int verbose, s7k3_ProcessedSideScan *
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1523,13 +1500,12 @@ int mbsys_reson7k3_print_ProcessedSideScan(int verbose, s7k3_ProcessedSideScan *
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_SonarSettings(int verbose, s7k3_SonarSettings *SonarSettings, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SonarSettings";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       SonarSettings:  %p\n", (void *)SonarSettings);
@@ -1543,7 +1519,7 @@ int mbsys_reson7k3_print_SonarSettings(int verbose, s7k3_SonarSettings *SonarSet
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, SonarSettings->serial_number);
@@ -1589,7 +1565,7 @@ int mbsys_reson7k3_print_SonarSettings(int verbose, s7k3_SonarSettings *SonarSet
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1601,13 +1577,12 @@ int mbsys_reson7k3_print_SonarSettings(int verbose, s7k3_SonarSettings *SonarSet
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_device(int verbose, s7k3_device *device, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_device";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       device:            %p\n", (void *)device);
@@ -1618,7 +1593,7 @@ int mbsys_reson7k3_print_device(int verbose, s7k3_device *device, int *error) {
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     magic_number:               %d\n", first, device->magic_number);
@@ -1631,7 +1606,7 @@ int mbsys_reson7k3_print_device(int verbose, s7k3_device *device, int *error) {
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1643,13 +1618,12 @@ int mbsys_reson7k3_print_device(int verbose, s7k3_device *device, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Configuration(int verbose, s7k3_Configuration *Configuration, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Configuration";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       Configuration:     %p\n", (void *)Configuration);
@@ -1663,7 +1637,7 @@ int mbsys_reson7k3_print_Configuration(int verbose, s7k3_Configuration *Configur
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, Configuration->serial_number);
@@ -1674,7 +1648,7 @@ int mbsys_reson7k3_print_Configuration(int verbose, s7k3_Configuration *Configur
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1686,13 +1660,12 @@ int mbsys_reson7k3_print_Configuration(int verbose, s7k3_Configuration *Configur
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_MatchFilter(int verbose, s7k3_MatchFilter *MatchFilter, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_MatchFilter";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       MatchFilter:       %p\n", (void *)MatchFilter);
@@ -1706,7 +1679,7 @@ int mbsys_reson7k3_print_MatchFilter(int verbose, s7k3_MatchFilter *MatchFilter,
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, MatchFilter->serial_number);
@@ -1724,7 +1697,7 @@ int mbsys_reson7k3_print_MatchFilter(int verbose, s7k3_MatchFilter *MatchFilter,
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1738,13 +1711,12 @@ int mbsys_reson7k3_print_MatchFilter(int verbose, s7k3_MatchFilter *MatchFilter,
 int mbsys_reson7k3_print_FirmwareHardwareConfiguration(int verbose,
                                                         s7k3_FirmwareHardwareConfiguration *FirmwareHardwareConfiguration,
                                                         int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_FirmwareHardwareConfiguration";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       FirmwareHardwareConfiguration:       %p\n", (void *)FirmwareHardwareConfiguration);
@@ -1758,7 +1730,7 @@ int mbsys_reson7k3_print_FirmwareHardwareConfiguration(int verbose,
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     device_count:               %d\n", first, FirmwareHardwareConfiguration->device_count);
@@ -1769,7 +1741,7 @@ int mbsys_reson7k3_print_FirmwareHardwareConfiguration(int verbose,
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1781,13 +1753,12 @@ int mbsys_reson7k3_print_FirmwareHardwareConfiguration(int verbose,
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_BeamGeometry(int verbose, s7k3_BeamGeometry *BeamGeometry, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_BeamGeometry";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       BeamGeometry:      %p\n", (void *)BeamGeometry);
@@ -1801,7 +1772,7 @@ int mbsys_reson7k3_print_BeamGeometry(int verbose, s7k3_BeamGeometry *BeamGeomet
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, BeamGeometry->serial_number);
@@ -1815,7 +1786,7 @@ int mbsys_reson7k3_print_BeamGeometry(int verbose, s7k3_BeamGeometry *BeamGeomet
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1827,13 +1798,12 @@ int mbsys_reson7k3_print_BeamGeometry(int verbose, s7k3_BeamGeometry *BeamGeomet
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Bathymetry(int verbose, s7k3_Bathymetry *Bathymetry, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Bathymetry";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       Bathymetry:        %p\n", (void *)Bathymetry);
@@ -1847,7 +1817,7 @@ int mbsys_reson7k3_print_Bathymetry(int verbose, s7k3_Bathymetry *Bathymetry, in
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, Bathymetry->serial_number);
@@ -1880,7 +1850,7 @@ int mbsys_reson7k3_print_Bathymetry(int verbose, s7k3_Bathymetry *Bathymetry, in
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1892,7 +1862,6 @@ int mbsys_reson7k3_print_Bathymetry(int verbose, s7k3_Bathymetry *Bathymetry, in
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SideScan(int verbose, s7k3_SideScan *SideScan, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SideScan";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -1901,7 +1870,7 @@ int mbsys_reson7k3_print_SideScan(int verbose, s7k3_SideScan *SideScan, int *err
   int *intptr;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       SideScan:       %p\n", (void *)SideScan);
@@ -1915,7 +1884,7 @@ int mbsys_reson7k3_print_SideScan(int verbose, s7k3_SideScan *SideScan, int *err
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, SideScan->serial_number);
@@ -1968,7 +1937,7 @@ int mbsys_reson7k3_print_SideScan(int verbose, s7k3_SideScan *SideScan, int *err
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1988,13 +1957,12 @@ int mbsys_reson7k3_print_WaterColumn(int verbose, s7k3_WaterColumn *WaterColumn,
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_VerticalDepth(int verbose, s7k3_VerticalDepth *VerticalDepth, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_VerticalDepth";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       VerticalDepth:     %p\n", (void *)VerticalDepth);
@@ -2008,7 +1976,7 @@ int mbsys_reson7k3_print_VerticalDepth(int verbose, s7k3_VerticalDepth *Vertical
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     frequency:                  %f\n", first, VerticalDepth->frequency);
@@ -2024,7 +1992,7 @@ int mbsys_reson7k3_print_VerticalDepth(int verbose, s7k3_VerticalDepth *Vertical
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2036,14 +2004,13 @@ int mbsys_reson7k3_print_VerticalDepth(int verbose, s7k3_VerticalDepth *Vertical
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_TVG(int verbose, s7k3_TVG *TVG, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_TVG";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
   float *tvg_float;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       TVG:               %p\n", (void *)TVG);
@@ -2057,7 +2024,7 @@ int mbsys_reson7k3_print_TVG(int verbose, s7k3_TVG *TVG, int *error) {
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, TVG->serial_number);
@@ -2074,7 +2041,7 @@ int mbsys_reson7k3_print_TVG(int verbose, s7k3_TVG *TVG, int *error) {
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2086,7 +2053,6 @@ int mbsys_reson7k3_print_TVG(int verbose, s7k3_TVG *TVG, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Image(int verbose, s7k3_Image *Image, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Image";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2095,7 +2061,7 @@ int mbsys_reson7k3_print_Image(int verbose, s7k3_Image *Image, int *error) {
   int *intptr;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       Image:             %p\n", (void *)Image);
@@ -2109,7 +2075,7 @@ int mbsys_reson7k3_print_Image(int verbose, s7k3_Image *Image, int *error) {
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     ping_number:                %u\n", first, Image->ping_number);
@@ -2145,7 +2111,7 @@ int mbsys_reson7k3_print_Image(int verbose, s7k3_Image *Image, int *error) {
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2157,13 +2123,12 @@ int mbsys_reson7k3_print_Image(int verbose, s7k3_Image *Image, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_PingMotion(int verbose, s7k3_PingMotion *PingMotion, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_PingMotion";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       PingMotion:      %p\n", (void *)PingMotion);
@@ -2177,7 +2142,7 @@ int mbsys_reson7k3_print_PingMotion(int verbose, s7k3_PingMotion *PingMotion, in
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, PingMotion->serial_number);
@@ -2199,7 +2164,7 @@ int mbsys_reson7k3_print_PingMotion(int verbose, s7k3_PingMotion *PingMotion, in
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2219,13 +2184,12 @@ int mbsys_reson7k3_print_AdaptiveGate(int verbose, s7k3_AdaptiveGate *AdaptiveGa
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_DetectionDataSetup(int verbose, s7k3_DetectionDataSetup *DetectionDataSetup, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_DetectionDataSetup";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       DetectionDataSetup:  %p\n", (void *)DetectionDataSetup);
@@ -2239,7 +2203,7 @@ int mbsys_reson7k3_print_DetectionDataSetup(int verbose, s7k3_DetectionDataSetup
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, DetectionDataSetup->serial_number);
@@ -2274,7 +2238,7 @@ int mbsys_reson7k3_print_DetectionDataSetup(int verbose, s7k3_DetectionDataSetup
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2286,14 +2250,13 @@ int mbsys_reson7k3_print_DetectionDataSetup(int verbose, s7k3_DetectionDataSetup
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Beamformed(int verbose, s7k3_Beamformed *Beamformed, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Beamformed";
   s7k3_amplitudephase *amplitudephase;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       Beamformed:      %p\n", (void *)Beamformed);
@@ -2307,7 +2270,7 @@ int mbsys_reson7k3_print_Beamformed(int verbose, s7k3_Beamformed *Beamformed, in
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, Beamformed->serial_number);
@@ -2333,7 +2296,7 @@ int mbsys_reson7k3_print_Beamformed(int verbose, s7k3_Beamformed *Beamformed, in
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2353,7 +2316,6 @@ int mbsys_reson7k3_print_VernierProcessingDataRaw(int verbose, s7k3_VernierProce
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_BITE(int verbose, s7k3_BITE *BITE, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_BITE";
   s7k3_bitereport *bitereport;
   s7k3_bitefield *bitefield;
   s7k3_time *s7kTime;
@@ -2362,7 +2324,7 @@ int mbsys_reson7k3_print_BITE(int verbose, s7k3_BITE *BITE, int *error) {
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       BITE:      %p\n", (void *)BITE);
@@ -2376,7 +2338,7 @@ int mbsys_reson7k3_print_BITE(int verbose, s7k3_BITE *BITE, int *error) {
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     number_reports:             %u\n", first, BITE->number_reports);
@@ -2418,7 +2380,7 @@ int mbsys_reson7k3_print_BITE(int verbose, s7k3_BITE *BITE, int *error) {
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2430,13 +2392,12 @@ int mbsys_reson7k3_print_BITE(int verbose, s7k3_BITE *BITE, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SonarSourceVersion(int verbose, s7k3_SonarSourceVersion *SonarSourceVersion, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SonarSourceVersion";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       SonarSourceVersion: %p\n", (void *)SonarSourceVersion);
@@ -2450,7 +2411,7 @@ int mbsys_reson7k3_print_SonarSourceVersion(int verbose, s7k3_SonarSourceVersion
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     version:                    %s\n", first, SonarSourceVersion->version);
@@ -2458,7 +2419,7 @@ int mbsys_reson7k3_print_SonarSourceVersion(int verbose, s7k3_SonarSourceVersion
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2470,13 +2431,12 @@ int mbsys_reson7k3_print_SonarSourceVersion(int verbose, s7k3_SonarSourceVersion
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_WetEndVersion8k(int verbose, s7k3_WetEndVersion8k *WetEndVersion8k, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_WetEndVersion8k";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       WetEndVersion8k:      %p\n", (void *)WetEndVersion8k);
@@ -2490,7 +2450,7 @@ int mbsys_reson7k3_print_WetEndVersion8k(int verbose, s7k3_WetEndVersion8k *WetE
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     version:                    %s\n", first, WetEndVersion8k->version);
@@ -2498,7 +2458,7 @@ int mbsys_reson7k3_print_WetEndVersion8k(int verbose, s7k3_WetEndVersion8k *WetE
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2510,7 +2470,6 @@ int mbsys_reson7k3_print_WetEndVersion8k(int verbose, s7k3_WetEndVersion8k *WetE
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_RawDetection(int verbose, s7k3_RawDetection *RawDetection, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_RawDetection";
   s7k3_rawdetectiondata *rawdetectiondata;
   s7k3_bathydata *bathydata;
   char *debug_str = "dbg2  ";
@@ -2518,7 +2477,7 @@ int mbsys_reson7k3_print_RawDetection(int verbose, s7k3_RawDetection *RawDetecti
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       RawDetection:      %p\n", (void *)RawDetection);
@@ -2532,7 +2491,7 @@ int mbsys_reson7k3_print_RawDetection(int verbose, s7k3_RawDetection *RawDetecti
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, RawDetection->serial_number);
@@ -2584,7 +2543,7 @@ int mbsys_reson7k3_print_RawDetection(int verbose, s7k3_RawDetection *RawDetecti
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2596,7 +2555,6 @@ int mbsys_reson7k3_print_RawDetection(int verbose, s7k3_RawDetection *RawDetecti
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_Snippet(int verbose, s7k3_Snippet *Snippet, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_Snippet";
   s7k3_snippetdata *snippetdata;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
@@ -2606,7 +2564,7 @@ int mbsys_reson7k3_print_Snippet(int verbose, s7k3_Snippet *Snippet, int *error)
   u32 *u32_ptr;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       Snippet:      %p\n", (void *)Snippet);
@@ -2620,7 +2578,7 @@ int mbsys_reson7k3_print_Snippet(int verbose, s7k3_Snippet *Snippet, int *error)
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, Snippet->serial_number);
@@ -2670,7 +2628,7 @@ int mbsys_reson7k3_print_Snippet(int verbose, s7k3_Snippet *Snippet, int *error)
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2690,13 +2648,12 @@ int mbsys_reson7k3_print_VernierProcessingDataFiltered(int verbose, s7k3_Vernier
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_InstallationParameters(int verbose, s7k3_InstallationParameters *InstallationParameters, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_InstallationParameters";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       InstallationParameters:      %p\n", (void *)InstallationParameters);
@@ -2710,7 +2667,7 @@ int mbsys_reson7k3_print_InstallationParameters(int verbose, s7k3_InstallationPa
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     frequency:                  %f\n", first, InstallationParameters->frequency);
@@ -2750,7 +2707,7 @@ int mbsys_reson7k3_print_InstallationParameters(int verbose, s7k3_InstallationPa
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2777,7 +2734,6 @@ int mbsys_reson7k3_print_CompressedBeamformedMagnitude(int verbose, s7k3_Compres
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWaterColumn *CompressedWaterColumn, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_CompressedWaterColumn";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
@@ -2789,7 +2745,7 @@ int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWater
   int i, j, k, l;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       CompressedWaterColumn:      %p\n", (void *)CompressedWaterColumn);
@@ -2803,7 +2759,7 @@ int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWater
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, CompressedWaterColumn->serial_number);
@@ -2867,7 +2823,7 @@ int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWater
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2879,7 +2835,6 @@ int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWater
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDetection *SegmentedRawDetection, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SegmentedRawDetection";
   s7k3_rawdetectiondata *rawdetectiondata;
   s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata;
   s7k3_segmentedrawdetectionrxdata *segmentedrawdetectionrxdata;
@@ -2889,7 +2844,7 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       SegmentedRawDetection:      %p\n", (void *)SegmentedRawDetection);
@@ -2903,7 +2858,7 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     record_header_size:         %u\n", first, SegmentedRawDetection->record_header_size);
@@ -2988,7 +2943,7 @@ int mbsys_reson7k3_print_SegmentedRawDetection(int verbose, s7k3_SegmentedRawDet
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3014,13 +2969,12 @@ int mbsys_reson7k3_print_SystemEvents(int verbose, s7k3_SystemEvents *SystemEven
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SystemEventMessage(int verbose, s7k3_SystemEventMessage *SystemEventMessage, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SystemEventMessage";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       SystemEventMessage:%p\n", (void *)SystemEventMessage);
@@ -3034,7 +2988,7 @@ int mbsys_reson7k3_print_SystemEventMessage(int verbose, s7k3_SystemEventMessage
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, SystemEventMessage->serial_number);
@@ -3047,7 +3001,7 @@ int mbsys_reson7k3_print_SystemEventMessage(int verbose, s7k3_SystemEventMessage
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3095,14 +3049,13 @@ int mbsys_reson7k3_print_CalibratedSideScan(int verbose, s7k3_CalibratedSideScan
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_SnippetBackscatteringStrength *s7k3_SnippetBackscatteringStrength, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SnippetBackscatteringStrength";
   s7k3_snippetbackscatteringstrengthdata *snippetbackscatteringstrengthdata;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       s7k3_SnippetBackscatteringStrength:      %p\n", (void *)s7k3_SnippetBackscatteringStrength);
@@ -3116,7 +3069,7 @@ int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_Snippet
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, s7k3_SnippetBackscatteringStrength->serial_number);
@@ -3144,7 +3097,7 @@ int mbsys_reson7k3_print_SnippetBackscatteringStrength(int verbose, s7k3_Snippet
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3164,14 +3117,13 @@ int mbsys_reson7k3_print_MB2Status(int verbose, s7k3_MB2Status *MB2Status, int *
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_FileHeader";
   s7k3_subsystem *subsystem;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       FileHeader:        %p\n", (void *)FileHeader);
@@ -3185,7 +3137,7 @@ int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, in
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     file_identifier:            0x", first);
@@ -3216,7 +3168,7 @@ int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, in
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3228,14 +3180,13 @@ int mbsys_reson7k3_print_FileHeader(int verbose, s7k3_FileHeader *FileHeader, in
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_FileCatalog(int verbose, s7k3_FileCatalog *FileCatalog, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_FileCatalog";
   s7k3_filecatalogdata *filecatalogdata;
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       FileCatalog:       %p\n", (void *)FileCatalog);
@@ -3249,7 +3200,7 @@ int mbsys_reson7k3_print_FileCatalog(int verbose, s7k3_FileCatalog *FileCatalog,
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     size:                         %d\n", first, FileCatalog->size);
@@ -3661,7 +3612,7 @@ fprintf(stderr, "nrec_SpreadingLoss:                        %7d\n", nrec_Spreadi
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3701,13 +3652,12 @@ int mbsys_reson7k3_print_RemoteControlNotAcknowledge(int verbose, s7k3_RemoteCon
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_RemoteControlSonarSettings(int verbose, s7k3_RemoteControlSonarSettings *RemoteControlSonarSettings, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_RemoteControlSonarSettings";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       RemoteControlSonarSettings:  %p\n", (void *)RemoteControlSonarSettings);
@@ -3721,7 +3671,7 @@ int mbsys_reson7k3_print_RemoteControlSonarSettings(int verbose, s7k3_RemoteCont
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, RemoteControlSonarSettings->serial_number);
@@ -3798,7 +3748,7 @@ int mbsys_reson7k3_print_RemoteControlSonarSettings(int verbose, s7k3_RemoteCont
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3811,13 +3761,12 @@ int mbsys_reson7k3_print_RemoteControlSonarSettings(int verbose, s7k3_RemoteCont
 /*--------------------------------------------------------------------*/
 
 int mbsys_reson7k3_print_CommonSystemSettings(int verbose, s7k3_CommonSystemSettings *CommonSystemSettings, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_CommonSystemSettings";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       CommonSystemSettings:  %p\n", (void *)CommonSystemSettings);
@@ -3831,7 +3780,7 @@ int mbsys_reson7k3_print_CommonSystemSettings(int verbose, s7k3_CommonSystemSett
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     serial_number:              %llu\n", first, CommonSystemSettings->serial_number);
@@ -3902,7 +3851,7 @@ int mbsys_reson7k3_print_CommonSystemSettings(int verbose, s7k3_CommonSystemSett
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3930,13 +3879,12 @@ int mbsys_reson7k3_print_SystemLockStatus(int verbose, s7k3_SystemLockStatus *Sy
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SoundVelocity(int verbose, s7k3_SoundVelocity *SoundVelocity, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SoundVelocity";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       SoundVelocity:     %p\n", (void *)SoundVelocity);
@@ -3950,7 +3898,7 @@ int mbsys_reson7k3_print_SoundVelocity(int verbose, s7k3_SoundVelocity *SoundVel
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     SoundVelocity:              %f\n", first, SoundVelocity->soundvelocity);
@@ -3960,7 +3908,7 @@ int mbsys_reson7k3_print_SoundVelocity(int verbose, s7k3_SoundVelocity *SoundVel
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3972,13 +3920,12 @@ int mbsys_reson7k3_print_SoundVelocity(int verbose, s7k3_SoundVelocity *SoundVel
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_AbsorptionLoss(int verbose, s7k3_AbsorptionLoss *AbsorptionLoss, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_absorptionloss";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       AbsorptionLoss:    %p\n", (void *)AbsorptionLoss);
@@ -3992,7 +3939,7 @@ int mbsys_reson7k3_print_AbsorptionLoss(int verbose, s7k3_AbsorptionLoss *Absorp
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     absorptionloss:             %f\n", first, AbsorptionLoss->absorptionloss);
@@ -4000,7 +3947,7 @@ int mbsys_reson7k3_print_AbsorptionLoss(int verbose, s7k3_AbsorptionLoss *Absorp
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4012,13 +3959,12 @@ int mbsys_reson7k3_print_AbsorptionLoss(int verbose, s7k3_AbsorptionLoss *Absorp
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_print_SpreadingLoss(int verbose, s7k3_SpreadingLoss *SpreadingLoss, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_print_SpreadingLoss";
   char *debug_str = "dbg2  ";
   char *nodebug_str = "  ";
   char *first;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       SpreadingLoss:     %p\n", (void *)SpreadingLoss);
@@ -4032,7 +3978,7 @@ int mbsys_reson7k3_print_SpreadingLoss(int verbose, s7k3_SpreadingLoss *Spreadin
     first = debug_str;
   else {
     first = nodebug_str;
-    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, function_name);
+    fprintf(stderr, "\n%sMBIO function <%s> called\n", first, __func__);
   }
   fprintf(stderr, "%sStructure Contents:\n", first);
   fprintf(stderr, "%s     SpreadingLoss:              %f\n", first, SpreadingLoss->spreadingloss);
@@ -4040,7 +3986,7 @@ int mbsys_reson7k3_print_SpreadingLoss(int verbose, s7k3_SpreadingLoss *Spreadin
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4053,7 +3999,6 @@ int mbsys_reson7k3_print_SpreadingLoss(int verbose, s7k3_SpreadingLoss *Spreadin
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-  static const char function_name[] = "mbsys_reson7k3_dimensions";
   struct mbsys_reson7k3_struct *store;
   s7k3_bathydata *bathydata;
   s7k3_rawdetectiondata *rawdetectiondata;
@@ -4063,7 +4008,7 @@ int mbsys_reson7k3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
   s7k3_SegmentedRawDetection *SegmentedRawDetection;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -4105,7 +4050,7 @@ int mbsys_reson7k3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
     fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
@@ -4121,7 +4066,6 @@ int mbsys_reson7k3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_pingnumber";
   struct mbsys_reson7k3_struct *store;
   s7k3_bathydata *bathydata;
   s7k3_rawdetectiondata *rawdetectiondata;
@@ -4131,7 +4075,7 @@ int mbsys_reson7k3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnum
   s7k3_SegmentedRawDetection *SegmentedRawDetection;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -4156,7 +4100,7 @@ int mbsys_reson7k3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnum
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       pingnumber: %u\n", *pingnumber);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -4169,11 +4113,10 @@ int mbsys_reson7k3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnum
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_sonartype";
   struct mbsys_reson7k3_struct *store;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -4192,7 +4135,7 @@ int mbsys_reson7k3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       sonartype:  %d\n", *sonartype);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -4205,11 +4148,10 @@ int mbsys_reson7k3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_sidescantype";
   struct mbsys_reson7k3_struct *store;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -4228,7 +4170,7 @@ int mbsys_reson7k3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, in
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       ss_type:    %d\n", *ss_type);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -4244,7 +4186,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k3_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_preprocess";
   struct mbsys_reson7k3_struct *store;
   struct mb_platform_struct *platform;
   struct mb_preprocess_struct *pars;
@@ -4342,7 +4283,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
   double ttime;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:                   %p\n", (void *)mbio_ptr);
@@ -4795,7 +4736,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
               "Timestamp changed in function %s: "
               "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d "
               "| ping_number:%d\n",
-              function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+              __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
               RawDetection->ping_number);
 
       /* apply the timestamp to all of the relevant data records */
@@ -4936,7 +4877,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
       /* print debug statements */
       if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2 Recalculating Bathymetry in %s: 7k ping records read:\n", function_name);
+        fprintf(stderr, "\ndbg2 Recalculating Bathymetry in %s: 7k ping records read:\n", __func__);
         fprintf(stderr, "dbg2      read_ProcessedSideScan:              %d\n",
                 store->read_ProcessedSideScan);
         fprintf(stderr, "dbg2      read_SonarSettings:                  %d\n",
@@ -5358,7 +5299,7 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:         %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5369,7 +5310,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_extract_platform";
   struct mb_platform_struct *platform;
   struct mbsys_reson7k3_struct *store;
   s7k3_InstallationParameters *InstallationParameters;
@@ -5378,7 +5318,7 @@ int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
   int isensor;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:         %p\n", (void *)mbio_ptr);
@@ -5528,7 +5468,7 @@ int mbsys_reson7k3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:           %d\n", *kind);
     fprintf(stderr, "dbg2       platform_ptr:   %p\n", (void *)platform_ptr);
@@ -5545,7 +5485,6 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_extract";
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarSettings *SonarSettings = NULL;
@@ -5565,7 +5504,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -5594,7 +5533,7 @@ int mbsys_reson7k3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
   *kind = store->kind;
 
 #ifdef MBSYS_RESON7K3_DEBUG
-fprintf(stderr, "\nMBIO function <%s> called store->kind:%d\n", function_name, store->kind);
+fprintf(stderr, "\nMBIO function <%s> called store->kind:%d\n", __func__, store->kind);
 if (store->kind == MB_DATA_DATA) {
   fprintf(stderr,  "Records read:\n");
   if (store->read_ProcessedSideScan > 0)
@@ -5807,7 +5746,7 @@ if (store->kind == MB_DATA_DATA) {
 
     /* print debug statements */
     if (verbose >= 4) {
-      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
       fprintf(stderr, "dbg4       kind:       %d\n", *kind);
       fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -5864,7 +5803,7 @@ if (store->kind == MB_DATA_DATA) {
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
       fprintf(stderr, "dbg4       kind:       %d\n", *kind);
       fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -5912,7 +5851,7 @@ if (store->kind == MB_DATA_DATA) {
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
       fprintf(stderr, "dbg4       kind:       %d\n", *kind);
       fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -5948,7 +5887,7 @@ if (store->kind == MB_DATA_DATA) {
 
     /* print debug statements */
     if (verbose >= 4) {
-      fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  New ping values:\n");
       fprintf(stderr, "dbg4       kind:       %d\n", *kind);
       fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -5973,7 +5912,7 @@ if (store->kind == MB_DATA_DATA) {
 
     /* print debug statements */
     if (verbose >= 4) {
-      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
       fprintf(stderr, "dbg4       kind:       %d\n", *kind);
       fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -5990,7 +5929,7 @@ if (store->kind == MB_DATA_DATA) {
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
   }
@@ -6038,7 +5977,6 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_insert";
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_SonarSettings *SonarSettings = NULL;
   s7k3_BeamGeometry *BeamGeometry = NULL;
@@ -6057,7 +5995,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
   u32 quality;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -6338,7 +6276,7 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return value:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6351,7 +6289,6 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_ttimes";
   struct mbsys_reson7k3_struct *store;
   s7k3_SonarSettings *SonarSettings;
   s7k3_BeamGeometry *BeamGeometry;
@@ -6364,7 +6301,7 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
   double sonardepth;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -6474,7 +6411,7 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
   }
@@ -6496,7 +6433,6 @@ int mbsys_reson7k3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_detects";
   struct mbsys_reson7k3_struct *store;
   s7k3_RawDetection *RawDetection;
   s7k3_rawdetectiondata *rawdetectiondata;
@@ -6507,7 +6443,7 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
   s7k3_BeamGeometry *BeamGeometry;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -6594,7 +6530,7 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
   }
@@ -6614,7 +6550,6 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_gains";
   struct mbsys_reson7k3_struct *store;
   s7k3_RawDetection *RawDetection;
   s7k3_rawdetectiondata *rawdetectiondata;
@@ -6625,7 +6560,7 @@ int mbsys_reson7k3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind
   s7k3_SonarSettings *SonarSettings;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -6686,7 +6621,7 @@ int mbsys_reson7k3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
   }
@@ -6707,7 +6642,6 @@ int mbsys_reson7k3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
                                     int *kind, double *transducer_depth,
                                     double *altitudev, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_extract_altitude";
   struct mbsys_reson7k3_struct *store;
   s7k3_header *header;
   s7k3_Navigation *Navigation;
@@ -6729,7 +6663,7 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
   mb_u_char beamflag;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -6851,7 +6785,7 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:              %d\n", *kind);
     fprintf(stderr, "dbg2       transducer_depth:  %f\n", *transducer_depth);
@@ -6867,7 +6801,6 @@ int mbsys_reson7k3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_extract_nav";
   struct mbsys_reson7k3_struct *store;
   s7k3_header *header;
   s7k3_Position *Position;
@@ -6889,7 +6822,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
   int time_j[5];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -7261,7 +7194,7 @@ int mbsys_reson7k3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:          %d\n", *kind);
     fprintf(stderr, "dbg2       time_i[0]:     %d\n", time_i[0]);
@@ -7297,13 +7230,12 @@ int mbsys_reson7k3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
                                 double *time_d, double *navlon, double *navlat,
                                 double *speed, double *heading, double *draft,
                                 double *roll, double *pitch, double *heave, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_extract_nnav";
   struct mbsys_reson7k3_struct *store;
   s7k3_CustomAttitude *CustomAttitude;
   s7k3_Attitude *Attitude;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -7405,7 +7337,7 @@ int mbsys_reson7k3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
     fprintf(stderr, "dbg2       n:          %d\n", *n);
@@ -7434,7 +7366,6 @@ int mbsys_reson7k3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson7k3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-  static const char function_name[] = "mbsys_reson7k3_insert_nav";
   struct mbsys_reson7k3_struct *store;
   s7k3_SonarSettings *SonarSettings;
   s7k3_BeamGeometry *BeamGeometry;
@@ -7448,7 +7379,7 @@ int mbsys_reson7k3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
   s7k3_Navigation *Navigation;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -7551,7 +7482,7 @@ int mbsys_reson7k3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return value:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7563,12 +7494,11 @@ int mbsys_reson7k3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
-  static const char function_name[] = "mbsys_reson7k3_extract_svp";
   struct mbsys_reson7k3_struct *store;
   s7k3_SoundVelocityProfile *SoundVelocityProfile;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -7616,7 +7546,7 @@ int mbsys_reson7k3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:              %d\n", *kind);
     fprintf(stderr, "dbg2       nsvp:              %d\n", *nsvp);
@@ -7632,12 +7562,11 @@ int mbsys_reson7k3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
-  static const char function_name[] = "mbsys_reson7k3_insert_svp";
   struct mbsys_reson7k3_struct *store;
   s7k3_SoundVelocityProfile *SoundVelocityProfile;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -7682,7 +7611,7 @@ int mbsys_reson7k3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return value:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -7694,7 +7623,6 @@ int mbsys_reson7k3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
                       double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_ctd";
   struct mbsys_reson7k3_struct *store;
   s7k3_header *header;
   s7k3_CTD *CTD;
@@ -7702,7 +7630,7 @@ int mbsys_reson7k3_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   int time_i[7];
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -7752,7 +7680,7 @@ int mbsys_reson7k3_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
   }
@@ -7782,12 +7710,11 @@ int mbsys_reson7k3_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 int mbsys_reson7k3_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsamples, double *time_d,
                                    double *sensor1, double *sensor2, double *sensor3, double *sensor4, double *sensor5,
                                    double *sensor6, double *sensor7, double *sensor8, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_ancilliarysensor";
   struct mbsys_reson7k3_struct *store;
   s7k3_header *header;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -7807,7 +7734,7 @@ int mbsys_reson7k3_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr
   *nsamples = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
   }
@@ -7838,14 +7765,13 @@ int mbsys_reson7k3_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_copy";
   struct mbsys_reson7k3_struct *store;
   struct mbsys_reson7k3_struct *copy;
   int nalloc;
   char *charptr, *copycharptr;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -8487,7 +8413,7 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   copy->FileHeader = store->FileHeader;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -8499,7 +8425,6 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-  static const char function_name[] = "mbsys_reson7k3_makess";
   struct mbsys_reson7k3_struct *store = NULL;
   s7k3_SonarSettings *SonarSettings = NULL;
   s7k3_BeamGeometry *BeamGeometry = NULL;
@@ -8549,7 +8474,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
   int i, j, k, kk;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
@@ -9285,7 +9210,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
 
     /* print debug statements */
     if (verbose >= 2) {
-      fprintf(stderr, "\ndbg2  SideScan regenerated in <%s>\n", function_name);
+      fprintf(stderr, "\ndbg2  SideScan regenerated in <%s>\n", __func__);
       fprintf(stderr, "dbg2       pixels_ss:  %d\n", nss);
       for (int i = 0; i < nss; i++)
         fprintf(stderr, "dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n", i, ss_cnt[i], ss[i],
@@ -9296,7 +9221,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return value:\n");
     fprintf(stderr, "dbg2       pixel_size:      %f\n", *pixel_size);
     fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
