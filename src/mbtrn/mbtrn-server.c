@@ -101,6 +101,9 @@ GNU General Public License for more details
 #include "mbtrn-server.h"
 #include "mdebug.h"
 
+#ifndef sleep
+#define sleep _sleep
+#endif
 
 /////////////////////////
 // Declarations 

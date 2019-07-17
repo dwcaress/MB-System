@@ -84,6 +84,7 @@ GNU General Public License for more details
 #	if defined(_MSC_VER)
 #		include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
+#define ftruncate _chsize	// https://stackoverflow.com/questions/873454/how-to-truncate-a-file-in-c 
 #	endif
 #else
 #	include <sys/socket.h>
@@ -97,6 +98,22 @@ typedef SSIZE_T ssize_t;
 #include "mdebug.h"
 #include "mconfig.h"
 #include "r7kc.h"
+
+#ifndef MSG_NOSIGNAL
+# define MSG_NOSIGNAL 0
+#endif
+
+#ifdef _MSC_VER
+int vdprintf(int d, const char *format, va_list va) {	// No idea if this really works. JL
+	char buf[2048];
+	int len = vsnprintf(buf, 2048, format, va);
+	return write(d, buf, len);
+}
+
+#include "fsync.c"
+
+#define S_IWUSR S_IWUSR_		// Another uncomprehensible shit. Have to trick it this way. JL
+#endif
 
 /////////////////////////
 // Macros
@@ -1296,7 +1313,7 @@ static int s_iow2posix_flags(int iflags)
     pflags |= ( (iflags&IOW_NONBLOCK)!=0 ? FIONBIO : 0 );		// I'm really not sure about this. JL
 #else
     pflags |= ( (iflags&IOW_NONBLOCK)!=0 ? O_NONBLOCK : 0 );
-#endif
+
     pflags |= ( (iflags&IOW_DSYNC   )!=0 ? O_DSYNC    : 0 );
 #if defined(__APPLE__)
     pflags |= ( (iflags&IOW_RSYNC   )!=0 ? O_SYNC    : 0 );
@@ -1310,6 +1327,7 @@ static int s_iow2posix_flags(int iflags)
     pflags |= ( (iflags&IOW_ASYNC   )!=0 ? O_ASYNC    : 0 );
 #endif
     pflags |= ( (iflags&IOW_EXCL    )!=0 ? O_EXCL     : 0 );
+#endif
 //    pflags |= ( (iflags&IOW_DIRECT  )!=0 ? O_DIRECT   : 0 );
     
     return pflags;

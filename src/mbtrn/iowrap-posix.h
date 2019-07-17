@@ -101,7 +101,11 @@ static const mode_t S_ISUID      = 0x08000000;           ///< does nothing
 static const mode_t S_ISGID      = 0x04000000;           ///< does nothing
 static const mode_t S_ISVTX      = 0x02000000;           ///< does nothing
 static const mode_t S_IRUSR      = (mode_t)(_S_IREAD);     ///< read by user
+#ifdef _MSC_VER		// No idea why I have to jump this one (and redefine back in iowrap-posix.c).  JL
+static const mode_t S_IWUSR_     = (mode_t)(_S_IWRITE);    ///< write by user
+#else
 static const mode_t S_IWUSR      = (mode_t)(_S_IWRITE);    ///< write by user
+#endif
 static const mode_t S_IXUSR      = 0x00400000;           ///< does nothing
 #   ifndef STRICT_UGO_PERMISSIONS
 static const mode_t S_IRGRP      = (mode_t)(_S_IREAD);     ///< read by *USER*
