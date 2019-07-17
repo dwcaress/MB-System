@@ -42,9 +42,6 @@ void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, int (*cmp)(
 /* 	function mb_esf_check checks for an existing esf file. */
 int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *error) {
 	static const char function_name[] = "mb_esf_check";
-	int status = MB_SUCCESS;
-	int mbp_edit_mode;
-	char mbp_editfile[MB_PATH_MAXLINE];
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -55,7 +52,9 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
 
 	/* check if edit save file is set in mbprocess parameter file
 	    or just lying around */
-	status = mb_pr_get_edit(verbose, swathfile, &mbp_edit_mode, mbp_editfile, error);
+	int mbp_edit_mode;
+	char mbp_editfile[MB_PATH_MAXLINE];
+	int status = mb_pr_get_edit(verbose, swathfile, &mbp_edit_mode, mbp_editfile, error);
 	if (mbp_edit_mode == MBP_EDIT_ON) {
 		*found = MB_YES;
 		strcpy(esffile, mbp_editfile);
@@ -96,7 +95,6 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
 int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
                 int *error) {
 	static const char function_name[] = "mb_esf_load";
-	int status = MB_SUCCESS;
 	int found;
 
 	if (verbose >= 2) {
@@ -123,7 +121,7 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
 
 	/* get name of existing or new esffile, then load old edits
 	    and/or open new esf file */
-	status = mb_esf_check(verbose, swathfile, esffile, &found, error);
+	int status = mb_esf_check(verbose, swathfile, esffile, &found, error);
 	if ((load == MB_YES && found == MB_YES) || output != MBP_ESF_NOWRITE) {
 		status = mb_esf_open(verbose, program_name, esffile, load, output, esf, error);
 	}
@@ -475,7 +473,6 @@ int mb_esf_fixtimestamps(int verbose, struct mb_esf_struct *esf, double time_d, 
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int pingmultiplicity, int nbath, char *beamflag,
                  int *error) {
 	static const char function_name[] = "mb_esf_apply";
-	int status = MB_SUCCESS;
 	int firstedit, lastedit;
 	int apply, action;
 	int beamoffset, beamoffsetmax;
@@ -656,6 +653,8 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			esf->startnextsearch = esf->nedit - 1;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -677,7 +676,6 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 /* 	function mb_esf_save saves one edit event to an esf file. */
 int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error) {
 	static const char function_name[] = "mb_esf_save";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -690,6 +688,8 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 		fprintf(stderr, "dbg2       beam:             %d\n", beam);
 		fprintf(stderr, "dbg2       action:           %d\n", action);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write out the edit */
 	if (esf->esffp != NULL) {
@@ -732,7 +732,6 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 /* 	function mb_ess_save saves one edit event to an edit save stream file. */
 int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam, int action, int *error) {
 	static const char function_name[] = "mb_ess_save";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -745,6 +744,8 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 		fprintf(stderr, "dbg2       beam:             %d\n", beam);
 		fprintf(stderr, "dbg2       action:           %d\n", action);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write out the edit */
 	if (esf->essfp != NULL) {
@@ -787,7 +788,6 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 /* 	function mb_esf_close deallocates memory in the esf structure. */
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
 	static const char function_name[] = "mb_esf_close";
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -797,6 +797,8 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error) {
 		fprintf(stderr, "dbg2       esf->edit:        %p\n", (void *)esf->edit);
 		fprintf(stderr, "dbg2       esf->esffp:       %p\n", (void *)esf->esffp);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* deallocate the arrays */
 	if (esf->edit != NULL)
@@ -940,10 +942,6 @@ static const int THRESHOLD = 16; /* Best choice for natural merge cut-off. */
  * Arguments are as for qsort.
  */
 int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(const void *, const void *)) {
-	register int sense;
-	int big, iflag;
-	register mb_u_char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
-	mb_u_char *list2, *list1, *p2, *p, *last, **p1;
 
 	if (size < PSIZE / 2) { /* Pointers must fit into 2 * size. */
 		/*errno = EINVAL;*/
@@ -954,20 +952,26 @@ int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(cons
 	 * XXX
 	 * Stupid subtraction for the Cray.
 	 */
-	iflag = 0;
+	int iflag = 0;
 	if (!(size % ISIZE) && !(((char *)base - (char *)0) % ISIZE))
 		iflag = 1;
 
-	if ((list2 = (mb_u_char *)malloc(nmemb * size + PSIZE)) == NULL)
+	mb_u_char *list2 = (mb_u_char *)malloc(nmemb * size + PSIZE);
+	if (list2 == NULL)
 		return (-1);
 
-	list1 = base;
+	int sense;
+	mb_u_char *f1, *f2, *t, *b, *tp2, *q;
+	mb_u_char *l1;
+	mb_u_char *p2, *p, *last;
+	mb_u_char *list1 = base;
 	mb_mergesort_setup(list1, list2, nmemb, size, cmp);
 	last = list2 + nmemb * size;
-	int i = big = 0;
+	int i = 0;
+	int big = 0;
 	while (*EVAL(list2) != last) {
-		l2 = list1;
-		p1 = EVAL(list1);
+		mb_u_char *l2 = list1;
+		mb_u_char **p1 = EVAL(list1);
 		for (tp2 = p2 = list2; p2 != last; p1 = EVAL(l2)) {
 			p2 = *EVAL(p2);
 			f1 = l2;
@@ -1109,23 +1113,25 @@ int mb_mergesort(void *base, size_t nmemb, register size_t size, int (*cmp)(cons
  * is defined.  Otherwise simple pairwise merging is used.)
  */
 void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void *)) {
-	int length, size2, tmp, sense;
-	mb_u_char *f1, *f2, *s, *l2, *last, *p2;
-
-	size2 = size * 2;
 	if (n <= 5) {
 		mb_mergesort_insertionsort(list1, n, size, cmp);
 		*EVAL(list2) = (mb_u_char *)list2 + n * size;
 		return;
 	}
+
+	const int size2 = size * 2;
+
 	/*
 	 * Avoid running pointers out of bounds; limit n to evens
 	 * for simplicity.
 	 */
 	int i = 4 + (n & 1);
 	mb_mergesort_insertionsort(list1 + (n - i) * size, i, size, cmp);
-	last = list1 + size * (n - i);
+	mb_u_char *last = list1 + size * (n - i);
 	*EVAL(list2 + (last - list1)) = list2 + n * size;
+
+	int length, tmp, sense;
+	mb_u_char *f1, *f2, *s, *l2, *p2;
 
 #ifdef NATURAL
 	p2 = list2;
@@ -1179,12 +1185,12 @@ void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t siz
  * last 4 elements.
  */
 void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void *)) {
-	mb_u_char *ai, *s, *t, *u, tmp;
+	mb_u_char *s, tmp;
 	int i;
 
-	for (ai = a + size; --n >= 1; ai += size)
-		for (t = ai; t > a; t -= size) {
-			u = t - size;
+	for (mb_u_char *ai = a + size; --n >= 1; ai += size)
+		for (mb_u_char *t = ai; t > a; t -= size) {
+			mb_u_char *u = t - size;
 			if (cmp(u, t) <= 0)
 				break;
 			swap(u, t);
