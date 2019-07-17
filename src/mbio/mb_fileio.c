@@ -36,10 +36,6 @@
 /*--------------------------------------------------------------------*/
 int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 	static const char function_name[] = "mb_fileio_open";
-	int fileiobuffer;
-	size_t fileiobufferbytes;
-	int buffer_status = MB_SUCCESS;
-	int buffer_error = MB_ERROR_NO_ERROR;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -52,6 +48,8 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	int status = MB_SUCCESS;
+
+	int buffer_error = MB_ERROR_NO_ERROR;
 
 	/* open the file for reading */
 	if (mb_io_ptr->filemode == MB_FILEMODE_READ) {
@@ -72,15 +70,16 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 	                    0   use fread() and fwrite() with standard buffering
 	                    >0  use fread() and fwrite() with user defined buffer
 	                    <0  use mmap for file i/o */
+	int fileiobuffer;
 	if (status == MB_SUCCESS) {
 		mb_fileiobuffer(verbose, &fileiobuffer);
 		if (fileiobuffer > 0) {
 			/* the buffer size must be a multiple of 512, plus 8 to be efficient */
-			fileiobufferbytes = (fileiobuffer * 1024) + 8;
+			const size_t fileiobufferbytes = (fileiobuffer * 1024) + 8;
 
 			/* allocate the buffer */
 			buffer_error = MB_ERROR_NO_ERROR;
-			buffer_status =
+			int buffer_status =
 			    mb_mallocd(verbose, __FILE__, __LINE__, fileiobufferbytes, (void **)&mb_io_ptr->file_iobuffer, &buffer_error);
 
 			/* apply the buffer */
@@ -136,7 +135,6 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error) {
 	static const char function_name[] = "mb_fileio_get";
-	size_t read_len;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -153,6 +151,7 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 
 	int status = MB_SUCCESS;
 
+	size_t read_len;
     if (mb_io_ptr->mbfp != NULL) {
         /* read expected number of bytes into buffer */
         if ((read_len = fread(buffer, 1, *size, mb_io_ptr->mbfp)) != *size) {
@@ -219,7 +218,6 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 /*--------------------------------------------------------------------*/
 int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error) {
 	static const char function_name[] = "mb_fileio_put";
-	size_t write_len;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
@@ -237,7 +235,8 @@ int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 	int status = MB_SUCCESS;
 
 	/* write expected number of bytes from buffer */
-	if ((write_len = fwrite(buffer, 1, *size, mb_io_ptr->mbfp)) != *size) {
+	size_t write_len = fwrite(buffer, 1, *size, mb_io_ptr->mbfp);
+	if (write_len != *size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		*size = write_len;
