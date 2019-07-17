@@ -37,7 +37,6 @@
     reading. The file headers are returned */
 int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct mb_segyasciiheader_struct *segyasciiheader,
                       struct mb_segyfileheader_struct *segyfileheader, int *error) {
-	static const char function_name[] = "mb_segy_read_init";
 	struct mb_segyio_struct *mb_segyio_ptr;
 	struct mb_segyasciiheader_struct *asciiheader;
 	struct mb_segyfileheader_struct *fileheader;
@@ -45,7 +44,7 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 	int index;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
 		fprintf(stderr, "dbg2       segyfile:            %s\n", segyfile);
@@ -194,7 +193,7 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       asciiheader:         %p\n", (void *)asciiheader);
 		fprintf(stderr, "dbg2       fileheader:          %p\n", (void *)fileheader);
@@ -254,13 +253,12 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
     writing. The file headers are inserted. */
 int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_struct *asciiheader,
                        struct mb_segyfileheader_struct *fileheader, void **mbsegyio_ptr, int *error) {
-	static const char function_name[] = "mb_segy_write_init";
 	struct mb_segyio_struct *mb_segyio_ptr;
 	char *buffer;
 	int index;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
 		fprintf(stderr, "dbg2       segyfile:            %s\n", segyfile);
@@ -435,7 +433,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -450,14 +448,13 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 /* 	function mb_segy_close closes a segy file that was opened
     for either reading or writing. */
 int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
-	static const char function_name[] = "mb_segy_close";
 	struct mb_segyio_struct *mb_segyio_ptr;
 
 	/* get pointer to segyio structure */
 	mb_segyio_ptr = (struct mb_segyio_struct *)*mbsegyio_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       fp:          %p\n", (void *)mb_segyio_ptr->fp);
@@ -476,7 +473,7 @@ int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       fp:            %p\n", (void *)mb_segyio_ptr->fp);
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
@@ -495,7 +492,6 @@ int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
     additional memory can be allocated if necessary */
 int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheader_struct *traceheaderptr, float **traceptr,
                        int *error) {
-	static const char function_name[] = "mb_segy_read_trace";
 	struct mb_segyio_struct *mb_segyio_ptr;
 	struct mb_segyfileheader_struct *fileheader;
 	struct mb_segytraceheader_struct *traceheader;
@@ -508,7 +504,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 	int i;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       mbsegyio_ptr:     %p\n", (void *)mbsegyio_ptr);
@@ -768,7 +764,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       seq_num:       %d\n", traceheader->seq_num);
 		fprintf(stderr, "dbg2       seq_reel:      %d\n", traceheader->seq_reel);
@@ -853,7 +849,6 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
     in as a pointer */
 int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheader_struct *traceheader, float *trace,
                         int *error) {
-	static const char function_name[] = "mb_segy_write_trace";
 	struct mb_segyio_struct *mb_segyio_ptr;
 	struct mb_segyasciiheader_struct *asciiheader;
 	struct mb_segyfileheader_struct *fileheader;
@@ -869,7 +864,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	fileheader = &(mb_segyio_ptr->fileheader);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
 		fprintf(stderr, "dbg2       mbsegyio_ptr:  %p\n", (void *)mbsegyio_ptr);
@@ -1258,7 +1253,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

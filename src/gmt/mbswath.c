@@ -1209,7 +1209,6 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 }
 /*--------------------------------------------------------------------*/
 int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
-	char *function_name = "mbswath_get_footprints";
 	int status = MB_SUCCESS;
 	struct swath *swath;
 	struct ping *pingcur;
@@ -1229,7 +1228,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
 		fprintf(stderr, "dbg2       Ctrl->A.mode:             %d\n", Ctrl->A.mode);
@@ -1685,7 +1684,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 	/* print debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Beam footprints found in function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg2  Beam footprints found in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2       npings:         %d\n", swath->npings);
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 		fprintf(stderr, "dbg2       status:         %d\n", status);
@@ -1718,7 +1717,7 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1729,7 +1728,6 @@ int mbswath_get_footprints(int verbose, struct MBSWATH_CTRL *Ctrl, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GMT, struct GMT_PALETTE *CPT, int *error) {
-	char *function_name = "mbswath_get_shading";
 	int status = MB_SUCCESS;
 	struct swath *swath;
 	struct ping *ping0;
@@ -1751,7 +1749,7 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       Ctrl:               %p\n", Ctrl);
@@ -1904,7 +1902,7 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 
 	/* print debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Shading values in function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg2  Shading values in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2       npings:         %d\n", swath->npings);
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 		fprintf(stderr, "dbg2       status:         %d\n", status);
@@ -1923,7 +1921,7 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1935,7 +1933,6 @@ int mbswath_get_shading(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL 
 /*--------------------------------------------------------------------*/
 int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GMT, struct GMT_PALETTE *CPT,
                                 struct PSL_CTRL *PSL, int first, int nplot, int *error) {
-	char *function_name = "mbswath_plot_data_footprint";
 	int status = MB_SUCCESS;
 	struct swath *swath;
 	struct ping *pingcur;
@@ -1951,7 +1948,7 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       Ctrl:               %p\n", Ctrl);
@@ -2039,7 +2036,7 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2051,7 +2048,6 @@ int mbswath_plot_data_footprint(int verbose, struct MBSWATH_CTRL *Ctrl, struct G
 /*--------------------------------------------------------------------*/
 int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GMT, struct GMT_PALETTE *CPT,
                             struct PSL_CTRL *PSL, int first, int nplot, int *error) {
-	char *function_name = "mbswath_plot_data_point";
 	int status = MB_SUCCESS;
 	struct swath *swath;
 	struct ping *pingcur;
@@ -2065,7 +2061,7 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       Ctrl:               %p\n", Ctrl);
@@ -2135,7 +2131,7 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2147,7 +2143,6 @@ int mbswath_plot_data_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_C
 /*--------------------------------------------------------------------*/
 int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GMT, struct PSL_CTRL *PSL, double *x, double *y,
                      double *rgb, int *error) {
-	char *function_name = "mbswath_plot_box";
 	int status = MB_SUCCESS;
 	int ix[5], iy[5];
 	int ixmin, ixmax, iymin, iymax;
@@ -2159,7 +2154,7 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       GMT:                %p\n", GMT);
@@ -2283,7 +2278,7 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2295,7 +2290,6 @@ int mbswath_plot_box(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GM
 /*--------------------------------------------------------------------*/
 int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *GMT, struct PSL_CTRL *PSL, double x, double y,
                        double *rgb, int *error) {
-	char *function_name = "mbswath_plot_point";
 	int status = MB_SUCCESS;
 	double size = 0.005;
 	int ix, iy;
@@ -2303,7 +2297,7 @@ int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
 		fprintf(stderr, "dbg2       GMT:                %p\n", GMT);
@@ -2346,7 +2340,7 @@ int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2357,7 +2351,6 @@ int mbswath_plot_point(int verbose, struct MBSWATH_CTRL *Ctrl, struct GMT_CTRL *
 }
 /*--------------------------------------------------------------------*/
 int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *error) {
-	char *function_name = "mbswath_ping_copy";
 	int status = MB_SUCCESS;
 
 	struct ping *ping1;
@@ -2366,7 +2359,7 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       one:        %d\n", one);
@@ -2425,7 +2418,7 @@ int mbswath_ping_copy(int verbose, int one, int two, struct swath *swath, int *e
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSWATH function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

@@ -36,12 +36,11 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_alloc";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -94,7 +93,7 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	memset(store->comment, 0, MBSYS_LDEOIH_MAXLINE);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)*store_ptr);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -106,12 +105,11 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_deall";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -135,7 +133,7 @@ int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -147,12 +145,11 @@ int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                             int *error) {
-	static const char function_name[] = "mbsys_ldeoih_dimensions";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -183,7 +180,7 @@ int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       nbath:      %d\n", *nbath);
@@ -198,12 +195,11 @@ int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
 }
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_sonartype";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -224,7 +220,7 @@ int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *so
     }
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       sonartype:  %d\n", *sonartype);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -236,12 +232,11 @@ int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *so
 }
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_sidescantype";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -258,7 +253,7 @@ int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int 
 	*ss_type = store->ss_type;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ss_type:    %d\n", *ss_type);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -271,7 +266,6 @@ int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 							  int *sensorhead, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_sensorhead";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
@@ -280,7 +274,7 @@ int mbsys_ldeoih_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 	assert(store_ptr != NULL);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", mbio_ptr);
@@ -301,7 +295,7 @@ int mbsys_ldeoih_sensorhead(int verbose, void *mbio_ptr, void *store_ptr,
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       sensorhead: %d\n", *sensorhead);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -316,13 +310,12 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                          double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                          double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_extract";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 	double ss_scale;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -397,7 +390,7 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 		/* print debug statements */
 		if (verbose >= 5) {
-			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -437,7 +430,7 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
 			fprintf(stderr, "dbg4       comment:    %s\n", comment);
@@ -445,7 +438,7 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -493,7 +486,6 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
                         double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                         double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                         double *ssalongtrack, char *comment, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_insert";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 	double depthmax, distmax;
@@ -501,7 +493,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	int ngood;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -595,7 +587,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 				status = MB_FAILURE;
 				*error = MB_ERROR_MEMORY_FAIL;
 				if (verbose >= 2) {
-					fprintf(stderr, "\ndbg2  MBcopy function <%s> terminated with error\n", function_name);
+					fprintf(stderr, "\ndbg2  MBcopy function <%s> terminated with error\n", __func__);
 					fprintf(stderr, "dbg2  Return values:\n");
 					fprintf(stderr, "dbg2       error:      %d\n", *error);
 					fprintf(stderr, "dbg2  Return status:\n");
@@ -618,7 +610,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 					status = MB_FAILURE;
 					*error = MB_ERROR_MEMORY_FAIL;
 					if (verbose >= 2) {
-						fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+						fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 						fprintf(stderr, "dbg2  Return values:\n");
 						fprintf(stderr, "dbg2       error:      %d\n", *error);
 						fprintf(stderr, "dbg2  Return status:\n");
@@ -652,7 +644,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 					status = MB_FAILURE;
 					*error = MB_ERROR_MEMORY_FAIL;
 					if (verbose >= 2) {
-						fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+						fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 						fprintf(stderr, "dbg2  Return values:\n");
 						fprintf(stderr, "dbg2       error:      %d\n", *error);
 						fprintf(stderr, "dbg2  Return status:\n");
@@ -744,7 +736,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -757,12 +749,11 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 int mbsys_ldeoih_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                         double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                         double *ssv, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_ttimes";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -825,7 +816,7 @@ int mbsys_ldeoih_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -847,12 +838,11 @@ int mbsys_ldeoih_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_detects";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -901,7 +891,7 @@ int mbsys_ldeoih_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -921,14 +911,13 @@ int mbsys_ldeoih_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                   double *altitude, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_extract_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 	double bath_best;
 	double xtrack_min;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -990,7 +979,7 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       transducer_depth:  %f\n", *transducer_depth);
@@ -1005,12 +994,11 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
                                  int *error) {
-	static const char function_name[] = "mbsys_ldeoih_insert_altitude";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:            %p\n", (void *)mbio_ptr);
@@ -1046,7 +1034,7 @@ int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, d
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:             %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1059,12 +1047,11 @@ int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, d
 int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                              double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                              double *pitch, double *heave, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_extract_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1106,7 +1093,7 @@ int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 		/* print debug statements */
 		if (verbose >= 5) {
-			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -1146,7 +1133,7 @@ int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1180,12 +1167,11 @@ int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                             double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                             int *error) {
-	static const char function_name[] = "mbsys_ldeoih_insert_nav";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1237,7 +1223,7 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1248,13 +1234,12 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 }
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	static const char function_name[] = "mbsys_ldeoih_copy";
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *store;
 	struct mbsys_ldeoih_struct *copy;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1349,7 +1334,7 @@ int mbsys_ldeoih_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

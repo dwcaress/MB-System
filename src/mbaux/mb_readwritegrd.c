@@ -42,7 +42,6 @@
 int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue, int *nxy,
                     int *n_columns, int *n_rows, double *min, double *max, double *xmin, double *xmax, double *ymin, double *ymax,
                     double *dx, double *dy, float **data, float **data_dzdx, float **data_dzdy, int *error) {
-	char function_name[] = "mb_read_gmt_grd";
 	int status = MB_SUCCESS;
 	void *API = NULL;               /* GMT API control structure pointer */
 	struct GMT_GRID *G = NULL;      /* GMT grid structure pointer */
@@ -63,7 +62,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       grdfile:         %s\n", grdfile);
@@ -85,8 +84,8 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	if (status == MB_SUCCESS) {
 
 		/* Initialize new GMT session */
-		if ((API = GMT_Create_Session(function_name, 2U, 0U, NULL)) == NULL) {
-			fprintf(stderr, "\nUnable to initialize a GMT session with GMT_Create_Session() in function %s\n", function_name);
+		if ((API = GMT_Create_Session(__func__, 2U, 0U, NULL)) == NULL) {
+			fprintf(stderr, "\nUnable to initialize a GMT session with GMT_Create_Session() in function %s\n", __func__);
 			fprintf(stderr, "Unable to read GMT grid file %s\n",grdfile);
 			fprintf(stderr, "Program terminated\n");
 			exit(EXIT_FAILURE);
@@ -111,7 +110,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 		}
 		if (G == NULL) {
 			fprintf(stderr, "\nUnable to read GMT grid file %s with GMT_Read_Data() after %d tries in function %s\n",
-					grdfile, num_tries, function_name);
+					grdfile, num_tries, __func__);
 			fprintf(stderr, "Program terminated\n");
 			exit(EXIT_FAILURE);
 		}
@@ -247,7 +246,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 
 		/* Destroy GMT session */
 		if (GMT_Destroy_Session(API) != 0) {
-			fprintf(stderr, "\nUnable to destroy a GMT session with GMT_Destroy_Session() in function %s\n", function_name);
+			fprintf(stderr, "\nUnable to destroy a GMT session with GMT_Destroy_Session() in function %s\n", __func__);
 			fprintf(stderr, "Unable to read GMT grid file %s\n",grdfile);
 			fprintf(stderr, "Program terminated\n");
 			exit(EXIT_FAILURE);
@@ -291,7 +290,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBBA function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		if (status == MB_SUCCESS) {
 		        fprintf(stderr, "dbg2       Dimensions: %d %d\n", header->n_columns, header->n_rows);
@@ -340,7 +339,6 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue, int n_columns, int n_rows, double xmin, double xmax,
                      double ymin, double ymax, double zmin, double zmax, double dx, double dy, char *xlab, char *ylab, char *zlab,
                      char *titl, char *projection, int argc, char **argv, int *error) {
-	char *function_name = "mb_write_gmt_grd";
 	int status = MB_SUCCESS;
 
 	double wesn[4];
@@ -376,7 +374,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       grdfile:    %s\n", grdfile);
@@ -400,8 +398,8 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	}
 
 	/* Initializing new GMT session */
-	if ((API = GMT_Create_Session(function_name, 2U, 0U, NULL)) == NULL) {
-		fprintf(stderr, "\nUnable to initialize a GMT session with GMT_Create_Session() in function %s\n", function_name);
+	if ((API = GMT_Create_Session(__func__, 2U, 0U, NULL)) == NULL) {
+		fprintf(stderr, "\nUnable to initialize a GMT session with GMT_Create_Session() in function %s\n", __func__);
 		fprintf(stderr, "Unable to write GMT grid file %s\n",grdfile);
 		fprintf(stderr, "Program terminated\n");
 		exit(EXIT_FAILURE);
@@ -577,20 +575,20 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	if (GMT_Write_Data(API, GMT_IS_GRID, GMT_IS_FILE, GMT_IS_SURFACE, mode, NULL, grdfile, G) != 0) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
-		fprintf(stderr, "Unable to write GMT grid file %s with GMT_Write_Data() in function %s\n", grdfile, function_name);
+		fprintf(stderr, "Unable to write GMT grid file %s with GMT_Write_Data() in function %s\n", grdfile, __func__);
 	}
 
 	/* Destroy GMT session */
 	if (GMT_Destroy_Session(API) != 0) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
-		fprintf(stderr, "\nUnable to destroy a GMT session with GMT_Write_Data() in function %s\n", function_name);
+		fprintf(stderr, "\nUnable to destroy a GMT session with GMT_Write_Data() in function %s\n", __func__);
 		fprintf(stderr, "Unable to write GMT grid file %s\n",grdfile);
 	}
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

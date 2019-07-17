@@ -35,13 +35,12 @@
 
 /*--------------------------------------------------------------------*/
 int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **topogrid_ptr, int *error) {
-	char *function_name = "mb_topogrid_init";
 	int status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       topogridfile:              %s\n", topogridfile);
@@ -106,7 +105,7 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       lonflip:                   %d\n", *lonflip);
 		fprintf(stderr, "dbg2       topogrid:                  %p\n", topogrid);
@@ -136,13 +135,12 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 }
 /*--------------------------------------------------------------------*/
 int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error) {
-	char *function_name = "mb_topogrid_deall";
 	int status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       topogrid_ptr:              %p\n", topogrid_ptr);
@@ -157,7 +155,7 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -169,7 +167,6 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navlat, double *topo, int *error) {
-	char *function_name = "mb_topogrid_topo";
 	int status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 	int nfound;
@@ -180,7 +177,7 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       navlon:                    %f\n", navlon);
@@ -228,7 +225,7 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       topo:            %f\n", *topo);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -241,7 +238,6 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 }
 /*--------------------------------------------------------------------*/
 int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *error) {
-	char *function_name = "mb_topogrid_bounds";
 	int status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 	int nfound;
@@ -252,7 +248,7 @@ int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *e
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       topogrid:                  %p\n", topogrid);
@@ -283,7 +279,7 @@ int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *e
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       bounds[0]:       %f\n", topogrid->xmin);
 		fprintf(stderr, "dbg2       bounds[1]:       %f\n", topogrid->xmax);
@@ -301,7 +297,6 @@ int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *e
 int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double navlat, double altitude, double sonardepth,
                           double mtodeglon, double mtodeglat, double vx, double vy, double vz, double *lon, double *lat,
                           double *topo, double *range, int *error) {
-	char *function_name = "mb_topogrid_intersect";
 	int status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 	int done;
@@ -319,7 +314,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       navlon:                    %f\n", navlon);
@@ -466,7 +461,7 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       lon:             %f\n", *lon);
 		fprintf(stderr, "dbg2       lat:             %f\n", *lat);
@@ -485,7 +480,6 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
                               double navlat, double heading, double altitude, double sonardepth, double pitch,
                               double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                               double *table_range, int *error) {
-	char *function_name = "mb_topogrid_getangletable";
 	int status = MB_SUCCESS;
 	struct mb_topogrid_struct *topogrid;
 	double mtodeglon, mtodeglat;
@@ -501,7 +495,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       nangle:                    %d\n", nangle);
@@ -624,7 +618,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       Lookup tables:\n");
 		for (int i = 0; i < nangle; i++)

@@ -46,10 +46,8 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
            int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
            int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
            double *beamwidth_ltrack, int *error) {
-  static const char function_name[] = "mbr_info_kemkmall";
-
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
   }
@@ -84,7 +82,7 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       system:             %d\n", *system);
     fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -116,12 +114,11 @@ int mbr_info_kemkmall(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
-  static const char function_name[] = "mbr_alm_kemkmall";
   char **bufferptr = NULL;
   int *bufferalloc = NULL;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -155,7 +152,7 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->save1 = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -167,12 +164,11 @@ int mbr_alm_kemkmall(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
-  static const char function_name[] = "mbr_dem_kemkmall";
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   int *dgm_count = NULL;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -209,7 +205,7 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
   status = mbsys_kmbes_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -222,13 +218,12 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_create_dgm_index_table";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   size_t size_bytes = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -269,7 +264,7 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   mb_io_ptr->save2 = MB_NO; // file has been indexed
 
     if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
         fprintf(stderr, "dbg2  Return values:\n");
         fprintf(stderr, "dbg2       error:      %d\n", *error);
         fprintf(stderr, "dbg2  Return status:\n");
@@ -282,14 +277,13 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, void *new_index_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_add_dgm_to_dgm_index_table";
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *new_dgm_index = NULL;
   size_t dgm_count = 0;
   size_t new_num_alloc = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
     fprintf(stderr, "dbg2       index_table_ptr: %p\n", (void *)index_table_ptr);
@@ -328,7 +322,7 @@ int mbr_kemkmall_add_dgm_to_dgm_index_table(int verbose, void *index_table_ptr, 
   }
 
     if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
         fprintf(stderr, "dbg2  Return values:\n");
         fprintf(stderr, "dbg2       error:      %d\n", *error);
         fprintf(stderr, "dbg2  Return status:\n");
@@ -447,13 +441,12 @@ int mbr_kemkmall_indextable_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm_type_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_hdr";
   struct mbsys_kmbes_header *header = NULL;
   mbsys_kmbes_emdgm_type *emdgm_type = NULL;
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:         %p\n", (void *)buffer);
@@ -539,7 +532,7 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:        %.4s\n", header->dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", header->dgmVersion);
@@ -552,7 +545,7 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
   int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       dgmType:    %.4s\n", header->dgmType);
     fprintf(stderr, "dbg2       emdgm_type: %d\n", *emdgm_type);
@@ -568,7 +561,6 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_spo";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
@@ -576,7 +568,7 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -628,7 +620,7 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spo->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                     %s\n", spo->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spo->header.dgmVersion);
@@ -665,7 +657,7 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -685,7 +677,6 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
 
 
 int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_skm";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
@@ -693,7 +684,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -800,7 +791,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", skm->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                    %s\n", skm->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                 %u\n", skm->header.dgmVersion);
@@ -874,7 +865,7 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -893,7 +884,6 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  static const char function_name[] = "mbr_kemkmall_rd_svp";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
@@ -901,7 +891,7 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -949,7 +939,7 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
     fprintf(stderr, " dbg5       dgmType:         %s\n", svp->header.dgmType);
     fprintf(stderr, " dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
@@ -986,7 +976,7 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1005,7 +995,6 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  static const char function_name[] = "mbr_kemkmall_rd_svt";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_svt *svt = NULL;
@@ -1013,7 +1002,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1067,7 +1056,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:             %u\n", svt->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                 %s\n", svt->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:              %u\n", svt->header.dgmVersion);
@@ -1106,7 +1095,7 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1125,7 +1114,6 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_scl";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_scl *scl = NULL;
@@ -1133,7 +1121,7 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1173,7 +1161,7 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:         %u\n", scl->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:             %s\n", scl->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:          %u\n", scl->header.dgmVersion);
@@ -1204,7 +1192,7 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1223,7 +1211,6 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_sde";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_sde *sde = NULL;
@@ -1231,7 +1218,7 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1277,7 +1264,7 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", sde->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:          %s\n", sde->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", sde->header.dgmVersion);
@@ -1311,7 +1298,7 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1331,7 +1318,6 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_shi";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_shi *shi = NULL;
@@ -1339,7 +1325,7 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1379,7 +1365,7 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", shi->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:          %s\n", shi->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", shi->header.dgmVersion);
@@ -1410,7 +1396,7 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1431,7 +1417,6 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_sha";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_sha *sha = NULL;
@@ -1439,7 +1424,7 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -1489,7 +1474,7 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:            %u\n", sha->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                %s\n", sha->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:             %u\n", sha->header.dgmVersion);
@@ -1527,7 +1512,7 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1546,7 +1531,6 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_mrz";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
@@ -1557,7 +1541,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   int index_rxInfo, index_extraDetClassInfo, index_sounding, index_SIsample = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *) buffer);
@@ -1579,7 +1563,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr,"dbg5       numOfDgms = %d\n", partition.numOfDgms);
     fprintf(stderr,"dbg5       dgmNum    = %d\n", partition.dgmNum);
   }
@@ -1608,7 +1592,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   index++;
 
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr,"dbg5       numBytesCmnPart:     %d\n", cmnPart.numBytesCmnPart);
     fprintf(stderr,"dbg5       pingCnt:             %d\n", cmnPart.pingCnt);
     fprintf(stderr,"dbg5       rxFansPerPing:       %d\n", cmnPart.rxFansPerPing);
@@ -1746,7 +1730,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr,"dbg5       numBytesInfoData:             %d\n", mrz->pingInfo.numBytesInfoData);
     fprintf(stderr,"dbg5       padding0:                     %d\n", mrz->pingInfo.padding0);
     fprintf(stderr,"dbg5       pingRate_Hz:                  %f\n", mrz->pingInfo.pingRate_Hz);
@@ -1837,7 +1821,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mrz->pingInfo.numTxSectors);
       fprintf(stderr, "dbg5       txSectorNumb:             %d\n", mrz->sectorInfo[i].txSectorNumb);
       fprintf(stderr, "dbg5       txArrNumber:              %d\n", mrz->sectorInfo[i].txArrNumber);
@@ -1891,7 +1875,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesInfoData:           %d\n", mrz->rxInfo.numBytesRxInfo);
     fprintf(stderr, "dbg5       numSoundingsMaxMain:        %d\n", mrz->rxInfo.numSoundingsMaxMain);
     fprintf(stderr, "dbg5       numSoundingsValidMain:      %d\n", mrz->rxInfo.numSoundingsValidMain);
@@ -1926,7 +1910,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
       fprintf(stderr, "dbg5       padding:             %d\n", mrz->extraDetClassInfo[i].padding);
       fprintf(stderr, "dbg5       alarmFlag:           %d\n", mrz->extraDetClassInfo[i].alarmFlag);
@@ -2067,7 +2051,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       soundingIndex:                   %d\n", mrz->sounding[i].soundingIndex);
       fprintf(stderr, "dbg5       txSectorNumb:                    %d\n", mrz->sounding[i].txSectorNumb);
       fprintf(stderr, "dbg5       detectionType:                   %d\n", mrz->sounding[i].detectionType);
@@ -2115,7 +2099,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numSidescanSamples:  %d\n", numSidescanSamples);
   }
 
@@ -2142,7 +2126,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2162,7 +2146,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_mwc";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
@@ -2173,7 +2156,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   int i, j, k;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2195,7 +2178,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numOfDgms:  %d\n", partition.numOfDgms);
     fprintf(stderr, "dbg5       dgmNum:     %d\n", partition.dgmNum);
   }
@@ -2224,7 +2207,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", cmnPart.numBytesCmnPart);
     fprintf(stderr, "dbg5       pingCnt:             %d\n", cmnPart.pingCnt);
     fprintf(stderr, "dbg5       rxFansPerPing:       %d\n", cmnPart.rxFansPerPing);
@@ -2258,7 +2241,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesTxInfo:       %d\n", mwc->txInfo.numBytesTxInfo);
     fprintf(stderr, "dbg5       numTxSectors:         %d\n", mwc->txInfo.numTxSectors);
     fprintf(stderr, "dbg5       numBytesPerTxSector:  %d\n", mwc->txInfo.numBytesPerTxSector);
@@ -2281,7 +2264,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mwc->txInfo.numTxSectors);
       fprintf(stderr, "dbg5       tiltAngleReTx_deg:     %f\n", mwc->sectorData[i].tiltAngleReTx_deg);
       fprintf(stderr, "dbg5       centreFreq_Hz:         %f\n", mwc->sectorData[i].centreFreq_Hz);
@@ -2311,7 +2294,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesRxInfo:         %d\n", mwc->rxInfo.numBytesRxInfo);
     fprintf(stderr, "dbg5       numBeams:               %d\n", mwc->rxInfo.numBeams);
     fprintf(stderr, "dbg5       numBytesPerBeamEntry:   %d\n", mwc->rxInfo.numBytesPerBeamEntry);
@@ -2416,7 +2399,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 
         /* print debug statements */
         if (status == MB_SUCCESS && verbose >= 5) {
-          fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+          fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
           fprintf(stderr, "dbg5       #MWC receiver beam data %d/%d:\n", i, mwc->rxInfo.numBeams);
           fprintf(stderr, "dbg5       tiltAngleReTx_deg:       %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
           fprintf(stderr, "dbg5       startRangeSampleNum:     %d\n", mwc->beamData_p[i].startRangeSampleNum);
@@ -2451,7 +2434,7 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2471,7 +2454,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_cpo";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_cpo *cpo = NULL;
@@ -2480,7 +2462,7 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
 
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2533,7 +2515,7 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                  %u\n", cpo->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                      %s\n", cpo->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                   %u\n", cpo->header.dgmVersion);
@@ -2570,7 +2552,7 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2589,7 +2571,6 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_che";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_che *che = NULL;
@@ -2597,7 +2578,7 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
 
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2618,7 +2599,7 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", che->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:        %s\n", che->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", che->header.dgmVersion);
@@ -2652,7 +2633,7 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesCmnPart:      %d\n", che->cmnPart.numBytesCmnPart);
     fprintf(stderr, "dbg5       pingCnt:              %d\n", che->cmnPart.pingCnt);
     fprintf(stderr, "dbg5       rxFansPerPing:        %d\n", che->cmnPart.rxFansPerPing);
@@ -2670,7 +2651,7 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       heave_m                         = %f\n", che->data.heave_m);
   }
 
@@ -2686,7 +2667,7 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2705,7 +2686,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_iip";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
@@ -2713,7 +2693,7 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2743,7 +2723,7 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:          %s\n", iip->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", iip->header.dgmVersion);
@@ -2770,7 +2750,7 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2789,7 +2769,6 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  static const char function_name[] = "mbr_kemkmall_rd_iop";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_iop *iop = NULL;
@@ -2797,7 +2776,7 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2827,7 +2806,7 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", iop->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                    %s\n", iop->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                 %u\n", iop->header.dgmVersion);
@@ -2854,7 +2833,7 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2873,7 +2852,6 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_xmb";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xmb *xmb = NULL;
@@ -2882,7 +2860,7 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2913,7 +2891,7 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmb->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:        %s\n", xmb->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmb->header.dgmVersion);
@@ -2940,7 +2918,7 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -2959,7 +2937,6 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_xmc";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
@@ -2968,7 +2945,7 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -2997,7 +2974,7 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmc->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:        %s\n", xmc->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmc->header.dgmVersion);
@@ -3023,7 +3000,7 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3042,7 +3019,6 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_xms";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
@@ -3051,7 +3027,7 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -3092,7 +3068,7 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xms->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:        %s\n", xms->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xms->header.dgmVersion);
@@ -3124,7 +3100,7 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3143,12 +3119,11 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_unknown";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_header *header = NULL;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -3162,7 +3137,7 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3180,7 +3155,6 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_index_data";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index dgm_index;
@@ -3199,7 +3173,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -3513,7 +3487,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   fseek(mb_io_ptr->mbfp, 0, SEEK_SET);
 
     if (verbose >= 2) {
-        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+        fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
         fprintf(stderr, "dbg2  Return values:\n");
         fprintf(stderr, "dbg2       error:      %d\n", *error);
         fprintf(stderr, "dbg2  Return status:\n");
@@ -3527,7 +3501,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_rd_data";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *dgm_index = NULL;
@@ -3541,7 +3514,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int numSoundings, numBackscatterSamples;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -3832,7 +3805,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3844,14 +3817,13 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_rt_kemkmall";
   int interp_error = MB_ERROR_NO_ERROR;
   struct mbsys_kmbes_struct *store = NULL;
   int *file_indexed = NULL;
   double *pixel_size, *swath_width;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -3901,7 +3873,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3914,13 +3886,12 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_header";
   struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       header_ptr: %p\n", (void *)header_ptr);
@@ -3931,7 +3902,7 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:        %s\n", header->dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", header->dgmVersion);
@@ -3967,7 +3938,7 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -3981,7 +3952,6 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  static const char function_name[] = "mbr_kemkmall_wr_spo";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_spo *spo = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -3990,7 +3960,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -4005,7 +3975,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spo->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                     %s\n", spo->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                  %u\n", spo->header.dgmVersion);
@@ -4095,7 +4065,7 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4114,7 +4084,6 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  static const char function_name[] = "mbr_kemkmall_wr_skm";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_skm *skm = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4123,7 +4092,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -4138,7 +4107,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", skm->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                    %s\n", skm->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                 %u\n", skm->header.dgmVersion);
@@ -4317,7 +4286,7 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4336,7 +4305,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_svp";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svp *svp = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4345,7 +4313,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -4360,7 +4328,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
     fprintf(stderr, " dbg5       dgmType:         %s\n", svp->header.dgmType);
     fprintf(stderr, " dbg5       dgmVersion:      %u\n", svp->header.dgmVersion);
@@ -4443,7 +4411,7 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4462,7 +4430,6 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_svt";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_svt *svt = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4471,7 +4438,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -4486,7 +4453,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:              %u\n", svt->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                  %s\n", svt->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:               %u\n", svt->header.dgmVersion);
@@ -4576,7 +4543,7 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4595,7 +4562,6 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_scl";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_scl *scl;
   struct mbsys_kmbes_header *header = NULL;
@@ -4604,7 +4570,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -4620,7 +4586,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:         %u\n", scl->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:             %s\n", scl->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:          %u\n", scl->header.dgmVersion);
@@ -4690,7 +4656,7 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4709,7 +4675,6 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  static const char function_name[] = "mbr_kemkmall_wr_sde";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_sde *sde = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4718,7 +4683,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -4733,7 +4698,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", sde->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:          %s\n", sde->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", sde->header.dgmVersion);
@@ -4812,7 +4777,7 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4831,7 +4796,6 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  static const char function_name[] = "mbr_kemkmall_wr_shi";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_shi *shi = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4840,7 +4804,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -4855,7 +4819,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", shi->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:          %s\n", shi->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", shi->header.dgmVersion);
@@ -4925,7 +4889,7 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -4944,7 +4908,6 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_sha";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_sha *sha = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -4953,7 +4916,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -4968,7 +4931,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:            %u\n", sha->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                %s\n", sha->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:             %u\n", sha->header.dgmVersion);
@@ -5054,7 +5017,7 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5073,7 +5036,6 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_mrz";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5084,7 +5046,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -5157,7 +5119,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numOfDgms:  %d\n", mrz->partition.numOfDgms);
       fprintf(stderr, "dbg5       dgmNum:     %d\n", mrz->partition.dgmNum);
     }
@@ -5185,7 +5147,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     index++;
 
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", mrz->cmnPart.numBytesCmnPart);
       fprintf(stderr, "dbg5       pingCnt:             %d\n", mrz->cmnPart.pingCnt);
       fprintf(stderr, "dbg5       rxFansPerPing:       %d\n", mrz->cmnPart.rxFansPerPing);
@@ -5310,7 +5272,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesInfoData:            %d\n", mrz->pingInfo.numBytesInfoData);
       fprintf(stderr, "dbg5       padding0:                    %d\n", mrz->pingInfo.padding0);
       fprintf(stderr, "dbg5       pingRate_Hz:                 %f\n", mrz->pingInfo.pingRate_Hz);
@@ -5392,7 +5354,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mrz->pingInfo.numTxSectors);
         fprintf(stderr, "dbg5       txSectorNumb:             %d\n", mrz->sectorInfo[i].txSectorNumb);
         fprintf(stderr, "dbg5       txArrNumber:              %d\n", mrz->sectorInfo[i].txArrNumber);
@@ -5441,7 +5403,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesInfoData:          %d\n", mrz->rxInfo.numBytesRxInfo);
       fprintf(stderr, "dbg5       numSoundingsMaxMain:       %d\n", mrz->rxInfo.numSoundingsMaxMain);
       fprintf(stderr, "dbg5       numSoundingsValidMain:     %d\n", mrz->rxInfo.numSoundingsValidMain);
@@ -5467,7 +5429,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
         fprintf(stderr, "dbg5       padding:             %d\n", mrz->extraDetClassInfo[i].padding);
         fprintf(stderr, "dbg5       alarmFlag:           %d\n", mrz->extraDetClassInfo[i].alarmFlag);
@@ -5582,7 +5544,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       soundingIndex:                  %d\n", mrz->sounding[i].soundingIndex);
         fprintf(stderr, "dbg5       txSectorNumb:                   %d\n", mrz->sounding[i].txSectorNumb);
         fprintf(stderr, "dbg5       detectionType:                  %d\n", mrz->sounding[i].detectionType);
@@ -5639,7 +5601,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5658,7 +5620,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_mwc";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5667,7 +5628,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i, k;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -5714,7 +5675,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numOfDgms:  %d\n", mwc->partition.numOfDgms);
       fprintf(stderr, "dbg5       dgmNum:     %d\n", mwc->partition.dgmNum);
     }
@@ -5743,7 +5704,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", mwc->cmnPart.numBytesCmnPart);
       fprintf(stderr, "dbg5       pingCnt:             %d\n", mwc->cmnPart.pingCnt);
       fprintf(stderr, "dbg5       rxFansPerPing:       %d\n", mwc->cmnPart.rxFansPerPing);
@@ -5770,7 +5731,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesTxInfo:       %d\n", mwc->txInfo.numBytesTxInfo);
       fprintf(stderr, "dbg5       numTxSectors:         %d\n", mwc->txInfo.numTxSectors);
       fprintf(stderr, "dbg5       numBytesPerTxSector:  %d\n", mwc->txInfo.numBytesPerTxSector);
@@ -5793,7 +5754,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mwc->txInfo.numTxSectors);
         fprintf(stderr, "dbg5       tiltAngleReTx_deg:     %f\n", mwc->sectorData[i].tiltAngleReTx_deg);
         fprintf(stderr, "dbg5       centreFreq_Hz:         %f\n", mwc->sectorData[i].centreFreq_Hz);
@@ -5823,7 +5784,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesRxInfo:         %d\n", mwc->rxInfo.numBytesRxInfo);
       fprintf(stderr, "dbg5       numBeams:               %d\n", mwc->rxInfo.numBeams);
       fprintf(stderr, "dbg5       numBytesPerBeamEntry:   %d\n", mwc->rxInfo.numBytesPerBeamEntry);
@@ -5873,7 +5834,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       /* print debug statements */
       if (status == MB_SUCCESS && verbose >= 5) {
-        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+        fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       #MWC receiver beam data %d/%d:\n", i, mwc->rxInfo.numBeams);
         fprintf(stderr, "dbg5       tiltAngleReTx_deg:       %f\n", mwc->beamData_p[i].beamPointAngReVertical_deg);
         fprintf(stderr, "dbg5       startRangeSampleNum:     %d\n", mwc->beamData_p[i].startRangeSampleNum);
@@ -5902,7 +5863,7 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -5921,7 +5882,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_cpo";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_cpo *cpo = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -5930,7 +5890,7 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -5945,7 +5905,7 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                  %u\n", cpo->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                      %s\n", cpo->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:                   %u\n", cpo->header.dgmVersion);
@@ -6035,7 +5995,7 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6054,7 +6014,6 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_che";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_che *che = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6063,7 +6022,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -6103,7 +6062,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* print debug statements */
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesDgm:    %u\n", che->header.numBytesDgm);
       fprintf(stderr, "dbg5       dgmType:        %s\n", che->header.dgmType);
       fprintf(stderr, "dbg5       dgmVersion:     %u\n", che->header.dgmVersion);
@@ -6136,7 +6095,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     index++;
 
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", che->cmnPart.numBytesCmnPart);
       fprintf(stderr, "dbg5       pingCnt:             %d\n", che->cmnPart.pingCnt);
       fprintf(stderr, "dbg5       rxFansPerPing:       %d\n", che->cmnPart.rxFansPerPing);
@@ -6154,7 +6113,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     index += 4;
 
     if (verbose >= 5) {
-      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+      fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       heave_m:             %f\n", che->data.heave_m);
     }
 
@@ -6163,7 +6122,7 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6182,7 +6141,6 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_iip";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6191,7 +6149,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -6206,7 +6164,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:          %s\n", iip->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", iip->header.dgmVersion);
@@ -6263,7 +6221,7 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       size:       %zu\n", *size);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -6283,7 +6241,6 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_iop";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_iop *iop = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6292,7 +6249,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   int index = 0;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -6307,7 +6264,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iop->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:          %s\n", iop->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:       %u\n", iop->header.dgmVersion);
@@ -6364,7 +6321,7 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6383,7 +6340,6 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_xmb";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xmb *xmb = NULL;
   struct mbsys_kmbes_iip *iip = NULL;
@@ -6394,7 +6350,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -6421,7 +6377,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:             %u\n", xmb->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:                 %s\n", xmb->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:              %u\n", xmb->header.dgmVersion);
@@ -6476,7 +6432,7 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       size:       %zu\n", *size);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -6496,7 +6452,6 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_xmc";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xmc *xmc = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6506,7 +6461,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -6526,7 +6481,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmc->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:        %s\n", xmc->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xmc->header.dgmVersion);
@@ -6575,7 +6530,7 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       size:       %zu\n", *size);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -6595,7 +6550,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_xms";
   struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_xms *xms = NULL;
   struct mbsys_kmbes_header *header = NULL;
@@ -6605,7 +6559,7 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   int i;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -6620,7 +6574,7 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 
   /* print debug statements */
   if (verbose >= 5) {
-    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+    fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xms->header.numBytesDgm);
     fprintf(stderr, "dbg5       dgmType:        %s\n", xms->header.dgmType);
     fprintf(stderr, "dbg5       dgmVersion:     %u\n", xms->header.dgmVersion);
@@ -6692,7 +6646,7 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       size:       %zu\n", *size);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -6712,11 +6666,10 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_unknown";
   struct mbsys_kmbes_struct *store = NULL;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       bufferalloc:%d\n", *bufferalloc);
@@ -6730,7 +6683,7 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
   const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6748,7 +6701,6 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
 };
 /*--------------------------------------------------------------------*/
 int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_kemkmall_wr_data";
   struct mbsys_kmbes_struct *store = NULL;
   size_t write_len = 0;
   char **bufferptr = NULL;
@@ -6759,7 +6711,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -6926,7 +6878,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6939,11 +6891,10 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  static const char function_name[] = "mbr_wt_kemkmall";
   struct mbsys_kmbes_struct *store = NULL;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -6972,7 +6923,7 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6985,10 +6936,8 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
-  static const char function_name[] = "mbr_register_kemkmall";
-
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
   }
@@ -7038,7 +6987,7 @@ int mbr_register_kemkmall(int verbose, void *mbio_ptr, int *error) {
   mb_io_ptr->mb_io_ancilliarysensor = NULL;
 
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
     fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

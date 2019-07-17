@@ -46,10 +46,8 @@ int mbr_info_em300mba(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	static const char function_name[] = "mbr_info_em300mba";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -85,7 +83,7 @@ int mbr_info_em300mba(int verbose, int *system, int *beams_bath_max, int *beams_
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -116,13 +114,12 @@ int mbr_info_em300mba(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300mba(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_alm_em300mba";
 	int *databyteswapped;
 	double *pixel_size;
 	double *swath_width;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -145,7 +142,7 @@ int mbr_alm_em300mba(int verbose, void *mbio_ptr, int *error) {
 	*swath_width = 0.0;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -156,10 +153,8 @@ int mbr_alm_em300mba(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_em300mba(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_dem_em300mba";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -172,7 +167,7 @@ int mbr_dem_em300mba(int verbose, void *mbio_ptr, int *error) {
 	const int status = mbsys_simrad2_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -183,7 +178,6 @@ int mbr_dem_em300mba(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type, short *sonar) {
-	static const char function_name[] = "mbr_em300mba_chk_label";
 	mb_u_char startbyte;
 	mb_u_char typebyte;
 	short *sonar_save;
@@ -197,7 +191,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	int sonarunswapgood;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -337,7 +331,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       type:       %d\n", *type);
 		fprintf(stderr, "dbg2       sonar:      %d\n", *sonar);
@@ -350,7 +344,6 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short type, short sonar,
                           int *version, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_start";
 	char line[MBSYS_SIMRAD2_BUFFER_SIZE];
 	short short_val;
 	int read_len, len;
@@ -359,7 +352,7 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	int i1, i2, i3;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -629,7 +622,7 @@ file will return error */
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -705,7 +698,7 @@ file will return error */
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       version:    %d\n", *version);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -718,13 +711,12 @@ file will return error */
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar,
                                   int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_run_parameter";
 	char line[EM2_RUN_PARAMETER_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -796,7 +788,7 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -828,7 +820,7 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -839,13 +831,12 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_clock";
 	char line[EM2_CLOCK_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -891,7 +882,7 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -906,7 +897,7 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -917,13 +908,12 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_tide";
 	char line[EM2_TIDE_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -970,7 +960,7 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -985,7 +975,7 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -996,13 +986,12 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_height";
 	char line[EM2_HEIGHT_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1047,7 +1036,7 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -1061,7 +1050,7 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1072,14 +1061,13 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_heading";
 	struct mbsys_simrad2_heading_struct *heading;
 	char line[EM2_HEADING_HEADER_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1161,7 +1149,7 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -1179,7 +1167,7 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1190,14 +1178,13 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_ssv";
 	struct mbsys_simrad2_ssv_struct *ssv;
 	char line[EM2_SSV_HEADER_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1278,7 +1265,7 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -1295,7 +1282,7 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1306,14 +1293,13 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_tilt";
 	struct mbsys_simrad2_tilt_struct *tilt;
 	char line[EM2_TILT_HEADER_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1394,7 +1380,7 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -1411,7 +1397,7 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1423,14 +1409,13 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar,
                                     int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_extraparameters";
 	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	char line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
 	short short_val;
 	size_t read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1525,7 +1510,7 @@ int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -1550,7 +1535,7 @@ int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1561,14 +1546,13 @@ int mbr_em300mba_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_attitude";
 	struct mbsys_simrad2_attitude_struct *attitude;
 	char line[EM2_ATTITUDE_HEADER_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1658,7 +1642,7 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -1677,7 +1661,7 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1688,7 +1672,6 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_pos";
 	char line[MBSYS_SIMRAD2_COMMENT_LENGTH];
 	short short_val;
 	int read_len;
@@ -1696,7 +1679,7 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	int navchannel;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1821,7 +1804,7 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -1842,7 +1825,7 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1853,13 +1836,12 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_svp";
 	char line[EM2_SVP_HEADER_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1941,7 +1923,7 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -1961,7 +1943,7 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1972,13 +1954,12 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_svp2";
 	char line[EM2_SVP2_HEADER_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2058,7 +2039,7 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -2078,7 +2059,7 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2090,7 +2071,6 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *match, short sonar,
                          int version, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_bath";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_BATH_MBA_HEADER_SIZE];
 	short short_val;
@@ -2100,7 +2080,7 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2292,7 +2272,7 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       match:      %d\n", *match);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -2304,14 +2284,13 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_rawbeam";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM_HEADER_SIZE];
 	short short_val;
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2415,7 +2394,7 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -2435,7 +2414,7 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2446,7 +2425,6 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_rawbeam2";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM2_HEADER_SIZE];
 	short short_val;
@@ -2454,7 +2432,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	int spare;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2616,7 +2594,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -2663,7 +2641,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2674,7 +2652,6 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_rawbeam3";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM3_HEADER_SIZE];
 	short short_val;
@@ -2685,7 +2662,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	int read_len;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2844,7 +2821,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -2879,7 +2856,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2891,7 +2868,6 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int length, int *match,
                        int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_ss";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[2 * MBSYS_SIMRAD2_BUFFER_SIZE];
 	short short_val;
@@ -2905,7 +2881,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	int offset;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -3164,7 +3140,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -3220,7 +3196,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       match:      %d\n", *match);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -3232,7 +3208,6 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_wc";
 	struct mbsys_simrad2_watercolumn_struct *wc;
 	char line[EM2_WC_HEADER_SIZE];
 	short short_val;
@@ -3241,7 +3216,7 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	int file_bytes;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -3381,7 +3356,7 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -3423,7 +3398,7 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3434,7 +3409,6 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_em300mba_rd_data";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	struct mbsys_simrad2_extraparameters_struct *extraparameters;
@@ -3465,7 +3439,7 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char junk;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -4105,7 +4079,7 @@ Have a nice day...\n");
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4116,7 +4090,6 @@ Have a nice day...\n");
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_rt_em300mba";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_attitude_struct *attitude;
 	struct mbsys_simrad2_heading_struct *heading;
@@ -4132,7 +4105,7 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -4211,14 +4184,14 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		else if (bath_time_d > ss_time_d) {
 			if (verbose > 0)
 				fprintf(stderr, "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, bathtime:%f >  sstime:%f\n",
-				        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
+				        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
 				        ss_time_d);
 			status = mbsys_simrad2_zero_ss(verbose, store_ptr, error);
 		}
 		else if (bath_time_d < ss_time_d) {
 			if (verbose > 0)
 				fprintf(stderr, "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Ping unintelligible bathtime:%f < sstime%f\n",
-				        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
+				        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], bath_time_d,
 				        ss_time_d);
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
@@ -4230,7 +4203,7 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					fprintf(
 					    stderr,
 					    "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
-					    function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
+					    __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 					    ping->png_nbeams, ping->png_nbeams_ss);
 			}
 			else if (ping->png_nbeams == ping->png_nbeams_ss) {
@@ -4241,7 +4214,7 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 							fprintf(stderr,
 							        "%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes "
 							        "don't match: : %d %d %d\n",
-							        function_name, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], i,
+							        __func__, time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], i,
 							        ping->png_beam_num[i], ping->png_beam_index[i]);
 					}
 				}
@@ -4291,7 +4264,7 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_kind = store->kind;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4302,7 +4275,6 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_start";
 	char line[MBSYS_SIMRAD2_BUFFER_SIZE], *buff;
 	int buff_len, write_len;
 	int write_size;
@@ -4311,7 +4283,7 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -4321,7 +4293,7 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -4611,7 +4583,7 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 		status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4622,7 +4594,6 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_run_parameter";
 	char line[EM2_RUN_PARAMETER_SIZE];
 	short label;
 	int write_len;
@@ -4631,7 +4602,7 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -4641,7 +4612,7 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -4769,7 +4740,7 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4780,7 +4751,6 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_clock";
 	char line[EM2_CLOCK_SIZE];
 	short label;
 	int write_len;
@@ -4789,7 +4759,7 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -4799,7 +4769,7 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -4893,7 +4863,7 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4904,7 +4874,6 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_tide";
 	char line[EM2_TIDE_SIZE];
 	short label;
 	int write_len;
@@ -4913,7 +4882,7 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -4923,7 +4892,7 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -5018,7 +4987,7 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5029,7 +4998,6 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_height";
 	char line[EM2_HEIGHT_SIZE];
 	short label;
 	int write_len;
@@ -5038,7 +5006,7 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -5048,7 +5016,7 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -5140,7 +5108,7 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5151,7 +5119,6 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_heading";
 	struct mbsys_simrad2_heading_struct *heading;
 	char line[EM2_HEADING_HEADER_SIZE];
 	short label;
@@ -5161,7 +5128,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -5174,7 +5141,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -5313,7 +5280,7 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5324,7 +5291,6 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_ssv";
 	struct mbsys_simrad2_ssv_struct *ssv;
 	char line[EM2_SSV_HEADER_SIZE];
 	short label;
@@ -5334,7 +5300,7 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -5347,7 +5313,7 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -5484,7 +5450,7 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5495,7 +5461,6 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_tilt";
 	struct mbsys_simrad2_tilt_struct *tilt;
 	char line[EM2_TILT_HEADER_SIZE];
 	short label;
@@ -5505,7 +5470,7 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -5518,7 +5483,7 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -5655,7 +5620,7 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5666,7 +5631,6 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_extraparameters";
 	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	char line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
 	short label;
@@ -5676,7 +5640,7 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -5689,7 +5653,7 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -5830,7 +5794,7 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5841,7 +5805,6 @@ int mbr_em300mba_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_attitude";
 	struct mbsys_simrad2_attitude_struct *attitude;
 	char line[EM2_ATTITUDE_HEADER_SIZE];
 	short label;
@@ -5851,7 +5814,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -5864,7 +5827,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -6008,7 +5971,7 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -6019,7 +5982,6 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_pos";
 	char line[EM2_POS_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -6028,7 +5990,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -6038,7 +6000,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -6180,7 +6142,7 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -6191,7 +6153,6 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_svp";
 	char line[EM2_SVP2_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -6200,7 +6161,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -6210,7 +6171,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -6353,7 +6314,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -6364,7 +6325,6 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_bath";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_BATH_MBA_HEADER_SIZE];
 	short label;
@@ -6374,7 +6334,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -6391,7 +6351,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -6567,7 +6527,7 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -6578,7 +6538,6 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_rawbeam";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM_HEADER_SIZE];
 	short label;
@@ -6588,7 +6547,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -6601,7 +6560,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -6747,7 +6706,7 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -6758,7 +6717,6 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_rawbeam2";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM2_HEADER_SIZE];
 	short label;
@@ -6768,7 +6726,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -6781,7 +6739,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -7003,7 +6961,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -7014,7 +6972,6 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_rawbeam3";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM3_HEADER_SIZE];
 	short label;
@@ -7024,7 +6981,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -7041,8 +6998,8 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -7242,7 +7199,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -7253,7 +7210,6 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_ss";
 	struct mbsys_simrad2_ping_struct *ping;
 	char line[2 * MBSYS_SIMRAD2_BUFFER_SIZE];
 	short label;
@@ -7264,7 +7220,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	int offset;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -7281,7 +7237,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -7521,7 +7477,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -7532,7 +7488,6 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_wc";
 	struct mbsys_simrad2_watercolumn_struct *wc;
 	char line[EM2_WC_HEADER_SIZE];
 	short label;
@@ -7544,7 +7499,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	int pad;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -7557,7 +7512,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
 		fprintf(stderr, "dbg5       sonar:           %d\n", store->sonar);
 		fprintf(stderr, "dbg5       date:            %d\n", store->date);
@@ -7775,7 +7730,7 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -7786,14 +7741,13 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_em300mba_wr_data";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	FILE *mbfp;
 	int swap;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -7979,12 +7933,12 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -7995,12 +7949,11 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_wt_em300mba";
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -8018,7 +7971,7 @@ int mbr_wt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	const int status = mbr_em300mba_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -8030,10 +7983,8 @@ int mbr_wt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_register_em300mba";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -8080,7 +8031,7 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

@@ -4949,7 +4949,6 @@ void do_visualize_sensitivity(void) {
 /*--------------------------------------------------------------------*/
 
 void do_pickroute_notify(size_t instance) {
-	char function_name[] = "do_pickroute_notify";
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_shareddata_struct *shareddata;
@@ -4958,7 +4957,7 @@ void do_pickroute_notify(size_t instance) {
 
 	/* print input debug statements */
 	if (mbna_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
@@ -5012,7 +5011,6 @@ void do_pickroute_notify(size_t instance) {
 /*--------------------------------------------------------------------*/
 
 void do_picknav_notify(size_t instance) {
-	char function_name[] = "do_picknav_notify";
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_shareddata_struct *shareddata;
@@ -5021,7 +5019,7 @@ void do_picknav_notify(size_t instance) {
 
 	/* print input debug statements */
 	if (mbna_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}

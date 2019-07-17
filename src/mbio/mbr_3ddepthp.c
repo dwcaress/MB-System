@@ -43,11 +43,8 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	static const char function_name[] = "mbr_info_3ddepthp";
-
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -82,7 +79,7 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -113,10 +110,8 @@ int mbr_info_3ddepthp(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_alm_3ddepthp";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -143,7 +138,7 @@ int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->save2 = MB_NO;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -154,10 +149,8 @@ int mbr_alm_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_dem_3ddepthp";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -173,7 +166,7 @@ int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	const int status = mbsys_3datdepthlidar_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -184,10 +177,8 @@ int mbr_dem_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_3ddepthp_rd_data";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -957,7 +948,7 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		mbsys_3datdepthlidar_print_store(verbose, store_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -968,10 +959,8 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_rt_3ddepthp";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1003,7 +992,7 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_kind = store->kind;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1014,10 +1003,8 @@ int mbr_rt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_3ddepthp_wr_data";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1036,7 +1023,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *file_header_readwritten = (int *)&mb_io_ptr->save1;
 
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  Data record kind in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       kind:       %d\n", store->kind);
 	}
 
@@ -1301,7 +1288,7 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1312,10 +1299,8 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_wt_3ddepthp";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1334,7 +1319,7 @@ int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	const int status = mbr_3ddepthp_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1345,10 +1330,8 @@ int mbr_wt_3ddepthp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_register_3ddepthp";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -1391,7 +1374,7 @@ int mbr_register_3ddepthp(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

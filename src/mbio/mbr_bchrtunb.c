@@ -43,10 +43,8 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	static const char function_name[] = "mbr_info_bchrtunb";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -80,7 +78,7 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -112,11 +110,10 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
 
 /*--------------------------------------------------------------------*/
 int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
-	static const char function_name[] = "mbr_zero_bchrtunb";
 	struct mbf_bchrtunb_struct *data;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
@@ -242,7 +239,7 @@ int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
 	*error = MB_ERROR_NO_ERROR;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -253,10 +250,8 @@ int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_alm_bchrtunb";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -275,7 +270,7 @@ int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	mbr_zero_bchrtunb(verbose, mb_io_ptr->raw_data, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -286,10 +281,8 @@ int mbr_alm_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_dem_bchrtunb";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -303,7 +296,7 @@ int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -314,11 +307,10 @@ int mbr_dem_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_rd_comment";
 	char line[ELAC_COMMENT_SIZE + 3];
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -342,12 +334,12 @@ int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -358,11 +350,10 @@ int mbr_bchrtunb_rd_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_rd_parameter";
 	char line[ELAC_PARAMETER_SIZE + 3];
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -492,7 +483,7 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
 		fprintf(stderr, "dbg5       month:            %d\n", data->par_month);
 		fprintf(stderr, "dbg5       day:              %d\n", data->par_day);
@@ -528,7 +519,7 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -539,11 +530,10 @@ int mbr_bchrtunb_rd_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_rd_pos";
 	char line[ELAC_POS_SIZE + 3];
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -617,7 +607,7 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
 		fprintf(stderr, "dbg5       month:            %d\n", data->pos_month);
 		fprintf(stderr, "dbg5       day:              %d\n", data->pos_day);
@@ -640,7 +630,7 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -651,11 +641,10 @@ int mbr_bchrtunb_rd_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_rd_svp";
 	char line[ELAC_SVP_SIZE + 3];
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -711,7 +700,7 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
 		fprintf(stderr, "dbg5       month:            %d\n", data->svp_month);
 		fprintf(stderr, "dbg5       day:              %d\n", data->svp_day);
@@ -728,7 +717,7 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -739,13 +728,12 @@ int mbr_bchrtunb_rd_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_rd_bath56";
 	char line[ELAC_BATH56_SIZE + 3];
 	char *profile;
 	char *beam;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -853,7 +841,7 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
 		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
@@ -892,7 +880,7 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -903,13 +891,12 @@ int mbr_bchrtunb_rd_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_rd_bath40";
 	char line[ELAC_BATH40_SIZE + 3];
 	char *profile;
 	char *beam;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1017,7 +1004,7 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
 		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
@@ -1056,7 +1043,7 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1067,13 +1054,12 @@ int mbr_bchrtunb_rd_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_rd_bath32";
 	char line[ELAC_BATH32_SIZE + 3];
 	char *profile;
 	char *beam;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1181,7 +1167,7 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
 		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
@@ -1220,7 +1206,7 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1231,7 +1217,6 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_rd_data";
 	struct mbf_bchrtunb_struct *data;
 	char *data_ptr;
 	FILE *mbfp;
@@ -1240,7 +1225,7 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	static char label[2];
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1345,7 +1330,7 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->file_bytes = ftell(mbfp);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1356,7 +1341,6 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_rt_bchrtunb";
 	struct mbf_bchrtunb_struct *data;
 	struct mbsys_elac_struct *store;
 	int time_i[7];
@@ -1366,7 +1350,7 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double speed;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1531,7 +1515,7 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1542,11 +1526,10 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_wr_comment";
 	short int label;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1555,7 +1538,7 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
 	}
 
@@ -1600,7 +1583,7 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1611,12 +1594,11 @@ int mbr_bchrtunb_wr_comment(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_wr_parameter";
 	char line[ELAC_PARAMETER_SIZE + 3];
 	short int label;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1625,7 +1607,7 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
 		fprintf(stderr, "dbg5       month:            %d\n", data->par_month);
 		fprintf(stderr, "dbg5       day:              %d\n", data->par_day);
@@ -1800,7 +1782,7 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1811,12 +1793,11 @@ int mbr_bchrtunb_wr_parameter(int verbose, FILE *mbfp, struct mbf_bchrtunb_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_wr_pos";
 	char line[ELAC_POS_SIZE + 3];
 	short int label;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1825,7 +1806,7 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
 		fprintf(stderr, "dbg5       month:            %d\n", data->pos_month);
 		fprintf(stderr, "dbg5       day:              %d\n", data->pos_day);
@@ -1927,7 +1908,7 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1938,12 +1919,11 @@ int mbr_bchrtunb_wr_pos(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_wr_svp";
 	char line[ELAC_SVP_SIZE + 3];
 	short int label;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1952,7 +1932,7 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
 		fprintf(stderr, "dbg5       month:            %d\n", data->svp_month);
 		fprintf(stderr, "dbg5       day:              %d\n", data->svp_day);
@@ -2037,7 +2017,7 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2048,14 +2028,13 @@ int mbr_bchrtunb_wr_svp(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_wr_bath56";
 	char line[ELAC_BATH56_SIZE + 3];
 	char *profile;
 	char *beam;
 	short int label;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2064,7 +2043,7 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
 		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
@@ -2218,7 +2197,7 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2229,14 +2208,13 @@ int mbr_bchrtunb_wr_bath56(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_wr_bath40";
 	char line[ELAC_BATH40_SIZE + 3];
 	char *profile;
 	char *beam;
 	short int label;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2245,7 +2223,7 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
 		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
@@ -2399,7 +2377,7 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2410,14 +2388,13 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_wr_bath32";
 	char line[ELAC_BATH32_SIZE + 3];
 	char *profile;
 	char *beam;
 	short int label;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2426,7 +2403,7 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       ping_num:         %d\n", data->ping_num);
 		fprintf(stderr, "dbg5       sound_vel:        %d\n", data->sound_vel);
 		fprintf(stderr, "dbg5       mode:             %d\n", data->mode);
@@ -2580,7 +2557,7 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2592,11 +2569,10 @@ int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct *data, int *error) {
-	static const char function_name[] = "mbr_bchrtunb_wr_data";
 	FILE *mbfp;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -2635,12 +2611,12 @@ int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct
 	}
 
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2651,14 +2627,12 @@ int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	static const char function_name[] = "mbr_wt_bchrtunb";
-
 	struct mbf_bchrtunb_struct *data;
 	char *data_ptr;
 	struct mbsys_elac_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -2790,7 +2764,7 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	const int status = mbr_bchrtunb_wr_data(verbose, mbio_ptr, data, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2801,10 +2775,8 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mbr_register_bchrtunb";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -2843,7 +2815,7 @@ int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

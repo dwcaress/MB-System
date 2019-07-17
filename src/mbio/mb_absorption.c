@@ -127,10 +127,8 @@
  */
 int mb_absorption(int verbose, double frequency, double temperature, double salinity, double depth, double ph, double soundspeed,
                   double *absorption, int *error) {
-	static const char function_name[] = "mb_absorption";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       frequency:  %f\n", frequency);
@@ -181,7 +179,7 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -206,10 +204,8 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
  */
 int mb_potential_temperature(int verbose, double temperature, double salinity, double pressure, double *potential_temperature,
                              int *error) {
-	static const char function_name[] = "mb_potential_temperature";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       temperature:%f deg C\n", temperature);
@@ -236,7 +232,7 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       potential_temperature: %f deg C\n", *potential_temperature);
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);
@@ -280,10 +276,8 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
  *
  */
 int mb_seabird_density(int verbose, double salinity, double temperature, double pressure, double *density, int *error) {
-	static const char function_name[] = "mb_seabird_density";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       salinity:   %f PSU\n", salinity);
@@ -332,7 +326,7 @@ int mb_seabird_density(int verbose, double salinity, double temperature, double 
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       density:               %f kg/m^3\n", *density);
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);
@@ -353,10 +347,8 @@ int mb_seabird_density(int verbose, double salinity, double temperature, double 
  *
  */
 int mb_seabird_depth(int verbose, double pressure, double latitude, double *depth, int *error) {
-	static const char function_name[] = "mb_seabird_depth";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pressure:   %f dbar\n", pressure);
@@ -375,7 +367,7 @@ int mb_seabird_depth(int verbose, double pressure, double latitude, double *dept
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       depth:                 %f m\n", *depth);
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);
@@ -388,9 +380,8 @@ int mb_seabird_depth(int verbose, double pressure, double latitude, double *dept
 }
 /*--------------------------------------------------------------------*/
 int mb_seabird_salinity(int verbose, double conductivity, double temperature, double pressure, double *salinity, int *error) {
-	static const char function_name[] = "mb_seabird_salinity";
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
 		fprintf(stderr, "dbg2       conductivity:   %f S/m\n", conductivity);
@@ -441,7 +432,7 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       salinity:              %f PSU\n", *salinity);
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);
@@ -458,10 +449,8 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 						  double temperature, double pressure,
 						  double *soundspeed, int *error) {
-	static const char function_name[] = "mb_seabird_soundspeed";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
 		fprintf(stderr, "dbg2       algorithm:      %d\n", algorithm);
@@ -534,7 +523,7 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       soundspeed:            %f m/s\n", *soundspeed);
 		fprintf(stderr, "dbg2       error:                 %d\n", *error);

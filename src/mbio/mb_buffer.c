@@ -51,10 +51,8 @@
 
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
-	static const char function_name[] = "mb_buffer_init";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -69,7 +67,7 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 		buff->buffer[i] = NULL;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)*buff_ptr);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -81,10 +79,8 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
-	static const char function_name[] = "mb_buffer_close";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)*buff_ptr);
@@ -110,7 +106,7 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)buff_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -121,10 +117,8 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *nload, int *nbuff, int *error) {
-	static const char function_name[] = "mb_buffer_load";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)buff_ptr);
@@ -148,7 +142,7 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 
 	/* print debug statements */
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Getting ready to read records in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  Getting ready to read records in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nwant:         %d\n", nwant);
 		fprintf(stderr, "dbg4       nget:          %d\n", nget);
 		fprintf(stderr, "dbg4       nload:         %d\n", *nload);
@@ -168,7 +162,7 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  New record read by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  New record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       kind:          %d\n", kind);
 			fprintf(stderr, "dbg4       store_ptr:     %p\n", (void *)store_ptr);
 			fprintf(stderr, "dbg4       nbuffer:       %d\n", buff->nbuffer);
@@ -201,7 +195,7 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  Buffer status in MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Buffer status in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       nbuffer:       %d\n", buff->nbuffer);
 			fprintf(stderr, "dbg4       nload:         %d\n", *nload);
 			fprintf(stderr, "dbg4       nget:          %d\n", nget);
@@ -234,7 +228,7 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nload:      %d\n", *nload);
 		fprintf(stderr, "dbg2       nbuff:      %d\n", *nbuff);
@@ -247,10 +241,8 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr, int nhold, int *ndump, int *nbuff, int *error) {
-	static const char function_name[] = "mb_buffer_dump";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)buff_ptr);
@@ -281,7 +273,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 
 	/* print debug statements */
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Buffer list in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  Buffer list in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
 		for (int i = 0; i < buff->nbuffer; i++) {
 			fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
@@ -293,7 +285,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 		for (int i = 0; i < *ndump; i++) {
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Dumping record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Dumping record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
 				fprintf(stderr, "dbg4       ptr:         %p\n", (void *)buff->buffer[i]);
 				fprintf(stderr, "dbg4       kind:        %d\n", buff->buffer_kind[i]);
@@ -305,7 +297,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Deallocating record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Deallocating record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
 				fprintf(stderr, "dbg4       ptr:         %p\n", (void *)buff->buffer[i]);
 				fprintf(stderr, "dbg4       kind:        %d\n", buff->buffer_kind[i]);
@@ -316,7 +308,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Done dumping record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Done dumping record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
 				fprintf(stderr, "dbg4       ptr:         %p\n", (void *)buff->buffer[i]);
 				fprintf(stderr, "dbg4       kind:        %d\n", buff->buffer_kind[i]);
@@ -325,7 +317,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 		for (int i = 0; i < nhold; i++) {
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Moving buffer record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Moving buffer record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       old:         %d\n", *ndump + i);
 				fprintf(stderr, "dbg4       new:         %d\n", i);
 				fprintf(stderr, "dbg4       old ptr:     %p\n", (void *)buff->buffer[*ndump + i]);
@@ -341,7 +333,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Done moving buffer record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Done moving buffer record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       old:         %d\n", *ndump + i);
 				fprintf(stderr, "dbg4       new:         %d\n", i);
 				fprintf(stderr, "dbg4       old ptr:     %p\n", (void *)buff->buffer[*ndump + i]);
@@ -355,7 +347,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 
 	/* print debug statements */
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Buffer list at end of MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  Buffer list at end of MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
 		for (int i = 0; i < buff->nbuffer; i++) {
 			fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
@@ -366,7 +358,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	*nbuff = buff->nbuffer;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndump:      %d\n", *ndump);
 		fprintf(stderr, "dbg2       nbuff:      %d\n", *nbuff);
@@ -379,10 +371,8 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int *ndump, int *nbuff, int *error) {
-	static const char function_name[] = "mb_buffer_clear";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)buff_ptr);
@@ -412,7 +402,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 
 	/* print debug statements */
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Buffer list in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  Buffer list in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
 		for (int i = 0; i < buff->nbuffer; i++) {
 			fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
@@ -424,7 +414,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 		for (int i = 0; i < *ndump; i++) {
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Deallocating record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Deallocating record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
 				fprintf(stderr, "dbg4       ptr:         %p\n", (void *)buff->buffer[i]);
 				fprintf(stderr, "dbg4       kind:        %d\n", buff->buffer_kind[i]);
@@ -435,7 +425,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Done dumping record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Done dumping record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
 				fprintf(stderr, "dbg4       ptr:         %p\n", (void *)buff->buffer[i]);
 				fprintf(stderr, "dbg4       kind:        %d\n", buff->buffer_kind[i]);
@@ -444,7 +434,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 		for (int i = 0; i < nhold; i++) {
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Moving buffer record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Moving buffer record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       old:         %d\n", *ndump + i);
 				fprintf(stderr, "dbg4       new:         %d\n", i);
 				fprintf(stderr, "dbg4       old ptr:     %p\n", (void *)buff->buffer[*ndump + i]);
@@ -460,7 +450,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Done moving buffer record in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Done moving buffer record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       old:         %d\n", *ndump + i);
 				fprintf(stderr, "dbg4       new:         %d\n", i);
 				fprintf(stderr, "dbg4       old ptr:     %p\n", (void *)buff->buffer[*ndump + i]);
@@ -474,7 +464,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 
 	/* print debug statements */
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Buffer list at end of MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  Buffer list at end of MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
 		for (int i = 0; i < buff->nbuffer; i++) {
 			fprintf(stderr, "dbg4       i:%d  kind:%d  ptr:%p\n", i, buff->buffer_kind[i], (void *)buff->buffer[i]);
@@ -485,7 +475,7 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 	*nbuff = buff->nbuffer;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndump:      %d\n", *ndump);
 		fprintf(stderr, "dbg2       nbuff:      %d\n", *nbuff);
@@ -501,10 +491,8 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
                             double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                             char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                             double *ss, double *ssacrosstrack, double *ssalongtrack, int *error) {
-	static const char function_name[] = "mb_buffer_get_next_data";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)buff_ptr);
@@ -544,7 +532,7 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       id:         %d\n", *id);
 	}
@@ -593,10 +581,8 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int start, int *id, int time_i[7], double *time_d,
                            double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                            double *pitch, double *heave, int *error) {
-	static const char function_name[] = "mb_buffer_get_next_nav";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)buff_ptr);
@@ -633,7 +619,7 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr, int star
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       id:         %d\n", *id);
 	}
@@ -668,10 +654,8 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
                       double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                       char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	static const char function_name[] = "mb_buffer_extract";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)buff_ptr);
@@ -706,7 +690,7 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -760,10 +744,8 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *kind, int time_i[7], double *time_d,
                           double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                           double *pitch, double *heave, int *error) {
-	static const char function_name[] = "mb_buffer_extract_nav";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buff_ptr:   %p\n", (void *)buff_ptr);
@@ -797,7 +779,7 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, i
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -832,10 +814,8 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
-	static const char function_name[] = "mb_buffer_insert";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -894,7 +874,7 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -907,10 +887,8 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, int time_i[7], double time_d, double navlon,
                          double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                          int *error) {
-	static const char function_name[] = "mb_buffer_insert_nav";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -952,7 +930,7 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -963,10 +941,8 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *kind, int *error) {
-	static const char function_name[] = "mb_buffer_get_kind";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -990,7 +966,7 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -1002,10 +978,8 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 }
 /*--------------------------------------------------------------------*/
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void **store_ptr, int *error) {
-	static const char function_name[] = "mb_buffer_get_ptr";
-
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1029,7 +1003,7 @@ int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)*store_ptr);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);

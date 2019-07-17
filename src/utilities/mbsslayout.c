@@ -2929,7 +2929,6 @@ int main(int argc, char **argv) {
 int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
                                     double altitude, double pitch, double *table_angle, double *table_xtrack,
                                     double *table_ltrack, double *table_altitude, double *table_range, int *error) {
-	char *function_name = "mbsslayout_get_flatbottom_table";
 	int status = MB_SUCCESS;
 	double dangle;
 	double rr, xx, zz;
@@ -2938,7 +2937,7 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
@@ -2972,7 +2971,7 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       Lookup tables:\n");
 		for (i = 0; i < nangle; i++)

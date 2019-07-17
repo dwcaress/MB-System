@@ -73,14 +73,13 @@
 /*------------------------------------------------------------------------------*/
 int mbview_getvectorcount(int verbose, size_t instance, int *nvector, int *error) {
 	/* local variables */
-	char *function_name = "mbview_getvectorcount";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -96,7 +95,7 @@ int mbview_getvectorcount(int verbose, size_t instance, int *nvector, int *error
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nvector:                      %d\n", *nvector);
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
@@ -111,7 +110,6 @@ int mbview_getvectorcount(int verbose, size_t instance, int *nvector, int *error
 /*------------------------------------------------------------------------------*/
 int mbview_getvectorpointcount(int verbose, size_t instance, int vec, int *npoint, int *nintpoint, int *error) {
 	/* local variables */
-	char *function_name = "mbview_getvectorpointcount";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -119,7 +117,7 @@ int mbview_getvectorpointcount(int verbose, size_t instance, int vec, int *npoin
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -144,7 +142,7 @@ int mbview_getvectorpointcount(int verbose, size_t instance, int vec, int *npoin
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       npoint:                    %d\n", *npoint);
 		fprintf(stderr, "dbg2       nintpoint:                 %d\n", *nintpoint);
@@ -161,12 +159,11 @@ int mbview_getvectorpointcount(int verbose, size_t instance, int vec, int *npoin
 int mbview_allocvectorarrays(int verbose, int npointtotal, double **veclon, double **veclat, double **vecz, double **vecdata,
                              int *error) {
 	/* local variables */
-	char *function_name = "mbview_allocvectorarrays";
 	int status = MB_SUCCESS;
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -188,7 +185,7 @@ int mbview_allocvectorarrays(int verbose, int npointtotal, double **veclon, doub
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       veclon:                    %p\n", *veclon);
 		fprintf(stderr, "dbg2       veclat:                    %p\n", *veclat);
@@ -206,12 +203,11 @@ int mbview_allocvectorarrays(int verbose, int npointtotal, double **veclon, doub
 /*------------------------------------------------------------------------------*/
 int mbview_freevectorarrays(int verbose, double **veclon, double **veclat, double **vecz, double **vecdata, int *error) {
 	/* local variables */
-	char *function_name = "mbview_freevectorarrays";
 	int status = MB_SUCCESS;
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -229,7 +225,7 @@ int mbview_freevectorarrays(int verbose, double **veclon, double **veclat, doubl
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       veclon:                    %p\n", *veclon);
 		fprintf(stderr, "dbg2       veclat:                    %p\n", *veclat);
@@ -248,7 +244,6 @@ int mbview_freevectorarrays(int verbose, double **veclon, double **veclat, doubl
 int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, double *veclat, double *vecz, double *vecdata,
                      int veccolor, int vecsize, mb_path vecname, double vecdatamin, double vecdatamax, int *error) {
 	/* local variables */
-	char *function_name = "mbview_addvector";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -258,7 +253,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -399,7 +394,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 
 	/* print vec debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  vec data altered in function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg2  vec data altered in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  vec values:\n");
 		fprintf(stderr, "dbg2       vector_mode:        %d\n", shared.shareddata.vector_mode);
 		fprintf(stderr, "dbg2       vector_view_mode:      %d\n", data->vector_view_mode);
@@ -449,7 +444,7 @@ int mbview_addvector(int verbose, size_t instance, int npoint, double *veclon, d
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -465,14 +460,13 @@ int mbview_enableviewvectors(int verbose, size_t instance, int *error)
 
 {
 	/* local variables */
-	char *function_name = "mbview_enableviewvectors";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -495,7 +489,7 @@ int mbview_enableviewvectors(int verbose, size_t instance, int *error)
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -510,7 +504,6 @@ int mbview_enableviewvectors(int verbose, size_t instance, int *error)
 int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel, int ypixel) {
 
 	/* local variables */
-	char *function_name = "mbview_pick_vector_select";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -523,7 +516,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -601,7 +594,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 
 	/* print vec debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  vec data altered in function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg2  vec data altered in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2  vec values:\n");
 		fprintf(stderr, "dbg2       vector_mode:           %d\n", shared.shareddata.vector_mode);
 		fprintf(stderr, "dbg2       vector_view_mode:         %d\n", data->vector_view_mode);
@@ -651,7 +644,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -664,7 +657,6 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 int mbview_vector_delete(size_t instance, int ivec) {
 
 	/* local variables */
-	char *function_name = "mbview_vector_delete";
 	int error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
@@ -673,7 +665,7 @@ int mbview_vector_delete(size_t instance, int ivec) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       ivec:            %d\n", ivec);
@@ -716,7 +708,7 @@ int mbview_vector_delete(size_t instance, int ivec) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -728,7 +720,6 @@ int mbview_vector_delete(size_t instance, int ivec) {
 /*------------------------------------------------------------------------------*/
 int mbview_drawvector(size_t instance, int rez) {
 	/* local variables */
-	char *function_name = "mbview_drawvector";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -743,7 +734,7 @@ int mbview_drawvector(size_t instance, int rez) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -823,12 +814,12 @@ int mbview_drawvector(size_t instance, int rez) {
 	}
 
 #ifdef MBV_GETERRORS
-	mbview_glerrorcheck(instance, 1, function_name);
+	mbview_glerrorcheck(instance, 1, __func__);
 #endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}

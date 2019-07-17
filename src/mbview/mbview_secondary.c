@@ -84,7 +84,6 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 
 {
 	/* local variables */
-	char *function_name = "mbview_setsecondarygrid";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -93,7 +92,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -138,7 +137,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->secondary_nxy, (void **)&data->secondary_data, error);
 	if (status != MB_SUCCESS) {
 		fprintf(stderr, "\nUnable to allocate memory to store secondary grid data\n");
-		fprintf(stderr, "\nProgram terminated in function <%s>.\n", function_name);
+		fprintf(stderr, "\nProgram terminated in function <%s>.\n", __func__);
 		exit(*error);
 	}
 
@@ -169,7 +168,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 		if (proj_status != MB_SUCCESS) {
 			mb_error(verbose, *error, &message);
 			fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", message);
-			fprintf(stderr, "\nProgram terminated in <%s>\n", function_name);
+			fprintf(stderr, "\nProgram terminated in <%s>\n", __func__);
 			mb_memory_clear(mbv_verbose, error);
 			exit(*error);
 		}
@@ -180,7 +179,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance, int secondary_grid_pro
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -196,7 +195,6 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 
 {
 	/* local variables */
-	char *function_name = "mbview_updatesecondarygrid";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -205,7 +203,7 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
@@ -246,7 +244,7 @@ int mbview_updatesecondarygrid(int verbose, size_t instance, int secondary_n_col
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -262,7 +260,6 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_i
 
 {
 	/* local variables */
-	char *function_name = "mbview_setsecondarygrid";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -270,7 +267,7 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_i
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
@@ -293,7 +290,7 @@ int mbview_updatesecondarygridcell(int verbose, size_t instance, int secondary_i
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -311,14 +308,13 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 
 {
 	/* local variables */
-	char *function_name = "mbview_setsecondarycolortable";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -373,7 +369,7 @@ int mbview_setsecondarycolortable(int verbose, size_t instance, int secondary_co
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -390,7 +386,6 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 
 {
 	/* local variables */
-	char *function_name = "mbview_setsecondaryname";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -401,7 +396,7 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
@@ -436,7 +431,7 @@ int mbview_setsecondaryname(int verbose, size_t instance, char *name, int *error
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:                     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

@@ -42,11 +42,10 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_alloc";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -115,7 +114,7 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 		store->comment[i] = 0;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)*store_ptr);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -127,10 +126,9 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_deall";
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -141,7 +139,7 @@ int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	const int status = mb_freed(verbose, __FILE__, __LINE__, store_ptr, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -153,11 +151,10 @@ int mbsys_singlebeam_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                 int *error) {
-	static const char function_name[] = "mbsys_singlebeam_dimensions";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -190,7 +187,7 @@ int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       nbath:         %d\n", *nbath);
@@ -205,11 +202,10 @@ int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_pingnumber";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -227,7 +223,7 @@ int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pingnumber: %u\n", *pingnumber);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -239,11 +235,10 @@ int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, int *line, int *shot, int *cdp, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_segynumber";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -263,7 +258,7 @@ int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, int *line, int *sho
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       line:       %d\n", *line);
 		fprintf(stderr, "dbg2       shot:       %d\n", *shot);
@@ -280,11 +275,10 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
                              double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                              char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                              double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_extract";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -332,7 +326,7 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 		/* print debug statements */
 		if (verbose >= 5) {
-			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -364,7 +358,7 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
 			fprintf(stderr, "dbg4       comment:    %s\n", comment);
@@ -372,7 +366,7 @@ int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -414,11 +408,10 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
                             double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
                             double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                             double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_insert";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -496,7 +489,7 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -509,11 +502,10 @@ int mbsys_singlebeam_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                             double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                             double *ssv, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_ttimes";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -577,7 +569,7 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -599,11 +591,10 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_detects";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -654,7 +645,7 @@ int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -674,11 +665,10 @@ int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                       double *altitude, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_extract_altitude";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -742,7 +732,7 @@ int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:              %d\n", *kind);
 		fprintf(stderr, "dbg2       transducer_depth:  %f\n", *transducer_depth);
@@ -758,11 +748,10 @@ int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                  double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                  double *pitch, double *heave, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_extract_nav";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -809,7 +798,7 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 
 		/* print debug statements */
 		if (verbose >= 5) {
-			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
 			fprintf(stderr, "dbg4       kind:       %d\n", *kind);
 			fprintf(stderr, "dbg4       error:      %d\n", *error);
@@ -848,7 +837,7 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -882,11 +871,10 @@ int mbsys_singlebeam_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                                 double navlat, double speed, double heading, double draft, double roll, double pitch,
                                 double heave, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_insert_nav";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -945,7 +933,7 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -957,11 +945,10 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_swathbounds(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *portlon, double *portlat,
                                  double *stbdlon, double *stbdlat, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_swathbounds";
 	struct mbsys_singlebeam_struct *store;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -1005,7 +992,7 @@ int mbsys_singlebeam_swathbounds(int verbose, void *mbio_ptr, void *store_ptr, i
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 	}
@@ -1025,12 +1012,11 @@ int mbsys_singlebeam_swathbounds(int verbose, void *mbio_ptr, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_copy";
 	struct mbsys_singlebeam_struct *store;
 	struct mbsys_singlebeam_struct *copy;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1048,7 +1034,7 @@ int mbsys_singlebeam_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1059,10 +1045,9 @@ int mbsys_singlebeam_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 }
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_pressuredepth(int verbose, double pressure, double latitude, double *depth, int *error) {
-	static const char function_name[] = "mbsys_singlebeam_pressuredepth";
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pressure:   %f\n", pressure);
@@ -1094,7 +1079,7 @@ int mbsys_singlebeam_pressuredepth(int verbose, double pressure, double latitude
 	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       depth:      %f\n", *depth);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
