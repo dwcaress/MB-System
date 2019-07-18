@@ -3076,7 +3076,6 @@ int main(int argc, char **argv) {
  */
 int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                 double dx, double dy, int *error) {
-	char *function_name = "write_ascii";
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 	int i;
@@ -3087,7 +3086,7 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
@@ -3135,7 +3134,7 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3151,14 +3150,13 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
  */
 int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                    double dx, double dy, double nodata, int *error) {
-	char *function_name = "write_ascii";
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 	int i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
@@ -3203,7 +3201,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3220,13 +3218,12 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
  */
 int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                  double dx, double dy, int *error) {
-	char *function_name = "write_oldgrd";
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
@@ -3263,7 +3260,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3284,7 +3281,6 @@ int double_compare(double *a, double *b) {
 int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, double beamwidth_ltrack, double altitude,
                            double acrosstrack, double alongtrack, double acrosstrack_spacing, struct footprint *footprint,
                            int *error) {
-	char *function_name = "mbmosaic_get_footprint";
 	int status = MB_SUCCESS;
 	double r;
 	double theta, phi, thetap, phip;
@@ -3292,7 +3288,7 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
 		fprintf(stderr, "dbg2       mode:                %d\n", mode);
@@ -3342,7 +3338,7 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		for (i = 0; i < 4; i++)
 			fprintf(stderr, "dbg2       footprint: x[%d]:%f y[%d]:%f\n", i, footprint->x[i], i, footprint->y[i]);
@@ -3357,13 +3353,12 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 /*--------------------------------------------------------------------*/
 int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
                             double *bathalongtrack, double *gangles, int *error) {
-	char *function_name = "mbmosaic_get_beamangles";
 	int status = MB_SUCCESS;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       sonardepth:      %f\n", sonardepth);
@@ -3383,7 +3378,7 @@ int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry:\n");
@@ -3403,7 +3398,6 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
                                 double *priority_angle_priority, double priority_azimuth, double priority_azimuth_factor,
                                 double priority_heading, double priority_heading_factor, double heading, int beams_bath,
                                 char *beamflag, double *gangles, double *priorities, int *error) {
-	char *function_name = "mbmosaic_get_beampriorities";
 	int status = MB_SUCCESS;
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
@@ -3411,7 +3405,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       priority_mode:             %d\n", priority_mode);
@@ -3519,7 +3513,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry grazing angles and priorities:\n");
@@ -3536,7 +3530,6 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 /*--------------------------------------------------------------------*/
 int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack, double *slopes,
                             int *error) {
-	char *function_name = "mbmosaic_get_beamslopes";
 	int status = MB_SUCCESS;
 	int found_pre, found_post;
 	int i0, i1;
@@ -3544,7 +3537,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
@@ -3606,7 +3599,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry:\n");
@@ -3626,7 +3619,6 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
                                 double *bathacrosstrack, double *bathalongtrack, double angle_min, double angle_max, int nangle,
                                 double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                                 double *table_range, int *error) {
-	char *function_name = "mbmosaic_bath_getangletable";
 	int status = MB_SUCCESS;
 	double dangle, angle0, angle1, factor;
 	int found, foundnext;
@@ -3634,7 +3626,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       sonardepth:      %f\n", sonardepth);
@@ -3753,7 +3745,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
 		fprintf(stderr, "dbg2       tables:\n");
@@ -3772,14 +3764,13 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle_min, double angle_max, int nangle,
                                       double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                                       double *table_range, int *error) {
-	char *function_name = "mbmosaic_flatbottom_getangletable";
 	int status = MB_SUCCESS;
 	double dangle;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       altitude:        %f\n", altitude);
@@ -3801,7 +3792,7 @@ int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
 		fprintf(stderr, "dbg2       tables:\n");
@@ -3820,14 +3811,13 @@ int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle
 int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *table_xtrack, double *table_ltrack,
                           double *table_altitude, double *table_range, int pixels_ss, double *ss, double *ssacrosstrack,
                           double *gangles, int *error) {
-	char *function_name = "mbmosaic_get_ssangles";
 	int status = MB_SUCCESS;
 	int found;
 	int i, j, jstart;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
@@ -3875,7 +3865,7 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
 		fprintf(stderr, "dbg2       sidescan grazing angles:\n");
@@ -3894,7 +3884,6 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
                               double *priority_angle_priority, double priority_azimuth, double priority_azimuth_factor,
                               double priority_heading, double priority_heading_factor, double heading, int pixels_ss, double *ss,
                               double *gangles, double *priorities, int *error) {
-	char *function_name = "mbmosaic_get_sspriorities";
 	int status = MB_SUCCESS;
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
@@ -3902,7 +3891,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       priority_mode:             %d\n", priority_mode);
@@ -4010,7 +3999,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
 		fprintf(stderr, "dbg2       sidescan grazing angles and priorities:\n");

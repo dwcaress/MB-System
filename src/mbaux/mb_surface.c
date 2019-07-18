@@ -171,11 +171,9 @@ int gcd_euclid(int a, int b);
 
 int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, double xxmin, double xxmax, double yymin,
                double yymax, double xxinc, double yyinc, double ttension, float *sgrid) {
-	char *function_name = "mb_surface";
-
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       xxmin:      %f\n", xxmin);
@@ -317,7 +315,7 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", local_error);
 		for (int i = 0; i < m_columns * m_rows; i++)

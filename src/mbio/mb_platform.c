@@ -37,11 +37,8 @@
 
 /*--------------------------------------------------------------------*/
 int mb_platform_init(int verbose, void **platform_ptr, int *error) {
-  char *function_name = "mb_platform_init";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:             %p\n", platform_ptr);
@@ -110,9 +107,8 @@ int mb_platform_init(int verbose, void **platform_ptr, int *error) {
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       *platform_ptr:             %p\n", *platform_ptr);
     fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -126,11 +122,8 @@ int mb_platform_init(int verbose, void **platform_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, char *organization, char *documentation_url,
                         double start_time_d, double end_time_d, int *error) {
-  char *function_name = "mb_platform_setinfo";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:             %p\n", platform_ptr);
@@ -186,9 +179,8 @@ int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, c
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:           %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -202,11 +194,8 @@ int mb_platform_setinfo(int verbose, void *platform_ptr, int type, char *name, c
 int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longname model, mb_longname manufacturer,
                            mb_longname serialnumber, int capability1, int capability2, int num_offsets, int num_time_latency,
                            int *error) {
-  char *function_name = "mb_platform_add_sensor";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:         %p\n", platform_ptr);
@@ -241,7 +230,7 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
         char *message = NULL;
         mb_error(verbose, *error, &message);
         fprintf(stderr, "\nMBIO Error allocating sensor structures:\n%s\n", message);
-        fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+        fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
         exit(*error);
       }
     }
@@ -281,7 +270,7 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
         char *message = NULL;
         mb_error(verbose, *error, &message);
         fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
-        fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+        fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
         exit(*error);
       }
     }
@@ -301,7 +290,7 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
         char *message = NULL;
         mb_error(verbose, *error, &message);
         fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
-        fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+        fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
         exit(*error);
       }
     }
@@ -318,9 +307,8 @@ int mb_platform_add_sensor(int verbose, void *platform_ptr, int type, mb_longnam
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       platform_ptr:  %p\n", platform_ptr);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -335,11 +323,8 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
                                   double position_offset_x, double position_offset_y, double position_offset_z,
                                   int attitude_offset_mode, double attitude_offset_heading, double attitude_offset_roll,
                                   double attitude_offset_pitch, int *error) {
-  char *function_name = "mb_platform_set_sensor_offset";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:                     %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:                %p\n", platform_ptr);
@@ -377,7 +362,7 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
         char *message = NULL;
         mb_error(verbose, *error, &message);
         fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
-        fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+        fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
         exit(*error);
       }
     }
@@ -407,9 +392,8 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       platform_ptr:  %p\n", platform_ptr);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -423,11 +407,8 @@ int mb_platform_set_sensor_offset(int verbose, void *platform_ptr, int isensor, 
 int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isensor, int time_latency_mode,
                                        double time_latency_static, int num_time_latency, double *time_latency_time_d,
                                        double *time_latency_value, int *error) {
-  char *function_name = "mb_platform_set_sensor_timelatency";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:            %p\n", platform_ptr);
@@ -464,7 +445,7 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
         char *message = NULL;
         mb_error(verbose, *error, &message);
         fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
-        fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+        fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
         exit(*error);
       }
     }
@@ -490,9 +471,8 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -504,11 +484,8 @@ int mb_platform_set_sensor_timelatency(int verbose, void *platform_ptr, int isen
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_type, int sensor, int *error) {
-  char *function_name = "mb_platform_set_source_sensor";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:             %p\n", platform_ptr);
@@ -601,9 +578,8 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       platform_ptr:                  %p\n", platform_ptr);
     if (platform_ptr != NULL) {
@@ -683,11 +659,8 @@ int mb_platform_set_source_sensor(int verbose, void *platform_ptr, int source_ty
 /*--------------------------------------------------------------------*/
 
 int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
-  char *function_name = "mb_platform_deall";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:      %p\n", platform_ptr);
@@ -742,9 +715,8 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
     fprintf(stderr, "dbg2       *platform_ptr:     %p\n", *platform_ptr);
@@ -759,11 +731,8 @@ int mb_platform_deall(int verbose, void **platform_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 
 int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int *error) {
-  char *function_name = "mb_platform_read";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       platform_file:     %s\n", platform_file);
@@ -938,7 +907,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
                 char *message;
                 mb_error(verbose, *error, &message);
                 fprintf(stderr, "\nMBIO Error allocating sensor structures:\n%s\n", message);
-                fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+                fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
                 exit(*error);
               }
             }
@@ -1004,7 +973,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
                 char *message;
                 mb_error(verbose, *error, &message);
                 fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
-                fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+                fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
                 exit(*error);
               }
             }
@@ -1067,7 +1036,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
                   char *message;
                   mb_error(verbose, *error, &message);
                   fprintf(stderr, "\nMBIO Error allocating sensor offsets structures:\n%s\n", message);
-                  fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+                  fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
                   exit(*error);
                 }
               }
@@ -1084,7 +1053,7 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
                   *error = MB_ERROR_EOF;
                   mb_error(verbose, *error, &message);
                   fprintf(stderr, "\nMBIO Error parsing sensor offset time latency model:\n%s\n", message);
-                  fprintf(stderr, "\nProgram terminated in function <%s>\n", function_name);
+                  fprintf(stderr, "\nProgram terminated in function <%s>\n", __func__);
                   exit(*error);
                 }
               }
@@ -1115,9 +1084,8 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -1129,11 +1097,8 @@ int mb_platform_read(int verbose, char *platform_file, void **platform_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int *error) {
-  char *function_name = "mb_platform_write";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
@@ -1509,9 +1474,8 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
     *error = MB_ERROR_BAD_DATA;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -1523,14 +1487,11 @@ int mb_platform_write(int verbose, char *platform_file, void *platform_ptr, int 
 /*--------------------------------------------------------------------*/
 int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading, double roll,
                       double pitch, double *lever_x, double *lever_y, double *lever_z, int *error) {
-  char *function_name = "mb_platform_lever";
-
   /* reset error */
   *error = MB_ERROR_NO_ERROR;
 
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
@@ -1634,9 +1595,8 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       lever_x:            %f\n", *lever_x);
     fprintf(stderr, "dbg2       lever_y:            %f\n", *lever_y);
@@ -1652,11 +1612,8 @@ int mb_platform_lever(int verbose, void *platform_ptr, int targetsensor, int tar
 int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double navlon, double navlat,
                          double sensordepth, double heading, double roll, double pitch, double *targetlon, double *targetlat,
                          double *targetdepth, int *error) {
-  char *function_name = "mb_platform_position";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
@@ -1708,9 +1665,8 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       targetlon:    %f\n", *targetlon);
     fprintf(stderr, "dbg2       targetlat:    %f\n", *targetlat);
@@ -1725,11 +1681,8 @@ int mb_platform_position(int verbose, void *platform_ptr, int targetsensor, int 
 /*--------------------------------------------------------------------*/
 int mb_platform_orientation(int verbose, void *platform_ptr, double heading, double roll, double pitch, double *platform_heading,
                             double *platform_roll, double *platform_pitch, int *error) {
-  char *function_name = "mb_platform_orientation";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
@@ -1787,9 +1740,8 @@ int mb_platform_orientation(int verbose, void *platform_ptr, double heading, dou
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       platform_heading:  %f\n", *platform_heading);
     fprintf(stderr, "dbg2       platform_roll:    %f\n", *platform_roll);
@@ -1805,11 +1757,8 @@ int mb_platform_orientation(int verbose, void *platform_ptr, double heading, dou
 int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset,
                                    double *target_hdg_offset, double *target_roll_offset, double *target_pitch_offset,
                                    int *error) {
-  char *function_name = "mb_platform_orientation_offset";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
@@ -1866,9 +1815,8 @@ int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetse
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       target_roll_offset:    %f\n", *target_roll_offset);
     fprintf(stderr, "dbg2       target_pitch_offset:    %f\n", *target_pitch_offset);
@@ -1884,11 +1832,8 @@ int mb_platform_orientation_offset(int verbose, void *platform_ptr, int targetse
 int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetsensor, int targetsensoroffset, double heading,
                                    double roll, double pitch, double *target_heading, double *target_roll, double *target_pitch,
                                    int *error) {
-  char *function_name = "mb_platform_orientation";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:    %p\n", platform_ptr);
@@ -1956,9 +1901,8 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
     *error = MB_ERROR_BAD_DESCRIPTOR;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       target_heading:  %f\n", *target_heading);
     fprintf(stderr, "dbg2       target_roll:    %f\n", *target_roll);
@@ -1972,11 +1916,8 @@ int mb_platform_orientation_target(int verbose, void *platform_ptr, int targetse
 }
 /*--------------------------------------------------------------------*/
 int mb_platform_print(int verbose, void *platform_ptr, int *error) {
-  char *function_name = "mb_platform_print";
-
-  /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
     fprintf(stderr, "dbg2       platform_ptr:         %p\n", platform_ptr);
@@ -1989,7 +1930,6 @@ int mb_platform_print(int verbose, void *platform_ptr, int *error) {
     /* get platform structure */
     struct mb_platform_struct *platform = (struct mb_platform_struct *)platform_ptr;
 
-    /* print output debug statements */
     if (verbose >= 2 && platform_ptr != NULL) {
       fprintf(stderr, "dbg2       platform->type:             %d\n", platform->type);
       fprintf(stderr, "dbg2       platform->name:             %s\n", platform->name);

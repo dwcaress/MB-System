@@ -68,11 +68,9 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
                     void (*contour_newpen)(int), void (*contour_setline)(int),
                     void (*contour_justify_string)(double, char *, double *),
                     void (*contour_plot_string)(double, double, double, double, char *), int *error) {
-	char *function_name = "mb_contour_init";
-
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                 %p\n", data);
@@ -282,7 +280,7 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -296,12 +294,11 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 /* 	function mb_contour_deall deallocates the memory required to
     contour multibeam bathymetry data. */
 int mb_contour_deall(int verbose, struct swath *data, int *error) {
-	char *function_name = "mb_contour_deall";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
@@ -364,7 +361,7 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -376,11 +373,9 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour calls the appropriate contouring routine. */
 int mb_contour(int verbose, struct swath *data, int *error) {
-	char *function_name = "mb_contour";
-
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
@@ -396,7 +391,7 @@ int mb_contour(int verbose, struct swath *data, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -409,11 +404,9 @@ int mb_contour(int verbose, struct swath *data, int *error) {
 /*--------------------------------------------------------------------------*/
 /* 	function mb_tcontour contours multibeam data. */
 int mb_tcontour(int verbose, struct swath *data, int *error) {
-	char *function_name = "mb_tcontour";
-
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
@@ -686,7 +679,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  About to contour level in function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  About to contour level in function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       value:         %f\n", value);
 				fprintf(stderr, "dbg4       tick:          %d\n", tick);
 				fprintf(stderr, "dbg4       label:         %d\n", label);
@@ -808,7 +801,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1026,11 +1019,9 @@ int dump_contour(struct swath *data, double value) {
 /*--------------------------------------------------------------------------*/
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error) {
-	char *function_name = "mb_ocontour";
-
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
@@ -1195,7 +1186,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 
 			/* print debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  About to contour level in function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  About to contour level in function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       value:         %f\n", value);
 				fprintf(stderr, "dbg4       tick:          %d\n", tick);
 				fprintf(stderr, "dbg4       label:         %d\n", label);
@@ -1390,7 +1381,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

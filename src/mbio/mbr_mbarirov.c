@@ -37,11 +37,7 @@
 #include "mbf_mbarirov.h"
 #include "mbsys_singlebeam.h"
 
-int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error);
-int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
-
-static char header[] =
+static const char header[] =
     "Year,Day,Time,Usec,Lat,Lon,East,North,Pres,Head,Alti,Pitch,Roll,PosFlag,PresFlag,HeadFlag,AltiFlag,AttitFlag\n";
 
 /*--------------------------------------------------------------------*/
@@ -50,18 +46,13 @@ int mbr_info_mbarirov(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_mbarirov";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SINGLEBEAM;
 	*beams_bath_max = 1;
@@ -87,9 +78,10 @@ int mbr_info_mbarirov(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -119,94 +111,11 @@ int mbr_info_mbarirov(int verbose, int *system, int *beams_bath_max, int *beams_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_mbarirov(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_mbarirov";
-	int status = MB_SUCCESS;
-	struct mbf_mbarirov_struct *data;
-	char *data_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_mbarirov_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
-
-	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mbarirov_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-
-	/* set number of records read or written to zero */
-	mb_io_ptr->save1 = 0;
-
-	/* initialize everything to zeros */
-	mbr_zero_mbarirov(verbose, data_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_mbarirov(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_mbarirov";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
 int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_mbarirov";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
@@ -241,12 +150,11 @@ int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -256,124 +164,65 @@ int mbr_zero_mbarirov(int verbose, char *data_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_mbarirov";
-	int status = MB_SUCCESS;
+int mbr_alm_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_mbarirov_struct *data;
-	struct mbsys_singlebeam_struct *store;
+	char *data_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mbarirov_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_mbarirov_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* translate values to data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		store->kind = data->kind;
-		store->time_d = data->time_d;
-		for (int i = 0; i < 7; i++)
-			store->time_i[i] = data->time_i[i];
-		store->longitude = data->longitude;
-		store->latitude = data->latitude;
-		store->easting = data->easting;
-		store->northing = data->northing;
-		store->sonar_depth = data->rov_depth;
-		store->rov_pressure = data->rov_pressure;
-		store->heading = data->rov_heading;
-		store->rov_altitude = data->rov_altitude;
-		store->roll = data->rov_roll;
-		store->pitch = data->rov_pitch;
-		store->position_flag = data->position_flag;
-		store->pressure_flag = data->pressure_flag;
-		store->heading_flag = data->heading_flag;
-		store->altitude_flag = data->altitude_flag;
-		store->attitude_flag = data->attitude_flag;
-		for (int i = 0; i < MBF_MBARIROV_MAXLINE; i++)
-			store->comment[i] = data->comment[i];
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_mbarirov";
-	int status = MB_SUCCESS;
-	struct mbf_mbarirov_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
-	data = (struct mbf_mbarirov_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbf_mbarirov_struct);
+	mb_io_ptr->data_structure_size = 0;
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
 
-	/* first translate values from data storage structure */
-	if (store != NULL) {
-		data->kind = store->kind;
-		data->time_d = store->time_d;
-		for (int i = 0; i < 7; i++)
-			data->time_i[i] = store->time_i[i];
-		data->longitude = store->longitude;
-		data->latitude = store->latitude;
-		data->easting = store->easting;
-		data->northing = store->northing;
-		data->rov_depth = store->sonar_depth;
-		data->rov_pressure = store->rov_pressure;
-		data->rov_heading = store->heading;
-		data->rov_altitude = store->rov_altitude;
-		data->rov_roll = store->roll;
-		data->rov_pitch = store->pitch;
-		data->position_flag = store->position_flag;
-		data->pressure_flag = store->pressure_flag;
-		data->heading_flag = store->heading_flag;
-		data->altitude_flag = store->altitude_flag;
-		data->attitude_flag = store->attitude_flag;
-		for (int i = 0; i < MBF_MBARIROV_MAXLINE; i++)
-			data->comment[i] = store->comment[i];
-		data->comment[MBF_MBARIROV_MAXLINE - 1] = '\0';
+	/* get pointer to mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_mbarirov_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
+
+	/* set number of records read or written to zero */
+	mb_io_ptr->save1 = 0;
+
+	/* initialize everything to zeros */
+	mbr_zero_mbarirov(verbose, data_ptr, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* write next data to file */
-	status = mbr_mbarirov_wr_data(verbose, mbio_ptr, (void *)data, error);
-
-	/* print output debug statements */
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_dem_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* deallocate memory for data descriptor */
+	int status = mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, &mb_io_ptr->store_data, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -384,8 +233,6 @@ int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_mbarirov_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 	char line[MBF_MBARIROV_MAXLINE + 1] = "";
 	int year, jday;
@@ -393,9 +240,8 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
 	char *line_ptr;
 	int nread;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -413,6 +259,8 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* read next record */
 	if ((line_ptr = fgets(line, MBF_MBARIROV_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
@@ -492,9 +340,8 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
 			data->rov_depth =
 			    data->rov_pressure / (1.0052405 * (1 + 5.28E-3 * sin(DTR * data->latitude) * sin(DTR * data->latitude)));
 
-			/* print output debug statements */
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Data read in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Data read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4  Values,read:\n");
 				fprintf(stderr, "dbg4       time_d:       %f\n", data->time_d);
 				fprintf(stderr, "dbg4       latitude:     %f\n", data->latitude);
@@ -522,9 +369,68 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbf_mbarirov_struct *data;
+	struct mbsys_singlebeam_struct *store;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_mbarirov_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	/* read next data from file */
+	const int status = mbr_mbarirov_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* translate values to data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		store->kind = data->kind;
+		store->time_d = data->time_d;
+		for (int i = 0; i < 7; i++)
+			store->time_i[i] = data->time_i[i];
+		store->longitude = data->longitude;
+		store->latitude = data->latitude;
+		store->easting = data->easting;
+		store->northing = data->northing;
+		store->sonar_depth = data->rov_depth;
+		store->rov_pressure = data->rov_pressure;
+		store->heading = data->rov_heading;
+		store->rov_altitude = data->rov_altitude;
+		store->roll = data->rov_roll;
+		store->pitch = data->rov_pitch;
+		store->position_flag = data->position_flag;
+		store->pressure_flag = data->pressure_flag;
+		store->heading_flag = data->heading_flag;
+		store->altitude_flag = data->altitude_flag;
+		store->attitude_flag = data->attitude_flag;
+		for (int i = 0; i < MBF_MBARIROV_MAXLINE; i++)
+			store->comment[i] = data->comment[i];
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -535,17 +441,14 @@ int mbr_mbarirov_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_mbarirov_wr_data";
-	int status = MB_SUCCESS;
 	struct mbf_mbarirov_struct *data;
 	char line[MBF_MBARIROV_MAXLINE + 1] = "";
 	int time_j[6], year, jday, timetag;
 	int len;
 	int *write_count;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -576,9 +479,8 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		data->rov_pressure =
 		    data->rov_depth * (1.0052405 * (1 + 5.28E-3 * sin(DTR * data->latitude) * sin(DTR * data->latitude)));
 
-		/* print output debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  Data to be written in MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  Data to be written in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Values,read:\n");
 			fprintf(stderr, "dbg4       time_d:       %f\n", data->time_d);
 			fprintf(stderr, "dbg4       latitude:     %f\n", data->latitude);
@@ -596,7 +498,6 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 			fprintf(stderr, "dbg4       altitude_flag:%d\n", data->altitude_flag);
 			fprintf(stderr, "dbg4       attitude_flag:%d\n", data->attitude_flag);
 			fprintf(stderr, "dbg4       error:        %d\n", *error);
-			fprintf(stderr, "dbg4       status:       %d\n", status);
 		}
 
 		mb_get_jtime(verbose, data->time_i, time_j);
@@ -608,6 +509,8 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		        data->rov_heading, data->rov_altitude, data->rov_pitch, data->rov_roll, data->position_flag, data->pressure_flag,
 		        data->heading_flag, data->altitude_flag, data->attitude_flag);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write file header if needed */
 	if (*write_count == 0) {
@@ -632,15 +535,72 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_mbarirov(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbf_mbarirov_struct *data;
+	struct mbsys_singlebeam_struct *store;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_mbarirov_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	/* first translate values from data storage structure */
+	if (store != NULL) {
+		data->kind = store->kind;
+		data->time_d = store->time_d;
+		for (int i = 0; i < 7; i++)
+			data->time_i[i] = store->time_i[i];
+		data->longitude = store->longitude;
+		data->latitude = store->latitude;
+		data->easting = store->easting;
+		data->northing = store->northing;
+		data->rov_depth = store->sonar_depth;
+		data->rov_pressure = store->rov_pressure;
+		data->rov_heading = store->heading;
+		data->rov_altitude = store->rov_altitude;
+		data->rov_roll = store->roll;
+		data->rov_pitch = store->pitch;
+		data->position_flag = store->position_flag;
+		data->pressure_flag = store->pressure_flag;
+		data->heading_flag = store->heading_flag;
+		data->altitude_flag = store->altitude_flag;
+		data->attitude_flag = store->attitude_flag;
+		for (int i = 0; i < MBF_MBARIROV_MAXLINE; i++)
+			data->comment[i] = store->comment[i];
+		data->comment[MBF_MBARIROV_MAXLINE - 1] = '\0';
+	}
+
+	/* write next data to file */
+	const int status = mbr_mbarirov_wr_data(verbose, mbio_ptr, (void *)data, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -652,12 +612,8 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_mbarirov";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -666,7 +622,7 @@ int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mbarirov(
+	const int status = mbr_info_mbarirov(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
@@ -695,9 +651,8 @@ int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

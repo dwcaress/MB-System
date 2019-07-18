@@ -47,49 +47,19 @@
 #define SWAPFLAG MB_NO
 #endif
 
-int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error);
-int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_l3xseraw";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_XSE;
 	*beams_bath_max = 151;
@@ -117,9 +87,10 @@ int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
 
-	/* print output debug statements */
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -150,12 +121,8 @@ int mbr_info_l3xseraw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_l3xseraw";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -164,16 +131,12 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, MBSYS_XSE_BUFFER_SIZE, (void **)&mb_io_ptr->hdr_comment, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, MBSYS_XSE_BUFFER_SIZE, (void **)&mb_io_ptr->hdr_comment, error);
 	mbsys_xse_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -184,12 +147,8 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_l3xseraw";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -199,890 +158,11 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_l3xseraw";
-	int status = MB_SUCCESS;
-	struct mbsys_xse_struct *store;
-	double time_d;
-	double lon, lat;
-	double heading;
-	double speed;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_xse_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_l3xseraw_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/*fprintf(stderr, "read kind:%d\n", store->kind);
-	fprintf(stderr, "store->mul_frame:%d store->sid_frame:%d\n\n",
-	store->mul_frame, store->sid_frame);*/
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* save fix if nav data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_NAV) {
-		/* get time */
-		time_d = store->nav_sec - MBSYS_XSE_TIME_OFFSET + 0.000001 * store->nav_usec;
-
-		/* add nav to navlist */
-		if (store->nav_group_position == MB_YES)
-			mb_navint_add(verbose, mbio_ptr, time_d, RTD * store->nav_x, RTD * store->nav_y, error);
-
-		/* add heading to navlist */
-		if (store->nav_group_heading == MB_YES)
-			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_hdg_heading, error);
-		else if (store->nav_group_motiongt == MB_YES)
-			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_course_ground, error);
-		else if (store->nav_group_motiontw == MB_YES)
-			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_course_water, error);
-	}
-
-	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->mul_group_mbsystemnav == MB_NO) {
-		/* get timestamp */
-		time_d = store->mul_sec - MBSYS_XSE_TIME_OFFSET + 0.000001 * store->mul_usec;
-
-		/* interpolate heading */
-		mb_hedint_interp(verbose, mbio_ptr, time_d, &heading, error);
-
-		/* get speed if possible */
-		if (store->nav_group_log == MB_YES)
-			speed = 3.6 * store->nav_log_speed;
-		else if (store->nav_group_motiongt == MB_YES)
-			speed = 3.6 * store->nav_speed_ground;
-		else if (store->nav_group_motiontw == MB_YES)
-			speed = 3.6 * store->nav_speed_water;
-		else
-			speed = 0.0;
-
-		/* interpolate position */
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, speed, &lon, &lat, &speed, error);
-
-		/* set values */
-		store->mul_lon = DTR * lon;
-		store->mul_lat = DTR * lat;
-		store->mul_heading = DTR * heading;
-		store->mul_speed = speed / 3.6;
-		store->mul_group_mbsystemnav = MB_YES;
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_l3xseraw";
-	int status = MB_SUCCESS;
-	struct mbsys_xse_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
-
-	/* write next data to file */
-	status = mbr_l3xseraw_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_data";
-	int status = MB_SUCCESS;
-	struct mbsys_xse_struct *store;
-	FILE *mbfp;
-	static char label[4];
-	int done;
-	int frame_id;
-	int frame_source;
-	int frame_sec;
-	int frame_usec;
-	int frame_transaction;
-	int frame_address;
-	int buffer_size;
-	int frame_size;
-	int *buffer_size_max;
-	int *frame_save;
-	int *frame_expect;
-	int *frame_id_save;
-	int *frame_source_save;
-	int *frame_sec_save;
-	int *frame_usec_save;
-	int *buffer_size_save;
-	char *buffer;
-	int index;
-	int read_len;
-	int skip;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
-
-	/* set file position */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	/* read until done */
-	*error = MB_ERROR_NO_ERROR;
-	frame_expect = (int *)&mb_io_ptr->save1;
-	frame_save = (int *)&mb_io_ptr->save2;
-	frame_id_save = (int *)&mb_io_ptr->save3;
-	frame_source_save = (int *)&mb_io_ptr->save4;
-	frame_sec_save = (int *)&mb_io_ptr->save5;
-	frame_usec_save = (int *)&mb_io_ptr->save6;
-	buffer_size_save = (int *)&mb_io_ptr->save7;
-	buffer_size_max = (int *)&mb_io_ptr->save8;
-	buffer = mb_io_ptr->hdr_comment;
-	store->sbm_properties = MB_NO;
-	store->sbm_hrp = MB_NO;
-	store->sbm_signal = MB_NO;
-	store->sbm_message = MB_NO;
-	done = MB_NO;
-	if (*frame_save == MB_YES) {
-		store->mul_frame = MB_NO;
-		store->sid_frame = MB_NO;
-	}
-	while (done == MB_NO) {
-		/* use saved frame if available */
-		if (*frame_save == MB_YES) {
-			frame_id = *frame_id_save;
-			frame_source = *frame_source_save;
-			frame_sec = *frame_sec_save;
-			frame_usec = *frame_usec_save;
-			buffer_size = *buffer_size_save;
-			*frame_save = MB_NO;
-		}
-
-		/* else read from file */
-		else {
-
-			/* look for the next frame start */
-			skip = 0;
-			if ((read_len = fread(&label[0], 1, 4, mb_io_ptr->mbfp)) != 4) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-#ifdef MB_DEBUG
-			fprintf(stderr, "Byte: %d %c %o %x\n", label[0], label[0], label[0], label[0]);
-			fprintf(stderr, "Byte: %d %c %o %x\n", label[1], label[1], label[1], label[1]);
-			fprintf(stderr, "Byte: %d %c %o %x\n", label[2], label[2], label[2], label[2]);
-			fprintf(stderr, "Byte: %d %c %o %x\n", label[3], label[3], label[3], label[3]);
-#endif
-
-#ifdef DATAINPCBYTEORDER
-			while (status == MB_SUCCESS && strncmp(label, "FSH$", 4))
-#else
-			while (status == MB_SUCCESS && strncmp(label, "$HSF", 4))
-#endif
-			{
-				/* get next byte */
-				for (int i = 0; i < 3; i++)
-					label[i] = label[i + 1];
-				if ((read_len = fread(&label[3], 1, 1, mb_io_ptr->mbfp)) != 1) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-				}
-				else {
-					skip++;
-#ifdef MB_DEBUG
-					fprintf(stderr, "Byte: %d %c %o %x\n", label[3], label[3], label[3], label[3]);
-#endif
-				}
-			}
-
-			/* Read entire data record into buffer. The XSE frame byte count value */
-			/* is notorious for being incorrect.  So we read the data record by */
-			/* reading up to the next frame end mark. */
-
-			/* copy the frame start label to the buffer */
-			if (status == MB_SUCCESS) {
-				strncpy(buffer, label, 4);
-				index = 4;
-				buffer_size = 4;
-			}
-
-			/* Read next four bytes from the file into buffer to get us started. */
-			if (status == MB_SUCCESS) {
-				if ((read_len = fread(&buffer[index], 1, 4, mb_io_ptr->mbfp)) != 4) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-					frame_size = 0;
-				}
-				else {
-					buffer_size += 4;
-					mb_get_binary_int(SWAPFLAG, &buffer[4], (int *)&frame_size);
-				}
-			}
-
-/* now read a byte at a time, continuing until we find the end mark */
-#ifdef DATAINPCBYTEORDER
-			while (status == MB_SUCCESS && strncmp(&buffer[index], "FSH#", 4))
-#else
-			while (status == MB_SUCCESS && strncmp(&buffer[index], "#HSF", 4))
-#endif
-			{
-				/* read next byte */
-				if ((read_len = fread(&buffer[buffer_size], 1, 1, mb_io_ptr->mbfp)) != 1) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_EOF;
-				}
-				else {
-					buffer_size++;
-					index++;
-				}
-
-				/* don't let buffer overflow - error if record exceeds max size */
-				if (buffer_size >= MBSYS_XSE_BUFFER_SIZE) {
-					status = MB_FAILURE;
-					*error = MB_ERROR_UNINTELLIGIBLE;
-				}
-			}
-			*buffer_size_max = MAX(buffer_size, *buffer_size_max);
-
-#ifdef MB_DEBUG
-			if (*error != MB_ERROR_EOF) {
-				fprintf(stderr, "%s:%d | \n", __FILE__, __LINE__);
-				if (skip > 0)
-					fprintf(stderr, "\n%s:%d | BYTES SKIPPED BETWEEN FRAMES: %d\n", __FILE__, __LINE__, skip);
-				fprintf(stderr, "\n%s:%d | BUFFER SIZE: %u  MAX FOUND: %u  MAX: %u\n", __FILE__, __LINE__, buffer_size,
-				        *buffer_size_max, MBSYS_XSE_BUFFER_SIZE);
-			}
-#endif
-
-			/* parse header values */
-			if (status == MB_SUCCESS) {
-				/* get frame id, source, and time */
-				index = 8;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_id);
-				index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_source);
-				index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_sec);
-				index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_usec);
-				index += 4;
-
-				/* if it's a control frame, get the transaction and address values */
-				if (frame_id == MBSYS_XSE_CNT_FRAME) {
-					mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_transaction);
-					index += 4;
-					mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_address);
-					index += 4;
-				}
-			}
-		}
-
-		/* parse data if possible */
-		if (status == MB_SUCCESS) {
-#ifdef MB_DEBUG
-			fprintf(stderr, "%s:%d | FRAME ID: %u  BUFFER SIZE:%d  FRAME SIZE:%d\n", __FILE__, __LINE__, frame_id, buffer_size,
-			        frame_size);
-#endif
-			if (frame_id == MBSYS_XSE_NAV_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV\n", __FILE__, __LINE__);
-#endif
-				status = mbr_l3xseraw_rd_nav(verbose, buffer_size, buffer, store_ptr, error);
-				if (store->nav_source > 0) {
-					store->kind = MB_DATA_NAV;
-#ifdef MB_DEBUG
-					fprintf(stderr, "%s:%d | nav_source:%d  time:%u.%6.6u\n", __FILE__, __LINE__, store->nav_source,
-					        store->nav_sec, store->nav_usec);
-#endif
-				}
-				else
-					store->kind = MB_DATA_RAW_LINE;
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_SVP_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ SVP\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_VELOCITY_PROFILE;
-				status = mbr_l3xseraw_rd_svp(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_TID_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ TIDE\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-				status = mbr_l3xseraw_rd_tide(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_SHP_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ PARAMETER\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_PARAMETER;
-				status = mbr_l3xseraw_rd_ship(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_SSN_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ SIDESCAN\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_DATA;
-				status = mbr_l3xseraw_rd_sidescan(verbose, buffer_size, buffer, store_ptr, error);
-				store->sid_frame = MB_YES;
-				if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && store->sid_group_avl == MB_YES) {
-					*frame_expect = MBSYS_XSE_NONE_FRAME;
-					done = MB_YES;
-				}
-				else if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && store->sid_group_avl == MB_NO) {
-					done = MB_NO;
-				}
-				else if (*frame_expect == MBSYS_XSE_NONE_FRAME) {
-					*frame_expect = MBSYS_XSE_MBM_FRAME;
-					done = MB_NO;
-				}
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | \tframe_id:%d frame_expect:%d ping:%d %d sid_group_avl:%d\n", __FILE__, __LINE__,
-				        frame_id, *frame_expect, store->sid_ping, store->mul_ping, store->sid_group_avl);
-				fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n", __FILE__, __LINE__, done, store->mul_num_beams,
-				        store->sid_avl_num_samples);
-#endif
-			}
-			else if (frame_id == MBSYS_XSE_MBM_FRAME && *frame_expect == MBSYS_XSE_SSN_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NOTHING - SAVE HEADER\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_DATA;
-				*frame_save = MB_YES;
-				*frame_id_save = frame_id;
-				*frame_source_save = frame_source;
-				*frame_sec_save = frame_sec;
-				*frame_usec_save = frame_usec;
-				*buffer_size_save = buffer_size;
-				*frame_expect = MBSYS_XSE_NONE_FRAME;
-				done = MB_YES;
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n", __FILE__, __LINE__, done, store->mul_num_beams,
-				        store->sid_avl_num_samples);
-#endif
-			}
-			else if (frame_id == MBSYS_XSE_MBM_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ MULTIBEAM\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_DATA;
-				status = mbr_l3xseraw_rd_multibeam(verbose, buffer_size, buffer, store_ptr, error);
-				store->mul_frame = MB_YES;
-				if (frame_id == *frame_expect && store->sid_ping == store->mul_ping) {
-					*frame_expect = MBSYS_XSE_NONE_FRAME;
-					done = MB_YES;
-				}
-				else if (frame_id == *frame_expect) {
-					*frame_expect = MBSYS_XSE_SSN_FRAME;
-					done = MB_NO;
-				}
-				else if (*frame_expect == MBSYS_XSE_NONE_FRAME) {
-					*frame_expect = MBSYS_XSE_SSN_FRAME;
-					done = MB_NO;
-				}
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n", __FILE__, __LINE__, done, store->mul_num_beams,
-				        store->sid_avl_num_samples);
-#endif
-			}
-			else if (frame_id == MBSYS_XSE_SNG_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ SINGLEBEAM\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-				status = mbr_l3xseraw_rd_singlebeam(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_CNT_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ CONTROL\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-				status = mbr_l3xseraw_rd_control(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_BTH_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ BATHYMETRY\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-				status = mbr_l3xseraw_rd_bathymetry(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_PRD_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ PRODUCT\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-				status = mbr_l3xseraw_rd_product(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_NTV_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NATIVE\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-				status = mbr_l3xseraw_rd_native(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_GEO_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ GEODETIC\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-				status = mbr_l3xseraw_rd_geodetic(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_SBM_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ SEABEAM\n", __FILE__, __LINE__);
-#endif
-				status = mbr_l3xseraw_rd_seabeam(verbose, buffer_size, buffer, store_ptr, error);
-				if (store->sbm_properties == MB_YES)
-					store->kind = MB_DATA_RUN_PARAMETER;
-				else
-					store->kind = MB_DATA_RAW_LINE;
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_MSG_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ MESSAGE\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-				status = mbr_l3xseraw_rd_message(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else if (frame_id == MBSYS_XSE_COM_FRAME) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ COMMENT\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_COMMENT;
-				status = mbr_l3xseraw_rd_comment(verbose, buffer_size, buffer, store_ptr, error);
-				done = MB_YES;
-			}
-			else /* handle an unrecognized frame */
-			{
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ OTHER\n", __FILE__, __LINE__);
-#endif
-				store->kind = MB_DATA_RAW_LINE;
-			}
-
-			if (store->kind == MB_DATA_RAW_LINE) {
-				store->rawsize = buffer_size;
-				for (int i = 0; i < buffer_size; i++)
-					store->raw[i] = buffer[i];
-				done = MB_YES;
-			}
-		}
-		else if (*frame_expect != MBSYS_XSE_NONE_FRAME && frame_id != *frame_expect) {
-#ifdef MB_DEBUG
-			fprintf(stderr, "%s:%d | READ NOTHING - SAVE HEADER\n", __FILE__, __LINE__);
-#endif
-			store->kind = MB_DATA_DATA;
-			*frame_save = MB_YES;
-			*frame_id_save = frame_id;
-			*frame_source_save = frame_source;
-			*frame_sec_save = frame_sec;
-			*frame_usec_save = frame_usec;
-			*buffer_size_save = buffer_size;
-			*frame_expect = MBSYS_XSE_NONE_FRAME;
-			done = MB_YES;
-		}
-
-		/* check for status */
-		if (status == MB_FAILURE) {
-			done = MB_YES;
-			*frame_save = MB_NO;
-		}
-	}
-
-	/* get file position */
-	mb_io_ptr->file_bytes = ftell(mbfp);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_nav";
-	int status = MB_SUCCESS;
-	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int skip;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
-		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
-
-	/* get source and time */
-	index = 12;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_source);
-	index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_sec);
-	index += 4;
-	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_usec);
-	index += 4;
-
-	/* reset group read flags */
-	store->nav_group_general = MB_NO;  /* boolean flag */
-	store->nav_group_position = MB_NO; /* boolean flag */
-	store->nav_group_accuracy = MB_NO; /* boolean flag */
-	store->nav_group_motiongt = MB_NO; /* boolean flag */
-	store->nav_group_motiontw = MB_NO; /* boolean flag */
-	store->nav_group_track = MB_NO;    /* boolean flag */
-	store->nav_group_hrp = MB_NO;      /* boolean flag */
-	store->nav_group_heave = MB_NO;    /* boolean flag */
-	store->nav_group_roll = MB_NO;     /* boolean flag */
-	store->nav_group_pitch = MB_NO;    /* boolean flag */
-	store->nav_group_heading = MB_NO;  /* boolean flag */
-	store->nav_group_log = MB_NO;      /* boolean flag */
-	store->nav_group_gps = MB_NO;      /* boolean flag */
-
-	/* loop over groups */
-	done = MB_NO;
-	while (index <= buffer_size && status == MB_SUCCESS && done == MB_NO) {
-		/* look for group start or frame end */
-		skip = 0;
-#ifdef DATAINPCBYTEORDER
-		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
-			index++;
-			skip++;
-		}
-		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
-			done = MB_YES;
-		else
-			index += 4;
-#else
-		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
-			index++;
-			skip++;
-		}
-		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
-			done = MB_YES;
-		else
-			index += 4;
-#endif
-
-#ifdef MB_DEBUG
-		if (skip > 4)
-			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, function_name);
-#endif
-
-		/* deal with group */
-		if (done == MB_NO) {
-			/* get group size and id */
-			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
-			index += 4;
-			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
-			index += 4;
-
-			/* print debug statements */
-			if (verbose >= 5) {
-				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
-				        function_name);
-			}
-#ifdef MB_DEBUG
-			fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n", __FILE__, __LINE__, group_id,
-			        byte_count, function_name);
-#endif
-
-			/* handle general group */
-			if (group_id == MBSYS_XSE_NAV_GROUP_GEN) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_GEN\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_quality);
-				index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_status);
-				index += 4;
-				store->nav_group_general = MB_YES;
-			}
-
-			/* handle point group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_POS) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_POS\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_description_len);
-				index += 4;
-				for (int i = 0; i < store->nav_description_len; i++) {
-					store->nav_description[i] = buffer[index];
-					index++;
-				}
-				store->nav_description[store->nav_description_len] = '\0';
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_x);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_y);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_z);
-				index += 8;
-				store->nav_group_position = MB_YES;
-			}
-
-			/* handle accuracy group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_ACCURACY) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_ACCURACY\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_acc_quality);
-				index += 4;
-				store->nav_acc_numsatellites = buffer[index];
-				index++;
-				mb_get_binary_float(SWAPFLAG, &buffer[index], (float *)&store->nav_acc_horizdilution);
-				index += 4;
-				mb_get_binary_float(SWAPFLAG, &buffer[index], (float *)&store->nav_acc_diffage);
-				index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_acc_diffref);
-				index += 4;
-				store->nav_group_accuracy = MB_YES;
-			}
-
-			/* handle motion ground truth group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONGT) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_MOTIONGT\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_ground);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_ground);
-				index += 8;
-				store->nav_group_motiongt = MB_YES;
-			}
-
-			/* handle motion through water group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONTW) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_MOTIONTW\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_water);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_water);
-				index += 8;
-				store->nav_group_motiontw = MB_YES;
-			}
-
-			/* handle current track steering properties group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_TRACK) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_TRACK\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_track);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_sol);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_eol);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_distance_sol);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_azimuth_sol);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_distance_eol);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_azimuth_eol);
-				index += 8;
-				store->nav_group_track = MB_YES;
-			}
-
-			/* handle the heaverollpitch group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_HRP) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_HRP\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_heave);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_roll);
-				index += 8;
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_pitch);
-				index += 8;
-				store->nav_group_hrp = MB_YES;
-				/* heave, roll, and pitch are best obtained from the multibeam frame */
-			}
-
-			/* handle the heave group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_HEAVE) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_HEAVE\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hea_heave);
-				index += 8;
-				store->nav_group_heave = MB_YES;
-				/* heave is obtained from the multibeam frame */
-			}
-
-			/* handle the roll group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_ROLL) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_ROLL\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_rol_roll);
-				index += 8;
-				store->nav_group_roll = MB_YES;
-				/* roll is obtained from the multibeam frame */
-			}
-
-			/* handle the pitch group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_PITCH) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_PITCH\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_pit_pitch);
-				index += 8;
-				store->nav_group_pitch = MB_YES;
-				/* pitch is obtained from the multibeam frame */
-			}
-
-			/* handle the heading group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_HEADING) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_HEADING\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hdg_heading);
-				index += 8;
-				store->nav_group_heading = MB_YES;
-				/* Heading Group value overrides the MTW Group course value */
-			}
-
-			/* handle the log group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_LOG) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_LOG\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_log_speed);
-				index += 8;
-				store->nav_group_log = MB_YES;
-				/* speed is obtained from the motion ground truth */
-				/* and motion through water groups */
-			}
-
-			/* handle the gps group */
-			else if (group_id == MBSYS_XSE_NAV_GROUP_GPS) {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_LOG\n", __FILE__, __LINE__);
-#endif
-				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->nav_gps_altitude);
-				index += 4;
-				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->nav_gps_geoidalseparation);
-				index += 4;
-				store->nav_group_gps = MB_YES;
-			}
-
-			else {
-#ifdef MB_DEBUG
-				fprintf(stderr, "%s:%d | READ NAV_GROUP_OTHER\n", __FILE__, __LINE__);
-#endif
-			}
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       nav_source:          %d\n", store->nav_source);
-		fprintf(stderr, "dbg5       nav_sec:             %u\n", store->nav_sec);
-		fprintf(stderr, "dbg5       nav_usec:            %u\n", store->nav_usec);
-		fprintf(stderr, "dbg5       nav_quality:         %d\n", store->nav_quality);
-		fprintf(stderr, "dbg5       nav_status:          %d\n", store->nav_status);
-		fprintf(stderr, "dbg5       nav_description_len: %d\n", store->nav_description_len);
-		fprintf(stderr, "dbg5       nav_description:     %s\n", store->nav_description);
-		fprintf(stderr, "dbg5       nav_x:               %f\n", store->nav_x);
-		fprintf(stderr, "dbg5       nav_y:               %f\n", store->nav_y);
-		fprintf(stderr, "dbg5       nav_z:               %f\n", store->nav_z);
-		fprintf(stderr, "dbg5       nav_speed_ground:    %f\n", store->nav_speed_ground);
-		fprintf(stderr, "dbg5       nav_course_ground:   %f\n", store->nav_course_ground);
-		fprintf(stderr, "dbg5       nav_speed_water:     %f\n", store->nav_speed_water);
-		fprintf(stderr, "dbg5       nav_course_water:    %f\n", store->nav_course_water);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1093,8 +173,6 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -1102,9 +180,8 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 	int index;
 	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -1124,6 +201,8 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->svp_usec);
 	index += 4;
 
+	const int status = MB_SUCCESS;
+
 	/* loop over groups */
 	done = MB_NO;
 	while (index <= buffer_size && status == MB_SUCCESS && done == MB_NO) {
@@ -1151,7 +230,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 
 #ifdef MB_DEBUG
 		if (skip > 4)
-			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, function_name);
+			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, __func__);
 #endif
 
 		/* deal with group */
@@ -1165,11 +244,11 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
-				        function_name);
+				        __func__);
 			}
 #ifdef MB_DEBUG
 			fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n", __FILE__, __LINE__, group_id,
-			        byte_count, function_name);
+			        byte_count, __func__);
 #endif
 
 			/* handle general group */
@@ -1301,7 +380,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       svp_source:          %d\n", store->svp_source);
 		fprintf(stderr, "dbg5       svp_sec:             %u\n", store->svp_sec);
 		fprintf(stderr, "dbg5       svp_usec:            %u\n", store->svp_usec);
@@ -1315,9 +394,8 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 			        store->svp_temperature[i], store->svp_pressure[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1328,13 +406,10 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_tide";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -1347,9 +422,10 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 
 	/* The tide frame is currently unused by MB-System */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1360,8 +436,6 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_ship";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -1370,9 +444,8 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 	int skip;
 	int nchar;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -1391,6 +464,8 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->par_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -1419,7 +494,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 
 #ifdef MB_DEBUG
 		if (skip > 4)
-			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, function_name);
+			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, __func__);
 #endif
 
 		/* deal with group */
@@ -1433,11 +508,11 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
-				        function_name);
+				        __func__);
 			}
 #ifdef MB_DEBUG
 			fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n", __FILE__, __LINE__, group_id,
-			        byte_count, function_name);
+			        byte_count, __func__);
 #endif
 
 			/* handle general group */
@@ -1629,7 +704,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       par_source:          %d\n", store->par_source);
 		fprintf(stderr, "dbg5       par_sec:             %u\n", store->par_sec);
 		fprintf(stderr, "dbg5       par_usec:            %u\n", store->par_usec);
@@ -1694,9 +769,8 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 			        store->par_xdx_azimuth[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1707,8 +781,6 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_sidescan";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -1718,9 +790,8 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 	double xmin, xmax, binsize;
 	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -1739,6 +810,8 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sid_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -1767,7 +840,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 
 #ifdef MB_DEBUG
 		if (skip > 4)
-			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, function_name);
+			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, __func__);
 #endif
 
 		/* deal with group */
@@ -1781,11 +854,11 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
-				        function_name);
+				        __func__);
 			}
 #ifdef MB_DEBUG
 			fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n", __FILE__, __LINE__, group_id,
-			        byte_count, function_name);
+			        byte_count, __func__);
 #endif
 
 			/* handle general group */
@@ -2070,7 +1143,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sid_frame:            %d\n", store->sid_frame);
 		fprintf(stderr, "dbg5       sid_group_avt:        %d\n", store->sid_group_avt);
 		fprintf(stderr, "dbg5       sid_group_pvt:        %d\n", store->sid_group_pvt);
@@ -2137,9 +1210,8 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 		fprintf(stderr, "dbg5       sid_wgt_samplesright:  %d\n", store->sid_wgt_samplesright);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2150,8 +1222,6 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_multibeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -2163,9 +1233,8 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	int ngoodss;
 	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -2208,6 +1277,8 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->mul_usec);
 	index += 4;
 
+	int status = MB_SUCCESS;
+
 	/* loop over groups */
 	done = MB_NO;
 	while (index <= buffer_size && status == MB_SUCCESS && done == MB_NO) {
@@ -2235,7 +1306,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 
 #ifdef MB_DEBUG
 		if (skip > 4)
-			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, function_name);
+			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, __func__);
 #endif
 
 		/* deal with group */
@@ -2249,11 +1320,11 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
-				        function_name);
+				        __func__);
 			}
 #ifdef MB_DEBUG
 			fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n", __FILE__, __LINE__, group_id,
-			        byte_count, function_name);
+			        byte_count, __func__);
 #endif
 
 			/* handle general group */
@@ -2825,7 +1896,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mul_group_beam:      %d\n", store->mul_group_beam);
 		fprintf(stderr, "dbg5       mul_group_tt:        %d\n", store->mul_group_tt);
 		fprintf(stderr, "dbg5       mul_group_quality:   %d\n", store->mul_group_quality);
@@ -2884,9 +1955,8 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 		fprintf(stderr, "dbg5       mul_normamp_across_beamwidth: %f\n", store->mul_normamp_across_beamwidth);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2897,13 +1967,10 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_singlebeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -2916,9 +1983,10 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 
 	/* The singlebeam frame is currently unused by MB-System */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2929,13 +1997,10 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_message";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -2948,9 +2013,10 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 
 	/* The message frame is currently unused by MB-System */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2961,8 +2027,6 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_seabeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -2970,9 +2034,8 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 	int index;
 	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -2991,6 +2054,8 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->sbm_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -3019,7 +2084,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 
 #ifdef MB_DEBUG
 		if (skip > 4)
-			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, function_name);
+			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, __func__);
 #endif
 
 		/* deal with group */
@@ -3033,11 +2098,11 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
-				        function_name);
+				        __func__);
 			}
 #ifdef MB_DEBUG
 			fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n", __FILE__, __LINE__, group_id,
-			        byte_count, function_name);
+			        byte_count, __func__);
 #endif
 
 			/* handle properties group */
@@ -3174,7 +2239,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sbm_source:          %d\n", store->sbm_source);
 		fprintf(stderr, "dbg5       sbm_sec:             %u\n", store->sbm_sec);
 		fprintf(stderr, "dbg5       sbm_usec:            %u\n", store->sbm_usec);
@@ -3230,9 +2295,8 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 		fprintf(stderr, "dbg5       sbm_spacing_equidistance_max:  %f\n", store->sbm_spacing_equidistance_max);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3243,13 +2307,10 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_geodetic";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -3262,9 +2323,10 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 
 	/* The geodetic frame is currently unused by MB-System */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3275,13 +2337,10 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_native";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -3294,9 +2353,10 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 
 	/* The native frame is currently unused by MB-System */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3307,13 +2367,10 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_product";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -3326,9 +2383,10 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 
 	/* The product frame is currently unused by MB-System */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3339,13 +2397,10 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_bathymetry";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -3358,9 +2413,10 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 
 	/* The bathymetry frame is currently unused by MB-System */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3371,13 +2427,10 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_control";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -3390,9 +2443,10 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 
 	/* The control frame is currently unused by MB-System */
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3403,8 +2457,6 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_rd_comment";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
@@ -3412,9 +2464,8 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 	int index;
 	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
@@ -3433,6 +2484,8 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 	index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->com_usec);
 	index += 4;
+
+	const int status = MB_SUCCESS;
 
 	/* loop over groups */
 	done = MB_NO;
@@ -3461,7 +2514,7 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 
 #ifdef MB_DEBUG
 		if (skip > 4)
-			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, function_name);
+			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, __func__);
 #endif
 
 		/* deal with group */
@@ -3475,11 +2528,11 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
-				        function_name);
+				        __func__);
 			}
 #ifdef MB_DEBUG
 			fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n", __FILE__, __LINE__, group_id,
-			        byte_count, function_name);
+			        byte_count, __func__);
 #endif
 
 			/* handle general group */
@@ -3495,13 +2548,12 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:             %s\n", store->comment);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3510,24 +2562,350 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 
 	return (status);
 }
-
 /*--------------------------------------------------------------------*/
-int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_data";
-	int status = MB_SUCCESS;
+int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
+	struct mbsys_xse_struct *store;
+	int byte_count;
+	int group_id;
+	int done;
+	int index;
+	int skip;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       buffer_size:%d\n", buffer_size);
+		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to store data structure */
+	store = (struct mbsys_xse_struct *)store_ptr;
+
+	/* get source and time */
+	index = 12;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_source);
+	index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_sec);
+	index += 4;
+	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_usec);
+	index += 4;
+
+	/* reset group read flags */
+	store->nav_group_general = MB_NO;  /* boolean flag */
+	store->nav_group_position = MB_NO; /* boolean flag */
+	store->nav_group_accuracy = MB_NO; /* boolean flag */
+	store->nav_group_motiongt = MB_NO; /* boolean flag */
+	store->nav_group_motiontw = MB_NO; /* boolean flag */
+	store->nav_group_track = MB_NO;    /* boolean flag */
+	store->nav_group_hrp = MB_NO;      /* boolean flag */
+	store->nav_group_heave = MB_NO;    /* boolean flag */
+	store->nav_group_roll = MB_NO;     /* boolean flag */
+	store->nav_group_pitch = MB_NO;    /* boolean flag */
+	store->nav_group_heading = MB_NO;  /* boolean flag */
+	store->nav_group_log = MB_NO;      /* boolean flag */
+	store->nav_group_gps = MB_NO;      /* boolean flag */
+
+	const int status = MB_SUCCESS;
+
+	/* loop over groups */
+	done = MB_NO;
+	while (index <= buffer_size && status == MB_SUCCESS && done == MB_NO) {
+		/* look for group start or frame end */
+		skip = 0;
+#ifdef DATAINPCBYTEORDER
+		while (index < buffer_size && strncmp(&buffer[index], "GSH$", 4) && strncmp(&buffer[index], "FSH#", 4)) {
+			index++;
+			skip++;
+		}
+		if (index >= buffer_size || !strncmp(&buffer[index], "FSH#", 4))
+			done = MB_YES;
+		else
+			index += 4;
+#else
+		while (index < buffer_size && strncmp(&buffer[index], "$HSG", 4) && strncmp(&buffer[index], "#HSF", 4)) {
+			index++;
+			skip++;
+		}
+		if (index >= buffer_size || !strncmp(&buffer[index], "#HSF", 4))
+			done = MB_YES;
+		else
+			index += 4;
+#endif
+
+#ifdef MB_DEBUG
+		if (skip > 4)
+			fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n", __FILE__, __LINE__, skip - 4, __func__);
+#endif
+
+		/* deal with group */
+		if (done == MB_NO) {
+			/* get group size and id */
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&byte_count);
+			index += 4;
+			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
+			index += 4;
+
+			/* print debug statements */
+			if (verbose >= 5) {
+				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
+				        __func__);
+			}
+#ifdef MB_DEBUG
+			fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n", __FILE__, __LINE__, group_id,
+			        byte_count, __func__);
+#endif
+
+			/* handle general group */
+			if (group_id == MBSYS_XSE_NAV_GROUP_GEN) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_GEN\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_quality);
+				index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_status);
+				index += 4;
+				store->nav_group_general = MB_YES;
+			}
+
+			/* handle point group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_POS) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_POS\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_description_len);
+				index += 4;
+				for (int i = 0; i < store->nav_description_len; i++) {
+					store->nav_description[i] = buffer[index];
+					index++;
+				}
+				store->nav_description[store->nav_description_len] = '\0';
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_x);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_y);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_z);
+				index += 8;
+				store->nav_group_position = MB_YES;
+			}
+
+			/* handle accuracy group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_ACCURACY) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_ACCURACY\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_acc_quality);
+				index += 4;
+				store->nav_acc_numsatellites = buffer[index];
+				index++;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (float *)&store->nav_acc_horizdilution);
+				index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (float *)&store->nav_acc_diffage);
+				index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&store->nav_acc_diffref);
+				index += 4;
+				store->nav_group_accuracy = MB_YES;
+			}
+
+			/* handle motion ground truth group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONGT) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_MOTIONGT\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_ground);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_ground);
+				index += 8;
+				store->nav_group_motiongt = MB_YES;
+			}
+
+			/* handle motion through water group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONTW) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_MOTIONTW\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_water);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_water);
+				index += 8;
+				store->nav_group_motiontw = MB_YES;
+			}
+
+			/* handle current track steering properties group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_TRACK) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_TRACK\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_track);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_sol);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_eol);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_distance_sol);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_azimuth_sol);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_distance_eol);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_azimuth_eol);
+				index += 8;
+				store->nav_group_track = MB_YES;
+			}
+
+			/* handle the heaverollpitch group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_HRP) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_HRP\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_heave);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_roll);
+				index += 8;
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_pitch);
+				index += 8;
+				store->nav_group_hrp = MB_YES;
+				/* heave, roll, and pitch are best obtained from the multibeam frame */
+			}
+
+			/* handle the heave group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_HEAVE) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_HEAVE\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hea_heave);
+				index += 8;
+				store->nav_group_heave = MB_YES;
+				/* heave is obtained from the multibeam frame */
+			}
+
+			/* handle the roll group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_ROLL) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_ROLL\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_rol_roll);
+				index += 8;
+				store->nav_group_roll = MB_YES;
+				/* roll is obtained from the multibeam frame */
+			}
+
+			/* handle the pitch group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_PITCH) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_PITCH\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_pit_pitch);
+				index += 8;
+				store->nav_group_pitch = MB_YES;
+				/* pitch is obtained from the multibeam frame */
+			}
+
+			/* handle the heading group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_HEADING) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_HEADING\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hdg_heading);
+				index += 8;
+				store->nav_group_heading = MB_YES;
+				/* Heading Group value overrides the MTW Group course value */
+			}
+
+			/* handle the log group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_LOG) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_LOG\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_log_speed);
+				index += 8;
+				store->nav_group_log = MB_YES;
+				/* speed is obtained from the motion ground truth */
+				/* and motion through water groups */
+			}
+
+			/* handle the gps group */
+			else if (group_id == MBSYS_XSE_NAV_GROUP_GPS) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_LOG\n", __FILE__, __LINE__);
+#endif
+				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->nav_gps_altitude);
+				index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->nav_gps_geoidalseparation);
+				index += 4;
+				store->nav_group_gps = MB_YES;
+			}
+
+			else {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV_GROUP_OTHER\n", __FILE__, __LINE__);
+#endif
+			}
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       nav_source:          %d\n", store->nav_source);
+		fprintf(stderr, "dbg5       nav_sec:             %u\n", store->nav_sec);
+		fprintf(stderr, "dbg5       nav_usec:            %u\n", store->nav_usec);
+		fprintf(stderr, "dbg5       nav_quality:         %d\n", store->nav_quality);
+		fprintf(stderr, "dbg5       nav_status:          %d\n", store->nav_status);
+		fprintf(stderr, "dbg5       nav_description_len: %d\n", store->nav_description_len);
+		fprintf(stderr, "dbg5       nav_description:     %s\n", store->nav_description);
+		fprintf(stderr, "dbg5       nav_x:               %f\n", store->nav_x);
+		fprintf(stderr, "dbg5       nav_y:               %f\n", store->nav_y);
+		fprintf(stderr, "dbg5       nav_z:               %f\n", store->nav_z);
+		fprintf(stderr, "dbg5       nav_speed_ground:    %f\n", store->nav_speed_ground);
+		fprintf(stderr, "dbg5       nav_course_ground:   %f\n", store->nav_course_ground);
+		fprintf(stderr, "dbg5       nav_speed_water:     %f\n", store->nav_speed_water);
+		fprintf(stderr, "dbg5       nav_course_water:    %f\n", store->nav_course_water);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_xse_struct *store;
 	FILE *mbfp;
+	static char label[4];
+	int done;
+	int frame_id;
+	int frame_source;
+	int frame_sec;
+	int frame_usec;
+	int frame_transaction;
+	int frame_address;
 	int buffer_size;
-	int write_size;
+	int frame_size;
+	int *buffer_size_max;
+	int *frame_save;
+	int *frame_expect;
+	int *frame_id_save;
+	int *frame_source_save;
+	int *frame_sec_save;
+	int *frame_usec_save;
+	int *buffer_size_save;
 	char *buffer;
+	int index;
+	int read_len;
+	int skip;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
@@ -3536,112 +2914,394 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get pointer to store data structure */
 	store = (struct mbsys_xse_struct *)store_ptr;
 	mbfp = mb_io_ptr->mbfp;
+
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	/* read until done */
+	*error = MB_ERROR_NO_ERROR;
+	frame_expect = (int *)&mb_io_ptr->save1;
+	frame_save = (int *)&mb_io_ptr->save2;
+	frame_id_save = (int *)&mb_io_ptr->save3;
+	frame_source_save = (int *)&mb_io_ptr->save4;
+	frame_sec_save = (int *)&mb_io_ptr->save5;
+	frame_usec_save = (int *)&mb_io_ptr->save6;
+	buffer_size_save = (int *)&mb_io_ptr->save7;
+	buffer_size_max = (int *)&mb_io_ptr->save8;
 	buffer = mb_io_ptr->hdr_comment;
+	store->sbm_properties = MB_NO;
+	store->sbm_hrp = MB_NO;
+	store->sbm_signal = MB_NO;
+	store->sbm_message = MB_NO;
+	done = MB_NO;
+	if (*frame_save == MB_YES) {
+		store->mul_frame = MB_NO;
+		store->sid_frame = MB_NO;
+	}
 
-#ifdef MB_DEBUG
-	fprintf(stderr, "%s:%d | WRITE KIND: %d\n", __FILE__, __LINE__, store->kind);
-#endif
+	int status = MB_SUCCESS;
 
-	if (store->kind == MB_DATA_COMMENT) {
-#ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE COMMMENT\n", __FILE__, __LINE__);
-#endif
-		status = mbr_l3xseraw_wr_comment(verbose, &buffer_size, buffer, store_ptr, error);
-		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
+	while (done == MB_NO) {
+		/* use saved frame if available */
+		if (*frame_save == MB_YES) {
+			frame_id = *frame_id_save;
+			frame_source = *frame_source_save;
+			frame_sec = *frame_sec_save;
+			frame_usec = *frame_usec_save;
+			buffer_size = *buffer_size_save;
+			*frame_save = MB_NO;
 		}
-	}
-	else if (store->kind == MB_DATA_NAV) {
-#ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE NAV\n", __FILE__, __LINE__);
-#endif
-		status = mbr_l3xseraw_wr_nav(verbose, &buffer_size, buffer, store_ptr, error);
-		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-	}
-	else if (store->kind == MB_DATA_VELOCITY_PROFILE) {
-#ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE SVP\n", __FILE__, __LINE__);
-#endif
-		status = mbr_l3xseraw_wr_svp(verbose, &buffer_size, buffer, store_ptr, error);
-		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-	}
-	else if (store->kind == MB_DATA_PARAMETER) {
-#ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE SHIP\n", __FILE__, __LINE__);
-#endif
-		status = mbr_l3xseraw_wr_ship(verbose, &buffer_size, buffer, store_ptr, error);
-		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
-		}
-	}
-	else if (store->kind == MB_DATA_DATA) {
-#ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE MULTIBEAM\n", __FILE__, __LINE__);
-#endif
-		if (store->mul_frame == MB_YES) {
-			status = mbr_l3xseraw_wr_multibeam(verbose, &buffer_size, buffer, store_ptr, error);
-			if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
-				*error = MB_ERROR_WRITE_FAIL;
+
+		/* else read from file */
+		else {
+
+			/* look for the next frame start */
+			skip = 0;
+			if ((read_len = fread(&label[0], 1, 4, mb_io_ptr->mbfp)) != 4) {
 				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+#ifdef MB_DEBUG
+			fprintf(stderr, "Byte: %d %c %o %x\n", label[0], label[0], label[0], label[0]);
+			fprintf(stderr, "Byte: %d %c %o %x\n", label[1], label[1], label[1], label[1]);
+			fprintf(stderr, "Byte: %d %c %o %x\n", label[2], label[2], label[2], label[2]);
+			fprintf(stderr, "Byte: %d %c %o %x\n", label[3], label[3], label[3], label[3]);
+#endif
+
+#ifdef DATAINPCBYTEORDER
+			while (status == MB_SUCCESS && strncmp(label, "FSH$", 4))
+#else
+			while (status == MB_SUCCESS && strncmp(label, "$HSF", 4))
+#endif
+			{
+				/* get next byte */
+				for (int i = 0; i < 3; i++)
+					label[i] = label[i + 1];
+				if ((read_len = fread(&label[3], 1, 1, mb_io_ptr->mbfp)) != 1) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+				}
+				else {
+					skip++;
+#ifdef MB_DEBUG
+					fprintf(stderr, "Byte: %d %c %o %x\n", label[3], label[3], label[3], label[3]);
+#endif
+				}
+			}
+
+			/* Read entire data record into buffer. The XSE frame byte count value */
+			/* is notorious for being incorrect.  So we read the data record by */
+			/* reading up to the next frame end mark. */
+
+			/* copy the frame start label to the buffer */
+			if (status == MB_SUCCESS) {
+				strncpy(buffer, label, 4);
+				index = 4;
+				buffer_size = 4;
+			}
+
+			/* Read next four bytes from the file into buffer to get us started. */
+			if (status == MB_SUCCESS) {
+				if ((read_len = fread(&buffer[index], 1, 4, mb_io_ptr->mbfp)) != 4) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					frame_size = 0;
+				}
+				else {
+					buffer_size += 4;
+					mb_get_binary_int(SWAPFLAG, &buffer[4], (int *)&frame_size);
+				}
+			}
+
+/* now read a byte at a time, continuing until we find the end mark */
+#ifdef DATAINPCBYTEORDER
+			while (status == MB_SUCCESS && strncmp(&buffer[index], "FSH#", 4))
+#else
+			while (status == MB_SUCCESS && strncmp(&buffer[index], "#HSF", 4))
+#endif
+			{
+				/* read next byte */
+				if ((read_len = fread(&buffer[buffer_size], 1, 1, mb_io_ptr->mbfp)) != 1) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+				}
+				else {
+					buffer_size++;
+					index++;
+				}
+
+				/* don't let buffer overflow - error if record exceeds max size */
+				if (buffer_size >= MBSYS_XSE_BUFFER_SIZE) {
+					status = MB_FAILURE;
+					*error = MB_ERROR_UNINTELLIGIBLE;
+				}
+			}
+			*buffer_size_max = MAX(buffer_size, *buffer_size_max);
+
+#ifdef MB_DEBUG
+			if (*error != MB_ERROR_EOF) {
+				fprintf(stderr, "%s:%d | \n", __FILE__, __LINE__);
+				if (skip > 0)
+					fprintf(stderr, "\n%s:%d | BYTES SKIPPED BETWEEN FRAMES: %d\n", __FILE__, __LINE__, skip);
+				fprintf(stderr, "\n%s:%d | BUFFER SIZE: %u  MAX FOUND: %u  MAX: %u\n", __FILE__, __LINE__, buffer_size,
+				        *buffer_size_max, MBSYS_XSE_BUFFER_SIZE);
+			}
+#endif
+
+			/* parse header values */
+			if (status == MB_SUCCESS) {
+				/* get frame id, source, and time */
+				index = 8;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_id);
+				index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_source);
+				index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_sec);
+				index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_usec);
+				index += 4;
+
+				/* if it's a control frame, get the transaction and address values */
+				if (frame_id == MBSYS_XSE_CNT_FRAME) {
+					mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_transaction);
+					index += 4;
+					mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&frame_address);
+					index += 4;
+				}
 			}
 		}
+
+		/* parse data if possible */
+		if (status == MB_SUCCESS) {
 #ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE SIDESCAN\n", __FILE__, __LINE__);
+			fprintf(stderr, "%s:%d | FRAME ID: %u  BUFFER SIZE:%d  FRAME SIZE:%d\n", __FILE__, __LINE__, frame_id, buffer_size,
+			        frame_size);
 #endif
-		if (store->sid_frame == MB_YES) {
-			status = mbr_l3xseraw_wr_sidescan(verbose, &buffer_size, buffer, store_ptr, error);
-			if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
-				*error = MB_ERROR_WRITE_FAIL;
-				status = MB_FAILURE;
+			if (frame_id == MBSYS_XSE_NAV_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NAV\n", __FILE__, __LINE__);
+#endif
+				status = mbr_l3xseraw_rd_nav(verbose, buffer_size, buffer, store_ptr, error);
+				if (store->nav_source > 0) {
+					store->kind = MB_DATA_NAV;
+#ifdef MB_DEBUG
+					fprintf(stderr, "%s:%d | nav_source:%d  time:%u.%6.6u\n", __FILE__, __LINE__, store->nav_source,
+					        store->nav_sec, store->nav_usec);
+#endif
+				}
+				else
+					store->kind = MB_DATA_RAW_LINE;
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_SVP_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ SVP\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_VELOCITY_PROFILE;
+				status = mbr_l3xseraw_rd_svp(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_TID_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ TIDE\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+				status = mbr_l3xseraw_rd_tide(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_SHP_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ PARAMETER\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_PARAMETER;
+				status = mbr_l3xseraw_rd_ship(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_SSN_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ SIDESCAN\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_DATA;
+				status = mbr_l3xseraw_rd_sidescan(verbose, buffer_size, buffer, store_ptr, error);
+				store->sid_frame = MB_YES;
+				if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && store->sid_group_avl == MB_YES) {
+					*frame_expect = MBSYS_XSE_NONE_FRAME;
+					done = MB_YES;
+				}
+				else if (frame_id == *frame_expect && store->sid_ping == store->mul_ping && store->sid_group_avl == MB_NO) {
+					done = MB_NO;
+				}
+				else if (*frame_expect == MBSYS_XSE_NONE_FRAME) {
+					*frame_expect = MBSYS_XSE_MBM_FRAME;
+					done = MB_NO;
+				}
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | \tframe_id:%d frame_expect:%d ping:%d %d sid_group_avl:%d\n", __FILE__, __LINE__,
+				        frame_id, *frame_expect, store->sid_ping, store->mul_ping, store->sid_group_avl);
+				fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n", __FILE__, __LINE__, done, store->mul_num_beams,
+				        store->sid_avl_num_samples);
+#endif
+			}
+			else if (frame_id == MBSYS_XSE_MBM_FRAME && *frame_expect == MBSYS_XSE_SSN_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NOTHING - SAVE HEADER\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_DATA;
+				*frame_save = MB_YES;
+				*frame_id_save = frame_id;
+				*frame_source_save = frame_source;
+				*frame_sec_save = frame_sec;
+				*frame_usec_save = frame_usec;
+				*buffer_size_save = buffer_size;
+				*frame_expect = MBSYS_XSE_NONE_FRAME;
+				done = MB_YES;
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n", __FILE__, __LINE__, done, store->mul_num_beams,
+				        store->sid_avl_num_samples);
+#endif
+			}
+			else if (frame_id == MBSYS_XSE_MBM_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ MULTIBEAM\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_DATA;
+				status = mbr_l3xseraw_rd_multibeam(verbose, buffer_size, buffer, store_ptr, error);
+				store->mul_frame = MB_YES;
+				if (frame_id == *frame_expect && store->sid_ping == store->mul_ping) {
+					*frame_expect = MBSYS_XSE_NONE_FRAME;
+					done = MB_YES;
+				}
+				else if (frame_id == *frame_expect) {
+					*frame_expect = MBSYS_XSE_SSN_FRAME;
+					done = MB_NO;
+				}
+				else if (*frame_expect == MBSYS_XSE_NONE_FRAME) {
+					*frame_expect = MBSYS_XSE_SSN_FRAME;
+					done = MB_NO;
+				}
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n", __FILE__, __LINE__, done, store->mul_num_beams,
+				        store->sid_avl_num_samples);
+#endif
+			}
+			else if (frame_id == MBSYS_XSE_SNG_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ SINGLEBEAM\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+				status = mbr_l3xseraw_rd_singlebeam(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_CNT_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ CONTROL\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+				status = mbr_l3xseraw_rd_control(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_BTH_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ BATHYMETRY\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+				status = mbr_l3xseraw_rd_bathymetry(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_PRD_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ PRODUCT\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+				status = mbr_l3xseraw_rd_product(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_NTV_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ NATIVE\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+				status = mbr_l3xseraw_rd_native(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_GEO_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ GEODETIC\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+				status = mbr_l3xseraw_rd_geodetic(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_SBM_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ SEABEAM\n", __FILE__, __LINE__);
+#endif
+				status = mbr_l3xseraw_rd_seabeam(verbose, buffer_size, buffer, store_ptr, error);
+				if (store->sbm_properties == MB_YES)
+					store->kind = MB_DATA_RUN_PARAMETER;
+				else
+					store->kind = MB_DATA_RAW_LINE;
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_MSG_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ MESSAGE\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+				status = mbr_l3xseraw_rd_message(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else if (frame_id == MBSYS_XSE_COM_FRAME) {
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ COMMENT\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_COMMENT;
+				status = mbr_l3xseraw_rd_comment(verbose, buffer_size, buffer, store_ptr, error);
+				done = MB_YES;
+			}
+			else /* handle an unrecognized frame */
+			{
+#ifdef MB_DEBUG
+				fprintf(stderr, "%s:%d | READ OTHER\n", __FILE__, __LINE__);
+#endif
+				store->kind = MB_DATA_RAW_LINE;
+			}
+
+			if (store->kind == MB_DATA_RAW_LINE) {
+				store->rawsize = buffer_size;
+				for (int i = 0; i < buffer_size; i++)
+					store->raw[i] = buffer[i];
+				done = MB_YES;
 			}
 		}
-	}
-	else if (store->kind == MB_DATA_RUN_PARAMETER) {
+		else if (*frame_expect != MBSYS_XSE_NONE_FRAME && frame_id != *frame_expect) {
 #ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE RUN PARAMETER\n", __FILE__, __LINE__);
+			fprintf(stderr, "%s:%d | READ NOTHING - SAVE HEADER\n", __FILE__, __LINE__);
 #endif
-		status = mbr_l3xseraw_wr_seabeam(verbose, &buffer_size, buffer, store_ptr, error);
-		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
-			*error = MB_ERROR_WRITE_FAIL;
-			status = MB_FAILURE;
+			store->kind = MB_DATA_DATA;
+			*frame_save = MB_YES;
+			*frame_id_save = frame_id;
+			*frame_source_save = frame_source;
+			*frame_sec_save = frame_sec;
+			*frame_usec_save = frame_usec;
+			*buffer_size_save = buffer_size;
+			*frame_expect = MBSYS_XSE_NONE_FRAME;
+			done = MB_YES;
+		}
+
+		/* check for status */
+		if (status == MB_FAILURE) {
+			done = MB_YES;
+			*frame_save = MB_NO;
 		}
 	}
-	else if (store->kind == MB_DATA_RAW_LINE) {
-#ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE RAW LINE\n", __FILE__, __LINE__);
-#endif
-		if (store->rawsize > 0) {
-			if ((write_size = fwrite(store->raw, 1, store->rawsize, mbfp)) != store->rawsize) {
-				*error = MB_ERROR_WRITE_FAIL;
-				status = MB_FAILURE;
-			}
-		}
-	}
-	else {
-#ifdef MB_DEBUG
-		fprintf(stderr, "%s:%d | WRITE FAILURE BAD KIND\n", __FILE__, __LINE__);
-#endif
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
-	}
 
-	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
-	}
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3651,9 +3311,96 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbsys_xse_struct *store;
+	double time_d;
+	double lon, lat;
+	double heading;
+	double speed;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	store = (struct mbsys_xse_struct *)store_ptr;
+
+	/* read next data from file */
+	const int status = mbr_l3xseraw_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+	/*fprintf(stderr, "read kind:%d\n", store->kind);
+	fprintf(stderr, "store->mul_frame:%d store->sid_frame:%d\n\n",
+	store->mul_frame, store->sid_frame);*/
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
+	/* save fix if nav data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_NAV) {
+		/* get time */
+		time_d = store->nav_sec - MBSYS_XSE_TIME_OFFSET + 0.000001 * store->nav_usec;
+
+		/* add nav to navlist */
+		if (store->nav_group_position == MB_YES)
+			mb_navint_add(verbose, mbio_ptr, time_d, RTD * store->nav_x, RTD * store->nav_y, error);
+
+		/* add heading to navlist */
+		if (store->nav_group_heading == MB_YES)
+			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_hdg_heading, error);
+		else if (store->nav_group_motiongt == MB_YES)
+			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_course_ground, error);
+		else if (store->nav_group_motiontw == MB_YES)
+			mb_hedint_add(verbose, mbio_ptr, time_d, RTD * store->nav_course_water, error);
+	}
+
+	/* interpolate navigation for survey pings if needed */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA && store->mul_group_mbsystemnav == MB_NO) {
+		/* get timestamp */
+		time_d = store->mul_sec - MBSYS_XSE_TIME_OFFSET + 0.000001 * store->mul_usec;
+
+		/* interpolate heading */
+		mb_hedint_interp(verbose, mbio_ptr, time_d, &heading, error);
+
+		/* get speed if possible */
+		if (store->nav_group_log == MB_YES)
+			speed = 3.6 * store->nav_log_speed;
+		else if (store->nav_group_motiongt == MB_YES)
+			speed = 3.6 * store->nav_speed_ground;
+		else if (store->nav_group_motiontw == MB_YES)
+			speed = 3.6 * store->nav_speed_water;
+		else
+			speed = 0.0;
+
+		/* interpolate position */
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, speed, &lon, &lat, &speed, error);
+
+		/* set values */
+		store->mul_lon = DTR * lon;
+		store->mul_lat = DTR * lat;
+		store->mul_heading = DTR * heading;
+		store->mul_speed = speed / 3.6;
+		store->mul_group_mbsystemnav = MB_YES;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_nav";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -3663,9 +3410,8 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	int frame_id;
 	int group_id;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -3677,7 +3423,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       nav_source:          %d\n", store->nav_source);
 		fprintf(stderr, "dbg5       nav_sec:             %u\n", store->nav_sec);
 		fprintf(stderr, "dbg5       nav_usec:            %u\n", store->nav_usec);
@@ -4312,9 +4058,10 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/* set buffer size */
 	*buffer_size = index;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", *buffer_size);
@@ -4326,8 +4073,6 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_svp";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -4341,9 +4086,8 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	int write_temperature = MB_NO;
 	int write_pressure = MB_NO;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4355,7 +4099,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       svp_source:          %d\n", store->svp_source);
 		fprintf(stderr, "dbg5       svp_sec:             %u\n", store->svp_sec);
 		fprintf(stderr, "dbg5       svp_usec:            %u\n", store->svp_usec);
@@ -4726,9 +4470,10 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	/* set buffer size */
 	*buffer_size = index;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", *buffer_size);
@@ -4740,8 +4485,6 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_ship";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -4752,9 +4495,8 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 	int group_id;
 	int nchar;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -4766,7 +4508,7 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       par_source:          %d\n", store->par_source);
 		fprintf(stderr, "dbg5       par_sec:             %u\n", store->par_sec);
 		fprintf(stderr, "dbg5       par_usec:            %u\n", store->par_usec);
@@ -5237,9 +4979,10 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 	/* set buffer size */
 	*buffer_size = index;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", *buffer_size);
@@ -5251,8 +4994,6 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_multibeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -5262,9 +5003,8 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	int frame_id;
 	int group_id;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -5277,7 +5017,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	/* print debug statements */
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mul_group_beam:      %d\n", store->mul_group_beam);
 		fprintf(stderr, "dbg5       mul_group_tt:        %d\n", store->mul_group_tt);
 		fprintf(stderr, "dbg5       mul_group_quality:   %d\n", store->mul_group_quality);
@@ -6358,9 +6098,10 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	/* set buffer size */
 	*buffer_size = index;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", *buffer_size);
@@ -6372,8 +6113,6 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_sidescan";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -6383,9 +6122,8 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	int frame_id;
 	int group_id;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -6397,7 +6135,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sid_frame:            %d\n", store->sid_frame);
 		fprintf(stderr, "dbg5       sid_group_avt:        %d\n", store->sid_group_avt);
 		fprintf(stderr, "dbg5       sid_group_pvt:        %d\n", store->sid_group_pvt);
@@ -6964,9 +6702,10 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/* set buffer size */
 	*buffer_size = index;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", *buffer_size);
@@ -6978,8 +6717,6 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_seabeam";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
@@ -6989,9 +6726,8 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	int frame_id;
 	int group_id;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7003,7 +6739,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sbm_source:          %d\n", store->sbm_source);
 		fprintf(stderr, "dbg5       sbm_sec:             %u\n", store->sbm_sec);
 		fprintf(stderr, "dbg5       sbm_usec:            %u\n", store->sbm_usec);
@@ -7400,9 +7136,10 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	/* set buffer size */
 	*buffer_size = index;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", *buffer_size);
@@ -7414,8 +7151,6 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	char *function_name = "mbr_l3xseraw_wr_comment";
-	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int index;
 	int size;
@@ -7423,9 +7158,8 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 	int frame_id;
 	int group_id;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       buffer:     %p\n", (void *)buffer);
@@ -7437,7 +7171,7 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:             %s\n", store->comment);
 	}
 
@@ -7504,9 +7238,10 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 
 	*buffer_size = index;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2       buffer_size:%d\n", *buffer_size);
@@ -7518,13 +7253,178 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_l3xseraw";
+int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbsys_xse_struct *store;
+	FILE *mbfp;
+	int buffer_size;
+	int write_size;
+	char *buffer;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to store data structure */
+	store = (struct mbsys_xse_struct *)store_ptr;
+	mbfp = mb_io_ptr->mbfp;
+	buffer = mb_io_ptr->hdr_comment;
+
+#ifdef MB_DEBUG
+	fprintf(stderr, "%s:%d | WRITE KIND: %d\n", __FILE__, __LINE__, store->kind);
+#endif
+
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
+	if (store->kind == MB_DATA_COMMENT) {
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE COMMMENT\n", __FILE__, __LINE__);
+#endif
+		status = mbr_l3xseraw_wr_comment(verbose, &buffer_size, buffer, store_ptr, error);
+		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+	}
+	else if (store->kind == MB_DATA_NAV) {
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE NAV\n", __FILE__, __LINE__);
+#endif
+		status = mbr_l3xseraw_wr_nav(verbose, &buffer_size, buffer, store_ptr, error);
+		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+	}
+	else if (store->kind == MB_DATA_VELOCITY_PROFILE) {
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE SVP\n", __FILE__, __LINE__);
+#endif
+		status = mbr_l3xseraw_wr_svp(verbose, &buffer_size, buffer, store_ptr, error);
+		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+	}
+	else if (store->kind == MB_DATA_PARAMETER) {
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE SHIP\n", __FILE__, __LINE__);
+#endif
+		status = mbr_l3xseraw_wr_ship(verbose, &buffer_size, buffer, store_ptr, error);
+		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+	}
+	else if (store->kind == MB_DATA_DATA) {
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE MULTIBEAM\n", __FILE__, __LINE__);
+#endif
+		if (store->mul_frame == MB_YES) {
+			status = mbr_l3xseraw_wr_multibeam(verbose, &buffer_size, buffer, store_ptr, error);
+			if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
+				*error = MB_ERROR_WRITE_FAIL;
+				status = MB_FAILURE;
+			}
+		}
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE SIDESCAN\n", __FILE__, __LINE__);
+#endif
+		if (store->sid_frame == MB_YES) {
+			status = mbr_l3xseraw_wr_sidescan(verbose, &buffer_size, buffer, store_ptr, error);
+			if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
+				*error = MB_ERROR_WRITE_FAIL;
+				status = MB_FAILURE;
+			}
+		}
+	}
+	else if (store->kind == MB_DATA_RUN_PARAMETER) {
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE RUN PARAMETER\n", __FILE__, __LINE__);
+#endif
+		status = mbr_l3xseraw_wr_seabeam(verbose, &buffer_size, buffer, store_ptr, error);
+		if ((write_size = fwrite(buffer, 1, buffer_size, mbfp)) != buffer_size) {
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+		}
+	}
+	else if (store->kind == MB_DATA_RAW_LINE) {
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE RAW LINE\n", __FILE__, __LINE__);
+#endif
+		if (store->rawsize > 0) {
+			if ((write_size = fwrite(store->raw, 1, store->rawsize, mbfp)) != store->rawsize) {
+				*error = MB_ERROR_WRITE_FAIL;
+				status = MB_FAILURE;
+			}
+		}
+	}
+	else {
+#ifdef MB_DEBUG
+		fprintf(stderr, "%s:%d | WRITE FAILURE BAD KIND\n", __FILE__, __LINE__);
+#endif
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Data record kind in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	}
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbsys_xse_struct *store;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to store data structure */
+	store = (struct mbsys_xse_struct *)store_ptr;
+
+	/* write next data to file */
+	const int status = mbr_l3xseraw_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error) {
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -7533,7 +7433,7 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_l3xseraw(
+	const int status = mbr_info_l3xseraw(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
@@ -7562,9 +7462,8 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

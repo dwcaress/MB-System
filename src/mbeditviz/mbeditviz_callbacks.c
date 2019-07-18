@@ -230,12 +230,11 @@ void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) 
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon) {
-	char function_name[] = "do_mbeditviz_init";
 	int i;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       mbev_verbose:   %d\n", mbev_verbose);
 		fprintf(stderr, "dbg2       parentwidget:   %p\n", parentwidget);
@@ -298,13 +297,12 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbeditviz_mode_change(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_mode_change";
 	XmToggleButtonCallbackStruct *acs;
 	acs = (XmToggleButtonCallbackStruct *)call_data;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -345,7 +343,6 @@ void do_mbeditviz_mode_change(Widget w, XtPointer client_data, XtPointer call_da
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_openfile";
 	XmFileSelectionBoxCallbackStruct *acs;
 	acs = (XmFileSelectionBoxCallbackStruct *)call_data;
 	char *file_ptr;
@@ -353,7 +350,7 @@ void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -384,13 +381,12 @@ void do_mbeditviz_openfile(Widget w, XtPointer client_data, XtPointer call_data)
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_fileselection_list(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_fileselection_list";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -424,7 +420,6 @@ void do_mbeditviz_fileselection_list(Widget w, XtPointer client_data, XtPointer 
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_fileSelectionBox_openswath";
 	XmAnyCallbackStruct *acs;
 	XmString tmp0;
 	Boolean argok;
@@ -432,7 +427,7 @@ void do_mbeditviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, Xt
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -464,7 +459,6 @@ void do_mbeditviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, Xt
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_quit";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	struct mbev_file_struct *file;
@@ -472,7 +466,7 @@ void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -517,7 +511,6 @@ void do_mbeditviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_viewall";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	struct mbev_file_struct *file;
@@ -526,7 +519,7 @@ void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) 
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -611,7 +604,6 @@ void do_mbeditviz_viewall(Widget w, XtPointer client_data, XtPointer call_data) 
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_viewselected";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	struct mbev_file_struct *file;
@@ -624,7 +616,7 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -716,7 +708,6 @@ void do_mbeditviz_viewselected(Widget w, XtPointer client_data, XtPointer call_d
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_regrid";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	struct mbev_file_struct *file;
@@ -725,7 +716,7 @@ void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -783,7 +774,6 @@ void do_mbeditviz_regrid(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbeditviz_updategrid(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_updategrid";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	struct mbev_file_struct *file;
@@ -792,7 +782,7 @@ void do_mbeditviz_updategrid(Widget w, XtPointer client_data, XtPointer call_dat
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -844,7 +834,6 @@ void do_mbeditviz_updategrid(Widget w, XtPointer client_data, XtPointer call_dat
 
 /*--------------------------------------------------------------------*/
 void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_changecellsize";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	char string[MB_PATH_MAXLINE];
@@ -852,7 +841,7 @@ void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -888,7 +877,6 @@ void do_mbeditviz_changecellsize(Widget w, XtPointer client_data, XtPointer call
 
 /*--------------------------------------------------------------------*/
 void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_gridparameters";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int icellsize;
@@ -896,7 +884,7 @@ void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -930,7 +918,6 @@ void do_mbeditviz_gridparameters(Widget w, XtPointer client_data, XtPointer call
 
 /*--------------------------------------------------------------------*/
 void do_mbeditviz_viewgrid() {
-	char function_name[] = "do_mbeditviz_viewgrid";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	char mbv_title[MB_PATH_MAXLINE];
@@ -999,7 +986,7 @@ void do_mbeditviz_viewgrid() {
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 #ifdef MBEDITVIZ_GUI_DEBUG
@@ -1249,11 +1236,10 @@ void do_mbeditviz_viewgrid() {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbeditviz_mbview_dismiss_notify(size_t instance) {
-	char function_name[] = "do_mbeditviz_mbview_dismiss_notify";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:   %zu\n", instance);
 	}
@@ -1296,7 +1282,6 @@ int do_mbeditviz_mbview_dismiss_notify(size_t instance) {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_deleteselected(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_deleteselected";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	int *position_list = NULL;
@@ -1305,7 +1290,7 @@ void do_mbeditviz_deleteselected(Widget w, XtPointer client_data, XtPointer call
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1338,13 +1323,12 @@ void do_mbeditviz_deleteselected(Widget w, XtPointer client_data, XtPointer call
 
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_changeoutputmode(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_changeoutputmode";
 	XmToggleButtonCallbackStruct *acs;
 	acs = (XmToggleButtonCallbackStruct *)call_data;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1385,11 +1369,10 @@ void do_mbeditviz_changeoutputmode(Widget w, XtPointer client_data, XtPointer ca
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbeditviz_opendata(char *input_file_ptr, int format) {
-	char function_name[] = "do_mbeditviz_opendata";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       input_file_ptr:    %s\n", input_file_ptr);
 		fprintf(stderr, "dbg2       format:            %d\n", format);
@@ -1412,7 +1395,6 @@ int do_mbeditviz_opendata(char *input_file_ptr, int format) {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_update_gui() {
-	char function_name[] = "do_mbeditviz_update_gui";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	char string[MB_PATH_MAXLINE];
@@ -1420,7 +1402,7 @@ void do_mbeditviz_update_gui() {
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 #ifdef MBEDITVIZ_GUI_DEBUG
@@ -1489,7 +1471,6 @@ void do_mbeditviz_update_gui() {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_update_filelist() {
-	char function_name[] = "do_mbeditviz_update_filelist";
 	struct mbev_file_struct *file;
 	int update_filelist;
 
@@ -1531,7 +1512,7 @@ void do_mbeditviz_update_filelist() {
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 #ifdef MBEDITVIZ_GUI_DEBUG
@@ -1657,11 +1638,10 @@ void do_mbeditviz_update_filelist() {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_pickonepoint_notify(size_t instance) {
-	char function_name[] = "do_mbeditviz_pickonepoint_notify";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
@@ -1677,11 +1657,10 @@ void do_mbeditviz_pickonepoint_notify(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbeditviz_picktwopoint_notify(size_t instance) {
-	char function_name[] = "do_mbeditviz_picktwopoint_notify";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
@@ -1697,11 +1676,10 @@ void do_mbeditviz_picktwopoint_notify(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbeditviz_pickarea_notify(size_t instance) {
-	char function_name[] = "do_mbeditviz_pickarea_notify";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
@@ -1729,11 +1707,10 @@ void do_mbeditviz_pickarea_notify(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbeditviz_pickregion_notify(size_t instance) {
-	char function_name[] = "do_mbeditviz_pickregion_notify";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
@@ -1761,11 +1738,10 @@ void do_mbeditviz_pickregion_notify(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbeditviz_picksite_notify(size_t instance) {
-	char function_name[] = "do_mbeditviz_picksite_notify";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
@@ -1781,11 +1757,10 @@ void do_mbeditviz_picksite_notify(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbeditviz_pickroute_notify(size_t instance) {
-	char function_name[] = "do_mbeditviz_pickroute_notify";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
@@ -1801,11 +1776,10 @@ void do_mbeditviz_pickroute_notify(size_t instance) {
 /*------------------------------------------------------------------------------*/
 
 void do_mbeditviz_picknav_notify(size_t instance) {
-	char function_name[] = "do_mbeditviz_picknav_notify";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:    %zu\n", instance);
 	}
@@ -1837,7 +1811,6 @@ void do_mbeditviz_picknav_notify(size_t instance) {
 }
 /*------------------------------------------------------------------------------*/
 void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_data) {
-	char function_name[] = "do_mbeditviz_regrid_notify";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct *)call_data;
 	double rollbias;
@@ -1848,7 +1821,7 @@ void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       w:           %p\n", w);
 		fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1878,7 +1851,6 @@ void do_mbeditviz_regrid_notify(Widget w, XtPointer client_data, XtPointer call_
 /*------------------------------------------------------------------------------*/
 
 int do_mbeditviz_message_on(char *message) {
-	char function_name[] = "do_mbeditviz_message_on";
 	Widget diashell, topshell;
 	Window diawindow, topwindow;
 	XWindowAttributes xwa;
@@ -1886,7 +1858,7 @@ int do_mbeditviz_message_on(char *message) {
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       message:   %s\n", message);
 	}
@@ -1923,11 +1895,10 @@ int do_mbeditviz_message_on(char *message) {
 /*------------------------------------------------------------------------------*/
 
 int do_mbeditviz_message_off() {
-	char function_name[] = "do_mbeditviz_message_off";
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	mbev_message_on = MB_NO;

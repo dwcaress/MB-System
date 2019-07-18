@@ -155,15 +155,12 @@ void BxExitCB ARGLIST((w, client, call)) UARG(Widget, w) ARG(XtPointer, client) 
 /* code below used for mb3dsoundings library                                           */
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_startup";
-
 	/* set local verbosity */
 	mbs_verbose = verbose;
 
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -185,7 +182,7 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -521,15 +518,12 @@ int mb3dsoundings_updatelabelmousemode() {
 }
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_end(int verbose, int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_end()";
-
 	/* set local verbosity */
 	mbs_verbose = verbose;
 
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -563,7 +557,7 @@ int mb3dsoundings_end(int verbose, int *error) {
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -576,12 +570,9 @@ int mb3dsoundings_end(int verbose, int *error) {
 /*------------------------------------------------------------------------------*/
 
 int mb3dsoundings_set_dismiss_notify(int verbose, void(dismiss_notify)(), int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_set_dismiss_notify";
-
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -595,7 +586,7 @@ int mb3dsoundings_set_dismiss_notify(int verbose, void(dismiss_notify)(), int *e
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -608,12 +599,9 @@ int mb3dsoundings_set_dismiss_notify(int verbose, void(dismiss_notify)(), int *e
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_set_edit_notify(int verbose, void(edit_notify)(int, int, int, char, int), int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_set_edit_notify";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -630,7 +618,7 @@ int mb3dsoundings_set_edit_notify(int verbose, void(edit_notify)(int, int, int, 
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -643,12 +631,9 @@ int mb3dsoundings_set_edit_notify(int verbose, void(edit_notify)(int, int, int, 
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_set_info_notify(int verbose, void(info_notify)(int, int, int, char *), int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_set_info_notify";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -665,7 +650,7 @@ int mb3dsoundings_set_info_notify(int verbose, void(info_notify)(int, int, int, 
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -678,12 +663,9 @@ int mb3dsoundings_set_info_notify(int verbose, void(info_notify)(int, int, int, 
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double, double, double, double), int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_set_bias_notify";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -700,7 +682,7 @@ int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double,
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -713,12 +695,9 @@ int mb3dsoundings_set_bias_notify(int verbose, void(bias_notify)(double, double,
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(double, double, double, double, double), int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_set_biasapply_notify";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -732,7 +711,7 @@ int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(doubl
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -745,12 +724,9 @@ int mb3dsoundings_set_biasapply_notify(int verbose, void(biasapply_notify)(doubl
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_set_flagsparsevoxels_notify(int verbose, void(flagsparsevoxels_notify)(int, int), int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_set_flagsparsevoxels_notify";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -764,7 +740,7 @@ int mb3dsoundings_set_flagsparsevoxels_notify(int verbose, void(flagsparsevoxels
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -777,12 +753,9 @@ int mb3dsoundings_set_flagsparsevoxels_notify(int verbose, void(flagsparsevoxels
 
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_set_colorsoundings_notify(int verbose, void(colorsoundings_notify)(int), int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_set_colorsoundings_notify";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -796,7 +769,7 @@ int mb3dsoundings_set_colorsoundings_notify(int verbose, void(colorsoundings_not
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -811,12 +784,9 @@ int mb3dsoundings_set_colorsoundings_notify(int verbose, void(colorsoundings_not
 int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
                                                 void(optimizebiasvalues_notify)(int, double *, double *, double *, double *, double *),
                                                 int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_set_optimizebiasvalues_notify";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -830,7 +800,7 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -844,11 +814,9 @@ int mb3dsoundings_set_optimizebiasvalues_notify(int verbose,
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_reset() {
 	/* local variables */
-	char *function_name = "mb3dsoundings_reset";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
@@ -933,7 +901,7 @@ int mb3dsoundings_reset() {
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:       %d\n", mbs_status);
 	}
@@ -945,7 +913,6 @@ int mb3dsoundings_reset() {
 /*---------------------------------------------------------------------------------------*/
 int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, int *error) {
 	/* local variables */
-	char *function_name = "mb3dsoundings_open";
 	XColor XColorBlack;
 	XColor XColorWhite;
 	XColor XColorRed;
@@ -958,7 +925,7 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 
 	/* print starting debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
@@ -1088,7 +1055,7 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1101,11 +1068,9 @@ int mb3dsoundings_open(int verbose, struct mb3dsoundings_struct *soundingdata, i
 /*------------------------------------------------------------------------------*/
 int mb3dsoundings_reset_glx() {
 	/* local variables */
-	char *function_name = "mb3dsoundings_reset_glx";
-
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 	}
@@ -1114,15 +1079,15 @@ int mb3dsoundings_reset_glx() {
 	/* delete old glx_context if it exists */
 	if (mb3dsoundings.glx_init == MB_YES) {
 #ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, function_name, mb3dsoundings.dpy, mb3dsoundings.glx_context);
+	fprintf(stderr, "%s:%d:%s glXDestroyContext(%p,%p)\n", __FILE__, __LINE__, __func__, mb3dsoundings.dpy, mb3dsoundings.glx_context);
 #endif
 		glXDestroyContext(mb3dsoundings.dpy, mb3dsoundings.glx_context);
 #ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s XtDestroyWidget(%p)\n", __FILE__, __LINE__, function_name, mb3dsoundings.glwmda);
+	fprintf(stderr, "%s:%d:%s XtDestroyWidget(%p)\n", __FILE__, __LINE__, __func__, mb3dsoundings.glwmda);
 #endif
 		XtDestroyWidget(mb3dsoundings.glwmda);
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
 		mb3dsoundings.glx_init = MB_NO;
 	}
@@ -1160,16 +1125,16 @@ int mb3dsoundings_reset_glx() {
 	ac++;
 	XtGetValues(mb3dsoundings.glwmda, args, ac);
 #ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s glXCreateContext(%p,%p)\n", __FILE__, __LINE__, function_name, mb3dsoundings.dpy, mb3dsoundings.vi);
+	fprintf(stderr, "%s:%d:%s glXCreateContext(%p,%p)\n", __FILE__, __LINE__, __func__, mb3dsoundings.dpy, mb3dsoundings.vi);
 #endif
 	mb3dsoundings.glx_context = glXCreateContext(mb3dsoundings.dpy, mb3dsoundings.vi, NULL, GL_TRUE);
 #ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, XtDisplay(mb3dsoundings.glwmda),
+	fprintf(stderr, "%s:%d:%s glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, XtDisplay(mb3dsoundings.glwmda),
 	        XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
 #endif
 	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda), XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
 	glViewport(0, 0, mb3dsoundings.gl_width, mb3dsoundings.gl_height);
 	mb3dsoundings.aspect_ratio = ((float)mb3dsoundings.gl_width) / ((float)mb3dsoundings.gl_height);
@@ -1180,12 +1145,12 @@ int mb3dsoundings_reset_glx() {
 	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), XtWindow(mb3dsoundings.mb3dsdg.drawingArea),
 	              mb3dsoundings.TargetBlackCursor);
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", mbs_status);
 	}
@@ -2553,9 +2518,6 @@ int mb3dsoundings_setzscale(int verbose, int *error) {
 /*---------------------------------------------------------------------------------------*/
 
 int mb3dsoundings_plot(int verbose, int *error) {
-	/* local variables */
-	char *function_name = "mb3dsoundings_plot";
-
 	struct mb3dsoundings_struct *soundingdata;
 	struct mb3dsoundings_sounding_struct *sounding;
 	struct mb3dsoundings_sounding_struct *sounding2;
@@ -2569,7 +2531,7 @@ int mb3dsoundings_plot(int verbose, int *error) {
 
 	/* print starting debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -2582,13 +2544,13 @@ soundingdata->num_soundings); */
 
 /* make correct window current for OpenGL */
 #ifdef MBV_DEBUG_GLX
-	fprintf(stderr, "%s:%d:%s glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, function_name, XtDisplay(mb3dsoundings.glwmda),
+	fprintf(stderr, "%s:%d:%s glXMakeCurrent(%p,%p,%p)\n", __FILE__, __LINE__, __func__, XtDisplay(mb3dsoundings.glwmda),
 	        XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
 #endif
 	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda), XtWindow(mb3dsoundings.glwmda), mb3dsoundings.glx_context);
 
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
 
 	/* set background color */
@@ -2854,12 +2816,12 @@ soundingdata->num_soundings); */
 	glXSwapBuffers(XtDisplay(mb3dsoundings.glwmda), XtWindow(mb3dsoundings.glwmda));
 
 #ifdef MBV_GET_GLX_ERRORS
-	mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+	mbview_glerrorcheck(0, __FILE__, __LINE__, __func__);
 #endif
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

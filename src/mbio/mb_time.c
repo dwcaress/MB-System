@@ -35,14 +35,11 @@ int yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 /* 	function mb_get_time returns the number of seconds from
  * 	1/1/70 00:00:00 calculated from (yy/mm/dd/hr/mi/sc). */
 int mb_get_time(int verbose, int time_i[7], double *time_d) {
-	char *function_name = "mb_get_time";
-	int status;
 	int yearday;
 	int leapday;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 		fprintf(stderr, "dbg2       year:    %d\n", time_i[0]);
@@ -65,11 +62,10 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
 	          time_i[4] * MB_SECINMINUTE + time_i[5] + 0.000001 * time_i[6];
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       time_d:  %f\n", *time_d);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -84,15 +80,12 @@ int mb_get_time(int verbose, int time_i[7], double *time_d) {
  * 	from the number of seconds after 1/1/70 00:00:0 */
 int mb_get_date(int verbose, double time_d, int time_i[7]) {
 
-	char *function_name = "mb_get_date";
-	int status;
 	int daytotal;
 	int yearday;
 	int leapday;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 		fprintf(stderr, "dbg2       time_d:  %f\n", time_d);
@@ -122,11 +115,10 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
 	time_i[2] = yearday - yday[time_i[1] - 1] - leapday;
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\nMBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\nMBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       year:    %d\n", time_i[0]);
 		fprintf(stderr, "dbg2       month:   %d\n", time_i[1]);
@@ -147,14 +139,10 @@ int mb_get_date(int verbose, double time_d, int time_i[7]) {
  *          yyyy/mm/dd:hh:mm:ss.ssssss
  * 	from the number of seconds after 1/1/70 00:00:0 */
 int mb_get_date_string(int verbose, double time_d, char *string) {
-
-	char *function_name = "mb_get_date_string";
-	int status;
 	int time_i[7];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose: %d\n", verbose);
 		fprintf(stderr, "dbg2       time_d:  %f\n", time_d);
@@ -166,11 +154,10 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
 	        time_i[6]);
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\nMBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\nMBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       string: %s\n", string);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -184,12 +171,8 @@ int mb_get_date_string(int verbose, double time_d, char *string) {
 /* 	function mb_get_jtime returns the day of year calculated
  *	from (yy/mm/dd/hr/mi/sc). */
 int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
-	char *function_name = "mb_get_jtime";
-	int status;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       year:       %d\n", time_i[0]);
@@ -211,11 +194,10 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
 	time_j[4] = time_i[6];
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       year:       %d\n", time_j[0]);
 		fprintf(stderr, "dbg2       day of year:%d\n", time_j[1]);
@@ -235,13 +217,10 @@ int mb_get_jtime(int verbose, int time_i[7], int time_j[5]) {
  *	day of the year.
  */
 int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
-	char *function_name = "mb_get_itime";
-	int status;
 	int leapday;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       year:       %d\n", time_j[0]);
@@ -270,11 +249,10 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
 	time_i[2] = time_j[1] - yday[time_i[1] - 1] - leapday;
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       year:       %d\n", time_i[0]);
 		fprintf(stderr, "dbg2       month:      %d\n", time_i[1]);
@@ -302,12 +280,8 @@ int mb_get_itime(int verbose, int time_j[5], int time_i[7]) {
  *      data can have timestamps dating prior to 1962.
  */
 int mb_fix_y2k(int verbose, int year_short, int *year_long) {
-	char *function_name = "mb_fix_y2k";
-	int status;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       year_short: %d\n", year_short);
@@ -320,11 +294,10 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
 		*year_long = year_short + 2000;
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       year_long:  %d\n", *year_long);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -350,12 +323,8 @@ int mb_fix_y2k(int verbose, int year_short, int *year_long) {
  *          year_short = year_long % 100;
  */
 int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
-	char *function_name = "mb_unfix_y2k";
-	int status;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       year_long:  %d\n", year_long);
@@ -365,11 +334,10 @@ int mb_unfix_y2k(int verbose, int year_long, int *year_short) {
 	*year_short = year_long % 100;
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       year_short: %d\n", *year_short);
 		fprintf(stderr, "dbg2  Return status:\n");

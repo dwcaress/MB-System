@@ -1185,13 +1185,12 @@ int main(int argc, char **argv) {
 /*--------------------------------------------------------------------*/
 int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct **sndgptr, int *error) {
 	/* local variables */
-	char *function_name = "getsoundingptr";
 	int status = MB_SUCCESS;
 	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       soundingid:      %d\n", soundingid);
@@ -1209,7 +1208,7 @@ int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct *
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       *sndgptr:        %p\n", (void *)sndgptr);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -1224,12 +1223,11 @@ int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct *
 
 int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct mbareaclean_sndg_struct *sndg, int *error) {
 	/* local variables */
-	char *function_name = "flag_sounding";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
 		fprintf(stderr, "dbg2       flag:          %d\n", flag);
@@ -1258,7 +1256,7 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       sndg->sndg_edit:     %d\n", sndg->sndg_edit);
 		fprintf(stderr, "dbg2       sndg->sndg_beamflag: %d\n", sndg->sndg_beamflag);

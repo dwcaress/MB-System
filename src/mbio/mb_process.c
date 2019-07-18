@@ -38,7 +38,6 @@
 
 /*--------------------------------------------------------------------*/
 int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
-	char *function_name = "mb_pr_checkstatus";
 	int ifilemodtime = 0;
 	int ofilemodtime = 0;
 	int pfilemodtime = 0;
@@ -52,9 +51,8 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 	int fstat;
 	mb_path mbp_pfile;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:   %d\n", verbose);
 		fprintf(stderr, "dbg2       file:      %s\n", file);
@@ -148,9 +146,8 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       prstatus:   %d\n", *prstatus);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -162,7 +159,6 @@ int mb_pr_checkstatus(int verbose, char *file, int *prstatus, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_struct *process, int *error) {
-	char *function_name = "mb_pr_readpar";
 	char parfile[MBP_FILENAMESIZE];
 	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	char *lastslash;
@@ -172,9 +168,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	int explicit;
 	char *bufptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
 		fprintf(stderr, "dbg2       file:         %s\n", file);
@@ -1181,9 +1176,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 		*error = MB_ERROR_OPEN_FAIL;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_ifile_specified:    %d\n", process->mbp_ifile_specified);
 		fprintf(stderr, "dbg2       mbp_ifile:              %s\n", process->mbp_ifile);
@@ -1316,7 +1310,6 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, int *error) {
-	char *function_name = "mb_pr_writepar";
 	char parfile[MBP_FILENAMESIZE];
 	char pwd[MBP_FILENAMESIZE];
 	char relative_path[MBP_FILENAMESIZE];
@@ -1326,9 +1319,8 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 	char *bufptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                   %s\n", file);
@@ -1485,7 +1477,7 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	/* open parameter file */
 	if ((fp = fopen(parfile, "w")) != NULL) {
 		fprintf(fp, "## MB-System processing parameter file\n");
-		fprintf(fp, "## Written by %s\n", function_name);
+		fprintf(fp, "## Written by %s\n", __func__);
 		fprintf(fp, "## MB-system Version %s\n", MB_VERSION);
 		right_now = time((time_t *)0);
 		strcpy(date, ctime(&right_now));
@@ -1747,9 +1739,8 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 			fprintf(stderr, "\nUnable to Open Parameter File <%s> for writing\n", parfile);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1760,11 +1751,8 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
-	char *function_name = "mb_pr_bathmode";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:   %d\n", verbose);
 		fprintf(stderr, "dbg2       process:   %p\n", (void *)process);
@@ -1787,9 +1775,8 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1800,13 +1787,11 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *error) {
-	char *function_name = "mb_pr_default_output";
 	char fileroot[MBP_FILENAMESIZE];
 	int format;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
 		fprintf(stderr, "dbg2       process:             %p\n", (void *)process);
@@ -1848,9 +1833,8 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 		process->mbp_ofile_specified = MB_YES;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_ofile_specified: %d\n", process->mbp_ofile_specified);
 		fprintf(stderr, "dbg2       mbp_ofile:           %s\n", process->mbp_ofile);
@@ -1865,13 +1849,11 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process, int *er
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *error) {
-	char *function_name = "mb_pr_get_output";
 	char fileroot[MBP_FILENAMESIZE];
 	int tformat;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:	%d\n", verbose);
 		fprintf(stderr, "dbg2       format:	%d\n", *format);
@@ -1908,9 +1890,8 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 		sprintf(ofile, "%s.proc", ifile);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       format:	%d\n", *format);
 		fprintf(stderr, "dbg2       ofile:	%s\n", ofile);
@@ -1923,7 +1904,6 @@ int mb_pr_get_output(int verbose, int *format, char *ifile, char *ofile, int *er
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, int *error) {
-	char *function_name = "mb_pr_check";
 	char ofile[MBP_FILENAMESIZE];
 	int format;
 	char line[MB_PATH_MAXLINE];
@@ -1945,9 +1925,8 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 	    output if verbose > 1) */
 	FILE *output;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:   %d\n", verbose);
 		fprintf(stderr, "dbg2       ifile:     %s\n", ifile);
@@ -2129,9 +2108,8 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 			fprintf(output, "%s : Missing tide file : %s\n", process.mbp_ifile, process.mbp_tidefile);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       nparproblem:  %d\n", *nparproblem);
 		fprintf(stderr, "dbg2       ndataproblem: %d\n", *ndataproblem);
@@ -2144,11 +2122,8 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *mbp_ofile, int *error) {
-	char *function_name = "mb_pr_update_ofile";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                %s\n", file);
@@ -2173,9 +2148,8 @@ int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *m
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2186,11 +2160,8 @@ int mb_pr_update_ofile(int verbose, char *file, int mbp_ofile_specified, char *m
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int mbp_format, int *error) {
-	char *function_name = "mb_pr_update_format";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                 %s\n", file);
@@ -2209,9 +2180,8 @@ int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int m
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2223,11 +2193,8 @@ int mb_pr_update_format(int verbose, char *file, int mbp_format_specified, int m
 /*--------------------------------------------------------------------*/
 int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double mbp_rollbias, double mbp_rollbias_port,
                           double mbp_rollbias_stbd, int *error) {
-	char *function_name = "mb_pr_update_rollbias";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2253,9 +2220,8 @@ int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2266,11 +2232,8 @@ int mb_pr_update_rollbias(int verbose, char *file, int mbp_rollbias_mode, double
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, double mbp_pitchbias, int *error) {
-	char *function_name = "mb_pr_update_pitchbias";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2292,9 +2255,8 @@ int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, doub
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2306,11 +2268,8 @@ int mb_pr_update_pitchbias(int verbose, char *file, int mbp_pitchbias_mode, doub
 /*--------------------------------------------------------------------*/
 int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_draft, double mbp_draft_offset,
                        double mbp_draft_mult, int *error) {
-	char *function_name = "mb_pr_update_draft";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2336,9 +2295,8 @@ int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_d
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2349,11 +2307,8 @@ int mb_pr_update_draft(int verbose, char *file, int mbp_draft_mode, double mbp_d
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_heave, double mbp_heave_mult, int *error) {
-	char *function_name = "mb_pr_update_heave";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2377,9 +2332,8 @@ int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_h
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2392,11 +2346,8 @@ int mb_pr_update_heave(int verbose, char *file, int mbp_heave_mode, double mbp_h
 int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_vru_offsetx, double mbp_vru_offsety,
                        double mbp_vru_offsetz, double mbp_sonar_offsetx, double mbp_sonar_offsety, double mbp_sonar_offsetz,
                        int *error) {
-	char *function_name = "mb_pr_update_lever";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2428,9 +2379,8 @@ int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_v
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2441,11 +2391,8 @@ int mb_pr_update_lever(int verbose, char *file, int mbp_lever_mode, double mbp_v
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tidefile, int mbp_tide_format, int *error) {
-	char *function_name = "mb_pr_update_tide";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2470,9 +2417,8 @@ int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tide
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2483,11 +2429,8 @@ int mb_pr_update_tide(int verbose, char *file, int mbp_tide_mode, char *mbp_tide
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult, int *error) {
-	char *function_name = "mb_pr_update_tt";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2509,9 +2452,8 @@ int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2522,11 +2464,8 @@ int mb_pr_update_tt(int verbose, char *file, int mbp_tt_mode, double mbp_tt_mult
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, int *error) {
-	char *function_name = "mb_pr_update_ssv";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2548,9 +2487,8 @@ int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2562,11 +2500,8 @@ int mb_pr_update_ssv(int verbose, char *file, int mbp_ssv_mode, double mbp_ssv, 
 /*--------------------------------------------------------------------*/
 int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfile, int mbp_angle_mode, int mbp_corrected,
                      int *error) {
-	char *function_name = "mb_pr_update_svp";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2593,9 +2528,8 @@ int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfil
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2606,11 +2540,8 @@ int mb_pr_update_svp(int verbose, char *file, int mbp_svp_mode, char *mbp_svpfil
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_staticfile, int *error) {
-	char *function_name = "mb_pr_update_static";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2630,9 +2561,8 @@ int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2644,11 +2574,8 @@ int mb_pr_update_static(int verbose, char *file, int mbp_static_mode, char *mbp_
 /*--------------------------------------------------------------------*/
 int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_navadjfile, int mbp_navadj_algorithm,
                         int *error) {
-	char *function_name = "mb_pr_update_navadj";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                 %s\n", file);
@@ -2672,9 +2599,8 @@ int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2686,11 +2612,8 @@ int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_
 /*--------------------------------------------------------------------*/
 int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *mbp_attitudefile, int mbp_attitude_format,
                           int *error) {
-	char *function_name = "mb_pr_update_attitude";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2715,9 +2638,8 @@ int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2729,11 +2651,8 @@ int mb_pr_update_attitude(int verbose, char *file, int mbp_attitude_mode, char *
 /*--------------------------------------------------------------------*/
 int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, char *mbp_sonardepthfile, int mbp_sonardepth_format,
                             int *error) {
-	char *function_name = "mb_pr_update_sonardepth";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                  %s\n", file);
@@ -2758,9 +2677,8 @@ int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, ch
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2773,11 +2691,8 @@ int mb_pr_update_sonardepth(int verbose, char *file, int mbp_sonardepth_mode, ch
 int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfile, int mbp_nav_format, int mbp_nav_heading,
                      int mbp_nav_speed, int mbp_nav_draft, int mbp_nav_attitude, int mbp_nav_algorithm, double mbp_nav_timeshift,
                      int *error) {
-	char *function_name = "mb_pr_update_nav";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2811,9 +2726,8 @@ int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfil
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2826,11 +2740,8 @@ int mb_pr_update_nav(int verbose, char *file, int mbp_nav_mode, char *mbp_navfil
 int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp_nav_offsetx, double mbp_nav_offsety,
                           double mbp_nav_offsetz, double mbp_nav_shiftlon, double mbp_nav_shiftlat, double mbp_nav_shiftx,
                           double mbp_nav_shifty, int *error) {
-	char *function_name = "mb_pr_update_navshift";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2861,9 +2772,8 @@ int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2874,11 +2784,8 @@ int mb_pr_update_navshift(int verbose, char *file, int mbp_nav_shift, double mbp
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double mbp_headingbias, int *error) {
-	char *function_name = "mb_pr_update_heading";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2897,9 +2804,8 @@ int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double m
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2911,11 +2817,8 @@ int mb_pr_update_heading(int verbose, char *file, int mbp_heading_mode, double m
 /*--------------------------------------------------------------------*/
 int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_kind, int *mbp_cut_mode, double *mbp_cut_min,
                          double *mbp_cut_max, int *error) {
-	char *function_name = "mb_pr_update_datacut";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2944,9 +2847,8 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2957,11 +2859,8 @@ int mb_pr_update_datacut(int verbose, char *file, int mbp_cut_num, int *mbp_cut_
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_editfile, int *error) {
-	char *function_name = "mb_pr_update_edit";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -2981,9 +2880,8 @@ int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_edit
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2996,11 +2894,8 @@ int mb_pr_update_edit(int verbose, char *file, int mbp_edit_mode, char *mbp_edit
 int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mbp_ampcorrfile, int mbp_ampcorr_type,
                          int mbp_ampcorr_symmetry, double mbp_ampcorr_angle, int mbp_ampcorr_slope, char *mbp_ampsscorr_topofile,
                          int *error) {
-	char *function_name = "mb_pr_update_ampcorr";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                     %s\n", file);
@@ -3031,9 +2926,8 @@ int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mb
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:                    %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3046,11 +2940,8 @@ int mb_pr_update_ampcorr(int verbose, char *file, int mbp_ampcorr_mode, char *mb
 int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_sscorrfile, int mbp_sscorr_type,
                         int mbp_sscorr_symmetry, double mbp_sscorr_angle, int mbp_sscorr_slope, char *mbp_ampsscorr_topofile,
                         int *error) {
-	char *function_name = "mb_pr_update_sscorr";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                     %s\n", file);
@@ -3081,9 +2972,8 @@ int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:                    %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3095,11 +2985,8 @@ int mb_pr_update_sscorr(int verbose, char *file, int mbp_sscorr_mode, char *mbp_
 /*--------------------------------------------------------------------*/
 int mb_pr_update_ssrecalc(int verbose, char *file, int mbp_ssrecalc_mode, double mbp_ssrecalc_pixelsize,
                           double mbp_ssrecalc_swathwidth, int mbp_ssrecalc_interpolate, int *error) {
-	char *function_name = "mb_pr_update_ssrecalc";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                     %s\n", file);
@@ -3122,9 +3009,8 @@ int mb_pr_update_ssrecalc(int verbose, char *file, int mbp_ssrecalc_mode, double
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:                    %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3140,11 +3026,8 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
                           int mbp_meta_tidecorrected, int mbp_meta_batheditmanual, int mbp_meta_batheditauto,
                           double mbp_meta_rollbias, double mbp_meta_pitchbias, double mbp_meta_headingbias, double mbp_meta_draft,
                           int *error) {
-	char *function_name = "mb_pr_update_metadata";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                     %s\n", file);
@@ -3198,9 +3081,8 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
 	/* write new process parameter file */
 	status &= mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:                    %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3213,11 +3095,8 @@ int mb_pr_update_metadata(int verbose, char *file, char *mbp_meta_vessel, char *
 int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge002, int mbp_kluge003, int mbp_kluge004,
                         int mbp_kluge005, int mbp_kluge006, int mbp_kluge007, int mbp_kluge008, int mbp_kluge009,
                         int mbp_kluge010, int *error) {
-	char *function_name = "mb_pr_update_kluges";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                  %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                     %s\n", file);
@@ -3252,9 +3131,8 @@ int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:                    %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3265,14 +3143,12 @@ int mb_pr_update_kluges(int verbose, char *file, int mbp_kluge001, int mbp_kluge
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp_ofile, int *error) {
-	char *function_name = "mb_pr_get_ofile";
 	char parfile[MBP_FILENAMESIZE];
 	char buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	FILE *fp;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                %s\n", file);
@@ -3306,9 +3182,8 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_ofile_specified: %d\n", *mbp_ofile_specified);
 		fprintf(stderr, "dbg2       ofile:               %s\n", mbp_ofile);
@@ -3321,11 +3196,8 @@ int mb_pr_get_ofile(int verbose, char *file, int *mbp_ofile_specified, char *mbp
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mbp_format, int *error) {
-	char *function_name = "mb_pr_get_format";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                 %s\n", file);
@@ -3339,9 +3211,8 @@ int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mb
 	*mbp_format_specified = process.mbp_format_specified;
 	*mbp_format = process.mbp_format;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_format_specified: %d\n", *mbp_format_specified);
 		fprintf(stderr, "dbg2       mbp_format:           %d\n", *mbp_format);
@@ -3355,11 +3226,8 @@ int mb_pr_get_format(int verbose, char *file, int *mbp_format_specified, int *mb
 /*--------------------------------------------------------------------*/
 int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *mbp_rollbias, double *mbp_rollbias_port,
                        double *mbp_rollbias_stbd, int *error) {
-	char *function_name = "mb_pr_get_rollbias";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3375,9 +3243,8 @@ int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *
 	*mbp_rollbias_port = process.mbp_rollbias_port;
 	*mbp_rollbias_stbd = process.mbp_rollbias_stbd;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_rollbias_mode: %d\n", *mbp_rollbias_mode);
 		fprintf(stderr, "dbg2       mbp_rollbias:      %f\n", *mbp_rollbias);
@@ -3392,11 +3259,8 @@ int mb_pr_get_rollbias(int verbose, char *file, int *mbp_rollbias_mode, double *
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double *mbp_pitchbias, int *error) {
-	char *function_name = "mb_pr_get_pitchbias";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3410,9 +3274,8 @@ int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double
 	*mbp_pitchbias_mode = process.mbp_pitchbias_mode;
 	*mbp_pitchbias = process.mbp_pitchbias;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_pitchbias_mode: %d\n", *mbp_pitchbias_mode);
 		fprintf(stderr, "dbg2       mbp_pitchbias:      %f\n", *mbp_pitchbias);
@@ -3426,11 +3289,8 @@ int mb_pr_get_pitchbias(int verbose, char *file, int *mbp_pitchbias_mode, double
 /*--------------------------------------------------------------------*/
 int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_draft, double *mbp_draft_offset,
                     double *mbp_draft_mult, int *error) {
-	char *function_name = "mb_pr_get_draft";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3446,9 +3306,8 @@ int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_dr
 	*mbp_draft_offset = process.mbp_draft_offset;
 	*mbp_draft_mult = process.mbp_draft_mult;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_draft_mode:    %d\n", *mbp_draft_mode);
 		fprintf(stderr, "dbg2       mbp_draft:         %f\n", *mbp_draft);
@@ -3463,11 +3322,8 @@ int mb_pr_get_draft(int verbose, char *file, int *mbp_draft_mode, double *mbp_dr
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_heave, double *mbp_heave_mult, int *error) {
-	char *function_name = "mb_pr_get_heave";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3482,9 +3338,8 @@ int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_he
 	*mbp_heave = process.mbp_heave;
 	*mbp_heave_mult = process.mbp_heave_mult;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_heave_mode:    %d\n", *mbp_heave_mode);
 		fprintf(stderr, "dbg2       mbp_heave:         %f\n", *mbp_heave);
@@ -3500,11 +3355,8 @@ int mb_pr_get_heave(int verbose, char *file, int *mbp_heave_mode, double *mbp_he
 int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vru_offsetx, double *mbp_vru_offsety,
                     double *mbp_vru_offsetz, double *mbp_sonar_offsetx, double *mbp_sonar_offsety, double *mbp_sonar_offsetz,
                     int *error) {
-	char *function_name = "mb_pr_get_lever";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3523,9 +3375,8 @@ int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vr
 	*mbp_sonar_offsety = process.mbp_sonar_offsety;
 	*mbp_sonar_offsetz = process.mbp_sonar_offsetz;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_lever_mode:    %d\n", *mbp_lever_mode);
 		fprintf(stderr, "dbg2       mbp_vru_offsetx:   %f\n", *mbp_vru_offsetx);
@@ -3543,11 +3394,8 @@ int mb_pr_get_lever(int verbose, char *file, int *mbp_lever_mode, double *mbp_vr
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefile, int *mbp_tide_format, int *error) {
-	char *function_name = "mb_pr_get_tide";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3563,9 +3411,8 @@ int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefi
 		strcpy(mbp_tidefile, process.mbp_tidefile);
 	*mbp_tide_format = process.mbp_tide_format;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_tide_mode:     %d\n", *mbp_tide_mode);
 		fprintf(stderr, "dbg2       mbp_tidefile:      %s\n", mbp_tidefile);
@@ -3579,11 +3426,8 @@ int mb_pr_get_tide(int verbose, char *file, int *mbp_tide_mode, char *mbp_tidefi
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult, int *error) {
-	char *function_name = "mb_pr_get_tt";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3597,9 +3441,8 @@ int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult,
 	*mbp_tt_mode = process.mbp_tt_mode;
 	*mbp_tt_mult = process.mbp_tt_mult;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_tt_mode:       %d\n", *mbp_tt_mode);
 		fprintf(stderr, "dbg2       mbp_tt_mult:       %f\n", *mbp_tt_mult);
@@ -3612,11 +3455,8 @@ int mb_pr_get_tt(int verbose, char *file, int *mbp_tt_mode, double *mbp_tt_mult,
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, int *error) {
-	char *function_name = "mb_pr_get_ssv";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3630,9 +3470,8 @@ int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, i
 	*mbp_ssv_mode = process.mbp_ssv_mode;
 	*mbp_ssv = process.mbp_ssv;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_ssv_mode:      %d\n", *mbp_ssv_mode);
 		fprintf(stderr, "dbg2       mbp_ssv:           %f\n", *mbp_ssv);
@@ -3646,11 +3485,8 @@ int mb_pr_get_ssv(int verbose, char *file, int *mbp_ssv_mode, double *mbp_ssv, i
 /*--------------------------------------------------------------------*/
 int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile, int *mbp_angle_mode, int *mbp_corrected,
                   int *error) {
-	char *function_name = "mb_pr_get_svp";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3667,9 +3503,8 @@ int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile,
 	*mbp_angle_mode = process.mbp_angle_mode;
 	*mbp_corrected = process.mbp_corrected;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_svp_mode:      %d\n", *mbp_svp_mode);
 		fprintf(stderr, "dbg2       mbp_svpfile:       %s\n", mbp_svpfile);
@@ -3684,11 +3519,8 @@ int mb_pr_get_svp(int verbose, char *file, int *mbp_svp_mode, char *mbp_svpfile,
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_staticfile, int *error) {
-	char *function_name = "mb_pr_get_static";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3703,9 +3535,8 @@ int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_st
 	if (mbp_staticfile != NULL)
 		strcpy(mbp_staticfile, process.mbp_staticfile);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_static_mode:   %d\n", *mbp_static_mode);
 		fprintf(stderr, "dbg2       mbp_staticfile:    %s\n", mbp_staticfile);
@@ -3718,11 +3549,8 @@ int mb_pr_get_static(int verbose, char *file, int *mbp_static_mode, char *mbp_st
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_navadjfile, int *mbp_navadj_algorithm, int *error) {
-	char *function_name = "mb_pr_get_navadj";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
 		fprintf(stderr, "dbg2       file:                 %s\n", file);
@@ -3741,9 +3569,8 @@ int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_na
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_navadj_mode:      %d\n", *mbp_navadj_mode);
 		fprintf(stderr, "dbg2       mbp_navadjfile:       %s\n", mbp_navadjfile);
@@ -3758,11 +3585,8 @@ int mb_pr_get_navadj(int verbose, char *file, int *mbp_navadj_mode, char *mbp_na
 /*--------------------------------------------------------------------*/
 int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mbp_attitudefile, int *mbp_attitude_format,
                        int *error) {
-	char *function_name = "mb_pr_get_attitude";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3778,9 +3602,8 @@ int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mb
 		strcpy(mbp_attitudefile, process.mbp_attitudefile);
 	*mbp_attitude_format = process.mbp_attitude_format;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_attitude_mode: %d\n", *mbp_attitude_mode);
 		fprintf(stderr, "dbg2       mbp_attitudefile:  %s\n", mbp_attitudefile);
@@ -3795,11 +3618,8 @@ int mb_pr_get_attitude(int verbose, char *file, int *mbp_attitude_mode, char *mb
 /*--------------------------------------------------------------------*/
 int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char *mbp_sonardepthfile, int *mbp_sonardepth_format,
                          int *error) {
-	char *function_name = "mb_pr_get_sonardepth";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3815,9 +3635,8 @@ int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char
 		strcpy(mbp_sonardepthfile, process.mbp_sonardepthfile);
 	*mbp_sonardepth_format = process.mbp_sonardepth_format;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_sonardepth_mode:   %d\n", *mbp_sonardepth_mode);
 		fprintf(stderr, "dbg2       mbp_sonardepthfile:    %s\n", mbp_sonardepthfile);
@@ -3833,11 +3652,8 @@ int mb_pr_get_sonardepth(int verbose, char *file, int *mbp_sonardepth_mode, char
 int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile, int *mbp_nav_format, int *mbp_nav_heading,
                   int *mbp_nav_speed, int *mbp_nav_draft, int *mbp_nav_attitude, int *mbp_nav_algorithm,
                   double *mbp_nav_timeshift, int *error) {
-	char *function_name = "mb_pr_get_nav";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3859,9 +3675,8 @@ int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile,
 	*mbp_nav_algorithm = process.mbp_nav_algorithm;
 	*mbp_nav_timeshift = process.mbp_nav_timeshift;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_nav_mode:      %d\n", *mbp_nav_mode);
 		fprintf(stderr, "dbg2       mbp_navfile:       %s\n", mbp_navfile);
@@ -3883,11 +3698,8 @@ int mb_pr_get_nav(int verbose, char *file, int *mbp_nav_mode, char *mbp_navfile,
 int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_nav_offsetx, double *mbp_nav_offsety,
                        double *mbp_nav_offsetz, double *mbp_nav_shiftlon, double *mbp_nav_shiftlat, double *mbp_nav_shiftx,
                        double *mbp_nav_shifty, int *error) {
-	char *function_name = "mb_pr_get_navshift";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3907,9 +3719,8 @@ int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_
 	*mbp_nav_shiftx = process.mbp_nav_shiftx;
 	*mbp_nav_shifty = process.mbp_nav_shifty;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_nav_shift:     %d\n", *mbp_nav_shift);
 		fprintf(stderr, "dbg2       mbp_nav_offsetx:   %f\n", *mbp_nav_offsetx);
@@ -3927,11 +3738,8 @@ int mb_pr_get_navshift(int verbose, char *file, int *mbp_nav_shift, double *mbp_
 	return (status);
 } /*--------------------------------------------------------------------*/
 int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mbp_headingbias, int *error) {
-	char *function_name = "mb_pr_get_heading";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3945,9 +3753,8 @@ int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mb
 	*mbp_heading_mode = process.mbp_heading_mode;
 	*mbp_headingbias = process.mbp_headingbias;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_heading_mode:  %d\n", *mbp_heading_mode);
@@ -3962,11 +3769,8 @@ int mb_pr_get_heading(int verbose, char *file, int *mbp_heading_mode, double *mb
 /*--------------------------------------------------------------------*/
 int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_kind, int *mbp_cut_mode, double *mbp_cut_min,
                       double *mbp_cut_max, int *error) {
-	char *function_name = "mb_pr_update_datacut";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -3985,9 +3789,8 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 		mbp_cut_max[i] = process.mbp_cut_max[i];
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_cut_num:        %d\n", *mbp_cut_num);
 		for (int i = 0; i < *mbp_cut_num; i++) {
@@ -4005,11 +3808,8 @@ int mb_pr_get_datacut(int verbose, char *file, int *mbp_cut_num, int *mbp_cut_ki
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfile, int *error) {
-	char *function_name = "mb_pr_get_edit";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -4024,9 +3824,8 @@ int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfi
 	if (mbp_editfile != NULL)
 		strcpy(mbp_editfile, process.mbp_editfile);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_edit_mode:     %d\n", *mbp_edit_mode);
 		fprintf(stderr, "dbg2       mbp_editfile:      %s\n", mbp_editfile);
@@ -4041,11 +3840,8 @@ int mb_pr_get_edit(int verbose, char *file, int *mbp_edit_mode, char *mbp_editfi
 int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_ampcorrfile, int *mbp_ampcorr_type,
                       int *mbp_ampcorr_symmetry, double *mbp_ampcorr_angle, int *mbp_ampcorr_slope, char *mbp_ampsscorr_topofile,
                       int *error) {
-	char *function_name = "mb_pr_get_ampcorr";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -4066,9 +3862,8 @@ int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_
 	if (mbp_ampsscorr_topofile != NULL)
 		strcpy(mbp_ampsscorr_topofile, process.mbp_ampsscorr_topofile);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_ampcorr_mode:         %d\n", *mbp_ampcorr_mode);
 		fprintf(stderr, "dbg2       mbp_ampcorrfile:          %s\n", mbp_ampcorrfile);
@@ -4088,11 +3883,8 @@ int mb_pr_get_ampcorr(int verbose, char *file, int *mbp_ampcorr_mode, char *mbp_
 int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_sscorrfile, int *mbp_sscorr_type,
                      int *mbp_sscorr_symmetry, double *mbp_sscorr_angle, int *mbp_sscorr_slope, char *mbp_ampsscorr_topofile,
                      int *error) {
-	char *function_name = "mb_pr_get_sscorr";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -4113,9 +3905,8 @@ int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_ss
 	if (mbp_ampsscorr_topofile != NULL)
 		strcpy(mbp_ampsscorr_topofile, process.mbp_ampsscorr_topofile);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_sscorr_mode:          %d\n", *mbp_sscorr_mode);
 		fprintf(stderr, "dbg2       mbp_sscorrfile:           %s\n", mbp_sscorrfile);
@@ -4134,11 +3925,8 @@ int mb_pr_get_sscorr(int verbose, char *file, int *mbp_sscorr_mode, char *mbp_ss
 /*--------------------------------------------------------------------*/
 int mb_pr_get_ssrecalc(int verbose, char *file, int *mbp_ssrecalc_mode, double *mbp_ssrecalc_pixelsize,
                        double *mbp_ssrecalc_swathwidth, int *mbp_ssrecalc_interpolate, int *error) {
-	char *function_name = "mb_pr_get_ssrecalc";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -4154,9 +3942,8 @@ int mb_pr_get_ssrecalc(int verbose, char *file, int *mbp_ssrecalc_mode, double *
 	*mbp_ssrecalc_swathwidth = process.mbp_ssrecalc_swathwidth;
 	*mbp_ssrecalc_interpolate = process.mbp_ssrecalc_interpolate;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_ssrecalc_mode:        %d\n", *mbp_ssrecalc_mode);
 		fprintf(stderr, "dbg2       mbp_ssrecalc_pixelsize:   %f\n", *mbp_ssrecalc_pixelsize);
@@ -4176,11 +3963,8 @@ int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp
                        int *mbp_meta_tidecorrected, int *mbp_meta_batheditmanual, int *mbp_meta_batheditauto,
                        double *mbp_meta_rollbias, double *mbp_meta_pitchbias, double *mbp_meta_headingbias,
                        double *mbp_meta_draft, int *error) {
-	char *function_name = "mb_pr_get_metadata";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -4210,9 +3994,8 @@ int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp
 	*mbp_meta_headingbias = process.mbp_meta_headingbias;
 	*mbp_meta_draft = process.mbp_meta_draft;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_meta_vessel:          %s\n", mbp_meta_vessel);
 		fprintf(stderr, "dbg2       mbp_meta_institution:     %s\n", mbp_meta_institution);
@@ -4243,11 +4026,8 @@ int mb_pr_get_metadata(int verbose, char *file, char *mbp_meta_vessel, char *mbp
 int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge002, int *mbp_kluge003, int *mbp_kluge004,
                      int *mbp_kluge005, int *mbp_kluge006, int *mbp_kluge007, int *mbp_kluge008, int *mbp_kluge009,
                      int *mbp_kluge010, int *error) {
-	char *function_name = "mb_pr_get_kluges";
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
 		fprintf(stderr, "dbg2       file:              %s\n", file);
@@ -4269,9 +4049,8 @@ int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge0
 	*mbp_kluge009 = process.mbp_kluge009;
 	*mbp_kluge010 = process.mbp_kluge010;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       mbp_kluge001:             %d\n", *mbp_kluge001);
 		fprintf(stderr, "dbg2       mbp_kluge002:             %d\n", *mbp_kluge002);
@@ -4294,15 +4073,13 @@ int mb_pr_get_kluges(int verbose, char *file, int *mbp_kluge001, int *mbp_kluge0
 int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack,
                             int *ndepths, double *depths, double *depthacrosstrack, int *nslopes, double *slopes,
                             double *slopeacrosstrack, double *depthsmooth, int *error) {
-	char *function_name = "mb_pr_set_bathyslopenew";
 	double dxtrack;
 	double weight;
 	int j1, j2;
 	int j;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       nsmooth:         %d\n", nsmooth);
@@ -4368,9 +4145,8 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndepths:         %d\n", *ndepths);
 		fprintf(stderr, "dbg2       depths:\n");
@@ -4391,7 +4167,6 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths,
                          double *depths, double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack,
                          double *depthsmooth, int *error) {
-	char *function_name = "mb_pr_set_bathyslope";
 	int first, next, last;
 	int nbathgood;
 	double depthsum;
@@ -4400,9 +4175,8 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 	int j1, j2;
 	int j;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       nbath:           %d\n", nbath);
@@ -4519,9 +4293,8 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 
 	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndepths:         %d\n", *ndepths);
 		fprintf(stderr, "dbg2       depths:\n");
@@ -4541,13 +4314,11 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 /*--------------------------------------------------------------------*/
 int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
                          double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
-	char *function_name = "get_bathyslope";
 	int found_depth, found_slope;
 	int idepth, islope;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       ndepths:         %d\n", ndepths);
@@ -4620,9 +4391,8 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 		*slope = 0.0;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       depth:           %f\n", *depth);
 		fprintf(stderr, "dbg2       slope:           %f\n", *slope);
@@ -4635,14 +4405,12 @@ int mb_pr_get_bathyslope(int verbose, int ndepths, double *depths, double *depth
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y, int *error) {
-	char *function_name = "mb_pr_point_in_quad";
 	int inside = MB_YES;
 	double ax, ay, bx, by;
 	double z1, z2, z3, z4, z;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       px:              %f\n", px);
@@ -4692,9 +4460,8 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 	if (z <= 0.0)
 		inside = MB_NO;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4706,7 +4473,6 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 /*--------------------------------------------------------------------*/
 
 int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int *error) {
-	char *function_name = "mb_pr_lockswathfile";
 	mb_path lockfile;
 	FILE *fp;
 
@@ -4718,9 +4484,8 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 	time_t right_now;
 	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       file:       %s\n", file);
@@ -4773,9 +4538,8 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4788,7 +4552,6 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 
 int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *program, char *user, char *cpu, char *date,
                    int *error) {
-	char *function_name = "mb_pr_lockinfo";
 	mb_path lockfile;
 	FILE *fp;
 	mb_path line;
@@ -4797,9 +4560,8 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 	struct stat file_status;
 	int fstat;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       file:       %s\n", file);
@@ -4853,9 +4615,8 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       locked:     %d\n", *locked);
 		fprintf(stderr, "dbg2       purpose:    %d\n", *purpose);
@@ -4872,7 +4633,6 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, int *error) {
-	char *function_name = "mb_pr_unlockswathfile";
 	mb_path lockfile;
 	int locked;
 	mb_path lock_program;
@@ -4890,9 +4650,8 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, i
 	struct stat file_status;
 	int fstat;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       file:       %s\n", file);
@@ -4934,9 +4693,8 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, i
 		*error = MB_ERROR_FILE_NOT_FOUND;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

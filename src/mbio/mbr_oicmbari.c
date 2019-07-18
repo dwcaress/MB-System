@@ -45,12 +45,10 @@ int mbr_info_oicmbari(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_oicmbari";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -83,9 +81,8 @@ int mbr_info_oicmbari(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -116,15 +113,13 @@ int mbr_info_oicmbari(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_oicmbari(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_oicmbari";
 	int status = MB_SUCCESS;
 	struct mbf_oicmbari_struct *dataplus;
 	struct mbf_oicmbari_header_struct *header;
 	struct mbf_oicmbari_data_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -171,9 +166,8 @@ int mbr_alm_oicmbari(int verbose, void *mbio_ptr, int *error) {
 	data->ssalongtrack = NULL;
 	status = mbsys_oic_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -184,15 +178,13 @@ int mbr_alm_oicmbari(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_oicmbari(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_oicmbari";
 	int status = MB_SUCCESS;
 	struct mbf_oicmbari_struct *dataplus;
 	struct mbf_oicmbari_header_struct *header;
 	struct mbf_oicmbari_data_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -232,9 +224,8 @@ int mbr_dem_oicmbari(int verbose, void *mbio_ptr, int *error) {
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status = mbsys_oic_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -245,7 +236,6 @@ int mbr_dem_oicmbari(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_oicmbari";
 	int status = MB_SUCCESS;
 	struct mbf_oicmbari_struct *dataplus;
 	struct mbf_oicmbari_header_struct *header;
@@ -261,9 +251,8 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	float *float_ptr;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -506,7 +495,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  New header read in function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New header read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:             %d\n", header->type);
 		fprintf(stderr, "dbg5       proc_status:      %d\n", header->proc_status);
 		fprintf(stderr, "dbg5       data_size:        %d\n", header->data_size);
@@ -557,7 +546,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       num_samples[%1d]: %d\n", i, header->channel[i].num_samples);
 		}
 		for (int i = 0; i < header->num_chan; i++) {
-			fprintf(stderr, "\ndbg5  New data read in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg5  New data read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       channel:   %d\n", i);
 			if (header->channel[i].type == OIC_TYPE_SIDESCAN)
 				fprintf(stderr, "dbg5       data type: sidescan\n");
@@ -769,7 +758,7 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
-		fprintf(stderr, "\ndbg5  New processed data read in function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New processed data read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", header->beams_bath);
 		fprintf(stderr, "dbg5       beam   bath  xtrack ltrack   tt   angle\n");
 		for (int i = 0; i < header->beams_bath; i++) {
@@ -945,9 +934,8 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->client[i] = dataplus->client[i];
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -958,7 +946,6 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_oicmbari";
 	int status = MB_SUCCESS;
 	struct mbf_oicmbari_struct *dataplus;
 	struct mbf_oicmbari_header_struct *header;
@@ -974,9 +961,8 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	float *float_ptr;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -1148,7 +1134,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  New header set in function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New header set in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:             %d\n", header->type);
 		fprintf(stderr, "dbg5       proc_status:      %d\n", header->proc_status);
 		fprintf(stderr, "dbg5       data_size:        %d\n", header->data_size);
@@ -1205,7 +1191,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* print debug messages */
 	if (verbose >= 5 && status == MB_SUCCESS) {
 		for (int i = 0; i < header->num_chan; i++) {
-			fprintf(stderr, "\ndbg5  New data set in function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg5  New data set in function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       channel:   %d\n", i);
 			if (header->channel[i].type == OIC_TYPE_SIDESCAN)
 				fprintf(stderr, "dbg5       data type: sidescan\n");
@@ -1266,7 +1252,7 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
-		fprintf(stderr, "\ndbg5  New processed data set in function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  New processed data set in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", header->beams_bath);
 		fprintf(stderr, "dbg5       beam   bath  xtrack ltrack   tt   angle\n");
 		for (int i = 0; i < header->beams_bath; i++) {
@@ -1569,9 +1555,8 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1583,12 +1568,10 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_oicmbari(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_oicmbari";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -1626,9 +1609,8 @@ int mbr_register_oicmbari(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

@@ -66,22 +66,6 @@ static const int MBF_SB2100BI_LABEL_LEN = 8;
 /* define end of record label */
 static const char mbf_sb2100bi_eor[2] = {'\r', '\n'};
 
-int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error);
-int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error);
-int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error);
-int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error);
-int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error);
-int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error);
-int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error);
-
 /* text for ascii file header */
 static const char *mbf_sb2100bi_file_header_text_1 = {"\
 \nSeaBeam 2100 multibeam sonar binary data format\n\
@@ -388,12 +372,10 @@ int mbr_info_sb2100b1(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_sb2100b1";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -425,9 +407,8 @@ int mbr_info_sb2100b1(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -463,12 +444,10 @@ int mbr_info_sb2100b2(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_sb2100b2";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -501,9 +480,8 @@ int mbr_info_sb2100b2(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -534,89 +512,12 @@ int mbr_info_sb2100b2(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_sb2100bi";
-	int status = MB_SUCCESS;
-	struct mbsys_sb2100_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbsys_sb2100_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
-
-	/* get store structure pointer */
-	store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
-
-	/* set comment pointer */
-	store->comment = (char *)&(store->roll_bias_port);
-
-	/* initialize everything to zeros */
-	mbr_zero_sb2100bi(verbose, mb_io_ptr->raw_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_sb2100bi";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
 int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
-	char *function_name = "mbr_zero_sb2100bi";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store_ptr: %p\n", (void *)store_ptr);
@@ -712,9 +613,8 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -724,92 +624,680 @@ int mbr_zero_sb2100bi(int verbose, char *store_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_sb2100bi";
+int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_sb2100_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_sb2100bi_rd_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* zero sidescan for format MBF_SB2100B2 (43) */
-	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT && mb_io_ptr->format == MBF_SB2100B2)
-		store->npixels = 0;
-
-	/* set unset parameters in sb2100 data storage structure */
-	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT) {
-		/* parameters for MBF_SB2100RW format */
-		store->range_scale = ' ';
-		store->spare_dr[0] = ' ';
-		store->spare_dr[1] = ' ';
-		store->num_algorithms = 1;
-		for (int i = 0; i < 4; i++)
-			store->algorithm_order[i] = ' ';
-		store->svp_corr_ss = 0;
-		store->ss_data_length = 4 * MBSYS_SB2100_PIXELS;
-		store->pixel_size_scale = 'D';
-		store->spare_ss = ' ';
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_sb2100bi";
-	int status = MB_SUCCESS;
-	struct mbsys_sb2100_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	/* set initial status */
+	status = MB_SUCCESS;
 
-	/* make sure no sidescan is written for format MBF_SB2100B2 (43) */
-	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT && mb_io_ptr->format == MBF_SB2100B2)
-		store->npixels = 0;
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbsys_sb2100_struct);
+	mb_io_ptr->data_structure_size = 0;
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
 
-	/* write next data to file */
-	status = mbr_sb2100bi_wr_data(verbose, mbio_ptr, store_ptr, error);
+	/* get store structure pointer */
+	store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
 
-	/* print output debug statements */
+	/* set comment pointer */
+	store->comment = (char *)&(store->roll_bias_port);
+
+	/* initialize everything to zeros */
+	mbr_zero_sb2100bi(verbose, mb_io_ptr->raw_data, error);
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_dem_sb2100bi(int verbose, void *mbio_ptr, int *error) {
+	int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* deallocate memory for data descriptor */
+	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
+	int status = MB_SUCCESS;
+	int nread;
+	int nlast;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
+	}
+
+	/* check record size */
+	if (record_length > 100000) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+	}
+
+	/* if success read rest of record */
+	if (status == MB_SUCCESS) {
+		/* read data into buffer */
+		nread = record_length / 100;
+		nlast = record_length % 100;
+		for (int i = 0; i < nread; i++)
+			if ((status = fread(buffer, 100, 1, mbfp)) != 1) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+		if (nlast > 0)
+			if ((status = fread(buffer, nlast, 1, mbfp)) != 1) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+	int status = MB_SUCCESS;
+	int read_length;
+	unsigned int checksum_read;
+	unsigned int checksum;
+	char eor_read[6];
+	int index;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
+	}
+
+	/* check record size */
+	if (record_length != MBF_SB2100BI_PR_WRITE_LEN + 6) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+	}
+
+	/* if success read rest of record */
+	if (status == MB_SUCCESS) {
+		/* read data into structure */
+		read_length = MBF_SB2100BI_PR_WRITE_LEN;
+		if ((status = fread(buffer, 1, MBF_SB2100BI_PR_WRITE_LEN, mbfp)) != MBF_SB2100BI_PR_WRITE_LEN) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		index = 0;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->year);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->jday);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->hour);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->minute);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->sec);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->msec);
+		index += 2;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->roll_bias_port);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->roll_bias_starboard);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->pitch_bias);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->ship_draft);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->offset_x);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->offset_y);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->offset_z);
+		index += 4;
+		mb_get_binary_int(MB_NO, &buffer[index], &store->num_svp);
+		index += 4;
+		for (int i = 0; i < store->num_svp; i++) {
+			mb_get_binary_float(MB_NO, &buffer[index], &(store->svp[i].depth));
+			index += 4;
+			mb_get_binary_float(MB_NO, &buffer[index], &(store->svp[i].velocity));
+			index += 4;
+		}
+
+		/* read checksum and eor */
+		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
+
+		/* do checksum */
+		if (verbose >= 2) {
+			checksum = 0;
+			for (int i = 0; i < read_length; i++)
+				checksum += (unsigned int)buffer[i];
+
+			/* check checksum and report */
+			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
+			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
+			if (checksum != checksum_read) {
+				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
+			}
+			else {
+				fprintf(stderr, "dbg5       checksum ok\n");
+			}
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       year:             %d\n", store->year);
+		fprintf(stderr, "dbg5       julian day:       %d\n", store->jday);
+		fprintf(stderr, "dbg5       hour:             %d\n", store->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", store->minute);
+		fprintf(stderr, "dbg5       sec:              %d\n", store->sec);
+		fprintf(stderr, "dbg5       msec:             %d\n", store->msec);
+		fprintf(stderr, "dbg5       roll_bias_port:   %f\n", store->roll_bias_port);
+		fprintf(stderr, "dbg5       roll_bias_strbrd: %f\n", store->roll_bias_starboard);
+		fprintf(stderr, "dbg5       pitch_bias:       %f\n", store->pitch_bias);
+		fprintf(stderr, "dbg5       ship_draft:       %f\n", store->ship_draft);
+		fprintf(stderr, "dbg5       offset_x:         %f\n", store->offset_x);
+		fprintf(stderr, "dbg5       offset_y:         %f\n", store->offset_y);
+		fprintf(stderr, "dbg5       offset_z:         %f\n", store->offset_z);
+		fprintf(stderr, "dbg5       num_svp:          %d\n", store->num_svp);
+		fprintf(stderr, "dbg5       Sound Velocity Profile:\n");
+		for (int i = 0; i < store->num_svp; i++)
+			fprintf(stderr, "dbg5       %d  depth:%f  velocity:%f\n", i, store->svp[i].depth, store->svp[i].velocity);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+	int status = MB_SUCCESS;
+	int read_length;
+	unsigned int checksum_read;
+	unsigned int checksum;
+	char eor_read[6];
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
+	}
+
+	/* check record size */
+	if (record_length > MBSYS_SB2100_MAXLINE + 6) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+	}
+
+	/* if success read rest of record */
+	if (status == MB_SUCCESS) {
+		/* read data into structure */
+		read_length = record_length - 6;
+		if ((status = fread(store->comment, read_length, 1, mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+
+		/* read checksum and eor */
+		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
+
+		/* do checksum */
+		if (verbose >= 2) {
+			checksum = 0;
+			for (int i = 0; i < read_length; i++)
+				checksum += (unsigned int)buffer[i];
+
+			/* check checksum and report */
+			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
+			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
+			if (checksum != checksum_read) {
+				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
+			}
+			else {
+				fprintf(stderr, "dbg5       checksum ok\n");
+			}
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Value read in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       comment:          %s\n", store->comment);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+	int status = MB_SUCCESS;
+	int read_length;
+	unsigned int checksum_read;
+	unsigned int checksum;
+	char eor_read[6];
+	int index;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
+	}
+
+	/* check record size */
+	if (record_length != MBF_SB2100BI_DH_WRITE_LEN + 6) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+	}
+
+	/* if success read rest of record */
+	if (status == MB_SUCCESS) {
+		/* read data into structure */
+		read_length = MBF_SB2100BI_DH_WRITE_LEN;
+		if ((status = fread(buffer, read_length, 1, mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		index = 0;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->year);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->jday);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->hour);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->minute);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->sec);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->msec);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->spare1);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->spare2);
+		index += 2;
+		mb_get_binary_double(MB_NO, &buffer[index], &store->longitude);
+		index += 8;
+		mb_get_binary_double(MB_NO, &buffer[index], &store->latitude);
+		index += 8;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->heading);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->speed);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->roll);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->pitch);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->heave);
+		index += 4;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->ssv);
+		index += 4;
+		store->frequency = buffer[index];
+		index++;
+		store->depth_gate_mode = buffer[index];
+		index++;
+		store->ping_gain = buffer[index];
+		index++;
+		store->ping_pulse_width = buffer[index];
+		index++;
+		store->transmitter_attenuation = buffer[index];
+		index++;
+		store->ssv_source = buffer[index];
+		index++;
+		store->svp_correction = buffer[index];
+		index++;
+		store->pixel_algorithm = buffer[index];
+		index++;
+		mb_get_binary_float(MB_NO, &buffer[index], &store->pixel_size);
+		index += 4;
+		mb_get_binary_int(MB_NO, &buffer[index], &store->nbeams);
+		index += 4;
+		mb_get_binary_int(MB_NO, &buffer[index], &store->npixels);
+		index += 4;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->spare3);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->spare4);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->spare5);
+		index += 2;
+		mb_get_binary_short(MB_NO, &buffer[index], &store->spare6);
+		index += 2;
+
+		/* read checksum and eor */
+		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
+
+		/* do checksum */
+		if (verbose >= 2) {
+			checksum = 0;
+			for (int i = 0; i < read_length; i++)
+				checksum += (unsigned int)buffer[i];
+
+			/* check checksum and report */
+			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
+			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
+			if (checksum != checksum_read) {
+				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
+			}
+			else {
+				fprintf(stderr, "dbg5       checksum ok\n");
+			}
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       year:             %d\n", store->year);
+		fprintf(stderr, "dbg5       julian day:       %d\n", store->jday);
+		fprintf(stderr, "dbg5       hour:             %d\n", store->hour);
+		fprintf(stderr, "dbg5       minute:           %d\n", store->minute);
+		fprintf(stderr, "dbg5       sec:              %d\n", store->sec);
+		fprintf(stderr, "dbg5       msec:             %d\n", store->msec);
+		fprintf(stderr, "dbg5       longitude:        %f\n", store->longitude);
+		fprintf(stderr, "dbg5       latitude:         %f\n", store->latitude);
+		fprintf(stderr, "dbg5       heading:          %f\n", store->heading);
+		fprintf(stderr, "dbg5       speed:            %f\n", store->speed);
+		fprintf(stderr, "dbg5       roll:             %f\n", store->roll);
+		fprintf(stderr, "dbg5       pitch:            %f\n", store->pitch);
+		fprintf(stderr, "dbg5       heave:            %f\n", store->heave);
+		fprintf(stderr, "dbg5       ssv:              %f\n", store->ssv);
+		fprintf(stderr, "dbg5       frequency:        %c\n", store->frequency);
+		fprintf(stderr, "dbg5       depth_gate_mode:  %c\n", store->depth_gate_mode);
+		fprintf(stderr, "dbg5       ping_gain:        %d\n", store->ping_gain);
+		fprintf(stderr, "dbg5       ping_pulse_width: %d\n", store->ping_pulse_width);
+		fprintf(stderr, "dbg5       trans_atten:      %d\n", store->transmitter_attenuation);
+		fprintf(stderr, "dbg5       ssv_source:       %c\n", store->ssv_source);
+		fprintf(stderr, "dbg5       svp_correction:   %c\n", store->svp_correction);
+		fprintf(stderr, "dbg5       pixel_algorithm:  %c\n", store->pixel_algorithm);
+		fprintf(stderr, "dbg5       pixel_size:       %f\n", store->pixel_size);
+		fprintf(stderr, "dbg5       nbeams:           %d\n", store->nbeams);
+		fprintf(stderr, "dbg5       npixels:          %d\n", store->npixels);
+		fprintf(stderr, "dbg5       spare1:           %d\n", store->spare1);
+		fprintf(stderr, "dbg5       spare2:           %d\n", store->spare2);
+		fprintf(stderr, "dbg5       spare3:           %d\n", store->spare3);
+		fprintf(stderr, "dbg5       spare4:           %d\n", store->spare4);
+		fprintf(stderr, "dbg5       spare5:           %d\n", store->spare5);
+		fprintf(stderr, "dbg5       spare6:           %d\n", store->spare6);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+	int status = MB_SUCCESS;
+	int read_length;
+	unsigned int checksum_read;
+	unsigned int checksum;
+	char eor_read[6];
+	int index;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
+	}
+
+	/* check record size */
+	if (record_length != store->nbeams * MBF_SB2100BI_BR_WRITE_LEN + 6) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+	}
+
+	/* if success read rest of record */
+	if (status == MB_SUCCESS) {
+		/* read data into structure */
+		read_length = store->nbeams * MBF_SB2100BI_BR_WRITE_LEN;
+		if (read_length > 0)
+			if ((status = fread(buffer, read_length, 1, mbfp)) != 1) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+		index = 0;
+		for (int i = 0; i < store->nbeams; i++) {
+			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].depth);
+			index += 4;
+			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].acrosstrack);
+			index += 4;
+			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].alongtrack);
+			index += 4;
+			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].range);
+			index += 4;
+			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].angle_across);
+			index += 4;
+			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].angle_forward);
+			index += 4;
+			mb_get_binary_short(MB_NO, &buffer[index], &store->beams[i].amplitude);
+			index += 2;
+			mb_get_binary_short(MB_NO, &buffer[index], &store->beams[i].signal_to_noise);
+			index += 2;
+			mb_get_binary_short(MB_NO, &buffer[index], &store->beams[i].echo_length);
+			index += 2;
+			store->beams[i].quality = buffer[index];
+			index++;
+			store->beams[i].source = buffer[index];
+			index++;
+		}
+
+		/* read checksum and eor */
+		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
+
+		/* do checksum */
+		if (verbose >= 2) {
+			checksum = 0;
+			for (int i = 0; i < read_length; i++)
+				checksum += (unsigned int)buffer[i];
+
+			/* check checksum and report */
+			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
+			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
+			if (checksum != checksum_read) {
+				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
+			}
+			else {
+				fprintf(stderr, "dbg5       checksum ok\n");
+			}
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       beam depth xtrack ltrack tt angle angfor amp sig2noise echo src quality\n");
+		for (int i = 0; i < store->nbeams; i++) {
+			fprintf(stderr, "dbg5       %3d %8.2f %9.2f %8.2f %6.3f %7.3f %7.3f %3d %3d %3d %c %c\n", i, store->beams[i].depth,
+			        store->beams[i].acrosstrack, store->beams[i].alongtrack, store->beams[i].range, store->beams[i].angle_across,
+			        store->beams[i].angle_forward, store->beams[i].amplitude, store->beams[i].signal_to_noise,
+			        store->beams[i].echo_length, store->beams[i].source, store->beams[i].quality);
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
+	int status = MB_SUCCESS;
+	int read_length;
+	unsigned int checksum_read;
+	unsigned int checksum;
+	char eor_read[6];
+	short amplitude_short;
+	short alongtrack_short;
+	int index;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
+		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
+	}
+
+	/* check record size */
+	if (record_length != store->npixels * MBF_SB2100BI_SR_WRITE_LEN + 6) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_UNINTELLIGIBLE;
+	}
+
+	/* if success read rest of record */
+	if (status == MB_SUCCESS) {
+		/* read store into structure */
+		read_length = store->npixels * MBF_SB2100BI_SR_WRITE_LEN;
+		if (read_length > 0)
+			if ((status = fread(buffer, read_length, 1, mbfp)) != 1) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+
+		index = 0;
+		for (int i = 0; i < store->npixels; i++) {
+			mb_get_binary_short(MB_NO, &buffer[index], &amplitude_short);
+			index += 2;
+			mb_get_binary_short(MB_NO, &buffer[index], &alongtrack_short);
+			index += 2;
+			store->pixels[i].amplitude = (float)amplitude_short;
+			store->pixels[i].alongtrack = 0.1 * ((float)alongtrack_short);
+		}
+
+		/* read checksum and eor */
+		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
+
+		/* do checksum */
+		if (verbose >= 2) {
+			checksum = 0;
+			for (int i = 0; i < read_length; i++)
+				checksum += (unsigned int)buffer[i];
+
+			/* check checksum and report */
+			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
+			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
+			if (checksum != checksum_read) {
+				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
+			}
+			else {
+				fprintf(stderr, "dbg5       checksum ok\n");
+			}
+		}
+	}
+
+	/* print debug statements */
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       pixel amplitude alongtrack\n");
+		for (int i = 0; i < store->npixels; i++) {
+			fprintf(stderr, "dbg5       %3d   %f   %f\n", i, store->pixels[i].amplitude, store->pixels[i].alongtrack);
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -820,7 +1308,6 @@ int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_data";
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
 	FILE *mbfp;
@@ -834,9 +1321,8 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	char record_length_fh_str[8];
 	int record_length_fh;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -994,9 +1480,8 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1006,691 +1491,50 @@ int mbr_sb2100bi_rd_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_fh(int verbose, FILE *mbfp, int record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_fh";
-	int status = MB_SUCCESS;
-	int nread;
-	int nlast;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
-	}
-
-	/* check record size */
-	if (record_length > 100000) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-	}
-
-	/* if success read rest of record */
-	if (status == MB_SUCCESS) {
-		/* read data into buffer */
-		nread = record_length / 100;
-		nlast = record_length % 100;
-		for (int i = 0; i < nread; i++)
-			if ((status = fread(buffer, 100, 1, mbfp)) != 1) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-		if (nlast > 0)
-			if ((status = fread(buffer, nlast, 1, mbfp)) != 1) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_pr";
-	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
-	char eor_read[6];
-	int index;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
-		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
-	}
-
-	/* check record size */
-	if (record_length != MBF_SB2100BI_PR_WRITE_LEN + 6) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-	}
-
-	/* if success read rest of record */
-	if (status == MB_SUCCESS) {
-		/* read data into structure */
-		read_length = MBF_SB2100BI_PR_WRITE_LEN;
-		if ((status = fread(buffer, 1, MBF_SB2100BI_PR_WRITE_LEN, mbfp)) != MBF_SB2100BI_PR_WRITE_LEN) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		index = 0;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->year);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->jday);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->hour);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->minute);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->sec);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->msec);
-		index += 2;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->roll_bias_port);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->roll_bias_starboard);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->pitch_bias);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->ship_draft);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->offset_x);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->offset_y);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->offset_z);
-		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], &store->num_svp);
-		index += 4;
-		for (int i = 0; i < store->num_svp; i++) {
-			mb_get_binary_float(MB_NO, &buffer[index], &(store->svp[i].depth));
-			index += 4;
-			mb_get_binary_float(MB_NO, &buffer[index], &(store->svp[i].velocity));
-			index += 4;
-		}
-
-		/* read checksum and eor */
-		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
-
-		/* do checksum */
-		if (verbose >= 2) {
-			checksum = 0;
-			for (int i = 0; i < read_length; i++)
-				checksum += (unsigned int)buffer[i];
-
-			/* check checksum and report */
-			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", function_name);
-			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
-			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
-			if (checksum != checksum_read) {
-				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
-			}
-			else {
-				fprintf(stderr, "dbg5       checksum ok\n");
-			}
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       year:             %d\n", store->year);
-		fprintf(stderr, "dbg5       julian day:       %d\n", store->jday);
-		fprintf(stderr, "dbg5       hour:             %d\n", store->hour);
-		fprintf(stderr, "dbg5       minute:           %d\n", store->minute);
-		fprintf(stderr, "dbg5       sec:              %d\n", store->sec);
-		fprintf(stderr, "dbg5       msec:             %d\n", store->msec);
-		fprintf(stderr, "dbg5       roll_bias_port:   %f\n", store->roll_bias_port);
-		fprintf(stderr, "dbg5       roll_bias_strbrd: %f\n", store->roll_bias_starboard);
-		fprintf(stderr, "dbg5       pitch_bias:       %f\n", store->pitch_bias);
-		fprintf(stderr, "dbg5       ship_draft:       %f\n", store->ship_draft);
-		fprintf(stderr, "dbg5       offset_x:         %f\n", store->offset_x);
-		fprintf(stderr, "dbg5       offset_y:         %f\n", store->offset_y);
-		fprintf(stderr, "dbg5       offset_z:         %f\n", store->offset_z);
-		fprintf(stderr, "dbg5       num_svp:          %d\n", store->num_svp);
-		fprintf(stderr, "dbg5       Sound Velocity Profile:\n");
-		for (int i = 0; i < store->num_svp; i++)
-			fprintf(stderr, "dbg5       %d  depth:%f  velocity:%f\n", i, store->svp[i].depth, store->svp[i].velocity);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_tr";
-	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
-	char eor_read[6];
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
-		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
-	}
-
-	/* check record size */
-	if (record_length > MBSYS_SB2100_MAXLINE + 6) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-	}
-
-	/* if success read rest of record */
-	if (status == MB_SUCCESS) {
-		/* read data into structure */
-		read_length = record_length - 6;
-		if ((status = fread(store->comment, read_length, 1, mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-
-		/* read checksum and eor */
-		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
-
-		/* do checksum */
-		if (verbose >= 2) {
-			checksum = 0;
-			for (int i = 0; i < read_length; i++)
-				checksum += (unsigned int)buffer[i];
-
-			/* check checksum and report */
-			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", function_name);
-			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
-			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
-			if (checksum != checksum_read) {
-				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
-			}
-			else {
-				fprintf(stderr, "dbg5       checksum ok\n");
-			}
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Value read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       comment:          %s\n", store->comment);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_dh";
-	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
-	char eor_read[6];
-	int index;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
-		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
-	}
-
-	/* check record size */
-	if (record_length != MBF_SB2100BI_DH_WRITE_LEN + 6) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-	}
-
-	/* if success read rest of record */
-	if (status == MB_SUCCESS) {
-		/* read data into structure */
-		read_length = MBF_SB2100BI_DH_WRITE_LEN;
-		if ((status = fread(buffer, read_length, 1, mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		index = 0;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->year);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->jday);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->hour);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->minute);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->sec);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->msec);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->spare1);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->spare2);
-		index += 2;
-		mb_get_binary_double(MB_NO, &buffer[index], &store->longitude);
-		index += 8;
-		mb_get_binary_double(MB_NO, &buffer[index], &store->latitude);
-		index += 8;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->heading);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->speed);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->roll);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->pitch);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->heave);
-		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->ssv);
-		index += 4;
-		store->frequency = buffer[index];
-		index++;
-		store->depth_gate_mode = buffer[index];
-		index++;
-		store->ping_gain = buffer[index];
-		index++;
-		store->ping_pulse_width = buffer[index];
-		index++;
-		store->transmitter_attenuation = buffer[index];
-		index++;
-		store->ssv_source = buffer[index];
-		index++;
-		store->svp_correction = buffer[index];
-		index++;
-		store->pixel_algorithm = buffer[index];
-		index++;
-		mb_get_binary_float(MB_NO, &buffer[index], &store->pixel_size);
-		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], &store->nbeams);
-		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], &store->npixels);
-		index += 4;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->spare3);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->spare4);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->spare5);
-		index += 2;
-		mb_get_binary_short(MB_NO, &buffer[index], &store->spare6);
-		index += 2;
-
-		/* read checksum and eor */
-		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
-
-		/* do checksum */
-		if (verbose >= 2) {
-			checksum = 0;
-			for (int i = 0; i < read_length; i++)
-				checksum += (unsigned int)buffer[i];
-
-			/* check checksum and report */
-			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", function_name);
-			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
-			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
-			if (checksum != checksum_read) {
-				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
-			}
-			else {
-				fprintf(stderr, "dbg5       checksum ok\n");
-			}
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       year:             %d\n", store->year);
-		fprintf(stderr, "dbg5       julian day:       %d\n", store->jday);
-		fprintf(stderr, "dbg5       hour:             %d\n", store->hour);
-		fprintf(stderr, "dbg5       minute:           %d\n", store->minute);
-		fprintf(stderr, "dbg5       sec:              %d\n", store->sec);
-		fprintf(stderr, "dbg5       msec:             %d\n", store->msec);
-		fprintf(stderr, "dbg5       longitude:        %f\n", store->longitude);
-		fprintf(stderr, "dbg5       latitude:         %f\n", store->latitude);
-		fprintf(stderr, "dbg5       heading:          %f\n", store->heading);
-		fprintf(stderr, "dbg5       speed:            %f\n", store->speed);
-		fprintf(stderr, "dbg5       roll:             %f\n", store->roll);
-		fprintf(stderr, "dbg5       pitch:            %f\n", store->pitch);
-		fprintf(stderr, "dbg5       heave:            %f\n", store->heave);
-		fprintf(stderr, "dbg5       ssv:              %f\n", store->ssv);
-		fprintf(stderr, "dbg5       frequency:        %c\n", store->frequency);
-		fprintf(stderr, "dbg5       depth_gate_mode:  %c\n", store->depth_gate_mode);
-		fprintf(stderr, "dbg5       ping_gain:        %d\n", store->ping_gain);
-		fprintf(stderr, "dbg5       ping_pulse_width: %d\n", store->ping_pulse_width);
-		fprintf(stderr, "dbg5       trans_atten:      %d\n", store->transmitter_attenuation);
-		fprintf(stderr, "dbg5       ssv_source:       %c\n", store->ssv_source);
-		fprintf(stderr, "dbg5       svp_correction:   %c\n", store->svp_correction);
-		fprintf(stderr, "dbg5       pixel_algorithm:  %c\n", store->pixel_algorithm);
-		fprintf(stderr, "dbg5       pixel_size:       %f\n", store->pixel_size);
-		fprintf(stderr, "dbg5       nbeams:           %d\n", store->nbeams);
-		fprintf(stderr, "dbg5       npixels:          %d\n", store->npixels);
-		fprintf(stderr, "dbg5       spare1:           %d\n", store->spare1);
-		fprintf(stderr, "dbg5       spare2:           %d\n", store->spare2);
-		fprintf(stderr, "dbg5       spare3:           %d\n", store->spare3);
-		fprintf(stderr, "dbg5       spare4:           %d\n", store->spare4);
-		fprintf(stderr, "dbg5       spare5:           %d\n", store->spare5);
-		fprintf(stderr, "dbg5       spare6:           %d\n", store->spare6);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_br";
-	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
-	char eor_read[6];
-	int index;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
-		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
-	}
-
-	/* check record size */
-	if (record_length != store->nbeams * MBF_SB2100BI_BR_WRITE_LEN + 6) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-	}
-
-	/* if success read rest of record */
-	if (status == MB_SUCCESS) {
-		/* read data into structure */
-		read_length = store->nbeams * MBF_SB2100BI_BR_WRITE_LEN;
-		if (read_length > 0)
-			if ((status = fread(buffer, read_length, 1, mbfp)) != 1) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-		index = 0;
-		for (int i = 0; i < store->nbeams; i++) {
-			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].depth);
-			index += 4;
-			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].acrosstrack);
-			index += 4;
-			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].alongtrack);
-			index += 4;
-			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].range);
-			index += 4;
-			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].angle_across);
-			index += 4;
-			mb_get_binary_float(MB_NO, &buffer[index], &store->beams[i].angle_forward);
-			index += 4;
-			mb_get_binary_short(MB_NO, &buffer[index], &store->beams[i].amplitude);
-			index += 2;
-			mb_get_binary_short(MB_NO, &buffer[index], &store->beams[i].signal_to_noise);
-			index += 2;
-			mb_get_binary_short(MB_NO, &buffer[index], &store->beams[i].echo_length);
-			index += 2;
-			store->beams[i].quality = buffer[index];
-			index++;
-			store->beams[i].source = buffer[index];
-			index++;
-		}
-
-		/* read checksum and eor */
-		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
-
-		/* do checksum */
-		if (verbose >= 2) {
-			checksum = 0;
-			for (int i = 0; i < read_length; i++)
-				checksum += (unsigned int)buffer[i];
-
-			/* check checksum and report */
-			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", function_name);
-			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
-			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
-			if (checksum != checksum_read) {
-				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
-			}
-			else {
-				fprintf(stderr, "dbg5       checksum ok\n");
-			}
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       beam depth xtrack ltrack tt angle angfor amp sig2noise echo src quality\n");
-		for (int i = 0; i < store->nbeams; i++) {
-			fprintf(stderr, "dbg5       %3d %8.2f %9.2f %8.2f %6.3f %7.3f %7.3f %3d %3d %3d %c %c\n", i, store->beams[i].depth,
-			        store->beams[i].acrosstrack, store->beams[i].alongtrack, store->beams[i].range, store->beams[i].angle_across,
-			        store->beams[i].angle_forward, store->beams[i].amplitude, store->beams[i].signal_to_noise,
-			        store->beams[i].echo_length, store->beams[i].source, store->beams[i].quality);
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100bi_rd_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, short record_length, int *error) {
-	char *function_name = "mbr_sb2100bi_rd_sr";
-	int status = MB_SUCCESS;
-	int read_length;
-	unsigned int checksum_read;
-	unsigned int checksum;
-	char eor_read[6];
-	short amplitude_short;
-	short alongtrack_short;
-	int index;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
-		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
-		fprintf(stderr, "dbg2       record_len: %d\n", record_length);
-	}
-
-	/* check record size */
-	if (record_length != store->npixels * MBF_SB2100BI_SR_WRITE_LEN + 6) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
-	}
-
-	/* if success read rest of record */
-	if (status == MB_SUCCESS) {
-		/* read store into structure */
-		read_length = store->npixels * MBF_SB2100BI_SR_WRITE_LEN;
-		if (read_length > 0)
-			if ((status = fread(buffer, read_length, 1, mbfp)) != 1) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-
-		index = 0;
-		for (int i = 0; i < store->npixels; i++) {
-			mb_get_binary_short(MB_NO, &buffer[index], &amplitude_short);
-			index += 2;
-			mb_get_binary_short(MB_NO, &buffer[index], &alongtrack_short);
-			index += 2;
-			store->pixels[i].amplitude = (float)amplitude_short;
-			store->pixels[i].alongtrack = 0.1 * ((float)alongtrack_short);
-		}
-
-		/* read checksum and eor */
-		if ((status = fread(&eor_read[0], 6, 1, mbfp)) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-		mb_get_binary_int(MB_NO, &eor_read[0], (int *)&checksum_read);
-
-		/* do checksum */
-		if (verbose >= 2) {
-			checksum = 0;
-			for (int i = 0; i < read_length; i++)
-				checksum += (unsigned int)buffer[i];
-
-			/* check checksum and report */
-			fprintf(stderr, "\ndbg5  Checksum test done in MBIO function <%s>\n", function_name);
-			fprintf(stderr, "dbg5       checksum read:       %d\n", checksum_read);
-			fprintf(stderr, "dbg5       checksum calculated: %d\n", checksum);
-			if (checksum != checksum_read) {
-				fprintf(stderr, "dbg5       CHECKSUM ERROR!!\n");
-			}
-			else {
-				fprintf(stderr, "dbg5       checksum ok\n");
-			}
-		}
-	}
-
-	/* print debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       pixel amplitude alongtrack\n");
-		for (int i = 0; i < store->npixels; i++) {
-			fprintf(stderr, "dbg5       %3d   %f   %f\n", i, store->pixels[i].amplitude, store->pixels[i].alongtrack);
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_data";
+int mbr_rt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 	struct mbsys_sb2100_struct *store;
-	FILE *mbfp;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
+	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
 	store = (struct mbsys_sb2100_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
 
-	/* write file header if not written yet */
-	if (mb_io_ptr->save_flag == MB_NO) {
-		status = mbr_sb2100bi_wr_fh(verbose, mbfp, error);
-		mb_io_ptr->save_flag = MB_YES;
-	}
+	/* read next data from file */
+	status = mbr_sb2100bi_rd_data(verbose, mbio_ptr, store_ptr, error);
 
-	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
-		status = mbr_sb2100bi_wr_pr(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_COMMENT) {
-		status = mbr_sb2100bi_wr_tr(verbose, mbfp, store, error);
-	}
-	else if (store->kind == MB_DATA_DATA) {
-		status = mbr_sb2100bi_wr_dh(verbose, mbfp, store, error);
-		status = mbr_sb2100bi_wr_br(verbose, mbfp, store, error);
-		status = mbr_sb2100bi_wr_sr(verbose, mbfp, store, error);
-	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_KIND;
-	}
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
 
-	/* print output debug statements */
-	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  store record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	/* zero sidescan for format MBF_SB2100B2 (43) */
+	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT && mb_io_ptr->format == MBF_SB2100B2)
+		store->npixels = 0;
+
+	/* set unset parameters in sb2100 data storage structure */
+	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT) {
+		/* parameters for MBF_SB2100RW format */
+		store->range_scale = ' ';
+		store->spare_dr[0] = ' ';
+		store->spare_dr[1] = ' ';
+		store->num_algorithms = 1;
+		for (int i = 0; i < 4; i++)
+			store->algorithm_order[i] = ' ';
+		store->svp_corr_ss = 0;
+		store->ss_data_length = 4 * MBSYS_SB2100_PIXELS;
+		store->pixel_size_scale = 'D';
+		store->spare_ss = ' ';
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1701,14 +1545,12 @@ int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_fh";
 	int status = MB_SUCCESS;
 	int record_length;
 	char record_length_str[8];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1716,7 +1558,7 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       file_header_text: \n%s%s\n", mbf_sb2100bi_file_header_text_1,
 		        mbf_sb2100bi_file_header_text_2);
 	}
@@ -1766,9 +1608,8 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1779,16 +1620,14 @@ int mbr_sb2100bi_wr_fh(int verbose, FILE *mbfp, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_pr";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
 	unsigned int checksum;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1797,7 +1636,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
 		fprintf(stderr, "dbg5       julian day:       %d\n", store->jday);
 		fprintf(stderr, "dbg5       hour:             %d\n", store->hour);
@@ -1903,9 +1742,8 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1916,16 +1754,14 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_tr";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
 	unsigned int checksum;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1934,7 +1770,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", store->comment);
 	}
 
@@ -1995,9 +1831,8 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2008,16 +1843,14 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_dh";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
 	unsigned int checksum;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2026,7 +1859,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", store->year);
 		fprintf(stderr, "dbg5       julian day:       %d\n", store->jday);
 		fprintf(stderr, "dbg5       hour:             %d\n", store->hour);
@@ -2174,9 +2007,8 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2187,16 +2019,14 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_br";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
 	unsigned int checksum;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2205,7 +2035,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       beam depth xtrack ltrack tt angle angfor amp sig2noise echo src quality\n");
 		for (int i = 0; i < store->nbeams; i++) {
 			fprintf(stderr, "dbg5       %3d %8.2f %9.2f %8.2f %6.3f %7.3f %7.3f %3d %3d %3d %c %c\n", i, store->beams[i].depth,
@@ -2291,9 +2121,8 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2304,7 +2133,6 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *store, int *error) {
-	char *function_name = "mbr_sb2100bi_wr_sr";
 	int status = MB_SUCCESS;
 	short record_length;
 	int write_length;
@@ -2313,9 +2141,8 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	short alongtrack_short;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2324,7 +2151,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       pixel amplitude alongtrack\n");
 		for (int i = 0; i < store->npixels; i++) {
 			fprintf(stderr, "dbg5       %3d   %f   %f\n", i, store->pixels[i].amplitude, store->pixels[i].alongtrack);
@@ -2391,9 +2218,102 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_sb2100bi_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
+	int status = MB_SUCCESS;
+	struct mbsys_sb2100_struct *store;
+	FILE *mbfp;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_sb2100_struct *)store_ptr;
+	mbfp = mb_io_ptr->mbfp;
+
+	/* write file header if not written yet */
+	if (mb_io_ptr->save_flag == MB_NO) {
+		status = mbr_sb2100bi_wr_fh(verbose, mbfp, error);
+		mb_io_ptr->save_flag = MB_YES;
+	}
+
+	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
+		status = mbr_sb2100bi_wr_pr(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_COMMENT) {
+		status = mbr_sb2100bi_wr_tr(verbose, mbfp, store, error);
+	}
+	else if (store->kind == MB_DATA_DATA) {
+		status = mbr_sb2100bi_wr_dh(verbose, mbfp, store, error);
+		status = mbr_sb2100bi_wr_br(verbose, mbfp, store, error);
+		status = mbr_sb2100bi_wr_sr(verbose, mbfp, store, error);
+	}
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_KIND;
+	}
+
+	if (verbose >= 5) {
+		fprintf(stderr, "\ndbg5  store record kind in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_sb2100bi(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	int status = MB_SUCCESS;
+	struct mbsys_sb2100_struct *store;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_sb2100_struct *)store_ptr;
+
+	/* make sure no sidescan is written for format MBF_SB2100B2 (43) */
+	if (status == MB_SUCCESS && store != NULL && store->kind != MB_DATA_COMMENT && mb_io_ptr->format == MBF_SB2100B2)
+		store->npixels = 0;
+
+	/* write next data to file */
+	status = mbr_sb2100bi_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2404,12 +2324,10 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_sb2100b1";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -2447,9 +2365,8 @@ int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);
@@ -2500,12 +2417,10 @@ int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b2(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_sb2100b2";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -2544,9 +2459,8 @@ int mbr_register_sb2100b2(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

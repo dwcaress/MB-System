@@ -38,21 +38,16 @@
 /* turn on debug statements here */
 /* #define MBR_XTFR8101_DEBUG 1 */
 
-int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error);
-int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_xtfr8101";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -87,9 +82,8 @@ int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 1.5;
 	*beamwidth_ltrack = 1.5;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -119,16 +113,50 @@ int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error) {
+	int status = MB_SUCCESS;
+	struct mbf_xtfr8101_struct *data;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
+
+	/* get pointer to data descriptor */
+	data = (struct mbf_xtfr8101_struct *)data_ptr;
+
+	/* initialize everything to zeros */
+	if (data != NULL) {
+		memset(data, 0, sizeof(struct mbf_xtfr8101_struct));
+		data->kind = MB_DATA_NONE;
+		data->sonar = MBSYS_RESON8K_UNKNOWN;
+	}
+
+	/* assume success */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_xtfr8101";
 	int status = MB_SUCCESS;
 	int *fileheaderread;
 	double *pixel_size;
 	double *swath_width;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -157,9 +185,8 @@ int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 	/* initialize everything to zeros */
 	mbr_zero_xtfr8101(verbose, mb_io_ptr->raw_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -170,12 +197,10 @@ int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_xtfr8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_xtfr8101";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -188,427 +213,8 @@ int mbr_dem_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_xtfr8101";
-	int status = MB_SUCCESS;
-	struct mbf_xtfr8101_struct *data;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
-	}
-
-	/* get pointer to data descriptor */
-	data = (struct mbf_xtfr8101_struct *)data_ptr;
-
-	/* initialize everything to zeros */
-	if (data != NULL) {
-		memset(data, 0, sizeof(struct mbf_xtfr8101_struct));
-		data->kind = MB_DATA_NONE;
-		data->sonar = MBSYS_RESON8K_UNKNOWN;
-	}
-
-	/* assume success */
-	status = MB_SUCCESS;
-	*error = MB_ERROR_NO_ERROR;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_xtfr8101";
-	int status = MB_SUCCESS;
-	struct mbf_xtfr8101_struct *data;
-	struct mbsys_reson8k_struct *store;
-	int nchan;
-	int time_i[7];
-	double time_d, ntime_d, dtime, timetag;
-	double ttscale, angscale;
-	int icenter, quality;
-	int intensity_max;
-	double angle, theta, phi;
-	double rr, xx, zz;
-	double *pixel_size, *swath_width;
-	double lever_x, lever_y, lever_z;
-	int badtime;
-	double gain_correction;
-	double lon, lat;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_xtfr8101_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_reson8k_struct *)store_ptr;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
-
-	/* read next data from file */
-	status = mbr_xtfr8101_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* handle navigation fix delay */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA) {
-		/* get ping time */
-		time_i[0] = data->bathheader.Year;
-		time_i[1] = data->bathheader.Month;
-		time_i[2] = data->bathheader.Day;
-		time_i[3] = data->bathheader.Hour;
-		time_i[4] = data->bathheader.Minute;
-		time_i[5] = data->bathheader.Second;
-		time_i[6] = 10000 * data->bathheader.HSeconds;
-		mb_get_time(verbose, time_i, &time_d);
-
-		/* do check on time here - we sometimes get a bad fix */
-		badtime = MB_NO;
-		if (time_i[0] < 1970 && time_i[0] > 2100)
-			badtime = MB_YES;
-		if (time_i[1] < 0 && time_i[1] > 12)
-			badtime = MB_YES;
-		if (time_i[2] < 0 && time_i[2] > 31)
-			badtime = MB_YES;
-		if (badtime == MB_YES) {
-			if (verbose > 0)
-				fprintf(stderr, " Bad time from XTF in bathy header\n");
-			data->kind = MB_DATA_NONE;
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-		}
-
-		/* get nav time */
-		dtime = 3600.0 * (data->bathheader.FixTimeHour - data->bathheader.Hour) +
-		        60.0 * (data->bathheader.FixTimeMinute - data->bathheader.Minute) + data->bathheader.FixTimeSecond -
-		        data->bathheader.Second - 0.01 * data->bathheader.HSeconds;
-		if (data->bathheader.FixTimeHour - data->bathheader.Hour > 1)
-			dtime -= 3600.0 * 24;
-		ntime_d = time_d + dtime;
-
-		/* check for use of projected coordinates
-		    XTF allows projected coordinates like UTM but the format spec
-		    lists the projection specification values as unused!
-		    Assume UTM zone 1N as we have to assume something */
-		if (mb_io_ptr->projection_initialized == MB_YES) {
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, data->bathheader.SensorXcoordinate, data->bathheader.SensorYcoordinate,
-			                &lon, &lat, error);
-		}
-		else {
-			lon = data->bathheader.SensorXcoordinate;
-			lat = data->bathheader.SensorYcoordinate;
-		}
-
-		/* add latest fix to list */
-		mb_navint_add(verbose, mbio_ptr, ntime_d, lon, lat, error);
-	}
-
-	/* translate values to reson data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		/* type of data record */
-		store->kind = data->kind;
-
-		/* type of sonar */
-		store->sonar = data->sonar; /* Type of Reson sonar */
-
-		/* parameter info */
-		nchan = data->fileheader.NumberOfSonarChannels + data->fileheader.NumberOfBathymetryChannels;
-		for (int i = 0; i < nchan; i++) {
-			if (data->fileheader.chaninfo[i].TypeOfChannel == 3) {
-				store->MBOffsetX = data->fileheader.chaninfo[i].OffsetX;
-				store->MBOffsetY = data->fileheader.chaninfo[i].OffsetY;
-				store->MBOffsetZ = data->fileheader.chaninfo[i].OffsetZ;
-			}
-		}
-		store->NavLatency = data->fileheader.NavigationLatency;  /* GPS_time_received - GPS_time_sent (sec) */
-		store->NavOffsetY = data->fileheader.NavOffsetY;         /* Nav offset (m) */
-		store->NavOffsetX = data->fileheader.NavOffsetX;         /* Nav offset (m) */
-		store->NavOffsetZ = data->fileheader.NavOffsetZ;         /* Nav z offset (m) */
-		store->NavOffsetYaw = data->fileheader.NavOffsetZ;       /* Heading offset (m) */
-		store->MRUOffsetY = data->fileheader.MRUOffsetY;         /* Multibeam MRU y offset (m) */
-		store->MRUOffsetX = data->fileheader.MRUOffsetX;         /* Multibeam MRU x offset (m) */
-		store->MRUOffsetZ = data->fileheader.MRUOffsetZ;         /* Multibeam MRU z offset (m) */
-		store->MRUOffsetPitch = data->fileheader.MRUOffsetPitch; /* Multibeam MRU pitch offset (degrees) */
-		store->MRUOffsetRoll = data->fileheader.MRUOffsetRoll;   /* Multibeam MRU roll offset (degrees) */
-
-		/* attitude data */
-		store->att_timetag = data->attitudeheader.TimeTag;
-		store->att_heading = data->attitudeheader.Heading;
-		store->att_heave = data->attitudeheader.Heave;
-		store->att_roll = data->attitudeheader.Roll;
-		store->att_pitch = data->attitudeheader.Pitch;
-
-		/* comment */
-		for (int i = 0; i < MBSYS_RESON8K_COMMENT_LENGTH; i++)
-			store->comment[i] = data->comment[i];
-
-		/* survey data */
-		store->png_latency = 0.001 * data->reson8100rit.latency;
-		time_i[0] = data->bathheader.Year;
-		time_i[1] = data->bathheader.Month;
-		time_i[2] = data->bathheader.Day;
-		time_i[3] = data->bathheader.Hour;
-		time_i[4] = data->bathheader.Minute;
-		time_i[5] = data->bathheader.Second;
-		time_i[6] = 10000 * data->bathheader.HSeconds;
-		mb_get_time(verbose, time_i, &(store->png_time_d));
-		store->png_time_d -= store->png_latency;
-		store->png_longitude = data->bathheader.SensorXcoordinate;
-		store->png_latitude = data->bathheader.SensorYcoordinate;
-		store->png_speed = 0.0;
-
-		/* interpolate attitude if possible */
-		if (mb_io_ptr->nattitude > 1) {
-			/* time tag is on receive;  average reception is closer
-		to the midpoint of the two way travel time
-		but will vary on beam angle and water depth
-		set the receive time delay to the average
-	( 0 to 60 deg)  two way travel time for a seabed
-		located at 80% of the maximum range
-		Old code:
-	timetag = 0.001 * data->bathheader.AttitudeTimeTag
-			- store->png_latency
-			+ 2.0 * ((double)data->reson8100rit.range_set)
-			    / ((double)data->reson8100rit.velocity); */
-			timetag = 0.001 * data->bathheader.AttitudeTimeTag - store->png_latency +
-			          1.4 * ((double)data->reson8100rit.range_set) / ((double)data->reson8100rit.velocity);
-			mb_attint_interp(verbose, mbio_ptr, timetag, &(store->png_heave), &(store->png_roll), &(store->png_pitch), error);
-			mb_hedint_interp(verbose, mbio_ptr, timetag, &(store->png_heading), error);
-#ifdef MBR_XTFR8101_DEBUG
-			fprintf(stderr, "roll: %d %f %f %f %f   latency:%f time:%f %f roll:%f\n", mb_io_ptr->nattitude,
-			        mb_io_ptr->attitude_time_d[0], mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude - 1],
-			        mb_io_ptr->attitude_roll[0], mb_io_ptr->attitude_roll[mb_io_ptr->nattitude - 1], store->png_latency,
-			        (double)(0.001 * data->bathheader.AttitudeTimeTag), timetag, store->png_roll);
-#endif
-		}
-		else {
-			store->png_roll = data->bathheader.SensorRoll;
-			store->png_pitch = data->bathheader.SensorPitch;
-			store->png_heading = data->bathheader.SensorHeading;
-			store->png_heave = data->bathheader.Heave;
-		}
-
-		/* interpolate nav if possible */
-		if (mb_io_ptr->nfix > 0) {
-			mb_navint_interp(verbose, mbio_ptr, store->png_time_d, store->png_heading, 0.0, &(store->png_longitude),
-			                 &(store->png_latitude), &(store->png_speed), error);
-
-			/* now deal with odd case where original nav is in eastings and northings
-			    - since the projection is initialized, it will be applied when data
-			    are extracted using mb_extract(), mb_extract_nav(), etc., so we have
-			    to reproject the lon lat values to eastings northings for now */
-			if (mb_io_ptr->projection_initialized == MB_YES) {
-				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->png_longitude, store->png_latitude, &(store->png_longitude),
-				                &(store->png_latitude), error);
-			}
-		}
-
-		/* get lever arm correction for heave */
-		mb_lever(verbose, (double)store->MBOffsetX, (double)store->MBOffsetY, (double)store->MBOffsetZ, (double)store->NavOffsetX,
-		         (double)store->NavOffsetY, (double)store->NavOffsetZ, (double)store->MRUOffsetX, (double)store->MRUOffsetY,
-		         (double)store->MRUOffsetZ, (double)(store->png_roll - store->MRUOffsetRoll),
-		         (double)(store->MRUOffsetPitch - store->png_pitch), &lever_x, &lever_y, &lever_z, error);
-		store->png_heave -= lever_z;
-#ifdef MBR_XTFR8101_DEBUG
-		fprintf(stderr, "offsets: %f %f %f   roll:%f pitch:%f    dz:%f\n", store->MBOffsetX - store->MRUOffsetX,
-		        store->MBOffsetY - store->MRUOffsetY, store->MBOffsetZ - store->MRUOffsetZ,
-		        (double)(store->png_roll - store->MRUOffsetRoll), (double)(store->MRUOffsetPitch - store->png_pitch), lever_z);
-#endif
-
-		store->packet_type = data->reson8100rit.packet_type;       /* identifier for packet type  */
-		store->packet_subtype = data->reson8100rit.packet_subtype; /* identifier for packet subtype */
-		                                                           /* for dual head system, most significant bit (bit 7) */
-		                                                           /* indicates which sonar head to associate with packet */
-		                                                           /* 	head 1 - bit 7 set to 0 */
-		                                                           /* 	head 2 -	bit 7 set to 1 		 */
-		store->latency = data->reson8100rit.latency;               /* time from ping to output (milliseconds) */
-		store->Seconds = data->reson8100rit.Seconds;               /* seconds since 00:00:00, 1 January 1970 */
-		store->Millisecs = data->reson8100rit.Millisecs;           /* milliseconds, LSB = 1 ms */
-		store->ping_number = data->reson8100rit.ping_number;       /* sequential ping number from sonar startup/reset */
-		store->sonar_id = data->reson8100rit.sonar_id;             /* least significant four bytes of Ethernet address */
-		store->sonar_model = data->reson8100rit.sonar_model;       /* coded model number of sonar */
-		store->frequency = data->reson8100rit.frequency;           /* sonar frequency in KHz */
-		store->velocity = data->reson8100rit.velocity;             /* programmed sound velocity (LSB = 1 m/sec) */
-		store->sample_rate = data->reson8100rit.sample_rate;       /* A/D sample rate (samples per second) */
-		store->ping_rate = data->reson8100rit.ping_rate;           /* Ping rate (pings per second * 1000) */
-		store->range_set = data->reson8100rit.range_set;           /* range setting for SeaBat (meters ) */
-		store->power = data->reson8100rit.power;                   /* power setting for SeaBat  	 */
-		                                                           /* bits	0-4 -	power (0 - 8) */
-		store->gain = data->reson8100rit.gain;                     /* gain setting for SeaBat */
-		                                                           /* bits	0-6 -	gain (1 - 45) */
-		                                                           /* bit 	14	(0 = fixed, 1 = tvg) */
-		                                                           /* bit	15	(0 = manual, 1 = auto) */
-		store->pulse_width = data->reson8100rit.pulse_width;       /* transmit pulse width (microseconds) */
-		store->tvg_spread = data->reson8100rit.tvg_spread;         /* spreading coefficient for tvg * 4  */
-		                                                           /* valid values = 0 to 240 (0.0 to 60.0 in 0.25 steps) */
-		store->tvg_absorp = data->reson8100rit.tvg_absorp;         /* absorption coefficient for tvg */
-		store->projector_type = data->reson8100rit.projector_type; /* bits 0-4 = projector type */
-		                                                           /* 0 = stick projector */
-		                                                           /* 1 = array face */
-		                                                           /* 2 = ER projector */
-		                                                           /* bit 7 - pitch steering (1=enabled, 0=disabled) */
-		store->projector_beam_width =
-		    data->reson8100rit.projector_beam_width;                   /* along track transmit beam width (degrees * 10) */
-		store->beam_width_num = data->reson8100rit.beam_width_num;     /* cross track receive beam width numerator */
-		store->beam_width_denom = data->reson8100rit.beam_width_denom; /* cross track receive beam width denominator */
-		                                                               /* beam width degrees = numerator / denominator */
-		store->projector_angle = data->reson8100rit.projector_angle;   /* projector pitch steering angle (degrees * 100) */
-		store->min_range = data->reson8100rit.min_range;               /* sonar filter settings */
-		store->max_range = data->reson8100rit.max_range;
-		store->min_depth = data->reson8100rit.min_depth;
-		store->max_depth = data->reson8100rit.max_depth;
-		store->filters_active = data->reson8100rit.filters_active; /* range/depth filters active  */
-		                                                           /* bit 0 - range filter (0 = off, 1 = active) */
-		                                                           /* bit 1 - depth filter (0 = off, 1 = active) */
-		store->temperature = data->reson8100rit.temperature;       /* temperature at sonar head (deg C * 10) */
-		store->beam_count = data->reson8100rit.beam_count;         /* number of sets of beam data in packet */
-		for (int i = 0; i < store->beam_count; i++)
-			store->range[i] = data->reson8100rit.range[i]; /* range for beam where n = Beam Count */
-		                                                   /* range units = sample cells * 4 */
-		for (int i = 0; i < store->beam_count / 2 + 1; i++)
-			store->quality[i] = data->reson8100rit.quality[i]; /* packed quality array (two 4 bit values/char) */
-		                                                       /* cnt = n/2 if beam count even, n/2+1 if odd */
-		                                                       /* cnt then rounded up to next even number */
-		                                                       /* e.g. if beam count=101, cnt=52  */
-		                                                       /* unused trailing quality values set to zero */
-		                                                       /* bit 0 - brightness test (0=failed, 1=passed) */
-		                                                       /* bit 1 - colinearity test (0=failed, 1=passed) */
-		                                                       /* bit 2 - amplitude bottom detect used */
-		                                                       /* bit 3 - phase bottom detect used */
-		                                                       /* bottom detect can be amplitude, phase or both */
-		intensity_max = 0;
-		for (int i = 0; i < store->beam_count; i++) {
-			store->intensity[i] = data->reson8100rit.intensity[i]; /* intensities at bottom detect  */
-			intensity_max = MAX(intensity_max, (int)store->intensity[i]);
-		}
-
-		store->beams_bath = data->reson8100rit.beam_count;
-		if (intensity_max > 0)
-			store->beams_amp = store->beams_bath;
-		else
-			store->beams_amp = 0;
-
-		/* ttscale in seconds per range count ( 4 counts per time interval) */
-		ttscale = 0.25 / store->sample_rate;
-		icenter = store->beams_bath / 2;
-		angscale = ((double)store->beam_width_num) / ((double)store->beam_width_denom);
-		for (int i = 0; i < store->beams_bath; i++) {
-			/* get beamflag */
-			if (i % 2 == 0)
-				quality = ((store->quality[i / 2]) & 15) & 3;
-			else
-				quality = ((store->quality[i / 2] >> 4) & 15) & 3;
-			if (quality == 0)
-				store->beamflag[i] = MB_FLAG_NULL;
-			else if (quality < 3)
-				store->beamflag[i] = (char)(MB_FLAG_FLAG | MB_FLAG_SONAR);
-			else
-				store->beamflag[i] = MB_FLAG_NONE;
-
-			if (store->beamflag[i] == MB_FLAG_NULL) {
-				store->bath[i] = 0.0;             /* bathymetry (m) */
-				store->bath_acrosstrack[i] = 0.0; /* acrosstrack distance (m) */
-				store->bath_alongtrack[i] = 0.0;  /* alongtrack distance (m) */
-			}
-			else {
-				angle = 90.0 + (icenter - i) * angscale + store->png_roll;
-				mb_rollpitch_to_takeoff(verbose, store->png_pitch, angle, &theta, &phi, error);
-				rr = 0.5 * store->velocity * ttscale * store->range[i];
-				xx = rr * sin(DTR * theta);
-				zz = rr * cos(DTR * theta);
-				store->bath_acrosstrack[i] = xx * cos(DTR * phi);
-				store->bath_alongtrack[i] = xx * sin(DTR * phi);
-				store->bath[i] = zz - store->png_heave + store->MBOffsetZ;
-				/*if (i==store->beams_bath/2 && timetag > 1.0)
-				fprintf(stderr,"%f %f %f %f %f\n",timetag,zz,store->png_heave,lever_z,store->bath[i]);*/
-			}
-		}
-		gain_correction = 2.2 * (store->gain & 63) + 6 * store->power;
-		for (int i = 0; i < store->beams_amp; i++) {
-			store->amp[i] = (double)(40.0 * log10(store->intensity[i]) - gain_correction);
-		}
-		store->ssrawtimedelay = data->pingchanportheader.TimeDelay;
-		store->ssrawtimeduration = data->pingchanportheader.TimeDuration;
-		store->ssrawbottompick = data->sidescanheader.SensorPrimaryAltitude / data->sidescanheader.SoundVelocity;
-		store->ssrawportsamples = data->pingchanportheader.NumSamples;
-		store->ssrawstbdsamples = data->pingchanstbdheader.NumSamples;
-		for (int i = 0; i < store->ssrawportsamples; i++)
-			store->ssrawport[i] = data->ssrawport[store->ssrawportsamples - i - 1];
-		for (int i = 0; i < store->ssrawstbdsamples; i++)
-			store->ssrawstbd[i] = data->ssrawstbd[i];
-
-		/* generate processed sidescan */
-		store->pixel_size = 0.0;
-		store->pixels_ss = 0;
-		status = mbsys_reson8k_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, error);
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_xtfr8101";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set error as this is a read only format */
-	status = MB_FAILURE;
-	*error = MB_ERROR_WRITE_FAIL;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -619,7 +225,6 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_xtfr8101_rd_data";
 	int status = MB_SUCCESS;
 	struct mbf_xtfr8101_struct *data;
 	char line[MBF_XTFR8101_MAXLINE];
@@ -644,9 +249,8 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int utm_zone;
 	char projection[MB_NAME_LENGTH];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -809,7 +413,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* print debug statements */
 			if (verbose >= 5) {
-				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       FileFormat:                 %d\n", fileheader->FileFormat);
 				fprintf(stderr, "dbg5       SystemType:                 %d\n", fileheader->SystemType);
 				fprintf(stderr, "dbg5       RecordingProgramName:       %s\n", fileheader->RecordingProgramName);
@@ -928,7 +532,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* print debug statements */
 			if (verbose >= 5) {
-				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       Bytes Skipped:              %d\n", skip);
 				fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n", packetheader.MagicNumber[0],
 				        packetheader.MagicNumber[1], packetheader.MagicNumber[0], packetheader.MagicNumber[1]);
@@ -991,7 +595,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 				/* print debug statements */
 				if (verbose >= 5) {
-					fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n",
 					        attitudeheader->packetheader.MagicNumber[0], attitudeheader->packetheader.MagicNumber[1],
 					        attitudeheader->packetheader.MagicNumber[0], attitudeheader->packetheader.MagicNumber[1]);
@@ -1377,7 +981,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 			/* print debug statements */
 			if (verbose >= 5) {
-				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n",
 				        sidescanheader->packetheader.MagicNumber[0], sidescanheader->packetheader.MagicNumber[1],
 				        sidescanheader->packetheader.MagicNumber[0], sidescanheader->packetheader.MagicNumber[1]);
@@ -1856,7 +1460,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 				/* print debug statements */
 				if (verbose >= 5) {
-					fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n",
 					        bathheader->packetheader.MagicNumber[0], bathheader->packetheader.MagicNumber[1],
 					        bathheader->packetheader.MagicNumber[0], bathheader->packetheader.MagicNumber[1]);
@@ -2010,9 +1614,381 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	int status = MB_SUCCESS;
+	struct mbf_xtfr8101_struct *data;
+	struct mbsys_reson8k_struct *store;
+	int nchan;
+	int time_i[7];
+	double time_d, ntime_d, dtime, timetag;
+	double ttscale, angscale;
+	int icenter, quality;
+	int intensity_max;
+	double angle, theta, phi;
+	double rr, xx, zz;
+	double *pixel_size, *swath_width;
+	double lever_x, lever_y, lever_z;
+	int badtime;
+	double gain_correction;
+	double lon, lat;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_xtfr8101_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_reson8k_struct *)store_ptr;
+	pixel_size = (double *)&mb_io_ptr->saved1;
+	swath_width = (double *)&mb_io_ptr->saved2;
+
+	/* read next data from file */
+	status = mbr_xtfr8101_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* handle navigation fix delay */
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA) {
+		/* get ping time */
+		time_i[0] = data->bathheader.Year;
+		time_i[1] = data->bathheader.Month;
+		time_i[2] = data->bathheader.Day;
+		time_i[3] = data->bathheader.Hour;
+		time_i[4] = data->bathheader.Minute;
+		time_i[5] = data->bathheader.Second;
+		time_i[6] = 10000 * data->bathheader.HSeconds;
+		mb_get_time(verbose, time_i, &time_d);
+
+		/* do check on time here - we sometimes get a bad fix */
+		badtime = MB_NO;
+		if (time_i[0] < 1970 && time_i[0] > 2100)
+			badtime = MB_YES;
+		if (time_i[1] < 0 && time_i[1] > 12)
+			badtime = MB_YES;
+		if (time_i[2] < 0 && time_i[2] > 31)
+			badtime = MB_YES;
+		if (badtime == MB_YES) {
+			if (verbose > 0)
+				fprintf(stderr, " Bad time from XTF in bathy header\n");
+			data->kind = MB_DATA_NONE;
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+
+		/* get nav time */
+		dtime = 3600.0 * (data->bathheader.FixTimeHour - data->bathheader.Hour) +
+		        60.0 * (data->bathheader.FixTimeMinute - data->bathheader.Minute) + data->bathheader.FixTimeSecond -
+		        data->bathheader.Second - 0.01 * data->bathheader.HSeconds;
+		if (data->bathheader.FixTimeHour - data->bathheader.Hour > 1)
+			dtime -= 3600.0 * 24;
+		ntime_d = time_d + dtime;
+
+		/* check for use of projected coordinates
+		    XTF allows projected coordinates like UTM but the format spec
+		    lists the projection specification values as unused!
+		    Assume UTM zone 1N as we have to assume something */
+		if (mb_io_ptr->projection_initialized == MB_YES) {
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr, data->bathheader.SensorXcoordinate, data->bathheader.SensorYcoordinate,
+			                &lon, &lat, error);
+		}
+		else {
+			lon = data->bathheader.SensorXcoordinate;
+			lat = data->bathheader.SensorYcoordinate;
+		}
+
+		/* add latest fix to list */
+		mb_navint_add(verbose, mbio_ptr, ntime_d, lon, lat, error);
+	}
+
+	/* translate values to reson data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		/* type of data record */
+		store->kind = data->kind;
+
+		/* type of sonar */
+		store->sonar = data->sonar; /* Type of Reson sonar */
+
+		/* parameter info */
+		nchan = data->fileheader.NumberOfSonarChannels + data->fileheader.NumberOfBathymetryChannels;
+		for (int i = 0; i < nchan; i++) {
+			if (data->fileheader.chaninfo[i].TypeOfChannel == 3) {
+				store->MBOffsetX = data->fileheader.chaninfo[i].OffsetX;
+				store->MBOffsetY = data->fileheader.chaninfo[i].OffsetY;
+				store->MBOffsetZ = data->fileheader.chaninfo[i].OffsetZ;
+			}
+		}
+		store->NavLatency = data->fileheader.NavigationLatency;  /* GPS_time_received - GPS_time_sent (sec) */
+		store->NavOffsetY = data->fileheader.NavOffsetY;         /* Nav offset (m) */
+		store->NavOffsetX = data->fileheader.NavOffsetX;         /* Nav offset (m) */
+		store->NavOffsetZ = data->fileheader.NavOffsetZ;         /* Nav z offset (m) */
+		store->NavOffsetYaw = data->fileheader.NavOffsetZ;       /* Heading offset (m) */
+		store->MRUOffsetY = data->fileheader.MRUOffsetY;         /* Multibeam MRU y offset (m) */
+		store->MRUOffsetX = data->fileheader.MRUOffsetX;         /* Multibeam MRU x offset (m) */
+		store->MRUOffsetZ = data->fileheader.MRUOffsetZ;         /* Multibeam MRU z offset (m) */
+		store->MRUOffsetPitch = data->fileheader.MRUOffsetPitch; /* Multibeam MRU pitch offset (degrees) */
+		store->MRUOffsetRoll = data->fileheader.MRUOffsetRoll;   /* Multibeam MRU roll offset (degrees) */
+
+		/* attitude data */
+		store->att_timetag = data->attitudeheader.TimeTag;
+		store->att_heading = data->attitudeheader.Heading;
+		store->att_heave = data->attitudeheader.Heave;
+		store->att_roll = data->attitudeheader.Roll;
+		store->att_pitch = data->attitudeheader.Pitch;
+
+		/* comment */
+		for (int i = 0; i < MBSYS_RESON8K_COMMENT_LENGTH; i++)
+			store->comment[i] = data->comment[i];
+
+		/* survey data */
+		store->png_latency = 0.001 * data->reson8100rit.latency;
+		time_i[0] = data->bathheader.Year;
+		time_i[1] = data->bathheader.Month;
+		time_i[2] = data->bathheader.Day;
+		time_i[3] = data->bathheader.Hour;
+		time_i[4] = data->bathheader.Minute;
+		time_i[5] = data->bathheader.Second;
+		time_i[6] = 10000 * data->bathheader.HSeconds;
+		mb_get_time(verbose, time_i, &(store->png_time_d));
+		store->png_time_d -= store->png_latency;
+		store->png_longitude = data->bathheader.SensorXcoordinate;
+		store->png_latitude = data->bathheader.SensorYcoordinate;
+		store->png_speed = 0.0;
+
+		/* interpolate attitude if possible */
+		if (mb_io_ptr->nattitude > 1) {
+			/* time tag is on receive;  average reception is closer
+		to the midpoint of the two way travel time
+		but will vary on beam angle and water depth
+		set the receive time delay to the average
+	( 0 to 60 deg)  two way travel time for a seabed
+		located at 80% of the maximum range
+		Old code:
+	timetag = 0.001 * data->bathheader.AttitudeTimeTag
+			- store->png_latency
+			+ 2.0 * ((double)data->reson8100rit.range_set)
+			    / ((double)data->reson8100rit.velocity); */
+			timetag = 0.001 * data->bathheader.AttitudeTimeTag - store->png_latency +
+			          1.4 * ((double)data->reson8100rit.range_set) / ((double)data->reson8100rit.velocity);
+			mb_attint_interp(verbose, mbio_ptr, timetag, &(store->png_heave), &(store->png_roll), &(store->png_pitch), error);
+			mb_hedint_interp(verbose, mbio_ptr, timetag, &(store->png_heading), error);
+#ifdef MBR_XTFR8101_DEBUG
+			fprintf(stderr, "roll: %d %f %f %f %f   latency:%f time:%f %f roll:%f\n", mb_io_ptr->nattitude,
+			        mb_io_ptr->attitude_time_d[0], mb_io_ptr->attitude_time_d[mb_io_ptr->nattitude - 1],
+			        mb_io_ptr->attitude_roll[0], mb_io_ptr->attitude_roll[mb_io_ptr->nattitude - 1], store->png_latency,
+			        (double)(0.001 * data->bathheader.AttitudeTimeTag), timetag, store->png_roll);
+#endif
+		}
+		else {
+			store->png_roll = data->bathheader.SensorRoll;
+			store->png_pitch = data->bathheader.SensorPitch;
+			store->png_heading = data->bathheader.SensorHeading;
+			store->png_heave = data->bathheader.Heave;
+		}
+
+		/* interpolate nav if possible */
+		if (mb_io_ptr->nfix > 0) {
+			mb_navint_interp(verbose, mbio_ptr, store->png_time_d, store->png_heading, 0.0, &(store->png_longitude),
+			                 &(store->png_latitude), &(store->png_speed), error);
+
+			/* now deal with odd case where original nav is in eastings and northings
+			    - since the projection is initialized, it will be applied when data
+			    are extracted using mb_extract(), mb_extract_nav(), etc., so we have
+			    to reproject the lon lat values to eastings northings for now */
+			if (mb_io_ptr->projection_initialized == MB_YES) {
+				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->png_longitude, store->png_latitude, &(store->png_longitude),
+				                &(store->png_latitude), error);
+			}
+		}
+
+		/* get lever arm correction for heave */
+		mb_lever(verbose, (double)store->MBOffsetX, (double)store->MBOffsetY, (double)store->MBOffsetZ, (double)store->NavOffsetX,
+		         (double)store->NavOffsetY, (double)store->NavOffsetZ, (double)store->MRUOffsetX, (double)store->MRUOffsetY,
+		         (double)store->MRUOffsetZ, (double)(store->png_roll - store->MRUOffsetRoll),
+		         (double)(store->MRUOffsetPitch - store->png_pitch), &lever_x, &lever_y, &lever_z, error);
+		store->png_heave -= lever_z;
+#ifdef MBR_XTFR8101_DEBUG
+		fprintf(stderr, "offsets: %f %f %f   roll:%f pitch:%f    dz:%f\n", store->MBOffsetX - store->MRUOffsetX,
+		        store->MBOffsetY - store->MRUOffsetY, store->MBOffsetZ - store->MRUOffsetZ,
+		        (double)(store->png_roll - store->MRUOffsetRoll), (double)(store->MRUOffsetPitch - store->png_pitch), lever_z);
+#endif
+
+		store->packet_type = data->reson8100rit.packet_type;       /* identifier for packet type  */
+		store->packet_subtype = data->reson8100rit.packet_subtype; /* identifier for packet subtype */
+		                                                           /* for dual head system, most significant bit (bit 7) */
+		                                                           /* indicates which sonar head to associate with packet */
+		                                                           /* 	head 1 - bit 7 set to 0 */
+		                                                           /* 	head 2 -	bit 7 set to 1 		 */
+		store->latency = data->reson8100rit.latency;               /* time from ping to output (milliseconds) */
+		store->Seconds = data->reson8100rit.Seconds;               /* seconds since 00:00:00, 1 January 1970 */
+		store->Millisecs = data->reson8100rit.Millisecs;           /* milliseconds, LSB = 1 ms */
+		store->ping_number = data->reson8100rit.ping_number;       /* sequential ping number from sonar startup/reset */
+		store->sonar_id = data->reson8100rit.sonar_id;             /* least significant four bytes of Ethernet address */
+		store->sonar_model = data->reson8100rit.sonar_model;       /* coded model number of sonar */
+		store->frequency = data->reson8100rit.frequency;           /* sonar frequency in KHz */
+		store->velocity = data->reson8100rit.velocity;             /* programmed sound velocity (LSB = 1 m/sec) */
+		store->sample_rate = data->reson8100rit.sample_rate;       /* A/D sample rate (samples per second) */
+		store->ping_rate = data->reson8100rit.ping_rate;           /* Ping rate (pings per second * 1000) */
+		store->range_set = data->reson8100rit.range_set;           /* range setting for SeaBat (meters ) */
+		store->power = data->reson8100rit.power;                   /* power setting for SeaBat  	 */
+		                                                           /* bits	0-4 -	power (0 - 8) */
+		store->gain = data->reson8100rit.gain;                     /* gain setting for SeaBat */
+		                                                           /* bits	0-6 -	gain (1 - 45) */
+		                                                           /* bit 	14	(0 = fixed, 1 = tvg) */
+		                                                           /* bit	15	(0 = manual, 1 = auto) */
+		store->pulse_width = data->reson8100rit.pulse_width;       /* transmit pulse width (microseconds) */
+		store->tvg_spread = data->reson8100rit.tvg_spread;         /* spreading coefficient for tvg * 4  */
+		                                                           /* valid values = 0 to 240 (0.0 to 60.0 in 0.25 steps) */
+		store->tvg_absorp = data->reson8100rit.tvg_absorp;         /* absorption coefficient for tvg */
+		store->projector_type = data->reson8100rit.projector_type; /* bits 0-4 = projector type */
+		                                                           /* 0 = stick projector */
+		                                                           /* 1 = array face */
+		                                                           /* 2 = ER projector */
+		                                                           /* bit 7 - pitch steering (1=enabled, 0=disabled) */
+		store->projector_beam_width =
+		    data->reson8100rit.projector_beam_width;                   /* along track transmit beam width (degrees * 10) */
+		store->beam_width_num = data->reson8100rit.beam_width_num;     /* cross track receive beam width numerator */
+		store->beam_width_denom = data->reson8100rit.beam_width_denom; /* cross track receive beam width denominator */
+		                                                               /* beam width degrees = numerator / denominator */
+		store->projector_angle = data->reson8100rit.projector_angle;   /* projector pitch steering angle (degrees * 100) */
+		store->min_range = data->reson8100rit.min_range;               /* sonar filter settings */
+		store->max_range = data->reson8100rit.max_range;
+		store->min_depth = data->reson8100rit.min_depth;
+		store->max_depth = data->reson8100rit.max_depth;
+		store->filters_active = data->reson8100rit.filters_active; /* range/depth filters active  */
+		                                                           /* bit 0 - range filter (0 = off, 1 = active) */
+		                                                           /* bit 1 - depth filter (0 = off, 1 = active) */
+		store->temperature = data->reson8100rit.temperature;       /* temperature at sonar head (deg C * 10) */
+		store->beam_count = data->reson8100rit.beam_count;         /* number of sets of beam data in packet */
+		for (int i = 0; i < store->beam_count; i++)
+			store->range[i] = data->reson8100rit.range[i]; /* range for beam where n = Beam Count */
+		                                                   /* range units = sample cells * 4 */
+		for (int i = 0; i < store->beam_count / 2 + 1; i++)
+			store->quality[i] = data->reson8100rit.quality[i]; /* packed quality array (two 4 bit values/char) */
+		                                                       /* cnt = n/2 if beam count even, n/2+1 if odd */
+		                                                       /* cnt then rounded up to next even number */
+		                                                       /* e.g. if beam count=101, cnt=52  */
+		                                                       /* unused trailing quality values set to zero */
+		                                                       /* bit 0 - brightness test (0=failed, 1=passed) */
+		                                                       /* bit 1 - colinearity test (0=failed, 1=passed) */
+		                                                       /* bit 2 - amplitude bottom detect used */
+		                                                       /* bit 3 - phase bottom detect used */
+		                                                       /* bottom detect can be amplitude, phase or both */
+		intensity_max = 0;
+		for (int i = 0; i < store->beam_count; i++) {
+			store->intensity[i] = data->reson8100rit.intensity[i]; /* intensities at bottom detect  */
+			intensity_max = MAX(intensity_max, (int)store->intensity[i]);
+		}
+
+		store->beams_bath = data->reson8100rit.beam_count;
+		if (intensity_max > 0)
+			store->beams_amp = store->beams_bath;
+		else
+			store->beams_amp = 0;
+
+		/* ttscale in seconds per range count ( 4 counts per time interval) */
+		ttscale = 0.25 / store->sample_rate;
+		icenter = store->beams_bath / 2;
+		angscale = ((double)store->beam_width_num) / ((double)store->beam_width_denom);
+		for (int i = 0; i < store->beams_bath; i++) {
+			/* get beamflag */
+			if (i % 2 == 0)
+				quality = ((store->quality[i / 2]) & 15) & 3;
+			else
+				quality = ((store->quality[i / 2] >> 4) & 15) & 3;
+			if (quality == 0)
+				store->beamflag[i] = MB_FLAG_NULL;
+			else if (quality < 3)
+				store->beamflag[i] = (char)(MB_FLAG_FLAG | MB_FLAG_SONAR);
+			else
+				store->beamflag[i] = MB_FLAG_NONE;
+
+			if (store->beamflag[i] == MB_FLAG_NULL) {
+				store->bath[i] = 0.0;             /* bathymetry (m) */
+				store->bath_acrosstrack[i] = 0.0; /* acrosstrack distance (m) */
+				store->bath_alongtrack[i] = 0.0;  /* alongtrack distance (m) */
+			}
+			else {
+				angle = 90.0 + (icenter - i) * angscale + store->png_roll;
+				mb_rollpitch_to_takeoff(verbose, store->png_pitch, angle, &theta, &phi, error);
+				rr = 0.5 * store->velocity * ttscale * store->range[i];
+				xx = rr * sin(DTR * theta);
+				zz = rr * cos(DTR * theta);
+				store->bath_acrosstrack[i] = xx * cos(DTR * phi);
+				store->bath_alongtrack[i] = xx * sin(DTR * phi);
+				store->bath[i] = zz - store->png_heave + store->MBOffsetZ;
+				/*if (i==store->beams_bath/2 && timetag > 1.0)
+				fprintf(stderr,"%f %f %f %f %f\n",timetag,zz,store->png_heave,lever_z,store->bath[i]);*/
+			}
+		}
+		gain_correction = 2.2 * (store->gain & 63) + 6 * store->power;
+		for (int i = 0; i < store->beams_amp; i++) {
+			store->amp[i] = (double)(40.0 * log10(store->intensity[i]) - gain_correction);
+		}
+		store->ssrawtimedelay = data->pingchanportheader.TimeDelay;
+		store->ssrawtimeduration = data->pingchanportheader.TimeDuration;
+		store->ssrawbottompick = data->sidescanheader.SensorPrimaryAltitude / data->sidescanheader.SoundVelocity;
+		store->ssrawportsamples = data->pingchanportheader.NumSamples;
+		store->ssrawstbdsamples = data->pingchanstbdheader.NumSamples;
+		for (int i = 0; i < store->ssrawportsamples; i++)
+			store->ssrawport[i] = data->ssrawport[store->ssrawportsamples - i - 1];
+		for (int i = 0; i < store->ssrawstbdsamples; i++)
+			store->ssrawstbd[i] = data->ssrawstbd[i];
+
+		/* generate processed sidescan */
+		store->pixel_size = 0.0;
+		store->pixels_ss = 0;
+		status = mbsys_reson8k_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, error);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* set error as this is a read only format */
+	status = MB_FAILURE;
+	*error = MB_ERROR_WRITE_FAIL;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2024,12 +2000,10 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_xtfr8101";
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -2067,9 +2041,8 @@ int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

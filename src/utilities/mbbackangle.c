@@ -1567,7 +1567,6 @@ by MBprocess.";
 /*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
                  int symmetry, int *nmean, double *mean, double *sigma, int *error) {
-	char *function_name = "output_table";
 	int status = MB_SUCCESS;
 	double angle, amean, asigma, sum, sumsq, sumn;
 	int time_i[7];
@@ -1576,7 +1575,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
@@ -1636,7 +1635,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1650,7 +1649,6 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 int output_model(int verbose, FILE *tfp, double beamwidth, double depression, double ref_angle, int ntable, int nping,
                  double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
                  double *mean, double *sigma, int *error) {
-	char *function_name = "output_model";
 	int status = MB_SUCCESS;
 	double ref_amp, range, del, factor, aa;
 	double angle, amean, asigma, sum, sumsq, sumn;
@@ -1660,7 +1658,7 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
@@ -1730,7 +1728,7 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

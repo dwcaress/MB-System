@@ -54,18 +54,13 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_image83p";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_IMAGE83P;
 	*beams_bath_max = 480;
@@ -91,9 +86,10 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 0.75;
 	*beamwidth_ltrack = 0.75;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -124,12 +120,8 @@ int mbr_info_image83p(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_image83p(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_image83p";
-	int status;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -138,15 +130,11 @@ int mbr_alm_image83p(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_image83p_struct), &mb_io_ptr->store_data, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_image83p_struct), &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -157,12 +145,8 @@ int mbr_alm_image83p(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_image83p";
-	int status;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -172,11 +156,10 @@ int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -187,8 +170,6 @@ int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_image83p";
-	int status;
 	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
 	int done;
@@ -201,9 +182,8 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double alpha, beta, theta, phi;
 	double soundspeed, rr, xx, zz;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -223,6 +203,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	done = MB_NO;
 	for (int i = 0; i < MBF_IMAGE83P_BUFFER_SIZE; i++)
 		buffer[i] = 0;
+	int status = MB_SUCCESS;
 	if ((status = fread(buffer, 1, 6, mb_io_ptr->mbfp)) == 6) {
 		/* check for valid header */
 		if (strncmp(buffer, "83P", 3) == 0) {
@@ -515,9 +496,8 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg2  Record read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg2  Record read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4  Data values:\n");
 		fprintf(stderr, "dbg4       kind:               %d\n", store->kind);
 		fprintf(stderr, "dbg4       version:            %d\n", store->version);
@@ -560,9 +540,8 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			        store->beamflag[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -573,8 +552,6 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_image83p";
-	int status = MB_SUCCESS;
 	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
 	int swap = MB_NO;
@@ -585,9 +562,8 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int write_len = 0;
 	int index;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -602,18 +578,16 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Status at beginning of MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Status at beginning of MBIO function <%s>\n", __func__);
 		if (store != NULL)
 			fprintf(stderr, "dbg5       store->kind:    %d\n", store->kind);
 		fprintf(stderr, "dbg5       new_kind:       %d\n", mb_io_ptr->new_kind);
 		fprintf(stderr, "dbg5       new_error:      %d\n", mb_io_ptr->new_error);
 		fprintf(stderr, "dbg5       error:          %d\n", *error);
-		fprintf(stderr, "dbg5       status:         %d\n", status);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg2  Record read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg2  Record read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4  Data values:\n");
 		fprintf(stderr, "dbg4       kind:               %d\n", store->kind);
 		fprintf(stderr, "dbg4       version:            %d\n", store->version);
@@ -655,6 +629,8 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			        store->angles_forward[i], store->bath[i], store->bathacrosstrack[i], store->bathalongtrack[i],
 			        store->beamflag[i]);
 	}
+
+	int status = MB_SUCCESS;
 
 	/*  translate values from image83p data storage structure */
 	if (store != NULL) {
@@ -864,7 +840,7 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			if (verbose >= 5)
-				fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", __func__);
 		}
 	}
 
@@ -872,12 +848,11 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		if (verbose >= 5)
-			fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg5  No data written in MBIO function <%s>\n", __func__);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -888,12 +863,8 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_register_image83p(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_image83p";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -902,7 +873,7 @@ int mbr_register_image83p(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_image83p(
+	const int status = mbr_info_image83p(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
@@ -931,9 +902,8 @@ int mbr_register_image83p(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

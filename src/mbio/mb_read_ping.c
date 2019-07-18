@@ -34,16 +34,13 @@
 
 /*--------------------------------------------------------------------*/
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error) {
-	char *function_name = "mb_read_ping";
-	int status;
 	int localkind;
 	int beams_bath;
 	int beams_amp;
 	int pixels_ss;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
@@ -51,6 +48,8 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* call the appropriate mbr_ read and translate routine */
 	if (mb_io_ptr->mb_io_read_ping != NULL) {
@@ -86,9 +85,8 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 		mb_io_ptr->pixels_ss_max = MAX(mb_io_ptr->pixels_ss_max, pixels_ss);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       kind:       %d\n", *kind);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);

@@ -38,13 +38,10 @@
 
 /*--------------------------------------------------------------------------*/
 int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double ypn, double *y2, int *error) {
-	char *function_name = "mb_spline_init";
-	int status = MB_SUCCESS;
 	double p, qn, sig, un, *u;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       x:                %p\n", x);
@@ -54,6 +51,8 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 		fprintf(stderr, "dbg2       ypn:              %f\n", ypn);
 		fprintf(stderr, "dbg2       y2:               %p\n", y2);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n > 2 */
 	if (n < 3) {
@@ -94,9 +93,8 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&u, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -107,14 +105,11 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 }
 /*--------------------------------------------------------------------*/
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_spline_interp";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b, a;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       xa:               %p\n", xa);
@@ -123,6 +118,8 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -152,9 +149,8 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 		*i = klo;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       y:          %f\n", *y);
 		fprintf(stderr, "dbg2       i:          %d\n", *i);
@@ -167,14 +163,11 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_linear_interp";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       xa:               %p\n", xa);
@@ -182,6 +175,8 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -225,9 +220,8 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       y:          %f\n", *y);
 		fprintf(stderr, "dbg2       i:          %d\n", *i);
@@ -240,15 +234,12 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_linear_interp_longitude";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
 	double yahi, yalo;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       xa:               %p\n", xa);
@@ -256,6 +247,8 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -307,9 +300,8 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       y:          %f\n", *y);
 		fprintf(stderr, "dbg2       i:          %d\n", *i);
@@ -322,15 +314,12 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_linear_interp_latitude";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
 	double yahi, yalo;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       xa:               %p\n", xa);
@@ -338,6 +327,8 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -385,9 +376,8 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       y:          %f\n", *y);
 		fprintf(stderr, "dbg2       i:          %d\n", *i);
@@ -400,15 +390,12 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	char *function_name = "mb_linear_interp_heading";
-	int status = MB_SUCCESS;
 	int klo, khi;
 	double h, b;
 	double yahi, yalo;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:          %d\n", verbose);
 		fprintf(stderr, "dbg2       xa:               %p\n", xa);
@@ -416,6 +403,8 @@ int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double 
 		fprintf(stderr, "dbg2       n:                %d\n", n);
 		fprintf(stderr, "dbg2       x:                %f\n", x);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* check for n >= 1 */
 	if (n < 1) {
@@ -467,9 +456,8 @@ int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double 
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       y:          %f\n", *y);
 		fprintf(stderr, "dbg2       i:          %d\n", *i);

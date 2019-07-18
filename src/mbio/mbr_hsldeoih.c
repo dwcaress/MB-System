@@ -37,27 +37,8 @@
 #include "mbf_hsldeoih.h"
 #include "mbsys_hsds.h"
 
-/* local defines */
 #define ZERO_ALL 0
 #define ZERO_SOME 1
-
-int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error);
-int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error);
-int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
-int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
-int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error);
 
 /*--------------------------------------------------------------------*/
 int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
@@ -65,18 +46,13 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hsldeoih";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HSDS;
 	*beams_bath_max = 59;
@@ -102,9 +78,10 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -134,91 +111,11 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hsldeoih";
-	int status = MB_SUCCESS;
-	struct mbf_hsldeoih_struct *data;
-	char *data_ptr;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_hsldeoih_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
-
-	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-
-	/* initialize everything to zeros */
-	mbr_zero_hsldeoih(verbose, data_ptr, ZERO_ALL, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_hsldeoih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hsldeoih";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
 int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
-	char *function_name = "mbr_zero_hsldeoih";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
@@ -339,12 +236,11 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -354,283 +250,36 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hsldeoih";
-	int status = MB_SUCCESS;
-	struct mbf_hsldeoih_struct *data;
-	struct mbsys_hsds_struct *store;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_hsds_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_hsldeoih_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* translate values to hydrosweep data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		/* type of data record */
-		store->kind = data->kind;
-
-		/* position (all records ) */
-		store->lon = data->lon;
-		store->lat = data->lat;
-
-		/* time stamp (all records ) */
-		store->year = data->year;
-		store->month = data->month;
-		store->day = data->day;
-		store->hour = data->hour;
-		store->minute = data->minute;
-		store->second = data->second;
-		store->alt_minute = data->alt_minute;
-		store->alt_second = data->alt_second;
-
-		/* additional navigation and depths (ERGNMESS and ERGNEICH) */
-		store->course_true = data->course_true;
-		store->speed_transverse = data->speed_transverse;
-		store->speed = data->speed;
-		store->speed_reference[0] = data->speed_reference[0];
-		store->pitch = data->pitch;
-		store->track = data->track;
-		store->depth_center = data->depth_center;
-		store->depth_scale = data->depth_scale;
-		store->spare = data->spare;
-		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			store->distance[i] = data->distance[i];
-			store->depth[i] = data->depth[i];
-		}
-
-		/* travel time data (ERGNSLZT) */
-		store->course_ground = data->course_ground;
-		store->speed_ground = data->speed_ground;
-		store->heave = data->heave;
-		store->roll = data->roll;
-		store->time_center = data->time_center;
-		store->time_scale = data->time_scale;
-		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
-			store->time[i] = data->time[i];
-		for (int i = 0; i < 11; i++)
-			store->gyro[i] = data->gyro[i];
-
-		/* amplitude data (ERGNAMPL) */
-		store->mode[0] = data->mode[0];
-		store->trans_strbd = data->trans_strbd;
-		store->trans_vert = data->trans_vert;
-		store->trans_port = data->trans_port;
-		store->pulse_len_strbd = data->pulse_len_strbd;
-		store->pulse_len_vert = data->pulse_len_vert;
-		store->pulse_len_port = data->pulse_len_port;
-		store->gain_start = data->gain_start;
-		store->r_compensation_factor = data->r_compensation_factor;
-		store->compensation_start = data->compensation_start;
-		store->increase_start = data->increase_start;
-		store->tvc_near = data->tvc_near;
-		store->tvc_far = data->tvc_far;
-		store->increase_int_near = data->increase_int_near;
-		store->increase_int_far = data->increase_int_far;
-		store->gain_center = data->gain_center;
-		store->filter_gain = data->filter_gain;
-		store->amplitude_center = data->amplitude_center;
-		store->echo_duration_center = data->echo_duration_center;
-		store->echo_scale_center = data->echo_scale_center;
-		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			store->amplitude[i] = data->amplitude[i];
-			store->echo_duration[i] = data->echo_duration[i];
-		}
-		for (int i = 0; i < 16; i++) {
-			store->gain[i] = data->gain[i];
-			store->echo_scale[i] = data->echo_scale[i];
-		}
-
-		/* mean velocity (ERGNHYDI) */
-		store->draught = data->draught;
-		store->vel_mean = data->vel_mean;
-		store->vel_keel = data->vel_keel;
-		store->tide = data->tide;
-
-		/* water velocity profile (HS_ERGNCTDS) */
-		store->num_vel = data->num_vel;
-		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
-			store->vdepth[i] = data->vdepth[i];
-			store->velocity[i] = data->velocity[i];
-		}
-
-		/* navigation source (ERGNPOSI) */
-		store->pos_corr_x = data->pos_corr_x;
-		store->pos_corr_y = data->pos_corr_y;
-		strncpy(store->sensors, data->sensors, 8);
-
-		/* comment (LDEOCMNT) */
-		strncpy(store->comment, data->comment, MBSYS_HSDS_MAXLINE);
-
-		/* processed backscatter */
-		store->back_scale = data->back_scale;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			store->back[i] = data->back[i];
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hsldeoih";
-	int status = MB_SUCCESS;
+int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	struct mbf_hsldeoih_struct *data;
 	char *data_ptr;
-	struct mbsys_hsds_struct *store;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbf_hsldeoih_struct);
+	mb_io_ptr->data_structure_size = 0;
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsds_struct), &mb_io_ptr->store_data, error);
+
+	/* get pointer to mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
 	data_ptr = (char *)data;
-	store = (struct mbsys_hsds_struct *)store_ptr;
 
-	/* first translate values from data storage structure */
-	if (store != NULL) {
-		/* type of data record */
-		data->kind = store->kind;
+	/* initialize everything to zeros */
+	mbr_zero_hsldeoih(verbose, data_ptr, ZERO_ALL, error);
 
-		/* position (all records ) */
-		data->lon = store->lon;
-		data->lat = store->lat;
-
-		/* time stamp (all records ) */
-		data->year = store->year;
-		data->month = store->month;
-		data->day = store->day;
-		data->hour = store->hour;
-		data->minute = store->minute;
-		data->second = store->second;
-		data->alt_minute = store->alt_minute;
-		data->alt_second = store->alt_second;
-
-		/* additional navigation and depths (ERGNMESS and ERGNEICH) */
-		data->course_true = store->course_true;
-		data->speed_transverse = store->speed_transverse;
-		data->speed = store->speed;
-		data->speed_reference[0] = store->speed_reference[0];
-		data->pitch = store->pitch;
-		data->track = store->track;
-		data->depth_center = store->depth_center;
-		data->depth_scale = store->depth_scale;
-		data->spare = store->spare;
-		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			data->distance[i] = store->distance[i];
-			data->depth[i] = store->depth[i];
-		}
-
-		/* travel time data (ERGNSLZT) */
-		data->course_ground = store->course_ground;
-		data->speed_ground = store->speed_ground;
-		data->heave = store->heave;
-		data->roll = store->roll;
-		data->time_center = store->time_center;
-		data->time_scale = store->time_scale;
-		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
-			data->time[i] = store->time[i];
-		for (int i = 0; i < 11; i++)
-			data->gyro[i] = store->gyro[i];
-
-		/* amplitude data (ERGNAMPL) */
-		data->mode[0] = store->mode[0];
-		data->trans_strbd = store->trans_strbd;
-		data->trans_vert = store->trans_vert;
-		data->trans_port = store->trans_port;
-		data->pulse_len_strbd = store->pulse_len_strbd;
-		data->pulse_len_vert = store->pulse_len_vert;
-		data->pulse_len_port = store->pulse_len_port;
-		data->gain_start = store->gain_start;
-		data->r_compensation_factor = store->r_compensation_factor;
-		data->compensation_start = store->compensation_start;
-		data->increase_start = store->increase_start;
-		data->tvc_near = store->tvc_near;
-		data->tvc_far = store->tvc_far;
-		data->increase_int_near = store->increase_int_near;
-		data->increase_int_far = store->increase_int_far;
-		data->gain_center = store->gain_center;
-		data->filter_gain = store->filter_gain;
-		data->amplitude_center = store->amplitude_center;
-		data->echo_duration_center = store->echo_duration_center;
-		data->echo_scale_center = store->echo_scale_center;
-		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			data->amplitude[i] = store->amplitude[i];
-			data->echo_duration[i] = store->echo_duration[i];
-		}
-		for (int i = 0; i < 16; i++) {
-			data->gain[i] = store->gain[i];
-			data->echo_scale[i] = store->echo_scale[i];
-		}
-
-		/* mean velocity (ERGNHYDI) */
-		data->draught = store->draught;
-		data->vel_mean = store->vel_mean;
-		data->vel_keel = store->vel_keel;
-		data->tide = store->tide;
-
-		/* water velocity profile (HS_ERGNCTDS) */
-		data->num_vel = store->num_vel;
-		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
-			data->vdepth[i] = store->vdepth[i];
-			data->velocity[i] = store->velocity[i];
-		}
-
-		/* navigation source (ERGNPOSI) */
-		data->pos_corr_x = store->pos_corr_x;
-		data->pos_corr_y = store->pos_corr_y;
-		strncpy(data->sensors, store->sensors, 8);
-
-		/* comment (LDEOCMNT) */
-		strncpy(data->comment, store->comment, MBSYS_HSDS_MAXLINE);
-
-		/* processed backscatter */
-		data->back_scale = store->back_scale;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			data->back[i] = store->back[i];
-		}
-	}
-
-	/* write next data to file */
-	status = mbr_hsldeoih_wr_data(verbose, mbio_ptr, data_ptr, error);
-
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -640,22 +289,9 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_data";
-	int status = MB_SUCCESS;
-	struct mbf_hsldeoih_struct *data = NULL;
-	char *data_ptr = NULL;
-	FILE *mbfp = NULL;
-	unsigned int label = 0;
-	char *labelchar = NULL;
-	unsigned int label_test = 0;
-	int record_size = 0;
-	short int tmp = 0;
-	int i = 0;
-
-	/* print input debug statements */
+int mbr_dem_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -664,189 +300,27 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* get pointer to raw data structure */
-	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	mbfp = mb_io_ptr->mbfp;
+	/* deallocate memory for data descriptor */
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
-	/* initialize everything to zeros */
-	mbr_zero_hsldeoih(verbose, data_ptr, ZERO_SOME, error);
-
-	/* set file position */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-
-	/* get next record type */
-	if (fread(&label, 1, sizeof(int), mbfp) == sizeof(int)) {
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-
-		labelchar = (char *)&label;
-		label_test = MBF_HSLDEOIH_LABEL;
-#ifdef BYTESWAPPED
-		label_test = mb_swap_int(label_test);
-#endif
-		while (label != label_test && status == MB_SUCCESS) {
-			for (int i = 0; i < 3; i++)
-				labelchar[i] = labelchar[i + 1];
-			if (fread(&labelchar[3], 1, 1, mbfp) != 1) {
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-			}
-		}
-	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-
-	/* see if we just encountered a record label */
-	if (status == MB_SUCCESS) {
-/* swap bytes if necessary */
-#ifdef BYTESWAPPED
-		label = mb_swap_int(label);
-#endif
-
-		if (label != MBF_HSLDEOIH_LABEL) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-		}
-	}
-
-	/* read what size and kind of record it is */
-	if (status == MB_SUCCESS) {
-		if ((status = fread(&tmp, 1, sizeof(short int), mbfp)) == sizeof(short int)) {
-#ifdef BYTESWAPPED
-			data->kind = (int)mb_swap_short(tmp);
-#else
-			data->kind = (int)tmp;
-#endif
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
-		}
-		else {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-	}
-	if (status == MB_SUCCESS) {
-		if ((status = fread(&tmp, 1, sizeof(short int), mbfp)) == sizeof(short int)) {
-#ifdef BYTESWAPPED
-			record_size = (int)mb_swap_short(tmp);
-#else
-			record_size = (int)tmp;
-#endif
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
-		}
-		else {
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;
-		}
-	}
-
-	/* fix problems introduced by changes in data kind flags
-	 * that were unknowingly mapped into data files
-	 */
-	if (data->kind == MBF_HSLDEOIH_OLDKIND_CALIBRATE && record_size == 952) {
-		data->kind = MBF_HSLDEOIH_KIND_CALIBRATE;
-	}
-	else if (data->kind == MBF_HSLDEOIH_OLDKIND_MEAN_VELOCITY && record_size == 40) {
-		data->kind = MBF_HSLDEOIH_KIND_MEAN_VELOCITY;
-	}
-	else if (data->kind == MBF_HSLDEOIH_OLDKIND_VELOCITY_PROFILE && record_size == 264) {
-		data->kind = MBF_HSLDEOIH_KIND_VELOCITY_PROFILE;
-	}
-	else if (data->kind == MBF_HSLDEOIH_OLDKIND_STANDBY && record_size == 52) {
-		data->kind = MBF_HSLDEOIH_KIND_STANDBY;
-	}
-	else if (data->kind == MBF_HSLDEOIH_OLDKIND_NAV_SOURCE && record_size == 44) {
-		data->kind = MBF_HSLDEOIH_KIND_NAV_SOURCE;
-	}
-
-	/* translate format kind values to MBIO kind values
-	 */
-	if (data->kind == MBF_HSLDEOIH_KIND_DATA) {
-		data->kind = MB_DATA_DATA;
-	}
-	else if (data->kind == MBF_HSLDEOIH_KIND_COMMENT) {
-		data->kind = MB_DATA_COMMENT;
-	}
-	else if (data->kind == MBF_HSLDEOIH_KIND_CALIBRATE) {
-		data->kind = MB_DATA_CALIBRATE;
-	}
-	else if (data->kind == MBF_HSLDEOIH_KIND_MEAN_VELOCITY) {
-		data->kind = MB_DATA_MEAN_VELOCITY;
-	}
-	else if (data->kind == MBF_HSLDEOIH_KIND_VELOCITY_PROFILE) {
-		data->kind = MB_DATA_VELOCITY_PROFILE;
-	}
-	else if (data->kind == MBF_HSLDEOIH_KIND_STANDBY) {
-		data->kind = MB_DATA_STANDBY;
-	}
-	else if (data->kind == MBF_HSLDEOIH_KIND_NAV_SOURCE) {
-		data->kind = MB_DATA_NAV_SOURCE;
-	}
-
-	/* print debug statements */
-	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Read record label in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg4       label:      %d\n", label);
-		fprintf(stderr, "dbg4       size:       %d\n", record_size);
-		fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
-		fprintf(stderr, "dbg4       error:      %d\n", *error);
-		fprintf(stderr, "dbg4       status:     %d\n", status);
-	}
-
-	/* read the data */
-	if (status == MB_SUCCESS) {
-		if (data->kind == MB_DATA_DATA)
-			status = mbr_hsldeoih_rd_survey(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_COMMENT)
-			status = mbr_hsldeoih_rd_comment(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_CALIBRATE)
-			status = mbr_hsldeoih_rd_calibrate(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_MEAN_VELOCITY)
-			status = mbr_hsldeoih_rd_mean_velocity(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_VELOCITY_PROFILE)
-			status = mbr_hsldeoih_rd_velocity_profile(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_STANDBY)
-			status = mbr_hsldeoih_rd_standby(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_NAV_SOURCE)
-			status = mbr_hsldeoih_rd_nav_source(verbose, mbfp, data, error);
-		else {
-			status = MB_FAILURE;
-			*error = MB_ERROR_UNINTELLIGIBLE;
-		}
-	}
-
-	/* get file position */
-	mb_io_ptr->file_bytes = ftell(mbfp);
-
-	/* handle Hydrosweep Y2K problem */
-	if (status == MB_SUCCESS && data->year < 1962)
-		data->year = 2000 + (data->year % 100);
-
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
+		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
 	return (status);
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_nav_source";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_nav_source_struct read_data;
 	int read_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -855,6 +329,7 @@ int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -901,7 +376,7 @@ int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -917,9 +392,8 @@ int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 		fprintf(stderr, "dbg5       sensors:          %s\n", data->sensors);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -930,14 +404,11 @@ int mbr_hsldeoih_rd_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_mean_velocity";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_mean_velocity_struct read_data;
 	int read_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -946,6 +417,7 @@ int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -995,7 +467,7 @@ int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1012,9 +484,8 @@ int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 		fprintf(stderr, "dbg5       tide:             %f\n", data->tide);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1025,14 +496,11 @@ int mbr_hsldeoih_rd_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_velocity_profile";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_velocity_profile_struct read_data;
 	int read_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1041,6 +509,7 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1094,7 +563,7 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1109,9 +578,8 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 			fprintf(stderr, "dbg5         %d  %f  %f\n", i, data->vdepth[i], data->velocity[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1122,14 +590,11 @@ int mbr_hsldeoih_rd_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_standby";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_standby_struct read_data;
 	int read_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1138,6 +603,7 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1191,7 +657,7 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1211,9 +677,8 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 		fprintf(stderr, "dbg5       depth_center:     %f\n", data->depth_center);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1224,17 +689,14 @@ int mbr_hsldeoih_rd_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_survey";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_survey_struct read_data;
 	int read_size;
 	int need_back, gain_ok;
 	int gain_inner, gain_outer;
 	double gain_beam, factor;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1243,6 +705,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1466,7 +929,7 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1534,9 +997,8 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->back[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1547,17 +1009,14 @@ int mbr_hsldeoih_rd_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_calibrate";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_calibrate_struct read_data;
 	int read_size;
 	int need_back, gain_ok;
 	int gain_inner, gain_outer;
 	double gain_beam, factor;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1566,6 +1025,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1783,7 +1243,7 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1851,9 +1311,8 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 			fprintf(stderr, "dbg5         %d  %d\n", i, data->back[i]);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1864,14 +1323,11 @@ int mbr_hsldeoih_rd_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_rd_comment";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_comment_struct read_data;
 	int read_size;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -1880,6 +1336,7 @@ int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 	/* read record from file */
 	read_size = sizeof(read_data);
+	int status = MB_SUCCESS;
 	if ((status = fread(&read_data, 1, sizeof(read_data), mbfp)) != read_size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -1896,13 +1353,12 @@ int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1912,111 +1368,332 @@ int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_data";
-	int status = MB_SUCCESS;
-	struct mbf_hsldeoih_struct *data;
-	FILE *mbfp;
-	unsigned int label;
-	short int shortkind;
+int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
+	struct mbf_hsldeoih_struct *data = NULL;
+	char *data_ptr = NULL;
+	FILE *mbfp = NULL;
+	unsigned int label = 0;
+	char *labelchar = NULL;
+	unsigned int label_test = 0;
+	int record_size = 0;
+	short int tmp = 0;
+	int i = 0;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsldeoih_struct *)data_ptr;
+	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
 	mbfp = mb_io_ptr->mbfp;
 
-	/* print output debug statements */
-	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Data record kind in MBIO function <%s>\n", function_name);
-		fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
-	}
+	/* initialize everything to zeros */
+	mbr_zero_hsldeoih(verbose, data_ptr, ZERO_SOME, error);
 
-	/* write record label to file */
-	label = MBF_HSLDEOIH_LABEL;
+	/* set file position */
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
+
+	/* get next record type */
+	if (fread(&label, 1, sizeof(int), mbfp) == sizeof(int)) {
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+
+		labelchar = (char *)&label;
+		label_test = MBF_HSLDEOIH_LABEL;
 #ifdef BYTESWAPPED
-	label = mb_swap_int(label);
+		label_test = mb_swap_int(label_test);
 #endif
-	if ((status = fwrite(&label, 1, sizeof(int), mbfp)) != sizeof(int)) {
+		while (label != label_test && status == MB_SUCCESS) {
+			for (int i = 0; i < 3; i++)
+				labelchar[i] = labelchar[i + 1];
+			if (fread(&labelchar[3], 1, 1, mbfp) != 1) {
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+			}
+		}
+	}
+	else {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 	}
-	else {
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-	}
-	shortkind = data->kind;
 
-	/* translate MBIO kind values to format kind values
-	 */
-	if (data->kind == MB_DATA_DATA) {
-		shortkind = MBF_HSLDEOIH_KIND_DATA;
-	}
-	else if (data->kind == MB_DATA_COMMENT) {
-		shortkind = MBF_HSLDEOIH_KIND_COMMENT;
-	}
-	else if (data->kind == MB_DATA_CALIBRATE) {
-		shortkind = MBF_HSLDEOIH_KIND_CALIBRATE;
-	}
-	else if (data->kind == MB_DATA_MEAN_VELOCITY) {
-		shortkind = MBF_HSLDEOIH_KIND_MEAN_VELOCITY;
-	}
-	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
-		shortkind = MBF_HSLDEOIH_KIND_VELOCITY_PROFILE;
-	}
-	else if (data->kind == MB_DATA_STANDBY) {
-		shortkind = MBF_HSLDEOIH_KIND_STANDBY;
-	}
-	else if (data->kind == MB_DATA_NAV_SOURCE) {
-		shortkind = MBF_HSLDEOIH_KIND_NAV_SOURCE;
-	}
-#ifdef BYTESWAPPED
-	shortkind = mb_swap_short(shortkind);
-#endif
-	if ((status = fwrite(&shortkind, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
-	}
-	else {
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
-	}
-
-	/* write the data */
+	/* see if we just encountered a record label */
 	if (status == MB_SUCCESS) {
-		if (data->kind == MB_DATA_DATA)
-			status = mbr_hsldeoih_wr_survey(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_COMMENT)
-			status = mbr_hsldeoih_wr_comment(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_CALIBRATE)
-			status = mbr_hsldeoih_wr_calibrate(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_MEAN_VELOCITY)
-			status = mbr_hsldeoih_wr_mean_velocity(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_VELOCITY_PROFILE)
-			status = mbr_hsldeoih_wr_velocity_profile(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_STANDBY)
-			status = mbr_hsldeoih_wr_standby(verbose, mbfp, data, error);
-		else if (data->kind == MB_DATA_NAV_SOURCE)
-			status = mbr_hsldeoih_wr_nav_source(verbose, mbfp, data, error);
-		else {
+/* swap bytes if necessary */
+#ifdef BYTESWAPPED
+		label = mb_swap_int(label);
+#endif
+
+		if (label != MBF_HSLDEOIH_LABEL) {
 			status = MB_FAILURE;
-			*error = MB_ERROR_BAD_KIND;
+			*error = MB_ERROR_UNINTELLIGIBLE;
 		}
 	}
 
-	/* print output debug statements */
+	/* read what size and kind of record it is */
+	if (status == MB_SUCCESS) {
+		if ((status = fread(&tmp, 1, sizeof(short int), mbfp)) == sizeof(short int)) {
+#ifdef BYTESWAPPED
+			data->kind = (int)mb_swap_short(tmp);
+#else
+			data->kind = (int)tmp;
+#endif
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+		}
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+	}
+	if (status == MB_SUCCESS) {
+		if ((status = fread(&tmp, 1, sizeof(short int), mbfp)) == sizeof(short int)) {
+#ifdef BYTESWAPPED
+			record_size = (int)mb_swap_short(tmp);
+#else
+			record_size = (int)tmp;
+#endif
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+		}
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+		}
+	}
+
+	/* fix problems introduced by changes in data kind flags
+	 * that were unknowingly mapped into data files
+	 */
+	if (data->kind == MBF_HSLDEOIH_OLDKIND_CALIBRATE && record_size == 952) {
+		data->kind = MBF_HSLDEOIH_KIND_CALIBRATE;
+	}
+	else if (data->kind == MBF_HSLDEOIH_OLDKIND_MEAN_VELOCITY && record_size == 40) {
+		data->kind = MBF_HSLDEOIH_KIND_MEAN_VELOCITY;
+	}
+	else if (data->kind == MBF_HSLDEOIH_OLDKIND_VELOCITY_PROFILE && record_size == 264) {
+		data->kind = MBF_HSLDEOIH_KIND_VELOCITY_PROFILE;
+	}
+	else if (data->kind == MBF_HSLDEOIH_OLDKIND_STANDBY && record_size == 52) {
+		data->kind = MBF_HSLDEOIH_KIND_STANDBY;
+	}
+	else if (data->kind == MBF_HSLDEOIH_OLDKIND_NAV_SOURCE && record_size == 44) {
+		data->kind = MBF_HSLDEOIH_KIND_NAV_SOURCE;
+	}
+
+	/* translate format kind values to MBIO kind values
+	 */
+	if (data->kind == MBF_HSLDEOIH_KIND_DATA) {
+		data->kind = MB_DATA_DATA;
+	}
+	else if (data->kind == MBF_HSLDEOIH_KIND_COMMENT) {
+		data->kind = MB_DATA_COMMENT;
+	}
+	else if (data->kind == MBF_HSLDEOIH_KIND_CALIBRATE) {
+		data->kind = MB_DATA_CALIBRATE;
+	}
+	else if (data->kind == MBF_HSLDEOIH_KIND_MEAN_VELOCITY) {
+		data->kind = MB_DATA_MEAN_VELOCITY;
+	}
+	else if (data->kind == MBF_HSLDEOIH_KIND_VELOCITY_PROFILE) {
+		data->kind = MB_DATA_VELOCITY_PROFILE;
+	}
+	else if (data->kind == MBF_HSLDEOIH_KIND_STANDBY) {
+		data->kind = MB_DATA_STANDBY;
+	}
+	else if (data->kind == MBF_HSLDEOIH_KIND_NAV_SOURCE) {
+		data->kind = MB_DATA_NAV_SOURCE;
+	}
+
+	/* print debug statements */
+	if (verbose >= 4) {
+		fprintf(stderr, "\ndbg4  Read record label in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg4       label:      %d\n", label);
+		fprintf(stderr, "dbg4       size:       %d\n", record_size);
+		fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
+		fprintf(stderr, "dbg4       error:      %d\n", *error);
+		fprintf(stderr, "dbg4       status:     %d\n", status);
+	}
+
+	/* read the data */
+	if (status == MB_SUCCESS) {
+		if (data->kind == MB_DATA_DATA)
+			status = mbr_hsldeoih_rd_survey(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_COMMENT)
+			status = mbr_hsldeoih_rd_comment(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_CALIBRATE)
+			status = mbr_hsldeoih_rd_calibrate(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_MEAN_VELOCITY)
+			status = mbr_hsldeoih_rd_mean_velocity(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_VELOCITY_PROFILE)
+			status = mbr_hsldeoih_rd_velocity_profile(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_STANDBY)
+			status = mbr_hsldeoih_rd_standby(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_NAV_SOURCE)
+			status = mbr_hsldeoih_rd_nav_source(verbose, mbfp, data, error);
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+		}
+	}
+
+	/* get file position */
+	mb_io_ptr->file_bytes = ftell(mbfp);
+
+	/* handle Hydrosweep Y2K problem */
+	if (status == MB_SUCCESS && data->year < 1962)
+		data->year = 2000 + (data->year % 100);
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbf_hsldeoih_struct *data;
+	struct mbsys_hsds_struct *store;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_hsds_struct *)store_ptr;
+
+	/* read next data from file */
+	const int status = mbr_hsldeoih_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* translate values to hydrosweep data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		/* type of data record */
+		store->kind = data->kind;
+
+		/* position (all records ) */
+		store->lon = data->lon;
+		store->lat = data->lat;
+
+		/* time stamp (all records ) */
+		store->year = data->year;
+		store->month = data->month;
+		store->day = data->day;
+		store->hour = data->hour;
+		store->minute = data->minute;
+		store->second = data->second;
+		store->alt_minute = data->alt_minute;
+		store->alt_second = data->alt_second;
+
+		/* additional navigation and depths (ERGNMESS and ERGNEICH) */
+		store->course_true = data->course_true;
+		store->speed_transverse = data->speed_transverse;
+		store->speed = data->speed;
+		store->speed_reference[0] = data->speed_reference[0];
+		store->pitch = data->pitch;
+		store->track = data->track;
+		store->depth_center = data->depth_center;
+		store->depth_scale = data->depth_scale;
+		store->spare = data->spare;
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			store->distance[i] = data->distance[i];
+			store->depth[i] = data->depth[i];
+		}
+
+		/* travel time data (ERGNSLZT) */
+		store->course_ground = data->course_ground;
+		store->speed_ground = data->speed_ground;
+		store->heave = data->heave;
+		store->roll = data->roll;
+		store->time_center = data->time_center;
+		store->time_scale = data->time_scale;
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			store->time[i] = data->time[i];
+		for (int i = 0; i < 11; i++)
+			store->gyro[i] = data->gyro[i];
+
+		/* amplitude data (ERGNAMPL) */
+		store->mode[0] = data->mode[0];
+		store->trans_strbd = data->trans_strbd;
+		store->trans_vert = data->trans_vert;
+		store->trans_port = data->trans_port;
+		store->pulse_len_strbd = data->pulse_len_strbd;
+		store->pulse_len_vert = data->pulse_len_vert;
+		store->pulse_len_port = data->pulse_len_port;
+		store->gain_start = data->gain_start;
+		store->r_compensation_factor = data->r_compensation_factor;
+		store->compensation_start = data->compensation_start;
+		store->increase_start = data->increase_start;
+		store->tvc_near = data->tvc_near;
+		store->tvc_far = data->tvc_far;
+		store->increase_int_near = data->increase_int_near;
+		store->increase_int_far = data->increase_int_far;
+		store->gain_center = data->gain_center;
+		store->filter_gain = data->filter_gain;
+		store->amplitude_center = data->amplitude_center;
+		store->echo_duration_center = data->echo_duration_center;
+		store->echo_scale_center = data->echo_scale_center;
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			store->amplitude[i] = data->amplitude[i];
+			store->echo_duration[i] = data->echo_duration[i];
+		}
+		for (int i = 0; i < 16; i++) {
+			store->gain[i] = data->gain[i];
+			store->echo_scale[i] = data->echo_scale[i];
+		}
+
+		/* mean velocity (ERGNHYDI) */
+		store->draught = data->draught;
+		store->vel_mean = data->vel_mean;
+		store->vel_keel = data->vel_keel;
+		store->tide = data->tide;
+
+		/* water velocity profile (HS_ERGNCTDS) */
+		store->num_vel = data->num_vel;
+		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+			store->vdepth[i] = data->vdepth[i];
+			store->velocity[i] = data->velocity[i];
+		}
+
+		/* navigation source (ERGNPOSI) */
+		store->pos_corr_x = data->pos_corr_x;
+		store->pos_corr_y = data->pos_corr_y;
+		strncpy(store->sensors, data->sensors, 8);
+
+		/* comment (LDEOCMNT) */
+		strncpy(store->comment, data->comment, MBSYS_HSDS_MAXLINE);
+
+		/* processed backscatter */
+		store->back_scale = data->back_scale;
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+			store->back[i] = data->back[i];
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2027,15 +1704,12 @@ int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_nav_source";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_nav_source_struct write_data;
 	int write_size;
 	short int write_size_short;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2044,7 +1718,7 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -2061,38 +1735,34 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
-		write_data.pos_corr_x = data->pos_corr_x;
-		write_data.pos_corr_y = data->pos_corr_y;
-		strncpy(write_data.sensors, data->sensors, 8);
-	}
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
+	write_data.pos_corr_x = data->pos_corr_x;
+	write_data.pos_corr_y = data->pos_corr_y;
+	strncpy(write_data.sensors, data->sensors, 8);
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
-		mb_swap_float(&write_data.pos_corr_x);
-		mb_swap_float(&write_data.pos_corr_y);
-	}
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
+	mb_swap_float(&write_data.pos_corr_x);
+	mb_swap_float(&write_data.pos_corr_y);
 #endif
 
 	/* write record to file */
@@ -2101,6 +1771,7 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2118,9 +1789,8 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2131,15 +1801,12 @@ int mbr_hsldeoih_wr_nav_source(int verbose, FILE *mbfp, struct mbf_hsldeoih_stru
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_mean_velocity";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_mean_velocity_struct write_data;
 	int write_size;
 	short int write_size_short;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2148,7 +1815,7 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -2166,41 +1833,37 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
-		write_data.draught = data->draught;
-		write_data.vel_mean = data->vel_mean;
-		write_data.vel_keel = data->vel_keel;
-		write_data.tide = data->tide;
-	}
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
+	write_data.draught = data->draught;
+	write_data.vel_mean = data->vel_mean;
+	write_data.vel_keel = data->vel_keel;
+	write_data.tide = data->tide;
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
-		mb_swap_float(&write_data.draught);
-		mb_swap_float(&write_data.vel_mean);
-		mb_swap_float(&write_data.vel_keel);
-		mb_swap_float(&write_data.tide);
-	}
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
+	mb_swap_float(&write_data.draught);
+	mb_swap_float(&write_data.vel_mean);
+	mb_swap_float(&write_data.vel_keel);
+	mb_swap_float(&write_data.tide);
 #endif
 
 	/* write record to file */
@@ -2209,6 +1872,7 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2226,9 +1890,8 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2239,15 +1902,12 @@ int mbr_hsldeoih_wr_mean_velocity(int verbose, FILE *mbfp, struct mbf_hsldeoih_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_velocity_profile";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_velocity_profile_struct write_data;
 	int write_size;
 	short int write_size_short;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2256,7 +1916,7 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -2272,38 +1932,34 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.num_vel = data->num_vel;
-		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
-			write_data.vdepth[i] = data->vdepth[i];
-			write_data.velocity[i] = data->velocity[i];
-		}
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.num_vel = data->num_vel;
+	for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		write_data.vdepth[i] = data->vdepth[i];
+		write_data.velocity[i] = data->velocity[i];
 	}
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		data->num_vel = mb_swap_short(write_data.num_vel);
-		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
-			mb_swap_float(&write_data.vdepth[i]);
-			mb_swap_float(&write_data.velocity[i]);
-		}
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	data->num_vel = mb_swap_short(write_data.num_vel);
+	for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+		mb_swap_float(&write_data.vdepth[i]);
+		mb_swap_float(&write_data.velocity[i]);
 	}
 #endif
 
@@ -2313,6 +1969,7 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2330,9 +1987,8 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2343,15 +1999,12 @@ int mbr_hsldeoih_wr_velocity_profile(int verbose, FILE *mbfp, struct mbf_hsldeoi
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_standby";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_standby_struct write_data;
 	int write_size;
 	short int write_size_short;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2360,7 +2013,7 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -2381,46 +2034,42 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
-		write_data.course_true = data->course_true;
-		write_data.speed_transverse = data->speed_transverse;
-		write_data.speed = data->speed;
-		write_data.speed_reference[0] = data->speed_reference[0];
-		write_data.pitch = data->pitch;
-		write_data.track = data->track;
-		write_data.depth_center = data->depth_center;
-	}
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
+	write_data.course_true = data->course_true;
+	write_data.speed_transverse = data->speed_transverse;
+	write_data.speed = data->speed;
+	write_data.speed_reference[0] = data->speed_reference[0];
+	write_data.pitch = data->pitch;
+	write_data.track = data->track;
+	write_data.depth_center = data->depth_center;
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
-		mb_swap_float(&write_data.course_true);
-		mb_swap_float(&write_data.speed_transverse);
-		mb_swap_float(&write_data.speed);
-		mb_swap_float(&write_data.pitch);
-		write_data.track = mb_swap_short(write_data.track);
-		mb_swap_float(&write_data.depth_center);
-	}
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
+	mb_swap_float(&write_data.course_true);
+	mb_swap_float(&write_data.speed_transverse);
+	mb_swap_float(&write_data.speed);
+	mb_swap_float(&write_data.pitch);
+	write_data.track = mb_swap_short(write_data.track);
+	mb_swap_float(&write_data.depth_center);
 #endif
 
 	/* write record to file */
@@ -2429,6 +2078,7 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2446,9 +2096,8 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2459,15 +2108,12 @@ int mbr_hsldeoih_wr_standby(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_survey";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_survey_struct write_data;
 	int write_size;
 	short int write_size_short;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2476,7 +2122,7 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -2545,161 +2191,157 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		/* position */
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
+	/* position */
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
 
-		/* time stamp */
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
+	/* time stamp */
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
 
-		/* additional navigation and depths */
-		write_data.course_true = data->course_true;
-		write_data.speed_transverse = data->speed_transverse;
-		write_data.speed = data->speed;
-		write_data.speed_reference[0] = data->speed_reference[0];
-		write_data.pitch = data->pitch;
-		write_data.track = data->track;
-		write_data.depth_center = data->depth_center;
-		write_data.depth_scale = data->depth_scale;
-		write_data.spare = data->spare;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.distance[i] = data->distance[i];
-			write_data.depth[i] = data->depth[i];
-		}
-
-		/* travel time data */
-		write_data.course_ground = data->course_ground;
-		write_data.speed_ground = data->speed_ground;
-		write_data.heave = data->heave;
-		write_data.roll = data->roll;
-		write_data.time_center = data->time_center;
-		write_data.time_scale = data->time_scale;
-		write_data.mode[0] = data->mode[0];
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.time[i] = data->time[i];
-		for (int i = 0; i < 11; i++)
-			write_data.gyro[i] = data->gyro[i];
-
-		/* amplitude data */
-		write_data.trans_strbd = data->trans_strbd;
-		write_data.trans_vert = data->trans_vert;
-		write_data.trans_port = data->trans_port;
-		write_data.pulse_len_strbd = data->pulse_len_strbd;
-		write_data.pulse_len_vert = data->pulse_len_vert;
-		write_data.pulse_len_port = data->pulse_len_port;
-		write_data.gain_start = data->gain_start;
-		write_data.r_compensation_factor = data->r_compensation_factor;
-		write_data.compensation_start = data->compensation_start;
-		write_data.increase_start = data->increase_start;
-		write_data.tvc_near = data->tvc_near;
-		write_data.tvc_far = data->tvc_far;
-		write_data.increase_int_near = data->increase_int_near;
-		write_data.increase_int_far = data->increase_int_far;
-		write_data.gain_center = data->gain_center;
-		write_data.filter_gain = data->filter_gain;
-		write_data.amplitude_center = data->amplitude_center;
-		write_data.echo_duration_center = data->echo_duration_center;
-		write_data.echo_scale_center = data->echo_scale_center;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.amplitude[i] = data->amplitude[i];
-			write_data.echo_duration[i] = data->echo_duration[i];
-		}
-		for (int i = 0; i < 16; i++) {
-			write_data.gain[i] = data->gain[i];
-			write_data.echo_scale[i] = data->echo_scale[i];
-		}
-
-		/* processed backscatter data */
-		write_data.back_scale = data->back_scale;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.back[i] = data->back[i];
+	/* additional navigation and depths */
+	write_data.course_true = data->course_true;
+	write_data.speed_transverse = data->speed_transverse;
+	write_data.speed = data->speed;
+	write_data.speed_reference[0] = data->speed_reference[0];
+	write_data.pitch = data->pitch;
+	write_data.track = data->track;
+	write_data.depth_center = data->depth_center;
+	write_data.depth_scale = data->depth_scale;
+	write_data.spare = data->spare;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.distance[i] = data->distance[i];
+		write_data.depth[i] = data->depth[i];
 	}
+
+	/* travel time data */
+	write_data.course_ground = data->course_ground;
+	write_data.speed_ground = data->speed_ground;
+	write_data.heave = data->heave;
+	write_data.roll = data->roll;
+	write_data.time_center = data->time_center;
+	write_data.time_scale = data->time_scale;
+	write_data.mode[0] = data->mode[0];
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.time[i] = data->time[i];
+	for (int i = 0; i < 11; i++)
+		write_data.gyro[i] = data->gyro[i];
+
+	/* amplitude data */
+	write_data.trans_strbd = data->trans_strbd;
+	write_data.trans_vert = data->trans_vert;
+	write_data.trans_port = data->trans_port;
+	write_data.pulse_len_strbd = data->pulse_len_strbd;
+	write_data.pulse_len_vert = data->pulse_len_vert;
+	write_data.pulse_len_port = data->pulse_len_port;
+	write_data.gain_start = data->gain_start;
+	write_data.r_compensation_factor = data->r_compensation_factor;
+	write_data.compensation_start = data->compensation_start;
+	write_data.increase_start = data->increase_start;
+	write_data.tvc_near = data->tvc_near;
+	write_data.tvc_far = data->tvc_far;
+	write_data.increase_int_near = data->increase_int_near;
+	write_data.increase_int_far = data->increase_int_far;
+	write_data.gain_center = data->gain_center;
+	write_data.filter_gain = data->filter_gain;
+	write_data.amplitude_center = data->amplitude_center;
+	write_data.echo_duration_center = data->echo_duration_center;
+	write_data.echo_scale_center = data->echo_scale_center;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.amplitude[i] = data->amplitude[i];
+		write_data.echo_duration[i] = data->echo_duration[i];
+	}
+	for (int i = 0; i < 16; i++) {
+		write_data.gain[i] = data->gain[i];
+		write_data.echo_scale[i] = data->echo_scale[i];
+	}
+
+	/* processed backscatter data */
+	write_data.back_scale = data->back_scale;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.back[i] = data->back[i];
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		/* position */
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
+	/* position */
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
 
-		/* time stamp */
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
+	/* time stamp */
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
 
-		/* additional navigation and depths */
-		mb_swap_float(&write_data.course_true);
-		mb_swap_float(&write_data.speed_transverse);
-		mb_swap_float(&write_data.speed);
-		mb_swap_float(&write_data.pitch);
-		write_data.track = mb_swap_short(write_data.track);
-		mb_swap_float(&write_data.depth_center);
-		mb_swap_float(&write_data.depth_scale);
-		write_data.spare = mb_swap_short(write_data.spare);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.distance[i] = mb_swap_short(write_data.distance[i]);
-			write_data.depth[i] = mb_swap_short(write_data.depth[i]);
-		}
-
-		/* travel time data */
-		mb_swap_float(&write_data.course_ground);
-		mb_swap_float(&write_data.speed_ground);
-		mb_swap_float(&write_data.heave);
-		mb_swap_float(&write_data.roll);
-		mb_swap_float(&write_data.time_center);
-		mb_swap_float(&write_data.time_scale);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.time[i] = mb_swap_short(write_data.time[i]);
-		for (int i = 0; i < 11; i++)
-			mb_swap_float(&write_data.gyro[i]);
-
-		/* amplitude data */
-		write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
-		write_data.trans_vert = mb_swap_short(write_data.trans_vert);
-		write_data.trans_port = mb_swap_short(write_data.trans_port);
-		write_data.pulse_len_strbd = mb_swap_short(write_data.pulse_len_strbd);
-		write_data.pulse_len_vert = mb_swap_short(write_data.pulse_len_vert);
-		write_data.pulse_len_port = mb_swap_short(write_data.pulse_len_port);
-		write_data.gain_start = mb_swap_short(write_data.gain_start);
-		write_data.r_compensation_factor = mb_swap_short(write_data.r_compensation_factor);
-		write_data.compensation_start = mb_swap_short(write_data.compensation_start);
-		write_data.increase_start = mb_swap_short(write_data.increase_start);
-		write_data.tvc_near = mb_swap_short(write_data.tvc_near);
-		write_data.tvc_far = mb_swap_short(write_data.tvc_far);
-		write_data.increase_int_near = mb_swap_short(write_data.increase_int_near);
-		write_data.increase_int_far = mb_swap_short(write_data.increase_int_far);
-		write_data.gain_center = mb_swap_short(write_data.gain_center);
-		mb_swap_float(&write_data.filter_gain);
-		write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
-		write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
-		write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
-			write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
-		}
-		for (int i = 0; i < 16; i++) {
-			write_data.gain[i] = mb_swap_short(write_data.gain[i]);
-			write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
-		}
-
-		/* processed backscatter data */
-		mb_swap_float(&write_data.back_scale);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.back[i] = mb_swap_short(write_data.back[i]);
+	/* additional navigation and depths */
+	mb_swap_float(&write_data.course_true);
+	mb_swap_float(&write_data.speed_transverse);
+	mb_swap_float(&write_data.speed);
+	mb_swap_float(&write_data.pitch);
+	write_data.track = mb_swap_short(write_data.track);
+	mb_swap_float(&write_data.depth_center);
+	mb_swap_float(&write_data.depth_scale);
+	write_data.spare = mb_swap_short(write_data.spare);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.distance[i] = mb_swap_short(write_data.distance[i]);
+		write_data.depth[i] = mb_swap_short(write_data.depth[i]);
 	}
+
+	/* travel time data */
+	mb_swap_float(&write_data.course_ground);
+	mb_swap_float(&write_data.speed_ground);
+	mb_swap_float(&write_data.heave);
+	mb_swap_float(&write_data.roll);
+	mb_swap_float(&write_data.time_center);
+	mb_swap_float(&write_data.time_scale);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.time[i] = mb_swap_short(write_data.time[i]);
+	for (int i = 0; i < 11; i++)
+		mb_swap_float(&write_data.gyro[i]);
+
+	/* amplitude data */
+	write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
+	write_data.trans_vert = mb_swap_short(write_data.trans_vert);
+	write_data.trans_port = mb_swap_short(write_data.trans_port);
+	write_data.pulse_len_strbd = mb_swap_short(write_data.pulse_len_strbd);
+	write_data.pulse_len_vert = mb_swap_short(write_data.pulse_len_vert);
+	write_data.pulse_len_port = mb_swap_short(write_data.pulse_len_port);
+	write_data.gain_start = mb_swap_short(write_data.gain_start);
+	write_data.r_compensation_factor = mb_swap_short(write_data.r_compensation_factor);
+	write_data.compensation_start = mb_swap_short(write_data.compensation_start);
+	write_data.increase_start = mb_swap_short(write_data.increase_start);
+	write_data.tvc_near = mb_swap_short(write_data.tvc_near);
+	write_data.tvc_far = mb_swap_short(write_data.tvc_far);
+	write_data.increase_int_near = mb_swap_short(write_data.increase_int_near);
+	write_data.increase_int_far = mb_swap_short(write_data.increase_int_far);
+	write_data.gain_center = mb_swap_short(write_data.gain_center);
+	mb_swap_float(&write_data.filter_gain);
+	write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
+	write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
+	write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
+		write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
+	}
+	for (int i = 0; i < 16; i++) {
+		write_data.gain[i] = mb_swap_short(write_data.gain[i]);
+		write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
+	}
+
+	/* processed backscatter data */
+	mb_swap_float(&write_data.back_scale);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.back[i] = mb_swap_short(write_data.back[i]);
 #endif
 
 	/* write record to file */
@@ -2708,6 +2350,7 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -2725,9 +2368,8 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2738,15 +2380,12 @@ int mbr_hsldeoih_wr_survey(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_calibrate";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_calibrate_struct write_data;
 	int write_size;
 	short int write_size_short;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -2755,7 +2394,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
 		fprintf(stderr, "dbg5       latitude:         %f\n", data->lat);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -2824,161 +2463,157 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		/* position */
-		write_data.lon = data->lon;
-		write_data.lat = data->lat;
+	/* position */
+	write_data.lon = data->lon;
+	write_data.lat = data->lat;
 
-		/* time stamp */
-		write_data.year = data->year;
-		write_data.month = data->month;
-		write_data.day = data->day;
-		write_data.hour = data->hour;
-		write_data.minute = data->minute;
-		write_data.second = data->second;
-		write_data.alt_minute = data->alt_minute;
-		write_data.alt_second = data->alt_second;
+	/* time stamp */
+	write_data.year = data->year;
+	write_data.month = data->month;
+	write_data.day = data->day;
+	write_data.hour = data->hour;
+	write_data.minute = data->minute;
+	write_data.second = data->second;
+	write_data.alt_minute = data->alt_minute;
+	write_data.alt_second = data->alt_second;
 
-		/* additional navigation and depths */
-		write_data.course_true = data->course_true;
-		write_data.speed_transverse = data->speed_transverse;
-		write_data.speed = data->speed;
-		write_data.speed_reference[0] = data->speed_reference[0];
-		write_data.pitch = data->pitch;
-		write_data.track = data->track;
-		write_data.depth_center = data->depth_center;
-		write_data.depth_scale = data->depth_scale;
-		write_data.spare = data->spare;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.distance[i] = data->distance[i];
-			write_data.depth[i] = data->depth[i];
-		}
-
-		/* travel time data */
-		write_data.course_ground = data->course_ground;
-		write_data.speed_ground = data->speed_ground;
-		write_data.heave = data->heave;
-		write_data.roll = data->roll;
-		write_data.time_center = data->time_center;
-		write_data.time_scale = data->time_scale;
-		write_data.mode[0] = data->mode[0];
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.time[i] = data->time[i];
-		for (int i = 0; i < 11; i++)
-			write_data.gyro[i] = data->gyro[i];
-
-		/* amplitude data */
-		write_data.trans_strbd = data->trans_strbd;
-		write_data.trans_vert = data->trans_vert;
-		write_data.trans_port = data->trans_port;
-		write_data.pulse_len_strbd = data->pulse_len_strbd;
-		write_data.pulse_len_vert = data->pulse_len_vert;
-		write_data.pulse_len_port = data->pulse_len_port;
-		write_data.gain_start = data->gain_start;
-		write_data.r_compensation_factor = data->r_compensation_factor;
-		write_data.compensation_start = data->compensation_start;
-		write_data.increase_start = data->increase_start;
-		write_data.tvc_near = data->tvc_near;
-		write_data.tvc_far = data->tvc_far;
-		write_data.increase_int_near = data->increase_int_near;
-		write_data.increase_int_far = data->increase_int_far;
-		write_data.gain_center = data->gain_center;
-		write_data.filter_gain = data->filter_gain;
-		write_data.amplitude_center = data->amplitude_center;
-		write_data.echo_duration_center = data->echo_duration_center;
-		write_data.echo_scale_center = data->echo_scale_center;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.amplitude[i] = data->amplitude[i];
-			write_data.echo_duration[i] = data->echo_duration[i];
-		}
-		for (int i = 0; i < 16; i++) {
-			write_data.gain[i] = data->gain[i];
-			write_data.echo_scale[i] = data->echo_scale[i];
-		}
-
-		/* processed backscatter data */
-		write_data.back_scale = data->back_scale;
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.back[i] = data->back[i];
+	/* additional navigation and depths */
+	write_data.course_true = data->course_true;
+	write_data.speed_transverse = data->speed_transverse;
+	write_data.speed = data->speed;
+	write_data.speed_reference[0] = data->speed_reference[0];
+	write_data.pitch = data->pitch;
+	write_data.track = data->track;
+	write_data.depth_center = data->depth_center;
+	write_data.depth_scale = data->depth_scale;
+	write_data.spare = data->spare;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.distance[i] = data->distance[i];
+		write_data.depth[i] = data->depth[i];
 	}
+
+	/* travel time data */
+	write_data.course_ground = data->course_ground;
+	write_data.speed_ground = data->speed_ground;
+	write_data.heave = data->heave;
+	write_data.roll = data->roll;
+	write_data.time_center = data->time_center;
+	write_data.time_scale = data->time_scale;
+	write_data.mode[0] = data->mode[0];
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.time[i] = data->time[i];
+	for (int i = 0; i < 11; i++)
+		write_data.gyro[i] = data->gyro[i];
+
+	/* amplitude data */
+	write_data.trans_strbd = data->trans_strbd;
+	write_data.trans_vert = data->trans_vert;
+	write_data.trans_port = data->trans_port;
+	write_data.pulse_len_strbd = data->pulse_len_strbd;
+	write_data.pulse_len_vert = data->pulse_len_vert;
+	write_data.pulse_len_port = data->pulse_len_port;
+	write_data.gain_start = data->gain_start;
+	write_data.r_compensation_factor = data->r_compensation_factor;
+	write_data.compensation_start = data->compensation_start;
+	write_data.increase_start = data->increase_start;
+	write_data.tvc_near = data->tvc_near;
+	write_data.tvc_far = data->tvc_far;
+	write_data.increase_int_near = data->increase_int_near;
+	write_data.increase_int_far = data->increase_int_far;
+	write_data.gain_center = data->gain_center;
+	write_data.filter_gain = data->filter_gain;
+	write_data.amplitude_center = data->amplitude_center;
+	write_data.echo_duration_center = data->echo_duration_center;
+	write_data.echo_scale_center = data->echo_scale_center;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.amplitude[i] = data->amplitude[i];
+		write_data.echo_duration[i] = data->echo_duration[i];
+	}
+	for (int i = 0; i < 16; i++) {
+		write_data.gain[i] = data->gain[i];
+		write_data.echo_scale[i] = data->echo_scale[i];
+	}
+
+	/* processed backscatter data */
+	write_data.back_scale = data->back_scale;
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.back[i] = data->back[i];
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	if (status == MB_SUCCESS) {
-		/* position */
-		mb_swap_float(&write_data.lon);
-		mb_swap_float(&write_data.lat);
+	/* position */
+	mb_swap_float(&write_data.lon);
+	mb_swap_float(&write_data.lat);
 
-		/* time stamp */
-		write_data.year = mb_swap_short(write_data.year);
-		write_data.month = mb_swap_short(write_data.month);
-		write_data.day = mb_swap_short(write_data.day);
-		write_data.hour = mb_swap_short(write_data.hour);
-		write_data.minute = mb_swap_short(write_data.minute);
-		write_data.second = mb_swap_short(write_data.second);
-		write_data.alt_minute = mb_swap_short(write_data.alt_minute);
-		write_data.alt_second = mb_swap_short(write_data.alt_second);
+	/* time stamp */
+	write_data.year = mb_swap_short(write_data.year);
+	write_data.month = mb_swap_short(write_data.month);
+	write_data.day = mb_swap_short(write_data.day);
+	write_data.hour = mb_swap_short(write_data.hour);
+	write_data.minute = mb_swap_short(write_data.minute);
+	write_data.second = mb_swap_short(write_data.second);
+	write_data.alt_minute = mb_swap_short(write_data.alt_minute);
+	write_data.alt_second = mb_swap_short(write_data.alt_second);
 
-		/* additional navigation and depths */
-		mb_swap_float(&write_data.course_true);
-		mb_swap_float(&write_data.speed_transverse);
-		mb_swap_float(&write_data.speed);
-		mb_swap_float(&write_data.pitch);
-		write_data.track = mb_swap_short(write_data.track);
-		mb_swap_float(&write_data.depth_center);
-		mb_swap_float(&write_data.depth_scale);
-		write_data.spare = mb_swap_short(write_data.spare);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.distance[i] = mb_swap_short(write_data.distance[i]);
-			write_data.depth[i] = mb_swap_short(write_data.depth[i]);
-		}
-
-		/* travel time data */
-		mb_swap_float(&write_data.course_ground);
-		mb_swap_float(&write_data.speed_ground);
-		mb_swap_float(&write_data.heave);
-		mb_swap_float(&write_data.roll);
-		mb_swap_float(&write_data.time_center);
-		mb_swap_float(&write_data.time_scale);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.time[i] = mb_swap_short(write_data.time[i]);
-		for (int i = 0; i < 11; i++)
-			mb_swap_float(&write_data.gyro[i]);
-
-		/* amplitude data */
-		write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
-		write_data.trans_vert = mb_swap_short(write_data.trans_vert);
-		write_data.trans_port = mb_swap_short(write_data.trans_port);
-		write_data.pulse_len_strbd = mb_swap_short(write_data.pulse_len_strbd);
-		write_data.pulse_len_vert = mb_swap_short(write_data.pulse_len_vert);
-		write_data.pulse_len_port = mb_swap_short(write_data.pulse_len_port);
-		write_data.gain_start = mb_swap_short(write_data.gain_start);
-		write_data.r_compensation_factor = mb_swap_short(write_data.r_compensation_factor);
-		write_data.compensation_start = mb_swap_short(write_data.compensation_start);
-		write_data.increase_start = mb_swap_short(write_data.increase_start);
-		write_data.tvc_near = mb_swap_short(write_data.tvc_near);
-		write_data.tvc_far = mb_swap_short(write_data.tvc_far);
-		write_data.increase_int_near = mb_swap_short(write_data.increase_int_near);
-		write_data.increase_int_far = mb_swap_short(write_data.increase_int_far);
-		write_data.gain_center = mb_swap_short(write_data.gain_center);
-		mb_swap_float(&write_data.filter_gain);
-		write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
-		write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
-		write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
-			write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
-			write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
-		}
-		for (int i = 0; i < 16; i++) {
-			write_data.gain[i] = mb_swap_short(write_data.gain[i]);
-			write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
-		}
-
-		/* processed backscatter data */
-		mb_swap_float(&write_data.back_scale);
-		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
-			write_data.back[i] = mb_swap_short(write_data.back[i]);
+	/* additional navigation and depths */
+	mb_swap_float(&write_data.course_true);
+	mb_swap_float(&write_data.speed_transverse);
+	mb_swap_float(&write_data.speed);
+	mb_swap_float(&write_data.pitch);
+	write_data.track = mb_swap_short(write_data.track);
+	mb_swap_float(&write_data.depth_center);
+	mb_swap_float(&write_data.depth_scale);
+	write_data.spare = mb_swap_short(write_data.spare);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.distance[i] = mb_swap_short(write_data.distance[i]);
+		write_data.depth[i] = mb_swap_short(write_data.depth[i]);
 	}
+
+	/* travel time data */
+	mb_swap_float(&write_data.course_ground);
+	mb_swap_float(&write_data.speed_ground);
+	mb_swap_float(&write_data.heave);
+	mb_swap_float(&write_data.roll);
+	mb_swap_float(&write_data.time_center);
+	mb_swap_float(&write_data.time_scale);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.time[i] = mb_swap_short(write_data.time[i]);
+	for (int i = 0; i < 11; i++)
+		mb_swap_float(&write_data.gyro[i]);
+
+	/* amplitude data */
+	write_data.trans_strbd = mb_swap_short(write_data.trans_strbd);
+	write_data.trans_vert = mb_swap_short(write_data.trans_vert);
+	write_data.trans_port = mb_swap_short(write_data.trans_port);
+	write_data.pulse_len_strbd = mb_swap_short(write_data.pulse_len_strbd);
+	write_data.pulse_len_vert = mb_swap_short(write_data.pulse_len_vert);
+	write_data.pulse_len_port = mb_swap_short(write_data.pulse_len_port);
+	write_data.gain_start = mb_swap_short(write_data.gain_start);
+	write_data.r_compensation_factor = mb_swap_short(write_data.r_compensation_factor);
+	write_data.compensation_start = mb_swap_short(write_data.compensation_start);
+	write_data.increase_start = mb_swap_short(write_data.increase_start);
+	write_data.tvc_near = mb_swap_short(write_data.tvc_near);
+	write_data.tvc_far = mb_swap_short(write_data.tvc_far);
+	write_data.increase_int_near = mb_swap_short(write_data.increase_int_near);
+	write_data.increase_int_far = mb_swap_short(write_data.increase_int_far);
+	write_data.gain_center = mb_swap_short(write_data.gain_center);
+	mb_swap_float(&write_data.filter_gain);
+	write_data.amplitude_center = mb_swap_short(write_data.amplitude_center);
+	write_data.echo_duration_center = mb_swap_short(write_data.echo_duration_center);
+	write_data.echo_scale_center = mb_swap_short(write_data.echo_scale_center);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+		write_data.amplitude[i] = mb_swap_short(write_data.amplitude[i]);
+		write_data.echo_duration[i] = mb_swap_short(write_data.echo_duration[i]);
+	}
+	for (int i = 0; i < 16; i++) {
+		write_data.gain[i] = mb_swap_short(write_data.gain[i]);
+		write_data.echo_scale[i] = mb_swap_short(write_data.echo_scale[i]);
+	}
+
+	/* processed backscatter data */
+	mb_swap_float(&write_data.back_scale);
+	for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++)
+		write_data.back[i] = mb_swap_short(write_data.back[i]);
 #endif
 
 	/* write record to file */
@@ -2987,6 +2622,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -3004,9 +2640,8 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3017,15 +2652,12 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp, struct mbf_hsldeoih_struc
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct *data, int *error) {
-	char *function_name = "mbr_hsldeoih_wr_comment";
-	int status = MB_SUCCESS;
 	struct mbf_hsldeoih_comment_struct write_data;
 	int write_size;
 	short int write_size_short;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
@@ -3034,14 +2666,12 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 	/* print debug statements */
 	if (verbose >= 5) {
-		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
 	}
 
 	/* copy data from internal storage */
-	if (status == MB_SUCCESS) {
-		strncpy(write_data.comment, data->comment, MBF_HSLDEOIH_MAXLINE);
-	}
+	strncpy(write_data.comment, data->comment, MBF_HSLDEOIH_MAXLINE);
 
 	/* write record to file */
 	write_size = sizeof(write_data);
@@ -3049,6 +2679,7 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 #ifdef BYTESWAPPED
 	write_size_short = mb_swap_short(write_size_short);
 #endif
+	int status = MB_SUCCESS;
 	if ((status = fwrite(&write_size_short, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
@@ -3066,9 +2697,257 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 		*error = MB_ERROR_NO_ERROR;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
+	struct mbf_hsldeoih_struct *data;
+	FILE *mbfp;
+	unsigned int label;
+	short int shortkind;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_hsldeoih_struct *)data_ptr;
+	mbfp = mb_io_ptr->mbfp;
+
+	if (verbose >= 4) {
+		fprintf(stderr, "\ndbg4  Data record kind in MBIO function <%s>\n", __func__);
+		fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
+	}
+
+	/* write record label to file */
+	label = MBF_HSLDEOIH_LABEL;
+#ifdef BYTESWAPPED
+	label = mb_swap_int(label);
+#endif
+	int status = MB_SUCCESS;
+	if ((status = fwrite(&label, 1, sizeof(int), mbfp)) != sizeof(int)) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+	else {
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+	}
+	shortkind = data->kind;
+
+	/* translate MBIO kind values to format kind values
+	 */
+	if (data->kind == MB_DATA_DATA) {
+		shortkind = MBF_HSLDEOIH_KIND_DATA;
+	}
+	else if (data->kind == MB_DATA_COMMENT) {
+		shortkind = MBF_HSLDEOIH_KIND_COMMENT;
+	}
+	else if (data->kind == MB_DATA_CALIBRATE) {
+		shortkind = MBF_HSLDEOIH_KIND_CALIBRATE;
+	}
+	else if (data->kind == MB_DATA_MEAN_VELOCITY) {
+		shortkind = MBF_HSLDEOIH_KIND_MEAN_VELOCITY;
+	}
+	else if (data->kind == MB_DATA_VELOCITY_PROFILE) {
+		shortkind = MBF_HSLDEOIH_KIND_VELOCITY_PROFILE;
+	}
+	else if (data->kind == MB_DATA_STANDBY) {
+		shortkind = MBF_HSLDEOIH_KIND_STANDBY;
+	}
+	else if (data->kind == MB_DATA_NAV_SOURCE) {
+		shortkind = MBF_HSLDEOIH_KIND_NAV_SOURCE;
+	}
+#ifdef BYTESWAPPED
+	shortkind = mb_swap_short(shortkind);
+#endif
+	if ((status = fwrite(&shortkind, 1, sizeof(short int), mbfp)) != sizeof(short int)) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+	}
+	else {
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+	}
+
+	/* write the data */
+	if (status == MB_SUCCESS) {
+		if (data->kind == MB_DATA_DATA)
+			status = mbr_hsldeoih_wr_survey(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_COMMENT)
+			status = mbr_hsldeoih_wr_comment(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_CALIBRATE)
+			status = mbr_hsldeoih_wr_calibrate(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_MEAN_VELOCITY)
+			status = mbr_hsldeoih_wr_mean_velocity(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_VELOCITY_PROFILE)
+			status = mbr_hsldeoih_wr_velocity_profile(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_STANDBY)
+			status = mbr_hsldeoih_wr_standby(verbose, mbfp, data, error);
+		else if (data->kind == MB_DATA_NAV_SOURCE)
+			status = mbr_hsldeoih_wr_nav_source(verbose, mbfp, data, error);
+		else {
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_KIND;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbf_hsldeoih_struct *data;
+	char *data_ptr;
+	struct mbsys_hsds_struct *store;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
+	data_ptr = (char *)data;
+	store = (struct mbsys_hsds_struct *)store_ptr;
+
+	/* first translate values from data storage structure */
+	if (store != NULL) {
+		/* type of data record */
+		data->kind = store->kind;
+
+		/* position (all records ) */
+		data->lon = store->lon;
+		data->lat = store->lat;
+
+		/* time stamp (all records ) */
+		data->year = store->year;
+		data->month = store->month;
+		data->day = store->day;
+		data->hour = store->hour;
+		data->minute = store->minute;
+		data->second = store->second;
+		data->alt_minute = store->alt_minute;
+		data->alt_second = store->alt_second;
+
+		/* additional navigation and depths (ERGNMESS and ERGNEICH) */
+		data->course_true = store->course_true;
+		data->speed_transverse = store->speed_transverse;
+		data->speed = store->speed;
+		data->speed_reference[0] = store->speed_reference[0];
+		data->pitch = store->pitch;
+		data->track = store->track;
+		data->depth_center = store->depth_center;
+		data->depth_scale = store->depth_scale;
+		data->spare = store->spare;
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			data->distance[i] = store->distance[i];
+			data->depth[i] = store->depth[i];
+		}
+
+		/* travel time data (ERGNSLZT) */
+		data->course_ground = store->course_ground;
+		data->speed_ground = store->speed_ground;
+		data->heave = store->heave;
+		data->roll = store->roll;
+		data->time_center = store->time_center;
+		data->time_scale = store->time_scale;
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			data->time[i] = store->time[i];
+		for (int i = 0; i < 11; i++)
+			data->gyro[i] = store->gyro[i];
+
+		/* amplitude data (ERGNAMPL) */
+		data->mode[0] = store->mode[0];
+		data->trans_strbd = store->trans_strbd;
+		data->trans_vert = store->trans_vert;
+		data->trans_port = store->trans_port;
+		data->pulse_len_strbd = store->pulse_len_strbd;
+		data->pulse_len_vert = store->pulse_len_vert;
+		data->pulse_len_port = store->pulse_len_port;
+		data->gain_start = store->gain_start;
+		data->r_compensation_factor = store->r_compensation_factor;
+		data->compensation_start = store->compensation_start;
+		data->increase_start = store->increase_start;
+		data->tvc_near = store->tvc_near;
+		data->tvc_far = store->tvc_far;
+		data->increase_int_near = store->increase_int_near;
+		data->increase_int_far = store->increase_int_far;
+		data->gain_center = store->gain_center;
+		data->filter_gain = store->filter_gain;
+		data->amplitude_center = store->amplitude_center;
+		data->echo_duration_center = store->echo_duration_center;
+		data->echo_scale_center = store->echo_scale_center;
+		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+			data->amplitude[i] = store->amplitude[i];
+			data->echo_duration[i] = store->echo_duration[i];
+		}
+		for (int i = 0; i < 16; i++) {
+			data->gain[i] = store->gain[i];
+			data->echo_scale[i] = store->echo_scale[i];
+		}
+
+		/* mean velocity (ERGNHYDI) */
+		data->draught = store->draught;
+		data->vel_mean = store->vel_mean;
+		data->vel_keel = store->vel_keel;
+		data->tide = store->tide;
+
+		/* water velocity profile (HS_ERGNCTDS) */
+		data->num_vel = store->num_vel;
+		for (int i = 0; i < MBF_HSLDEOIH_MAXVEL; i++) {
+			data->vdepth[i] = store->vdepth[i];
+			data->velocity[i] = store->velocity[i];
+		}
+
+		/* navigation source (ERGNPOSI) */
+		data->pos_corr_x = store->pos_corr_x;
+		data->pos_corr_y = store->pos_corr_y;
+		strncpy(data->sensors, store->sensors, 8);
+
+		/* comment (LDEOCMNT) */
+		strncpy(data->comment, store->comment, MBSYS_HSDS_MAXLINE);
+
+		/* processed backscatter */
+		data->back_scale = store->back_scale;
+		for (int i = 0; i < MBF_HSLDEOIH_BEAMS; i++) {
+			data->back[i] = store->back[i];
+		}
+	}
+
+	/* write next data to file */
+	const int status = mbr_hsldeoih_wr_data(verbose, mbio_ptr, data_ptr, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3080,12 +2959,8 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hsldeoih";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -3094,7 +2969,7 @@ int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hsldeoih(
+	const int status = mbr_info_hsldeoih(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
@@ -3123,9 +2998,8 @@ int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

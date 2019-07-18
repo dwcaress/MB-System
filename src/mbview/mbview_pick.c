@@ -81,7 +81,6 @@ static char value_list[MB_PATH_MAXLINE];
 int mbview_clearpicks(size_t instance) {
 
 	/* local variables */
-	char *function_name = "mbview_clearpicks";
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	int replotinstance;
@@ -92,7 +91,7 @@ int mbview_clearpicks(size_t instance) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -182,7 +181,7 @@ int mbview_clearpicks(size_t instance) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -195,7 +194,6 @@ int mbview_clearpicks(size_t instance) {
 int mbview_clearnavpicks(size_t instance) {
 
 	/* local variables */
-	char *function_name = "mbview_clearnavpicks";
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	int replotinstance;
@@ -206,7 +204,7 @@ int mbview_clearnavpicks(size_t instance) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -270,7 +268,7 @@ int mbview_clearnavpicks(size_t instance) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -283,7 +281,6 @@ int mbview_clearnavpicks(size_t instance) {
 int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* local variables */
-	char *function_name = "mbview_pick";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -295,7 +292,7 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -395,7 +392,7 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -408,7 +405,6 @@ int mbview_pick(size_t instance, int which, int xpixel, int ypixel) {
 int mbview_extract_pick_profile(size_t instance) {
 
 	/* local variables */
-	char *function_name = "mbview_extract_pick_profile";
 	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
@@ -419,7 +415,7 @@ int mbview_extract_pick_profile(size_t instance) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -505,7 +501,7 @@ int mbview_extract_pick_profile(size_t instance) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -518,7 +514,6 @@ int mbview_extract_pick_profile(size_t instance) {
 int mbview_picksize(size_t instance) {
 
 	/* local variables */
-	char *function_name = "mbview_picksize";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -529,7 +524,7 @@ int mbview_picksize(size_t instance) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -619,7 +614,7 @@ int mbview_picksize(size_t instance) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -631,7 +626,6 @@ int mbview_picksize(size_t instance) {
 int mbview_pick_text(size_t instance) {
 
 	/* local variables */
-	char *function_name = "mbview_pick_text";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -645,7 +639,7 @@ int mbview_pick_text(size_t instance) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -967,7 +961,7 @@ int mbview_pick_text(size_t instance) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -979,14 +973,13 @@ int mbview_pick_text(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latdstring, char *lonmstring, char *latmstring) {
 	/* local variables */
-	char *function_name = "mbview_setlonlatstrings";
 	int status = MB_SUCCESS;
 	int degree;
 	double minute;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       lon:              %f\n", lon);
@@ -1021,7 +1014,7 @@ int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latd
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       londstring:      %s\n", londstring);
 		fprintf(stderr, "dbg2       latdstring:      %s\n", latdstring);
@@ -1038,7 +1031,6 @@ int mbview_setlonlatstrings(double lon, double lat, char *londstring, char *latd
 int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* local variables */
-	char *function_name = "mbview_region";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -1055,7 +1047,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -1496,7 +1488,7 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -1508,7 +1500,6 @@ int mbview_region(size_t instance, int which, int xpixel, int ypixel) {
 int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* local variables */
-	char *function_name = "mbview_area";
 	int status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -1524,7 +1515,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -1909,7 +1900,7 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
@@ -1920,7 +1911,6 @@ int mbview_area(size_t instance, int which, int xpixel, int ypixel) {
 /*------------------------------------------------------------------------------*/
 int mbview_drawpick(size_t instance) {
 	/* local variables */
-	char *function_name = "mbview_drawpick";
 	int status = MB_SUCCESS;
 	int i;
 	struct mbview_world_struct *view;
@@ -1929,7 +1919,7 @@ int mbview_drawpick(size_t instance) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -2046,12 +2036,12 @@ int mbview_drawpick(size_t instance) {
 		}
 	}
 #ifdef MBV_GETERRORS
-	mbview_glerrorcheck(instance, 1, function_name);
+	mbview_glerrorcheck(instance, 1, __func__);
 #endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -2063,7 +2053,6 @@ int mbview_drawpick(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_drawregion(size_t instance) {
 	/* local variables */
-	char *function_name = "mbview_drawregion";
 	int status = MB_SUCCESS;
 	int i, j;
 	struct mbview_world_struct *view;
@@ -2071,7 +2060,7 @@ int mbview_drawregion(size_t instance) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -2109,7 +2098,7 @@ int mbview_drawregion(size_t instance) {
 				           (float)(data->region.segments[i].endpoints[1].zdisplay));
 				glEnd();
 #ifdef MBV_GETERRORS
-				mbview_glerrorcheck(instance, 1, function_name);
+				mbview_glerrorcheck(instance, 1, __func__);
 #endif
 			}
 		}
@@ -2117,7 +2106,7 @@ int mbview_drawregion(size_t instance) {
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
@@ -2129,7 +2118,6 @@ int mbview_drawregion(size_t instance) {
 /*------------------------------------------------------------------------------*/
 int mbview_drawarea(size_t instance) {
 	/* local variables */
-	char *function_name = "mbview_drawarea";
 	int status = MB_SUCCESS;
 	int i, j;
 	struct mbview_world_struct *view;
@@ -2137,7 +2125,7 @@ int mbview_drawarea(size_t instance) {
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       instance:         %zu\n", instance);
@@ -2163,7 +2151,7 @@ int mbview_drawarea(size_t instance) {
 			}
 			glEnd();
 #ifdef MBV_GETERRORS
-			mbview_glerrorcheck(instance, 1, function_name);
+			mbview_glerrorcheck(instance, 1, __func__);
 #endif
 		}
 		else {
@@ -2174,7 +2162,7 @@ int mbview_drawarea(size_t instance) {
 			           (float)(data->area.segment.endpoints[1].zdisplay));
 			glEnd();
 #ifdef MBV_GETERRORS
-			mbview_glerrorcheck(instance, 1, function_name);
+			mbview_glerrorcheck(instance, 1, __func__);
 #endif
 		}
 
@@ -2189,7 +2177,7 @@ int mbview_drawarea(size_t instance) {
 				}
 				glEnd();
 #ifdef MBV_GETERRORS
-				mbview_glerrorcheck(instance, 1, function_name);
+				mbview_glerrorcheck(instance, 1, __func__);
 #endif
 			}
 			else {
@@ -2202,18 +2190,18 @@ int mbview_drawarea(size_t instance) {
 				           (float)(data->area.segments[i].endpoints[1].zdisplay));
 				glEnd();
 #ifdef MBV_GETERRORS
-				mbview_glerrorcheck(instance, 1, function_name);
+				mbview_glerrorcheck(instance, 1, __func__);
 #endif
 			}
 		}
 	}
 #ifdef MBV_GETERRORS
-	mbview_glerrorcheck(instance, 1, function_name);
+	mbview_glerrorcheck(instance, 1, __func__);
 #endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}

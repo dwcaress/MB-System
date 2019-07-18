@@ -1053,13 +1053,12 @@ int main(int argc, char **argv) {
 }
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
-	char *function_name = "printsimplevalue";
 	int status = MB_SUCCESS;
 	char format[24];
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       value:           %f\n", value);
@@ -1100,7 +1099,7 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -1113,12 +1112,11 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 }
 /*--------------------------------------------------------------------*/
 int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
-	char *function_name = "printNaN";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
@@ -1142,7 +1140,7 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);

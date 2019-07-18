@@ -41,8 +41,6 @@
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                  double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
                  int *beams_amp, int *pixels_ss, int *error) {
-	char *function_name = "mb_read_init";
-	int status;
 	int status_save;
 	int error_save;
 	int sapi_status;
@@ -57,9 +55,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	int nscan;
 	char *stdin_string = "stdin";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       file:       %s\n", file);
@@ -89,7 +86,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	}
 
 	/* allocate memory for mbio descriptor */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
 	struct mb_io_struct *mb_io_ptr = NULL;
 	if (status == MB_SUCCESS) {
 		memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));
@@ -119,7 +116,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 		/* output debug information */
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 			fprintf(stderr, "dbg2  Return values:\n");
 			fprintf(stderr, "dbg2       error:      %d\n", *error);
 			fprintf(stderr, "dbg2  Return status:\n");
@@ -175,7 +172,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	mb_io_ptr->new_beams_amp = 0;
 	mb_io_ptr->new_pixels_ss = 0;
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Beam and pixel dimensions set in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  Beam and pixel dimensions set in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       beams_bath: %d\n", mb_io_ptr->beams_bath_max);
 		fprintf(stderr, "dbg4       beams_amp:  %d\n", mb_io_ptr->beams_amp_max);
 		fprintf(stderr, "dbg4       pixels_ss:  %d\n", mb_io_ptr->pixels_ss_max);
@@ -313,7 +310,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 			fprintf(stderr, "dbg2  Return values:\n");
 			fprintf(stderr, "dbg2       error:      %d\n", *error);
 			fprintf(stderr, "dbg2  Return status:\n");
@@ -523,7 +520,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 		/* output debug message */
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 			fprintf(stderr, "dbg2  Return values:\n");
 			fprintf(stderr, "dbg2       error:      %d\n", *error);
 			fprintf(stderr, "dbg2  Return status:\n");
@@ -624,9 +621,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)*mbio_ptr);
 		fprintf(stderr, "dbg2       ->numfile:  %d\n", mb_io_ptr->numfile);
@@ -663,8 +659,6 @@ int mb_input_init(int verbose, char *file, int format,
                 int (*input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error),
                 int (*input_close)(int verbose, void *mbio_ptr, int *error),
                 int *error) {
-	char *function_name = "mb_input_init";
-	int status;
 	int status_save;
 	int error_save;
 	char path[MB_PATH_MAXLINE];
@@ -675,9 +669,8 @@ int mb_input_init(int verbose, char *file, int format,
 	int nscan;
 	char *stdin_string = "stdin";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       file:            %s\n", file);
@@ -710,7 +703,7 @@ int mb_input_init(int verbose, char *file, int format,
 	}
 
 	/* allocate memory for mbio descriptor */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_io_struct), (void **)mbio_ptr, error);
 	struct mb_io_struct *mb_io_ptr = NULL;
 	if (status == MB_SUCCESS) {
 		memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));
@@ -740,7 +733,7 @@ int mb_input_init(int verbose, char *file, int format,
 
 		/* output debug information */
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 			fprintf(stderr, "dbg2  Return values:\n");
 			fprintf(stderr, "dbg2       error:      %d\n", *error);
 			fprintf(stderr, "dbg2  Return status:\n");
@@ -798,7 +791,7 @@ int mb_input_init(int verbose, char *file, int format,
 	mb_io_ptr->new_beams_amp = 0;
 	mb_io_ptr->new_pixels_ss = 0;
 	if (verbose >= 4) {
-		fprintf(stderr, "\ndbg4  Beam and pixel dimensions set in MBIO function <%s>\n", function_name);
+		fprintf(stderr, "\ndbg4  Beam and pixel dimensions set in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       beams_bath: %d\n", mb_io_ptr->beams_bath_max);
 		fprintf(stderr, "dbg4       beams_amp:  %d\n", mb_io_ptr->beams_amp_max);
 		fprintf(stderr, "dbg4       pixels_ss:  %d\n", mb_io_ptr->pixels_ss_max);
@@ -934,7 +927,7 @@ int mb_input_init(int verbose, char *file, int format,
 		status = MB_FAILURE;
 		*error = MB_ERROR_MEMORY_FAIL;
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 			fprintf(stderr, "dbg2  Return values:\n");
 			fprintf(stderr, "dbg2       error:      %d\n", *error);
 			fprintf(stderr, "dbg2  Return status:\n");
@@ -984,7 +977,7 @@ int mb_input_init(int verbose, char *file, int format,
 
 		/* output debug message */
 		if (verbose >= 2) {
-			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", function_name);
+			fprintf(stderr, "\ndbg2  MBIO function <%s> terminated with error\n", __func__);
 			fprintf(stderr, "dbg2  Return values:\n");
 			fprintf(stderr, "dbg2       error:      %d\n", *error);
 			fprintf(stderr, "dbg2  Return status:\n");
@@ -1085,9 +1078,8 @@ int mb_input_init(int verbose, char *file, int format,
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)*mbio_ptr);
 		fprintf(stderr, "dbg2       ->numfile:  %d\n", mb_io_ptr->numfile);

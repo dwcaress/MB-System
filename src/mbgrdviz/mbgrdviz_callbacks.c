@@ -452,7 +452,6 @@ Object %s is not a Shell\n",
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
-  char function_name[] = "do_mbgrdviz_init";
   Cardinal ac = 0;
   Arg args[256];
   char value_text[MB_PATH_MAXLINE];
@@ -461,7 +460,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       argc:           %d\n", argc);
     fprintf(stderr, "dbg2       argv:\n");
@@ -599,7 +598,6 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity) {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_sensitivity() {
-  char function_name[] = "do_mbgrdviz_sensitivity";
   int mbview_active;
   int mbview_allactive;
   Cardinal ac = 0;
@@ -610,7 +608,7 @@ void do_mbgrdviz_sensitivity() {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
   }
 
   /* fprintf(stderr,"do_mbgrdviz_sensitivity called\n");*/
@@ -686,7 +684,6 @@ void do_mbgrdviz_sensitivity() {
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox";
   size_t actionid;
   size_t mode;
   Cardinal ac = 0;
@@ -699,7 +696,7 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -731,7 +728,6 @@ void do_mbgrdviz_fileSelectionBox(Widget w, XtPointer client_data, XtPointer cal
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_openoverlay";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -743,7 +739,7 @@ void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, X
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -773,7 +769,6 @@ void do_mbgrdviz_fileSelectionBox_openoverlay(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_opensite";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -785,7 +780,7 @@ void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPo
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -815,7 +810,6 @@ void do_mbgrdviz_fileSelectionBox_opensite(Widget w, XtPointer client_data, XtPo
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_openroute";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -827,7 +821,7 @@ void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtP
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -857,7 +851,6 @@ void do_mbgrdviz_fileSelectionBox_openroute(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_opennav";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -869,7 +862,7 @@ void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPoi
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -899,7 +892,6 @@ void do_mbgrdviz_fileSelectionBox_opennav(Widget w, XtPointer client_data, XtPoi
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_openswath";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -911,7 +903,7 @@ void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtP
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -941,7 +933,6 @@ void do_mbgrdviz_fileSelectionBox_openswath(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_openvector";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -953,7 +944,7 @@ void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, Xt
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -983,7 +974,6 @@ void do_mbgrdviz_fileSelectionBox_openvector(Widget w, XtPointer client_data, Xt
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_savesite";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -995,7 +985,7 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1025,7 +1015,6 @@ void do_mbgrdviz_fileSelectionBox_savesite(Widget w, XtPointer client_data, XtPo
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_savesitewpt";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1037,7 +1026,7 @@ void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, X
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1067,7 +1056,6 @@ void do_mbgrdviz_fileSelectionBox_savesitewpt(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_saveroute";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1079,7 +1067,7 @@ void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtP
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1109,7 +1097,6 @@ void do_mbgrdviz_fileSelectionBox_saveroute(Widget w, XtPointer client_data, XtP
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_saverisiscript";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1121,7 +1108,7 @@ void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1151,7 +1138,6 @@ void do_mbgrdviz_fileSelectionBox_saverisiscript(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_savewinfrogpts";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1163,7 +1149,7 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1193,7 +1179,6 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_savewinfrogwpt";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1205,7 +1190,7 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1235,7 +1220,6 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogwpt(Widget w, XtPointer client_data
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_savedegdecmin";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1247,7 +1231,7 @@ void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data,
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1277,7 +1261,6 @@ void do_mbgrdviz_fileSelectionBox_savedegdecmin(Widget w, XtPointer client_data,
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_savelnw";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1289,7 +1272,7 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1319,7 +1302,6 @@ void do_mbgrdviz_fileSelectionBox_savelnw(Widget w, XtPointer client_data, XtPoi
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_savegreenseayml";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1331,7 +1313,7 @@ void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_dat
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1361,7 +1343,6 @@ void do_mbgrdviz_fileSelectionBox_savegreenseayml(Widget w, XtPointer client_dat
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_saveprofile";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1373,7 +1354,7 @@ void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, X
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1403,7 +1384,6 @@ void do_mbgrdviz_fileSelectionBox_saveprofile(Widget w, XtPointer client_data, X
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_fileSelectionBox_realtime";
   Cardinal ac = 0;
   Arg args[256];
   size_t instance;
@@ -1415,7 +1395,7 @@ void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPo
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1445,13 +1425,12 @@ void do_mbgrdviz_fileSelectionBox_realtime(Widget w, XtPointer client_data, XtPo
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbgrdviz_close(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_close";
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1461,7 +1440,6 @@ void do_mbgrdviz_close(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_quit";
   int status = MB_SUCCESS;
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
@@ -1473,7 +1451,7 @@ void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1483,14 +1461,13 @@ void do_mbgrdviz_quit(Widget w, XtPointer client_data, XtPointer call_data) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_dismiss_notify(size_t instance) {
-  char function_name[] = "do_mbgrdviz_dismiss_notify";
   int status = MB_SUCCESS;
   int verbose = 0;
   int i;
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:  %zu\n", instance);
   }
@@ -1520,7 +1497,6 @@ int do_mbgrdviz_dismiss_notify(size_t instance) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_openfile";
   int status = MB_SUCCESS;
   size_t actionid;
   size_t mode;
@@ -1533,7 +1509,7 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -1715,7 +1691,6 @@ void do_mbgrdviz_openfile(Widget w, XtPointer client_data, XtPointer call_data) 
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_openprimary(char *input_file_ptr) {
-  char function_name[] = "do_mbgrdviz_openprimary";
   int status = MB_SUCCESS;
   char *button_name_ptr;
   size_t instance;
@@ -1793,7 +1768,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
   }
@@ -2057,7 +2032,6 @@ int do_mbgrdviz_openprimary(char *input_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr) {
-  char function_name[] = "do_mbgrdviz_openoverlay";
   int status = MB_SUCCESS;
 
   /* mbview parameters */
@@ -2086,7 +2060,7 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
@@ -2147,7 +2121,6 @@ int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
-  char function_name[] = "do_mbgrdviz_opensite";
   int status = MB_SUCCESS;
   FILE *sfp;
   mb_path buffer;
@@ -2167,7 +2140,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
@@ -2305,7 +2278,6 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_savesite";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nsite;
@@ -2324,7 +2296,7 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -2417,7 +2389,6 @@ int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_savesitewpt";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nsite;
@@ -2436,7 +2407,7 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -2528,7 +2499,6 @@ int do_mbgrdviz_savesitewpt(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
-  char function_name[] = "do_mbgrdviz_openroute";
   int status = MB_SUCCESS;
   FILE *sfp;
   char buffer[MB_PATH_MAXLINE];
@@ -2551,7 +2521,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
@@ -2672,7 +2642,6 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_saveroute";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nroute = 0;
@@ -2702,7 +2671,7 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -2858,7 +2827,6 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_saverisiscript";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nroute = 0;
@@ -2898,7 +2866,7 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -3070,7 +3038,6 @@ int do_mbgrdviz_saverisiscript(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_savewinfrogpts";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nroute = 0;
@@ -3093,7 +3060,7 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -3180,7 +3147,6 @@ int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_savewinfrogwpt";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nroute = 0;
@@ -3203,7 +3169,7 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -3290,7 +3256,6 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_savedegdecmin";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nroute = 0;
@@ -3316,7 +3281,7 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -3424,7 +3389,6 @@ int do_mbgrdviz_savedegdecmin(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_savelnw";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nroute = 0;
@@ -3454,7 +3418,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -3546,7 +3510,7 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
           if (proj_status != MB_SUCCESS) {
             mb_error(verbose, error, &error_message);
             fprintf(stderr, "\nMBIO Error initializing projection:\n%s\n", error_message);
-            fprintf(stderr, "\nProgram terminated in <%s>\n", function_name);
+            fprintf(stderr, "\nProgram terminated in <%s>\n", __func__);
             mb_memory_clear(verbose, &error);
             exit(error);
           }
@@ -3589,7 +3553,6 @@ int do_mbgrdviz_savelnw(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_savegreenseayml";
   int status = MB_SUCCESS;
   FILE *sfp;
   int nroute = 0;
@@ -3623,7 +3586,7 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -3775,7 +3738,6 @@ int do_mbgrdviz_savegreenseayml(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
-  char function_name[] = "do_mbgrdviz_openvector";
   int status = MB_SUCCESS;
   FILE *sfp;
   char buffer[MB_PATH_MAXLINE];
@@ -3799,7 +3761,7 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       input_file_ptr:  %s\n", input_file_ptr);
@@ -3938,7 +3900,6 @@ int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
-  char function_name[] = "do_mbgrdviz_saveprofile";
   int status = MB_SUCCESS;
   FILE *sfp;
   int npoints = 0;
@@ -3959,7 +3920,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       output_file_ptr: %s\n", output_file_ptr);
@@ -4066,7 +4027,6 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr) {
 /*---------------------------------------------------------------------------------------*/
 
 int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) {
-  char function_name[] = "do_mbgrdviz_opennav";
   int status = MB_SUCCESS;
   void *datalist;
   mb_path swathfile;
@@ -4085,7 +4045,7 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) 
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       swathbounds:     %d\n", swathbounds);
@@ -4161,7 +4121,6 @@ int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr) 
 
 int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *pathraw, char *pathprocessed, int format,
                         int formatorg, double weight, int *error) {
-  char function_name[] = "do_mbgrdviz_readnav";
   int status = MB_SUCCESS;
   char *error_message;
 
@@ -4244,7 +4203,7 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       swathfile:       %s\n", swathfile);
@@ -4541,7 +4500,6 @@ int do_mbgrdviz_readnav(size_t instance, char *swathfile, int pathstatus, char *
 int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double factor3, int *grid_projection_mode,
                          char *grid_projection_id, float *nodatavalue, int *nxy, int *n_columns, int *n_rows, double *min, double *max,
                          double *xmin, double *xmax, double *ymin, double *ymax, double *dx, double *dy, float **data) {
-  char function_name[] = "do_mbgrdviz_opentest";
   int status = MB_SUCCESS;
   double xx, yy;
   float *usedata;
@@ -4549,7 +4507,7 @@ int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:        %zu\n", instance);
     fprintf(stderr, "dbg2       factor1:         %f\n", factor1);
@@ -4599,7 +4557,6 @@ int do_mbgrdviz_opentest(size_t instance, double factor1, double factor2, double
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_open_region";
   int status = MB_SUCCESS;
   int ixmin, ixmax, jymin, jymax;
   int i, j, k, ksource;
@@ -4654,7 +4611,7 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -4914,7 +4871,6 @@ void do_mbgrdviz_open_region(Widget w, XtPointer client_data, XtPointer call_dat
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_open_mbedit";
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -4933,7 +4889,7 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -4983,7 +4939,6 @@ void do_mbgrdviz_open_mbedit(Widget w, XtPointer client_data, XtPointer call_dat
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_open_mbeditviz";
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -5003,7 +4958,7 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -5058,7 +5013,6 @@ void do_mbgrdviz_open_mbeditviz(Widget w, XtPointer client_data, XtPointer call_
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_open_mbnavedit";
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -5077,7 +5031,7 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -5127,7 +5081,6 @@ void do_mbgrdviz_open_mbnavedit(Widget w, XtPointer client_data, XtPointer call_
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_open_mbvelocitytool";
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -5146,7 +5099,7 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -5196,7 +5149,6 @@ void do_mbgrdviz_open_mbvelocitytool(Widget w, XtPointer client_data, XtPointer 
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_make_survey";
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -5210,7 +5162,7 @@ void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_dat
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -5339,7 +5291,6 @@ void do_mbgrdviz_make_survey(Widget w, XtPointer client_data, XtPointer call_dat
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_generate_survey";
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -5384,7 +5335,7 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -5967,13 +5918,12 @@ void do_mbgrdviz_generate_survey(Widget w, XtPointer client_data, XtPointer call
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_arearoute_dismiss";
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -5985,7 +5935,6 @@ void do_mbgrdviz_arearoute_dismiss(Widget w, XtPointer client_data, XtPointer ca
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_arearoute_parameterchange";
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
   int status = MB_SUCCESS;
@@ -6002,7 +5951,7 @@ void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPo
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6109,7 +6058,6 @@ void do_mbgrdviz_arearoute_parameterchange(Widget w, XtPointer client_data, XtPo
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_recalc(size_t instance) {
-  char function_name[] = "do_mbgrdviz_arearoute_recalc";
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -6119,7 +6067,7 @@ void do_mbgrdviz_arearoute_recalc(size_t instance) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:   %zu\n", instance);
   }
@@ -6226,7 +6174,6 @@ void do_mbgrdviz_arearoute_recalc(size_t instance) {
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_arearoute_info(size_t instance) {
-  char function_name[] = "do_mbgrdviz_arearoute_info";
   int status = MB_SUCCESS;
 
   /* mbview instance */
@@ -6242,7 +6189,7 @@ void do_mbgrdviz_arearoute_info(size_t instance) {
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       instance:   %zu\n", instance);
   }
@@ -6282,7 +6229,6 @@ void do_mbgrdviz_arearoute_info(size_t instance) {
 void do_mbgrdviz_arearoute_linespacing_increment(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_arearoute_linespacing_increment";
   Cardinal ac = 0;
   Arg args[256];
   int linespacing;
@@ -6290,7 +6236,7 @@ void do_mbgrdviz_arearoute_linespacing_increment(Widget w, XtPointer client_data
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6324,7 +6270,6 @@ void do_mbgrdviz_arearoute_linespacing_increment(Widget w, XtPointer client_data
 void do_mbgrdviz_arearoute_altitude_increment(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_arearoute_altitude_increment";
   Cardinal ac = 0;
   Arg args[256];
   int altitude;
@@ -6332,7 +6277,7 @@ void do_mbgrdviz_arearoute_altitude_increment(Widget w, XtPointer client_data, X
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6366,7 +6311,6 @@ void do_mbgrdviz_arearoute_altitude_increment(Widget w, XtPointer client_data, X
 void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_arearoute_depth_increment";
   int status = MB_SUCCESS;
   Cardinal ac = 0;
   Arg args[256];
@@ -6375,7 +6319,7 @@ void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPo
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6406,7 +6350,7 @@ void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPo
 
   /* print output debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       error:       %d\n", error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -6416,13 +6360,12 @@ void do_mbgrdviz_arearoute_depth_increment(Widget w, XtPointer client_data, XtPo
 /*---------------------------------------------------------------------------------------*/
 
 void do_mbgrdviz_realtime_start(Widget w, XtPointer client_data, XtPointer call_data) {
-  char function_name[] = "do_mbgrdviz_realtime_start";
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6433,11 +6376,10 @@ void do_mbgrdviz_realtime_start(Widget w, XtPointer client_data, XtPointer call_
 void do_mbgrdviz_realtimesetup_path_reset(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtimesetup_path_reset";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6448,11 +6390,10 @@ void do_mbgrdviz_realtimesetup_path_reset(Widget w, XtPointer client_data, XtPoi
 void do_mbgrdviz_realtime_pause(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtime_pause";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6463,11 +6404,10 @@ void do_mbgrdviz_realtime_pause(Widget w, XtPointer client_data, XtPointer call_
 void do_mbgrdviz_realtime_stop(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtime_stop";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6478,11 +6418,10 @@ void do_mbgrdviz_realtime_stop(Widget w, XtPointer client_data, XtPointer call_d
 void do_mbgrdviz_realtime_resume(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtime_resume";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6493,11 +6432,10 @@ void do_mbgrdviz_realtime_resume(Widget w, XtPointer client_data, XtPointer call
 void do_mbgrdviz_realtimesetup_path_apply(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtimesetup_path_apply";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6508,11 +6446,10 @@ void do_mbgrdviz_realtimesetup_path_apply(Widget w, XtPointer client_data, XtPoi
 void do_mbgrdviz_realtimesetup_icon(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtimesetup_icon";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6523,11 +6460,10 @@ void do_mbgrdviz_realtimesetup_icon(Widget w, XtPointer client_data, XtPointer c
 void do_mbgrdviz_realtimesetup_path_browse(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtimesetup_path_browse";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6540,11 +6476,10 @@ void do_mbgrdviz_realtimesetup_path_browse(Widget w, XtPointer client_data, XtPo
 void do_mbgrdviz_realtimesetup_updaterate(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtimesetup_updaterate";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6555,11 +6490,10 @@ void do_mbgrdviz_realtimesetup_updaterate(Widget w, XtPointer client_data, XtPoi
 void do_mbgrdviz_realtimesetup_path_test(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtimesetup_path_test";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);
@@ -6570,11 +6504,10 @@ void do_mbgrdviz_realtimesetup_path_test(Widget w, XtPointer client_data, XtPoin
 void do_mbgrdviz_realtimesetup_pathmode(Widget w, XtPointer client_data, XtPointer call_data) {
   XmAnyCallbackStruct *acs;
   acs = (XmAnyCallbackStruct *)call_data;
-  char function_name[] = "do_mbgrdviz_realtimesetup_pathmode";
 
   /* print input debug statements */
   if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       w:           %p\n", w);
     fprintf(stderr, "dbg2       client_data: %p\n", client_data);

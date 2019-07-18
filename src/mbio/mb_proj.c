@@ -51,8 +51,6 @@ char *GMT_runtime_bindir_win32(char *result);
 
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
-	char *function_name = "mb_proj_init";
-	int status = MB_SUCCESS;
 	char pj_init_args[MB_PATH_MAXLINE];
 	projPJ pj;
 	struct stat file_status;
@@ -70,9 +68,8 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 	strcat(projectionfile, "\\share\\mbsystem\\Projections.dat");
 #endif
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       projection: %s\n", projection);
@@ -91,6 +88,8 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 	pch[0] = '\0';
 	strcat(projectionfile, "\\share\\mbsystem\\Projections.dat");
 #endif
+
+	int status = MB_SUCCESS;
 
 	/* check the existence of the projection database */
 	if ((fstat = stat(projectionfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
@@ -118,9 +117,8 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 		status = MB_FAILURE;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pjptr:           %p\n", (void *)*pjptr);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -132,13 +130,10 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_free(int verbose, void **pjptr, int *error) {
-	char *function_name = "mb_proj_free";
-	int status = MB_SUCCESS;
 	projPJ pj;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)*pjptr);
@@ -153,11 +148,10 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pjptr:           %p\n", (void *)*pjptr);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -169,15 +163,12 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *easting, double *northing, int *error) {
-	char *function_name = "mb_proj_forward";
-	int status = MB_SUCCESS;
 	projPJ pj;
 	projUV pjxy;
 	projUV pjll;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjptr);
@@ -197,11 +188,10 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       easting:         %f\n", *easting);
 		fprintf(stderr, "dbg2       northing:        %f\n", *northing);
@@ -214,15 +204,12 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, double *lon, double *lat, int *error) {
-	char *function_name = "mb_proj_inverse";
-	int status = MB_SUCCESS;
 	projPJ pj;
 	projUV pjxy;
 	projUV pjll;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjptr);
@@ -242,11 +229,10 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       lon:             %f\n", *lon);
 		fprintf(stderr, "dbg2       lat:             %f\n", *lat);
@@ -259,12 +245,9 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, double *x, double *y, double *z, int *error) {
-	char *function_name = "mb_proj_transform";
-	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjsrcptr);
@@ -281,11 +264,10 @@ int mb_proj_transform(int verbose, void *pjsrcptr, void *pjdstptr, int npoint, d
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       npoint:     %d\n", npoint);
 		for (int i = 0; i < npoint; i++)

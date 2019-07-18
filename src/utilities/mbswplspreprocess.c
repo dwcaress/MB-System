@@ -343,14 +343,13 @@ static void default_options(options *opts) {
 } /* default_options */
 /*----------------------------------------------------------------------*/
 static int parse_options(int verbose, int argc, char **argv, options *opts, int *error) {
-	char *function_name = "parse_options";
 	int status = MB_SUCCESS;
 	extern char *optarg;
 	int c;
 	int flag = 0;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       argc:       %d\n", argc);
@@ -420,7 +419,7 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2        error:     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -431,14 +430,13 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 } /* parse_options */
 /*---------------------------------------------------------------*/
 static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *error) {
-	char *function_name = "print_mbdefaults";
 	char *tagdebug2 = "dbg2 ";
 	char *tagdebug0 = "";
 	char *tag = NULL;
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       options:    %p\n", (void *)opts);
@@ -488,7 +486,7 @@ static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *
 	fprintf(stderr, "%scopy_rawamp:              %d\n", tag, opts->copy_rawamp);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2        error:     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -509,7 +507,6 @@ static void error_exit(int verbose, int error, char *funcname, char *message) {
 }
 /*---------------------------------------------------------------*/
 static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_path ifile, counts *recs, int *error) {
-	char *function_name = "scan_input_heights";
 	int status = MB_SUCCESS;
 	int i;
 	void *imbio_ptr = NULL;
@@ -524,7 +521,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       options:    %p\n", (void *)opts);
@@ -659,7 +656,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2        error:     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -671,14 +668,13 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 /*----------------------------------------------------------------------*/
 static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path *basename, int ofile_set, int split_txers,
                              int *error) {
-	char *function_name = "set_outfile_names";
 	mb_path fileroot;
 	int format;
 	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       ofile:      %p\n", (void *)ofile);
@@ -751,7 +747,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		for (i = 0; i < SWPLS_MAX_TXERS; i++) {
 			fprintf(stderr, "dbg2    ofile[%d]:      %s\n", i, ofile[i]);
@@ -766,11 +762,10 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 
 /*----------------------------------------------------------------------*/
 static int ping_txno(int verbose, struct mbsys_swathplus_struct *store, int *txno, int *error) {
-	char *function_name = "ping_txno";
 	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
@@ -790,7 +785,7 @@ static int ping_txno(int verbose, struct mbsys_swathplus_struct *store, int *txn
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2        txno:      %d\n", *txno);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -802,12 +797,11 @@ static int ping_txno(int verbose, struct mbsys_swathplus_struct *store, int *txn
 } /* ping_txno */
 /*----------------------------------------------------------------------*/
 static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
-	char *function_name = "copy_rawamp";
 	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       ping:        %p\n", (void *)ping);
@@ -818,7 +812,7 @@ static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -829,13 +823,12 @@ static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 } /* copy_rawamp */
 /*----------------------------------------------------------------------*/
 static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
-	char *function_name = "remove_rejected_samps";
 	int status = MB_SUCCESS;
 	swpls_point *points;
 	int valid, i;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       ping:        %p\n", (void *)ping);
@@ -876,7 +869,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&points, error);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -887,12 +880,11 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 } /* remove_rejected_samps */
 /*----------------------------------------------------------------------*/
 static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
-	char *function_name = "revcd";
 	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
 		fprintf(stderr, "dbg2       ping:        %p\n", (void *)ping);
@@ -908,7 +900,7 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -919,12 +911,11 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 } /* flip_sample_flags */
 /*----------------------------------------------------------------------*/
 static int ping_mode(int verbose, struct mbsys_swathplus_struct *store, int *mode, int *error) {
-	char *function_name = "ping_mode";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
@@ -950,7 +941,7 @@ static int ping_mode(int verbose, struct mbsys_swathplus_struct *store, int *mod
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2        mode:      %d\n", *mode);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -966,12 +957,11 @@ static int ping_mode(int verbose, struct mbsys_swathplus_struct *store, int *mod
  *----------------------------------------------------------------------*/
 
 static int zero_counts(int verbose, counts *recs, int *error) {
-	char *function_name = "zero_counts";
 	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       recs:       %p\n", (void *)recs);
@@ -1005,7 +995,7 @@ static int zero_counts(int verbose, counts *recs, int *error) {
 	recs->ping_sel_sim = 0;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1016,12 +1006,11 @@ static int zero_counts(int verbose, counts *recs, int *error) {
 } /* zero_counts */
 /*---------------------------------------------------------------*/
 static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct *store, int *error) {
-	char *function_name = "count_record";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       recs:       %p\n", (void *)recs);
@@ -1110,7 +1099,7 @@ static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1121,12 +1110,11 @@ static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct
 } /* count_record */
 /*----------------------------------------------------------------------*/
 static int add_counts(int verbose, counts *to, counts *from, int *error) {
-	char *function_name = "add_counts";
 	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       to:         %p\n", (void *)to);
@@ -1161,7 +1149,7 @@ static int add_counts(int verbose, counts *to, counts *from, int *error) {
 	to->ping_sel_sim += from->ping_sel_sim;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1172,12 +1160,11 @@ static int add_counts(int verbose, counts *to, counts *from, int *error) {
 } /* add_counts */
 /*----------------------------------------------------------------------*/
 static int print_counts(int verbose, counts *recs, int *error) {
-	char *function_name = "print_nrecs";
 	int status = MB_SUCCESS;
 	int i;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       recs:       %p\n", (void *)recs);
@@ -1214,7 +1201,7 @@ static int print_counts(int verbose, counts *recs, int *error) {
 	fprintf(stdout, "  Simultaneous:    = %d\n", recs->ping_sel_sim);
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1225,12 +1212,11 @@ static int print_counts(int verbose, counts *recs, int *error) {
 } /* print_counts */
 /*----------------------------------------------------------------------*/
 static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store, int *error) {
-	char *function_name = "print_latest_record";
 	int status = MB_SUCCESS;
 	FILE *stream;
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
@@ -1297,7 +1283,7 @@ static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store
 	}
 
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");

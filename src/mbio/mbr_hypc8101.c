@@ -35,27 +35,19 @@
 #include "mbf_hypc8101.h"
 #include "mbsys_reson.h"
 
-int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error);
-int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_hypc8101(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hypc8101";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_RESON;
 	*beams_bath_max = 101;
@@ -81,9 +73,10 @@ int mbr_info_hypc8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -113,84 +106,11 @@ int mbr_info_hypc8101(int verbose, int *system, int *beams_bath_max, int *beams_
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_alm_hypc8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hypc8101";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* set initial status */
-	status = MB_SUCCESS;
-
-	/* allocate memory for data structure */
-	mb_io_ptr->structure_size = sizeof(struct mbf_hypc8101_struct);
-	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson_struct), &mb_io_ptr->store_data, error);
-
-	/* initialize everything to zeros */
-	mbr_zero_hypc8101(verbose, mb_io_ptr->raw_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_dem_hypc8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hypc8101";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-	}
-
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
 int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error) {
-	char *function_name = "mbr_zero_hypc8101";
-	int status = MB_SUCCESS;
 	struct mbf_hypc8101_struct *data;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       data_ptr:   %p\n", (void *)data_ptr);
@@ -310,12 +230,11 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -325,192 +244,54 @@ int mbr_zero_hypc8101(int verbose, char *data_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hypc8101";
-	int status = MB_SUCCESS;
-	struct mbf_hypc8101_struct *data;
-	struct mbsys_reson_struct *store;
-	int time_i[7];
-	double time_d;
-	double lon, lat, heading, speed;
-
-	/* print input debug statements */
+int mbr_alm_hypc8101(int verbose, void *mbio_ptr, int *error) {
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointers to mbio descriptor and data structures */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_hypc8101_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_reson_struct *)store_ptr;
-
-	/* read next data from file */
-	status = mbr_hypc8101_rd_data(verbose, mbio_ptr, error);
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = data->kind;
-
-	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && data->longitude == 0 && data->latitude == 0 &&
-	    mb_io_ptr->nfix >= 1) {
-		mb_fix_y2k(verbose, data->year, &time_i[0]);
-		time_i[1] = data->month;
-		time_i[2] = data->day;
-		time_i[3] = data->hour;
-		time_i[4] = data->minute;
-		time_i[5] = data->second;
-		time_i[6] = 10000 * data->hundredth_sec + 100 * data->thousandth_sec;
-		mb_get_time(verbose, time_i, &time_d);
-		heading = 0.01 * data->heading;
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, &lon, &lat, &speed, error);
-		data->longitude = (int)(lon / 0.00000009);
-		data->latitude = (int)(lat / 0.00000009);
-	}
-
-	/* translate values to reson data storage structure */
-	if (status == MB_SUCCESS && store != NULL) {
-		store->kind = data->kind;
-		store->sonar = data->sonar;
-
-		/* parameter telegram */
-		store->par_year = data->par_year;
-		store->par_month = data->par_month;
-		store->par_day = data->par_day;
-		store->par_hour = data->par_hour;
-		store->par_minute = data->par_minute;
-		store->par_second = data->par_second;
-		store->par_hundredth_sec = data->par_hundredth_sec;
-		store->par_thousandth_sec = data->par_thousandth_sec;
-		store->roll_offset = data->roll_offset;
-		store->pitch_offset = data->pitch_offset;
-		store->heading_offset = data->heading_offset;
-		store->time_delay = data->time_delay;
-		store->transducer_depth = 10 * data->transducer_depth;
-		store->transducer_height = data->transducer_height;
-		store->transducer_x = data->transducer_x;
-		store->transducer_y = data->transducer_y;
-		store->antenna_x = data->antenna_x;
-		store->antenna_y = data->antenna_y;
-		store->antenna_z = data->antenna_z;
-		store->motion_sensor_x = data->motion_sensor_x;
-		store->motion_sensor_y = data->motion_sensor_y;
-		store->motion_sensor_z = data->motion_sensor_z;
-		store->spare = data->spare;
-		store->line_number = data->line_number;
-		store->start_or_stop = data->start_or_stop;
-		store->transducer_serial_number = data->transducer_serial_number;
-		for (int i = 0; i < MBSYS_RESON_COMMENT_LENGTH; i++)
-			store->comment[i] = data->comment[i];
-
-		/* position (position telegrams) */
-		store->pos_year = data->pos_year;
-		store->pos_month = data->pos_month;
-		store->pos_day = data->pos_day;
-		store->pos_hour = data->pos_hour;
-		store->pos_minute = data->pos_minute;
-		store->pos_second = data->pos_second;
-		store->pos_hundredth_sec = data->pos_hundredth_sec;
-		store->pos_thousandth_sec = data->pos_thousandth_sec;
-		store->pos_latitude = data->pos_latitude;
-		store->pos_longitude = data->pos_longitude;
-		store->utm_northing = data->utm_northing;
-		store->utm_easting = data->utm_easting;
-		store->utm_zone_lon = data->utm_zone_lon;
-		store->utm_zone = data->utm_zone;
-		store->hemisphere = data->hemisphere;
-		store->ellipsoid = data->ellipsoid;
-		store->pos_spare = data->pos_spare;
-		store->semi_major_axis = data->semi_major_axis;
-		store->other_quality = data->other_quality;
-
-		/* sound velocity profile */
-		store->svp_year = data->svp_year;
-		store->svp_month = data->svp_month;
-		store->svp_day = data->svp_day;
-		store->svp_hour = data->svp_hour;
-		store->svp_minute = data->svp_minute;
-		store->svp_second = data->svp_second;
-		store->svp_hundredth_sec = data->svp_hundredth_sec;
-		store->svp_thousandth_sec = data->svp_thousandth_sec;
-		store->svp_num = data->svp_num;
-		for (int i = 0; i < 500; i++) {
-			store->svp_depth[i] = data->svp_depth[i];
-			store->svp_vel[i] = data->svp_vel[i];
-		}
-
-		/* bathymetry */
-		store->year = data->year;
-		store->month = data->month;
-		store->day = data->day;
-		store->hour = data->hour;
-		store->minute = data->minute;
-		store->second = data->second;
-		store->hundredth_sec = data->hundredth_sec;
-		store->thousandth_sec = data->thousandth_sec;
-		store->longitude = data->longitude;
-		store->latitude = data->latitude;
-		store->roll = data->roll;
-		store->pitch = data->pitch;
-		store->heading = data->heading;
-		store->heave = data->heave;
-		store->ping_number = data->ping_number;
-		store->sound_vel = data->sound_vel;
-		store->mode = data->mode;
-		store->gain1 = data->gain1;
-		store->gain2 = data->gain2;
-		store->gain3 = data->gain3;
-		store->beams_bath = data->beams_bath;
-		for (int i = 0; i < store->beams_bath; i++) {
-			store->bath[i] = data->bath[i];
-			store->bath_acrosstrack[i] = data->bath_acrosstrack[i];
-			store->bath_alongtrack[i] = data->bath_alongtrack[i];
-			store->tt[i] = data->tt[i];
-			store->angle[i] = data->angle[i];
-			store->quality[i] = data->quality[i];
-			store->amp[i] = data->amp[i];
-		}
-	}
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hypc8101";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set error as this is a read only format */
-	status = MB_FAILURE;
-	*error = MB_ERROR_WRITE_FAIL;
+	/* allocate memory for data structure */
+	mb_io_ptr->structure_size = sizeof(struct mbf_hypc8101_struct);
+	mb_io_ptr->data_structure_size = 0;
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson_struct), &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
+	/* initialize everything to zeros */
+	mbr_zero_hypc8101(verbose, mb_io_ptr->raw_data, error);
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_dem_hypc8101(int verbose, void *mbio_ptr, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+	}
+
+	/* get pointers to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* deallocate memory for data descriptor */
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -521,8 +302,6 @@ int mbr_wt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_hypc8101_rd_data";
-	int status = MB_SUCCESS;
 	struct mbf_hypc8101_struct *data;
 	char *result;
 	char line[MBF_HYPC8101_MAXLINE];
@@ -555,9 +334,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	double ddummy1, ddummy2;
 	char *token;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -572,7 +350,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	done = MB_NO;
 	while (done == MB_NO) {
@@ -583,7 +361,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			*error = MB_ERROR_NO_ERROR;
 
 			if (verbose >= 4) {
-				fprintf(stderr, "\ndbg4  Raw line read by MBIO function <%s>\n", function_name);
+				fprintf(stderr, "\ndbg4  Raw line read by MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       line: %s\n", line);
 			}
 		}
@@ -629,7 +407,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 					/* print debug statements */
 					if (verbose >= 4) {
-						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", function_name);
+						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New attitude values:\n");
 						fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
 						fprintf(stderr, "dbg4       year:       %d\n", data->year);
@@ -679,7 +457,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 					/* print debug statements */
 					if (verbose >= 4) {
-						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", function_name);
+						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New heading values:\n");
 						fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
 						fprintf(stderr, "dbg4       year:       %d\n", data->year);
@@ -725,7 +503,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 					/* print debug statements */
 					if (verbose >= 4) {
-						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", function_name);
+						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New position values:\n");
 						fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
 						fprintf(stderr, "dbg4       year:       %d\n", data->year);
@@ -789,7 +567,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 					/* print debug statements */
 					if (verbose >= 4) {
-						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", function_name);
+						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New navigation values:\n");
 						fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
 						fprintf(stderr, "dbg4       year:       %d\n", data->pos_year);
@@ -946,7 +724,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 					/* print debug statements */
 					if (verbose >= 4) {
-						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", function_name);
+						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New ping values:\n");
 						fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
 						fprintf(stderr, "dbg4       year:       %d\n", data->year);
@@ -1065,7 +843,7 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4  New parameter values:\n");
 					fprintf(stderr, "dbg4       kind:       %d\n", data->kind);
 					fprintf(stderr, "dbg4       year:       %d\n", data->par_year);
@@ -1102,9 +880,191 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbf_hypc8101_struct *data;
+	struct mbsys_reson_struct *store;
+	int time_i[7];
+	double time_d;
+	double lon, lat, heading, speed;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointers to mbio descriptor and data structures */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	data = (struct mbf_hypc8101_struct *)mb_io_ptr->raw_data;
+	store = (struct mbsys_reson_struct *)store_ptr;
+
+	/* read next data from file */
+	const int status = mbr_hypc8101_rd_data(verbose, mbio_ptr, error);
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = data->kind;
+
+	/* interpolate navigation for survey pings if needed */
+	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA && data->longitude == 0 && data->latitude == 0 &&
+	    mb_io_ptr->nfix >= 1) {
+		mb_fix_y2k(verbose, data->year, &time_i[0]);
+		time_i[1] = data->month;
+		time_i[2] = data->day;
+		time_i[3] = data->hour;
+		time_i[4] = data->minute;
+		time_i[5] = data->second;
+		time_i[6] = 10000 * data->hundredth_sec + 100 * data->thousandth_sec;
+		mb_get_time(verbose, time_i, &time_d);
+		heading = 0.01 * data->heading;
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, 0.0, &lon, &lat, &speed, error);
+		data->longitude = (int)(lon / 0.00000009);
+		data->latitude = (int)(lat / 0.00000009);
+	}
+
+	/* translate values to reson data storage structure */
+	if (status == MB_SUCCESS && store != NULL) {
+		store->kind = data->kind;
+		store->sonar = data->sonar;
+
+		/* parameter telegram */
+		store->par_year = data->par_year;
+		store->par_month = data->par_month;
+		store->par_day = data->par_day;
+		store->par_hour = data->par_hour;
+		store->par_minute = data->par_minute;
+		store->par_second = data->par_second;
+		store->par_hundredth_sec = data->par_hundredth_sec;
+		store->par_thousandth_sec = data->par_thousandth_sec;
+		store->roll_offset = data->roll_offset;
+		store->pitch_offset = data->pitch_offset;
+		store->heading_offset = data->heading_offset;
+		store->time_delay = data->time_delay;
+		store->transducer_depth = 10 * data->transducer_depth;
+		store->transducer_height = data->transducer_height;
+		store->transducer_x = data->transducer_x;
+		store->transducer_y = data->transducer_y;
+		store->antenna_x = data->antenna_x;
+		store->antenna_y = data->antenna_y;
+		store->antenna_z = data->antenna_z;
+		store->motion_sensor_x = data->motion_sensor_x;
+		store->motion_sensor_y = data->motion_sensor_y;
+		store->motion_sensor_z = data->motion_sensor_z;
+		store->spare = data->spare;
+		store->line_number = data->line_number;
+		store->start_or_stop = data->start_or_stop;
+		store->transducer_serial_number = data->transducer_serial_number;
+		for (int i = 0; i < MBSYS_RESON_COMMENT_LENGTH; i++)
+			store->comment[i] = data->comment[i];
+
+		/* position (position telegrams) */
+		store->pos_year = data->pos_year;
+		store->pos_month = data->pos_month;
+		store->pos_day = data->pos_day;
+		store->pos_hour = data->pos_hour;
+		store->pos_minute = data->pos_minute;
+		store->pos_second = data->pos_second;
+		store->pos_hundredth_sec = data->pos_hundredth_sec;
+		store->pos_thousandth_sec = data->pos_thousandth_sec;
+		store->pos_latitude = data->pos_latitude;
+		store->pos_longitude = data->pos_longitude;
+		store->utm_northing = data->utm_northing;
+		store->utm_easting = data->utm_easting;
+		store->utm_zone_lon = data->utm_zone_lon;
+		store->utm_zone = data->utm_zone;
+		store->hemisphere = data->hemisphere;
+		store->ellipsoid = data->ellipsoid;
+		store->pos_spare = data->pos_spare;
+		store->semi_major_axis = data->semi_major_axis;
+		store->other_quality = data->other_quality;
+
+		/* sound velocity profile */
+		store->svp_year = data->svp_year;
+		store->svp_month = data->svp_month;
+		store->svp_day = data->svp_day;
+		store->svp_hour = data->svp_hour;
+		store->svp_minute = data->svp_minute;
+		store->svp_second = data->svp_second;
+		store->svp_hundredth_sec = data->svp_hundredth_sec;
+		store->svp_thousandth_sec = data->svp_thousandth_sec;
+		store->svp_num = data->svp_num;
+		for (int i = 0; i < 500; i++) {
+			store->svp_depth[i] = data->svp_depth[i];
+			store->svp_vel[i] = data->svp_vel[i];
+		}
+
+		/* bathymetry */
+		store->year = data->year;
+		store->month = data->month;
+		store->day = data->day;
+		store->hour = data->hour;
+		store->minute = data->minute;
+		store->second = data->second;
+		store->hundredth_sec = data->hundredth_sec;
+		store->thousandth_sec = data->thousandth_sec;
+		store->longitude = data->longitude;
+		store->latitude = data->latitude;
+		store->roll = data->roll;
+		store->pitch = data->pitch;
+		store->heading = data->heading;
+		store->heave = data->heave;
+		store->ping_number = data->ping_number;
+		store->sound_vel = data->sound_vel;
+		store->mode = data->mode;
+		store->gain1 = data->gain1;
+		store->gain2 = data->gain2;
+		store->gain3 = data->gain3;
+		store->beams_bath = data->beams_bath;
+		for (int i = 0; i < store->beams_bath; i++) {
+			store->bath[i] = data->bath[i];
+			store->bath_acrosstrack[i] = data->bath_acrosstrack[i];
+			store->bath_alongtrack[i] = data->bath_alongtrack[i];
+			store->tt[i] = data->tt[i];
+			store->angle[i] = data->angle[i];
+			store->quality[i] = data->quality[i];
+			store->amp[i] = data->amp[i];
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* set error as this is a read only format */
+	const int status = MB_FAILURE;
+	*error = MB_ERROR_WRITE_FAIL;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1116,12 +1076,8 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hypc8101";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -1130,7 +1086,7 @@ int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hypc8101(
+	const int status = mbr_info_hypc8101(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
@@ -1159,9 +1115,8 @@ int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_extract_rawss = NULL;
 	mb_io_ptr->mb_io_insert_rawss = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

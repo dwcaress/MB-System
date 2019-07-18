@@ -5375,7 +5375,6 @@ int main(int argc, char **argv) {
  */
 int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                 double dx, double dy, int *error) {
-	char *function_name = "write_ascii";
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 	int i;
@@ -5386,7 +5385,7 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
 		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
 		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
@@ -5434,7 +5433,7 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
 		fprintf(outfp, "dbg2       error:      %d\n", *error);
 		fprintf(outfp, "dbg2  Return status:\n");
@@ -5450,14 +5449,13 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
  */
 int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                    double dx, double dy, double nodata, int *error) {
-	char *function_name = "write_ascii";
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 	int i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
 		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
 		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
@@ -5502,7 +5500,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
 		fprintf(outfp, "dbg2       error:      %d\n", *error);
 		fprintf(outfp, "dbg2  Return status:\n");
@@ -5519,13 +5517,12 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
  */
 int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                  double dx, double dy, int *error) {
-	char *function_name = "write_oldgrd";
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
 		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
 		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
@@ -5562,7 +5559,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
 		fprintf(outfp, "dbg2       error:      %d\n", *error);
 		fprintf(outfp, "dbg2  Return status:\n");
@@ -5579,7 +5576,6 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
  */
 int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double pcy, double dx, double dy, double *px, double *py,
                   double *weight, int *use, int *error) {
-	char *function_name = "mbgrid_weight";
 	int status = MB_SUCCESS;
 	double fa, fb;
 	double xe, ye, ang, ratio;
@@ -5587,7 +5583,7 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", function_name);
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
 		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
 		fprintf(outfp, "dbg2       foot_a:     %f\n", foot_a);
@@ -5657,7 +5653,7 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
 		fprintf(outfp, "dbg2       error:      %d\n", *error);
 		fprintf(outfp, "dbg2       weight:     %f\n", *weight);

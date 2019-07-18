@@ -44,28 +44,19 @@
 // #define MBR_HYSWEEP1_DEBUG 1
 // #define MBR_HYSWEEP1_DEBUG2 1
 
-int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error);
-int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-
 /*--------------------------------------------------------------------*/
 int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, char *format_name,
                       char *system_name, char *format_description, int *numfile, int *filetype, int *variable_beams,
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	char *function_name = "mbr_info_hysweep1";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_HYSWEEP;
 	*beams_bath_max = 512;
@@ -92,9 +83,10 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
 	*beamwidth_xtrack = 1.0;
 	*beamwidth_ltrack = 1.0;
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", *system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", *beams_bath_max);
@@ -125,8 +117,6 @@ int mbr_info_hysweep1(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_alm_hysweep1";
-	int status = MB_SUCCESS;
 	int *file_header_read;
 	int *file_header_written;
 	int *line_saved;
@@ -134,9 +124,8 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	double *pixel_size;
 	double *swath_width;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -145,13 +134,10 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mbsys_hysweep_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_hysweep_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* set saved values */
 	file_header_read = (int *)&mb_io_ptr->save1;
@@ -168,9 +154,8 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -181,12 +166,8 @@ int mbr_alm_hysweep1(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_dem_hysweep1";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -196,11 +177,10 @@ int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_hysweep_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_hysweep_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -210,409 +190,38 @@ int mbr_dem_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_rt_hysweep1";
-	int status = MB_SUCCESS;
-	int interp_status;
-	int interp_error = MB_ERROR_NO_ERROR;
-	struct mbsys_hysweep_struct *store;
-	struct mbsys_hysweep_device_struct *device;
-	double navlon, navlat;
-	double roll, speed;
-	double alpha, beta, theta, phi;
-	double rr, xx, zz;
-	double *pixel_size, *swath_width;
+int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
+	char *result;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 	}
 
-	/* get pointers to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	int status = MB_SUCCESS;
 
-	/* read next data from file */
-	status = mbr_hysweep1_rd_data(verbose, mbio_ptr, store_ptr, error);
+	/* read the next line */
+	result = fgets(line, MBSYS_HYSWEEP_MAXLINE, mbfp);
+	if (result == line && strlen(line) < MBSYS_HYSWEEP_MAXLINE) {
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
 
-	/* get pointers to data structures */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
-
-	/* save position if primary data */
-	if (status == MB_SUCCESS && (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2)) {
-		/* check device for being enabled */
-		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->POS_device_number]);
-		if (device->DV2_enabled == MB_YES) {
-			/* add latest fix */
-			if (mb_io_ptr->projection_initialized == MB_YES) {
-				mb_proj_inverse(verbose, mb_io_ptr->pjptr, store->POS_x, store->POS_y, &navlon, &navlat, error);
-			}
-			else {
-				navlon = store->POS_x;
-				navlat = store->POS_y;
-			}
-			mb_navint_add(verbose, mbio_ptr, store->time_d, navlon, navlat, error);
-			/* fprintf(stderr,"POS %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
-			store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-			store->POS_x,store->POS_y,navlon,navlat);*/
-		}
-	}
-
-	/* save attitude if primary data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_ATTITUDE) {
-		/* check device for being enabled */
-		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->HCP_device_number]);
-		if (device->DV2_enabled == MB_YES) {
-			/* add latest attitude */
-			mb_attint_add(verbose, mbio_ptr, store->time_d, store->HCP_heave, -store->HCP_roll, store->HCP_pitch, error);
-		}
-	}
-
-	/* save heading if primary data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_HEADING) {
-		/* check device for being enabled */
-		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->GYR_device_number]);
-		if (device->DV2_enabled == MB_YES) {
-			/* add latest attitude */
-			mb_hedint_add(verbose, mbio_ptr, store->time_d, store->GYR_heading, error);
-		}
-	}
-
-	/* save sonardepth if primary data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_SONARDEPTH) {
-		/* check device for being enabled */
-		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->DFT_device_number]);
-		if (device->DV2_enabled == MB_YES) {
-			/* add latest attitude */
-			mb_depint_add(verbose, mbio_ptr, store->time_d, store->DFT_draft, error);
-		}
-	}
-
-	/* save altitude if primary data */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_ALTITUDE) {
-		/* check device for being enabled */
-		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->EC1_device_number]);
-		if (device->DV2_enabled == MB_YES) {
-			/* add latest attitude */
-			mb_altint_add(verbose, mbio_ptr, store->time_d, store->EC1_rawdepth, error);
-		}
-	}
-#ifdef MBR_HYSWEEP1_DEBUG
-	if (verbose > 0)
-		fprintf(stderr, "Record returned: type:%d status:%d error:%d\n\n", store->kind, status, *error);
-#endif
-
-	/* if survey data then interpolate nav, heading, attitude, sonardepth onto ping times */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		speed = 0.0;
-		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d, &(store->RMBint_heading), &interp_error);
-		interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d, &(store->RMBint_draft), &interp_error);
-
-		/* ignore heading and sonar depth errors */
-		interp_error = MB_ERROR_NO_ERROR;
-
-		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d, &(store->RMBint_heave), &(roll),
-		                                 &(store->RMBint_pitch), &interp_error);
-		store->RMBint_roll = -roll;
-		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed, &(store->RMBint_lon),
-		                                 &(store->RMBint_lat), &speed, &interp_error);
-		if (interp_status == MB_SUCCESS) {
-			if (mb_io_ptr->projection_initialized == MB_YES) {
-				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->RMBint_lon, store->RMBint_lat, &(store->RMBint_x),
-				                &(store->RMBint_y), error);
-			}
-			else {
-				store->RMBint_x = store->RMBint_lon;
-				store->RMBint_y = store->RMBint_lat;
-			}
-		}
-		else {
-			store->RMBint_lon = 0.0;
-			store->RMBint_lat = 0.0;
-			store->RMBint_x = 0.0;
-			store->RMBint_y = 0.0;
-		}
-		/* fprintf(stderr,"RMB %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
-		store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-		store->RMBint_x,store->RMBint_y,store->RMBint_lon,store->RMBint_lat);*/
-	}
-
-	/* if survey data then calculate angles and bathymetry as necessary */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		/* get mapping sonar device pointer */
-		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->RMB_device_number]);
-
-		/* deal with case of multibeam sonar */
-		if (store->RMB_beam_data_available & 0x0001) {
-			/* handle data that starts with beam angles in roll and pitch coordinates */
-			if (store->RMB_sonar_type == 1 || store->RMB_sonar_type == 2) {
-				/* get beam roll angles if necessary */
-				if (!(store->RMB_beam_data_available & 0x0080)) {
-					for (int i = 0; i < store->RMB_num_beams; i++) {
-						store->RMB_sounding_rollangles[i] = device->MBI_first_beam_angle + i * device->MBI_angle_increment;
-					}
-					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
-				}
-
-				/* get beam pitch angles if necessary */
-				if (!(store->RMB_beam_data_available & 0x0040)) {
-					for (int i = 0; i < store->RMB_num_beams; i++) {
-						store->RMB_sounding_pitchangles[i] = 0.0;
-					}
-					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
-				}
-			}
-
-			/* get beam takeoff and azimuthal angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0100) || !(store->RMB_beam_data_available & 0x0200)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					alpha = store->RMB_sounding_pitchangles[i];
-					beta = 90.0 + store->RMB_sounding_rollangles[i];
-
-					/* correct alpha for pitch if necessary */
-					if (!(device->MBI_sonar_flags & 0x0002))
-						alpha += store->RMBint_pitch;
-
-					/* correct beta for roll if necessary */
-					if (!(device->MBI_sonar_flags & 0x0001))
-						beta += store->RMBint_roll;
-
-					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-					store->RMB_sounding_takeoffangles[i] = theta;
-					store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
-				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0300;
-			}
-
-			/* get beam bathymetry if necessary */
-			if (!(store->RMB_beam_data_available & 0x0008) || !(store->RMB_beam_data_available & 0x0010) ||
-			    !(store->RMB_beam_data_available & 0x0020)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					rr = store->RMB_beam_ranges[i];
-					theta = store->RMB_sounding_takeoffangles[i];
-					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
-					xx = rr * sin(DTR * theta);
-					zz = rr * cos(DTR * theta);
-					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
-					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
-					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
-				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0038;
-			}
-
-			/* get beam flags if necessary */
-			if (!(store->RMB_beam_data_available & 0x2000)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
-				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
-
-				/* incorporate quality values */
-				if ((store->RMB_beam_data_available & 0x1000) && strncmp(device->DEV_device_name, "Reson Seabat 8", 14) == 0) {
-					for (int i = 0; i < store->RMB_num_beams; i++) {
-						if (store->RMB_sounding_quality[i] < 2)
-							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-					}
-				}
-
-				/* check for null ranges */
-				if ((store->RMB_beam_data_available & 0x0001)) {
-					for (int i = 0; i < store->RMB_num_beams; i++) {
-						if (store->RMB_beam_ranges[i] <= 0.0)
-							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-					}
-				}
-			}
-		}
-
-		/* deal with case of multiple transducer sonar */
-		if (store->RMB_beam_data_available & 0x0002) {
-			/* get beam roll angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0080)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					store->RMB_sounding_rollangles[i] = 0.0;
-				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
-			}
-
-			/* correct beam roll angles for roll if necessary */
-			if (!(device->MBI_sonar_flags & 0x0001)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					store->RMB_sounding_rollangles[i] -= store->RMBint_roll;
-				}
-			}
-
-			/* get beam pitch angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0040)) {
-				if (!(device->MBI_sonar_flags & 0x0002)) {
-					for (int i = 0; i < store->RMB_num_beams; i++) {
-						store->RMB_sounding_pitchangles[i] = store->RMBint_pitch;
-					}
-				}
-				else {
-					for (int i = 0; i < store->RMB_num_beams; i++) {
-						store->RMB_sounding_pitchangles[i] = 0.0;
-					}
-				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
-			}
-
-			/* get beam takeoff and azimuthal angles if necessary */
-			if (!(store->RMB_beam_data_available & 0x0100) || !(store->RMB_beam_data_available & 0x0200)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					alpha = store->RMB_sounding_pitchangles[i];
-					beta = 90.0 - store->RMB_sounding_rollangles[i];
-					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-					store->RMB_sounding_takeoffangles[i] = theta;
-					store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
-				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0300;
-			}
-
-			/* get beam bathymetry if necessary */
-			if (!(store->RMB_beam_data_available & 0x0004) || !(store->RMB_beam_data_available & 0x0008) ||
-			    !(store->RMB_beam_data_available & 0x0010) || !(store->RMB_beam_data_available & 0x0020)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					rr = store->RMB_multi_ranges[i];
-					theta = store->RMB_sounding_takeoffangles[i];
-					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
-					xx = rr * sin(DTR * theta);
-					zz = rr * cos(DTR * theta);
-					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
-					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
-					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
-				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x003C;
-			}
-
-			/* get beam flags if necessary */
-			if (!(store->RMB_beam_data_available & 0x2000)) {
-				for (int i = 0; i < store->RMB_num_beams; i++) {
-					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
-				}
-				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
-			}
-		}
-
-		/* generate processed sidescan if needed */
-		if (store->MSS_ping_number != store->RSS_ping_number &&
-		    (store->RSS_ping_number == store->RMB_ping_number || 10 * store->RSS_ping_number == store->RMB_ping_number)) {
-			status = mbsys_hysweep_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 5, error);
-		}
-
-		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  Multibeam bathymetry calculated by MBIO function <%s>\n", function_name);
-			fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
-			fprintf(stderr, "dbg4       RMB_time:                          %f\n", store->RMB_time);
-			fprintf(stderr, "dbg4       RMB_sonar_type:                    %x\n", store->RMB_sonar_type);
-			fprintf(stderr, "dbg4       RMB_sonar_flags:                   %x\n", store->RMB_sonar_flags);
-			fprintf(stderr, "dbg4       RMB_beam_data_available:           %x\n", store->RMB_beam_data_available);
-			fprintf(stderr, "dbg4       RMB_num_beams:                     %d\n", store->RMB_num_beams);
-			fprintf(stderr, "dbg4       RMB_num_beams_alloc:               %d\n", store->RMB_num_beams_alloc);
-			fprintf(stderr, "dbg4       RMB_sound_velocity:                %f\n", store->RMB_sound_velocity);
-			fprintf(stderr, "dbg4       RMB_ping_number:                   %d\n", store->RMB_ping_number);
-			for (int i = 0; i < store->RMB_num_beams; i++) {
-				fprintf(stderr, "dbg4       beam:%4d", i);
-
-				if (store->RMB_beam_data_available & 0x0001)
-					fprintf(stderr, " mbrng:%f", store->RMB_beam_ranges[i]);
-
-				if (store->RMB_beam_data_available & 0x0002)
-					fprintf(stderr, " mtrng:%f", store->RMB_multi_ranges[i]);
-
-				if (store->RMB_beam_data_available & 0x0004)
-					fprintf(stderr, " est:%f", store->RMB_sounding_eastings[i]);
-
-				if (store->RMB_beam_data_available & 0x0004)
-					fprintf(stderr, " nor:%f", store->RMB_sounding_northings[i]);
-
-				if (store->RMB_beam_data_available & 0x0008)
-					fprintf(stderr, " dep:%f", store->RMB_sounding_depths[i]);
-
-				if (store->RMB_beam_data_available & 0x0010)
-					fprintf(stderr, " ltr:%f", store->RMB_sounding_along[i]);
-
-				if (store->RMB_beam_data_available & 0x0020)
-					fprintf(stderr, " atr:%f", store->RMB_sounding_across[i]);
-
-				if (store->RMB_beam_data_available & 0x0040)
-					fprintf(stderr, " pth:%f", store->RMB_sounding_pitchangles[i]);
-
-				if (store->RMB_beam_data_available & 0x0080)
-					fprintf(stderr, " rll:%f", store->RMB_sounding_rollangles[i]);
-
-				if (store->RMB_beam_data_available & 0x0100)
-					fprintf(stderr, " toa:%f", store->RMB_sounding_takeoffangles[i]);
-
-				if (store->RMB_beam_data_available & 0x0200)
-					fprintf(stderr, " azi:%f", store->RMB_sounding_azimuthalangles[i]);
-
-				if (store->RMB_beam_data_available & 0x0400)
-					fprintf(stderr, " tim:%d", store->RMB_sounding_timedelays[i]);
-
-				if (store->RMB_beam_data_available & 0x0800)
-					fprintf(stderr, " int:%d", store->RMB_sounding_intensities[i]);
-
-				if (store->RMB_beam_data_available & 0x1000)
-					fprintf(stderr, " qua:%d", store->RMB_sounding_quality[i]);
-
-				if (store->RMB_beam_data_available & 0x2000)
-					fprintf(stderr, " flg:%d", store->RMB_sounding_flags[i]);
-
-				fprintf(stderr, "\n");
-			}
+			fprintf(stderr, "\ndbg4  Raw line read by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       line: %s\n", line);
 		}
 	}
-
-	/* set error and kind in mb_io_ptr */
-	mb_io_ptr->new_error = *error;
-	mb_io_ptr->new_kind = store->kind;
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
+	else {
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
 	}
 
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_wt_hysweep1";
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
-
-	/* write next data to file */
-	status = mbr_hysweep1_wr_data(verbose, mbio_ptr, store_ptr, error);
-
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       line:       %s\n", line);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -622,8 +231,6 @@ int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_hysweep1_rd_data";
-	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
@@ -675,9 +282,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int SNRok, RSSok;
 	int len;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -699,6 +305,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
@@ -1111,7 +719,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
 					fprintf(stderr, "dbg4       RMB_time:                          %f\n", store->RMB_time);
 					fprintf(stderr, "dbg4       RMB_sonar_type:                    %x\n", store->RMB_sonar_type);
@@ -1298,7 +906,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       RSS_device_number:                 %d\n", store->RSS_device_number);
 					fprintf(stderr, "dbg4       RSS_time:                          %f\n", store->RSS_time);
 					fprintf(stderr, "dbg4       RSS_sonar_flags:                   %x\n", store->RSS_sonar_flags);
@@ -1417,7 +1025,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  MSS data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  MSS data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       MSS_device_number:                 %d\n", store->MSS_device_number);
 					fprintf(stderr, "dbg4       MSS_time:                          %f\n", store->MSS_time);
 					fprintf(stderr, "dbg4       MSS_sound_velocity:                %f\n", store->MSS_sound_velocity);
@@ -1451,7 +1059,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  SNR data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  SNR data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       SNR_device_number:                 %d\n", store->SNR_device_number);
 					fprintf(stderr, "dbg4       SNR_time:                          %f\n", store->SNR_time);
 					fprintf(stderr, "dbg4       SNR_ping_number:                   %d\n", store->SNR_ping_number);
@@ -1515,7 +1123,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  TID data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  TID data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       TID_device_number:                 %d\n", store->TID_device_number);
 					fprintf(stderr, "dbg4       TID_time:                          %f\n", store->TID_time);
 					fprintf(stderr, "dbg4       TID_tide:                          %f\n", store->TID_tide);
@@ -1544,7 +1152,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  HCP data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  HCP data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       HCP_device_number:                 %d\n", store->HCP_device_number);
 					fprintf(stderr, "dbg4       HCP_time:                          %f\n", store->HCP_time);
 					fprintf(stderr, "dbg4       HCP_heave:                         %f\n", store->HCP_heave);
@@ -1574,7 +1182,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  EC1 data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  EC1 data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       EC1_device_number:                 %d\n", store->EC1_device_number);
 					fprintf(stderr, "dbg4       EC1_time:                          %f\n", store->EC1_time);
 					fprintf(stderr, "dbg4       EC1_rawdepth:                      %f\n", store->EC1_rawdepth);
@@ -1603,7 +1211,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  GPS data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  GPS data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       GPS_device_number:                 %d\n", store->GPS_device_number);
 					fprintf(stderr, "dbg4       GPS_time:                          %f\n", store->GPS_time);
 					fprintf(stderr, "dbg4       GPS_cog:                           %f\n", store->GPS_cog);
@@ -1627,7 +1235,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  GYR data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  GYR data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       GYR_device_number:                 %d\n", store->GYR_device_number);
 					fprintf(stderr, "dbg4       GYR_time:                          %f\n", store->GYR_time);
 					fprintf(stderr, "dbg4       GYR_heading:                       %f\n", store->GYR_heading);
@@ -1656,7 +1264,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  POS data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  POS data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       POS_device_number:                 %d\n", store->POS_device_number);
 					fprintf(stderr, "dbg4       POS_time:                          %f\n", store->POS_time);
 					fprintf(stderr, "dbg4       POS_x:                             %f\n", store->POS_x);
@@ -1706,7 +1314,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  DEV data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  DEV data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       DEV_device_number:                 %d\n", device->DEV_device_number);
 					fprintf(stderr, "dbg4       DEV_device_capability:             %d\n", device->DEV_device_capability);
 					fprintf(stderr, "dbg4       DEV_device_name:                   %s\n", device->DEV_device_name);
@@ -1733,7 +1341,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  DV2 data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  DV2 data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       DV2_device_number:                 %d\n", DV2_device_number);
 					fprintf(stderr, "dbg4       DV2_device_capability:             %d\n", device->DV2_device_capability);
 					fprintf(stderr, "dbg4       DV2_towfish:                       %d\n", device->DV2_towfish);
@@ -1747,7 +1355,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  EOH data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  EOH data record read by MBIO function <%s>\n", __func__);
 				}
 
 				/* handle some bookkeeping since the header has all been read */
@@ -1774,7 +1382,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  Hysweep file header read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  Hysweep file header read by MBIO function <%s>\n", __func__);
 				}
 
 				/* if successful this completes a file header record */
@@ -1790,7 +1398,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  EOL data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  EOL data record read by MBIO function <%s>\n", __func__);
 				}
 			}
 
@@ -1814,7 +1422,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  FTP data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  FTP data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       FTP_record:                        %s\n", store->FTP_record);
 				}
 			}
@@ -1832,7 +1440,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  VER data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  VER data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       VER_version:                       %s\n", store->VER_version);
 				}
 			}
@@ -1854,7 +1462,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  HSP data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  HSP data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       HSP_minimum_depth:                 %f\n", store->HSP_minimum_depth);
 					fprintf(stderr, "dbg4       HSP_maximum_depth:                 %f\n", store->HSP_maximum_depth);
 					fprintf(stderr, "dbg4       HSP_port_offset_limit:             %f\n", store->HSP_port_offset_limit);
@@ -1883,7 +1491,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  HSX data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  HSX data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       HSX_record:                        %d\n", store->HSX_record);
 				}
 			}
@@ -1904,7 +1512,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  HVF data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  HVF data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       HVF_device_number:                 %d\n", HVF_device_number);
 					fprintf(stderr, "dbg4       HVF_time_after_midnight:           %f\n", store->HVF_time_after_midnight);
 					fprintf(stderr, "dbg4       HVF_minimum_depth:                 %f\n", store->HVF_minimum_depth);
@@ -1989,7 +1597,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  INF data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  INF data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       INF_surveyor:                      %s\n", store->INF_surveyor);
 					fprintf(stderr, "dbg4       INF_boat:                          %s\n", store->INF_boat);
 					fprintf(stderr, "dbg4       INF_project:                       %s\n", store->INF_project);
@@ -2006,7 +1614,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  LBP data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  LBP data record read by MBIO function <%s>\n", __func__);
 				}
 			}
 
@@ -2016,7 +1624,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  LIN data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  LIN data record read by MBIO function <%s>\n", __func__);
 				}
 			}
 
@@ -2026,7 +1634,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  LNN data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  LNN data record read by MBIO function <%s>\n", __func__);
 				}
 			}
 
@@ -2055,7 +1663,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  MBI data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  MBI data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       MBI_device_number:                 %d\n", MBI_device_number);
 					fprintf(stderr, "dbg4       MBI_sonar_id:                      %d\n", device->MBI_sonar_id);
 					fprintf(stderr, "dbg4       MBI_sonar_receive_shape:           %d\n", device->MBI_sonar_receive_shape);
@@ -2098,7 +1706,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  OF2 data record read by OF2O function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  OF2 data record read by OF2O function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       OF2_device_number:                 %d\n", OF2_device_number);
 					fprintf(stderr, "dbg4       num_offsets:                       %d\n", device->num_offsets);
 					fprintf(stderr, "dbg4       OF2_offset_type:                   %d\n", offset->OF2_offset_type);
@@ -2129,7 +1737,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  PRI data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  PRI data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       primary_nav_device:                %d\n", store->primary_nav_device);
 				}
 			}
@@ -2140,7 +1748,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  PTS data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  PTS data record read by MBIO function <%s>\n", __func__);
 				}
 			}
 
@@ -2164,7 +1772,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  SSI data record read by SSIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  SSI data record read by SSIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       SSI_device_number:                 %d\n", SSI_device_number);
 					fprintf(stderr, "dbg4       SSI_sonar_flags:                   %x\n", device->SSI_sonar_flags);
 					fprintf(stderr, "dbg4       SSI_port_num_samples:              %d\n", device->SSI_port_num_samples);
@@ -2178,7 +1786,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  SVC data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  SVC data record read by MBIO function <%s>\n", __func__);
 				}
 			}
 
@@ -2208,7 +1816,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  TND data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  TND data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       TND_survey_time_i[0]:              %d\n", store->TND_survey_time_i[0]);
 					fprintf(stderr, "dbg4       TND_survey_time_i[1]:              %d\n", store->TND_survey_time_i[1]);
 					fprintf(stderr, "dbg4       TND_survey_time_i[2]:              %d\n", store->TND_survey_time_i[2]);
@@ -2233,7 +1841,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  DFT data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  DFT data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       DFT_device_number:                 %d\n", store->DFT_device_number);
 					fprintf(stderr, "dbg4       DFT_time:                          %f\n", store->DFT_time);
 					fprintf(stderr, "dbg4       DFT_draft:                         %f\n", store->DFT_draft);
@@ -2262,7 +1870,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  FIX data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  FIX data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       FIX_device_number:                 %d\n", store->FIX_device_number);
 					fprintf(stderr, "dbg4       FIX_time_after_midnight:           %f\n", store->FIX_time_after_midnight);
 					fprintf(stderr, "dbg4       FIX_event_number:                  %d\n", store->FIX_event_number);
@@ -2283,7 +1891,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  PSA data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  PSA data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       PSA_device_number:                 %d\n", store->PSA_device_number);
 					fprintf(stderr, "dbg4       PSA_time:                          %f\n", store->PSA_time);
 					fprintf(stderr, "dbg4       PSA_ping_number:                   %d\n", store->PSA_ping_number);
@@ -2305,7 +1913,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* print debug statements */
 				if (verbose >= 4) {
-					fprintf(stderr, "\ndbg4  COM data record read by MBIO function <%s>\n", function_name);
+					fprintf(stderr, "\ndbg4  COM data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       COM_comment:                       %s\n", store->COM_comment);
 				}
 			}
@@ -2325,7 +1933,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 					/* print debug statements */
 					if (verbose >= 4) {
-						fprintf(stderr, "\ndbg4  PRJ data record read by MBIO function <%s>\n", function_name);
+						fprintf(stderr, "\ndbg4  PRJ data record read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4       PRJ_proj4_command:                 %s\n", store->PRJ_proj4_command);
 					}
 				}
@@ -2334,7 +1942,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				else {
 					/* print debug statements */
 					if (verbose >= 4) {
-						fprintf(stderr, "\ndbg4  PRJ data record ignored by MBIO function <%s>\n", function_name);
+						fprintf(stderr, "\ndbg4  PRJ data record ignored by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4       Previously set PRJ_proj4_command:  %s\n", store->PRJ_proj4_command);
 						fprintf(stderr, "dbg4       Ignored PRJ_proj4_command:         %s\n", line + 4);
 					}
@@ -2362,9 +1970,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -2374,40 +1981,370 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
-	char *function_name = "mbr_hysweep1_rd_line";
-	int status = MB_SUCCESS;
-	char *result;
+int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	int interp_status;
+	int interp_error = MB_ERROR_NO_ERROR;
+	struct mbsys_hysweep_struct *store;
+	struct mbsys_hysweep_device_struct *device;
+	double navlon, navlat;
+	double roll, speed;
+	double alpha, beta, theta, phi;
+	double rr, xx, zz;
+	double *pixel_size, *swath_width;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* read the next line */
-	result = fgets(line, MBSYS_HYSWEEP_MAXLINE, mbfp);
-	if (result == line && strlen(line) < MBSYS_HYSWEEP_MAXLINE) {
-		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;
+	/* get pointers to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  Raw line read by MBIO function <%s>\n", function_name);
-			fprintf(stderr, "dbg4       line: %s\n", line);
+	/* read next data from file */
+	int status = mbr_hysweep1_rd_data(verbose, mbio_ptr, store_ptr, error);
+
+	/* get pointers to data structures */
+	store = (struct mbsys_hysweep_struct *)store_ptr;
+	pixel_size = (double *)&mb_io_ptr->saved1;
+	swath_width = (double *)&mb_io_ptr->saved2;
+
+	/* save position if primary data */
+	if (status == MB_SUCCESS && (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2)) {
+		/* check device for being enabled */
+		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->POS_device_number]);
+		if (device->DV2_enabled == MB_YES) {
+			/* add latest fix */
+			if (mb_io_ptr->projection_initialized == MB_YES) {
+				mb_proj_inverse(verbose, mb_io_ptr->pjptr, store->POS_x, store->POS_y, &navlon, &navlat, error);
+			}
+			else {
+				navlon = store->POS_x;
+				navlat = store->POS_y;
+			}
+			mb_navint_add(verbose, mbio_ptr, store->time_d, navlon, navlat, error);
+			/* fprintf(stderr,"POS %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
+			store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+			store->POS_x,store->POS_y,navlon,navlat);*/
 		}
 	}
-	else {
-		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;
+
+	/* save attitude if primary data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_ATTITUDE) {
+		/* check device for being enabled */
+		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->HCP_device_number]);
+		if (device->DV2_enabled == MB_YES) {
+			/* add latest attitude */
+			mb_attint_add(verbose, mbio_ptr, store->time_d, store->HCP_heave, -store->HCP_roll, store->HCP_pitch, error);
+		}
 	}
 
-	/* print output debug statements */
+	/* save heading if primary data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_HEADING) {
+		/* check device for being enabled */
+		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->GYR_device_number]);
+		if (device->DV2_enabled == MB_YES) {
+			/* add latest attitude */
+			mb_hedint_add(verbose, mbio_ptr, store->time_d, store->GYR_heading, error);
+		}
+	}
+
+	/* save sonardepth if primary data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_SONARDEPTH) {
+		/* check device for being enabled */
+		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->DFT_device_number]);
+		if (device->DV2_enabled == MB_YES) {
+			/* add latest attitude */
+			mb_depint_add(verbose, mbio_ptr, store->time_d, store->DFT_draft, error);
+		}
+	}
+
+	/* save altitude if primary data */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_ALTITUDE) {
+		/* check device for being enabled */
+		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->EC1_device_number]);
+		if (device->DV2_enabled == MB_YES) {
+			/* add latest attitude */
+			mb_altint_add(verbose, mbio_ptr, store->time_d, store->EC1_rawdepth, error);
+		}
+	}
+#ifdef MBR_HYSWEEP1_DEBUG
+	if (verbose > 0)
+		fprintf(stderr, "Record returned: type:%d status:%d error:%d\n\n", store->kind, status, *error);
+#endif
+
+	/* if survey data then interpolate nav, heading, attitude, sonardepth onto ping times */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
+		speed = 0.0;
+		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d, &(store->RMBint_heading), &interp_error);
+		interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d, &(store->RMBint_draft), &interp_error);
+
+		/* ignore heading and sonar depth errors */
+		interp_error = MB_ERROR_NO_ERROR;
+
+		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d, &(store->RMBint_heave), &(roll),
+		                                 &(store->RMBint_pitch), &interp_error);
+		store->RMBint_roll = -roll;
+		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, store->RMBint_heading, speed, &(store->RMBint_lon),
+		                                 &(store->RMBint_lat), &speed, &interp_error);
+		if (interp_status == MB_SUCCESS) {
+			if (mb_io_ptr->projection_initialized == MB_YES) {
+				mb_proj_forward(verbose, mb_io_ptr->pjptr, store->RMBint_lon, store->RMBint_lat, &(store->RMBint_x),
+				                &(store->RMBint_y), error);
+			}
+			else {
+				store->RMBint_x = store->RMBint_lon;
+				store->RMBint_y = store->RMBint_lat;
+			}
+		}
+		else {
+			store->RMBint_lon = 0.0;
+			store->RMBint_lat = 0.0;
+			store->RMBint_x = 0.0;
+			store->RMBint_y = 0.0;
+		}
+		/* fprintf(stderr,"RMB %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
+		store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+		store->RMBint_x,store->RMBint_y,store->RMBint_lon,store->RMBint_lat);*/
+	}
+
+	/* if survey data then calculate angles and bathymetry as necessary */
+	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
+		/* get mapping sonar device pointer */
+		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->RMB_device_number]);
+
+		/* deal with case of multibeam sonar */
+		if (store->RMB_beam_data_available & 0x0001) {
+			/* handle data that starts with beam angles in roll and pitch coordinates */
+			if (store->RMB_sonar_type == 1 || store->RMB_sonar_type == 2) {
+				/* get beam roll angles if necessary */
+				if (!(store->RMB_beam_data_available & 0x0080)) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
+						store->RMB_sounding_rollangles[i] = device->MBI_first_beam_angle + i * device->MBI_angle_increment;
+					}
+					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
+				}
+
+				/* get beam pitch angles if necessary */
+				if (!(store->RMB_beam_data_available & 0x0040)) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
+						store->RMB_sounding_pitchangles[i] = 0.0;
+					}
+					store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
+				}
+			}
+
+			/* get beam takeoff and azimuthal angles if necessary */
+			if (!(store->RMB_beam_data_available & 0x0100) || !(store->RMB_beam_data_available & 0x0200)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					alpha = store->RMB_sounding_pitchangles[i];
+					beta = 90.0 + store->RMB_sounding_rollangles[i];
+
+					/* correct alpha for pitch if necessary */
+					if (!(device->MBI_sonar_flags & 0x0002))
+						alpha += store->RMBint_pitch;
+
+					/* correct beta for roll if necessary */
+					if (!(device->MBI_sonar_flags & 0x0001))
+						beta += store->RMBint_roll;
+
+					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+					store->RMB_sounding_takeoffangles[i] = theta;
+					store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
+				}
+				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0300;
+			}
+
+			/* get beam bathymetry if necessary */
+			if (!(store->RMB_beam_data_available & 0x0008) || !(store->RMB_beam_data_available & 0x0010) ||
+			    !(store->RMB_beam_data_available & 0x0020)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					rr = store->RMB_beam_ranges[i];
+					theta = store->RMB_sounding_takeoffangles[i];
+					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
+					xx = rr * sin(DTR * theta);
+					zz = rr * cos(DTR * theta);
+					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
+					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
+					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
+				}
+				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0038;
+			}
+
+			/* get beam flags if necessary */
+			if (!(store->RMB_beam_data_available & 0x2000)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
+				}
+				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
+
+				/* incorporate quality values */
+				if ((store->RMB_beam_data_available & 0x1000) && strncmp(device->DEV_device_name, "Reson Seabat 8", 14) == 0) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
+						if (store->RMB_sounding_quality[i] < 2)
+							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+					}
+				}
+
+				/* check for null ranges */
+				if ((store->RMB_beam_data_available & 0x0001)) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
+						if (store->RMB_beam_ranges[i] <= 0.0)
+							store->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
+					}
+				}
+			}
+		}
+
+		/* deal with case of multiple transducer sonar */
+		if (store->RMB_beam_data_available & 0x0002) {
+			/* get beam roll angles if necessary */
+			if (!(store->RMB_beam_data_available & 0x0080)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					store->RMB_sounding_rollangles[i] = 0.0;
+				}
+				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0080;
+			}
+
+			/* correct beam roll angles for roll if necessary */
+			if (!(device->MBI_sonar_flags & 0x0001)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					store->RMB_sounding_rollangles[i] -= store->RMBint_roll;
+				}
+			}
+
+			/* get beam pitch angles if necessary */
+			if (!(store->RMB_beam_data_available & 0x0040)) {
+				if (!(device->MBI_sonar_flags & 0x0002)) {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
+						store->RMB_sounding_pitchangles[i] = store->RMBint_pitch;
+					}
+				}
+				else {
+					for (int i = 0; i < store->RMB_num_beams; i++) {
+						store->RMB_sounding_pitchangles[i] = 0.0;
+					}
+				}
+				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0040;
+			}
+
+			/* get beam takeoff and azimuthal angles if necessary */
+			if (!(store->RMB_beam_data_available & 0x0100) || !(store->RMB_beam_data_available & 0x0200)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					alpha = store->RMB_sounding_pitchangles[i];
+					beta = 90.0 - store->RMB_sounding_rollangles[i];
+					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+					store->RMB_sounding_takeoffangles[i] = theta;
+					store->RMB_sounding_azimuthalangles[i] = 90.0 - phi;
+				}
+				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x0300;
+			}
+
+			/* get beam bathymetry if necessary */
+			if (!(store->RMB_beam_data_available & 0x0004) || !(store->RMB_beam_data_available & 0x0008) ||
+			    !(store->RMB_beam_data_available & 0x0010) || !(store->RMB_beam_data_available & 0x0020)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					rr = store->RMB_multi_ranges[i];
+					theta = store->RMB_sounding_takeoffangles[i];
+					phi = 90.0 - store->RMB_sounding_azimuthalangles[i];
+					xx = rr * sin(DTR * theta);
+					zz = rr * cos(DTR * theta);
+					store->RMB_sounding_across[i] = xx * cos(DTR * phi);
+					store->RMB_sounding_along[i] = xx * sin(DTR * phi);
+					store->RMB_sounding_depths[i] = zz + store->RMBint_draft + store->RMBint_heave;
+				}
+				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x003C;
+			}
+
+			/* get beam flags if necessary */
+			if (!(store->RMB_beam_data_available & 0x2000)) {
+				for (int i = 0; i < store->RMB_num_beams; i++) {
+					store->RMB_sounding_flags[i] = MB_FLAG_NONE;
+				}
+				store->RMB_beam_data_available = store->RMB_beam_data_available | 0x2000;
+			}
+		}
+
+		/* generate processed sidescan if needed */
+		if (store->MSS_ping_number != store->RSS_ping_number &&
+		    (store->RSS_ping_number == store->RMB_ping_number || 10 * store->RSS_ping_number == store->RMB_ping_number)) {
+			status = mbsys_hysweep_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 5, error);
+		}
+
+		/* print debug statements */
+		if (verbose >= 4) {
+			fprintf(stderr, "\ndbg4  Multibeam bathymetry calculated by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
+			fprintf(stderr, "dbg4       RMB_time:                          %f\n", store->RMB_time);
+			fprintf(stderr, "dbg4       RMB_sonar_type:                    %x\n", store->RMB_sonar_type);
+			fprintf(stderr, "dbg4       RMB_sonar_flags:                   %x\n", store->RMB_sonar_flags);
+			fprintf(stderr, "dbg4       RMB_beam_data_available:           %x\n", store->RMB_beam_data_available);
+			fprintf(stderr, "dbg4       RMB_num_beams:                     %d\n", store->RMB_num_beams);
+			fprintf(stderr, "dbg4       RMB_num_beams_alloc:               %d\n", store->RMB_num_beams_alloc);
+			fprintf(stderr, "dbg4       RMB_sound_velocity:                %f\n", store->RMB_sound_velocity);
+			fprintf(stderr, "dbg4       RMB_ping_number:                   %d\n", store->RMB_ping_number);
+			for (int i = 0; i < store->RMB_num_beams; i++) {
+				fprintf(stderr, "dbg4       beam:%4d", i);
+
+				if (store->RMB_beam_data_available & 0x0001)
+					fprintf(stderr, " mbrng:%f", store->RMB_beam_ranges[i]);
+
+				if (store->RMB_beam_data_available & 0x0002)
+					fprintf(stderr, " mtrng:%f", store->RMB_multi_ranges[i]);
+
+				if (store->RMB_beam_data_available & 0x0004)
+					fprintf(stderr, " est:%f", store->RMB_sounding_eastings[i]);
+
+				if (store->RMB_beam_data_available & 0x0004)
+					fprintf(stderr, " nor:%f", store->RMB_sounding_northings[i]);
+
+				if (store->RMB_beam_data_available & 0x0008)
+					fprintf(stderr, " dep:%f", store->RMB_sounding_depths[i]);
+
+				if (store->RMB_beam_data_available & 0x0010)
+					fprintf(stderr, " ltr:%f", store->RMB_sounding_along[i]);
+
+				if (store->RMB_beam_data_available & 0x0020)
+					fprintf(stderr, " atr:%f", store->RMB_sounding_across[i]);
+
+				if (store->RMB_beam_data_available & 0x0040)
+					fprintf(stderr, " pth:%f", store->RMB_sounding_pitchangles[i]);
+
+				if (store->RMB_beam_data_available & 0x0080)
+					fprintf(stderr, " rll:%f", store->RMB_sounding_rollangles[i]);
+
+				if (store->RMB_beam_data_available & 0x0100)
+					fprintf(stderr, " toa:%f", store->RMB_sounding_takeoffangles[i]);
+
+				if (store->RMB_beam_data_available & 0x0200)
+					fprintf(stderr, " azi:%f", store->RMB_sounding_azimuthalangles[i]);
+
+				if (store->RMB_beam_data_available & 0x0400)
+					fprintf(stderr, " tim:%d", store->RMB_sounding_timedelays[i]);
+
+				if (store->RMB_beam_data_available & 0x0800)
+					fprintf(stderr, " int:%d", store->RMB_sounding_intensities[i]);
+
+				if (store->RMB_beam_data_available & 0x1000)
+					fprintf(stderr, " qua:%d", store->RMB_sounding_quality[i]);
+
+				if (store->RMB_beam_data_available & 0x2000)
+					fprintf(stderr, " flg:%d", store->RMB_sounding_flags[i]);
+
+				fprintf(stderr, "\n");
+			}
+		}
+	}
+
+	/* set error and kind in mb_io_ptr */
+	mb_io_ptr->new_error = *error;
+	mb_io_ptr->new_kind = store->kind;
+
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       line:       %s\n", line);
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -2417,8 +2354,6 @@ int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	char *function_name = "mbr_hysweep1_wr_data";
-	int status = MB_SUCCESS;
 	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
@@ -2437,9 +2372,8 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *device_number_MB_GYR;
 	int *device_number_MB_DFT;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
@@ -2610,13 +2544,13 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  FTP data record to be written by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  FTP data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       FTP_record:                        %s\n", hysweeptmp.FTP_record);
-			fprintf(stderr, "\ndbg4  HSX data record to be written by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  HSX data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       HSX_record:                        %d\n", hysweeptmp.HSX_record);
-			fprintf(stderr, "\ndbg4  VER data record to be written by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  VER data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       VER_version:                       %s\n", hysweeptmp.VER_version);
-			fprintf(stderr, "\ndbg4  TND data record to be written by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  TND data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       TND_survey_time_i[0]:              %d\n", hysweeptmp.TND_survey_time_i[0]);
 			fprintf(stderr, "dbg4       TND_survey_time_i[1]:              %d\n", hysweeptmp.TND_survey_time_i[1]);
 			fprintf(stderr, "dbg4       TND_survey_time_i[2]:              %d\n", hysweeptmp.TND_survey_time_i[2]);
@@ -2625,7 +2559,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "dbg4       TND_survey_time_i[5]:              %d\n", hysweeptmp.TND_survey_time_i[5]);
 			fprintf(stderr, "dbg4       TND_survey_time_i[6]:              %d\n", hysweeptmp.TND_survey_time_i[6]);
 			fprintf(stderr, "dbg4       TND_survey_time_d:                 %f\n", hysweeptmp.TND_survey_time_d);
-			fprintf(stderr, "\ndbg4  INF data record to be written by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  INF data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       INF_surveyor:                      %s\n", hysweeptmp.INF_surveyor);
 			fprintf(stderr, "dbg4       INF_boat:                          %s\n", hysweeptmp.INF_boat);
 			fprintf(stderr, "dbg4       INF_project:                       %s\n", hysweeptmp.INF_project);
@@ -2633,7 +2567,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "dbg4       INF_tide_correction:               %f\n", hysweeptmp.INF_tide_correction);
 			fprintf(stderr, "dbg4       INF_draft_correction:              %f\n", hysweeptmp.INF_draft_correction);
 			fprintf(stderr, "dbg4       INF_sound_velocity:                %f\n", hysweeptmp.INF_sound_velocity);
-			fprintf(stderr, "\ndbg4  HSP data record to be written by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  HSP data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       HSP_minimum_depth:                 %f\n", hysweeptmp.HSP_minimum_depth);
 			fprintf(stderr, "dbg4       HSP_maximum_depth:                 %f\n", hysweeptmp.HSP_maximum_depth);
 			fprintf(stderr, "dbg4       HSP_port_offset_limit:             %f\n", hysweeptmp.HSP_port_offset_limit);
@@ -2646,8 +2580,8 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "dbg4       HSP_towfish_layback:               %f\n", hysweeptmp.HSP_towfish_layback);
 			fprintf(stderr, "dbg4       HSP_units:                         %d\n", hysweeptmp.HSP_units);
 			fprintf(stderr, "dbg4       HSP_sonar_id:                      %d\n", hysweeptmp.HSP_sonar_id);
-			fprintf(stderr, "\ndbg4  EOH data record to be written by MBIO function <%s>\n", function_name);
-			fprintf(stderr, "\ndbg4  HVF data record to be written by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  EOH data record to be written by MBIO function <%s>\n", __func__);
+			fprintf(stderr, "\ndbg4  HVF data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       HVF_time_after_midnight:           %f\n", hysweeptmp.HVF_time_after_midnight);
 			fprintf(stderr, "dbg4       HVF_minimum_depth:                 %f\n", hysweeptmp.HVF_minimum_depth);
 			fprintf(stderr, "dbg4       HVF_maximum_depth:                 %f\n", hysweeptmp.HVF_maximum_depth);
@@ -2655,7 +2589,7 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			fprintf(stderr, "dbg4       HVF_starboard_offset_limit:        %f\n", hysweeptmp.HVF_starboard_offset_limit);
 			fprintf(stderr, "dbg4       HVF_minimum_angle_limit:           %f\n", hysweeptmp.HVF_minimum_angle_limit);
 			fprintf(stderr, "dbg4       HVF_maximum_angle_limit:           %f\n", hysweeptmp.HVF_maximum_angle_limit);
-			fprintf(stderr, "\ndbg4  FIX data record to be written by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  FIX data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       FIX_device_number:                 %d\n", hysweeptmp.FIX_device_number);
 			fprintf(stderr, "dbg4       FIX_time_after_midnight:           %f\n", hysweeptmp.FIX_time_after_midnight);
 			fprintf(stderr, "dbg4       FIX_event_number:                  %d\n", hysweeptmp.FIX_event_number);
@@ -2715,11 +2649,13 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		mb_io_ptr->projection_initialized = MB_YES;
 	}
 
+	int status = MB_SUCCESS;
+
 	/* call appropriate writing routines for ping data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
 		/* print debug statements */
 		if (verbose >= 4) {
-			fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", function_name);
+			fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
 			fprintf(stderr, "dbg4       RMB_time:                          %f\n", store->RMB_time);
 			fprintf(stderr, "dbg4       RMB_sonar_type:                    %x\n", store->RMB_sonar_type);
@@ -3185,9 +3121,39 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fprintf(stderr, "HYSWEEP1 DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
 #endif
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
+	struct mbsys_hysweep_struct *store;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_hysweep_struct *)store_ptr;
+
+	/* write next data to file */
+	const int status = mbr_hysweep1_wr_data(verbose, mbio_ptr, store_ptr, error);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3199,12 +3165,8 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error) {
-	char *function_name = "mbr_register_hysweep1";
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
@@ -3213,7 +3175,7 @@ int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_hysweep1(
+	const int status = mbr_info_hysweep1(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
@@ -3251,9 +3213,8 @@ int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->mb_io_ctd = NULL;
 	mb_io_ptr->mb_io_ancilliarysensor = NULL;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       system:             %d\n", mb_io_ptr->system);
 		fprintf(stderr, "dbg2       beams_bath_max:     %d\n", mb_io_ptr->beams_bath_max);

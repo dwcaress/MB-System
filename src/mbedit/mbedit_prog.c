@@ -301,7 +301,6 @@ static unsigned int pixel_values[256];
 /*--------------------------------------------------------------------*/
 int mbedit_init(int argc, char **argv, int *startup_file) {
 	/* local variables */
-	char *function_name = "mbedit_init";
 	int status = MB_SUCCESS;
 	int fileflag = 0;
 	int i;
@@ -431,7 +430,7 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       argc:      %d\n", argc);
 		for (i = 0; i < argc; i++)
@@ -446,7 +445,7 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       startup_file: %d\n", *startup_file);
 		fprintf(stderr, "dbg2       error:        %d\n", error);
@@ -461,13 +460,12 @@ int mbedit_init(int argc, char **argv, int *startup_file) {
 /*--------------------------------------------------------------------*/
 int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 	/* local variables */
-	char *function_name = "mbedit_set_graphics";
 	int status = MB_SUCCESS;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       xgid:         %p\n", xgid);
 		fprintf(stderr, "dbg2       ncolors:      %d\n", ncol);
@@ -485,7 +483,7 @@ int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -498,13 +496,12 @@ int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels) {
 /*--------------------------------------------------------------------*/
 int mbedit_set_scaling(int *brdr, int sh_time) {
 	/* local variables */
-	char *function_name = "mbedit_set_scaling";
 	int status = MB_SUCCESS;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		for (i = 0; i < 4; i++)
 			fprintf(stderr, "dbg2       brdr[%d]:     %d\n", i, brdr[i]);
@@ -538,7 +535,7 @@ int mbedit_set_scaling(int *brdr, int sh_time) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -551,12 +548,11 @@ int mbedit_set_scaling(int *brdr, int sh_time) {
 int mbedit_set_filters(int f_m, int f_m_t, int f_m_x, int f_m_l, int f_w, int f_w_t, int f_b, int f_b_b, int f_b_e, int f_d,
                        double f_d_b, double f_d_e, int f_a, double f_a_b, double f_a_e) {
 	/* local variables */
-	char *function_name = "mbedit_set_filters";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2       f_m:     %d\n", f_m);
 		fprintf(stderr, "dbg2       f_m_t:   %d\n", f_m_t);
 		fprintf(stderr, "dbg2       f_m_x:   %d\n", f_m_x);
@@ -593,7 +589,7 @@ int mbedit_set_filters(int f_m, int f_m_t, int f_m_x, int f_m_l, int f_w, int f_
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -606,13 +602,12 @@ int mbedit_set_filters(int f_m, int f_m_t, int f_m_x, int f_m_l, int f_w, int f_
 int mbedit_get_filters(int *b_m, double *d_m, int *f_m, int *f_m_t, int *f_m_x, int *f_m_l, int *f_w, int *f_w_t, int *f_b,
                        int *f_b_b, int *f_b_e, int *f_d, double *f_d_b, double *f_d_e, int *f_a, double *f_a_b, double *f_a_e) {
 	/* local variables */
-	char *function_name = "mbedit_get_filters";
 	int status = MB_SUCCESS;
 	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2       b_m:     %p\n", b_m);
 		fprintf(stderr, "dbg2       d_m:     %p\n", d_m);
 		fprintf(stderr, "dbg2       f_m:     %p\n", f_m);
@@ -671,7 +666,7 @@ int mbedit_get_filters(int *b_m, double *d_m, int *f_m, int *f_m_t, int *f_m_x, 
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       b_m:     %d\n", *b_m);
 		fprintf(stderr, "dbg2       d_m:     %f\n", *d_m);
@@ -703,13 +698,12 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
                         int *buffer_size, int *hold_size, int *form, int *plwd, int *exgr, int *xntrvl, int *yntrvl, int *ttime_i,
                         int *outmode) {
 	/* local variables */
-	char *function_name = "mbedit_get_defaults";
 	int status = MB_SUCCESS;
 	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	/* get maximum number of pings to plot */
@@ -760,7 +754,7 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       plot max:               %d\n", *plt_size_max);
 		fprintf(stderr, "dbg2       plot_size:              %d\n", *plt_size);
@@ -789,12 +783,11 @@ int mbedit_get_defaults(int *plt_size_max, int *plt_size, int *sh_mode, int *sh_
 /*--------------------------------------------------------------------*/
 int mbedit_get_viewmode(int *vw_mode) {
 	/* local variables */
-	char *function_name = "mbedit_get_viewmode";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	/* get view mode */
@@ -802,7 +795,7 @@ int mbedit_get_viewmode(int *vw_mode) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       view_mode:   %d\n", *vw_mode);
 		fprintf(stderr, "dbg2       error:       %d\n", error);
@@ -815,12 +808,11 @@ int mbedit_get_viewmode(int *vw_mode) {
 /*--------------------------------------------------------------------*/
 int mbedit_set_viewmode(int vw_mode) {
 	/* local variables */
-	char *function_name = "mbedit_set_viewmode";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       view_mode:   %d\n", vw_mode);
 	}
@@ -830,7 +822,7 @@ int mbedit_set_viewmode(int vw_mode) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -844,12 +836,11 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
                        int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *buffer_size, int *buffer_size_max,
                        int *hold_size, int *ndumped, int *nloaded, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_open";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       file:            %s\n", file);
 		fprintf(stderr, "dbg2       format:          %d\n", form);
@@ -920,7 +911,7 @@ int mbedit_action_open(char *file, int form, int fileid, int numfiles, int savem
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       buffer_size:     %d\n", *buffer_size);
 		fprintf(stderr, "dbg2       buffer_size_max: %d\n", *buffer_size_max);
@@ -944,13 +935,12 @@ int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr
                               int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
                               int *icurrent, int *nplt, int *quit) {
 	/* local variables */
-	char *function_name = "mbedit_action_next_buffer";
 	int status = MB_SUCCESS;
 	int save_dumped = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       hold_size:   %d\n", hold_size);
 		fprintf(stderr, "dbg2       buffer_size: %d\n", buffer_size);
@@ -1034,7 +1024,7 @@ int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndumped:     %d\n", *ndumped);
 		fprintf(stderr, "dbg2       nloaded:     %d\n", *nloaded);
@@ -1054,14 +1044,13 @@ int mbedit_action_next_buffer(int hold_size, int buffer_size, int plwd, int exgr
 /*--------------------------------------------------------------------*/
 int mbedit_action_close(int buffer_size, int *ndumped, int *nloaded, int *nbuffer, int *ngood, int *icurrent) {
 	/* local variables */
-	char *function_name = "mbedit_action_close";
 	int status = MB_SUCCESS;
 	int save_nloaded = 0;
 	int save_ndumped = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       buffer_size: %d\n", buffer_size);
 	}
@@ -1125,7 +1114,7 @@ int mbedit_action_close(int buffer_size, int *ndumped, int *nloaded, int *nbuffe
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndumped:     %d\n", *ndumped);
 		fprintf(stderr, "dbg2       nloaded:     %d\n", *nloaded);
@@ -1143,12 +1132,11 @@ int mbedit_action_close(int buffer_size, int *ndumped, int *nloaded, int *nbuffe
 /*--------------------------------------------------------------------*/
 int mbedit_action_done(int buffer_size, int *ndumped, int *nloaded, int *nbuffer, int *ngood, int *icurrent, int *quit) {
 	/* local variables */
-	char *function_name = "mbedit_action_done";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       buffer_size: %d\n", buffer_size);
 	}
@@ -1177,7 +1165,7 @@ int mbedit_action_done(int buffer_size, int *ndumped, int *nloaded, int *nbuffer
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndumped:     %d\n", *ndumped);
 		fprintf(stderr, "dbg2       nloaded:     %d\n", *nloaded);
@@ -1196,12 +1184,11 @@ int mbedit_action_done(int buffer_size, int *ndumped, int *nloaded, int *nbuffer
 /*--------------------------------------------------------------------*/
 int mbedit_action_quit(int buffer_size, int *ndumped, int *nloaded, int *nbuffer, int *ngood, int *icurrent) {
 	/* local variables */
-	char *function_name = "mbedit_action_quit";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       buffer_size: %d\n", buffer_size);
 	}
@@ -1223,7 +1210,7 @@ int mbedit_action_quit(int buffer_size, int *ndumped, int *nloaded, int *nbuffer
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndumped:     %d\n", *ndumped);
 		fprintf(stderr, "dbg2       nloaded:     %d\n", *nloaded);
@@ -1242,13 +1229,12 @@ int mbedit_action_quit(int buffer_size, int *ndumped, int *nloaded, int *nbuffer
 int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                        int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_step";
 	int status = MB_SUCCESS;
 	int old_id, new_id;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       step:        %d\n", step);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
@@ -1306,7 +1292,7 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -1324,12 +1310,11 @@ int mbedit_action_step(int step, int plwd, int exgr, int xntrvl, int yntrvl, int
 int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                        int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_plot";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -1371,7 +1356,7 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -1389,7 +1374,6 @@ int mbedit_action_plot(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
 int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
                                int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_mouse_toggle";
 	int status = MB_SUCCESS;
 	int zap_box, zap_ping;
 	int ix, iy, range, range_min;
@@ -1399,7 +1383,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
@@ -1545,7 +1529,7 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -1563,7 +1547,6 @@ int mbedit_action_mouse_toggle(int x_loc, int y_loc, int plwd, int exgr, int xnt
 int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
                              int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_mouse_pick";
 	int status = MB_SUCCESS;
 	int zap_box, zap_ping;
 	int ix, iy, range, range_min;
@@ -1573,7 +1556,7 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
@@ -1705,7 +1688,7 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -1723,7 +1706,6 @@ int mbedit_action_mouse_pick(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
                               int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_mouse_erase";
 	int status = MB_SUCCESS;
 	int zap_box, zap_ping;
 	int ix, iy, range;
@@ -1733,7 +1715,7 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
@@ -1854,7 +1836,7 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -1872,7 +1854,6 @@ int mbedit_action_mouse_erase(int x_loc, int y_loc, int plwd, int exgr, int xntr
 int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
                                 int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_mouse_restore";
 	int status = MB_SUCCESS;
 	int zap_box, zap_ping;
 	int ix, iy, range;
@@ -1882,7 +1863,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
@@ -2001,7 +1982,7 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -2019,7 +2000,6 @@ int mbedit_action_mouse_restore(int x_loc, int y_loc, int plwd, int exgr, int xn
 int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size,
                              int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_mouse_grab";
 	int status = MB_SUCCESS;
 	int zap_box, zap_ping;
 	int xgmin, xgmax, ygmin, ygmax;
@@ -2029,7 +2009,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       grabmode:    %d\n", grabmode);
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
@@ -2268,7 +2248,7 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -2286,7 +2266,6 @@ int mbedit_action_mouse_grab(int grabmode, int x_loc, int y_loc, int plwd, int e
 int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode,
                              int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_mouse_info";
 	int status = MB_SUCCESS;
 	int ix, iy, range, range_min;
 	int iping, jbeam;
@@ -2294,7 +2273,7 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       x_loc:       %d\n", x_loc);
 		fprintf(stderr, "dbg2       y_loc:       %d\n", y_loc);
@@ -2395,7 +2374,7 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -2413,14 +2392,13 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf,
                                 int sh_time, int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_zap_outbounds";
 	int status = MB_SUCCESS;
 	int found;
 	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:       %d\n", iping);
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
@@ -2509,7 +2487,7 @@ int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int y
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -2527,13 +2505,12 @@ int mbedit_action_zap_outbounds(int iping, int plwd, int exgr, int xntrvl, int y
 int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                            int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_bad_ping";
 	int status = MB_SUCCESS;
 	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -2613,7 +2590,7 @@ int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_s
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -2631,13 +2608,12 @@ int mbedit_action_bad_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_s
 int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_good_ping";
 	int status = MB_SUCCESS;
 	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -2706,7 +2682,7 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -2724,13 +2700,12 @@ int mbedit_action_good_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_left_ping";
 	int status = MB_SUCCESS;
 	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -2810,7 +2785,7 @@ int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -2828,13 +2803,12 @@ int mbedit_action_left_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_right_ping";
 	int status = MB_SUCCESS;
 	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -2914,7 +2888,7 @@ int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -2932,13 +2906,12 @@ int mbedit_action_right_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_zero_ping";
 	int status = MB_SUCCESS;
 	int j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -3008,7 +2981,7 @@ int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -3026,13 +2999,12 @@ int mbedit_action_zero_ping(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                             int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_flag_view";
 	int status = MB_SUCCESS;
 	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -3110,7 +3082,7 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -3128,13 +3100,12 @@ int mbedit_action_flag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_
 int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                               int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_unflag_view";
 	int status = MB_SUCCESS;
 	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -3208,7 +3179,7 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -3226,13 +3197,12 @@ int mbedit_action_unflag_view(int plwd, int exgr, int xntrvl, int yntrvl, int pl
 int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_unflag_all";
 	int status = MB_SUCCESS;
 	int i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -3304,7 +3274,7 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -3322,15 +3292,14 @@ int mbedit_action_unflag_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time,
                              int *nbuffer, int *ngood, int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_filter_all";
 	int status = MB_SUCCESS;
 	char string[MB_PATH_MAXLINE];
 	int i;
 
 	/* print input debug statements */
-	fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+	fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -3396,7 +3365,7 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nbuffer:     %d\n", *nbuffer);
 		fprintf(stderr, "dbg2       ngood:       %d\n", *ngood);
@@ -3413,7 +3382,6 @@ int mbedit_action_filter_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt
 /*--------------------------------------------------------------------*/
 int mbedit_filter_ping(int iping) {
 	/* local variables */
-	char *function_name = "mbedit_filter_ping";
 	int status = MB_SUCCESS;
 	int nbathsum, nbathlist;
 	double bathsum, bathmedian;
@@ -3424,7 +3392,7 @@ int mbedit_filter_ping(int iping) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:       %d\n", iping);
 	}
@@ -3729,7 +3697,7 @@ int mbedit_filter_ping(int iping) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:       %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3742,14 +3710,13 @@ int mbedit_filter_ping(int iping) {
 /*--------------------------------------------------------------------*/
 int mbedit_get_format(char *file, int *form) {
 	/* local variables */
-	char *function_name = "mbedit_get_format";
 	int status = MB_SUCCESS;
 	char tmp[MB_PATH_MAXLINE];
 	int tform;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       file:        %s\n", file);
 		fprintf(stderr, "dbg2       format:      %d\n", *form);
@@ -3763,7 +3730,7 @@ int mbedit_get_format(char *file, int *form) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       format:      %d\n", *form);
 		fprintf(stderr, "dbg2       error:      %d\n", error);
@@ -3777,7 +3744,6 @@ int mbedit_get_format(char *file, int *form) {
 /*--------------------------------------------------------------------*/
 int mbedit_open_file(char *file, int form, int savemode) {
 	/* local variables */
-	char *function_name = "mbedit_open_file";
 	int status = MB_SUCCESS;
 	int outputmode;
 	int i;
@@ -3796,7 +3762,7 @@ int mbedit_open_file(char *file, int form, int savemode) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       file:        %s\n", file);
 		fprintf(stderr, "dbg2       format:      %d\n", form);
@@ -3977,7 +3943,7 @@ int mbedit_open_file(char *file, int form, int savemode) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -3991,7 +3957,6 @@ int mbedit_open_file(char *file, int form, int savemode) {
 /*--------------------------------------------------------------------*/
 int mbedit_close_file() {
 	/* local variables */
-	char *function_name = "mbedit_close_file";
 	int status = MB_SUCCESS;
 	char command[MB_PATH_MAXLINE] = "";
 	int shellstatus;
@@ -3999,7 +3964,7 @@ int mbedit_close_file() {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	/* reset message */
@@ -4076,7 +4041,7 @@ int mbedit_close_file() {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4089,14 +4054,13 @@ int mbedit_close_file() {
 /*--------------------------------------------------------------------*/
 int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 	/* local variables */
-	char *function_name = "mbedit_dump_data";
 	int status = MB_SUCCESS;
 	int action;
 	int iping, jbeam;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       hold_size:   %d\n", hold_size);
 	}
@@ -4173,7 +4137,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndumped:    %d\n", *ndumped);
 		fprintf(stderr, "dbg2       nbuffer:    %d\n", *nbuffer);
@@ -4188,7 +4152,6 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 /*--------------------------------------------------------------------*/
 int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, int *icurrent) {
 	/* local variables */
-	char *function_name = "mbedit_load_data";
 	int status = MB_SUCCESS;
 	int namp, nss;
 	char string[MB_PATH_MAXLINE];
@@ -4201,7 +4164,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       buffer_size: %d\n", buffer_size);
 	}
@@ -4321,7 +4284,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 
 			/* print output debug statements */
 			if (verbose >= 5) {
-				fprintf(stderr, "\ndbg5  Next good data found in function <%s>:\n", function_name);
+				fprintf(stderr, "\ndbg5  Next good data found in function <%s>:\n", __func__);
 				fprintf(stderr, "dbg5       buffer id: %d   global id: %d\n", nbuff - 1, nbuff - 1 + ndump_total);
 			}
 		}
@@ -4410,7 +4373,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nloaded:    %d\n", *nloaded);
 		fprintf(stderr, "dbg2       nbuffer:    %d\n", *nbuffer);
@@ -4427,12 +4390,11 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 /*--------------------------------------------------------------------*/
 int mbedit_clear_screen() {
 	/* local variables */
-	char *function_name = "mbedit_clear_screen";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	/* clear screen */
@@ -4441,7 +4403,7 @@ int mbedit_clear_screen() {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4455,7 +4417,6 @@ int mbedit_clear_screen() {
 int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *nplt,
                     int autoscale) {
 	/* local variables */
-	char *function_name = "mbedit_plot_all";
 	int status = MB_SUCCESS;
 	int i, j;
 	int nbathsum, nbathlist;
@@ -4479,7 +4440,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       plot_width:  %d\n", plwd);
 		fprintf(stderr, "dbg2       exager:      %d\n", exgr);
@@ -4893,7 +4854,7 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nplot:       %d\n", *nplt);
 		fprintf(stderr, "dbg2       error:      %d\n", error);
@@ -4907,13 +4868,12 @@ int mbedit_plot_all(int plwd, int exgr, int xntrvl, int yntrvl, int plt_size, in
 /*--------------------------------------------------------------------*/
 int mbedit_plot_beam(int iping, int jbeam) {
 	/* local variables */
-	char *function_name = "mbedit_plot_beam";
 	int status = MB_SUCCESS;
 	int beam_color;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:       %d\n", iping);
 		fprintf(stderr, "dbg2       jbeam:       %d\n", jbeam);
@@ -4969,7 +4929,7 @@ int mbedit_plot_beam(int iping, int jbeam) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -4982,7 +4942,6 @@ int mbedit_plot_beam(int iping, int jbeam) {
 /*--------------------------------------------------------------------*/
 int mbedit_plot_ping(int iping) {
 	/* local variables */
-	char *function_name = "mbedit_plot_ping";
 	int status = MB_SUCCESS;
 	int j;
 	int first, last_flagged;
@@ -4990,7 +4949,7 @@ int mbedit_plot_ping(int iping) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:       %d\n", iping);
 	}
@@ -5037,7 +4996,7 @@ int mbedit_plot_ping(int iping) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5050,7 +5009,6 @@ int mbedit_plot_ping(int iping) {
 /*--------------------------------------------------------------------*/
 int mbedit_plot_ping_label(int iping, int save) {
 	/* local variables */
-	char *function_name = "mbedit_plot_ping_label";
 	int status = MB_SUCCESS;
 	int sascent, sdescent, swidth;
 	char string[MB_PATH_MAXLINE];
@@ -5058,7 +5016,7 @@ int mbedit_plot_ping_label(int iping, int save) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:       %d\n", iping);
 		fprintf(stderr, "dbg2       save:        %d\n", save);
@@ -5134,7 +5092,7 @@ int mbedit_plot_ping_label(int iping, int save) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5147,7 +5105,6 @@ int mbedit_plot_ping_label(int iping, int save) {
 /*--------------------------------------------------------------------*/
 int mbedit_plot_info() {
 	/* local variables */
-	char *function_name = "mbedit_plot_info";
 	int status = MB_SUCCESS;
 	char string[MB_PATH_MAXLINE];
 	int sascent, sdescent, swidth;
@@ -5155,7 +5112,7 @@ int mbedit_plot_info() {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	/* plot the info */
@@ -5183,7 +5140,7 @@ int mbedit_plot_info() {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5196,12 +5153,11 @@ int mbedit_plot_info() {
 /*--------------------------------------------------------------------*/
 int mbedit_unplot_beam(int iping, int jbeam) {
 	/* local variables */
-	char *function_name = "mbedit_unplot_beam";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:       %d\n", iping);
 		fprintf(stderr, "dbg2       jbeam:       %d\n", jbeam);
@@ -5224,7 +5180,7 @@ int mbedit_unplot_beam(int iping, int jbeam) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5237,14 +5193,13 @@ int mbedit_unplot_beam(int iping, int jbeam) {
 /*--------------------------------------------------------------------*/
 int mbedit_unplot_ping(int iping) {
 	/* local variables */
-	char *function_name = "mbedit_unplot_ping";
 	int status = MB_SUCCESS;
 	int j;
 	int first, xold, yold;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:       %d\n", iping);
 	}
@@ -5266,7 +5221,7 @@ int mbedit_unplot_ping(int iping) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5279,7 +5234,6 @@ int mbedit_unplot_ping(int iping) {
 /*--------------------------------------------------------------------*/
 int mbedit_unplot_info() {
 	/* local variables */
-	char *function_name = "mbedit_unplot_info";
 	int status = MB_SUCCESS;
 	char string[MB_PATH_MAXLINE];
 	int sascent, sdescent, swidth;
@@ -5287,7 +5241,7 @@ int mbedit_unplot_info() {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 	}
 
 	/* plot the info */
@@ -5320,7 +5274,7 @@ int mbedit_unplot_info() {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:      %d\n", error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -5335,7 +5289,6 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
                        int sh_mode, int sh_flggdsdg, int sh_flggdprf, int sh_time, int *ndumped, int *nloaded, int *nbuffer, int *ngood,
                        int *icurrent, int *nplt) {
 	/* local variables */
-	char *function_name = "mbedit_action_goto";
 	int status = MB_SUCCESS;
 	double ttime_d;
 	int found;
@@ -5343,7 +5296,7 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       time_i[0]:   %d\n", ttime_i[0]);
 		fprintf(stderr, "dbg2       time_i[1]:   %d\n", ttime_i[1]);
@@ -5501,7 +5454,7 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndumped:     %d\n", *ndumped);
 		fprintf(stderr, "dbg2       nloaded:     %d\n", *nloaded);
@@ -5520,12 +5473,11 @@ int mbedit_action_goto(int ttime_i[7], int hold_size, int buffer_size, int plwd,
 /*--------------------------------------------------------------------*/
 int mbedit_tslabel(int data_id, char *label) {
 	/* local variables */
-	char *function_name = "mbedit_tslabel";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       data_id:         %d\n", data_id);
 	}
@@ -5575,7 +5527,7 @@ int mbedit_tslabel(int data_id, char *label) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       label:       %s\n", label);
 		fprintf(stderr, "dbg2       error:       %d\n", error);
@@ -5589,12 +5541,11 @@ int mbedit_tslabel(int data_id, char *label) {
 /*--------------------------------------------------------------------*/
 int mbedit_tsvalue(int iping, int data_id, double *value) {
 	/* local variables */
-	char *function_name = "mbedit_tsvalue";
 	int status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:           %d\n", iping);
 		fprintf(stderr, "dbg2       data_id:         %d\n", data_id);
@@ -5647,7 +5598,7 @@ int mbedit_tsvalue(int iping, int data_id, double *value) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       value:       %f\n", *value);
 		fprintf(stderr, "dbg2       error:       %d\n", error);
@@ -5661,7 +5612,6 @@ int mbedit_tsvalue(int iping, int data_id, double *value) {
 /*--------------------------------------------------------------------*/
 int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *tsmax) {
 	/* local variables */
-	char *function_name = "mbedit_tsminmax";
 	int status = MB_SUCCESS;
 	double value, value2;
 	double halfwidth;
@@ -5670,7 +5620,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:           %d\n", iping);
 		fprintf(stderr, "dbg2       nping:           %d\n", nping);
@@ -5770,7 +5720,7 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       tsmin:       %f\n", *tsmin);
 		fprintf(stderr, "dbg2       tsmax:       %f\n", *tsmax);
@@ -5785,7 +5735,6 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 /*--------------------------------------------------------------------*/
 int mbedit_xtrackslope(int iping, double *slope) {
 	/* local variables */
-	char *function_name = "mbedit_xtrackslope";
 	int status = MB_SUCCESS;
 	int jbeam;
 	int ns;
@@ -5793,7 +5742,7 @@ int mbedit_xtrackslope(int iping, double *slope) {
 
 	/* print input debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       iping:           %d\n", iping);
 	}
@@ -5832,7 +5781,7 @@ int mbedit_xtrackslope(int iping, double *slope) {
 
 	/* print output debug statements */
 	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       slope:       %f\n", *slope);
 		fprintf(stderr, "dbg2       error:       %d\n", error);

@@ -119,14 +119,13 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 
 int mbpingedit_startup(int verbose, Widget parent, XtAppContext app, int *error) {
 	/* local variables */
-	char *function_name = "mbpingedit_startup";
 
 	/* set local verbosity */
 	mbp_verbose = verbose;
 
 	/* print starting debug statements */
 	if (mbp_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
@@ -148,7 +147,7 @@ int mbpingedit_startup(int verbose, Widget parent, XtAppContext app, int *error)
 
 	/* print output debug statements */
 	if (mbp_verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", function_name);
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       error:        %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
