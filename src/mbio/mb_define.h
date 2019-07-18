@@ -26,7 +26,15 @@
 extern "C" {
 #endif
 
+
 #ifdef _WIN32
+	/* https://www.zachburlingame.com/2011/05/resolving-redefinition-errors-betwen-ws2def-h-and-winsock-h/ */
+#	ifndef WIN32
+#		define WIN32
+#	endif
+#	include <WinSock2.h>
+#	include <Windows.h>
+
 #	include <mb_config.h>
 #else
 #	ifdef HAVE_CONFIG_H
