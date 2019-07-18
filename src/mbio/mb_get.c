@@ -36,15 +36,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
            double *speed, double *heading, double *distance, double *altitude, double *sonardepth, int *nbath, int *namp,
            int *nss, char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	char *store_ptr;
-	int done;
-	int reset_last;
-	double mtodeglon, mtodeglat;
-	double dx, dy;
-	double delta_time;
-	double headingx, headingy;
-	double denom;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -54,7 +45,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store_ptr = (char *)mb_io_ptr->store_data;
+	char *store_ptr = (char *)mb_io_ptr->store_data;
 
 	/* initialize binning values */
 	mb_io_ptr->pings_read = 0;
@@ -64,8 +55,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 	mb_io_ptr->lat = 0.0;
 	mb_io_ptr->speed = 0.0;
 	mb_io_ptr->heading = 0.0;
-	headingx = 0.0;
-	headingy = 0.0;
 	for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 		mb_io_ptr->beamflag[i] = MB_FLAG_NULL;
 		mb_io_ptr->bath[i] = 0.0;
@@ -85,9 +74,12 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 	}
 
 	int status = MB_SUCCESS;
+	int reset_last;
+	double headingx = 0.0;
+	double headingy = 0.0;
 
 	/* read the data */
-	done = MB_NO;
+	int done = MB_NO;
 	while (done == MB_NO) {
 
 		/* print debug statements */
@@ -113,20 +105,20 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 			    as these pointers may have changed */
 			if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA) {
 				if (mb_io_ptr->bath_arrays_reallocated == MB_YES) {
-					status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&beamflag, error);
-					status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&bath, error);
-					status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathacrosstrack, error);
-					status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathalongtrack, error);
+					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&beamflag, error);
+					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bath, error);
+					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathacrosstrack, error);
+					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&bathalongtrack, error);
 					mb_io_ptr->bath_arrays_reallocated = MB_NO;
 				}
 				if (mb_io_ptr->amp_arrays_reallocated == MB_YES) {
-					status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&amp, error);
+					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&amp, error);
 					mb_io_ptr->amp_arrays_reallocated = MB_NO;
 				}
 				if (mb_io_ptr->ss_arrays_reallocated == MB_YES) {
-					status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&ss, error);
-					status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssacrosstrack, error);
-					status = mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssalongtrack, error);
+					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ss, error);
+					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssacrosstrack, error);
+					status &= mb_update_arrayptr(verbose, mbio_ptr, (void **)&ssalongtrack, error);
 					mb_io_ptr->ss_arrays_reallocated = MB_NO;
 				}
 			}
@@ -500,7 +492,7 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 		*navlat = mb_io_ptr->lat / mb_io_ptr->pings_binned;
 		headingx = headingx / mb_io_ptr->pings_binned;
 		headingy = headingy / mb_io_ptr->pings_binned;
-		denom = sqrt(headingx * headingx + headingy * headingy);
+		const double denom = sqrt(headingx * headingx + headingy * headingy);
 		if (denom > 0.0) {
 			headingx = headingx / denom;
 			headingy = headingy / denom;
@@ -512,16 +504,20 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 			*heading = *heading + 360.0;
 
 		/* get coordinate scaling */
+		double mtodeglon;
+		double mtodeglat;
 		mb_coor_scale(verbose, *navlat, &mtodeglon, &mtodeglat);
 
 		/* get distance value */
 		if (mb_io_ptr->old_time_d > 0.0) {
-			dx = (*navlon - mb_io_ptr->old_lon) / mtodeglon;
-			dy = (*navlat - mb_io_ptr->old_lat) / mtodeglat;
+			const double dx = (*navlon - mb_io_ptr->old_lon) / mtodeglon;
+			const double dy = (*navlat - mb_io_ptr->old_lat) / mtodeglat;
 			*distance = 0.001 * sqrt(dx * dx + dy * dy); /* km */
 		}
 		else
 			*distance = 0.0;
+
+		double delta_time = 0.0;
 
 		/* get speed value */
 		if (mb_io_ptr->speed > 0.0) {
