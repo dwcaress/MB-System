@@ -417,8 +417,6 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
                    int *variable_beams, int *traveltime, int *beam_flagging, int *platform_source, int *nav_source,
                    int *sensordepth_source, int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                    double *beamwidth_ltrack, int *error) {
-	int status;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -455,6 +453,8 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		/* set new format value */
 		*format = i;
 	}
+
+	int status = MB_SUCCESS;
 
 	/* look for a corresponding format */
 	if (*format == MBF_SBSIOMRG) {
@@ -1043,7 +1043,12 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 }
 /*--------------------------------------------------------------------*/
 int mb_format(int verbose, int *format, int *error) {
-	int status;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+	}
 
 	/* format parameters */
 	int system;         /* system id */
@@ -1068,15 +1073,8 @@ int mb_format(int verbose, int *format, int *error) {
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       format:     %d\n", *format);
-	}
-
 	/* set the message and status */
-	status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
+	const int status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
 	                        format_description, &numfile, &filetype, &variable_beams, &traveltime, &beam_flagging,
 	                        &platform_source, &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source,
 	                        &beamwidth_xtrack, &beamwidth_ltrack, error);
@@ -1094,7 +1092,12 @@ int mb_format(int verbose, int *format, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error) {
-	int status;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+	}
 
 	/* format parameters */
 	int beams_bath_max; /* maximum number of bathymetry beams */
@@ -1118,15 +1121,8 @@ int mb_format_system(int verbose, int *format, int *system, int *error) {
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       format:     %d\n", *format);
-	}
-
 	/* set the message and status */
-	status = mb_format_info(verbose, format, system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
+	const int status = mb_format_info(verbose, format, system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
 	                        format_description, &numfile, &filetype, &variable_beams, &traveltime, &beam_flagging,
 	                        &platform_source, &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source,
 	                        &beamwidth_xtrack, &beamwidth_ltrack, error);
@@ -1148,7 +1144,12 @@ int mb_format_system(int verbose, int *format, int *system, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, int *error) {
-	int status;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+	}
 
 	/* format parameters */
 	int system; /* sonar system id */
@@ -1169,15 +1170,8 @@ int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *bea
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       format:     %d\n", *format);
-	}
-
 	/* set the message and status */
-	status = mb_format_info(verbose, format, &system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
+	const int status = mb_format_info(verbose, format, &system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
 	                        format_description, &numfile, &filetype, &variable_beams, &traveltime, &beam_flagging,
 	                        &platform_source, &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source,
 	                        &beamwidth_xtrack, &beamwidth_ltrack, error);
@@ -1203,7 +1197,12 @@ int mb_format_dimensions(int verbose, int *format, int *beams_bath_max, int *bea
 }
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error) {
-	int status;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+	}
 
 	/* format parameters */
 	int system;         /* sonar system id */
@@ -1227,15 +1226,8 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       format:     %d\n", *format);
-	}
-
 	/* set the message and status */
-	status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
+	const int status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
 	                        description, &numfile, &filetype, &variable_beams, &traveltime, &beam_flagging, &platform_source,
 	                        &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source, &beamwidth_xtrack,
 	                        &beamwidth_ltrack, error);
@@ -1254,7 +1246,12 @@ int mb_format_description(int verbose, int *format, char *description, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mb_format_flags(int verbose, int *format, int *variable_beams, int *traveltime, int *beam_flagging, int *error) {
-	int status;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+	}
 
 	/* format parameters */
 	int system;         /* sonar system id */
@@ -1276,15 +1273,8 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       format:     %d\n", *format);
-	}
-
 	/* set the message and status */
-	status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
+	const int status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
 	                        format_description, &numfile, &filetype, variable_beams, traveltime, beam_flagging, &platform_source,
 	                        &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source, &beamwidth_xtrack,
 	                        &beamwidth_ltrack, error);
@@ -1311,7 +1301,12 @@ int mb_format_flags(int verbose, int *format, int *variable_beams, int *travelti
 /*--------------------------------------------------------------------*/
 int mb_format_source(int verbose, int *format, int *platform_source, int *nav_source, int *sensordepth_source,
                      int *heading_source, int *attitude_source, int *svp_source, int *error) {
-	int status;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+	}
 
 	/* format parameters */
 	int system;         /* sonar system id */
@@ -1330,15 +1325,8 @@ int mb_format_source(int verbose, int *format, int *platform_source, int *nav_so
 	double beamwidth_xtrack; /* nominal acrosstrack beamwidth */
 	double beamwidth_ltrack; /* nominal alongtrack beamwidth */
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       format:     %d\n", *format);
-	}
-
 	/* set the message and status */
-	status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
+	const int status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
 	                        format_description, &numfile, &filetype, &variable_beams, &traveltime, &beam_flagging,
 	                        platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
 	                        &beamwidth_xtrack, &beamwidth_ltrack, error);
@@ -1370,7 +1358,12 @@ int mb_format_source(int verbose, int *format, int *platform_source, int *nav_so
 }
 /*--------------------------------------------------------------------*/
 int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, double *beamwidth_ltrack, int *error) {
-	int status;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       format:     %d\n", *format);
+	}
 
 	/* format parameters */
 	int system;         /* sonar system id */
@@ -1393,15 +1386,8 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
 	int attitude_source;    /* data record types containing the primary attitude */
 	int svp_source;         /* data record types containing the primary svp */
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       format:     %d\n", *format);
-	}
-
 	/* set the message and status */
-	status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
+	const int status = mb_format_info(verbose, format, &system, &beams_bath_max, &beams_amp_max, &pixels_ss_max, format_name, system_name,
 	                        format_description, &numfile, &filetype, &variable_beams, &traveltime, &beam_flagging,
 	                        &platform_source, &nav_source, &sensordepth_source, &heading_source, &attitude_source, &svp_source,
 	                        beamwidth_xtrack, beamwidth_ltrack, error);
@@ -1425,23 +1411,6 @@ int mb_format_beamwidth(int verbose, int *format, double *beamwidth_xtrack, doub
 }
 /*--------------------------------------------------------------------*/
 int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int *error) {
-	int status = MB_SUCCESS;
-	int found = MB_NO;
-	char *suffix;
-	int suffix_len;
-	FILE *checkfp;
-	mb_path parfile;
-	mb_path dummy;
-	int pformat;
-	struct stat statbuf;
-	char buffer[MB_COMMENT_MAXLINE];
-	char *result;
-
-	short *shortptr;
-	short type1, sonar1, type2, sonar2, type1swap, sonar1swap, type2swap, sonar2swap;
-	int nsonar, nlow, nhigh, subsystem, size;
-	int done;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1450,8 +1419,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	}
 
 	/* set format not found */
-	found = MB_NO;
+	int found = MB_NO;
 	*format = 0;
+
+	char *suffix;
+	int suffix_len;
 
 	/* first look for MB suffix convention */
 	if (found == MB_NO) {
@@ -1672,6 +1644,19 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 			}
 		}
 	}
+
+	FILE *checkfp;
+	mb_path parfile;
+	mb_path dummy;
+	int pformat;
+	struct stat statbuf;
+	char buffer[MB_COMMENT_MAXLINE];
+	char *result;
+
+	short *shortptr;
+	short type1, sonar1, type2, sonar2, type1swap, sonar1swap, type2swap, sonar2swap;
+	int nsonar, nlow, nhigh, subsystem, size;
+	int done;
 
 	/* look for old Simrad Mermaid suffix convention */
 	if (found == MB_NO) {
@@ -2844,6 +2829,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 		*format = i;
 	}
 
+	int status = MB_SUCCESS;
+
 	/* set error if needed */
 	if (found == MB_NO) {
 		*error = MB_ERROR_BAD_FORMAT;
@@ -2928,9 +2915,6 @@ int mb_datalist_open(int verbose, void **datalist_ptr, char *path, int look_proc
 
 /*--------------------------------------------------------------------*/
 int mb_datalist_close(int verbose, void **datalist_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_datalist_struct *datalist;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2941,13 +2925,15 @@ int mb_datalist_close(int verbose, void **datalist_ptr, int *error) {
 	/* close file */
 	if (*datalist_ptr != NULL) {
 		/* get datalist pointer */
-		datalist = (struct mb_datalist_struct *)*datalist_ptr;
+		struct mb_datalist_struct *datalist = (struct mb_datalist_struct *)*datalist_ptr;
 
 		/* close file */
 		if (datalist->open == MB_YES) {
 			fclose(datalist->fp);
 		}
 	}
+
+	int status = MB_SUCCESS;
 
 	/* deallocate structure */
 	if (*datalist_ptr != NULL) {
@@ -2967,12 +2953,6 @@ int mb_datalist_close(int verbose, void **datalist_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format, double *weight, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_datalist_struct *datalist;
-	char ppath[MB_PATH_MAXLINE];
-	char dpath[MB_PATH_MAXLINE];
-	int pstatus;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2981,7 +2961,7 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 	}
 
 	/* get datalist pointer */
-	datalist = (struct mb_datalist_struct *)datalist_ptr;
+	struct mb_datalist_struct *datalist = (struct mb_datalist_struct *)datalist_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       datalist->open:             %d\n", datalist->open);
@@ -2993,8 +2973,12 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 		fprintf(stderr, "dbg2       datalist->look_processed:   %d\n", datalist->look_processed);
 	}
 
+	char ppath[MB_PATH_MAXLINE];
+	char dpath[MB_PATH_MAXLINE];
+	int pstatus;
+
 	/* call mb_datalist_read2() */
-	status = mb_datalist_read2(verbose, datalist_ptr, &pstatus, path, ppath, dpath, format, weight, error);
+	const int status = mb_datalist_read2(verbose, datalist_ptr, &pstatus, path, ppath, dpath, format, weight, error);
 
 	/* deal with pstatus */
 	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR) {
@@ -3019,11 +3003,6 @@ int mb_datalist_readorg(int verbose, void *datalist_ptr, char *path, int *format
 
 /*--------------------------------------------------------------------*/
 int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, int *format, double *weight, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_datalist_struct *datalist;
-	char ppath[MB_PATH_MAXLINE];
-	int pstatus;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3032,7 +3011,7 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 	}
 
 	/* get datalist pointer */
-	datalist = (struct mb_datalist_struct *)datalist_ptr;
+	struct mb_datalist_struct *datalist = (struct mb_datalist_struct *)datalist_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       datalist->open:             %d\n", datalist->open);
@@ -3044,8 +3023,11 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 		fprintf(stderr, "dbg2       datalist->look_processed:   %d\n", datalist->look_processed);
 	}
 
+	char ppath[MB_PATH_MAXLINE];
+	int pstatus;
+
 	/* call mb_datalist_read2() */
-	status = mb_datalist_read2(verbose, datalist_ptr, &pstatus, path, ppath, dpath, format, weight, error);
+	const int status = mb_datalist_read2(verbose, datalist_ptr, &pstatus, path, ppath, dpath, format, weight, error);
 
 	/* deal with pstatus */
 	if (status == MB_SUCCESS && *error == MB_ERROR_NO_ERROR) {
@@ -3072,24 +3054,6 @@ int mb_datalist_read(int verbose, void *datalist_ptr, char *path, char *dpath, i
 /*--------------------------------------------------------------------*/
 int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path, char *ppath, char *dpath, int *format,
                       double *weight, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_datalist_struct *datalist;
-	struct mb_datalist_struct *datalist2;
-	char buffer[MB_PATH_MAXLINE];
-	char root[MB_PATH_MAXLINE];
-	char tmpstr[MB_PATH_MAXLINE];
-	char pfile[MB_PATH_MAXLINE];
-	int pfile_specified;
-	char *buffer_ptr;
-	int len;
-	int nscan, done, rdone;
-	int pformat;
-	struct stat file_status;
-	int fstat, file_ok;
-	int rawspecified = MB_NO;
-	int processedspecified = MB_NO;
-	int istart;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3098,7 +3062,7 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 	}
 
 	/* get datalist pointer */
-	datalist = (struct mb_datalist_struct *)datalist_ptr;
+	struct mb_datalist_struct *datalist = (struct mb_datalist_struct *)datalist_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       datalist->open:             %d\n", datalist->open);
@@ -3110,8 +3074,27 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 		fprintf(stderr, "dbg2       datalist->look_processed:   %d\n", datalist->look_processed);
 	}
 
+	int status = MB_SUCCESS;
+	struct mb_datalist_struct *datalist2;
+	char buffer[MB_PATH_MAXLINE];
+	char root[MB_PATH_MAXLINE];
+	char tmpstr[MB_PATH_MAXLINE];
+	char pfile[MB_PATH_MAXLINE];
+	int pfile_specified;
+	char *buffer_ptr;
+	int len;
+	int nscan;
+	int rdone;
+	int pformat;
+	struct stat file_status;
+	int fstat;
+	int file_ok;
+	int rawspecified = MB_NO;
+	int processedspecified = MB_NO;
+	int istart;
+
 	/* loop over reading from datalist_ptr */
-	done = MB_NO;
+	int done = MB_NO;
 	if (datalist->open == MB_YES && done == MB_NO) {
 		while (done == MB_NO) {
 			/* copy current datalist path */
@@ -3338,10 +3321,6 @@ int mb_datalist_read2(int verbose, void *datalist_ptr, int *pstatus, char *path,
 
 /*--------------------------------------------------------------------*/
 int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recursion, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_datalist_struct *datalist;
-	int start;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3350,10 +3329,11 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 		fprintf(stderr, "dbg2       print:         %d\n", print);
 	}
 
+
 	/* get datalist structure */
-	start = *recursion;
+	/* int start = *recursion; */
 	if (datalist_ptr != NULL) {
-		datalist = (struct mb_datalist_struct *)datalist_ptr;
+		struct mb_datalist_struct *datalist = (struct mb_datalist_struct *)datalist_ptr;
 		*recursion = datalist->recursion;
 		if (print == MB_YES && datalist->printed == MB_NO) {
 			fprintf(stderr, "<%2.2d> ", *recursion);
@@ -3378,6 +3358,8 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -3391,9 +3373,6 @@ int mb_datalist_recursion(int verbose, void *datalist_ptr, int print, int *recur
 }
 /*--------------------------------------------------------------------*/
 int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_imagelist_struct *imagelist;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3401,6 +3380,9 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 		fprintf(stderr, "dbg2       imagelist_ptr:      %p\n", (void *)*imagelist_ptr);
 		fprintf(stderr, "dbg2       path:          %s\n", path);
 	}
+
+	struct mb_imagelist_struct *imagelist = NULL;
+	int status = MB_SUCCESS;
 
 	/* allocate memory for imagelist structure */
 	if ((status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_imagelist_struct), imagelist_ptr, error)) ==
@@ -3447,9 +3429,6 @@ int mb_imagelist_open(int verbose, void **imagelist_ptr, char *path, int *error)
 
 /*--------------------------------------------------------------------*/
 int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_imagelist_struct *imagelist;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3457,10 +3436,12 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 		fprintf(stderr, "dbg2       imagelist_ptr:  %p\n", (void *)*imagelist_ptr);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* close file */
 	if (*imagelist_ptr != NULL) {
 		/* get imagelist pointer */
-		imagelist = (struct mb_imagelist_struct *)*imagelist_ptr;
+		struct mb_imagelist_struct *imagelist = (struct mb_imagelist_struct *)*imagelist_ptr;
 
 		/* close file */
 		if (imagelist->open == MB_YES) {
@@ -3487,17 +3468,6 @@ int mb_imagelist_close(int verbose, void **imagelist_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *path0, char *path1, char *dpath,
                       double *time_d, double *dtime_d, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_imagelist_struct *imagelist;
-	struct mb_imagelist_struct *imagelist2;
-	char buffer[MB_PATH_MAXLINE];
-	char tmpstr[MB_PATH_MAXLINE];
-	char *buffer_ptr;
-	int len;
-	int nscan, done, rdone;
-	struct stat file_status;
-	int fstat;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3506,7 +3476,7 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 	}
 
 	/* get imagelist pointer */
-	imagelist = (struct mb_imagelist_struct *)imagelist_ptr;
+	struct mb_imagelist_struct *imagelist = (struct mb_imagelist_struct *)imagelist_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       imagelist->open:             %d\n", imagelist->open);
@@ -3517,8 +3487,18 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 		fprintf(stderr, "dbg2       imagelist->imagelist:         %p\n", (void *)imagelist->imagelist);
 	}
 
+	int status = MB_SUCCESS;
+	struct mb_imagelist_struct *imagelist2;
+	char buffer[MB_PATH_MAXLINE];
+	char tmpstr[MB_PATH_MAXLINE];
+	char *buffer_ptr;
+	int len;
+	int nscan, rdone;
+	struct stat file_status;
+	int fstat;
+
 	/* loop over reading from imagelist_ptr */
-	done = MB_NO;
+	int done = MB_NO;
 	if (imagelist->open == MB_YES && done == MB_NO) {
 		while (done == MB_NO) {
 			/* copy current imagelist path */
@@ -3750,16 +3730,16 @@ int mb_imagelist_read(int verbose, void *imagelist_ptr, int *imagestatus, char *
 #ifdef WIN32
 void cvt_to_nix_path(char *path) {
 	/* Replace back slashes by slashes and trim first two chars in paths like "C:/path" */
-	size_t k, len = strlen(path);
+	const size_t len = strlen(path);
 
 	if (len == 0)
 		return;
-	for (k = 0; k < len; k++)
+	for (size_t k = 0; k < len; k++)
 		if (path[k] == '\\')
 			path[k] = '/';
 
 	if (path[1] == ':') {
-		for (k = 0; k < len - 2; k++)
+		for (size_t k = 0; k < len - 2; k++)
 			path[k] = path[k + 2];
 		path[len - 2] = '\0'; /* Make sure it's null terminated */
 	}
@@ -3770,14 +3750,6 @@ void cvt_to_nix_path(char *path) {
 
 /*--------------------------------------------------------------------*/
 int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
-	int status = MB_SUCCESS;
-	char relativepath[MB_PATH_MAXLINE] = {""};
-	char pwd[MB_PATH_MAXLINE] = {""};
-	int pathlen;
-	int pwdlen;
-	int same, isame, ndiff;
-	char *bufptr;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3787,8 +3759,8 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 	}
 
 	/* get string lengths */
-	pathlen = strlen(path);
-	pwdlen = strlen(ipwd);
+	int pathlen = strlen(path);
+	int pwdlen = strlen(ipwd);
 
 #ifdef WIN32
 	/* The approximation here is to try to make a Windows path like a unix one and expect that
@@ -3799,6 +3771,10 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 	cvt_to_nix_path(path);
 	cvt_to_nix_path(ipwd);
 #endif
+
+	int status = MB_SUCCESS;
+	char relativepath[MB_PATH_MAXLINE] = {""};
+	char *bufptr = NULL;
 
 	/* if path doesn't start with '/' not an absolute path */
 	if (pathlen > 0 && path[0] != '/') {
@@ -3818,6 +3794,8 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 			strcat(path, relativepath);
 		}
 	}
+
+	char pwd[MB_PATH_MAXLINE] = {""};
 
 	/* if path doesn't start with '/' not an absolute path */
 	if (pwdlen == 0)
@@ -3846,6 +3824,10 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 
 	pathlen = strlen(path);
 	pwdlen = strlen(pwd);
+
+	int same;
+	int isame;
+	int ndiff;
 
 	/* try to get best relative path */
 	if (pathlen > 0 && pwdlen > 0) {
@@ -3915,13 +3897,6 @@ int mb_get_relative_path(int verbose, char *path, char *ipwd, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_get_shortest_path(int verbose, char *path, int *error) {
-	int status = MB_SUCCESS;
-	char tmppath[MB_PATH_MAXLINE];
-	char lasttoken[MB_PATH_MAXLINE];
-	char *result;
-	int lasttokenordinary;
-	int done, change;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3934,21 +3909,25 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 // return(status);
 #endif
 
+	int status = MB_SUCCESS;
+	char lasttoken[MB_PATH_MAXLINE];
+
 	/* loop until no changes are made */
-	done = MB_NO;
+	int done = MB_NO;
 	while (done == MB_NO) {
 		/* set no change made */
-		change = MB_NO;
+		int change = MB_NO;
 
 		/* copy the path */
+		char tmppath[MB_PATH_MAXLINE];
 		strncpy(tmppath, path, MB_PATH_MAXLINE);
 
 		/* step through path */
 		path[0] = '\0';
 		if (tmppath[0] == '/')
 			strcpy(path, "/");
-		result = strtok(tmppath, "/");
-		lasttokenordinary = MB_NO;
+		char *result = strtok(tmppath, "/");
+		int lasttokenordinary = MB_NO;
 		while (result != NULL) {
 			if (strcmp("..", result) == 0) {
 				if (lasttokenordinary == MB_NO) {
@@ -3997,9 +3976,6 @@ int mb_get_shortest_path(int verbose, char *path, int *error) {
 /*--------------------------------------------------------------------*/
 
 int mb_get_basename(int verbose, char *path, int *error) {
-	int status = MB_SUCCESS;
-	char tmppath[MB_PATH_MAXLINE];
-	char *result;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4009,10 +3985,11 @@ int mb_get_basename(int verbose, char *path, int *error) {
 	}
 
 	/* copy the path */
+	char tmppath[MB_PATH_MAXLINE];
 	strncpy(tmppath, path, MB_PATH_MAXLINE);
 
 	/* return everything after the last '/' */
-	result = strrchr(tmppath, '/');
+	char *result = strrchr(tmppath, '/');
 	if (result != NULL && strlen(result) > 1)
 		strcpy(path, &result[1]);
 
@@ -4034,7 +4011,7 @@ int mb_get_basename(int verbose, char *path, int *error) {
 	}
 
 	/* no error even if no path */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	if (verbose >= 2) {
