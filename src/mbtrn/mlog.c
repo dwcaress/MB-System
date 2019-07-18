@@ -68,12 +68,17 @@ GNU General Public License for more details
 #ifdef _WIN32
 #	include "mlog.h"
 #	include "windirent.h"
+#	define gmtime_r gmtime
 #else
 #	include <dirent.h>
 #	include "mlog.h"
 #endif
 
 #include "mdebug.h"
+
+#ifndef sleep
+#define sleep _sleep
+#endif
 
 /////////////////////////
 // Macros

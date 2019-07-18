@@ -61,12 +61,32 @@ GNU General Public License for more details
 #include <inttypes.h>
 #include <errno.h>
 #include <time.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include <math.h>
 
 #include "r7kc.h"
 #include "mconfig.h"
 #include "mdebug.h"
+
+#ifdef _WIN32
+#	define gmtime_r gmtime
+void usleep(__int64 usec) { 
+    HANDLE timer; 
+    LARGE_INTEGER ft; 
+
+    ft.QuadPart = -(10*usec); // Convert to 100 nanosecond interval, negative value indicates relative time
+
+    timer = CreateWaitableTimer(NULL, TRUE, NULL); 
+    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0); 
+    WaitForSingleObject(timer, INFINITE); 
+    CloseHandle(timer); 
+}
+
+// https://stackoverflow.com/questions/321849/strptime-equivalent-on-windows
+#include "strptime.c"
+#endif
 
 /////////////////////////
 // Macros

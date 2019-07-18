@@ -70,7 +70,9 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <time.h>
+#ifndef _WIN32
 #include <sys/time.h>
+#endif
 #include <math.h>
 #include <errno.h>
 
@@ -79,6 +81,10 @@
 #include "mconfig.h"
 #include "mdebug.h"
 #include "merror.h"
+
+#ifdef _WIN32
+#	define gmtime_r gmtime
+#endif
 
 /////////////////////////
 // Macros
@@ -766,11 +772,18 @@ void mbtrn_reader_flush(mbtrn_reader_t *self, uint32_t len, int32_t retries, uin
 {
     if (NULL != self) {
         // read until timeout
+#ifdef _WIN32
+        byte *buf;
+#else
         byte buf[len];
+#endif
         int64_t x=0;
         uint32_t n=0;
         bool use_retries = (retries>0 ? true : false);
 
+#ifdef _WIN32
+		buf = (byte *)malloc(len);
+#endif
         do{
            x=iow_read_tmout(mbtrn_reader_sockif(self), buf, len, tmout_ms);
            n++;
@@ -780,6 +793,9 @@ void mbtrn_reader_flush(mbtrn_reader_t *self, uint32_t len, int32_t retries, uin
                 }
             }
         }while ( (x!=-1) && (me_errno!=(int)ME_ETMOUT));
+#ifdef _WIN32
+        free(buf);
+#endif
 //        MMDEBUG(MBTRN,"EXIT - retries[%d/%s] x[%lld] e[%d/%s] n[%u]\n",retries,(use_retries?"true":"false"),x,
 //               me_errno,me_strerror(me_errno),n);
     }

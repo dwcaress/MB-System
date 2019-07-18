@@ -389,8 +389,13 @@ int cbuf_test()
 
   
 	// init IO buffers
+#ifdef _WIN32
+    byte wdata[32];
+    byte rdata[32];
+#else
     byte wdata[rwcap];
     byte rdata[rwcap];
+#endif
     memset(wdata,0,rwcap);
     memset(rdata,0,rwcap);
     for (uint32_t i=0;i<rwcap; i++) {
