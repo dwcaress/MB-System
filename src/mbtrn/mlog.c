@@ -2,20 +2,20 @@
 /// @file mlog.c
 /// @authors k. Headley
 /// @date 01 jan 2018
- 
+
 /// General purpose application message logging
 /// configurable segmentation and rotation
 /// enables formatted and timestamped output
 
 /////////////////////////
-// Terms of use 
+// Terms of use
 /////////////////////////
 /*
 Copyright Information
 
 Copyright 2000-2018 MBARI
 Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
 Terms of Use
 
 This program is free software; you can redistribute it and/or modify
@@ -27,38 +27,38 @@ http://www.gnu.org/licenses/gpl-3.0.html
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details 
+GNU General Public License for more details
 (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
- express or implied, as to the software, title, non-infringement of third party 
+ express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
- the code, or the performance or results which you may obtain from its use. You 
- assume the entire risk associated with use of the code, and you agree to be 
- responsible for the entire cost of repair or servicing of the program with 
+ the code, or the performance or results which you may obtain from its use. You
+ assume the entire risk associated with use of the code, and you agree to be
+ responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
- incidental or consequential damages, arising out of your use of the software, 
- including, but not limited to, the loss or corruption of your data or damages 
- of any kind resulting from use of the software, any prohibited use, or your 
+ incidental or consequential damages, arising out of your use of the software,
+ including, but not limited to, the loss or corruption of your data or damages
+ of any kind resulting from use of the software, any prohibited use, or your
  inability to use the software. You agree to defend, indemnify and hold harmless
- MBARI and its officers, directors, and employees against any claim, loss, 
- liability or expense, including attorneys' fees, resulting from loss of or 
- damage to property or the injury to or death of any person arising out of the 
+ MBARI and its officers, directors, and employees against any claim, loss,
+ liability or expense, including attorneys' fees, resulting from loss of or
+ damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
- The MBARI software is provided without obligation on the part of the 
- Monterey Bay Aquarium Research Institute to assist in its use, correction, 
+
+ The MBARI software is provided without obligation on the part of the
+ Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
- MBARI assumes no responsibility or liability for any third party and/or 
- commercial software required for the database or applications. Licensee agrees 
- to obtain and maintain valid licenses for any additional third party software 
+
+ MBARI assumes no responsibility or liability for any third party and/or
+ commercial software required for the database or applications. Licensee agrees
+ to obtain and maintain valid licenses for any additional third party software
  required.
 */
 /////////////////////////
-// Headers 
+// Headers
 /////////////////////////
 
 #include <stdio.h>
@@ -76,7 +76,7 @@ GNU General Public License for more details
 
 #include "mdebug.h"
 
-#ifndef sleep
+#ifdef _WIN32
 #define sleep _sleep
 #endif
 
@@ -84,7 +84,7 @@ GNU General Public License for more details
 // Macros
 /////////////////////////
 
-// These macros should only be defined for 
+// These macros should only be defined for
 // application main files rather than general C files
 /*
 /// @def PRODUCT
@@ -105,7 +105,7 @@ GNU General Public License for more details
 
 
 /////////////////////////
-// Declarations 
+// Declarations
 /////////////////////////
 
 /// @struct mlog_list_entry_s
@@ -209,7 +209,7 @@ static void s_mlog_list_destroy(bool incl_logs)
 static mlog_t *s_lookup_log(int32_t id)
 {
     mlog_t *retval = NULL;
-    
+
     mlog_list_entry_t *plist = s_log_list;
     if (NULL!=plist) {
         do{
@@ -236,11 +236,11 @@ static int s_parse_path(const char *src, mlog_t *dest)
 
     if (NULL!=src && NULL!=dest && strcmp(src,".")!=0) {
 
-       
+
         char *scopy = strdup(src);
         char *ps = scopy;
         char *pend = scopy+strlen(scopy);
-        
+
         while ( (*ps=='\t' || *ps==' ') && ps<pend) {
             ps++;
         }
@@ -250,13 +250,13 @@ static int s_parse_path(const char *src, mlog_t *dest)
         if ( ps>scopy && ((*(ps-1))==ML_SYS_PATH_DEL) ) {
             ps--;
         }
-        
+
         char *pathe  = strrchr(ps, ML_SYS_PATH_DEL);
         char *exte  = strrchr(ps, ML_SYS_EXT_DEL);
         char *ppath = NULL;
         char *pname = NULL;
         char *pext = NULL;
-        
+
         if (pathe!=NULL) {
             pname = pathe+1;
             ppath = ps;
@@ -266,7 +266,7 @@ static int s_parse_path(const char *src, mlog_t *dest)
             ppath = NULL;
             pname = ps;
         }
-        
+
         if (exte!=NULL) {
             if (exte>pname) {
                 // name and ext
@@ -283,7 +283,7 @@ static int s_parse_path(const char *src, mlog_t *dest)
             // ext delimiter not found
             pext = NULL;
         }
-        
+
         if (pname != NULL && strlen(pname)>=1) {
             if (NULL != dest->name) {
                 free(dest->name);
@@ -311,7 +311,7 @@ static int s_parse_path(const char *src, mlog_t *dest)
             }
            dest->ext = strdup(pext);
         }
-        
+
         //MDEBUG("src[%s] path[%p] name[%p] ext[%p]\n",src,ppath,pname,pext);
 //        MDEBUG("src[%10s] path[%10s] name[%10s] ext[%10s]\n",src,dest->path,dest->name,dest->ext);
         free(scopy);
@@ -370,13 +370,13 @@ static int s_get_log_info(mlog_info_t *dest, char *path, char *name, char *fmt, 
         struct dirent *ep;
         time_t tseg=0;
         int16_t nseg=-1;
-        
+
         memset(dest,0,sizeof(mlog_info_t));
         dest->seg_min=0xFFFF;
         dest->tb=time(NULL);
-        
+
         iow_file_show(file,false,5);
-        
+
         dp = opendir ((path==NULL?".":path));
         if (dp != NULL){
             while ( (ep = readdir(dp))!=NULL ){
@@ -385,14 +385,14 @@ static int s_get_log_info(mlog_info_t *dest, char *path, char *name, char *fmt, 
                 if ( nseg >= 0) {
                     retval=0;
                     dest->seg_count++;
-                    
+
                     if (nseg > dest->seg_max) {
                         dest->seg_max = nseg;
                     }
                     if(nseg < dest->seg_min){
                         dest->seg_min = nseg;
                     }
-                    
+
                     tseg=iow_mtime(ep->d_name);
 //                    MDEBUG("tseg[%ld] nseg[%hu] tb[%ld] te[%ld]\n",tseg,nseg,dest->tb,dest->te);
                     if( tseg>0){
@@ -427,17 +427,17 @@ static int s_get_log_info(mlog_info_t *dest, char *path, char *name, char *fmt, 
 static int s_log_rotate(mlog_t *self)
 {
     int retval=-1;
-    
+
     // do any rotation required
     if (NULL!=self && NULL!=self->file) {
         mlog_flags_t flags=self->cfg->flags;
-        
+
         if( flags&ML_OSEG ){
             // segmented
             mlog_info_t linfo={0};
             s_get_log_info(&linfo, self->path,self->name,ML_SEG_FMT, self->file);
-            
-            
+
+
             if ( self->cur_seg < (self->cfg->lim_s-1)) {
                 // create new segment
                 if(s_log_set_seg(self, self->cur_seg+1) > 0){
@@ -469,11 +469,11 @@ static int s_log_rotate(mlog_t *self)
                 self->seg_len=0;
             }
         }
-        
+
     }else{
         MERROR("invalid argument\n");
     }
-    
+
     return retval;
 }
 // End function s_log_rotate
@@ -488,7 +488,7 @@ static int s_log_rotate(mlog_t *self)
 static int s_log_chklimits(mlog_t *self)
 {
     int retval=-1;
-    
+
     if (NULL!=self && NULL!=self->file) {
         mlog_flags_t flags=self->cfg->flags;
         mlog_dest_t dest = self->cfg->dest;
@@ -519,7 +519,7 @@ static int s_log_chklimits(mlog_t *self)
     }else{
         MERROR("invalid argument\n");
     }
-    
+
     return retval;
 }
 // End function s_log_chklimits
@@ -533,9 +533,9 @@ static int s_log_chklimits(mlog_t *self)
 static int s_log_set_seg(mlog_t *self, int16_t segno)
 {
     int retval=-1;
-    
+
     if (NULL!=self && NULL!=self->file && NULL!=self->name){
-        
+
         size_t len = strlen(self->name);
         len += ( NULL==self->path ? 0 : strlen(self->path));
         // ext
@@ -545,7 +545,7 @@ static int s_log_set_seg(mlog_t *self, int16_t segno)
 		// for delimiter(s), NULL
         len += 2;
         // init buffer
-        char new_name[1024];		// char new_name[len];  is not valid C. JL 
+        char new_name[1024];		// char new_name[len];  is not valid C. JL
         memset(new_name,0,len);
         char *bp = new_name;
 //        MDEBUG("path[%s] name[%s] ext[%s] len[%d]\n",self->path,self->name,self->ext,len);
@@ -569,7 +569,7 @@ static int s_log_set_seg(mlog_t *self, int16_t segno)
         }else{
 //            MDEBUG("rename failed [%d]\n",retval);
         }
-        
+
     }
 
     return retval;
@@ -587,15 +587,15 @@ static void s_init_log(mlog_t *self)
     if (NULL!=self && NULL!=self->file &&
         NULL!=self->cfg && NULL!=self->name) {
         // get latest and greatest segment
-        
+
         mlog_info_t linfo={0};
-        
+
         if(s_get_log_info(&linfo, self->path,self->name,ML_SEG_FMT, self->file)==0){
-			
+
             if (linfo.seg_max == (self->cfg->lim_s-1)) {
 //                MDEBUG("full segs, init to latest written [%d/%ld]\n",linfo.seg_e,linfo.te);
                 // use most recently written segment
-                
+
                 // set latest segment [rename, close/reopen if open]
                 s_log_set_seg(self,linfo.seg_e);
                 self->cur_seg = linfo.seg_e;
@@ -615,7 +615,7 @@ static void s_init_log(mlog_t *self)
             }else if (linfo.seg_b >= 0) {
 //                MDEBUG("init to latest written [%d/%ld]\n",linfo.seg_b,linfo.tb);
                 // use most recently written segment
-                
+
                 // set latest segment [rename, close/reopen if open]
                 s_log_set_seg(self,linfo.seg_b);
                 self->cur_seg = linfo.seg_b;
@@ -623,7 +623,7 @@ static void s_init_log(mlog_t *self)
                 self->stime = time(NULL);
                 // segments are zero indexed, so count is +1
                 self->seg_count=linfo.seg_count;
-                
+
             }else{
 //                MDEBUG("init to first\n");
                 // set current segment [rename, close/reopen if open]
@@ -655,7 +655,7 @@ static void s_init_log(mlog_t *self)
 }
 // End function s_init_log
 
-                
+
 /// @fn char * s_seg_path(const char * file_path, mlog_t * self, uint16_t segno)
 /// @brief return file segment path as new string. caller must free.
 /// @param[in] file_path file path (w/o segments,
@@ -799,8 +799,8 @@ mlog_t *mlog_new(const char *file_path, mlog_config_t *config)
             s_parse_path(file_path,self);
 
             self->stime = 0;
-            
-            
+
+
             self->file  = iow_file_new(NULL);
             char *tpath = s_seg_path(file_path,self,0);
             self->file  = iow_file_new(tpath);
@@ -892,7 +892,7 @@ void mlog_show(mlog_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[slen     %10u]\n",indent,(indent>0?" ":""),  self->seg_len);
         fprintf(stderr,"%*s[scount   %10hu]\n",indent,(indent>0?" ":""), self->seg_count);
         fprintf(stderr,"%*s[scur     %10hu]\n",indent,(indent>0?" ":""), self->cur_seg);
-        
+
     }
 }
 // End function mlog_show
@@ -907,11 +907,11 @@ void mlog_show(mlog_t *self, bool verbose, uint16_t indent)
 int mlog_open(mlog_t *self, iow_flags_t flags, iow_mode_t mode)
 {
     int retval = -1;
-    
+
     if (NULL!=self && NULL!=self->file) {
         retval = iow_mopen(self->file,flags,mode);
     }
-    
+
     return retval;
 }
 // End function mlog_open
@@ -924,11 +924,11 @@ int mlog_open(mlog_t *self, iow_flags_t flags, iow_mode_t mode)
 int mlog_close(mlog_t *self)
 {
     int retval = -1;
-    
+
     if (NULL!=self && NULL!=self->file) {
         retval = iow_close(self->file);
     }
-    
+
     return retval;
 }
 // End function mlog_close
@@ -944,13 +944,13 @@ int mlog_add(mlog_t *self, int32_t id, char *name)
 {
     int retval=-1;
     mlog_list_entry_t *new_entry = (mlog_list_entry_t *)malloc(sizeof(mlog_list_entry_t));
-    
+
     if (NULL != new_entry) {
         new_entry->log  = self;
         new_entry->id   = id;
         new_entry->name = strdup(name);
         new_entry->next = NULL;
-        
+
         mlog_list_entry_t *plist = s_log_list;
         int list_len = 0;
         if (NULL == plist){
@@ -989,7 +989,7 @@ int mlog_add(mlog_t *self, int32_t id, char *name)
 int mlog_delete(mlog_id_t id)
 {
     int retval=-1;
-    
+
     mlog_list_entry_t *plist = s_log_list;
     if (NULL != plist){
         mlog_list_entry_t *pbefore=NULL;
@@ -1018,9 +1018,9 @@ int mlog_delete(mlog_id_t id)
             plist   = plist->next;
             pafter  = plist->next;
         }while (NULL != plist->next);
-        
+
     }// else list is NULL
-   
+
     return retval;
 }
 // End function mlog_delete
@@ -1069,7 +1069,7 @@ int mlog_flush(mlog_id_t id)
 {
     int retval = -1;
     mlog_t *log = s_lookup_log(id);
-    
+
     if( NULL!=log && NULL!=log->file){
         retval = iow_flush(log->file);
     }else{
@@ -1090,23 +1090,23 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
     int retval = -1;
 
     mlog_t *log = s_lookup_log(id);
-    
+
     if(log!=NULL){
-        
+
         mlog_dest_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
-        
+
         //get the arguments
         va_list args;
         va_list cargs;
         va_start(args, fmt);
-        
+
         char term=( (fmt!=NULL && fmt[strlen(fmt)-1]=='\n') ? 0x00 : '\n');
 
 //        fprintf(stderr,"dest[%x]&ML_FILE[%x]\n",dest,(dest&ML_FILE));
 //        fprintf(stderr,"dest[%x]&ML_SERR[%x]\n",dest,(dest&ML_SERR));
 //        fprintf(stderr,"dest[%x]&ML_SOUT[%x]\n",dest,(dest&ML_SOUT));
-        
+
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
             // print message to buffer
             va_copy(cargs,args);
@@ -1125,7 +1125,7 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
         }else{
             MERROR("file output disabled d[%0X] f[%0X]\n",dest,flags);
         }
-        
+
         // send to stderr, stdout
         if( (dest&ML_SERR) !=0 ){
             va_copy(cargs,args);
@@ -1141,7 +1141,7 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
                 fprintf(stdout,"\n");
             }
         }
-        
+
         va_end(args);
     }
     return retval;
@@ -1158,40 +1158,40 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
 int mlog_tprintf(mlog_id_t id, char *fmt, ...)
 {
     int retval = -1;
-    
+
     mlog_t *log = s_lookup_log(id);
-    
+
     if(log!=NULL && NULL!=log->cfg){
-        
+
         mlog_dest_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
         struct tm now = {0};
         time_t tt = time(NULL);
         gmtime_r(&tt,&now);
-        
+
         char *tfmt = NULL;
         if (NULL!=log->cfg->tfmt) {
             tfmt = log->cfg->tfmt;
         }else{
             tfmt = ML_DFL_TFMT;
         }
-        
+
         char timestamp[ML_MAX_TS_BYTES]={0};
        	memset(timestamp,0,ML_MAX_TS_BYTES);
         strftime(timestamp,ML_MAX_TS_BYTES,tfmt,&now);
-        
+
         char *del = ( (NULL!=log->cfg->del)? log->cfg->del : ML_DFL_DEL);
-        
+
         //get the arguments
         va_list args;
         va_list cargs;
         va_start(args, fmt);
-        
+
         char term=( (fmt!=NULL && fmt[strlen(fmt)-1]=='\n') ? 0x00 : '\n');
 //        fprintf(stderr,"mask[%x]&TL_LOG[%x]\n",strmask,(strmask&TL_LOG));
 //        fprintf(stderr,"mask[%x]&TL_SERR[%x]\n",strmask,(strmask&TL_SERR));
 //        fprintf(stderr,"mask[%x]&TL_SOUT[%x]\n",strmask,(strmask&TL_SOUT));
-        
+
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
             // print message to buffer
             va_copy(cargs,args);
@@ -1215,7 +1215,7 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
         }else{
             MERROR("file output disabled d[%0X] f[%0X]\n",dest,flags);
         }
-        
+
         // send to stderr, stdout
         if( (dest&ML_SERR) !=0 ){
             va_copy(cargs,args);
@@ -1233,7 +1233,7 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
                 fprintf(stdout,"\n");
             }
         }
-        
+
         va_end(args);
     }
     return retval;
@@ -1250,14 +1250,14 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
 int mlog_write(mlog_id_t id, byte *data, uint32_t len)
 {
     int retval = -1;
-    
+
     mlog_t *log = s_lookup_log(id);
-    
+
     if(log!=NULL){
         mlog_dest_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
-            
+
             if ( (log->cfg->lim_b > 0) && (log->seg_len+len) > log->cfg->lim_b) {
                 // if segment length is limited and write would overflow,
                 // fill current segment and keep rotating
@@ -1308,9 +1308,9 @@ int mlog_write(mlog_id_t id, byte *data, uint32_t len)
 int mlog_puts(mlog_id_t id, char *data)
 {
     int retval = -1;
-    
+
     mlog_t *log = s_lookup_log(id);
-    
+
     if(NULL!=log && NULL!=data){
         mlog_dest_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
@@ -1333,11 +1333,11 @@ int mlog_puts(mlog_id_t id, char *data)
 int mlog_putc(mlog_id_t id, char data)
 {
     int retval = -1;
-    
+
     mlog_t *log = s_lookup_log(id);
-    
+
     if(NULL!=log){
-        
+
         mlog_dest_t dest = log->cfg->dest;
         mlog_flags_t flags = log->cfg->flags;
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
@@ -1357,8 +1357,8 @@ int mlog_putc(mlog_id_t id, char data)
 int mlog_test()
 {
     int retval = -1;
-	
-    
+
+
     mlog_id_t SYSLOG_ID=0x1;
     mlog_id_t BINLOG_ID=0x2;
 
@@ -1366,10 +1366,10 @@ int mlog_test()
         1024, 6, ML_NOLIMIT,
         ML_OSEG|ML_LIMLEN|ML_OVWR,
         ML_FILE,ML_TFMT_ISO1806};
-    
+
     mlog_t *syslog_orig = mlog_new("alog.out",&alog_conf);
     mlog_show(syslog_orig,true,5);
-    
+
     mlog_config_t blog_conf = {
         ML_NOLIMIT, ML_NOLIMIT, ML_NOLIMIT,
         ML_MONO,
@@ -1401,12 +1401,12 @@ int mlog_test()
     s_parse_path("./.x",syslog_orig);
     s_parse_path("./x.",syslog_orig);
     s_parse_path("./.x.",syslog_orig);
-    
+
     s_parse_path("../x",syslog_orig);
     s_parse_path("../.x",syslog_orig);
     s_parse_path("../x.",syslog_orig);
     s_parse_path("../.x.",syslog_orig);
-    
+
     s_parse_path("p/x",syslog_orig);
     s_parse_path("p/.x",syslog_orig);
     s_parse_path("p/x.",syslog_orig);
@@ -1428,7 +1428,7 @@ int mlog_test()
     s_parse_path("../p/.x.y.",syslog_orig);
 
     s_parse_path("./alog.out",syslog_orig);
-    
+
     iow_flags_t flags = IOW_RDWR|IOW_APPEND|IOW_CREATE;
     iow_mode_t mode = IOW_RU|IOW_WU|IOW_RG|IOW_WG;
 
@@ -1441,7 +1441,7 @@ int mlog_test()
 
     // save dest configuration
     uint32_t odest = mlog_get_dest(SYSLOG_ID);
-    
+
     // direct log to stderr only
     mlog_set_dest(SYSLOG_ID,ML_SERR);
     mlog_printf(SYSLOG_ID,"should appear only @ stderr\n");
@@ -1450,7 +1450,7 @@ int mlog_test()
     mlog_set_dest(SYSLOG_ID,ML_FILE|ML_SOUT);
     mlog_printf(SYSLOG_ID,"should appear @ syslog file and stdout\n");
     mlog_tprintf(SYSLOG_ID,"should appear @ syslog file (w/ timestamp) and stdout\n");
-    
+
     // restore original settings
     mlog_set_dest(SYSLOG_ID,odest);
     mlog_puts(SYSLOG_ID,"puts wrote this - putc follows:\n");
@@ -1466,11 +1466,11 @@ int mlog_test()
     MDEBUG("segno z_1999999.log/z_19 [%04d]\n",s_path_segno("z_1999999.log","z_19",ML_SEG_FMT));
     MDEBUG("segno z_1999999/z_16     [%04d]\n",s_path_segno("z_1999999","z_16",ML_SEG_FMT));
     MDEBUG("segno z_1999999/z_       [%04d]\n",s_path_segno("z_1999999","z_",ML_SEG_FMT));
-    
+
     MDEBUG("looking for max seg in dir [%s] using name[%s]\n", syslog_orig->path, syslog_orig->name);
     s_get_log_info(&linfo,syslog_orig->path,syslog_orig->name, ML_SEG_FMT,syslog_orig->file);
     MDEBUG("max_seg [%04hd]\n",linfo.seg_max);
-    
+
     MDEBUG("before write (should rotate)...\n\n");
     mlog_info_show(&linfo,true,5);
     byte x[2048]={0};
@@ -1501,5 +1501,3 @@ int mlog_test()
     return retval;
 }
 // End function mlog_test
-
-
