@@ -40,13 +40,6 @@
 /*--------------------------------------------------------------------*/
 int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *beams_bath, int *beams_amp, int *pixels_ss,
                   int *error) {
-	int status_save;
-	int error_save;
-	int sapi_status;
-	char *lastslash;
-	char path[MB_PATH_MAXLINE], name[MB_PATH_MAXLINE];
-	char *stdout_string = "stdout";
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -73,14 +66,16 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 		status = mb_format_register(verbose, &format, *mbio_ptr, error);
 	}
 
+	int status_save;
+
 	/* quit if there is a problem */
 	if (status == MB_FAILURE) {
 		/* free memory for mbio descriptor */
 		if (mbio_ptr != NULL) {
 			status_save = status;
-			error_save = *error;
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
-			status = status_save;
+			int error_save = *error;
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
+			status &= status_save;
 			*error = error_save;
 		}
 
@@ -267,8 +262,8 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE) {
-		status = mb_deall_ioarrays(verbose, mbio_ptr, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
+		status &= mb_deall_ioarrays(verbose, mbio_ptr, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
 		mb_io_ptr->beams_bath_alloc = 0;
 		mb_io_ptr->beams_amp_alloc = 0;
 		mb_io_ptr->pixels_ss_alloc = 0;
@@ -288,6 +283,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	   directly with fopen */
 	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL || mb_io_ptr->filetype == MB_FILETYPE_XDR) {
 		/* open the first file */
+		static const char stdout_string[] = "stdout";
 		if (strncmp(file, stdout_string, 6) == 0)
 			mb_io_ptr->mbfp = stdout;
 		else if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "wb")) == NULL) {
@@ -391,7 +387,9 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 
 	/* else handle surf files to be opened with libsapi */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SURF) {
-		lastslash = strrchr(file, '/');
+		char *lastslash = strrchr(file, '/');
+		char name[MB_PATH_MAXLINE];
+		char path[MB_PATH_MAXLINE];
 		if (lastslash != NULL && strlen(lastslash) > 1) {
 			strcpy(name, &(lastslash[1]));
 			strcpy(path, file);
@@ -414,7 +412,7 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 				name[strlen(name) - 4] = '\0';
 			else if (strcmp(&name[strlen(name) - 4], ".SIX") == 0)
 				name[strlen(name) - 4] = '\0';
-			sapi_status = SAPI_open(path, name, verbose);
+			const int sapi_status = SAPI_open(path, name, verbose);
 			if (sapi_status == 0) {
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
@@ -443,39 +441,39 @@ int mb_write_init(int verbose, char *file, int format, void **mbio_ptr, int *bea
 	if (status == MB_FAILURE) {
 		/* save status and error values */
 		status_save = status;
-		error_save = *error;
+		int error_save = *error;
 
 		/* free allocated memory */
 		if (mb_io_ptr->filetype == MB_FILETYPE_XDR && mb_io_ptr->xdrs != NULL)
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs, error);
 		if (mb_io_ptr->filetype == MB_FILETYPE_XDR && mb_io_ptr->xdrs2 != NULL)
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs2, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs2, error);
 		if (mb_io_ptr->filetype == MB_FILETYPE_XDR && mb_io_ptr->xdrs3 != NULL)
-			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs3, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->beamflag, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->bath, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->amp, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->bath_acrosstrack, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->bath_alongtrack, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->bath_num, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->amp_num, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->ss, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->ss_acrosstrack, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->ss_alongtrack, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->ss_num, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_beamflag, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_bath, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_amp, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_bath_acrosstrack, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_bath_alongtrack, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss_acrosstrack, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss_alongtrack, error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
+			status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->xdrs3, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->beamflag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->bath, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->amp, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->bath_acrosstrack, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->bath_alongtrack, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->bath_num, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->amp_num, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->ss, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->ss_acrosstrack, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->ss_alongtrack, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->ss_num, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_beamflag, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_bath, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_amp, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_bath_acrosstrack, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_bath_alongtrack, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss_acrosstrack, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->new_ss_alongtrack, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr, error);
 
 		/* restore error and status values */
 		if (status == MB_SUCCESS) {
-			status = status_save;
+			status &= status_save;
 			*error = error_save;
 		}
 
