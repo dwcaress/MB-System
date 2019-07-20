@@ -51,17 +51,13 @@ char *GMT_runtime_bindir_win32(char *result);
 
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
-	char pj_init_args[MB_PATH_MAXLINE];
-	projPJ pj;
-	struct stat file_status;
-	int fstat;
 #ifdef _WIN32
 	/* But on Windows get it from the bin dir */
-#	include <unistd.h>
-	char *pch, projectionfile[MB_PATH_MAXLINE + 1];
+#include <unistd.h>
+	char projectionfile[MB_PATH_MAXLINE + 1];
 	/* Find the path to the bin directory and from it, the location of the Projections.dat file */
 	GMT_runtime_bindir_win32 (projectionfile);
-	pch = strrchr(projectionfile, '\\');		/* Seek for the last '\' or '/'. One of them must exist. */
+	char *pch = strrchr(projectionfile, '\\');		/* Seek for the last '\' or '/'. One of them must exist. */
 	if (pch == NULL)
 		pch = strrchr(projectionfile, '/');
 	pch[0] = '\0';
@@ -92,10 +88,13 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* check the existence of the projection database */
-	if ((fstat = stat(projectionfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+	struct stat file_status;
+	int fstat = stat(projectionfile, &file_status);
+	if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
 		/* initialize the projection */
+		char pj_init_args[MB_PATH_MAXLINE];
 		sprintf(pj_init_args, "+init=%s:%s", projectionfile, projection);
-		pj = pj_init_plus(pj_init_args);
+		projPJ pj = pj_init_plus(pj_init_args);
 		*pjptr = (void *)pj;
 
 		/* check success */
@@ -130,8 +129,6 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_free(int verbose, void **pjptr, int *error) {
-	projPJ pj;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -141,7 +138,7 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
 
 	/* free the projection */
 	if (pjptr != NULL) {
-		pj = (projPJ)*pjptr;
+		projPJ pj = (projPJ)*pjptr;
 		pj_free(pj);
 		*pjptr = NULL;
 	}
@@ -163,10 +160,6 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *easting, double *northing, int *error) {
-	projPJ pj;
-	projUV pjxy;
-	projUV pjll;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -178,10 +171,11 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
 
 	/* do forward projection */
 	if (pjptr != NULL) {
-		pj = (projPJ)pjptr;
+		projPJ pj = (projPJ)pjptr;
+		projUV pjll;
 		pjll.u = DTR * lon;
 		pjll.v = DTR * lat;
-		pjxy = pj_fwd(pjll, pj);
+		projUV pjxy = pj_fwd(pjll, pj);
 		*easting = pjxy.u;
 		*northing = pjxy.v;
 	}
@@ -204,10 +198,6 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
 }
 /*--------------------------------------------------------------------*/
 int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, double *lon, double *lat, int *error) {
-	projPJ pj;
-	projUV pjxy;
-	projUV pjll;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -219,10 +209,11 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
 
 	/* do forward projection */
 	if (pjptr != NULL) {
-		pj = (projPJ)pjptr;
+		projPJ pj = (projPJ)pjptr;
+		projUV pjxy;
 		pjxy.u = easting;
 		pjxy.v = northing;
-		pjll = pj_inv(pjxy, pj);
+		projUV pjll = pj_inv(pjxy, pj);
 		*lon = RTD * pjll.u;
 		*lat = RTD * pjll.v;
 	}
