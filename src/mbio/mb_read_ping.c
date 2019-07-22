@@ -34,11 +34,6 @@
 
 /*--------------------------------------------------------------------*/
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error) {
-	int localkind;
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -71,6 +66,10 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 	/* check that io arrays are large enough, allocate larger arrays if necessary */
 	if (status == MB_SUCCESS && mb_io_ptr->new_kind == MB_DATA_DATA) {
 		/* check size of arrays needed for newly read data */
+		int localkind;
+		int beams_bath;
+		int beams_amp;
+		int pixels_ss;
 		status = mb_dimensions(verbose, mbio_ptr, store_ptr, &localkind, &beams_bath, &beams_amp, &pixels_ss, error);
 
 		/* if existing allocations are insufficient, allocate larger arrays
