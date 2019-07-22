@@ -38,8 +38,6 @@
 
 /*--------------------------------------------------------------------------*/
 int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double ypn, double *y2, int *error) {
-	double p, qn, sig, un, *u;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -61,8 +59,10 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 	}
 
 	/* allocate memory for working vector */
+	double *u;
 	if (status == MB_SUCCESS)
 		status = mb_mallocd(verbose, __FILE__, __LINE__, n * sizeof(double), (void **)&u, error);
+
 
 	/* set up spline interpolation coefficients */
 	if (status == MB_SUCCESS) {
@@ -73,15 +73,17 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 			u[1] = (3.0 / (x[2] - x[1])) * ((y[2] - y[1]) / (x[2] - x[1]) - yp1);
 		}
 		for (int i = 2; i <= n - 1; i++) {
-			sig = (x[i] - x[i - 1]) / (x[i + 1] - x[i - 1]);
-			p = sig * y2[i - 1] + 2.0;
+			const double sig = (x[i] - x[i - 1]) / (x[i + 1] - x[i - 1]);
+			const double p = sig * y2[i - 1] + 2.0;
 			y2[i] = (sig - 1.0) / p;
 			u[i] = (y[i + 1] - y[i]) / (x[i + 1] - x[i]) - (y[i] - y[i - 1]) / (x[i] - x[i - 1]);
 			u[i] = (6.0 * u[i] / (x[i + 1] - x[i - 1]) - sig * u[i - 1]) / p;
 		}
-		if (ypn > 0.99e30)
-			qn = un = 0.0;
-		else {
+                double qn = 0.0;
+                double un = 0.0;
+		if (ypn > 0.99e30) {
+			/* qn = un = 0.0; */
+		} else {
 			qn = 0.5;
 			un = (3.0 / (x[n] - x[n - 1])) * (ypn - (y[n] - y[n - 1]) / (x[n] - x[n - 1]));
 		}
@@ -105,9 +107,6 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 }
 /*--------------------------------------------------------------------*/
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, double x, double *y, int *i, int *error) {
-	int klo, khi;
-	double h, b, a;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -129,8 +128,8 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 
 	/* perform interpolation */
 	if (status == MB_SUCCESS) {
-		klo = 1;
-		khi = n;
+		int klo = 1;
+		int khi = n;
 		while (khi - klo > 1) {
 			const int k = (khi + klo) >> 1;
 			if (xa[k] > x)
@@ -142,9 +141,9 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 			khi = 2;
 		if (klo == n)
 			klo = n - 1;
-		h = xa[khi] - xa[klo];
-		a = (xa[khi] - x) / h;
-		b = (x - xa[klo]) / h;
+		const double h = xa[khi] - xa[klo];
+		const double a = (xa[khi] - x) / h;
+		const double b = (x - xa[klo]) / h;
 		*y = a * ya[klo] + b * ya[khi] + ((a * a * a - a) * y2a[klo] + (b * b * b - b) * y2a[khi]) * (h * h) / 6.0;
 		*i = klo;
 	}
@@ -163,9 +162,6 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	int klo, khi;
-	double h, b;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -200,8 +196,8 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 		}
 		/* in range of model so linearly interpolate */
 		else {
-			klo = 1;
-			khi = n;
+			int klo = 1;
+			int khi = n;
 			while (khi - klo > 1) {
 				const int k = (khi + klo) >> 1;
 				if (xa[k] > x)
@@ -213,8 +209,8 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 				khi = 2;
 			if (klo == n)
 				klo = n - 1;
-			h = xa[khi] - xa[klo];
-			b = (ya[khi] - ya[klo]) / h;
+			const double h = xa[khi] - xa[klo];
+			const double b = (ya[khi] - ya[klo]) / h;
 			*y = ya[klo] + b * (x - xa[klo]);
 			*i = klo;
 		}
@@ -234,10 +230,6 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	int klo, khi;
-	double h, b;
-	double yahi, yalo;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -270,8 +262,8 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 		}
 		/* in range of model so linearly interpolate */
 		else {
-			klo = 1;
-			khi = n;
+			int klo = 1;
+			int khi = n;
 			while (khi - klo > 1) {
 				const int k = (khi + klo) >> 1;
 				if (xa[k] > x)
@@ -283,14 +275,14 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 				khi = 2;
 			if (klo == n)
 				klo = n - 1;
-			h = xa[khi] - xa[klo];
-			yahi = ya[khi];
-			yalo = ya[klo];
+			const double h = xa[khi] - xa[klo];
+			double yahi = ya[khi];
+			const double yalo = ya[klo];
 			if (yahi - yalo > 180.0)
 				yahi -= 360.0;
 			else if (yahi - yalo < -180.0)
 				yahi += 360.0;
-			b = (yahi - yalo) / h;
+			const double b = (yahi - yalo) / h;
 			*y = ya[klo] + b * (x - xa[klo]);
 			if (*y >= 180.0)
 				*y -= 360.0;
@@ -314,10 +306,6 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	int klo, khi;
-	double h, b;
-	double yahi, yalo;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -350,8 +338,8 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 		}
 		/* in range of model so linearly interpolate */
 		else {
-			klo = 1;
-			khi = n;
+			int klo = 1;
+			int khi = n;
 			while (khi - klo > 1) {
 				const int k = (khi + klo) >> 1;
 				if (xa[k] > x)
@@ -363,10 +351,10 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 				khi = 2;
 			if (klo == n)
 				klo = n - 1;
-			h = xa[khi] - xa[klo];
-			yahi = ya[khi];
-			yalo = ya[klo];
-			b = (yahi - yalo) / h;
+			const double h = xa[khi] - xa[klo];
+			const double yahi = ya[khi];
+			const double yalo = ya[klo];
+			const double b = (yahi - yalo) / h;
 			*y = ya[klo] + b * (x - xa[klo]);
 			if (*y > 90.0)
 				*y = 90.0;
@@ -390,10 +378,6 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 }
 /*--------------------------------------------------------------------*/
 int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
-	int klo, khi;
-	double h, b;
-	double yahi, yalo;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -426,8 +410,8 @@ int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double 
 		}
 		/* in range of model so linearly interpolate */
 		else {
-			klo = 1;
-			khi = n;
+			int klo = 1;
+			int khi = n;
 			while (khi - klo > 1) {
 				const int k = (khi + klo) >> 1;
 				if (xa[k] > x)
@@ -439,14 +423,14 @@ int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double 
 				khi = 2;
 			if (klo == n)
 				klo = n - 1;
-			h = xa[khi] - xa[klo];
-			yahi = ya[khi];
-			yalo = ya[klo];
+			const double h = xa[khi] - xa[klo];
+			double yahi = ya[khi];
+			const double yalo = ya[klo];
 			if (yahi - yalo > 180.0)
 				yahi -= 360.0;
 			else if (yahi - yalo < -180.0)
 				yahi += 360.0;
-			b = (yahi - yalo) / h;
+			const double b = (yahi - yalo) / h;
 			*y = ya[klo] + b * (x - xa[klo]);
 			if (*y >= 360.0)
 				*y -= 360.0;
