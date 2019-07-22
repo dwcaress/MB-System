@@ -41,20 +41,6 @@
 int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, double bounds[4], int btime_i[7], int etime_i[7],
                  double speedmin, double timegap, void **mbio_ptr, double *btime_d, double *etime_d, int *beams_bath,
                  int *beams_amp, int *pixels_ss, int *error) {
-	int status_save;
-	int error_save;
-	int sapi_status;
-	char *lastslash;
-	char path[MB_PATH_MAXLINE], name[MB_PATH_MAXLINE];
-	char prjfile[MB_PATH_MAXLINE];
-	char projection_id[MB_NAME_LENGTH];
-	int proj_status;
-	FILE *pfp;
-	struct stat file_status;
-	int fstat;
-	int nscan;
-	char *stdin_string = "stdin";
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -107,8 +93,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	if (status == MB_FAILURE) {
 		/* free memory for mbio descriptor */
 		if (mbio_ptr != NULL) {
-			status_save = status;
-			error_save = *error;
+			const int status_save = status;
+			const int error_save = *error;
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
 			status = status_save;
 			*error = error_save;
@@ -323,6 +309,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	   directly with fopen */
 	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL || mb_io_ptr->filetype == MB_FILETYPE_XDR) {
 		/* open the first file */
+		static const char stdin_string[] = "stdin";
 		if (strncmp(file, stdin_string, 5) == 0)
 			mb_io_ptr->mbfp = stdin;
 		else if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "rb")) == NULL) {
@@ -340,7 +327,9 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 		/* or open the second file if desired and possible */
 		else if (status == MB_SUCCESS && mb_io_ptr->numfile <= -2) {
-			if ((fstat = stat(mb_io_ptr->file2, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
+			struct stat file_status;
+			const int fstat = stat(mb_io_ptr->file2, &file_status);
+			if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
 			    file_status.st_size > 0)
 				mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "rb");
 		}
@@ -355,7 +344,9 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 		/* or open the third file if desired and possible */
 		else if (status == MB_SUCCESS && mb_io_ptr->numfile <= -3) {
-			if ((fstat = stat(mb_io_ptr->file2, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
+			struct stat file_status;
+			const int fstat = stat(mb_io_ptr->file2, &file_status);
+			if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR &&
 			    file_status.st_size > 0)
 				mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "rb");
 		}
@@ -432,7 +423,9 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 
 	/* else handle surf files to be opened with libsapi */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SURF) {
-		lastslash = strrchr(file, '/');
+		char path[MB_PATH_MAXLINE];
+		char name[MB_PATH_MAXLINE];
+		char *lastslash = strrchr(file, '/');
 		if (lastslash != NULL && strlen(lastslash) > 1) {
 			strcpy(name, &(lastslash[1]));
 			strcpy(path, file);
@@ -455,7 +448,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 				name[strlen(name) - 4] = '\0';
 			else if (strcmp(&name[strlen(name) - 4], ".SIX") == 0)
 				name[strlen(name) - 4] = '\0';
-			sapi_status = SAPI_open(path, name, verbose);
+			int sapi_status = SAPI_open(path, name, verbose);
 			if (sapi_status == 0) {
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
@@ -483,8 +476,8 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 	/* if error terminate */
 	if (status == MB_FAILURE) {
 		/* save status and error values */
-		status_save = status;
-		error_save = *error;
+		const int status_save = status;
+		const int error_save = *error;
 
 		/* free allocated memory */
 		if (mb_io_ptr->filetype == MB_FILETYPE_XDR && mb_io_ptr->xdrs != NULL)
@@ -599,10 +592,13 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		mb_io_ptr->notice_list[i] = 0;
 
 	/* check for projection specification file */
+	char prjfile[MB_PATH_MAXLINE];
 	sprintf(prjfile, "%s.prj", file);
-	if ((pfp = fopen(prjfile, "r")) != NULL) {
-		nscan = fscanf(pfp, "%s", projection_id);
-		proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
+	FILE *pfp = fopen(prjfile, "r");
+	if (pfp != NULL) {
+		char projection_id[MB_NAME_LENGTH];
+		/* const int nscan = */ fscanf(pfp, "%s", projection_id);
+		const int proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
 		if (proj_status == MB_SUCCESS) {
 			mb_io_ptr->projection_initialized = MB_YES;
 			strcpy(mb_io_ptr->projection_id, projection_id);
@@ -659,16 +655,6 @@ int mb_input_init(int verbose, char *file, int format,
                 int (*input_read)(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error),
                 int (*input_close)(int verbose, void *mbio_ptr, int *error),
                 int *error) {
-	int status_save;
-	int error_save;
-	char path[MB_PATH_MAXLINE];
-	char prjfile[MB_PATH_MAXLINE];
-	char projection_id[MB_NAME_LENGTH];
-	int proj_status;
-	FILE *pfp;
-	int nscan;
-	char *stdin_string = "stdin";
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -724,8 +710,8 @@ int mb_input_init(int verbose, char *file, int format,
 	if (status == MB_FAILURE) {
 		/* free memory for mbio descriptor */
 		if (mbio_ptr != NULL) {
-			status_save = status;
-			error_save = *error;
+			const int status_save = status;
+			const int error_save = *error;
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)mbio_ptr, error);
 			status = status_save;
 			*error = error_save;
@@ -941,13 +927,14 @@ int mb_input_init(int verbose, char *file, int format,
     mb_io_ptr->mb_io_input_read = input_read;
     mb_io_ptr->mb_io_input_close = input_close;
 	mb_io_ptr->filetype = MB_FILETYPE_INPUT;
+	char path[MB_PATH_MAXLINE];
     status = (mb_io_ptr->mb_io_input_open)(verbose, *mbio_ptr, path, error);
 
 	/* if error terminate */
 	if (status == MB_FAILURE) {
 		/* save status and error values */
-		status_save = status;
-		error_save = *error;
+		const int status_save = status;
+		const int error_save = *error;
 
 		/* free allocated memory */
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->beamflag, error);
@@ -1056,10 +1043,13 @@ int mb_input_init(int verbose, char *file, int format,
 		mb_io_ptr->notice_list[i] = 0;
 
 	/* check for projection specification file */
+	char prjfile[MB_PATH_MAXLINE];
 	sprintf(prjfile, "%s.prj", file);
-	if ((pfp = fopen(prjfile, "r")) != NULL) {
-		nscan = fscanf(pfp, "%s", projection_id);
-		proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
+	FILE *pfp = fopen(prjfile, "r");
+	if (pfp != NULL) {
+		char projection_id[MB_NAME_LENGTH];
+		/* const int nscan = */ fscanf(pfp, "%s", projection_id);
+		const int proj_status = mb_proj_init(verbose, projection_id, &(mb_io_ptr->pjptr), error);
 		if (proj_status == MB_SUCCESS) {
 			mb_io_ptr->projection_initialized = MB_YES;
 			strcpy(mb_io_ptr->projection_id, projection_id);
