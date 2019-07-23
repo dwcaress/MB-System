@@ -23,9 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	September 19, 2002
- *
- *
- *
  */
 
 #include <math.h>
@@ -171,11 +168,6 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_singlebeam_struct *store = NULL;
-	char line[MBF_HYDROB93_RECORD_LENGTH] = "";
-	int ilongitude, ilatitude, idepth;
-	short itype;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -186,7 +178,7 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
@@ -196,6 +188,7 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* read next record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+	char line[MBF_HYDROB93_RECORD_LENGTH] = "";
 	const size_t num_bytes = fread(line, 1, MBF_HYDROB93_RECORD_LENGTH, mb_io_ptr->mbfp);
 	if (num_bytes == MBF_HYDROB93_RECORD_LENGTH) {
 		mb_io_ptr->file_bytes += num_bytes;
@@ -210,10 +203,15 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* handle the data */
 	if (status == MB_SUCCESS) {
+		int ilongitude;
+		int ilatitude;
+		int idepth;
+
 		/* parse data */
 		mb_get_binary_int(MB_YES, &line[0], (int *)&ilatitude);
 		mb_get_binary_int(MB_YES, &line[4], (int *)&ilongitude);
 		mb_get_binary_int(MB_YES, &line[8], (int *)&idepth);
+		short itype;
 		mb_get_binary_short(MB_YES, &line[12], (short *)&itype);
 		store->longitude = (ilongitude)*0.000001;
 		store->latitude = (ilatitude)*0.000001;
@@ -286,11 +284,6 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_singlebeam_struct *store = NULL;
-	char line[MBF_HYDROB93_RECORD_LENGTH] = "";
-	int ilongitude, ilatitude, idepth;
-	short itype;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -303,7 +296,9 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
+
+	char line[MBF_HYDROB93_RECORD_LENGTH] = "";
 
 	/* handle the data */
 	if (store->kind == MB_DATA_DATA) {
@@ -318,9 +313,10 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* put data into buffer */
-		ilongitude = (int)(1000000 * store->longitude);
-		ilatitude = (int)(1000000 * store->longitude);
-		idepth = (int)(10 * store->bath);
+		const int ilongitude = (int)(1000000 * store->longitude);
+		const int ilatitude = (int)(1000000 * store->longitude);
+		const int idepth = (int)(10 * store->bath);
+		short itype;
 		if (mb_beam_ok(store->flag))
 			itype = 711;
 		else if (store->flag == MB_FLAG_NULL)
