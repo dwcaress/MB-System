@@ -163,13 +163,6 @@ int mbr_dem_hir2rnav(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_singlebeam_struct *store;
-	char line[MB_COMMENT_MAXLINE] = "";
-	char *line_ptr;
-	int *read_count;
-	int nget;
-	double sec;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -180,10 +173,10 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* get pointer to read counter */
-	read_count = (int *)&mb_io_ptr->save1;
+	int *read_count = (int *)&mb_io_ptr->save1;
 
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
@@ -192,7 +185,9 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* read next record */
-	if ((line_ptr = fgets(line, MB_PATH_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
+	char line[MB_COMMENT_MAXLINE] = "";
+	char *line_ptr = fgets(line, MB_PATH_MAXLINE, mb_io_ptr->mbfp);
+	if (line_ptr != NULL) {
 		/* set status */
 		mb_io_ptr->file_bytes += strlen(line);
 		status = MB_SUCCESS;
@@ -214,9 +209,10 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 	else if (status == MB_SUCCESS) {
 		store->kind = MB_DATA_DATA;
+		double sec;
 
 		/* read data */
-		nget = sscanf(line, "%d-%d-%dT%d:%d:%lfZ %lf %lf %d %d %lf %d", &store->time_i[0], &store->time_i[1], &store->time_i[2],
+		int nget = sscanf(line, "%d-%d-%dT%d:%d:%lfZ %lf %lf %d %d %lf %d", &store->time_i[0], &store->time_i[1], &store->time_i[2],
 		              &store->time_i[3], &store->time_i[4], &sec, &store->longitude, &store->latitude, &store->gps_quality,
 		              &store->gps_nsat, &store->gps_dilution, &store->gps_height);
 		/* fprintf(stderr,"\nLINE:%s\tnget:%d %d/%d/%d %d:%d:%f  lon:%f lat:%f  gps:%d %d %f %d\n",
@@ -293,11 +289,6 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_singlebeam_struct *store;
-	char line[MB_COMMENT_MAXLINE] = "";
-	int *write_count;
-	int len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -308,10 +299,10 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure*/
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* get pointer to write counter */
-	write_count = (int *)&mb_io_ptr->save1;
+	int *write_count = (int *)&mb_io_ptr->save1;
 
 	if (store != NULL && verbose >= 4) {
 		if (store->kind == MB_DATA_DATA) {
@@ -344,11 +335,12 @@ int mbr_wt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* write the record */
 	if (store != NULL) {
+		char line[MB_COMMENT_MAXLINE] = "";
 		/* deal with comment */
 		if (store->kind == MB_DATA_COMMENT) {
 			line[0] = '#';
 			strncpy(&line[1], store->comment, MB_COMMENT_MAXLINE - 2);
-			len = strlen(line);
+			const int len = strlen(line);
 			if (line[len - 1] != '\n') {
 				line[len] = '\n';
 				line[len + 1] = '\0';
