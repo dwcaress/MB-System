@@ -1,0 +1,19 @@
+#These data copied by program MBcopy
+#MB-system Version 5.7.6beta1
+#Run by user <schwehr> on cpu <sonar.nowhere.google.com> at <Wed Jul 24 10:20:11 2019>
+#Control Parameters:
+#  Input file:         test/utilities/testdata/mb21/TN136HS.309.snipped.mb21
+#  Input MBIO format:  21
+#  Output file:        test/utilities/testdata/mb174/TN136HS.309.snipped.mb174
+#  Output MBIO format: 174
+#  Ping averaging:     1
+#  Longitude flip:     0
+#  Longitude bounds:   -360.000000 360.000000
+#  Latitude bounds:    -90.000000 90.000000
+#  Begin time:         1962 2 21 10 30 0 0
+#  End time:           2062 2 21 10 30 0 0
+#  Minimum speed:      0.000000
+#  Time gap:           1.000000
+# 
+		20011105	1.012222	40.838493	-124.501602				462.600006			1
+		20011105	1.013611	40.838516	-124.501633				462.399994			1
