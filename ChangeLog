@@ -20,8 +20,9 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+  Version 5.7.6beta2     July 25, 2019
   Version 5.7.6beta1     July 6, 2019
-  Version 5.7.5          June 26, 2019
+* Version 5.7.5          June 26, 2019
   Version 5.7.5beta12    June 24, 2019
   Version 5.7.5beta11    June 16, 2019
   Version 5.7.5beta10    June 9, 2019
@@ -318,6 +319,16 @@ announced releases.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta2 (July 25, 2019)
+
+Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): these i/o modules have been
+updated to handle both the original (v1.1) and updated (v1.2) 3D at Depth Wide
+Swath Lidar (WiSSL) *.raa format data.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
 
 -----> 5.7.6beta1 (July 6, 2019)
 
