@@ -43,8 +43,6 @@ int mbr_info_sbsiomrg(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +50,6 @@ int mbr_info_sbsiomrg(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SB;
 	*beams_bath_max = 19;
@@ -77,6 +74,8 @@ int mbr_info_sbsiomrg(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 2.67;
 	*beamwidth_ltrack = 2.67;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -110,8 +109,6 @@ int mbr_info_sbsiomrg(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_sbsiomrg(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -122,14 +119,11 @@ int mbr_alm_sbsiomrg(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_sbsiomrg_struct);
 	mb_io_ptr->data_structure_size = sizeof(struct mbf_sbsiomrg_data_struct);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -143,8 +137,6 @@ int mbr_alm_sbsiomrg(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_sbsiomrg(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -156,8 +148,8 @@ int mbr_dem_sbsiomrg(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -171,17 +163,6 @@ int mbr_dem_sbsiomrg(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sbsiomrg_struct *dataplus;
-	struct mbf_sbsiomrg_data_struct *data;
-	struct mbsys_sb_struct *store;
-	char *datacomment;
-	int icenter;
-	int jpos, jneg;
-	int ipos, ineg;
-	int apos, aneg;
-	int id;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -194,11 +175,13 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_sbsiomrg_struct *)mb_io_ptr->raw_data;
-	data = &(dataplus->data);
-	datacomment = (char *)data;
+	struct mbf_sbsiomrg_struct *dataplus = (struct mbf_sbsiomrg_struct *)mb_io_ptr->raw_data;
+	struct mbf_sbsiomrg_data_struct *data = &(dataplus->data);
+	char *datacomment = (char *)data;
 	dataplus->kind = MB_DATA_DATA;
-	store = (struct mbsys_sb_struct *)store_ptr;
+	struct mbsys_sb_struct *store = (struct mbsys_sb_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* read next record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -306,7 +289,7 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			}
 
 			/* find center beam */
-			icenter = -1;
+			int icenter = -1;
 			for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 				if (data->dist[i] == 0 && data->deph[i] != 0)
 					icenter = i;
@@ -314,10 +297,12 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					icenter = i;
 			}
 
+			int ipos = 0;
+			int ineg = 0;
 			/* get center beam from closest distances if still needed */
 			if (icenter < 0) {
-				jpos = 0;
-				jneg = 0;
+				int jpos = 0;
+				int jneg = 0;
 				for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 					if (data->dist[i] > 0 && (data->dist[i] < jpos || jpos == 0)) {
 						jpos = data->dist[i];
@@ -329,8 +314,8 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					}
 				}
 				if (jpos > 0 && jneg < 0) {
-					apos = jpos;
-					aneg = jneg;
+					const int apos = jpos;
+					const int aneg = jneg;
 					icenter = ineg + (int)((ipos - ineg) * ((0 - aneg) / (apos - aneg)) + 0.5);
 				}
 				if (icenter < 0 || icenter >= MB_BEAMS_RAW_SBSIOMRG)
@@ -339,8 +324,8 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* get center beam from any distances if still needed */
 			if (icenter < 0) {
-				jneg = 0;
-				jpos = 0;
+				int jneg = 0;
+				int jpos = 0;
 				for (int i = 0; i < MB_BEAMS_RAW_SBSIOMRG; i++) {
 					if (data->dist[i] != 0) {
 						if (jneg == 0 && jpos == 0) {
@@ -360,8 +345,8 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					}
 				}
 				if (jpos != 0 && jneg != 0 && jpos != jneg) {
-					apos = jpos;
-					aneg = jneg;
+					const int apos = jpos;
+					const int aneg = jneg;
 					icenter = ineg + (int)((ipos - ineg) * ((0 - aneg) / (apos - aneg)) + 0.5);
 				}
 				if (icenter < 0 || icenter >= MB_BEAMS_RAW_SBSIOMRG)
@@ -370,7 +355,7 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* center the data in the global arrays */
 			if (icenter >= 0) {
-				id = MB_BEAMS_PROC_SBSIOMRG / 2 - icenter;
+				const int id = MB_BEAMS_PROC_SBSIOMRG / 2 - icenter;
 				int j = 0;
 				int k = MB_BEAMS_RAW_SBSIOMRG;
 				if (id < 0)
@@ -410,12 +395,6 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sbsiomrg_struct *dataplus;
-	struct mbf_sbsiomrg_data_struct *data;
-	struct mbsys_sb_struct *store;
-	char *datacomment;
-	int offset, iend, id;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -429,10 +408,10 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_sbsiomrg_struct *)mb_io_ptr->raw_data;
-	data = &(dataplus->data);
-	datacomment = (char *)data;
-	store = (struct mbsys_sb_struct *)store_ptr;
+	struct mbf_sbsiomrg_struct *dataplus = (struct mbf_sbsiomrg_struct *)mb_io_ptr->raw_data;
+	struct mbf_sbsiomrg_data_struct *data = &(dataplus->data);
+	char *datacomment = (char *)data;
+	struct mbsys_sb_struct *store = (struct mbsys_sb_struct *)store_ptr;
 
 	/* translate values from seabeam data storage structure */
 	dataplus->kind = store->kind;
@@ -460,14 +439,14 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* find first nonzero beam */
-		id = MB_BEAMS_PROC_SBSIOMRG - 1;
-		offset = -1;
+		const int id = MB_BEAMS_PROC_SBSIOMRG - 1;
+		int offset = -1;
 		for (int i = 0; i < MB_BEAMS_PROC_SBSIOMRG; i++)
 			if (store->deph[id - i] != 0 && offset == -1)
 				offset = i;
 		if (offset == -1)
 			offset = 0;
-		iend = MB_BEAMS_RAW_SBSIOMRG;
+		int iend = MB_BEAMS_RAW_SBSIOMRG;
 		if (iend + offset > MB_BEAMS_PROC_SBSIOMRG)
 			iend = MB_BEAMS_PROC_SBSIOMRG - offset;
 
@@ -495,7 +474,6 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", dataplus->kind);
 		fprintf(stderr, "dbg5       error:      %d\n", *error);
-		fprintf(stderr, "dbg5       status:     %d\n", status);
 	}
 
 /* byte swap the data if necessary */
@@ -521,6 +499,8 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->spare2[i] = mb_swap_short(data->spare2[i]);
 	}
 #endif
+
+	int status = MB_SUCCESS;
 
 	/* write next record to file */
 	if (dataplus->kind == MB_DATA_DATA || dataplus->kind == MB_DATA_COMMENT) {
@@ -553,8 +533,6 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -565,7 +543,7 @@ int mbr_register_sbsiomrg(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_sbsiomrg(
+	const int status = mbr_info_sbsiomrg(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
