@@ -47,8 +47,6 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -56,7 +54,6 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SWATHPLUS;
 	*beams_bath_max = SWPLS_MAX_BEAMS;
@@ -83,6 +80,8 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = SWPLS_TYPE_M_BEAM_WIDTH;
 	*beamwidth_ltrack = SWPLS_TYPE_M_BEAM_WIDTH;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -116,16 +115,6 @@ int mbr_info_swplssxp(int verbose, int *system, int *beams_bath_max, int *beams_
 } /* mbr_info_swplssxp */
 /*--------------------------------------------------------------------*/
 int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	int *recordid;
-	int *recordidlast;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
-	int *size;
-	int *nbadrec;
-	int *header_rec_written;
-	int *projection_rec_written;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -137,22 +126,19 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mbsys_swathplus_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
-	recordid = (int *)&mb_io_ptr->save3;
-	recordidlast = (int *)&mb_io_ptr->save4;
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
-	size = (int *)&mb_io_ptr->save8;
-	nbadrec = (int *)&mb_io_ptr->save9;
-	header_rec_written = (int *)&(mb_io_ptr->save1);
-	projection_rec_written = (int *)&(mb_io_ptr->save2);
+	int status = mbsys_swathplus_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	int *recordid = (int *)&mb_io_ptr->save3;
+	int *recordidlast = (int *)&mb_io_ptr->save4;
+	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
+	char *buffer = (char *)*bufferptr;
+	int *bufferalloc = (int *)&mb_io_ptr->save6;
+	int *size = (int *)&mb_io_ptr->save8;
+	int *nbadrec = (int *)&mb_io_ptr->save9;
+	int *header_rec_written = (int *)&(mb_io_ptr->save1);
+	int *projection_rec_written = (int *)&(mb_io_ptr->save2);
 
 	*recordid = SWPLS_ID_NONE;
 	*recordidlast = SWPLS_ID_NONE;
@@ -183,10 +169,6 @@ int mbr_alm_swplssxp(int verbose, void *mbio_ptr, int *error) {
 } /* mbr_alm_swplssxp */
 /*--------------------------------------------------------------------*/
 int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -199,12 +181,12 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_swathplus_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	int status = mbsys_swathplus_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* deallocate memory for reading/writing buffer */
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
+	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
+	char *buffer = (char *)*bufferptr;
+	int *bufferalloc = (int *)&mb_io_ptr->save6;
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)bufferptr, error);
 	*bufferalloc = 0;
 
@@ -220,18 +202,6 @@ int mbr_dem_swplssxp(int verbose, void *mbio_ptr, int *error) {
 } /* mbr_dem_swplssxp */
 /*--------------------------------------------------------------------*/
 int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_swathplus_struct *store;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
-	int *recordid;
-	int *recordidlast;
-	int *size;
-	int *nbadrec;
-	int done;
-	size_t read_len;
-	int skip;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -245,31 +215,32 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_swathplus_struct *)store_ptr;
+	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 
 	/* get saved values */
-	recordid = (int *)&mb_io_ptr->save3;
-	recordidlast = (int *)&mb_io_ptr->save4;
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
-	size = (int *)&mb_io_ptr->save8;
-	nbadrec = (int *)&mb_io_ptr->save9;
+	int *recordid = (int *)&mb_io_ptr->save3;
+	int *recordidlast = (int *)&mb_io_ptr->save4;
+	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
+	char *buffer = (char *)*bufferptr;
+	int *bufferalloc = (int *)&mb_io_ptr->save6;
+	int *size = (int *)&mb_io_ptr->save8;
+	int *nbadrec = (int *)&mb_io_ptr->save9;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
+	int status = MB_SUCCESS;
+	int done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO) {
 		/* read next record header into buffer */
-		read_len = (size_t)SWPLS_SIZE_BLOCKHEADER;
+		size_t read_len = (size_t)SWPLS_SIZE_BLOCKHEADER;
 		status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
 
 		/* check header - if not a good header read a byte
 		    at a time until a good header is found */
-		skip = 0;
+		int skip = 0;
 		while (status == MB_SUCCESS && swpls_chk_header(verbose, mbio_ptr, buffer, recordid, size, error) != MB_SUCCESS) {
 			/* get next byte */
 			for (int i = 0; i < SWPLS_SIZE_BLOCKHEADER - 1; i++) {
@@ -367,13 +338,6 @@ int mbr_swplssxp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 } /* mbr_swplssxp_rd_data */
 /*--------------------------------------------------------------------*/
 int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_swathplus_struct *store;
-	swpls_header *header;
-	swpls_sxpping *ping;
-	swpls_comment *comment;
-	swpls_projection *projection;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -386,14 +350,14 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* read next data from file */
-	status = mbr_swplssxp_rd_data(verbose, mbio_ptr, store_ptr, error);
+	int status = mbr_swplssxp_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointer to data structure */
-	store = (struct mbsys_swathplus_struct *)store_ptr;
-	header = &store->sxp_header;
-	ping = &store->sxp_ping;
-	comment = &store->comment;
-	projection = &store->projection;
+	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
+	swpls_header *header = &store->sxp_header;
+	swpls_sxpping *ping = &store->sxp_ping;
+	swpls_comment *comment = &store->comment;
+	swpls_projection *projection = &store->projection;
 
 	/* check if projection has been set from *.prj file, if so, copy into projection structure */
 	if ((store->projection_set == MB_NO) && (mb_io_ptr->projection_initialized == MB_YES)) {
@@ -451,10 +415,6 @@ int mbr_rt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 } /* mbr_rt_swplssxp */
 /*--------------------------------------------------------------------*/
 int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_swathplus_struct *store;
-	int *header_rec_written;
-	int *projection_rec_written;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -468,16 +428,18 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_swathplus_struct *)store_ptr;
+	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 
 	/* get pointers to saved data */
-	header_rec_written = &(mb_io_ptr->save1);
-	projection_rec_written = &(mb_io_ptr->save2);
+	int *header_rec_written = &(mb_io_ptr->save1);
+	int *projection_rec_written = &(mb_io_ptr->save2);
+
+	int status = MB_SUCCESS;
 
 	/* write header record if needed (just once, here at top of file) */
 	if ((store->sxp_header_set == MB_YES) && (*header_rec_written == MB_NO)) {
-		int origkind = store->kind;
-		int origtype = store->type;
+		const int origkind = store->kind;
+		const int origtype = store->type;
 		store->kind = MB_DATA_HEADER;
 		store->type = SWPLS_ID_SXP_HEADER_DATA;
 		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
@@ -490,8 +452,8 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* write projection record if needed (just once, here at top of file) */
 	if ((store->projection_set == MB_YES) && (*projection_rec_written == MB_NO)) {
-		int origkind = store->kind;
-		int origtype = store->type;
+		const int origkind = store->kind;
+		const int origtype = store->type;
 		store->kind = MB_DATA_PARAMETER;
 		store->type = SWPLS_ID_PROJECTION;
 		status = swpls_wr_data(verbose, mbio_ptr, store_ptr, error);
@@ -520,8 +482,6 @@ int mbr_wt_swplssxp(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -532,7 +492,7 @@ int mbr_register_swplssxp(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_swplssxp(
+	const int status = mbr_info_swplssxp(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,
