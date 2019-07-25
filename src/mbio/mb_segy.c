@@ -37,12 +37,6 @@
     reading. The file headers are returned */
 int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct mb_segyasciiheader_struct *segyasciiheader,
                       struct mb_segyfileheader_struct *segyfileheader, int *error) {
-	struct mb_segyio_struct *mb_segyio_ptr;
-	struct mb_segyasciiheader_struct *asciiheader;
-	struct mb_segyfileheader_struct *fileheader;
-	char *buffer;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,6 +46,10 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 		fprintf(stderr, "dbg2       asciiheader:         %p\n", (void *)segyasciiheader);
 		fprintf(stderr, "dbg2       fileheader:          %p\n", (void *)segyfileheader);
 	}
+
+	struct mb_segyio_struct *mb_segyio_ptr = NULL;
+	struct mb_segyasciiheader_struct *asciiheader;
+	struct mb_segyfileheader_struct *fileheader;
 
 	int status = MB_SUCCESS;
 
@@ -111,8 +109,8 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 
 		/* extract file header data */
 		if (status == MB_SUCCESS) {
-			index = 0;
-			buffer = mb_segyio_ptr->buffer;
+			int index = 0;
+			char *buffer = mb_segyio_ptr->buffer;
 			mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(fileheader->jobid));
 			index += 4;
 			mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(fileheader->line));
@@ -244,7 +242,6 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return success */
 	return (status);
 }
 
@@ -253,10 +250,6 @@ int mb_segy_read_init(int verbose, char *segyfile, void **mbsegyio_ptr, struct m
     writing. The file headers are inserted. */
 int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_struct *asciiheader,
                        struct mb_segyfileheader_struct *fileheader, void **mbsegyio_ptr, int *error) {
-	struct mb_segyio_struct *mb_segyio_ptr;
-	char *buffer;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -306,6 +299,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		fprintf(stderr, "dbg2       mbsegyio_ptr:        %p\n", (void *)mbsegyio_ptr);
 	}
 
+	struct mb_segyio_struct *mb_segyio_ptr = NULL;
 	int status = MB_SUCCESS;
 
 	/* allocate memory for mbsegyio descriptor */
@@ -360,8 +354,8 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		mb_segyio_ptr->fileheader = *fileheader;
 
 		/* insert file header */
-		index = 0;
-		buffer = mb_segyio_ptr->buffer;
+		int index = 0;
+		char *buffer = mb_segyio_ptr->buffer;
 		mb_put_binary_int(MB_NO, fileheader->jobid, (void *)&(buffer[index]));
 		index += 4;
 		mb_put_binary_int(MB_NO, fileheader->line, (void *)&(buffer[index]));
@@ -440,7 +434,6 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return success */
 	return (status);
 }
 
@@ -448,10 +441,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 /* 	function mb_segy_close closes a segy file that was opened
     for either reading or writing. */
 int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
-	struct mb_segyio_struct *mb_segyio_ptr;
-
-	/* get pointer to segyio structure */
-	mb_segyio_ptr = (struct mb_segyio_struct *)*mbsegyio_ptr;
+	struct mb_segyio_struct *mb_segyio_ptr = (struct mb_segyio_struct *)*mbsegyio_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -481,7 +471,6 @@ int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return success */
 	return (status);
 }
 
@@ -492,17 +481,6 @@ int mb_segy_close(int verbose, void **mbsegyio_ptr, int *error) {
     additional memory can be allocated if necessary */
 int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheader_struct *traceheaderptr, float **traceptr,
                        int *error) {
-	struct mb_segyio_struct *mb_segyio_ptr;
-	struct mb_segyfileheader_struct *fileheader;
-	struct mb_segytraceheader_struct *traceheader;
-	float *trace;
-	char *buffer;
-	int index;
-	int bytes_per_sample;
-	int intval;
-	short shortval;
-	int i;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -514,9 +492,9 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 	}
 
 	/* get segyio pointer */
-	mb_segyio_ptr = (struct mb_segyio_struct *)mbsegyio_ptr;
-	fileheader = (struct mb_segyfileheader_struct *)&(mb_segyio_ptr->fileheader);
-	traceheader = (struct mb_segytraceheader_struct *)&(mb_segyio_ptr->traceheader);
+	struct mb_segyio_struct *mb_segyio_ptr = (struct mb_segyio_struct *)mbsegyio_ptr;
+	struct mb_segyfileheader_struct *fileheader = (struct mb_segyfileheader_struct *)&(mb_segyio_ptr->fileheader);
+	struct mb_segytraceheader_struct *traceheader = (struct mb_segytraceheader_struct *)&(mb_segyio_ptr->traceheader);
 
 	int status = MB_SUCCESS;
 
@@ -531,6 +509,8 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 			mb_segyio_ptr->bufferalloc = 0;
 	}
 
+	char *buffer;
+
 	/* read trace header */
 	if (status == MB_SUCCESS) {
 		buffer = (char *)mb_segyio_ptr->buffer;
@@ -540,9 +520,10 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		}
 	}
 
+	int index = 0;
+
 	/* extract trace header data */
 	if (status == MB_SUCCESS) {
-		index = 0;
 		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->seq_num));
 		index += 4;
 		mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(traceheader->seq_reel));
@@ -675,6 +656,8 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		index += 4;
 	}
 
+	int bytes_per_sample;
+
 	/* make sure there is adequate memory */
 	if (status == MB_SUCCESS) {
 		/* get bytes per sample */
@@ -727,6 +710,8 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		}
 	}
 
+	float *trace = NULL;
+
 	/* extract trace data */
 	if (status == MB_SUCCESS) {
 		trace = (float *)mb_segyio_ptr->trace;
@@ -741,11 +726,13 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 2) {
+				int intval;
 				mb_get_binary_int(MB_NO, (void *)&(buffer[index]), &(intval));
 				trace[i] = (float)intval;
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 3) {
+				short shortval;
 				mb_get_binary_short(MB_NO, (void *)&(buffer[index]), &(shortval));
 				trace[i] = (float)shortval;
 				index += bytes_per_sample;
@@ -840,7 +827,6 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return success */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -849,19 +835,10 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheade
     in as a pointer */
 int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytraceheader_struct *traceheader, float *trace,
                         int *error) {
-	struct mb_segyio_struct *mb_segyio_ptr;
-	struct mb_segyasciiheader_struct *asciiheader;
-	struct mb_segyfileheader_struct *fileheader;
-	char *buffer;
-	int index;
-	int bytes_per_sample;
-	int intval;
-	short shortval;
-
 	/* get segyio pointer */
-	mb_segyio_ptr = (struct mb_segyio_struct *)mbsegyio_ptr;
-	asciiheader = &(mb_segyio_ptr->asciiheader);
-	fileheader = &(mb_segyio_ptr->fileheader);
+	struct mb_segyio_struct *mb_segyio_ptr = (struct mb_segyio_struct *)mbsegyio_ptr;
+	struct mb_segyasciiheader_struct *asciiheader = &(mb_segyio_ptr->asciiheader);
+	struct mb_segyfileheader_struct *fileheader = &(mb_segyio_ptr->fileheader);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -951,6 +928,9 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		else
 			mb_segyio_ptr->asciiheader_set = MB_YES;
 	}
+
+	char *buffer = NULL;
+	int index;
 
 	/* if fileheader has not yet been written, write it */
 	if (mb_segyio_ptr->fileheader_set == MB_NO) {
@@ -1044,6 +1024,8 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		else
 			mb_segyio_ptr->bufferalloc = 0;
 	}
+
+	int bytes_per_sample;
 
 	/* make sure there is adequate memory */
 	if (status == MB_SUCCESS) {
@@ -1229,12 +1211,13 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 2) {
+				int intval;
 				intval = (int)trace[i];
 				mb_put_binary_int(MB_NO, intval, (void *)&buffer[index]);
 				index += bytes_per_sample;
 			}
 			else if (fileheader->format == 3) {
-				shortval = (short)trace[i];
+				short shortval = (short)trace[i];
 				mb_put_binary_short(MB_NO, shortval, (void *)&buffer[index]);
 				index += bytes_per_sample;
 			}
@@ -1260,7 +1243,6 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
 		fprintf(stderr, "dbg2       status:       %d\n", status);
 	}
 
-	/* return success */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1273,15 +1255,13 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, struct mb_segytracehead
     will return the Hilbert transform of delta in
     kappa. The values of n and delta are not modified.*/
 void hilbert(int n, double delta[], double kappa[]) {
-	double d1, d2, d3, d4;
-
 	for (int i1 = 0; i1 < n; i1++) {
 		kappa[i1] = 0.;
 		for (int i2 = 1; i2 < n; i2++) {
-			d1 = (i1 + i2 < n) ? delta[i1 + i2] : 0.;
-			d2 = (i1 - i2 >= 0) ? delta[i1 - i2] : 0.;
-			d3 = (i1 + i2 + 1 < n) ? delta[i1 + i2 + 1] : 0.;
-			d4 = (i1 - i2 - 1 >= 0) ? delta[i1 - i2 - 1] : 0.;
+			const double d1 = (i1 + i2 < n) ? delta[i1 + i2] : 0.;
+			const double d2 = (i1 - i2 >= 0) ? delta[i1 - i2] : 0.;
+			const double d3 = (i1 + i2 + 1 < n) ? delta[i1 + i2 + 1] : 0.;
+			const double d4 = (i1 - i2 - 1 >= 0) ? delta[i1 - i2 - 1] : 0.;
 
 			kappa[i1] -= 0.5 * (d1 - d2) / i2 + 0.5 * (d3 - d4) / (i2 + 1);
 		}
@@ -1303,15 +1283,13 @@ void hilbert(int n, double delta[], double kappa[]) {
         (data[1], data[3], ...data[n-1])
     The values of n and even elements of data are not modified.*/
 void hilbert2(int n, double data[]) {
-	double d1, d2, d3, d4;
-
 	for (int i1 = 0; i1 < n; i1++) {
 		data[2 * i1 + 1] = 0.;
 		for (int i2 = 1; i2 < n; i2++) {
-			d1 = (i1 + i2 < n) ? data[2 * (i1 + i2)] : 0.;
-			d2 = (i1 - i2 >= 0) ? data[2 * (i1 - i2)] : 0.;
-			d3 = (i1 + i2 + 1 < n) ? data[2 * (i1 + i2 + 1)] : 0.;
-			d4 = (i1 - i2 - 1 >= 0) ? data[2 * (i1 - i2 - 1)] : 0.;
+			const double d1 = (i1 + i2 < n) ? data[2 * (i1 + i2)] : 0.;
+			const double d2 = (i1 - i2 >= 0) ? data[2 * (i1 - i2)] : 0.;
+			const double d3 = (i1 + i2 + 1 < n) ? data[2 * (i1 + i2 + 1)] : 0.;
+			const double d4 = (i1 - i2 - 1 >= 0) ? data[2 * (i1 - i2 - 1)] : 0.;
 
 			data[2 * i1 + 1] -= 0.5 * (d1 - d2) / i2 + 0.5 * (d3 - d4) / (i2 + 1);
 		}

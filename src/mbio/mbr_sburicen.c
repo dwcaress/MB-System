@@ -43,8 +43,6 @@ int mbr_info_sburicen(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +50,6 @@ int mbr_info_sburicen(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SB;
 	*beams_bath_max = 19;
@@ -77,6 +74,8 @@ int mbr_info_sburicen(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 2.67;
 	*beamwidth_ltrack = 2.67;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -110,8 +109,6 @@ int mbr_info_sburicen(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_sburicen(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -122,14 +119,11 @@ int mbr_alm_sburicen(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_sburicen_struct);
 	mb_io_ptr->data_structure_size = sizeof(struct mbf_sburicen_data_struct);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -143,8 +137,6 @@ int mbr_alm_sburicen(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_sburicen(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -156,8 +148,8 @@ int mbr_dem_sburicen(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -171,13 +163,6 @@ int mbr_dem_sburicen(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sburicen_struct *dataplus;
-	struct mbf_sburicen_data_struct *data;
-	struct mbsys_sb_struct *store;
-	char *datacomment;
-	int id;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -190,11 +175,13 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_sburicen_struct *)mb_io_ptr->raw_data;
-	data = &(dataplus->data);
-	datacomment = (char *)data;
+	struct mbf_sburicen_struct *dataplus = (struct mbf_sburicen_struct *)mb_io_ptr->raw_data;
+	struct mbf_sburicen_data_struct *data = &(dataplus->data);
+	char *datacomment = (char *)data;
 	dataplus->kind = MB_DATA_DATA;
-	store = (struct mbsys_sb_struct *)store_ptr;
+	struct mbsys_sb_struct *store = (struct mbsys_sb_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* read next record from file */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -270,7 +257,7 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 			/* depths and distances */
 			/* switch order of data as it is read into the global arrays */
-			id = MBSYS_SB_BEAMS - 1;
+			const int id = MBSYS_SB_BEAMS - 1;
 			for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 				store->dist[id - i] = data->dist[i];
 				store->deph[id - i] = data->deph[i];
@@ -302,13 +289,6 @@ int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sburicen_struct *dataplus;
-	struct mbf_sburicen_data_struct *data;
-	struct mbsys_sb_struct *store;
-	char *datacomment;
-	int id;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -320,11 +300,13 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+	int status = MB_SUCCESS;
+
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_sburicen_struct *)mb_io_ptr->raw_data;
-	data = &(dataplus->data);
-	datacomment = (char *)data;
-	store = (struct mbsys_sb_struct *)store_ptr;
+	struct mbf_sburicen_struct *dataplus = (struct mbf_sburicen_struct *)mb_io_ptr->raw_data;
+	struct mbf_sburicen_data_struct *data = &(dataplus->data);
+	char *datacomment = (char *)data;
+	struct mbsys_sb_struct *store = (struct mbsys_sb_struct *)store_ptr;
 
 	/* first set some plausible amounts for some of the
 	    variables in the MBURICEN record */
@@ -351,7 +333,7 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* depths and distances */
 		/* switch order of data as it is read
 		    into the output arrays */
-		id = MBSYS_SB_BEAMS - 1;
+		const int id = MBSYS_SB_BEAMS - 1;
 		for (int i = 0; i < MBSYS_SB_BEAMS; i++) {
 			data->dist[i] = store->dist[id - i];
 			data->deph[i] = store->deph[id - i];
@@ -433,8 +415,6 @@ int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sburicen(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -445,7 +425,7 @@ int mbr_register_sburicen(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_sburicen(
+	const int status = mbr_info_sburicen(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

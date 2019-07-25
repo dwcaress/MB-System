@@ -208,9 +208,6 @@ int mb_rt_deall(int verbose, void **modelptr, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, double *depth, int *error) {
-	double alpha;
-	double velf;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -221,8 +218,8 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 	}
 
 	/* find depth */
-	alpha = model->pp * exp(dir_sign * model->tt_left * fabs(model->layer_gradient[model->layer]) + turn_sign * beta);
-	velf = 2 * alpha / (alpha * alpha + model->pp * model->pp);
+	const double alpha = model->pp * exp(dir_sign * model->tt_left * fabs(model->layer_gradient[model->layer]) + turn_sign * beta);
+	const double velf = 2 * alpha / (alpha * alpha + model->pp * model->pp);
 	*depth =
 	    model->layer_depth_top[model->layer] + (velf - model->layer_vel_top[model->layer]) / model->layer_gradient[model->layer];
 
@@ -241,12 +238,6 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, doubl
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad1(int verbose, int *error) {
-	double vi;
-	double ip;
-	double ipvi;
-	double beta;
-	double ivf;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -257,11 +248,11 @@ int mb_rt_quad1(int verbose, int *error) {
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
 	model->zc = model->layer_depth_center[model->layer];
 	model->xc = model->xx + SAFESQRT(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
-	vi = model->layer_vel_top[model->layer] +
+	const double vi = model->layer_vel_top[model->layer] +
 	     (model->zz - model->layer_depth_top[model->layer]) * model->layer_gradient[model->layer];
-	ip = 1.0 / model->pp;
-	ipvi = ip / vi;
-	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
+	const double ip = 1.0 / model->pp;
+	const double ipvi = ip / vi;
+	const double beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
 
 	int status = MB_SUCCESS;
 
@@ -280,7 +271,7 @@ int mb_rt_quad1(int verbose, int *error) {
 
 		/* raypath turns */
 		else {
-			ivf = 1.0 / model->layer_vel_top[model->layer];
+			const double ivf = 1.0 / model->layer_vel_top[model->layer];
 			model->dt = fabs((log(ip * ivf + ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) + beta) /
 			                 model->layer_gradient[model->layer]);
 
@@ -310,7 +301,7 @@ int mb_rt_quad1(int verbose, int *error) {
 	}
 	else {
 		/* ray cannot turn in this layer */
-		ivf = 1.0 / model->layer_vel_bottom[model->layer];
+		const double ivf = 1.0 / model->layer_vel_bottom[model->layer];
 		model->dt =
 		    fabs((log(ip * ivf + ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) - beta) / model->layer_gradient[model->layer]);
 
@@ -344,12 +335,6 @@ int mb_rt_quad1(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad2(int verbose, int *error) {
-	double vi;
-	double ip;
-	double ipvi;
-	double beta;
-	double ivf;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -361,14 +346,14 @@ int mb_rt_quad2(int verbose, int *error) {
 	model->zc = model->layer_depth_center[model->layer];
 	model->xc = model->xx - SAFESQRT(MAX(0.0, model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc)));
 
-	vi = model->layer_vel_top[model->layer] +
+	const double vi = model->layer_vel_top[model->layer] +
 	     (model->zz - model->layer_depth_top[model->layer]) * model->layer_gradient[model->layer];
-	ip = 1.0 / model->pp;
-	ipvi = ip / vi;
-	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
+	const double ip = 1.0 / model->pp;
+	const double ipvi = ip / vi;
+	const double beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
 
 	/* Check if ray ends in layer */
-	ivf = 1.0 / model->layer_vel_top[model->layer];
+	const double ivf = 1.0 / model->layer_vel_top[model->layer];
 	model->dt =
 	    fabs((log(ip * ivf + ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) - beta) / model->layer_gradient[model->layer]);
 
@@ -401,12 +386,6 @@ int mb_rt_quad2(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad3(int verbose, int *error) {
-	double vi;
-	double ip;
-	double ipvi;
-	double beta;
-	double ivf;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -417,14 +396,14 @@ int mb_rt_quad3(int verbose, int *error) {
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
 	model->zc = model->layer_depth_center[model->layer];
 	model->xc = model->xx - SAFESQRT(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
-	vi = model->layer_vel_top[model->layer] +
+	const double vi = model->layer_vel_top[model->layer] +
 	     (model->zz - model->layer_depth_top[model->layer]) * model->layer_gradient[model->layer];
-	ip = 1.0 / model->pp;
-	ipvi = ip / vi;
-	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
+	const double ip = 1.0 / model->pp;
+	const double ipvi = ip / vi;
+	const double beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
 
 	/* Check if ray ends in layer */
-	ivf = 1.0 / model->layer_vel_bottom[model->layer];
+	const double ivf = 1.0 / model->layer_vel_bottom[model->layer];
 	model->dt =
 	    fabs((log(ip * ivf + ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) - beta) / model->layer_gradient[model->layer]);
 
@@ -457,12 +436,6 @@ int mb_rt_quad3(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad4(int verbose, int *error) {
-	double vi;
-	double ip;
-	double ipvi;
-	double beta;
-	double ivf;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -473,11 +446,11 @@ int mb_rt_quad4(int verbose, int *error) {
 	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
 	model->zc = model->layer_depth_center[model->layer];
 	model->xc = model->xx + SAFESQRT(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
-	vi = model->layer_vel_top[model->layer] +
+	const double vi = model->layer_vel_top[model->layer] +
 	     (model->zz - model->layer_depth_top[model->layer]) * model->layer_gradient[model->layer];
-	ip = 1.0 / model->pp;
-	ipvi = ip / vi;
-	beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
+	const double ip = 1.0 / model->pp;
+	const double ipvi = ip / vi;
+	const double beta = log(ipvi + SAFESQRT(ipvi * ipvi - 1.0));
 
 	int status = MB_SUCCESS;
 
@@ -496,7 +469,7 @@ int mb_rt_quad4(int verbose, int *error) {
 
 		/* raypath turns */
 		else {
-			ivf = 1.0 / model->layer_vel_bottom[model->layer];
+			const double ivf = 1.0 / model->layer_vel_bottom[model->layer];
 			model->dt = fabs((log(ip * ivf + ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) + beta) /
 			                 model->layer_gradient[model->layer]);
 
@@ -526,7 +499,7 @@ int mb_rt_quad4(int verbose, int *error) {
 	}
 	else {
 		/* ray cannot turn in this layer */
-		ivf = 1.0 / model->layer_vel_top[model->layer];
+		const double ivf = 1.0 / model->layer_vel_top[model->layer];
 		model->dt =
 		    fabs((log(ip * ivf + ip * SAFESQRT(ivf * ivf - model->pp * model->pp)) - beta) / model->layer_gradient[model->layer]);
 
@@ -560,11 +533,6 @@ int mb_rt_quad4(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_plot_circular(int verbose, int *error) {
-	double ai;
-	double af;
-	double dang;
-	double angle;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -574,13 +542,13 @@ int mb_rt_plot_circular(int verbose, int *error) {
 	/* if full plot do circle segments */
 	if (model->plot_mode == MB_RT_PLOT_MODE_ON) {
 		/* get angle range */
-		ai = atan2((model->xx - model->xc), (model->zz - model->zc));
-		af = atan2((model->xf - model->xc), (model->zf - model->zc));
-		dang = (af - ai) / MB_RT_NUMBER_SEGMENTS;
+		const double ai = atan2((model->xx - model->xc), (model->zz - model->zc));
+		const double af = atan2((model->xf - model->xc), (model->zf - model->zc));
+		const double dang = (af - ai) / MB_RT_NUMBER_SEGMENTS;
 
 		/* add points to plotting arrays */
 		for (int i = 0; i < MB_RT_NUMBER_SEGMENTS; i++) {
-			angle = ai + (i + 1) * dang;
+			const double angle = ai + (i + 1) * dang;
 			if (model->number_plot < model->number_plot_max) {
 				model->xx_plot[model->number_plot] = model->sign_x * (model->xc + model->radius * sin(angle));
 				model->zz_plot[model->number_plot] = model->zc + model->radius * cos(angle);
@@ -643,11 +611,6 @@ int mb_rt_circular(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_line(int verbose, int *error) {
-	double theta;
-	double xvel;
-	double zvel;
-	double asin_arg;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -655,8 +618,8 @@ int mb_rt_line(int verbose, int *error) {
 	}
 
 	/* find linear path */
-	asin_arg = MIN(model->pp * model->layer_vel_top[model->layer], 1.000);
-	theta = asin(asin_arg);
+	const double asin_arg = MIN(model->pp * model->layer_vel_top[model->layer], 1.000);
+	double theta = asin(asin_arg);
 	if (model->turned == MB_NO) {
 		model->zf = model->layer_depth_bottom[model->layer];
 	}
@@ -664,8 +627,8 @@ int mb_rt_line(int verbose, int *error) {
 		theta = theta + M_PI;
 		model->zf = model->layer_depth_top[model->layer];
 	}
-	xvel = model->layer_vel_top[model->layer] * sin(theta);
-	zvel = model->layer_vel_top[model->layer] * cos(theta);
+	const double xvel = model->layer_vel_top[model->layer] * sin(theta);
+	const double zvel = model->layer_vel_top[model->layer] * cos(theta);
 	if (zvel != 0.0)
 		model->dt = (model->zf - model->zz) / zvel;
 	else
@@ -737,10 +700,6 @@ int mb_rt_line(int verbose, int *error) {
 }
 /*--------------------------------------------------------------------------*/
 int mb_rt_vertical(int verbose, int *error) {
-	double vi;
-	double vf;
-	double vfvi;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -748,8 +707,10 @@ int mb_rt_vertical(int verbose, int *error) {
 	}
 
 	/* find linear path */
-	vi = model->layer_vel_top[model->layer] +
+	const double vi = model->layer_vel_top[model->layer] +
 	     (model->zz - model->layer_depth_top[model->layer]) * model->layer_gradient[model->layer];
+
+	double vf;
 	if (model->turned == MB_NO) {
 		model->zf = model->layer_depth_bottom[model->layer];
 		vf = model->layer_vel_bottom[model->layer];
@@ -763,7 +724,7 @@ int mb_rt_vertical(int verbose, int *error) {
 	/* ray exhausts tt_left before exiting layer */
 	if (model->dt >= model->tt_left) {
 		model->xf = model->xx;
-		vfvi = exp(model->tt_left * model->layer_gradient[model->layer]);
+		const double vfvi = exp(model->tt_left * model->layer_gradient[model->layer]);
 		if (model->turned == MB_NO)
 			vf = vi * vfvi;
 		else if (model->turned == MB_YES)
@@ -808,9 +769,6 @@ int mb_rt_vertical(int verbose, int *error) {
 int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle, double end_time, int ssv_mode,
           double surface_vel, double null_angle, int nplot_max, int *nplot, double *xplot, double *zplot, double *x, double *z,
           double *travel_time, int *ray_stat, int *error) {
-	double diff_angle;
-	double vel_ratio;
-
 	/* get pointer to velocity model */
 	model = (struct velocity_model *)modelptr;
 
@@ -879,13 +837,14 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 	      SVP at the initial depth. This insures that the geometry
 	      of the receiving transducer array is properly handled.
 	 */
+	double vel_ratio;
 	if (ssv_mode == MB_SSV_CORRECT && surface_vel > 0.0) {
 		model->pp = sin(DTR * source_angle) / surface_vel;
 		vel_ratio = MIN(1.0, model->pp * model->vv_source);
 		source_angle = asin(vel_ratio) * RTD;
 	}
 	else if (ssv_mode == MB_SSV_INCORRECT && surface_vel > 0.0) {
-		diff_angle = source_angle - null_angle;
+		double diff_angle = source_angle - null_angle;
 		model->pp = sin(DTR * diff_angle) / surface_vel;
 		vel_ratio = MIN(1.0, model->pp * model->vv_source);
 		diff_angle = asin(vel_ratio) * RTD;

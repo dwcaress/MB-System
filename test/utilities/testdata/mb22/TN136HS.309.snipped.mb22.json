@@ -1,0 +1,83 @@
+{
+"file_info": {
+"swath_data_file": "TN136HS.309.snipped.mb22",
+"mbio_data_format_id": "22",
+"format_name": "MBF_HSLDEDMB",
+"informal_description": "EDMB Hydrosweep",
+"attributes": "Hydrosweep DS, bathymetry, 59 beams, binary, NRL."
+},
+"data_totals": {
+"number_of_records": "2"
+},
+"bathymetry_data": {
+"max_beams_per_ping": "59",
+"number_beams": "118",
+"number_good_beams": "115",
+"percent_good_beams": "97.46",
+"number_zero_beams": "3",
+"percent_zero_beams": " 2.54",
+"number_flagged_beams": "0",
+"percent_flagged_beams": " 0.00"
+},
+"amplitude_data": {
+"max_beams_per_ping": "0",
+"number_beams": "0",
+"number_good_beams": "0",
+"percent_good_beams": "  0.00",
+"number_zero_beams": "0",
+"percent_zero_beams": " 0.00",
+"number_flagged_beams": "0",
+"percent_flagged_beams": " 0.00"
+},
+"sidescan_data": {
+"max_pixels_per_ping": "0",
+"number_of_pixels": "0",
+"number_good_pixels": "0",
+"percent_good_pixels": " 0.00",
+"number_zero_pixels": "0",
+"percent_zero_pixels": " 0.00",
+"number_flagged_pixels": "0",
+"percent_flagged_pixels": " 0.00"
+},
+"navigation_totals": {
+"total_time_hours": "-0.3406",
+"total_track_length_km": "0.0036",
+"average_speed_km_per_hr": "0.0000",
+"average_speed_knots": "0.0000"
+},
+"start_of_data": {
+"time": "11 05 2001 00:31:11.000000  JD309",
+"time_iso": "2001-11-05T00:31:11.000000",
+"longitude": "-124.501602000",
+"latitude": "40.838493300",
+"depth_meters": "4626.0000",
+"speed_km_per_hour": "1.4400",
+"speed_knots": "0.7784",
+"heading_degrees": "324.5000",
+"sonar_depth_meters": "0.0000",
+"sonar_altitude_meters": "4626.0000"
+},
+"end_of_data": {
+"time": "11 05 2001 00:10:45.000000  JD309",
+"time_iso": "2001-11-05T00:10:45.000000",
+"longitude": "-124.501632500",
+"latitude": "40.838516200",
+"depth_meters": "4623.0000",
+"speed_km_per_hour": "0.3600",
+"speed_knots": "0.1946",
+"heading_degrees": "324.9000",
+"sonar_depth_meters": "0.0000",
+"sonar_altitude_meters": "4623.0000"
+},
+"limits": {
+"minimum_longitude": "-124.543277152",
+"maximum_longitude": "-124.459477361",
+"minimum_latitude": "40.816164757",
+"maximum_latitude": "40.861313385",
+"minimum_sonar_depth": "0.0000",
+"maximum_sonar_depth": "0.0000",
+"minimum_altitude": "4623.0000",
+"maximum_altitude": "4626.0000",
+"minimum_depth": "4482.0000",
+"maximum_depth": "4683.0000"
+}}

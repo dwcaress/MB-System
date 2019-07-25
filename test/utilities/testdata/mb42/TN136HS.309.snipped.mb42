@@ -1,0 +1,314 @@
+SB21BIFH 14554
+SeaBeam 2100 multibeam sonar binary data format
+MB-System formats 42 and 43
+Format specification 1.2 defined March 20, 1997
+David W. Caress
+SeaBeam Instruments, Inc.
+
+Format specification 1.3 updated December 23, 2003
+David W. Caress
+Monterey Bay Aquarium Research Institute.
+
+Format 42 is a binary data format for storing all 
+bathymetry and sidescan data obtained from a SeaBeam
+2100 multibeam sonar. Each file consists of an
+ASCII file header followed by a series of binary data records.
+All binary integer and float values are "big-endian" ordered.
+All floating point values (float and double) are in the
+IEEE standard format.
+
+Format 43 is identical to format 42 except that the
+number of sidescan pixels is always set to zero.
+
+The data records are:
+        Sonar Text Record (comments)
+        Sonar Parameter Record (roll bias, pitch bias, SVP)
+        Sonar Data Header
+        Sonar Bathymetry Record
+        Sonar Sidescan Record
+
+All data files will begin with the ascii File Header Record.
+
+All data files created by a sonar should include a Sonar
+Parameter Record before any ping data. Data files originating
+in the original SeaBeam 2100 format may not have a Sonar
+Parameter Record. Sonar Text Records may occur between the 
+File Header Record and any other data records.
+
+Each sonar ping produces three data records in the following
+order:
+        Sonar Data Header
+        Sonar Bathymetry Record
+        Sonar Sidescan Record
+The Sonar Bathymetry Record and Sonar Sidescan Record will
+appear even if the numbers of beams and/or pixels are zero.
+The Sonar Bathymetry Record and Sonar Sidescan Record are
+variable in length, depending on the number of bathymetry
+beams and sidescan pixels, respectively.
+
+The structure of this format is designed to maximize i/o
+throughput with MB-System programs. Most numeric parameters,
+except for the sidescan amplitude and alongtrack values,
+are stored as IEEE float or double values. The data records
+are constructed so that the records can be read directly into
+C structures on machines that enforce 4-byte boundaries in
+memory. 
+
+The data record definitions follow:
+----------------------------------------------------------------------------
+
+File Header Record (variable length ASCII, at start of each file):
+----------------------------------------------------------------------------
+Item            Units           Valid           # of    Byte    Coding
+                                Range           Bytes   Offset  
+----------------------------------------------------------------------------
+Record ID 1                     SB21            4       0       ASCII
+  >>Note: binary equivalent: 1396847153
+Record ID 2                     BIFH            4       4       ASCII
+  >>Note: binary equivalent: 1112098376
+Record Length   bytes           0 - 999999      6       8       ASCII
+  >>Note: Length of header text plus Record End in bytes Header
+
+Text                                            varies  14      ASCII Record
+
+Record End                      [CR][LF]        2       varies  ASCII
+----------------------------------------------------------------------------
+
+Sonar Text Record (variable length - comments derived from sonar or in processing):
+----------------------------------------------------------------------------
+Item            Units           Valid           # of    Byte    Coding
+                                Range           Bytes   Offset  
+----------------------------------------------------------------------------
+Record ID 1                     1396847153      4       0       unsigned int
+  >>Note: ASCII equivalent: "SB21"
+Record ID 2                     1112101970      4       4       unsigned int
+  >>Note: ASCII equivalent: "BITR"
+Record Length   bytes           6 - 1926        2       8       int
+  >>Note: Length of the rest of the record in bytes
+
+Comment text                                    varies  10      ASCII
+  >>Note: The comment string is null terminated unless it is 1920 bytes long.
+
+Checksum                                        4       varies  unsigned int
+Record End                      03338           2       varies  unsigned short
+  >>Note: ASCII equivalent: "[CR][LF]"
+----------------------------------------------------------------------------
+
+Sonar Parameter Record (300 bytes - roll bias, pitch bias, SVP):
+----------------------------------------------------------------------------
+Item            Units           Valid           # of    Byte    Coding
+                                Range           Bytes   Offset  
+----------------------------------------------------------------------------
+Record ID 1                     1396847153      4       0       unsigned int
+  >>Note: ASCII equivalent: "SB21"
+Record ID 2                     1112100946      4       4       unsigned int
+  >>Note: ASCII equivalent: "BIPR"
+Record Length   bytes           290             2       8       short
+  >>Note: Length of the rest of the record in bytes
+
+Year                            1994 -          2       10      short
+Day                             1 - 366         2       12      short
+  >>Note: Day of year
+Hour                            0 - 23          2       14      short
+Minute                          0 - 59          2       16      short
+Second                          0 - 59          2       18      short
+Millisecond                     0 - 999         2       20      short
+
+Roll bias port  degree          -5.0 - +5.0     4       22      float
+  >>Note: signed so + is port up
+Roll bias stbd  degree          -5.0 - +5.0     4       26      float
+  >>Note: signed so + is port up
+Pitch bias      degree          -5.0 - +5.0     4       30      float
+  >>Note: signed so + is stern up
+
+Ship's draft    m               0.0 - 10.0      4       34      float
+Nav X offset    m               -50.0 - 50.0    4       38      float
+Nav Y offset    m               -100.0 - 100.0  4       42      float
+Nav Z offset    m               0.0 - 20.0      4       46      float
+
+# of SVP points                 2 - 30          4       50      int
+
+SVP depth[0]    m               0 - 12000.0     4       54      float
+SVP depth[1]    m               0 - 12000.0     4       58      float
+.........
+SVP depth[29]   m               0 - 12000.0     4       170     float
+
+SVP velocity[0] m/s             1300.0 - 1700.0 4       174      float
+SVP velocity[1] m/s             1300.0 - 1700.0 4       178      float
+.........
+SVP velocity[29] m/s            1300.0 - 1700.0 4       290     float
+
+Checksum                                        4       294     unsigned int
+Record End                      03338           2       298     unsigned short
+  >>Note: ASCII equivalent: "[CR][LF]"
+----------------------------------------------------------------------------
+
+Sonar Data Header Record (96 bytes - navigation and sonar parameters):
+----------------------------------------------------------------------------
+Item            Units           Valid           # of    Byte    Coding
+                                Range           Bytes   Offset  
+----------------------------------------------------------------------------
+Record ID 1                     1396847153      4       0       unsigned int
+  >>Note: ASCII equivalent: "SB21"
+Record ID 2                     1112097864      4       4       unsigned int
+  >>Note: ASCII equivalent: "BIDH"
+Record Length    bytes          86              2       8       short
+  >>Note: Length of the rest of the record in bytes
+
+Year                            1994 -          2       10      short
+Day                             1 - 366         2       12      short
+  >>Note: Day of year
+Hour                            0 - 23          2       14      short
+Minute                          0 - 59          2       16      short
+Second                          0 - 59          2       18      short
+Millisecond                     0 - 999         2       20      short
+
+Spare                           0               2       22      short
+Spare                           0               2       24      short
+Longitude       degree E of 0E  0.0 - 359.99999 8       26      double
+Latitude        degree N of 0N  -90.0 - +90.0   8       34      double
+
+Heading at ping degree          0.0 - 359.999   4       42      float
+Speed           knot            0.0 - 100.0     4       46      float
+Roll at ping    degree          -45.0 - +45.0   4       50      float
+  >>Note: + = port up
+Pitch at ping   degree          -10.0 - +10.0   4       54      float
+  >>Note: + = stern up
+Heave at ping   m               -10.0 - +10.0   4       58      float
+  >>Note: + = above mean level
+Surface sound   m/s             1435.0 - 1565.0 4       62      float
+  velocity
+
+Frequency       kHz             L, H            1       66      char
+  >>Note: L = 12 kHz, H = 36 kHz
+Depth gate mode                 A, M            1       67      char
+  >>Note: A = auto, M = manual
+Ping gain       dB              0 - 45          1       68      unsigned char
+Ping pulse      0.001 s         1 - 20          1       69      unsigned char
+  width
+Transmitter     dB              0 - 18          1       70      unsigned char
+  attenuation
+SSV source                      V, M, T, E, U   1       71      char
+  >>Note: V = velocimeter, M = manual, T = temperature, 
+          E = external, U = unknown
+SVP correction                  0, T            1       72      char
+  >>Note: 0 = None, T = true depth and true position
+
+Pixel intensity                 D, L            1       73      char
+  algorithm
+  >>Note: D = logarithm, L = linear; should always be linear for new data
+Pixel size      m               0.125 - 20.0    4       74      float
+
+Number of beams                 0 - 151         2       78      short
+Number of pixels                0 - 2000        2       80      short
+
+Spare                           0               2       82      short
+Spare                           0               2       84      short
+Spare                           0               2       86      short
+Spare                           0               2       88      short
+
+Checksum                                        4       90      unsigned int
+Record End                      03338           2       94      unsigned short
+  >>Note: ASCII equivalent: "[CR][LF]"
+----------------------------------------------------------------------------
+
+Sonar Data Bathymetry Record (variable length - (16 + nbeams * 32) bytes 
+                              - bathymetry and amplitude):
+----------------------------------------------------------------------------
+Item            Units           Valid           # of    Byte    Coding
+                                Range           Bytes   Offset  
+----------------------------------------------------------------------------
+Record ID 1                     1396847153      4       0       unsigned int
+  >>Note: ASCII equivalent: "SB21"
+Record ID 2                     1112097362      4       4       unsigned int
+  >>Note: ASCII equivalent: "BIBR"
+Record Length   bytes           6 - 4838        2       8       short
+  >>Note: Length of the rest of the record in bytes
+
+  >>Note: This record contains "number of beams" instances 
+          of the following structure, where the "number of beams" 
+          value is found near the end of the preceding 
+          SB21BIDH header record
+Depth           m                               4       10      float
+Acrosstrack     m                               4       14      float
+  >>Note: + is starboard
+Alongtrack      m                               4       18      float
+  >>Note: + is forward
+Range           sec                             4       22      float
+  >>Note: raw round trip echo time
+Angle from      degree          -100.0 - +100.0 4       26      float
+  vertical
+  >>Note: see SeaBeam documentation figure for meaning of signs
+Angle forward   degree          -100.0 - +100.0 4       30      float
+  >>Note: see SeaBeam documentation figure for meaning of signs
+Beam amplitude  0.25 dB         0 - 400         2       34      short
+Signal to noise dB              0 - 99          2       36      short
+Echo length     sample interval 0 - 999         2       38      short
+Signal quality                  0, Q, F, G      1       40      char
+  >>Note: 0 = no data, Q = sonar flagged, 
+          F = processing flagged, G = good data
+Beam algorithm                  W, B            1       41      char
+  >>Note: W = weighted mean time, B = BDI
+
+  >>Note: The usual checksum and record end tag are placed after
+          the last instance of the per-beam data
+Checksum                                        4       varies  unsigned int
+Record End                      03338           2       varies  unsigned short
+  >>Note: ASCII equivalent: "[CR][LF]"
+----------------------------------------------------------------------------
+
+Sonar Data Sidescan Record (variable length - (16 + 4 * npixels) bytes 
+                            - 2000 pixels : 8016 bytes
+                            - sidescan):
+----------------------------------------------------------------------------
+Item            Units           Valid           # of    Byte    Coding
+                                Range           Bytes   Offset  
+----------------------------------------------------------------------------
+Record ID 1                     1396847153      4       0       unsigned int
+  >>Note: ASCII equivalent: "SB21"
+Record ID 2                     1112101714      4       4       unsigned int
+  >>Note: ASCII equivalent: "BISR"
+Record Length   bytes           6 - 16006       2       8       short
+  >>Note: Length of the rest of the record in bytes
+
+  >>Note: This record contains "number of pixels" instances 
+          of the following structure, where the "number of pixels" 
+          value is found near the end of the preceding 
+          SB21BIDH header record
+  >>Note: The "number of pixels" is always 0 for format 43.
+
+Amplitude                       0 - 65535       2       10      unsigned short
+Alongtrack      0.1 m           -32767 - 32767  2       12      short
+  >>Note: + is forward
+
+  >>Note: The usual checksum and record end tag are placed after
+          the last instance of the per-pixel data
+Checksum                                        4       varies  unsigned int
+Record End                      03338           2       varies  unsigned short
+  >>Note: ASCII equivalent: "[CR][LF]"
+----------------------------------------------------------------------------
+
+
+SB21BITR *These data copied by program MBcopy   ƒ
+SB21BITR #MB-system Version 5.7.6beta1   	R
+SB21BITR \Run by user <schwehr> on cpu <sonar.nowhere.google.com> at <Wed Jul 24 10:20:07 2019>   '
+SB21BITR Control Parameters:   O
+SB21BITR R  Input file:         test/utilities/testdata/mb21/TN136HS.309.snipped.mb21   p
+SB21BITR   Input MBIO format:  21   
+SB21BITR R  Output file:        test/utilities/testdata/mb42/TN136HS.309.snipped.mb42   ◊
+SB21BITR   Output MBIO format: 42   Å
+SB21BITR   Ping averaging:     1   ≠
+SB21BITR   Longitude flip:     0   ¿
+SB21BITR 3  Longitude bounds:   -360.000000 360.000000   K
+SB21BITR 1  Latitude bounds:    -90.000000 90.000000   
+ú
+SB21BITR 0  Begin time:         1962 2 21 10 30 0 0   ô
+SB21BITR 0  End time:           2062 2 21 10 30 0 0   
+SB21BITR %  Minimum speed:      0.000000   ≈
+SB21BITR %  Time gap:           1.000000   @
+SB21BITR       
+SB21BIDH V—5    ,      @moÚ‡'§@DkSøöµ#C¢@ @¯^                               ;              SB21BIBRf                              0 CÈLÕ√’Ä                         CËåÕ√…≥3                        CË@ √æÊf                        CËÃÕ√µ33                        CË¶f√´Yö                        CË33√°ÃÕ                        CË≥3√ô&f                        CÈ@ √êÃÕ                        CËôö√à                          CËåÕ√≥3                        CÈÕ√pLÕ                        CË¿ √`≥3                        CËff√QLÕ                        CÁŸö√BLÕ                        CÁö√3ff                        CËö√&33                        CË33√Ä                         CÁÄ √
+ôö                        CÁLÕ¬˙ff                        CÊ≥3¬ﬂÃÕ                        CÊÃÕ¬∆33                        CÁö¬≠                          CÁ  ¬ìÃÕ                        CÊ¿ ¬u33                        CÁ≥3¬Dff                        CÁff¬ÃÕ                        CÊ≥3¡√33                        CÊ≥3¡C33                        CÁLÕ                            CËÊfADÃÕ                        CËs3Aƒ                          CÁ≥3B33                        CÁ&fBD                          CÊ¿ Bu33                        CÊÊfBìôö                        CÊffB¨ff                        CÂ¿ B≈33                        CÂ33Bﬁ33                        C‰≥3B˜ôö                        C„ŸöCff                        C‰ÊfCLÕ                        C„≥3C#                          C„Û3C0Êf                        C‚Û3C>ö                        C‚@ CKÃÕ                        C‚ÕCZö                        C‚33Ci33                        C‚öCxÄ                         C‚LÕCÑLÕ                        C·¶fCåÕ                        C·ÕCîö                        C‡öCú&f                        C·åÕC¶33                        C„LÕC∞Êf                        C‚Û3C∫Ä                         C·YöC√ff                        C·¿ CŒÄ                         C‚&fC⁄33                          ö
+SB21BISR     
+SB21BIDH V—5    1      @moÚ†0åê@DkT¥FC¢s3?¯^    ¿   Ä                      ;              SB21BIBRf                              0 CÍ&f√÷¶f                        CÈ≥3√Àö                        CÈåÕ√¿Yö                        CÁÛ3√¥Êf                        CÁ@ √™≥3                        CËff√¢33                        CÈÄ √ôÛ3                        CË33√êff                        CÁLÕ√ás3                        CËö√ôö                        CÈÕ√pÃÕ                        CÈ@ √aÄ                         CË¶f√QÊf                        CË¿ √CLÕ                        CË¶f√4Êf                        CËÃÕ√&Êf                        CË@ √ÃÕ                        CË33√33                        CË33¬˚ÃÕ                        CÁYö¬‡ÃÕ                        CÁåÕ¬«33                        CËö¬Æ                          CÁŸö¬îff                        CËs3¬w33                        CÁåÕ¬DÃÕ                        CË  ¬ôö                        CÁYö¡ƒ                          CÁ@ ¡C33                        CÁ33                            CÁ&fAC33                        CÁffAƒ                          CËÛ3B                          CË¿ BEôö                        CËåÕBw33                        CÁ¶fBî33                        CÁs3B≠ff                        CÊ≥3B∆ff                        CÊ¿ B‡                          CÊ&fB˘ôö                        CÂÊfC	ÃÕ                        CÊÕCLÕ                        CÂs3C$Ä                         CÂ@ C233                        CÂ@ C@LÕ                        C‰ÃÕCNff                        CÂöC]Ä                         C‰@ CkÃÕ                        C„s3Czff                        C„LÕCÖ&f                        C‰¶fCé&f                        C‰öCñYö                        C„öCûÄ                         C‚@ Cß                          C‚33C∞s3                        C‰Û3CºåÕ                        C‰s3C∆åÕ                        C‚s3Cœ¶f                                                      0   Ù
+SB21BISR     

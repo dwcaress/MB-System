@@ -41,8 +41,6 @@ int mbr_info_segysegy(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -50,7 +48,7 @@ int mbr_info_segysegy(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SINGLEBEAM;
 	*beams_bath_max = 1;
@@ -109,8 +107,6 @@ int mbr_info_segysegy(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_segysegy(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -121,16 +117,13 @@ int mbr_alm_segysegy(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_singlebeam_struct), &mb_io_ptr->store_data, error);
 
 	/* get pointer to mbio descriptor */
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	/* mb_io_ptr = (struct mb_io_struct *)mbio_ptr; */
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -144,8 +137,6 @@ int mbr_alm_segysegy(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_segysegy(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -157,9 +148,9 @@ int mbr_dem_segysegy(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 	if (mb_io_ptr->data_structure_size > 0) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
 		mb_io_ptr->data_structure_size = 0;
 	}
 
@@ -175,14 +166,6 @@ int mbr_dem_segysegy(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_singlebeam_struct *store;
-	struct mb_segyio_struct *mb_segyio_ptr;
-	struct mb_segytraceheader_struct traceheader;
-	float *trace;
-	double factor;
-	int time_j[5];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -190,14 +173,15 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
-
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
-	mb_segyio_ptr = (struct mb_segyio_struct *)(mb_io_ptr->mbfp);
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mb_segyio_struct *mb_segyio_ptr = (struct mb_segyio_struct *)(mb_io_ptr->mbfp);
 
 	/* read next data from file */
-	status = mb_segy_read_trace(verbose, (void *)mb_segyio_ptr, &traceheader, &trace, error);
+	struct mb_segytraceheader_struct traceheader;
+	float *trace;
+	int status = mb_segy_read_trace(verbose, (void *)mb_segyio_ptr, &traceheader, &trace, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -208,6 +192,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->kind = MB_DATA_DATA;
 		for (int i = 0; i < 8; i++)
 			store->survey_id[i] = '\0';
+		int time_j[5];
 		time_j[0] = traceheader.year;
 		time_j[1] = traceheader.day_of_yr;
 		time_j[2] = 60 * traceheader.hour + traceheader.min;
@@ -218,6 +203,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->timezone = 0;
 		//store->longitude = ((double)traceheader.src_long) / 360000.0;
 		//store->latitude = ((double)traceheader.src_lat) / 360000.0;
+	double factor;
         if (traceheader.coord_scalar < 0)
             factor = 1.0 / ((float)(-traceheader.coord_scalar)) / 3600.0;
         else
@@ -294,13 +280,6 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_singlebeam_struct *store;
-	struct mb_segyio_struct *mb_segyio_ptr;
-	struct mb_segytraceheader_struct traceheader;
-	float *trace;
-	int time_j[5];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -313,13 +292,14 @@ int mbr_wt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
-	mb_segyio_ptr = (struct mb_segyio_struct *)(mb_io_ptr->mbfp);
-	traceheader = mb_segyio_ptr->traceheader;
-	trace = (float *)&mb_segyio_ptr->trace;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mb_segyio_struct *mb_segyio_ptr = (struct mb_segyio_struct *)(mb_io_ptr->mbfp);
+	struct mb_segytraceheader_struct traceheader = mb_segyio_ptr->traceheader;
+	float *trace = (float *)&mb_segyio_ptr->trace;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {
+		int time_j[5];
 		mb_get_jtime(verbose, store->time_i, time_j);
 		traceheader.year = store->time_i[0];
 		traceheader.day_of_yr = time_j[1];
@@ -338,7 +318,7 @@ int mbr_wt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* write next data to file */
-	status = mb_segy_write_trace(verbose, (void *)mb_segyio_ptr, &traceheader, trace, error);
+	const int status = mb_segy_write_trace(verbose, (void *)mb_segyio_ptr, &traceheader, trace, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

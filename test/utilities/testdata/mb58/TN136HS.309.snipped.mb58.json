@@ -1,0 +1,81 @@
+{
+"file_info": {
+"swath_data_file": "TN136HS.309.snipped.mb58",
+"mbio_data_format_id": "58",
+"format_name": "MBF_EM710RAW",
+"informal_description": "Kongsberg current multibeam vendor format",
+"attributes": "Kongsberg EM122, EM302, EM710,;                      bathymetry, amplitude, and sidescan,;                      up to 400 beams, variable pixels, binary, Kongsberg."
+},
+"data_totals": {
+"number_of_records": "0"
+},
+"bathymetry_data": {
+"max_beams_per_ping": "0",
+"number_beams": "0",
+"number_good_beams": "0",
+"percent_good_beams": " 0.00",
+"number_zero_beams": "0",
+"percent_zero_beams": " 0.00",
+"number_flagged_beams": "0",
+"percent_flagged_beams": " 0.00"
+},
+"amplitude_data": {
+"max_beams_per_ping": "0",
+"number_beams": "0",
+"number_good_beams": "0",
+"percent_good_beams": "  0.00",
+"number_zero_beams": "0",
+"percent_zero_beams": " 0.00",
+"number_flagged_beams": "0",
+"percent_flagged_beams": " 0.00"
+},
+"sidescan_data": {
+"max_pixels_per_ping": "0",
+"number_of_pixels": "0",
+"number_good_pixels": "0",
+"percent_good_pixels": " 0.00",
+"number_zero_pixels": "0",
+"percent_zero_pixels": " 0.00",
+"number_flagged_pixels": "0",
+"percent_flagged_pixels": " 0.00"
+},
+"navigation_totals": {
+"total_time_hours": "0.0000",
+"total_track_length_km": "0.0000",
+"average_speed_km_per_hr": "0.0000",
+"average_speed_knots": "0.0000"
+},
+"start_of_data": {
+"time": "00 00 0000 00:00:00.000000  JD0",
+"time_iso": "0000-00-00T00:00:00.000000",
+"longitude": "0.000000000",
+"latitude": "0.000000000",
+"depth_meters": "0.0000",
+"speed_km_per_hour": "0.0000",
+"speed_knots": "0.0000",
+"heading_degrees": "0.0000",
+"sonar_depth_meters": "0.0000",
+"sonar_altitude_meters": "0.0000"
+},
+"end_of_data": {
+"time": "00 00 0000 00:00:00.000000  JD0",
+"time_iso": "0000-00-00T00:00:00.000000",
+"longitude": "0.000000000",
+"latitude": "0.000000000",
+"depth_meters": "0.0000",
+"speed_km_per_hour": "0.0000",
+"speed_knots": "0.0000",
+"heading_degrees": "0.0000",
+"sonar_depth_meters": "0.0000",
+"sonar_altitude_meters": "0.0000"
+},
+"limits": {
+"minimum_longitude": "0.000000000",
+"maximum_longitude": "0.000000000",
+"minimum_latitude": "0.000000000",
+"maximum_latitude": "0.000000000",
+"minimum_sonar_depth": "0.0000",
+"maximum_sonar_depth": "0.0000",
+"minimum_altitude": "0.0000",
+"maximum_altitude": "0.0000"
+}}

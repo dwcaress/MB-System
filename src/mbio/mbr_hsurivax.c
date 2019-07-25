@@ -166,13 +166,6 @@ int mbr_dem_hsurivax(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_hsuricen_struct *dataplus;
-	struct mbf_hsuricen_data_struct *data;
-	struct mbsys_hsds_struct *store;
-	char *datacomment;
-	int time_j[5];
-	int id;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -184,12 +177,13 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_hsuricen_struct *)mb_io_ptr->raw_data;
-	data = &(dataplus->data);
-	datacomment = (char *)data;
+	struct mbf_hsuricen_struct *dataplus = (struct mbf_hsuricen_struct *)mb_io_ptr->raw_data;
+	struct mbf_hsuricen_data_struct *data = &(dataplus->data);
+	char *datacomment = (char *)data;
 	dataplus->kind = MB_DATA_DATA;
-	store = (struct mbsys_hsds_struct *)store_ptr;
+	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -254,6 +248,7 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->kind = dataplus->kind;
 
 		/* time stamp (all records ) */
+		int time_j[5];
 		time_j[0] = data->year;
 		time_j[1] = data->day;
 		time_j[2] = data->min;
@@ -288,7 +283,7 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->depth_scale = 0.01 * data->scale;
 		store->depth_center = store->depth_scale * data->deph[MBSYS_HSDS_BEAMS / 2];
 		store->spare = 1;
-		id = MBSYS_HSDS_BEAMS - 1;
+		/* const int id = MBSYS_HSDS_BEAMS - 1; */
 		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 			store->distance[i] = data->dist[i];
 			store->depth[i] = data->deph[i];
@@ -376,14 +371,6 @@ int mbr_rt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_hsuricen_struct *dataplus;
-	struct mbf_hsuricen_data_struct *data;
-	struct mbsys_hsds_struct *store;
-	char *datacomment;
-	int time_i[7];
-	int time_j[5];
-	int id;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -396,10 +383,10 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_hsuricen_struct *)mb_io_ptr->raw_data;
-	data = &(dataplus->data);
-	datacomment = (char *)data;
-	store = (struct mbsys_hsds_struct *)store_ptr;
+	struct mbf_hsuricen_struct *dataplus = (struct mbf_hsuricen_struct *)mb_io_ptr->raw_data;
+	struct mbf_hsuricen_data_struct *data = &(dataplus->data);
+	char *datacomment = (char *)data;
+	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -432,6 +419,7 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->lat = (int)(0.5 + 10000000.0 * store->lat);
 
 			/* time stamp */
+			int time_i[7];
 			time_i[0] = store->year;
 			time_i[1] = store->month;
 			time_i[2] = store->day;
@@ -439,6 +427,7 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			time_i[4] = store->minute;
 			time_i[5] = store->second;
 			time_i[6] = 0;
+			int time_j[5];
 			mb_get_jtime(verbose, time_i, time_j);
 			data->year = time_j[0];
 			data->day = time_j[1];
@@ -452,7 +441,7 @@ int mbr_wt_hsurivax(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			data->speed_ref = store->speed_reference[0];
 			data->pitch = 10.0 * store->pitch;
 			data->scale = 100 * store->depth_scale;
-			id = MBSYS_HSDS_BEAMS - 1;
+			/* const int id = MBSYS_HSDS_BEAMS - 1; */
 			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
 				data->dist[i] = store->distance[i];
 				data->deph[i] = store->depth[i];
