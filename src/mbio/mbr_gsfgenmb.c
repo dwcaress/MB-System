@@ -144,9 +144,6 @@ int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_gsfgenmb_struct *data;
-	gsfRecords *records;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -156,8 +153,8 @@ int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
-	records = &(data->records);
+	struct mbf_gsfgenmb_struct *data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
+	gsfRecords *records = &(data->records);
 
 	/* deallocate memory for data descriptor */
 	/*gsfFree(records);*/
@@ -176,12 +173,6 @@ int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_gsfgenmb_struct *data;
-	struct mbsys_gsf_struct *store;
-	gsfDataID *dataID;
-	gsfRecords *records;
-	gsfSwathBathyPing *mb_ping;
-	int ret;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -193,21 +184,21 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_gsf_struct *)store_ptr;
+	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
+	struct mbf_gsfgenmb_struct *data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
 
 	/* get pointers to GSF structures */
-	dataID = &(data->dataID);
-	records = &(data->records);
-	mb_ping = &(records->mb_ping);
+	gsfDataID *dataID = &(data->dataID);
+	gsfRecords *records = &(data->records);
+	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record from file */
-	ret = gsfRead((int)mb_io_ptr->gsfid, GSF_NEXT_RECORD, dataID, records, NULL, 0);
+	int ret = gsfRead((int)mb_io_ptr->gsfid, GSF_NEXT_RECORD, dataID, records, NULL, 0);
 
 	int status = MB_SUCCESS;
 
@@ -405,13 +396,6 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_gsfgenmb_struct *data;
-	struct mbsys_gsf_struct *store;
-	gsfDataID *dataID;
-	gsfRecords *records;
-	gsfSwathBathyPing *mb_ping;
-	int ret = 0;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -422,15 +406,15 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_gsf_struct *)store_ptr;
+	struct mbsys_gsf_struct *store = (struct mbsys_gsf_struct *)store_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
+	struct mbf_gsfgenmb_struct *data = (struct mbf_gsfgenmb_struct *)mb_io_ptr->raw_data;
 
 	/* get pointers to GSF structures */
-	dataID = &(data->dataID);
-	records = &(data->records);
-	mb_ping = &(records->mb_ping);
+	gsfDataID *dataID = &(data->dataID);
+	gsfRecords *records = &(data->records);
+	gsfSwathBathyPing *mb_ping = &(records->mb_ping);
 
 	/* translate values to data storage structure */
 	if (store != NULL) {
@@ -488,7 +472,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (data->kind == MB_DATA_DATA && mb_io_ptr->save1 == MB_NO) {
 			/* write a processing parameter record */
 			dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS;
-			if ((ret = gsfWrite((int)mb_io_ptr->gsfid, dataID, records)) < 0) {
+			if (gsfWrite((int)mb_io_ptr->gsfid, dataID, records) < 0) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_WRITE_FAIL;
 			}
@@ -501,7 +485,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			mb_io_ptr->save1 = MB_YES;
 
 		/* write the record */
-		if ((ret = gsfWrite((int)mb_io_ptr->gsfid, dataID, records)) < 0) {
+		if (gsfWrite((int)mb_io_ptr->gsfid, dataID, records) < 0) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_WRITE_FAIL;
 		}

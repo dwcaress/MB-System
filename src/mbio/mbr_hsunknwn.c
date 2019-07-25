@@ -196,10 +196,6 @@ int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_hsds_struct *store;
-	char line[MB_PATH_MAXLINE];
-	char *result;
-	double value;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -213,13 +209,14 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_hsds_struct *)store_ptr;
+	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read first line of next record from file */
 	int status = MB_SUCCESS;
+	char line[MB_PATH_MAXLINE];
         const size_t num_bytes = fread(line, 1, LINE1SIZE, mb_io_ptr->mbfp);
 	if (num_bytes == LINE1SIZE) {
 		mb_io_ptr->file_bytes += num_bytes;
@@ -229,7 +226,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* if comment just read the next line */
 		if (strncmp(line, "COMM", 4) == 0) {
 			store->kind = MB_DATA_COMMENT;
-			result = fgets(store->comment, MBSYS_HSDS_MAXLINE, mb_io_ptr->mbfp);
+			char *result = fgets(store->comment, MBSYS_HSDS_MAXLINE, mb_io_ptr->mbfp);
 			if (result == NULL) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
@@ -274,6 +271,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			*error = MB_ERROR_NO_ERROR;
 
 			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+				double value;
 				mb_get_double(&value, line + i * 7, 7);
 				store->depth[i] = (int)(10.0 * value);
 			}
@@ -291,6 +289,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			*error = MB_ERROR_NO_ERROR;
 
 			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+				double value;
 				mb_get_double(&value, line + i * 7, 7);
 				store->distance[i] = (int)(10.0 * value);
 			}
@@ -308,6 +307,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			*error = MB_ERROR_NO_ERROR;
 
 			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+				double value;
 				mb_get_double(&value, line + i * 7, 7);
 				store->back[i] = (int)(10.0 * value);
 			}
@@ -325,6 +325,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			*error = MB_ERROR_NO_ERROR;
 
 			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+				double value;
 				mb_get_double(&value, line + i * 7, 7);
 			}
 		}
@@ -341,6 +342,7 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			*error = MB_ERROR_NO_ERROR;
 
 			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
+				double value;
 				mb_get_double(&value, line + i * 7, 7);
 			}
 		}
@@ -393,9 +395,6 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_hsds_struct *store;
-	double value;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -408,7 +407,7 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_hsds_struct *)store_ptr;
+	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -470,27 +469,27 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		        store->month, store->day, store->hour, store->minute, store->second, store->lon, store->lat, 0.0, 0.0,
 		        store->course_true, store->depth_center);
 		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			value = store->depth[i] * store->depth_scale;
+			const double value = store->depth[i] * store->depth_scale;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
 		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			value = store->distance[i] * store->depth_scale;
+			const double value = store->distance[i] * store->depth_scale;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
 		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			value = store->back[i] * store->back_scale;
+			const double value = store->back[i] * store->back_scale;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
 		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			value = -9999.9;
+			const double value = -9999.9;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
 		for (int i = 0; i < MBSYS_HSDS_BEAMS; i++) {
-			value = 100.0;
+			const double value = 100.0;
 			fprintf(mb_io_ptr->mbfp, "%7.1f", value);
 		}
 		fprintf(mb_io_ptr->mbfp, "\r\n");
