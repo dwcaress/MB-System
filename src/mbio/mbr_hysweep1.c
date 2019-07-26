@@ -231,7 +231,6 @@ int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
 	int *file_header_read;
@@ -239,7 +238,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *line_saved;
 	int *RMB_read;
 	int done;
-	char *line;
 	int nscan, nread;
 	char *token;
 	int DEV_device_number;
@@ -294,8 +292,8 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
-	line = store->readline;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
+	char *line = store->readline;
 
 	/* get saved values */
 	file_header_read = (int *)&mb_io_ptr->save1;
@@ -1984,13 +1982,11 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int interp_status;
 	int interp_error = MB_ERROR_NO_ERROR;
-	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	double navlon, navlat;
 	double roll, speed;
 	double alpha, beta, theta, phi;
 	double rr, xx, zz;
-	double *pixel_size, *swath_width;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2007,9 +2003,9 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = mbr_hysweep1_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
+	double *pixel_size = (double *)&mb_io_ptr->saved1;
+	double *swath_width = (double *)&mb_io_ptr->saved2;
 
 	/* save position if primary data */
 	if (status == MB_SUCCESS && (store->kind == MB_DATA_NAV || store->kind == MB_DATA_NAV1 || store->kind == MB_DATA_NAV2)) {
@@ -2354,12 +2350,9 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_hysweep_struct *store;
 	struct mbsys_hysweep_device_struct *device;
 	struct mbsys_hysweep_device_offset_struct *offset;
 	struct mbsys_hysweep_struct hysweeptmp;
-	FILE *mbfp;
-	char *line;
 	int *file_header_read;
 	int *file_header_written;
 	int kindex;
@@ -2382,11 +2375,11 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
-	line = store->writeline;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
+	char *line = store->writeline;
 
 	/* get saved values */
 	file_header_read = (int *)&mb_io_ptr->save1;
@@ -3133,8 +3126,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3147,7 +3138,7 @@ int mbr_wt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_hysweep1_wr_data(verbose, mbio_ptr, store_ptr, error);

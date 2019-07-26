@@ -1381,9 +1381,6 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad_struct *store;
-	FILE *mbfp;
-	int done;
 	int *wrapper;
 	char *label;
 	int *label_save_flag;
@@ -1413,8 +1410,8 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	mbfp = mb_io_ptr->mbfp;
-	store = (struct mbsys_simrad_struct *)store_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
 	/* get saved values */
 	wrapper = (int *)&mb_io_ptr->save5;
@@ -1455,7 +1452,7 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
+	int done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO) {
 		/* if no label saved get next record label */
@@ -2142,16 +2139,12 @@ int mbr_emoldraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad_struct *store;
-	struct mbsys_simrad_survey_struct *ping;
 	int ntime_i[7];
 	double ntime_d;
 	int ptime_i[7];
 	double ptime_d;
 	double rawspeed, pheading;
 	double plon, plat, pspeed;
-	double *pixel_size;
-	double *swath_width;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2163,9 +2156,9 @@ int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_simrad_struct *)store_ptr;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
+	double *pixel_size = (double *)&mb_io_ptr->saved1;
+	double *swath_width = (double *)&mb_io_ptr->saved2;
 
 	/* read next data from file */
 	int status = mbr_emoldraw_rd_data(verbose, mbio_ptr, store_ptr, error);
@@ -2189,6 +2182,8 @@ int mbr_rt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* add latest fix */
 		mb_navint_add(verbose, mbio_ptr, ntime_d, store->pos_longitude, store->pos_latitude, error);
 	}
+
+	struct mbsys_simrad_survey_struct *ping;
 
 	/* handle navigation interpolation and generate sidescan */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
@@ -3784,10 +3779,6 @@ int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad_struct *store;
-	struct mbsys_simrad_survey_struct *ping;
-	FILE *mbfp;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3800,9 +3791,9 @@ int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad_struct *)store_ptr;
-	ping = (struct mbsys_simrad_survey_struct *)store->ping;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
+	struct mbsys_simrad_survey_struct *ping = (struct mbsys_simrad_survey_struct *)store->ping;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	int status = MB_SUCCESS;
 
@@ -3915,8 +3906,6 @@ int mbr_emoldraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3929,7 +3918,7 @@ int mbr_wt_emoldraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad_struct *)store_ptr;
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_emoldraw_wr_data(verbose, mbio_ptr, store_ptr, error);
