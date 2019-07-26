@@ -116,8 +116,6 @@ int mbr_info_em12ifrm(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
-	struct mbf_em12ifrm_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -126,7 +124,7 @@ int mbr_zero_em12ifrm(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_em12ifrm_struct *)data_ptr;
+	struct mbf_em12ifrm_struct *data = (struct mbf_em12ifrm_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -422,12 +420,10 @@ int mbr_dem_em12ifrm(int verbose, void *mbio_ptr, int *error) {
 }
 
 int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_em12ifrm_struct *data;
 	int *save_data;
 	int *nav_available;
 	int *ss_available;
 	int *save_ss;
-	int done;
 	int ptime_i[7];
 	double ptime_d;
 	int read_status;
@@ -464,13 +460,13 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_em12ifrm_struct *)mb_io_ptr->raw_data;
+	struct mbf_em12ifrm_struct *data = (struct mbf_em12ifrm_struct *)mb_io_ptr->raw_data;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* check if any data is required */
-	done = MB_NO;
+	int done = MB_NO;
 	save_data = (int *)&mb_io_ptr->save1;
 	nav_available = (int *)&mb_io_ptr->save2;
 	ss_available = (int *)&mb_io_ptr->save3;
@@ -944,8 +940,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_em12ifrm_struct *data;
-	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	int *save_ss;
 	int ntime_i[7];
@@ -967,8 +961,8 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_em12ifrm_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_simrad_struct *)store_ptr;
+	struct mbf_em12ifrm_struct *data = (struct mbf_em12ifrm_struct *)mb_io_ptr->raw_data;
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 	save_ss = (int *)&mb_io_ptr->save4;
 	pixel_size = (double *)&mb_io_ptr->saved1;
 	swath_width = (double *)&mb_io_ptr->saved2;
@@ -1184,9 +1178,6 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_em12ifrm_struct *data;
-	char *data_ptr;
-	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 
 	if (verbose >= 2) {
@@ -1201,9 +1192,9 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_em12ifrm_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_simrad_struct *)store_ptr;
+	struct mbf_em12ifrm_struct *data = (struct mbf_em12ifrm_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {
@@ -1347,7 +1338,6 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
-	struct mbf_em12ifrm_struct *data;
 	char line[MBF_EM12IFRM_RECORD_SIZE] = "";
 	int shift;
 	short short_value;
@@ -1366,7 +1356,7 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_em12ifrm_struct *)data_ptr;
+	struct mbf_em12ifrm_struct *data = (struct mbf_em12ifrm_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {

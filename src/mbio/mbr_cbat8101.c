@@ -110,8 +110,6 @@ int mbr_info_cbat8101(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -120,7 +118,7 @@ int mbr_zero_cbat8101(int verbose, void *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -1100,10 +1098,6 @@ int mbr_cbat8101_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbf_cbat8
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
-	char *data_ptr;
-	FILE *mbfp;
-	int done;
 	int first;
 	short *type;
 	char label[2];
@@ -1120,14 +1114,14 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	done = MB_NO;
+	int done = MB_NO;
 	type = (short *)label;
 	first = MB_YES;
 	int status = MB_SUCCESS;
@@ -1275,8 +1269,6 @@ int mbr_cbat8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
-	struct mbsys_reson_struct *store;
 	int time_i[7];
 	double time_d;
 	double lon, lat, heading, speed;
@@ -1291,8 +1283,8 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_cbat8101_rd_data(verbose, mbio_ptr, error);
@@ -1449,7 +1441,6 @@ int mbr_rt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
 	char line[RESON_COMMENT_SIZE + 3];
 	short label;
 	int len;
@@ -1464,7 +1455,7 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1522,7 +1513,6 @@ int mbr_cbat8101_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
 	char line[RESON_PARAMETER_SIZE + 3];
 	short label;
 	short *short_ptr;
@@ -1537,7 +1527,7 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1697,7 +1687,6 @@ int mbr_cbat8101_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
 	char line[RESON_NAV_SIZE + 3];
 	short label;
 	short *short_ptr;
@@ -1713,7 +1702,7 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1831,7 +1820,6 @@ int mbr_cbat8101_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
 	char line[RESON_SVP_SIZE + 3];
 	short label;
 	int size;
@@ -1850,7 +1838,7 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1962,7 +1950,6 @@ int mbr_cbat8101_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
 	char line[RESON_BATH_8101_SIZE + 3];
 	char *beamarray;
 	short label;
@@ -1980,7 +1967,7 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -2143,7 +2130,6 @@ int mbr_cbat8101_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
 	char line[RESON_HEADING_SIZE + 3];
 	short label;
 	short *short_ptr;
@@ -2158,7 +2144,7 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -2233,7 +2219,6 @@ int mbr_cbat8101_wr_heading(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
 	char line[RESON_ATTITUDE_SIZE + 3];
 	short label;
 	short *short_ptr;
@@ -2248,7 +2233,7 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, 
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -2333,9 +2318,6 @@ int mbr_cbat8101_wr_attitude(int verbose, FILE *mbfp, int swap, void *data_ptr, 
 }
 /*--------------------------------------------------------------------*/
 int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
-	FILE *mbfp;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2348,8 +2330,8 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)data_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)data_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	int status = MB_SUCCESS;
 
@@ -2396,10 +2378,6 @@ int mbr_cbat8101_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_cbat8101_struct *data;
-	char *data_ptr;
-	struct mbsys_reson_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2412,9 +2390,9 @@ int mbr_wt_cbat8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbf_cbat8101_struct *data = (struct mbf_cbat8101_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {

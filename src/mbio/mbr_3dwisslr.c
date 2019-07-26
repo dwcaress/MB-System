@@ -251,9 +251,6 @@ int mbr_3dwisslr_fixtimestamps
   int *error
 )
 {
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_struct *store;
-
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -269,17 +266,18 @@ int mbr_3dwisslr_fixtimestamps
   assert(mbio_ptr != NULL);
 
   /* always successful */
-  status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
 
   /* get mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
+  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)mb_io_ptr->store_data;
 
   /* correct timestamps in the file's internal index table using information
    * supplied in the external index table */
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2)
     {
@@ -322,7 +320,6 @@ int mbr_3dwisslr_index_data
 )
 {
   int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_struct *store;
   int *file_indexed;
   char *buffer = NULL;
   size_t read_len;
@@ -353,7 +350,7 @@ int mbr_3dwisslr_index_data
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* get saved values */
   file_indexed = (int *)&mb_io_ptr->save2;
@@ -894,8 +891,6 @@ int mbr_3dwisslr_rd_data
   int *error
 )
 {
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_struct *store;
   struct mbsys_3ddwissl_calibration_v1s1_struct *calibration_v1s1;
   struct mbsys_3ddwissl_calibration_v1s2_struct *calibration_v1s2;
   struct mbsys_3ddwissl_pulse_struct *pulse;
@@ -922,7 +917,7 @@ int mbr_3dwisslr_rd_data
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* get saved values */
   file_header_readwritten = (int *)&mb_io_ptr->save1;
@@ -931,7 +926,6 @@ int mbr_3dwisslr_rd_data
   mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
 
   /* set status */
-  status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
 
   /* find next unread record in the file index table */
@@ -943,6 +937,8 @@ int mbr_3dwisslr_rd_data
       found = MB_YES;
       irecord = i;
       }
+
+  int status = MB_SUCCESS;
 
   /* read the next record */
   if (found == MB_YES)
@@ -1685,8 +1681,6 @@ int mbr_rt_3dwisslr
   int *error
 )
 {
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_struct *store;
   int *file_indexed;
 
   if (verbose >= 2)
@@ -1704,10 +1698,12 @@ int mbr_rt_3dwisslr
 
   /* get pointers to mbio descriptor and data structure */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* get saved values */
   file_indexed = (int *)&mb_io_ptr->save2;
+
+  int status = MB_SUCCESS;
 
   /* if needed index the file */
   if (*file_indexed == MB_NO)
@@ -1754,8 +1750,6 @@ int mbr_3dwisslr_wr_data
   int *error
 )
 {
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_struct *store;
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_calibration_v1s1_struct *calibration_v1s1;
   struct mbsys_3ddwissl_calibration_v1s2_struct *calibration_v1s2;
@@ -1779,7 +1773,7 @@ int mbr_3dwisslr_wr_data
 
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* get saved values */
   file_header_readwritten = (int *)&mb_io_ptr->save1;
@@ -1794,7 +1788,7 @@ int mbr_3dwisslr_wr_data
     }
 
   /* set status */
-  status = MB_SUCCESS;
+  int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
 
   /* if first write then write the magic number file header */
@@ -2668,9 +2662,6 @@ int mbr_wt_3dwisslr
   int *error
 )
 {
-  int status = MB_SUCCESS;
-  struct mbsys_3ddwissl_struct *store;
-
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2686,10 +2677,10 @@ int mbr_wt_3dwisslr
 
   /* get pointers to mbio descriptor and data structure */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-  store = (struct mbsys_3ddwissl_struct *)store_ptr;
+  struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* write next data to file */
-  status = mbr_3dwisslr_wr_data(verbose, mbio_ptr, store_ptr, error);
+  const int status = mbr_3dwisslr_wr_data(verbose, mbio_ptr, store_ptr, error);
 
   if (verbose >= 2)
     {
