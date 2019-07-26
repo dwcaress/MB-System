@@ -239,7 +239,6 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_jstar_message_struct message;
-	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ss;
 	struct mbsys_jstar_nmea_struct *nmea;
@@ -257,7 +256,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int read_status;
 	int shortspersample;
 	int trace_size;
-    int testx1, testx2, testy1, testy2, obsolete_header;
+	int testx1, testx2, testy1, testy2, obsolete_header;
 	double time_d;
 	double navlon, navlat, heading;
 	double speed, sonardepth, altitude;
@@ -281,7 +280,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_jstar_struct *)store_ptr;
+	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
 
 	/* have a local struct mbsys_jstar_ss_struct ss_tmp for
 	 * reading old "sidescan" records and translating them
@@ -2293,7 +2292,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ss;
 	struct mbsys_jstar_nmea_struct *nmea;
@@ -2320,7 +2318,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_jstar_struct *)store_ptr;
+	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5 && store->kind == MB_DATA_COMMENT) {

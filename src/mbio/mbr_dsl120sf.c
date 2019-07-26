@@ -109,8 +109,6 @@ int mbr_info_dsl120sf(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error) {
-	struct mbf_dsl120sf_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -119,7 +117,7 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_dsl120sf_struct *)data_ptr;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -203,8 +201,6 @@ int mbr_zero_dsl120sf(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_dsl120sf_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -225,7 +221,7 @@ int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error) {
 	mbr_zero_dsl120sf(verbose, mb_io_ptr->raw_data, error);
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	/* struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data; */
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -266,8 +262,6 @@ int mbr_dem_dsl120sf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	struct mbf_dsl120sf_struct *data;
-	char *data_ptr;
 	char buffer[124];
 	int index;
 
@@ -282,8 +276,8 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	char *data_ptrr = (char *)data;
 
 	/* read header */
 	int status = fread(buffer, 1, 124, mbfp);
@@ -458,9 +452,7 @@ int mbr_dsl120sf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp, char *ty
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	struct mbf_dsl120sf_struct *data;
 	int read_bytes;
-	char *data_ptr;
 	char buffer[10000];
 	int index;
 
@@ -475,8 +467,8 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* read bath record */
 	read_bytes = data->bat_len - 12;
@@ -541,9 +533,7 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	struct mbf_dsl120sf_struct *data;
 	int read_bytes;
-	char *data_ptr;
 	char buffer[10000];
 	int index;
 
@@ -558,8 +548,8 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* read amp record */
 	read_bytes = data->amp_len - 12;
@@ -627,9 +617,7 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	struct mbf_dsl120sf_struct *data;
 	int read_bytes;
-	char *data_ptr;
 	char buffer[80];
 
 	if (verbose >= 2) {
@@ -643,8 +631,8 @@ int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* read comment record */
 	read_bytes = 80;
@@ -682,8 +670,6 @@ int mbr_dsl120sf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_dsl120sf_struct *data;
-	char *data_ptr;
 	char tag[5];
 	char type[5];
 	int len;
@@ -701,8 +687,8 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	int status = MB_SUCCESS;
 
@@ -782,9 +768,6 @@ int mbr_dsl120sf_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_dsl120sf_struct *data;
-	struct mbsys_dsl_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -795,8 +778,8 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_dsl_struct *)store_ptr;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	struct mbsys_dsl_struct *store = (struct mbsys_dsl_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_dsl120sf_rd_data(verbose, mbio_ptr, error);
@@ -880,8 +863,6 @@ int mbr_rt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	struct mbf_dsl120sf_struct *data;
-	char *data_ptr;
 	char buffer[17000];
 	int index;
 
@@ -897,8 +878,8 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1103,8 +1084,6 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
-	struct mbf_dsl120sf_struct *data;
-	char *data_ptr;
 	char buffer[10000];
 	int index;
 
@@ -1120,8 +1099,8 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1232,8 +1211,6 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
-	struct mbf_dsl120sf_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1246,7 +1223,7 @@ int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)data_ptr;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)data_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -1278,10 +1255,6 @@ int mbr_dsl120sf_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_dsl120sf_struct *data;
-	struct mbsys_dsl_struct *store;
-	char *data_ptr;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1294,9 +1267,9 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_dsl_struct *)store_ptr;
+	struct mbf_dsl120sf_struct *data = (struct mbf_dsl120sf_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	struct mbsys_dsl_struct *store = (struct mbsys_dsl_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {

@@ -108,8 +108,6 @@ int mbr_info_em12darw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_em12darw(int verbose, char *data_ptr, int *error) {
-	struct mbf_em12darw_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -118,7 +116,7 @@ int mbr_zero_em12darw(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_em12darw_struct *)data_ptr;
+	struct mbf_em12darw_struct *data = (struct mbf_em12darw_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -177,9 +175,6 @@ int mbr_zero_em12darw(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12darw(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_em12darw_struct *data;
-	char *data_ptr;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -197,8 +192,8 @@ int mbr_alm_em12darw(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_em12darw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_em12darw_struct *data = (struct mbf_em12darw_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* initialize everything to zeros */
 	mbr_zero_em12darw(verbose, data_ptr, error);
@@ -215,8 +210,6 @@ int mbr_alm_em12darw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_em12darw(int verbose, void *mbio_ptr, int *error) {
-	struct mbsys_simrad_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -226,7 +219,7 @@ int mbr_dem_em12darw(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_simrad_struct *)mb_io_ptr->store_data;
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)mb_io_ptr->store_data;
 
 	/* deallocate memory for data descriptor */
 	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
@@ -244,12 +237,9 @@ int mbr_dem_em12darw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_em12darw_struct *data;
-	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	char line[MBF_EM12DARW_RECORD_LENGTH];
 	int index;
-	char *datacomment;
 	int time_j[5];
 	int time_i[7];
 	int kind;
@@ -266,9 +256,9 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_em12darw_struct *)mb_io_ptr->raw_data;
-	datacomment = (char *)&line[80];
-	store = (struct mbsys_simrad_struct *)store_ptr;
+	struct mbf_em12darw_struct *data = (struct mbf_em12darw_struct *)mb_io_ptr->raw_data;
+	char *datacomment = (char *)&line[80];
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -531,12 +521,9 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_em12darw_struct *data;
-	struct mbsys_simrad_struct *store;
 	struct mbsys_simrad_survey_struct *ping;
 	char line[MBF_EM12DARW_RECORD_LENGTH];
 	int index;
-	char *datacomment;
 	int time_i[7];
 	int time_j[5];
 	int year;
@@ -553,9 +540,9 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_em12darw_struct *)mb_io_ptr->raw_data;
-	datacomment = (char *)&line[80];
-	store = (struct mbsys_simrad_struct *)store_ptr;
+	struct mbf_em12darw_struct *data = (struct mbf_em12darw_struct *)mb_io_ptr->raw_data;
+	char *datacomment = (char *)&line[80];
+	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
