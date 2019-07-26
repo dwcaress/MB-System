@@ -4201,8 +4201,6 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	FILE *mbfp;
 	int swap = -1;
 	int done;
 	int *databyteswapped;
@@ -4236,8 +4234,8 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* get saved values */
 	databyteswapped = (int *)&mb_io_ptr->save1;
@@ -4835,12 +4833,6 @@ Have a nice day...\n");
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_attitude_struct *attitude;
-	struct mbsys_simrad3_netattitude_struct *netattitude;
-	struct mbsys_simrad3_heading_struct *heading;
-	struct mbsys_simrad3_ssv_struct *ssv;
-	struct mbsys_simrad3_ping_struct *ping;
 	int time_i[7];
 	double ntime_d, btime_d;
 	double bath_time_d, ss_time_d;
@@ -4862,12 +4854,12 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = mbr_em710mba_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
-	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
-	attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
-	netattitude = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
-	heading = (struct mbsys_simrad3_heading_struct *)store->heading;
-	ssv = (struct mbsys_simrad3_ssv_struct *)store->ssv;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+	struct mbsys_simrad3_attitude_struct *attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
+	struct mbsys_simrad3_netattitude_struct *netattitude = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
+	struct mbsys_simrad3_heading_struct *heading = (struct mbsys_simrad3_heading_struct *)store->heading;
+	struct mbsys_simrad3_ssv_struct *ssv = (struct mbsys_simrad3_ssv_struct *)store->ssv;
 	pixel_size = (double *)&mb_io_ptr->saved1;
 	swath_width = (double *)&mb_io_ptr->saved2;
 
@@ -8649,11 +8641,6 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-	FILE *mbfp;
-	int swap;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8666,8 +8653,8 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr, "\nstart of mbr_em710mba_wr_data:\n");
@@ -8675,10 +8662,10 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 	/* figure out which storage structure to use */
-	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 	/* set swap flag */
-	swap = MB_YES;
+	int swap = MB_YES;
 
 	int status = MB_SUCCESS;
 
@@ -8943,8 +8930,6 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8957,7 +8942,7 @@ int mbr_wt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_em710mba_wr_data(verbose, mbio_ptr, store_ptr, error);

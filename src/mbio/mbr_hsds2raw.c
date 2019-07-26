@@ -178,7 +178,6 @@ int mbr_dem_hsds2raw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_atlas_struct *store;
 	int xdr_status;
 	int read_status;
 	int nskip;
@@ -276,7 +275,7 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -1299,8 +1298,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1316,7 +1313,7 @@ int mbr_rt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	const int status = mbr_hsds2raw_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -1334,8 +1331,6 @@ int mbr_rt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1348,7 +1343,7 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
@@ -1372,8 +1367,6 @@ int mbr_hsds2raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1386,7 +1379,7 @@ int mbr_wt_hsds2raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 

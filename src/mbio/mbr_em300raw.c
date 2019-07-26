@@ -3477,13 +3477,7 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_ping_struct *ping;
-	struct mbsys_simrad2_ping_struct *ping2;
 	struct mbsys_simrad2_extraparameters_struct *extraparameters;
-	FILE *mbfp;
-	int swap = -1;
-	int done;
 	int *databyteswapped;
 	int record_size;
 	int *record_size_save;
@@ -3521,10 +3515,10 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad2_struct *)store_ptr;
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	ping2 = (struct mbsys_simrad2_ping_struct *)store->ping2;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	struct mbsys_simrad2_ping_struct *ping2 = (struct mbsys_simrad2_ping_struct *)store->ping2;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* get saved values */
 	databyteswapped = (int *)&mb_io_ptr->save10;
@@ -3568,12 +3562,12 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* set flag to swap bytes if necessary */
-	swap = *databyteswapped;
+	int swap = *databyteswapped;
 
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
+	int done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO) {
 		/* if no label saved get next record label */
@@ -4184,11 +4178,6 @@ Have a nice day...\n");
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_attitude_struct *attitude;
-	struct mbsys_simrad2_heading_struct *heading;
-	struct mbsys_simrad2_ssv_struct *ssv;
-	struct mbsys_simrad2_ping_struct *ping;
 	int time_i[7];
 	double ntime_d, ptime_d, atime_d;
 	double bath_time_d, ss_time_d;
@@ -4198,7 +4187,6 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
 	double att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
 	double att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
-	double *pixel_size, *swath_width;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4215,13 +4203,13 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = mbr_em300raw_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_simrad2_struct *)store_ptr;
-	attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
-	heading = (struct mbsys_simrad2_heading_struct *)store->heading;
-	ssv = (struct mbsys_simrad2_ssv_struct *)store->ssv;
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
+	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
+	struct mbsys_simrad2_attitude_struct *attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
+	struct mbsys_simrad2_heading_struct *heading = (struct mbsys_simrad2_heading_struct *)store->heading;
+	struct mbsys_simrad2_ssv_struct *ssv = (struct mbsys_simrad2_ssv_struct *)store->ssv;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	double *pixel_size = (double *)&mb_io_ptr->saved1;
+	double *swath_width = (double *)&mb_io_ptr->saved2;
 
 	/* save fix if nav data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_NAV) {
@@ -7993,11 +7981,6 @@ int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad2_struct *store;
-	struct mbsys_simrad2_ping_struct *ping;
-	FILE *mbfp;
-	int swap;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8010,9 +7993,9 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad2_struct *)store_ptr;
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "\nstart of mbr_em300raw_wr_data:\n");
@@ -8020,7 +8003,7 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 	/* set swap flag */
-	swap = MB_NO;
+	int swap = MB_NO;
 
 	int status = MB_SUCCESS;
 
@@ -8204,8 +8187,6 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad2_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8218,7 +8199,7 @@ int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad2_struct *)store_ptr;
+	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_em300raw_wr_data(verbose, mbio_ptr, store_ptr, error);

@@ -112,8 +112,6 @@ int mbr_info_hsldeoih(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
-	struct mbf_hsldeoih_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -123,7 +121,7 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_hsldeoih_struct *)data_ptr;
+	struct mbf_hsldeoih_struct *data = (struct mbf_hsldeoih_struct *)data_ptr;
 
 	/* initialize almost everything to zeros */
 	if (data != NULL) {
@@ -251,9 +249,6 @@ int mbr_zero_hsldeoih(int verbose, void *data_ptr, int mode, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_hsldeoih_struct *data;
-	char *data_ptr;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -272,8 +267,8 @@ int mbr_alm_hsldeoih(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_hsldeoih_struct *data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* initialize everything to zeros */
 	mbr_zero_hsldeoih(verbose, data_ptr, ZERO_ALL, error);
@@ -1369,9 +1364,6 @@ int mbr_hsldeoih_rd_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_hsldeoih_struct *data = NULL;
-	char *data_ptr = NULL;
-	FILE *mbfp = NULL;
 	unsigned int label = 0;
 	char *labelchar = NULL;
 	unsigned int label_test = 0;
@@ -1390,9 +1382,9 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_hsldeoih_struct *data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* initialize everything to zeros */
 	mbr_zero_hsldeoih(verbose, data_ptr, ZERO_SOME, error);
@@ -1565,9 +1557,6 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_hsldeoih_struct *data;
-	struct mbsys_hsds_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1578,8 +1567,8 @@ int mbr_rt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_hsds_struct *)store_ptr;
+	struct mbf_hsldeoih_struct *data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
+	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_hsldeoih_rd_data(verbose, mbio_ptr, error);
@@ -2709,8 +2698,6 @@ int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, struct mbf_hsldeoih_struct 
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	struct mbf_hsldeoih_struct *data;
-	FILE *mbfp;
 	unsigned int label;
 	short int shortkind;
 
@@ -2726,8 +2713,8 @@ int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsldeoih_struct *)data_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_hsldeoih_struct *data = (struct mbf_hsldeoih_struct *)data_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Data record kind in MBIO function <%s>\n", __func__);
@@ -2819,10 +2806,6 @@ int mbr_hsldeoih_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_hsldeoih_struct *data;
-	char *data_ptr;
-	struct mbsys_hsds_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2835,9 +2818,9 @@ int mbr_wt_hsldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_hsds_struct *)store_ptr;
+	struct mbf_hsldeoih_struct *data = (struct mbf_hsldeoih_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {
