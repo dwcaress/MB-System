@@ -218,7 +218,6 @@ int mbr_dem_kemkmall(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   size_t size_bytes = 0;
 
@@ -237,7 +236,7 @@ int mbr_kemkmall_create_dgm_index_table(int verbose, void *mbio_ptr, void *store
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* allocate the datagram index table struct (vector struct) */
   int status = mb_mallocd(verbose, __FILE__, __LINE__,
@@ -561,9 +560,6 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_spo *spo = NULL;
   size_t numBytesRawSensorData = 0;
   int index = 0;
 
@@ -576,9 +572,9 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  spo = &(store->spo);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_spo *spo = &(store->spo);
 
   /* copy the header */
   spo->header = *header;
@@ -677,9 +673,6 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
 
 
 int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_skm *skm = NULL;
   int index = 0;
   int i;
 
@@ -692,9 +685,9 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  skm = &(store->skm);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_skm *skm = &(store->skm);
 
   /* copy the header */
   skm->header = *header;
@@ -884,12 +877,6 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_svp *svp = NULL;
-  int index = 0;
-  int i;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -899,15 +886,15 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  svp = &(store->svp);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_svp *svp = &(store->svp);
 
   /* copy the header */
   svp->header = *header;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   /* svp common part */
   mb_get_binary_short(MB_YES, &buffer[index], &(svp->numBytesCmnPart));
@@ -924,7 +911,7 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
   index += 8;
 
   /* svp data block */
-  for (i=0; i<(svp->numSamples); i++ ) {
+  for (int i = 0; i < svp->numSamples; i++ ) {
     mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].depth_m));
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(svp->sensorData[i].soundVelocity_mPerSec));
@@ -955,7 +942,7 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       latitude_deg:     %f\n", svp->latitude_deg);
     fprintf(stderr, "dbg5       longitude_deg:    %f\n", svp->longitude_deg);
 
-    for (i = 0; i < (svp->numSamples); i++) {
+    for (int i = 0; i < svp->numSamples; i++) {
       fprintf(stderr, "dbg5       sensorData[%3d].depth_m:                %f\n", i, svp->sensorData[i].depth_m);
       fprintf(stderr, "dbg5       sensorData[%3d].soundVelocity_mPerSec:  %f\n", i, svp->sensorData[i].soundVelocity_mPerSec);
       fprintf(stderr, "dbg5       sensorData[%3d].padding:                %d\n", i, svp->sensorData[i].padding);
@@ -995,9 +982,6 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_svt *svt = NULL;
   int index = 0;
   int i;
 
@@ -1010,9 +994,9 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  svt = &(store->svt);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_svt *svt = &(store->svt);
 
   /* copy the header */
   svt->header = *header;
@@ -1114,9 +1098,6 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_scl *scl = NULL;
   size_t numBytesRawSensorData = 0;
   int index = 0;
 
@@ -1129,9 +1110,9 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  scl = &(store->scl);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_scl *scl = &(store->scl);
 
   /* copy the header */
   scl->header = *header;
@@ -1211,12 +1192,6 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_sde *sde = NULL;
-  size_t numBytesRawSensorData = 0;
-  int index = 0;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1226,18 +1201,18 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  sde = &(store->sde);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_sde *sde = &(store->sde);
 
   /* copy the header */
   sde->header = *header;
 
   /* calc number of bytes for raw sensor data */
-  numBytesRawSensorData = sde->header.numBytesDgm - MBSYS_KMBES_SDE_VAR_OFFSET;
+  size_t numBytesRawSensorData = sde->header.numBytesDgm - MBSYS_KMBES_SDE_VAR_OFFSET;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
   mb_get_binary_short(MB_YES, &buffer[index], &(sde->cmnPart.numBytesCmnPart));
@@ -1318,12 +1293,6 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_shi *shi = NULL;
-  size_t numBytesRawSensorData = 0;
-  int index = 0;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1333,18 +1302,18 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  shi = &(store->shi);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_shi *shi = &(store->shi);
 
   /* copy the header */
   shi->header = *header;
 
   /* calc number of bytes for raw sensor data */
-  numBytesRawSensorData = shi->header.numBytesDgm - MBSYS_KMBES_SHI_VAR_OFFSET;
+  size_t numBytesRawSensorData = shi->header.numBytesDgm - MBSYS_KMBES_SHI_VAR_OFFSET;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
   mb_get_binary_short(MB_YES, &buffer[index], &(shi->cmnPart.numBytesCmnPart));
@@ -1417,12 +1386,6 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_sha *sha = NULL;
-  int index = 0;
-  int i;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1432,15 +1395,15 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  sha = &(store->sha);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_sha *sha = &(store->sha);
 
   /* get header */
   sha->header = *header;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
   mb_get_binary_short(MB_YES, &buffer[index], &(sha->cmnPart.numBytesCmnPart));
@@ -1463,7 +1426,7 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
   index += 2;
 
   // sensor data blocks
-  for (i = 0; i<(sha->dataInfo.numSamplesArray); i++) {
+  for (int i = 0; i < sha->dataInfo.numSamplesArray; i++) {
     mb_get_binary_int(MB_YES, &buffer[index], &(sha->sensorData[i].timeSinceRecStart_nanosec));
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(sha->sensorData[i].headingCorrected_deg));
@@ -1493,7 +1456,7 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       numBytesPerSample:      %u\n", sha->dataInfo.numBytesPerSample);
     fprintf(stderr, "dbg5       numBytesRawSensorData:  %u\n", sha->dataInfo.numBytesRawSensorData);
 
-    for (i = 0; i<(sha->dataInfo.numSamplesArray); i++) {
+    for (int i = 0; i < sha->dataInfo.numSamplesArray; i++) {
       fprintf(stderr, "dbg5       sensorData[%3d].timeSinceRecStart_nanosec: %u\n", i, sha->sensorData[i].timeSinceRecStart_nanosec);
       fprintf(stderr, "dbg5       sensorData[%3d].headingCorrected_deg:      %f\n", i, sha->sensorData[i].headingCorrected_deg);
       fprintf(stderr, "dbg5       sensorData[%3d].dataFromSensor:            %s\n", i, sha->sensorData[i].dataFromSensor);
@@ -1531,12 +1494,9 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_mrz *mrz = NULL;
   struct mbsys_kmbes_m_partition partition;
   struct mbsys_kmbes_m_body cmnPart;
-  int index = 0;
   int index_EMdgmMbody, index_pingInfo, index_txSectorInfo = 0;
   int index_rxInfo, index_extraDetClassInfo, index_sounding, index_SIsample = 0;
 
@@ -1549,11 +1509,11 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
 
   /* get the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   /* EMdgmMpartition - data partition information */
   mb_get_binary_short(MB_YES, &buffer[index], &(partition.numOfDgms));
@@ -2146,13 +2106,10 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   struct mbsys_kmbes_mwc *mwc = NULL;
   struct mbsys_kmbes_m_partition partition;
   struct mbsys_kmbes_m_body cmnPart;
   size_t alloc_size = 0;
-  int index = 0;
   int i, j, k;
 
   if (verbose >= 2) {
@@ -2164,11 +2121,11 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
 
   /* get the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   /* EMdgmMpartition - data partition information */
   mb_get_binary_short(MB_YES, &buffer[index], &(partition.numOfDgms));
@@ -2454,13 +2411,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_cpo *cpo = NULL;
-  size_t numBytesRawSensorData = 0;
-  int index = 0;
-
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2470,18 +2420,18 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  cpo = &(store->cpo);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_cpo *cpo = &(store->cpo);
 
   /* copy the header */
   cpo->header = *header;
 
   /* calc number of bytes for raw sensor data */
-  numBytesRawSensorData = cpo->header.numBytesDgm - MBSYS_KMBES_CPO_VAR_OFFSET;
+  size_t numBytesRawSensorData = cpo->header.numBytesDgm - MBSYS_KMBES_CPO_VAR_OFFSET;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   // common part
   mb_get_binary_short(MB_YES, &buffer[index], &(cpo->cmnPart.numBytesCmnPart));
@@ -2571,12 +2521,6 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_che *che = NULL;
-  int index = 0;
-
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2586,16 +2530,15 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  che = &(store->che);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_che *che = &(store->che);
 
   /* copy the header */
   che->header = *header;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
-
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -2686,12 +2629,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_iip *iip = NULL;
-  size_t numBytesRawSensorData = 0;
-  int index = 0;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2701,15 +2638,15 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  iip = &(store->iip);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_iip *iip = &(store->iip);
 
   /* copy the header */
   iip->header = *header;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   mb_get_binary_short(MB_YES, &buffer[index], &iip->numBytesCmnPart);
   index += 2;
@@ -2717,7 +2654,7 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   index += 2;
   mb_get_binary_short(MB_YES, &buffer[index], &iip->status);
   index += 2;
-  numBytesRawSensorData = iip->header.numBytesDgm - MBSYS_KMBES_IIP_VAR_OFFSET;
+  size_t numBytesRawSensorData = iip->header.numBytesDgm - MBSYS_KMBES_IIP_VAR_OFFSET;
   memcpy(&iip->install_txt, &buffer[index], numBytesRawSensorData);
 //fprintf(stderr, "\niip->install_txt:\n%s\n", iip->install_txt);
 
@@ -2769,12 +2706,6 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error){
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_iop *iop = NULL;
-  size_t numBytesRawSensorData = 0;
-  int index = 0;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2784,17 +2715,17 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  iop = &(store->iop);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_iop *iop = &(store->iop);
 
   /* copy the header */
   iop->header = *header;
 
-  numBytesRawSensorData = iop->header.numBytesDgm - MBSYS_KMBES_IOP_VAR_OFFSET;
+  size_t numBytesRawSensorData = iop->header.numBytesDgm - MBSYS_KMBES_IOP_VAR_OFFSET;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   mb_get_binary_short(MB_YES, &buffer[index], &iop->numBytesCmnPart);
   index += 2;
@@ -2852,12 +2783,7 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_xmb *xmb = NULL;
   size_t numBytesVersion = 0;
-  int index = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2868,19 +2794,19 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  xmb = &(store->xmb);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_xmb *xmb = &(store->xmb);
 
   /* copy the header */
   xmb->header = *header;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   mb_get_binary_int(MB_YES, &buffer[index], &xmb->pseudosidescan_enabled);
   index += 4;
-  for (i=0;i<28;i++) {
+  for (int i = 0; i < 28; i++) {
     xmb->unused[i] = buffer[index];
     index++;
   }
@@ -2901,7 +2827,7 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       time_nanosec:   %u\n", xmb->header.time_nanosec);
 
     fprintf(stderr, "dbg5       pseudosidescan_enabled:  %d\n", xmb->pseudosidescan_enabled);
-    for (i=0;i<28;i++)
+    for (int i = 0; i < 28; i++)
       fprintf(stderr, "dbg5       unused[%2d]:    %u\n", i, xmb->unused[i]);
     fprintf(stderr, "dbg5       version:        %s\n", xmb->version);
   }
@@ -2937,13 +2863,6 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_xmc *xmc = NULL;
-  size_t numBytesComment = 0;
-  int index = 0;
-  int i;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2953,21 +2872,21 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  xmc = &(store->xmc);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_xmc *xmc = &(store->xmc);
 
   /* copy the header */
   xmc->header = *header;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
-  for (i=0;i<32;i++) {
+  for (int i = 0; i < 32; i++) {
     xmc->unused[i] = buffer[index];
     index++;
   }
-  numBytesComment = xmc->header.numBytesDgm - MBSYS_KMBES_HEADER_SIZE - 36;
+  size_t numBytesComment = xmc->header.numBytesDgm - MBSYS_KMBES_HEADER_SIZE - 36;
   memcpy(xmc->comment, &buffer[index], numBytesComment);
   index += numBytesComment;
   memset(&xmc->comment[numBytesComment], 0, MB_COMMENT_MAXLINE - numBytesComment);
@@ -2983,7 +2902,7 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
     fprintf(stderr, "dbg5       time_sec:       %u\n", xmc->header.time_sec);
     fprintf(stderr, "dbg5       time_nanosec:   %u\n", xmc->header.time_nanosec);
 
-    for (i=0;i<32;i++)
+    for (int i = 0; i < 32; i++)
       fprintf(stderr, "dbg5       xmc->unused[%2d]:                        %u\n", i, xmc->unused[i]);
     fprintf(stderr, "dbg5       xmc->comment:                           %s\n", xmc->comment);
   }
@@ -3019,11 +2938,7 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-  struct mbsys_kmbes_xms *xms = NULL;
   size_t numBytes = 0;
-  int index = 0;
   int i;
 
   if (verbose >= 2) {
@@ -3035,15 +2950,15 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
-  xms = &(store->xms);
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_xms *xms = &(store->xms);
 
   /* copy the header */
   xms->header = *header;
 
   /* extract the data */
-  index = MBSYS_KMBES_HEADER_SIZE;
+  int index = MBSYS_KMBES_HEADER_SIZE;
 
   mb_get_binary_short(MB_YES, &buffer[index], &xms->pingCnt);
   index += 2;
@@ -3119,9 +3034,6 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *header_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_header *header = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3131,8 +3043,8 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  header = (struct mbsys_kmbes_header *)header_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_header *header = (struct mbsys_kmbes_header *)header_ptr;
 
   const int status = MB_SUCCESS;
 
@@ -3155,7 +3067,6 @@ int mbr_kemkmall_rd_unknown(int verbose, char *buffer, void *store_ptr, void *he
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index dgm_index;
   struct mbsys_kmbes_header header;
@@ -3191,7 +3102,7 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* now get the index table from the mbio descriptor field saveptr1 */
   dgm_index_table = (struct mbsys_kmbes_index_table *)mb_io_ptr->saveptr1;
@@ -3501,7 +3412,6 @@ int mbr_kemkmall_index_data(int verbose, void *mbio_ptr, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
   struct mbsys_kmbes_index_table *dgm_index_table = NULL;
   struct mbsys_kmbes_index *dgm_index = NULL;
   size_t read_len = 0;
@@ -3534,7 +3444,7 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   dgm_id = (int *)&mb_io_ptr->save1;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   int status = MB_SUCCESS;
 
@@ -3818,7 +3728,6 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int interp_error = MB_ERROR_NO_ERROR;
-  struct mbsys_kmbes_struct *store = NULL;
   int *file_indexed = NULL;
   double *pixel_size, *swath_width;
 
@@ -3856,7 +3765,7 @@ int mbr_rt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   status = mbr_kemkmall_rd_data(verbose, mbio_ptr, store_ptr, error);
 
   /* get pointers to data structures */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* if this is a ping and the first time read by MB-System generate pseudosidescan */
   if (status == MB_SUCCESS && store->kind == MB_DATA_DATA
@@ -3952,9 +3861,6 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_spo *spo = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -3969,9 +3875,9 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  spo = &(store->spo);
-  header = &store->spo.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_spo *spo = &(store->spo);
+  struct mbsys_kmbes_header *header = &store->spo.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -4084,9 +3990,6 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_skm *skm = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -4101,9 +4004,9 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  skm = &(store->skm);
-  header = &store->skm.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_skm *skm = &(store->skm);
+  struct mbsys_kmbes_header *header = &store->skm.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -4305,9 +4208,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_svp *svp = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -4322,9 +4222,9 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  svp = &(store->svp);
-  header = &store->svp.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_svp *svp = &(store->svp);
+  struct mbsys_kmbes_header *header = &store->svp.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -4430,9 +4330,6 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_svt *svt = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -4447,9 +4344,9 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  svt = &(store->svt);
-  header = &store->svt.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_svt *svt = &(store->svt);
+  struct mbsys_kmbes_header *header = &store->svt.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -4562,9 +4459,6 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_scl *scl;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -4580,9 +4474,9 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  scl = &(store->scl);
-  header = &store->scl.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_scl *scl = &(store->scl);
+  struct mbsys_kmbes_header *header = &store->scl.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -4675,9 +4569,6 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_sde *sde = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -4692,9 +4583,9 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  sde = &(store->sde);
-  header = &store->sde.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_sde *sde = &(store->sde);
+  struct mbsys_kmbes_header *header = &store->sde.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -4796,9 +4687,6 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error){
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_shi *shi = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -4813,9 +4701,9 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  shi = &(store->shi);
-  header = &store->shi.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_shi *shi = &(store->shi);
+  struct mbsys_kmbes_header *header = &store->shi.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -4908,9 +4796,6 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_sha *sha = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i;
@@ -4925,9 +4810,9 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  sha = &(store->sha);
-  header = &store->sha.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_sha *sha = &(store->sha);
+  struct mbsys_kmbes_header *header = &store->sha.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -5036,9 +4921,6 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imrz, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int numSoundings = 0;
   int numSidescanSamples = 0;
@@ -5056,9 +4938,9 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to the data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
-  header = &store->mrz[imrz].header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+  struct mbsys_kmbes_header *header = &store->mrz[imrz].header;
 
   /* size of output record and components thereof - set the size according to what
       we know about, as anything added by Kongsberg that we don't know about will
@@ -5620,9 +5502,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int imwc, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mwc *mwc = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   char *buffer = NULL;
   int index = 0;
   int i, k;
@@ -5638,9 +5517,9 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mwc = &(store->mwc[imwc]);
-  header = &store->mwc[imwc].header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_mwc *mwc = &(store->mwc[imwc]);
+  struct mbsys_kmbes_header *header = &store->mwc[imwc].header;
 
   /* size of output record */
   *size = (size_t) mwc->header.numBytesDgm;
@@ -5882,9 +5761,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_cpo *cpo = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -5899,9 +5775,9 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  cpo = &(store->cpo);
-  header = &store->cpo.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_cpo *cpo = &(store->cpo);
+  struct mbsys_kmbes_header *header = &store->cpo.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -6014,9 +5890,6 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_che *che = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6031,9 +5904,9 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  che = &(store->che);
-  header = &store->che.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_che *che = &(store->che);
+  struct mbsys_kmbes_header *header = &store->che.header;
 
   /* size of output record */
   *size = (size_t) che->header.numBytesDgm;
@@ -6141,9 +6014,6 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_iip *iip = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6158,9 +6028,9 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  iip = &(store->iip);
-  header = &store->iip.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_iip *iip = &(store->iip);
+  struct mbsys_kmbes_header *header = &store->iip.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -6241,9 +6111,6 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_iop *iop = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesRawSensorData = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6258,9 +6125,9 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  iop = &(store->iop);
-  header = &store->iop.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_iop *iop = &(store->iop);
+  struct mbsys_kmbes_header *header = &store->iop.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -6340,10 +6207,6 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_xmb *xmb = NULL;
-  struct mbsys_kmbes_iip *iip = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesVersion = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6359,10 +6222,10 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  xmb = &(store->xmb);
-  iip = &(store->iip);
-  header = &store->xmb.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_xmb *xmb = &(store->xmb);
+  struct mbsys_kmbes_iip *iip = &(store->iip);
+  struct mbsys_kmbes_header *header = &store->xmb.header;
 
   /* have to construct this record now */
   strncpy(xmb->version, MB_VERSION, MB_COMMENT_MAXLINE-1);
@@ -6452,9 +6315,6 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_xmc *xmc = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6470,9 +6330,9 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  xmc = &(store->xmc);
-  header = &store->xmc.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_xmc *xmc = &(store->xmc);
+  struct mbsys_kmbes_header *header = &store->xmc.header;
 
   /* size of output record */
   numBytesComment = strlen(store->xmc.comment) + (strlen(store->xmc.comment) % 2);
@@ -6550,9 +6410,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_xms *xms = NULL;
-  struct mbsys_kmbes_header *header = NULL;
   size_t numBytesComment = 0;
   char *buffer = NULL;
   int index = 0;
@@ -6568,9 +6425,9 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  xms = &(store->xms);
-  header = &store->xms.header;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_xms *xms = &(store->xms);
+  struct mbsys_kmbes_header *header = &store->xms.header;
 
   /* print debug statements */
   if (verbose >= 5) {
@@ -6666,8 +6523,6 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 
 int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, size_t *size, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6678,7 +6533,7 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   const int status = MB_SUCCESS;
 
@@ -6701,7 +6556,6 @@ int mbr_kemkmall_wr_unknown(int verbose, int *bufferalloc, char **bufferptr, voi
 };
 /*--------------------------------------------------------------------*/
 int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
   size_t write_len = 0;
   char **bufferptr = NULL;
   char *buffer = NULL;
@@ -6727,7 +6581,7 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   buffer = (char *)*bufferptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   int status = MB_SUCCESS;
 
@@ -6891,8 +6745,6 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-  struct mbsys_kmbes_struct *store = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6909,7 +6761,7 @@ int mbr_wt_kemkmall(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
 #ifdef MBR_KEMKMALL_DEBUG
   fprintf(stderr, "\nAbout to call mbr_kemkmall_wr_data record kind:%d\n", store->kind);

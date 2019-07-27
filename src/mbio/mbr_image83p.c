@@ -170,7 +170,6 @@ int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
 	int done;
 	int index;
@@ -194,7 +193,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -552,7 +551,6 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGE83P_BUFFER_SIZE] = "";
 	int swap = MB_NO;
 	int seconds_hundredths;
@@ -574,7 +572,7 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
