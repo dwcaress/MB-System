@@ -3679,10 +3679,6 @@ int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	FILE *mbfp;
-	int swap = -1;
-	int done;
 	int *databyteswapped;
 	int record_size;
 	int *record_size_save;
@@ -3714,8 +3710,8 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* get saved values */
 	databyteswapped = (int *)&mb_io_ptr->save1;
@@ -3733,7 +3729,7 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* set flag to swap bytes if necessary */
-	swap = *databyteswapped;
+	int swap = *databyteswapped;
 
 	/* if a ping structure was previously flagged as complete then reset the structure to empty */
 	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES; i++) {
@@ -3749,7 +3745,7 @@ int mbr_em710raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int status = MB_SUCCESS;
 
 	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
+	int done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO) {
 #ifdef MBR_EM710RAW_DEBUG
@@ -4250,12 +4246,6 @@ Have a nice day...\n");
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_attitude_struct *attitude;
-	struct mbsys_simrad3_netattitude_struct *netattitude;
-	struct mbsys_simrad3_heading_struct *heading;
-	struct mbsys_simrad3_ssv_struct *ssv;
-	struct mbsys_simrad3_ping_struct *ping;
 	int time_i[7];
 	double ntime_d, ptime_d, atime_d, btime_d;
 	double bath_time_d, ss_time_d;
@@ -4299,7 +4289,6 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	double reference_heading;
 	double beamAzimuth;
 	double beamDepression;
-	double *pixel_size, *swath_width;
 	mb_u_char detection_mask;
 
 	if (verbose >= 2) {
@@ -4317,14 +4306,14 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = mbr_em710raw_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
-	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
-	attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
-	netattitude = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
-	heading = (struct mbsys_simrad3_heading_struct *)store->heading;
-	ssv = (struct mbsys_simrad3_ssv_struct *)store->ssv;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+	struct mbsys_simrad3_attitude_struct *attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
+	struct mbsys_simrad3_netattitude_struct *netattitude = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
+	struct mbsys_simrad3_heading_struct *heading = (struct mbsys_simrad3_heading_struct *)store->heading;
+	struct mbsys_simrad3_ssv_struct *ssv = (struct mbsys_simrad3_ssv_struct *)store->ssv;
+	double *pixel_size = (double *)&mb_io_ptr->saved1;
+	double *swath_width = (double *)&mb_io_ptr->saved2;
 
 	/* save fix and heading if nav data from the active position system */
 	if (status == MB_SUCCESS &&
@@ -8352,11 +8341,6 @@ int mbr_em710raw_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-	FILE *mbfp;
-	int swap;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8369,8 +8353,8 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 #ifdef MBR_EM710RAW_DEBUG
 	fprintf(stderr, "\nstart of mbr_em710raw_wr_data:\n");
@@ -8378,10 +8362,10 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 	/* figure out which storage structure to use */
-	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 	/* set swap flag */
-	swap = MB_YES;
+	int swap = MB_YES;
 
 	int status = MB_SUCCESS;
 	if (store->kind == MB_DATA_COMMENT || store->kind == MB_DATA_START || store->kind == MB_DATA_STOP) {
@@ -8645,8 +8629,6 @@ int mbr_em710raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8659,7 +8641,7 @@ int mbr_wt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_em710raw_wr_data(verbose, mbio_ptr, store_ptr, error);

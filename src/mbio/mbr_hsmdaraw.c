@@ -110,8 +110,6 @@ int mbr_info_hsmdaraw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
-	struct mbf_hsmdaraw_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -120,7 +118,7 @@ int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_hsmdaraw_struct *)data_ptr;
+	struct mbf_hsmdaraw_struct *data = (struct mbf_hsmdaraw_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -207,8 +205,6 @@ int mbr_zero_hsmdaraw(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdaraw(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_hsmdaraw_struct *data;
-	char *data_ptr;
 	double *FirstReftime; /* time from the first header */
 	int *Header_count;    /* number of header records encounterd */
 	int *Rev_count;       /* Raw Event counter */
@@ -236,8 +232,8 @@ int mbr_alm_hsmdaraw(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_hsmdaraw_struct *data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* initialize saved values */
 	FirstReftime = &mb_io_ptr->saved1; /* time from the first header */
@@ -298,9 +294,6 @@ int mbr_dem_hsmdaraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_hsmdaraw_struct *data;
-	char *data_ptr;
-	FILE *mbfp;
 	XDR *xdrs; /* xdr i/o pointer */
 	int time_i[7];
 	double scale;
@@ -329,9 +322,9 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data; /* The data structure pointer */
-	mbfp = mb_io_ptr->mbfp;  /* The file pointer */
+	struct mbf_hsmdaraw_struct *data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data; /* The data structure pointer */
+	FILE *mbfp = mb_io_ptr->mbfp;  /* The file pointer */
 	xdrs = mb_io_ptr->xdrs;
 	FirstReftime = &mb_io_ptr->saved1; /* time from the first header */
 	Header_count = &mb_io_ptr->save1;  /* number of header records encounterd */
@@ -1062,8 +1055,6 @@ int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_hsmdaraw_struct *data;
-	struct mbsys_hsmd_struct *store;
 	int time_i[7];
 	double time_d;
 	double lon, lat, heading, speed;
@@ -1078,8 +1069,8 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbf_hsmdaraw_struct *data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* read next (record of) data from file */
 	const int status = mbr_hsmdaraw_rd_data(verbose, mbio_ptr, error);
@@ -1223,10 +1214,6 @@ int mbr_rt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error) {
-	struct mbf_hsmdaraw_struct *data;
-	FILE *mbfp;
-	XDR *xdrs; /* xdr i/o pointer */
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1239,9 +1226,9 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsmdaraw_struct *)data_ptr;
-	mbfp = mb_io_ptr->mbfp;
-	xdrs = mb_io_ptr->xdrs;
+	struct mbf_hsmdaraw_struct *data = (struct mbf_hsmdaraw_struct *)data_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
+	XDR *xdrs = mb_io_ptr->xdrs; /* xdr i/o pointer */
 
 	/* make sure transid is correct */
 	if (data->transid == MBF_HSMDARAW_BAT)
@@ -1523,10 +1510,6 @@ int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_hsmdaraw_struct *data;
-	char *data_ptr;
-	struct mbsys_hsmd_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1539,9 +1522,9 @@ int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbf_hsmdaraw_struct *data = (struct mbf_hsmdaraw_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {

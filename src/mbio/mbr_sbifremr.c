@@ -44,8 +44,6 @@ int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -53,7 +51,6 @@ int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SB;
 	*beams_bath_max = 19;
@@ -78,6 +75,8 @@ int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 2.67;
 	*beamwidth_ltrack = 2.67;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -111,8 +110,6 @@ int mbr_info_sbifremr(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_sbifremr(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -123,14 +120,11 @@ int mbr_alm_sbifremr(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_sbifremr_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb_struct), &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -144,8 +138,6 @@ int mbr_alm_sbifremr(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_sbifremr(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -157,8 +149,8 @@ int mbr_dem_sbifremr(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -172,45 +164,24 @@ int mbr_dem_sbifremr(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sbifremr_struct *data;
-	FILE *mbfp;
-	int done;
-	static char line[MBF_SBIFREMR_MAXLINE];
-	static int line_save = MB_NO;
-	static int first = MB_YES;
-	char *result;
-	int nchars;
-	char NorS, EorW;
-	int lon_deg, lat_deg;
-	double lon_min, lat_min;
-	double depth;
-	double heading;
-	static int ping_num_save = 0;
-	int ping_num;
-	int beam_num;
-	int day, month, year, hour, minute, second, tsecond;
-	int time_i[7], time_j[5];
-	static double heading_save = 0.0;
-	int center;
-	double mtodeglon, mtodeglat;
-	int beam_port, beam_starboard;
-	double denom;
-	double dx, dy, distance;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
+	static char line[MBF_SBIFREMR_MAXLINE];
+	static int line_save = MB_NO;
+	static int first = MB_YES;
+	static int ping_num_save = 0;
+	static double heading_save = 0.0;
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_sbifremr_struct *data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* initialize beams to zeros */
 	for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
@@ -218,13 +189,22 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		data->dist[i] = 0;
 	}
 
-	done = MB_NO;
-	status = MB_SUCCESS;
+	int day;
+	int month;
+	int year;
+	int hour;
+	int minute;
+	int second;
+	int tsecond;
+
+	int done = MB_NO;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
-	center = MBF_SBIFREMR_NUM_BEAMS / 2;
+	int center = MBF_SBIFREMR_NUM_BEAMS / 2;
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	while (done == MB_NO) {
 
+		char *result = NULL;
 		/* get next line */
 		if (line_save == MB_NO) {
 			mb_io_ptr->file_bytes = ftell(mbfp);
@@ -237,7 +217,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 
 		/* check size of line */
-		nchars = strlen(line);
+		const int nchars = strlen(line);
 
 		/* deal with end of file */
 		if (result == NULL) {
@@ -257,7 +237,9 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		/* deal with good line */
 		else if (nchars > 96) {
 			/* get ping number */
+			int ping_num;
 			mb_get_int(&ping_num, line + 52, 7);
+			int beam_num;
 			mb_get_int(&beam_num, line + 59, 4);
 			beam_num = 19 - beam_num;
 
@@ -271,12 +253,17 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* else convert and store the data */
 			else if (beam_num > -1 && beam_num < 19) {
 				/* parse the line */
-				NorS = line[0];
+				const char NorS = line[0];
+				int lat_deg;
 				mb_get_int(&lat_deg, line + 1, 2);
+				double lat_min;
 				mb_get_double(&lat_min, line + 3, 8);
-				EorW = line[12];
+				const char EorW = line[12];
+				int lon_deg;
 				mb_get_int(&lon_deg, line + 13, 3);
+				double lon_min;
 				mb_get_double(&lon_min, line + 16, 8);
+				double depth;
 				mb_get_double(&depth, line + 24, 11);
 				mb_get_int(&day, line + 76, 2);
 				mb_get_int(&month, line + 79, 2);
@@ -304,6 +291,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* if success convert the data */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA) {
 		/* do time */
+		int time_i[7];
 		mb_fix_y2k(verbose, year, &time_i[0]);
 		time_i[1] = month;
 		time_i[2] = day;
@@ -311,6 +299,7 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		time_i[4] = minute;
 		time_i[5] = second;
 		time_i[6] = 0;
+		int time_j[5];
 		mb_get_jtime(verbose, time_i, time_j);
 		data->year = time_j[0];
 		data->day = time_j[1];
@@ -324,11 +313,13 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		data->lat2b = (unsigned short)(600000.0 * (data->lat[center] + 90.0 - data->lat2u / 60.0));
 
 		/* get coordinate scaling */
+		double mtodeglon;
+		double mtodeglat;
 		mb_coor_scale(verbose, data->lat[center], &mtodeglon, &mtodeglat);
 
 		/* find port-most and starboard-most beams */
-		beam_port = MBF_SBIFREMR_NUM_BEAMS;
-		beam_starboard = -1;
+		int beam_port = MBF_SBIFREMR_NUM_BEAMS;
+		int beam_starboard = -1;
 		for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
 			if (data->deph[i] != 0) {
 				if (beam_port > i)
@@ -337,10 +328,11 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 					beam_starboard = i;
 			}
 		}
+		double heading;
 		if (beam_starboard > beam_port) {
-			dx = (data->lon[beam_port] - data->lon[beam_starboard]) / mtodeglon;
-			dy = (data->lat[beam_port] - data->lat[beam_starboard]) / mtodeglat;
-			denom = sqrt(dx * dx + dy * dy);
+			double dx = (data->lon[beam_port] - data->lon[beam_starboard]) / mtodeglon;
+			double dy = (data->lat[beam_port] - data->lat[beam_starboard]) / mtodeglat;
+			const double denom = sqrt(dx * dx + dy * dy);
 			if (denom > 0.0) {
 				dx = dx / denom;
 				dy = dy / denom;
@@ -410,9 +402,9 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 		if (status == MB_SUCCESS) {
 			for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++)
 				if (data->deph[i] != 0) {
-					dx = (data->lon[i] - data->lon[center]) / mtodeglon;
-					dy = (data->lat[i] - data->lat[center]) / mtodeglat;
-					distance = sqrt(dx * dx + dy * dy);
+					const double dx = (data->lon[i] - data->lon[center]) / mtodeglon;
+					const double dy = (data->lat[i] - data->lat[center]) / mtodeglat;
+					double distance = sqrt(dx * dx + dy * dy);
 					if (i > center)
 						distance = -distance;
 					data->dist[i] = distance;
@@ -432,10 +424,6 @@ int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sbifremr_struct *data;
-	struct mbsys_sb_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -448,12 +436,12 @@ int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
+	struct mbf_sbifremr_struct *data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
 	data->kind = MB_DATA_DATA;
-	store = (struct mbsys_sb_struct *)store_ptr;
+	struct mbsys_sb_struct *store = (struct mbsys_sb_struct *)store_ptr;
 
 	/* read next record from file */
-	status = mbr_sbifremr_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_sbifremr_rd_data(verbose, mbio_ptr, error);
 
 	/* set kind and error in mb_io_ptr */
 	mb_io_ptr->new_kind = data->kind;
@@ -505,22 +493,6 @@ int mbr_rt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sbifremr_struct *data;
-	FILE *mbfp;
-	char NorS, EorW;
-	int lon_deg, lat_deg;
-	double lon, lat, lon_min, lat_min;
-	double depth;
-	double heading;
-	static int ping_num_save = 0;
-	static int sounding_num_save = 0;
-	int beam_num;
-	int day, month, year, hour, minute, second, tsecond;
-	int time_i[7], time_j[5];
-	double mtodeglon, mtodeglat;
-	double headingx, headingy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -528,12 +500,17 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
+       	static int ping_num_save = 0;
+	static int sounding_num_save = 0;
+
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_sbifremr_struct *data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
+	FILE *mbfp = mb_io_ptr->mbfp;
+
+	int status = MB_SUCCESS;
 
 	/* write comment */
 	if (data->kind == MB_DATA_COMMENT) {
@@ -555,34 +532,39 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 		ping_num_save++;
 
 		/* get time */
+		int time_j[5];
 		time_j[0] = data->year;
 		time_j[1] = data->day;
 		time_j[2] = data->min;
 		time_j[3] = data->sec;
 		time_j[4] = 0;
+		int time_i[7];
 		mb_get_itime(verbose, time_j, time_i);
+		int year;
 		mb_unfix_y2k(verbose, time_i[0], &year);
-		month = time_i[1];
-		day = time_i[2];
-		hour = time_i[3];
-		minute = time_i[4];
-		second = time_i[5];
-		tsecond = 0;
+		const int month = time_i[1];
+		const int day = time_i[2];
+		const int hour = time_i[3];
+		const int minute = time_i[4];
+		const int second = time_i[5];
+		const int tsecond = 0;
 
 		/* get lon lat */
-		lon = data->lon2u / 60. + data->lon2b / 600000.;
-		lat = data->lat2u / 60. + data->lat2b / 600000. - 90.;
+		double lon = data->lon2u / 60. + data->lon2b / 600000.;
+		double lat = data->lat2u / 60. + data->lat2b / 600000. - 90.;
 		if (lon > 180.0)
 			lon = lon - 360.0;
 		else if (lon < -180.0)
 			lon = lon + 360.0;
 
 		/* get coordinate scaling */
-		heading = 0.0054932 * data->sbhdg;
+		const double heading = 0.0054932 * data->sbhdg;
 		data->sbhdg = (short int)(heading * 182.044444);
+		double mtodeglon;
+		double mtodeglat;
 		mb_coor_scale(verbose, lat, &mtodeglon, &mtodeglat);
-		headingx = sin(heading * DTR);
-		headingy = cos(heading * DTR);
+		const double headingx = sin(heading * DTR);
+		const double headingy = cos(heading * DTR);
 
 		/* write beams */
 		for (int i = 0; i < MBF_SBIFREMR_NUM_BEAMS; i++) {
@@ -595,31 +577,33 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 				data->lat[i] = lat - headingx * mtodeglat * data->dist[i];
 
 				/* get printing values */
-				beam_num = 19 - i;
+				const int beam_num = 19 - i;
 				if (data->lon[i] > 180.0)
 					data->lon[i] = data->lon[i] - 360.0;
 				else if (data->lon[i] < -180.0)
 					data->lon[i] = data->lon[i] + 360.0;
+				char EorW;
 				if (data->lon[i] < 0.0) {
 					EorW = 'W';
 					data->lon[i] = -data->lon[i];
 				}
 				else
 					EorW = 'E';
-				lon_deg = (int)data->lon[i];
-				lon_min = (data->lon[i] - lon_deg) * 60.0;
+				const int lon_deg = (int)data->lon[i];
+				const double lon_min = (data->lon[i] - lon_deg) * 60.0;
+				char NorS;
 				if (data->lat[i] < 0.0) {
 					NorS = 'S';
 					data->lat[i] = -data->lat[i];
 				}
 				else
 					NorS = 'N';
-				lat_deg = (int)data->lat[i];
-				lat_min = (data->lat[i] - lat_deg) * 60.0;
+				const int lat_deg = (int)data->lat[i];
+				const double lat_min = (data->lat[i] - lat_deg) * 60.0;
 
 				/* print out beam */
 				fprintf(mbfp, "%c%2.2d%8.4f %c%3.3d%8.4f", NorS, lat_deg, lat_min, EorW, lon_deg, lon_min);
-				depth = -data->deph[i];
+				const double depth = -data->deph[i];
 				fprintf(mbfp, "%11.3f ****************", depth);
 				fprintf(mbfp, "%7d%4d%7d    0 ", ping_num_save, beam_num, sounding_num_save);
 				fprintf(mbfp, "%2d/%2d/%2d %2dh%2dm%2ds00\n", day, month, year, hour, minute, second);
@@ -645,10 +629,6 @@ int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sbifremr_struct *data;
-	struct mbsys_sb_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -661,8 +641,8 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_sb_struct *)store_ptr;
+	struct mbf_sbifremr_struct *data = (struct mbf_sbifremr_struct *)mb_io_ptr->raw_data;
+	struct mbsys_sb_struct *store = (struct mbsys_sb_struct *)store_ptr;
 
 	/* second translate values from seabeam data storage structure */
 	if (store != NULL) {
@@ -701,8 +681,9 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", data->kind);
 		fprintf(stderr, "dbg5       error:      %d\n", *error);
-		fprintf(stderr, "dbg5       status:     %d\n", status);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write next record to file */
 	if (data->kind == MB_DATA_DATA || data->kind == MB_DATA_COMMENT) {
@@ -728,8 +709,6 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -740,7 +719,7 @@ int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_sbifremr(
+	const int status = mbr_info_sbifremr(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

@@ -108,8 +108,6 @@ int mbr_info_mbpronav(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
-	struct mbf_mbpronav_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -118,7 +116,7 @@ int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_mbpronav_struct *)data_ptr;
+	struct mbf_mbpronav_struct *data = (struct mbf_mbpronav_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -154,9 +152,6 @@ int mbr_zero_mbpronav(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_mbpronav_struct *data;
-	char *data_ptr;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -175,8 +170,8 @@ int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mbpronav_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_mbpronav_struct *data = (struct mbf_mbpronav_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* set number of header records read to zero */
 	mb_io_ptr->save1 = 0;
@@ -196,8 +191,6 @@ int mbr_alm_mbpronav(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_mbpronav(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -209,8 +202,8 @@ int mbr_dem_mbpronav(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -224,15 +217,6 @@ int mbr_dem_mbpronav(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_mbpronav_struct *data;
-	char line[MBF_MBPRONAV_MAXLINE + 1] = "";
-	char *line_ptr;
-	int nread;
-	double sec;
-	double d1, d2, d3, d4, d5;
-	double d6, d7, d8, d9;
-	double d10, d11, d12, d13;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -244,7 +228,7 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mbpronav_struct *)mb_io_ptr->raw_data;
+	struct mbf_mbpronav_struct *data = (struct mbf_mbpronav_struct *)mb_io_ptr->raw_data;
 
 	/* initialize everything to zeros */
 	mbr_zero_mbpronav(verbose, mb_io_ptr->raw_data, error);
@@ -256,7 +240,9 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* read next record */
-	if ((line_ptr = fgets(line, MBF_MBPRONAV_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
+	char line[MBF_MBPRONAV_MAXLINE + 1] = "";
+	char *line_ptr = fgets(line, MBF_MBPRONAV_MAXLINE, mb_io_ptr->mbfp);
+	if (line_ptr != NULL) {
 		mb_io_ptr->file_bytes += strlen(line);
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -275,8 +261,13 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 	else if (status == MB_SUCCESS) {
 		data->kind = MB_DATA_DATA;
 
+		double sec;
+		double d1, d2, d3, d4, d5;
+		double d6, d7, d8, d9;
+		double d10, d11, d12, d13;
+
 		/* read data */
-		nread = sscanf(line, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &data->time_i[0],
+		const int nread = sscanf(line, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &data->time_i[0],
 		               &data->time_i[1], &data->time_i[2], &data->time_i[3], &data->time_i[4], &sec, &d1, &d2, &d3, &d4, &d5, &d6,
 		               &d7, &d8, &d9, &d10, &d11, &d12, &d13);
 		data->time_i[5] = (int)sec;
@@ -371,9 +362,6 @@ int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mbpronav_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -384,8 +372,8 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mbpronav_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mbpronav_struct *data = (struct mbf_mbpronav_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_mbpronav_rd_data(verbose, mbio_ptr, error);
@@ -462,10 +450,6 @@ int mbr_rt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	struct mbf_mbpronav_struct *data;
-	char line[MBF_MBPRONAV_MAXLINE + 1];
-	int len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -478,13 +462,15 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mbpronav_struct *)data_ptr;
+	struct mbf_mbpronav_struct *data = (struct mbf_mbpronav_struct *)data_ptr;
+
+	char line[MBF_MBPRONAV_MAXLINE + 1];
 
 	/* handle the data */
 	if (data->kind == MB_DATA_COMMENT) {
 		line[0] = '#';
 		strncpy(&line[1], data->comment, MBF_MBPRONAV_MAXLINE - 2);
-		len = strlen(line);
+		const int len = strlen(line);
 		line[len] = '\n';
 		line[len + 1] = '\0';
 	}
@@ -550,9 +536,6 @@ int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mbpronav_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -565,8 +548,8 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mbpronav_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mbpronav_struct *data = (struct mbf_mbpronav_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {

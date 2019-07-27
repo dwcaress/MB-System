@@ -275,11 +275,6 @@ int mbr_dem_hs10jams(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_hs10_struct *store;
-	char line[MBF_HS10JAMS_MAXLINE];
-	char *line_ptr;
-	int shift;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -290,7 +285,7 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_hs10_struct *)store_ptr;
+	struct mbsys_hs10_struct *store = (struct mbsys_hs10_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
@@ -299,7 +294,9 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	/* read next record */
-	if ((line_ptr = fgets(line, MBF_HS10JAMS_MAXLINE, mb_io_ptr->mbfp)) != NULL) {
+	char line[MBF_HS10JAMS_MAXLINE];
+	const char *line_ptr = fgets(line, MBF_HS10JAMS_MAXLINE, mb_io_ptr->mbfp);
+	if (line_ptr != NULL) {
 		mb_io_ptr->file_bytes += strlen(line);
 		if (strlen(line) >= MBF_HS10JAMS_LENGTH - 2 || line[0] == '#') {
 			status = MB_SUCCESS;
@@ -329,7 +326,7 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* deal with survey ping */
 		else {
 			/* get time stamp */
-			shift = 0;
+			int shift = 0;
 			store->kind = MB_DATA_DATA;
 			mb_get_int(&store->year, &line[shift], 2);
 			shift += 2;
@@ -424,9 +421,6 @@ int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_hs10_struct *store;
-	char line[MBF_HS10JAMS_MAXLINE];
-	int shift;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -440,7 +434,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to storage data structure */
-	store = (struct mbsys_hs10_struct *)store_ptr;
+	struct mbsys_hs10_struct *store = (struct mbsys_hs10_struct *)store_ptr;
 
 	/* write out debug info */
 	if (verbose >= 5 && store->kind == MB_DATA_DATA) {
@@ -465,6 +459,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       comment: %s\n", store->comment);
 	}
 
+	char line[MBF_HS10JAMS_MAXLINE];
 	/* translate data from data storage structure */
 	if (store->kind == MB_DATA_COMMENT) {
 		/* deal with comment */
@@ -481,7 +476,7 @@ int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		sprintf(line, "%2d%2d%2d%2d%2d%3d%c%3d%5d%c%3d%5d%4d%5d", store->year, store->month, store->day, store->hour,
 		        store->minute, store->tenth_second, store->NorS, store->latdeg, store->latmin, store->EorW, store->londeg,
 		        store->lonmin, store->heading, store->center_depth);
-		shift = 40;
+		int shift = 40;
 		for (int i = 0; i < MBSYS_HS10_BEAMS; i++) {
 			sprintf(&line[shift], "%5d", store->depth[i]);
 			shift += 5;

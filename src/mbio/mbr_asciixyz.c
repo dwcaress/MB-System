@@ -188,7 +188,6 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE + 1] = "";
 	char flag;
 	char *line_ptr;
@@ -204,7 +203,7 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
@@ -327,7 +326,6 @@ int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_singlebeam_struct *store;
 	char line[MB_COMMENT_MAXLINE + 1] = "";
 	char flag;
 	double depth;
@@ -344,7 +342,7 @@ int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* handle the data */
 	if (store->kind == MB_DATA_COMMENT) {

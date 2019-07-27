@@ -110,8 +110,6 @@ int mbr_info_mbarrov2(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error) {
-	struct mbf_mbarrov2_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -120,7 +118,7 @@ int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_mbarrov2_struct *)data_ptr;
+	struct mbf_mbarrov2_struct *data = (struct mbf_mbarrov2_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {

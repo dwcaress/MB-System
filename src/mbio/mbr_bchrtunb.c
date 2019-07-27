@@ -110,8 +110,6 @@ int mbr_info_bchrtunb(int verbose, int *system, int *beams_bath_max, int *beams_
 
 /*--------------------------------------------------------------------*/
 int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
-	struct mbf_bchrtunb_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -120,7 +118,7 @@ int mbr_zero_bchrtunb(int verbose, void *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_bchrtunb_struct *)data_ptr;
+	struct mbf_bchrtunb_struct *data = (struct mbf_bchrtunb_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -1217,9 +1215,6 @@ int mbr_bchrtunb_rd_bath32(int verbose, FILE *mbfp, struct mbf_bchrtunb_struct *
 }
 /*--------------------------------------------------------------------*/
 int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_bchrtunb_struct *data;
-	char *data_ptr;
-	FILE *mbfp;
 	int done;
 	short int *type;
 	static char label[2];
@@ -1235,9 +1230,9 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_bchrtunb_struct *data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -1341,8 +1336,6 @@ int mbr_bchrtunb_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_bchrtunb_struct *data;
-	struct mbsys_elac_struct *store;
 	int time_i[7];
 	double time_d;
 	double lon;
@@ -1359,8 +1352,8 @@ int mbr_rt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbf_bchrtunb_struct *data  = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_bchrtunb_rd_data(verbose, mbio_ptr, error);
@@ -2627,10 +2620,6 @@ int mbr_bchrtunb_wr_data(int verbose, void *mbio_ptr, struct mbf_bchrtunb_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_bchrtunb_struct *data;
-	char *data_ptr;
-	struct mbsys_elac_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2643,9 +2632,9 @@ int mbr_wt_bchrtunb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbf_bchrtunb_struct *data = (struct mbf_bchrtunb_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {
