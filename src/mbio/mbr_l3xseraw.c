@@ -173,7 +173,6 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
 	int done;
@@ -190,7 +189,7 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* get source and time */
 	index = 12;
@@ -406,8 +405,6 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -418,7 +415,7 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The tide frame is currently unused by MB-System */
 
@@ -436,7 +433,6 @@ int mbr_l3xseraw_rd_tide(int verbose, int buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
 	int done;
@@ -454,7 +450,7 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* get source and time */
 	index = 12;
@@ -781,7 +777,6 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
 	int done;
@@ -800,7 +795,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* get source and time */
 	index = 12;
@@ -1222,7 +1217,6 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
 	int done;
@@ -1243,7 +1237,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* set group flags off */
 	store->mul_group_beam = MB_NO;         /* boolean flag - beam group read */
@@ -1967,8 +1961,6 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1979,7 +1971,7 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The singlebeam frame is currently unused by MB-System */
 
@@ -1997,8 +1989,6 @@ int mbr_l3xseraw_rd_singlebeam(int verbose, int buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2009,7 +1999,7 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The message frame is currently unused by MB-System */
 
@@ -2027,8 +2017,7 @@ int mbr_l3xseraw_rd_message(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-	int byte_count;
+int byte_count;
 	int group_id;
 	int done;
 	int index;
@@ -2044,7 +2033,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* get source and time */
 	index = 12;
@@ -2307,8 +2296,6 @@ int mbr_l3xseraw_rd_seabeam(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2319,7 +2306,7 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The geodetic frame is currently unused by MB-System */
 
@@ -2337,8 +2324,6 @@ int mbr_l3xseraw_rd_geodetic(int verbose, int buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2349,7 +2334,7 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The native frame is currently unused by MB-System */
 
@@ -2367,8 +2352,6 @@ int mbr_l3xseraw_rd_native(int verbose, int buffer_size, char *buffer, void *sto
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2379,7 +2362,7 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The product frame is currently unused by MB-System */
 
@@ -2397,8 +2380,6 @@ int mbr_l3xseraw_rd_product(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2409,7 +2390,7 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The bathymetry frame is currently unused by MB-System */
 
@@ -2427,8 +2408,6 @@ int mbr_l3xseraw_rd_bathymetry(int verbose, int buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2439,7 +2418,7 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* The control frame is currently unused by MB-System */
 
@@ -2457,7 +2436,6 @@ int mbr_l3xseraw_rd_control(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
 	int done;
@@ -2474,7 +2452,7 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* get source and time */
 	index = 12;
@@ -2564,7 +2542,6 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int byte_count;
 	int group_id;
 	int done;
@@ -2581,7 +2558,7 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* get source and time */
 	index = 12;
@@ -2876,8 +2853,6 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-	FILE *mbfp;
 	static char label[4];
 	int done;
 	int frame_id;
@@ -2912,8 +2887,8 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -3312,7 +3287,6 @@ int mbr_l3xseraw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	double time_d;
 	double lon, lat;
 	double heading;
@@ -3328,7 +3302,7 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_l3xseraw_rd_data(verbose, mbio_ptr, store_ptr, error);
@@ -3401,7 +3375,6 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
 	int group_count;
@@ -3419,7 +3392,7 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -4073,7 +4046,6 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
 	int group_count;
@@ -4095,7 +4067,7 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -4485,7 +4457,6 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
 	int group_count;
@@ -4504,7 +4475,7 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -4994,7 +4965,6 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
 	int group_count;
@@ -5012,7 +4982,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* print debug statements */
 	/* print debug statements */
@@ -6113,7 +6083,6 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
 	int group_count;
@@ -6131,7 +6100,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -6717,7 +6686,6 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int index;
 	int frame_count;
 	int group_count;
@@ -6735,7 +6703,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -7151,7 +7119,6 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 }
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
 	int index;
 	int size;
 	int len;
@@ -7167,7 +7134,7 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 	}
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -7254,11 +7221,8 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 
 /*--------------------------------------------------------------------*/
 int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-	FILE *mbfp;
 	int buffer_size;
 	int write_size;
-	char *buffer;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7272,9 +7236,9 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
-	buffer = mb_io_ptr->hdr_comment;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
+	char *buffer = mb_io_ptr->hdr_comment;
 
 #ifdef MB_DEBUG
 	fprintf(stderr, "%s:%d | WRITE KIND: %d\n", __FILE__, __LINE__, store->kind);
@@ -7390,8 +7354,6 @@ int mbr_l3xseraw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_xse_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7404,7 +7366,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to store data structure */
-	store = (struct mbsys_xse_struct *)store_ptr;
+	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_l3xseraw_wr_data(verbose, mbio_ptr, store_ptr, error);

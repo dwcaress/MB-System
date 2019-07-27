@@ -170,9 +170,7 @@ int mbr_dem_imagemba(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGEMBA_BUFFER_SIZE] = "";
-	int done;
 	int index;
 	int swap = MB_NO;
 	short short_val;
@@ -192,15 +190,15 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record header from file */
-	done = MB_NO;
 	for (int i = 0; i < MBF_IMAGEMBA_BUFFER_SIZE; i++)
 		buffer[i] = 0;
+	int done = MB_NO;
 	int status = MB_SUCCESS;
 	if ((status = fread(buffer, 1, 6, mb_io_ptr->mbfp)) == 6) {
 		/* check for valid header */
@@ -520,7 +518,6 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_image83p_struct *store;
 	char buffer[MBF_IMAGEMBA_BUFFER_SIZE] = "";
 	int swap = MB_NO;
 	int seconds_hundredths;
@@ -542,7 +539,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
