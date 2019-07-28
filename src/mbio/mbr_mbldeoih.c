@@ -223,7 +223,6 @@ int mbr_dem_mbldeoih(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_ldeoih_struct *store;
 	struct mbsys_ldeoih_old_struct oldstore;
 	int read_size;
 	short *flag;
@@ -248,7 +247,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_ldeoih_struct *)store_ptr;
+	struct mbsys_ldeoih_struct *store = (struct mbsys_ldeoih_struct *)store_ptr;
 	memset((void *)&oldstore, 0, sizeof(struct mbsys_ldeoih_old_struct));
 
 	/* set file position */
@@ -839,7 +838,6 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_ldeoih_struct *store;
 	struct mbsys_ldeoih_old_struct oldstore;
 	int write_size;
 	short *flag;
@@ -864,7 +862,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data storage */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_ldeoih_struct *)store_ptr;
+	struct mbsys_ldeoih_struct *store = (struct mbsys_ldeoih_struct *)store_ptr;
 
 	/* set data flag pointer */
 	flag = (short *)buffer;

@@ -252,7 +252,6 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_netcdf_struct *store;
 	int *dataread;
 	int *commentread;
 	int *recread;
@@ -279,7 +278,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 	dataread = (int *)&mb_io_ptr->save1;
 	commentread = (int *)&mb_io_ptr->save2;
 	recread = (int *)&mb_io_ptr->save4;
@@ -4899,8 +4898,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_netcdf_struct *store;
-	struct mbsys_netcdf_struct *storelocal;
 	int *datawrite;
 	int *commentwrite;
 	int *recwrite;
@@ -4936,8 +4933,8 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data storage */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_netcdf_struct *)store_ptr;
-	storelocal = (struct mbsys_netcdf_struct *)mb_io_ptr->store_data;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *storelocal = (struct mbsys_netcdf_struct *)mb_io_ptr->store_data;
 	datawrite = (int *)&mb_io_ptr->save1;
 	commentwrite = (int *)&mb_io_ptr->save2;
 	recwrite = (int *)&mb_io_ptr->save4;

@@ -262,9 +262,6 @@ int mbr_dem_photgram(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_stereopair_struct *store;
-	struct mbsys_stereopair_sounding_struct *sounding;
 	char buffer[MB_COMMENT_MAXLINE + 8];
 	size_t read_len;
 	int recordsize;
@@ -287,7 +284,8 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	int status = MB_SUCCESS;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -325,6 +323,7 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		status = mb_fileio_get(verbose, mbio_ptr, (char *)&buffer[7], &read_len, error);
 		skip++;
 	}
+
 
 	/* if a valid record label has been found then read and parse it */
 	if (status == MB_SUCCESS) {
@@ -400,7 +399,7 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* read in the soundings */
 			for (int i = 0; i < store->num_soundings; i++) {
-				sounding = &store->soundings[i];
+				struct mbsys_stereopair_sounding_struct *sounding = &store->soundings[i];
 
 				/* read the sounding */
 				read_len = MBSYS_STEREOPAIR_SOUNDING_SIZE;
@@ -566,9 +565,6 @@ int mbr_photgram_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -585,10 +581,10 @@ int mbr_rt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	/* read next data from file */
-	status = mbr_photgram_rd_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_photgram_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -610,14 +606,9 @@ int mbr_rt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_stereopair_struct *store;
-	struct mbsys_stereopair_sounding_struct *sounding;
 	char buffer[MB_COMMENT_MAXLINE + 8];
 	size_t write_len;
 	int checksum = 0;
-	int *fileheader_initialized;
-	int *formatversion;
 	int swap = MB_YES;
 	int index;
 
@@ -633,11 +624,13 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get saved values */
-	fileheader_initialized = (int *)&mb_io_ptr->save1;
-	formatversion = (int *)&mb_io_ptr->save2;
+	int *fileheader_initialized = (int *)&mb_io_ptr->save1;
+	int *formatversion = (int *)&mb_io_ptr->save2;
+
+	int status = MB_SUCCESS;
 
 	/* write file header if necessary */
 	if (*fileheader_initialized == MB_NO) {
@@ -676,6 +669,7 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "dbg4     num_soundings_alloc:        %d\n", store->num_soundings_alloc);
 				// for (i=0; i< store->num_soundings; i++)
 				for (int i = 0; i < 10; i++) {
+	struct mbsys_stereopair_sounding_struct *sounding;
 					sounding = &store->soundings[i];
 					fprintf(stderr, "dbg4     %10d  %10g  %10g  %10g %x   %3d %3d %3d\n", i, sounding->acrosstrack,
 					        sounding->alongtrack, sounding->depth, sounding->beamflag, sounding->red, sounding->green,
@@ -847,9 +841,6 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -862,14 +853,14 @@ int mbr_wt_photgram(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 #ifdef MBR_PHOTGRAM_DEBUG
 	fprintf(stderr, "About to call mbr_photgram_wr_data record kind:%d\n", store->kind);
 #endif
 
 	/* write next data to file */
-	status = mbr_photgram_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_photgram_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 #ifdef MBR_PHOTGRAM_DEBUG
 	fprintf(stderr, "Done with mbr_photgram_wr_data: status:%d error:%d\n", status, *error);

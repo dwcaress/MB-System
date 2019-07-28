@@ -161,9 +161,6 @@ int mbr_zero_mbarrov2(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbarrov2(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_mbarrov2_struct *data;
-	char *data_ptr;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -182,8 +179,8 @@ int mbr_alm_mbarrov2(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_mbarrov2_struct *data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* set number of records read or written to zero */
 	mb_io_ptr->save1 = 0;
@@ -229,7 +226,6 @@ int mbr_dem_mbarrov2(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mbarrov2_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_mbarrov2_struct *data;
 	char line[MBF_MBARROV2_MAXLINE + 1] = "";
 	char *line_ptr;
 	int nread;
@@ -245,7 +241,7 @@ int mbr_mbarrov2_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
+	struct mbf_mbarrov2_struct *data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
 
 	/* initialize everything to zeros */
 	mbr_zero_mbarrov2(verbose, mb_io_ptr->raw_data, error);
@@ -373,9 +369,6 @@ int mbr_mbarrov2_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mbarrov2_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -386,8 +379,8 @@ int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mbarrov2_struct *data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_mbarrov2_rd_data(verbose, mbio_ptr, error);
@@ -432,7 +425,6 @@ int mbr_rt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	struct mbf_mbarrov2_struct *data;
 	char line[MBF_MBARROV2_MAXLINE + 1] = "";
 	int len;
 	int *write_count;
@@ -449,7 +441,7 @@ int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mbarrov2_struct *)data_ptr;
+	struct mbf_mbarrov2_struct *data = (struct mbf_mbarrov2_struct *)data_ptr;
 
 	/* get pointer to write counter */
 	write_count = (int *)&mb_io_ptr->save1;
@@ -543,9 +535,6 @@ int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mbarrov2_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -558,8 +547,8 @@ int mbr_wt_mbarrov2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mbarrov2_struct *data = (struct mbf_mbarrov2_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {
