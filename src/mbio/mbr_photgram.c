@@ -647,6 +647,8 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (status == MB_SUCCESS) {
 		/* write a survey record */
 		if (store->kind == MB_DATA_DATA) {
+			struct mbsys_stereopair_sounding_struct *sounding = NULL;
+
 			/* calculate full write length */
 			write_len = 8 + MBSYS_STEREOPAIR_HEADER_SIZE + store->num_soundings * MBSYS_STEREOPAIR_SOUNDING_SIZE + 6;
 
@@ -669,7 +671,6 @@ int mbr_photgram_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				fprintf(stderr, "dbg4     num_soundings_alloc:        %d\n", store->num_soundings_alloc);
 				// for (i=0; i< store->num_soundings; i++)
 				for (int i = 0; i < 10; i++) {
-	struct mbsys_stereopair_sounding_struct *sounding;
 					sounding = &store->soundings[i];
 					fprintf(stderr, "dbg4     %10d  %10g  %10g  %10g %x   %3d %3d %3d\n", i, sounding->acrosstrack,
 					        sounding->alongtrack, sounding->depth, sounding->beamflag, sounding->red, sounding->green,
