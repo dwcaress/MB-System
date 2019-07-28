@@ -107,8 +107,6 @@ int mbr_info_mgd77dat(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error) {
-	struct mbf_mgd77dat_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -117,7 +115,7 @@ int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_mgd77dat_struct *)data_ptr;
+	struct mbf_mgd77dat_struct *data = (struct mbf_mgd77dat_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -173,9 +171,6 @@ int mbr_zero_mgd77dat(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_mgd77dat(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_mgd77dat_struct *data;
-	char *data_ptr;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -194,8 +189,8 @@ int mbr_alm_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mgd77dat_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
+	struct mbf_mgd77dat_struct *data = (struct mbf_mgd77dat_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
 
 	/* set number of header records read to zero */
 	mb_io_ptr->save1 = 0;
@@ -241,8 +236,6 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_mgd77dat_struct *data;
-	int *header_read;
 	char line[MBF_MGD77DAT_DATA_LEN] = "";
 	size_t read_len;
 	size_t skip;
@@ -262,8 +255,8 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77dat_struct *)mb_io_ptr->raw_data;
-	header_read = (int *)&mb_io_ptr->save1;
+	struct mbf_mgd77dat_struct *data = (struct mbf_mgd77dat_struct *)mb_io_ptr->raw_data;
+	int *header_read = (int *)&mb_io_ptr->save1;
 
 	/* initialize everything to zeros */
 	mbr_zero_mgd77dat(verbose, mb_io_ptr->raw_data, error);
@@ -572,9 +565,6 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mgd77dat_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -585,8 +575,8 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mgd77dat_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mgd77dat_struct *data = (struct mbf_mgd77dat_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_mgd77dat_rd_data(verbose, mbio_ptr, error);
@@ -647,7 +637,6 @@ int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	struct mbf_mgd77dat_struct *data;
 	char line[MBF_MGD77DAT_DATA_LEN + 1] = "";
 	int itmp;
 	int write_len;
@@ -665,7 +654,7 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77dat_struct *)data_ptr;
+	struct mbf_mgd77dat_struct *data = (struct mbf_mgd77dat_struct *)data_ptr;
 
 	/* handle the data */
 	if (data->kind == MB_DATA_HEADER) {
@@ -821,9 +810,6 @@ int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mgd77dat_struct *data;
-	struct mbsys_singlebeam_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -836,8 +822,8 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mgd77dat_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_singlebeam_struct *)store_ptr;
+	struct mbf_mgd77dat_struct *data = (struct mbf_mgd77dat_struct *)mb_io_ptr->raw_data;
+	struct mbsys_singlebeam_struct *store = (struct mbsys_singlebeam_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {

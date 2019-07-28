@@ -145,8 +145,6 @@ int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
-	struct mbsys_mr1v2001_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -156,7 +154,7 @@ int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_mr1v2001_struct *)mb_io_ptr->store_data;
+	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)mb_io_ptr->store_data;
 
 	/* deallocate memory for data descriptor */
 	if (store->bsbuffersize > 0 && store->bsbuffer != NULL)
@@ -175,9 +173,6 @@ int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbsys_mr1v2001_struct *store;
-	char *store_ptr;
-	char *xdrs;
 	int read_size;
 	int bs_status = BS_SUCCESS;
 	char *eol;
@@ -193,9 +188,9 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to data */
-	store = (struct mbsys_mr1v2001_struct *)mb_io_ptr->store_data;
-	store_ptr = (char *)store;
-	xdrs = mb_io_ptr->xdrs;
+	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)mb_io_ptr->store_data;
+	char *store_ptr = (char *)store;
+	char *xdrs = mb_io_ptr->xdrs;
 
 	int status = MB_SUCCESS;
 
@@ -463,8 +458,6 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_mr1v2001_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -475,7 +468,7 @@ int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_mr1v2001_struct *)store_ptr;
+	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_mr1prvr2_rd_data(verbose, mbio_ptr, error);
@@ -496,8 +489,6 @@ int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error) {
-	struct mbsys_mr1v2001_struct *store;
-	char *xdrs;
 	int bs_status = BS_SUCCESS;
 
 	if (verbose >= 2) {
@@ -511,8 +502,8 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to data */
-	store = (struct mbsys_mr1v2001_struct *)store_ptr;
-	xdrs = mb_io_ptr->xdrs;
+	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
+	char *xdrs = mb_io_ptr->xdrs;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -710,8 +701,6 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_mr1v2001_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -724,7 +713,7 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_mr1v2001_struct *)store_ptr;
+	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
 	/* write next data to file */
 	const int status = mbr_mr1prvr2_wr_data(verbose, mbio_ptr, store_ptr, error);
