@@ -202,8 +202,6 @@ int mbr_zero_mr1aldeo(int verbose, struct mbf_mr1aldeo_struct *data, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1aldeo(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_mr1aldeo_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -222,7 +220,7 @@ int mbr_alm_mr1aldeo(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mr1aldeo_struct *)mb_io_ptr->raw_data;
+	struct mbf_mr1aldeo_struct *data = (struct mbf_mr1aldeo_struct *)mb_io_ptr->raw_data;
 
 	/* initialize everything to zeros */
 	mbr_zero_mr1aldeo(verbose, data, error);
@@ -537,8 +535,6 @@ int mbr_mr1aldeo_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1aldeo_struct *dat
 }
 /*--------------------------------------------------------------------*/
 int mbr_mr1aldeo_rd_data(int verbose, void *mbio_ptr, int *error) {
-	struct mbf_mr1aldeo_struct *data;
-	XDR *xdrs;
 	int read_size;
 
 	if (verbose >= 2) {
@@ -552,8 +548,8 @@ int mbr_mr1aldeo_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mr1aldeo_struct *)mb_io_ptr->raw_data;
-	xdrs = mb_io_ptr->xdrs;
+	struct mbf_mr1aldeo_struct *data = (struct mbf_mr1aldeo_struct *)mb_io_ptr->raw_data;
+	XDR *xdrs = mb_io_ptr->xdrs;
 
 	/* initialize everything to zeros */
 	mbr_zero_mr1aldeo(verbose, data, error);
@@ -612,9 +608,6 @@ int mbr_mr1aldeo_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mr1aldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mr1aldeo_struct *data;
-	struct mbsys_mr1_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -625,8 +618,8 @@ int mbr_rt_mr1aldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_mr1aldeo_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_mr1_struct *)store_ptr;
+	struct mbf_mr1aldeo_struct *data = (struct mbf_mr1aldeo_struct *)mb_io_ptr->raw_data;
+	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
 
 	/* read next data from file */
 	const int status = mbr_mr1aldeo_rd_data(verbose, mbio_ptr, error);
@@ -988,9 +981,6 @@ int mbr_mr1aldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1aldeo_struct
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mr1aldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mr1aldeo_struct *data;
-	struct mbsys_mr1_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1003,8 +993,8 @@ int mbr_wt_mr1aldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mr1aldeo_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_mr1_struct *)store_ptr;
+	struct mbf_mr1aldeo_struct *data = (struct mbf_mr1aldeo_struct *)mb_io_ptr->raw_data;
+	struct mbsys_mr1_struct *store = (struct mbsys_mr1_struct *)store_ptr;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {

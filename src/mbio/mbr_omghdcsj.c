@@ -113,21 +113,6 @@ int mbr_info_omghdcsj(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_omghdcsj_struct *dataplus;
-	struct mbf_omghdcsj_summary_struct *summary;
-	struct mbf_omghdcsj_profile_struct *profile;
-	struct mbf_omghdcsj_data_struct *data;
-	int *read_summary;
-	int *fileVersion;
-	int *toolType;
-	int *profile_size;
-	int *num_beam;
-	int *beam_size;
-	int *data_size;
-	int *image_size;
-	double *pixel_size;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -138,9 +123,6 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* set name of possible parallel sidescan file */
 	if (strlen(mb_io_ptr->file) < 248) {
 		strcpy(mb_io_ptr->file2, mb_io_ptr->file);
@@ -149,23 +131,23 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_omghdcsj_struct);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, (void **)&mb_io_ptr->raw_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, (void **)&mb_io_ptr->raw_data, error);
 
 	/* get pointers */
 	if (status == MB_SUCCESS) {
-		dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
-		summary = &(dataplus->summary);
-		profile = &(dataplus->profile);
-		data = &(dataplus->data);
-		read_summary = (int *)&mb_io_ptr->save1;
-		fileVersion = (int *)&mb_io_ptr->save2;
-		toolType = (int *)&mb_io_ptr->save3;
-		profile_size = (int *)&mb_io_ptr->save4;
-		num_beam = (int *)&mb_io_ptr->save5;
-		beam_size = (int *)&mb_io_ptr->save6;
-		data_size = (int *)&mb_io_ptr->save7;
-		image_size = (int *)&mb_io_ptr->save8;
-		pixel_size = (double *)&mb_io_ptr->saved1;
+		struct mbf_omghdcsj_struct *dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
+		struct mbf_omghdcsj_summary_struct *summary = &(dataplus->summary);
+		struct mbf_omghdcsj_profile_struct *profile = &(dataplus->profile);
+		struct mbf_omghdcsj_data_struct *data = &(dataplus->data);
+		int *read_summary = (int *)&mb_io_ptr->save1;
+		int *fileVersion = (int *)&mb_io_ptr->save2;
+		int *toolType = (int *)&mb_io_ptr->save3;
+		int *profile_size = (int *)&mb_io_ptr->save4;
+		int *num_beam = (int *)&mb_io_ptr->save5;
+		int *beam_size = (int *)&mb_io_ptr->save6;
+		int *data_size = (int *)&mb_io_ptr->save7;
+		int *image_size = (int *)&mb_io_ptr->save8;
+		double *pixel_size = (double *)&mb_io_ptr->saved1;
 		dataplus->buffer = NULL;
 		dataplus->kind = MB_DATA_NONE;
 		status = mb_mallocd(verbose, __FILE__, __LINE__, MBF_OMGHDCSJ_SUMMARY_SIZE + MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE,
@@ -368,11 +350,6 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_omghdcsj_struct *dataplus;
-	struct mbf_omghdcsj_profile_struct *profile;
-	struct mbf_omghdcsj_data_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -382,9 +359,11 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
-	profile = &(dataplus->profile);
-	data = &(dataplus->data);
+	struct mbf_omghdcsj_struct *dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
+	struct mbf_omghdcsj_profile_struct *profile = &(dataplus->profile);
+	struct mbf_omghdcsj_data_struct *data = &(dataplus->data);
+
+	int status = MB_SUCCESS;
 
 	/* deallocate memory for data descriptor */
 	if (data->beams != NULL)
@@ -408,14 +387,6 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_omghdcsj_struct *dataplus;
-	struct mbf_omghdcsj_summary_struct *summary;
-	struct mbf_omghdcsj_profile_struct *profile;
-	struct mbf_omghdcsj_data_struct *data;
-	struct mbf_omghdcsj_beam_struct *beam;
-	struct mbsys_hdcs_struct *store;
-	struct mbsys_hdcs_beam_struct *sbeam;
 	int *read_summary;
 	int *fileVersion;
 	int *toolType;
@@ -454,13 +425,13 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_hdcs_struct *)store_ptr;
+	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
 
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
-	summary = &(dataplus->summary);
-	profile = &(dataplus->profile);
-	data = &(dataplus->data);
+	struct mbf_omghdcsj_struct *dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
+	struct mbf_omghdcsj_summary_struct *summary = &(dataplus->summary);
+	struct mbf_omghdcsj_profile_struct *profile = &(dataplus->profile);
+	struct mbf_omghdcsj_data_struct *data = &(dataplus->data);
 	comment = dataplus->comment;
 	buffer = dataplus->buffer;
 	read_summary = (int *)&mb_io_ptr->save1;
@@ -476,6 +447,10 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	mb_io_ptr->file2_pos = mb_io_ptr->file2_bytes;
+
+	int status = MB_SUCCESS;
+	struct mbf_omghdcsj_beam_struct *beam = NULL;
+	struct mbsys_hdcs_beam_struct *sbeam = NULL;
 
 	/* read next four bytes */
 	if ((read_size = fread(buffer, 1, 4, mb_io_ptr->mbfp)) == 4) {
@@ -4090,14 +4065,6 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_omghdcsj_struct *dataplus;
-	struct mbf_omghdcsj_summary_struct *summary;
-	struct mbf_omghdcsj_profile_struct *profile;
-	struct mbf_omghdcsj_data_struct *data;
-	struct mbf_omghdcsj_beam_struct *beam;
-	struct mbsys_hdcs_struct *store;
-	struct mbsys_hdcs_beam_struct *sbeam;
 	int *write_summary;
 	int *fileVersion;
 	int *toolType;
@@ -4130,13 +4097,13 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_hdcs_struct *)store_ptr;
+	struct mbsys_hdcs_struct *store = (struct mbsys_hdcs_struct *)store_ptr;
 
 	/* get pointer to raw data structure */
-	dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
-	summary = &(dataplus->summary);
-	profile = &(dataplus->profile);
-	data = &(dataplus->data);
+	struct mbf_omghdcsj_struct *dataplus = (struct mbf_omghdcsj_struct *)mb_io_ptr->raw_data;
+	struct mbf_omghdcsj_summary_struct *summary = &(dataplus->summary);
+	struct mbf_omghdcsj_profile_struct *profile = &(dataplus->profile);
+	struct mbf_omghdcsj_data_struct *data = &(dataplus->data);
 	comment = dataplus->comment;
 	buffer = dataplus->buffer;
 	write_summary = (int *)&mb_io_ptr->save1;
@@ -4152,6 +4119,11 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	mb_io_ptr->file2_pos = mb_io_ptr->file2_bytes;
+
+	struct mbf_omghdcsj_beam_struct *beam = NULL;
+	struct mbsys_hdcs_beam_struct *sbeam = NULL;
+
+	int status = MB_SUCCESS;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {

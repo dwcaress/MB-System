@@ -113,12 +113,6 @@ int mbr_info_nvnetcdf(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_navnetcdf_struct *store;
-	int *dataread;
-	int *commentread;
-	int *recread;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -129,19 +123,16 @@ int mbr_alm_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mbsys_navnetcdf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_navnetcdf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_navnetcdf_struct *)mb_io_ptr->store_data;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)mb_io_ptr->store_data;
 
 	/* initialize values in structure */
-	dataread = (int *)&mb_io_ptr->save1;
-	commentread = (int *)&mb_io_ptr->save2;
-	recread = (int *)&mb_io_ptr->save4;
+	int *dataread = (int *)&mb_io_ptr->save1;
+	int *commentread = (int *)&mb_io_ptr->save2;
+	int *recread = (int *)&mb_io_ptr->save4;
 	*dataread = MB_NO;
 	*commentread = 0;
 	*recread = 0;
@@ -185,11 +176,6 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_navnetcdf_struct *store;
-	int *dataread;
-	int *commentread;
-	int *recread;
 	int dim_id;
 	size_t index[2], count[2];
 	int nc_status;
@@ -209,13 +195,15 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
-	dataread = (int *)&mb_io_ptr->save1;
-	commentread = (int *)&mb_io_ptr->save2;
-	recread = (int *)&mb_io_ptr->save4;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	int *dataread = (int *)&mb_io_ptr->save1;
+	int *commentread = (int *)&mb_io_ptr->save2;
+	int *recread = (int *)&mb_io_ptr->save4;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
+
+	int status = MB_SUCCESS;
 
 	/* if first read then set everything up */
 	if (*dataread == MB_NO) {
@@ -1635,11 +1623,6 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_navnetcdf_struct *store;
-	struct mbsys_navnetcdf_struct *storelocal;
-	int *datawrite;
-	int *commentwrite;
-	int *recwrite;
 	int nc_status;
 	int mbHistoryRecNbr_id;
 	int mbNameLength_id;
@@ -1666,11 +1649,11 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data storage */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
-	storelocal = (struct mbsys_navnetcdf_struct *)mb_io_ptr->store_data;
-	datawrite = (int *)&mb_io_ptr->save1;
-	commentwrite = (int *)&mb_io_ptr->save2;
-	recwrite = (int *)&mb_io_ptr->save4;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *storelocal = (struct mbsys_navnetcdf_struct *)mb_io_ptr->store_data;
+	int *datawrite = (int *)&mb_io_ptr->save1;
+	int *commentwrite = (int *)&mb_io_ptr->save2;
+	int *recwrite = (int *)&mb_io_ptr->save4;
 
 	/* if comment and nothing written yet save it */
 	if (store->kind == MB_DATA_COMMENT && *recwrite == 0) {

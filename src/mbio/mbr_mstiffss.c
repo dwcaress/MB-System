@@ -170,8 +170,6 @@ int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mstiffss_struct *data;
-	struct mbsys_mstiff_struct *store;
 	char buffer[MBF_MSTIFFSS_BUFFERSIZE];
 	int ifd_offset;
 	short nentry;
@@ -239,8 +237,8 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mstiffss_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_mstiff_struct *)store_ptr;
+	struct mbf_mstiffss_struct *data = (struct mbf_mstiffss_struct *)mb_io_ptr->raw_data;
+	struct mbsys_mstiff_struct *store = (struct mbsys_mstiff_struct *)store_ptr;
 
 	/* get pointers to saved values in mb_io_ptr */
 	n_read = &(mb_io_ptr->save_label_flag);
@@ -1020,9 +1018,6 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbf_mstiffss_struct *data;
-	struct mbsys_mstiff_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1035,8 +1030,8 @@ int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_mstiffss_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_mstiff_struct *)store_ptr;
+	struct mbf_mstiffss_struct *data = (struct mbf_mstiffss_struct *)mb_io_ptr->raw_data;
+	struct mbsys_mstiff_struct *store = (struct mbsys_mstiff_struct *)store_ptr;
 
 	/* set error as this is a read only format */
 	const int status = MB_SUCCESS;
