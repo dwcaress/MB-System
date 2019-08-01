@@ -391,13 +391,6 @@ int main(int argc, char **argv) {
 				clipmode = MBGRID_INTERP_GAP;
 			else if (clipmode >= 3)
 				clipmode = MBGRID_INTERP_ALL;
-			if (n < 3) {
-#ifdef USESURFACE
-				tension = 0.35;
-#else
-				tension = 0.0;
-#endif
-			}
 			flag++;
 			break;
 		case 'D':
