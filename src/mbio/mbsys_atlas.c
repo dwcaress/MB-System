@@ -45,9 +45,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -59,10 +56,10 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_atlas_struct), store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_atlas_struct), store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)*store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)*store_ptr;
 
 	/* initialize everything */
 	store->kind = MB_DATA_NONE;
@@ -281,9 +278,6 @@ int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -293,10 +287,10 @@ int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	}
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)*store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)*store_ptr;
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -310,9 +304,6 @@ int mbsys_atlas_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -325,7 +316,7 @@ int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -343,6 +334,8 @@ int mbsys_atlas_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*namp = 0;
 		*nss = 0;
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -363,11 +356,6 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-	double pixel_size;
-	double range, tt, ttmin, ssdepth;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -380,7 +368,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -414,7 +402,7 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			bathacrosstrack[i] = 0.0;
 			bathalongtrack[i] = 0.0;
 		}
-		ttmin = 999999.9;
+		double ttmin = 999999.9;
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			bath[i] = store->pr_bath[i];
 			beamflag[i] = store->pr_beamflag[i];
@@ -426,8 +414,8 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		}
 		*namp = *nbath;
 		*nss = store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt;
-		pixel_size = store->start_cmean * store->ss_timespacing;
-		ssdepth = store->start_cmean * ttmin / 2.0;
+		const double pixel_size = store->start_cmean * store->ss_timespacing;
+		const double ssdepth = store->start_cmean * ttmin / 2.0;
 		for (int i = 0; i < *nss; i++) {
 			ss[i] = 0.0;
 			ssacrosstrack[i] = 0.0;
@@ -435,19 +423,19 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		}
 		for (int i = 0; i < store->ss_max_side_bb_cnt; i++) {
 			const int j = store->ss_max_side_bb_cnt - i;
-			tt = store->ss_timedelay + store->ss_timespacing * (i - 1);
+			const double tt = store->ss_timedelay + store->ss_timespacing * (i - 1);
 			if (tt > ttmin) {
 				ss[j] = store->ss_sidescan[i];
-				range = store->start_cmean * tt / 2.0;
+				const double range = store->start_cmean * tt / 2.0;
 				ssacrosstrack[j] = -sqrt(range * range - ssdepth * ssdepth);
 				ssalongtrack[j] = 0.0;
 			}
 		}
 		for (int i = store->ss_max_side_bb_cnt; i < *nss; i++) {
-			tt = store->ss_timedelay + store->ss_timespacing * (i - store->ss_max_side_bb_cnt);
+			const double tt = store->ss_timedelay + store->ss_timespacing * (i - store->ss_max_side_bb_cnt);
 			if (tt > ttmin) {
 				ss[i] = store->ss_sidescan[i];
-				range = store->start_cmean * tt / 2.0;
+				const double range = store->start_cmean * tt / 2.0;
 				ssacrosstrack[i] = sqrt(range * range - ssdepth * ssdepth);
 				ssalongtrack[i] = 0.0;
 			}
@@ -538,6 +526,9 @@ int mbsys_atlas_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -551,11 +542,6 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-	double xtrackmin;
-	int centerpixel;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -601,7 +587,7 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -631,8 +617,8 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 			store->tt_lamplitude[i] = amp[i];
 		}
 		if (store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt != nss) {
-			xtrackmin = 99999.9;
-			centerpixel = 0;
+			double xtrackmin = 99999.9;
+			int centerpixel = 0;
 			for (int i = 0; i < nss; i++) {
 				if (ss[i] > 0.0 && fabs(ssacrosstrack[i]) < xtrackmin) {
 					xtrackmin = fabs(ssacrosstrack[i]);
@@ -661,6 +647,8 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		strncpy(store->comment, comment, MBSYS_ATLAS_COMMENT_LENGTH);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -675,10 +663,6 @@ int mbsys_atlas_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                        double *ssv, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-	double *angle_table;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -697,13 +681,17 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
 
+	int status = MB_SUCCESS;
+
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
+		double *angle_table = NULL;
+
 		/* get angle_table for 90 degree coverage */
 		if (store->start_opmode[3] == 0) {
 			if (store->tt_beam_cnt == 140)
@@ -786,10 +774,6 @@ int mbsys_atlas_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-	int detect;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -803,14 +787,17 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
 
+	int status = MB_SUCCESS;
+
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get sonar type */
+		int detect;
 		if (store->start_opmode[14] <= 1)
 			detect = MB_DETECT_PHASE;
 		else
@@ -862,12 +849,6 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                  double *altitude, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-	double bath_best;
-	double xtrack_min;
-	int found;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -880,18 +861,20 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get transducer depth and altitude */
 		*transducer_depth = store->tt_draught + store->start_heave;
-		found = MB_NO;
-		bath_best = 0.0;
-		xtrack_min = 99999999.9;
+		int found = MB_NO;
+		double bath_best = 0.0;
+		double xtrack_min = 99999999.9;
 		for (int i = 0; i < store->tt_beam_cnt; i++) {
 			if (mb_beam_ok(store->pr_beamflag[i]) && fabs(store->pr_bathacrosstrack[i]) < xtrack_min) {
 				xtrack_min = fabs(store->pr_bathacrosstrack[i]);
@@ -952,9 +935,6 @@ int mbsys_atlas_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                             double *pitch, double *heave, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -967,10 +947,12 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from ping structure */
 	if (*kind == MB_DATA_DATA) {
@@ -1072,9 +1054,6 @@ int mbsys_atlas_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                            int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1103,7 +1082,7 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1129,6 +1108,8 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		store->start_heave = heave;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1141,10 +1122,6 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-	struct mbsys_atlas_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1158,11 +1135,13 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_atlas_struct *)store_ptr;
-	copy = (struct mbsys_atlas_struct *)copy_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *copy = (struct mbsys_atlas_struct *)copy_ptr;
 
 	/* copy the main structure */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1176,9 +1155,6 @@ int mbsys_atlas_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 }
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_atlas_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1191,7 +1167,7 @@ int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_atlas_struct *)store_ptr;
+	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
 	/* check for correct kind of data - hsd2 */
 	if (store->start_opmode[14] == 6 && store->kind == MB_DATA_DATA && store->tt_beam_cnt == 140) {
@@ -1206,6 +1182,8 @@ int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		}
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

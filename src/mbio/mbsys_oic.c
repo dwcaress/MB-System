@@ -36,8 +36,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +50,7 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_oic_struct), (void **)store_ptr, error);
 
 	/* get pointer to data structure */
-	store = (struct mbsys_oic_struct *)*store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)*store_ptr;
 
 	/* initialize values in structure */
 	store->kind = MB_DATA_NONE;
@@ -147,8 +145,6 @@ int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -158,7 +154,7 @@ int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 	}
 
 	/* get pointer to data structure */
-	store = (struct mbsys_oic_struct *)*store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)*store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -191,8 +187,6 @@ int mbsys_oic_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -205,7 +199,7 @@ int mbsys_oic_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -245,8 +239,6 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
                       double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                       double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                       double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -259,7 +251,7 @@ int mbsys_oic_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -411,8 +403,6 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
                      double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                      double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                      double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -460,7 +450,7 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -580,9 +570,6 @@ int mbsys_oic_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, int
 int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                      double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                      double *ssv, int *error) {
-	struct mbsys_oic_struct *store;
-	double alpha, beta;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -601,7 +588,7 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -616,8 +603,8 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 		/* initialize */
 		for (int i = 0; i < store->beams_bath; i++) {
 			ttimes[i] = store->tt[i];
-			beta = store->angle[i];
-			alpha = store->fish_pitch;
+			const double beta = store->angle[i];
+			const double alpha = store->fish_pitch;
 			status = mb_rollpitch_to_takeoff(verbose, alpha, beta, &angles[i], &angles_forward[i], error);
 			angles_null[i] = 0.0;
 			heave[i] = 0.0;
@@ -674,8 +661,6 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -689,7 +674,7 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -748,8 +733,6 @@ int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 /*--------------------------------------------------------------------*/
 int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                double *altitude, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -762,7 +745,7 @@ int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -805,8 +788,6 @@ int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
                               int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -821,7 +802,7 @@ int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -859,8 +840,6 @@ int mbsys_oic_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, doub
 int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                           double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                           double *heave, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -873,7 +852,7 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -985,8 +964,6 @@ int mbsys_oic_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon, double navlat,
                          double speed, double heading, double draft, double roll, double pitch, double heave, int *error) {
-	struct mbsys_oic_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1015,7 +992,7 @@ int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1058,9 +1035,6 @@ int mbsys_oic_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_
 }
 /*--------------------------------------------------------------------*/
 int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_oic_struct *store;
-	struct mbsys_oic_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1074,8 +1048,8 @@ int mbsys_oic_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_oic_struct *)store_ptr;
-	copy = (struct mbsys_oic_struct *)copy_ptr;
+	struct mbsys_oic_struct *store = (struct mbsys_oic_struct *)store_ptr;
+	struct mbsys_oic_struct *copy = (struct mbsys_oic_struct *)copy_ptr;
 
 	int status = MB_SUCCESS;
 
