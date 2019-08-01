@@ -299,9 +299,6 @@ int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *h
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
-  s7k3_header *header = NULL;
-  s7k3_FileCatalog *FileCatalog;
   s7k3_filecatalogdata *filecatalogdata;
   unsigned int checksum;
   int index;
@@ -317,9 +314,9 @@ int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
-  FileCatalog = &(store->FileCatalog_write);
-  header = &(FileCatalog->header);
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
+  s7k3_FileCatalog *FileCatalog = &(store->FileCatalog_write);
+  s7k3_header *header = &(FileCatalog->header);
 
 /* print out the data to be output */
 #ifdef MBR_RESON7K3_DEBUG2

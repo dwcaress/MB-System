@@ -111,9 +111,6 @@ int mbr_info_sb2100rw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -122,7 +119,9 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_sb2100rw_struct *)data_ptr;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -235,9 +234,6 @@ int mbr_zero_sb2100rw(int verbose, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_sb2100_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -248,17 +244,14 @@ int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_sb2100rw_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), &mb_io_ptr->store_data, error);
 
 	/* get store structure pointer */
-	store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)mb_io_ptr->store_data;
 
 	/* set comment pointer */
 	store->comment = (char *)&(store->roll_bias_port);
@@ -897,13 +890,6 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, struct mbf_sb2100rw_struct *data
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-	char *data_ptr;
-	FILE *mbfp;
-	int done;
-	int expect;
-
 	static int line_save_flag = MB_NO;
 	static char raw_line[MBF_SB2100RW_MAXLINE] = "\0";
 	static int type = MBF_SB2100RW_NONE;
@@ -919,9 +905,9 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* initialize everything to zeros */
 	mbr_zero_sb2100rw(verbose, data_ptr, error);
@@ -929,8 +915,9 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 	/* get file position at record beginning */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	done = MB_NO;
-	expect = MBF_SB2100RW_NONE;
+	int status = MB_SUCCESS;
+	int done = MB_NO;
+	int expect = MBF_SB2100RW_NONE;
 	while (done == MB_NO) {
 
 		/* get next record label */
@@ -1027,9 +1014,6 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-	struct mbsys_sb2100_struct *store;
 	double scale;
 
 	if (verbose >= 2) {
@@ -1042,11 +1026,11 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* read next data from file */
-	status = mbr_sb2100rw_rd_data(verbose, mbio_ptr, error);
+	const int status = mbr_sb2100rw_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -1184,9 +1168,6 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1196,13 +1177,15 @@ int mbr_sb2100rw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)data_ptr;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       raw line:         %s\n", data->comment);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -1230,8 +1213,6 @@ int mbr_sb2100rw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1239,6 +1220,8 @@ int mbr_sb2100rw_write_line(int verbose, FILE *mbfp, char *line, int *error) {
 		fprintf(stderr, "dbg2       mbfp:       %p\n", (void *)mbfp);
 		fprintf(stderr, "dbg2       line:       %s\n", line);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* write next line in file */
 	if ((status = fputs(line, mbfp)) != EOF) {
@@ -1289,9 +1272,6 @@ int mbr_sb2100rw_wr_label(int verbose, FILE *mbfp, char type, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1301,7 +1281,7 @@ int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)data_ptr;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1322,7 +1302,7 @@ int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* write the record label */
-	status = mbr_sb2100rw_wr_label(verbose, mbfp, MBF_SB2100RW_PR, error);
+	int status = mbr_sb2100rw_wr_label(verbose, mbfp, MBF_SB2100RW_PR, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -1368,9 +1348,6 @@ int mbr_sb2100rw_wr_pr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1380,7 +1357,7 @@ int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)data_ptr;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1389,7 +1366,7 @@ int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* write the record label */
-	status = mbr_sb2100rw_wr_label(verbose, mbfp, MBF_SB2100RW_TR, error);
+	int status = mbr_sb2100rw_wr_label(verbose, mbfp, MBF_SB2100RW_TR, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -1419,8 +1396,6 @@ int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
 	double degrees;
 	int idegrees, minutes;
 
@@ -1433,7 +1408,7 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)data_ptr;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1485,7 +1460,7 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* write the record label */
-	status = mbr_sb2100rw_wr_label(verbose, mbfp, MBF_SB2100RW_DR, error);
+	int status = mbr_sb2100rw_wr_label(verbose, mbfp, MBF_SB2100RW_DR, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -1600,8 +1575,6 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
 	unsigned short write_ss[2 * MBF_SB2100RW_PIXELS];
 	short *write_ss_ptr;
 	double degrees;
@@ -1616,7 +1589,7 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)data_ptr;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -1664,7 +1637,7 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	}
 
 	/* write the record label */
-	status = mbr_sb2100rw_wr_label(verbose, mbfp, MBF_SB2100RW_SS, error);
+	int status = mbr_sb2100rw_wr_label(verbose, mbfp, MBF_SB2100RW_SS, error);
 
 	/* write out the data */
 	if (status == MB_SUCCESS) {
@@ -1790,10 +1763,6 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-	FILE *mbfp;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1806,8 +1775,10 @@ int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)data_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)data_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
+
+	int status = MB_SUCCESS;
 
 	if (data->kind == MB_DATA_RAW_LINE) {
 		status = mbr_sb2100rw_wr_rawline(verbose, mbfp, data, error);
@@ -1844,10 +1815,6 @@ int mbr_sb2100rw_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_sb2100rw_struct *data;
-	char *data_ptr;
-	struct mbsys_sb2100_struct *store;
 	double scale;
 	double depth_max, across_max, along_max;
 
@@ -1863,9 +1830,11 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
-	data_ptr = (char *)data;
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbf_sb2100rw_struct *data = (struct mbf_sb2100rw_struct *)mb_io_ptr->raw_data;
+	char *data_ptr = (char *)data;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* first translate values from data storage structure */
 	if (store != NULL) {
