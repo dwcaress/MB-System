@@ -38,8 +38,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_sb2100_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -54,7 +52,7 @@ int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_sb2100_struct), store_ptr, error);
 
 	/* get store structure pointer */
-	store = (struct mbsys_sb2100_struct *)*store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)*store_ptr;
 
 	/* set comment pointer */
 	store->comment = (char *)&(store->roll_bias_port);
@@ -72,7 +70,6 @@ int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -97,8 +94,6 @@ int mbsys_sb2100_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                             int *error) {
-	struct mbsys_sb2100_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -111,7 +106,7 @@ int mbsys_sb2100_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -151,7 +146,6 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                          double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                          double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_sb2100_struct *store;
 	int time_j[5];
 	double gain_db;
 	double gain_factor;
@@ -169,7 +163,7 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -336,7 +330,6 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
                         double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                         double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                         double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_sb2100_struct *store;
 	int time_j[5];
 	int set_pixel_size;
 	double gain_db;
@@ -390,7 +383,7 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -484,8 +477,6 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                         double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                         double *ssv, int *error) {
-	struct mbsys_sb2100_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -504,7 +495,7 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -577,8 +568,6 @@ int mbsys_sb2100_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_sb2100_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -592,7 +581,7 @@ int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -656,8 +645,6 @@ int mbsys_sb2100_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                        double *receive_gain, int *error) {
-	struct mbsys_sb2100_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -670,7 +657,7 @@ int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -730,7 +717,6 @@ int mbsys_sb2100_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                   double *altitude, int *error) {
-	struct mbsys_sb2100_struct *store;
 	double bath_best;
 	double xtrack_min;
 
@@ -746,7 +732,7 @@ int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -817,9 +803,6 @@ int mbsys_sb2100_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                              double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                              double *pitch, double *heave, int *error) {
-	struct mbsys_sb2100_struct *store;
-	int time_j[5];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -832,7 +815,7 @@ int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -842,6 +825,7 @@ int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get time */
+		int time_j[5];
 		time_j[0] = store->year;
 		time_j[1] = store->jday;
 		time_j[2] = 60 * store->hour + store->minute;
@@ -944,9 +928,6 @@ int mbsys_sb2100_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_sb2100_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                             double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                             int *error) {
-	struct mbsys_sb2100_struct *store;
-	int time_j[5];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -975,11 +956,12 @@ int mbsys_sb2100_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get time */
+		int time_j[5];
 		mb_get_jtime(verbose, time_i, time_j);
 		store->year = time_j[0];
 		store->jday = time_j[1];
@@ -1024,8 +1006,6 @@ int mbsys_sb2100_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                              int *error) {
-	struct mbsys_sb2100_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1038,7 +1018,7 @@ int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1089,8 +1069,6 @@ int mbsys_sb2100_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	struct mbsys_sb2100_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1106,7 +1084,7 @@ int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1134,9 +1112,6 @@ int mbsys_sb2100_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int ns
 }
 /*--------------------------------------------------------------------*/
 int mbsys_sb2100_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_sb2100_struct *store;
-	struct mbsys_sb2100_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1150,8 +1125,8 @@ int mbsys_sb2100_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_sb2100_struct *)store_ptr;
-	copy = (struct mbsys_sb2100_struct *)copy_ptr;
+	struct mbsys_sb2100_struct *store = (struct mbsys_sb2100_struct *)store_ptr;
+	struct mbsys_sb2100_struct *copy = (struct mbsys_sb2100_struct *)copy_ptr;
 
 	/* copy the data */
 	*copy = *store;

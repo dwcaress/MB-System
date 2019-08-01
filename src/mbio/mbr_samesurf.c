@@ -43,8 +43,6 @@ int mbr_info_samesurf(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +50,6 @@ int mbr_info_samesurf(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_SURF;
 	*beams_bath_max = MBSYS_SURF_MAXBEAMS;
@@ -78,6 +75,8 @@ int mbr_info_samesurf(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_DATA;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -111,8 +110,6 @@ int mbr_info_samesurf(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -123,11 +120,8 @@ int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
-	status = mbsys_surf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_surf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -141,8 +135,6 @@ int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_samesurf(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -154,7 +146,7 @@ int mbr_dem_samesurf(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mbsys_surf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+	const int status = mbsys_surf_deall(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -168,9 +160,6 @@ int mbr_dem_samesurf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_surf_struct *store;
-	int sapi_verbose;
 	int sapi_status;
 	SurfSoundingData *SoundingDataPtr;
 	SurfTransducerParameterTable *ActualTransducerTablePtr;
@@ -189,7 +178,6 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int utm_zone;
 	char projection[MB_NAME_LENGTH];
 	double easting, northing, lon, lat;
-	double *refeasting, *refnorthing;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -201,15 +189,18 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_surf_struct *)store_ptr;
-	refeasting = &(mb_io_ptr->saved1);
-	refnorthing = &(mb_io_ptr->saved2);
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
+	double *refeasting = &(mb_io_ptr->saved1);
+	double *refnorthing = &(mb_io_ptr->saved2);
 
 	/* set sapi verbosity */
+	int sapi_verbose;
 	if (verbose > 1)
 		sapi_verbose = verbose;
 	else
 		sapi_verbose = 0;
+
+	int status = MB_SUCCESS;
 
 	/* read global info if the structure is blank (usually first time through) */
 	if (store->initialized == MB_NO) {
@@ -650,9 +641,6 @@ int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_surf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -662,11 +650,11 @@ int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to mbio descriptor and data structure */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_surf_struct *)store_ptr;
+	/* struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr; */
+	/* struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr; */
 
 	/* write failure always */
-	status = MB_FAILURE;
+	const int status = MB_FAILURE;
 	*error = MB_ERROR_WRITE_FAIL;
 
 	if (verbose >= 2) {
@@ -682,8 +670,6 @@ int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -694,7 +680,7 @@ int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_samesurf(
+	const int status = mbr_info_samesurf(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

@@ -197,11 +197,6 @@ int mbr_dem_wasspenl(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_genbathy_struct *genbathy;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -211,11 +206,11 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	genbathy = &(store->genbathy);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_genbathy_struct *genbathy = &(store->genbathy);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->version));
 	index += 4;
 	mb_get_binary_double(MB_YES, &buffer[index], &(genbathy->msec));
@@ -264,6 +259,8 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 	}
 	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->checksum));
 	index += 4;
+
+	int status = MB_SUCCESS;
 
 	/* set kind */
 	if (status == MB_SUCCESS) {
@@ -330,11 +327,6 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_corbathy_struct *corbathy;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -344,11 +336,11 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	corbathy = &(store->corbathy);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_corbathy_struct *corbathy = &(store->corbathy);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->version));
 	index += 4;
 	mb_get_binary_double(MB_YES, &buffer[index], &(corbathy->msec));
@@ -401,6 +393,8 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 	}
 	mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->checksum));
 	index += 4;
+
+	int status = MB_SUCCESS;
 
 	/* set kind */
 	if (status == MB_SUCCESS) {
@@ -456,12 +450,6 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_rawsonar_struct *rawsonar;
-	int index;
-	size_t rawdata_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -471,11 +459,11 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	rawsonar = &(store->rawsonar);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_rawsonar_struct *rawsonar = &(store->rawsonar);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->version));
 	index += 4;
 	mb_get_binary_double(MB_YES, &buffer[index], &(rawsonar->msec));
@@ -510,7 +498,8 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 		mb_get_binary_float(MB_YES, &buffer[index], &(rawsonar->beam_angle[i]));
 		index += 4;
 	}
-	rawdata_len = (size_t)(rawsonar->n * rawsonar->m);
+	const size_t rawdata_len = (size_t)(rawsonar->n * rawsonar->m);
+	int status = MB_SUCCESS;
 	if (rawsonar->rawdata_alloc < rawdata_len) {
 		status = mb_reallocd(verbose, __FILE__, __LINE__, rawdata_len, (void **)&(rawsonar->rawdata), error);
 		if (status != MB_SUCCESS)
@@ -571,11 +560,6 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_gen_sens_struct *gen_sens;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -585,11 +569,11 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	gen_sens = &(store->gen_sens);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_gen_sens_struct *gen_sens = &(store->gen_sens);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(gen_sens->version));
 	index += 4;
 	mb_get_binary_double(MB_YES, &buffer[index], &(gen_sens->msec));
@@ -602,6 +586,8 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 	index += gen_sens->message_length;
 	mb_get_binary_int(MB_YES, &buffer[index], &(gen_sens->checksum));
 	index += 4;
+
+	int status = MB_SUCCESS;
 
 	/* set kind */
 	if (status == MB_SUCCESS) {
@@ -636,11 +622,6 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_nvupdate_struct *nvupdate;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -650,11 +631,11 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	nvupdate = &(store->nvupdate);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_nvupdate_struct *nvupdate = &(store->nvupdate);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(nvupdate->version));
 	index += 4;
 	mb_get_binary_double(MB_YES, &buffer[index], &(nvupdate->latitude));
@@ -677,6 +658,8 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 	index += 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(nvupdate->checksum));
 	index += 4;
+
+	int status = MB_SUCCESS;
 
 	/* set kind */
 	if (status == MB_SUCCESS) {
@@ -716,11 +699,6 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -730,11 +708,11 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	wcd_navi = &(store->wcd_navi);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_wcd_navi_struct *wcd_navi = &(store->wcd_navi);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(wcd_navi->version));
 	index += 4;
 	mb_get_binary_double(MB_YES, &buffer[index], &(wcd_navi->latitude));
@@ -751,6 +729,7 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 	index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(wcd_navi->sample_rate));
 	index += 4;
+	int status = MB_SUCCESS;
 	if (wcd_navi->wcdata_alloc < wcd_navi->num_points) {
 		status =
 		    mb_reallocd(verbose, __FILE__, __LINE__, wcd_navi->num_points * sizeof(float), (void **)&(wcd_navi->wcdata_x), error);
@@ -815,11 +794,6 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_sensprop_struct *sensprop;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -829,11 +803,11 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	sensprop = &(store->sensprop);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_sensprop_struct *sensprop = &(store->sensprop);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->version));
 	index += 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->flags));
@@ -848,6 +822,9 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 	}
 	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->n));
 	index += 4;
+
+	int status = MB_SUCCESS;
+
 	if (sensprop->n_alloc < sensprop->n) {
 		status = mb_reallocd(verbose, __FILE__, __LINE__, sensprop->n * sizeof(struct mbsys_wassp_sensor_struct),
 		                     (void **)&(sensprop->sensors), error);
@@ -937,11 +914,6 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_sys_prop_struct *sys_prop;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -951,11 +923,11 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	sys_prop = &(store->sys_prop);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_sys_prop_struct *sys_prop = &(store->sys_prop);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->version));
 	index += 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->product_type));
@@ -980,6 +952,8 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 	}
 	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->checksum));
 	index += 4;
+
+	int status = MB_SUCCESS;
 
 	/* set kind */
 	if (status == MB_SUCCESS) {
@@ -1020,12 +994,6 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
-	int index;
-	unsigned int size;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1035,13 +1003,16 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	sys_cfg1 = &(store->sys_cfg1);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = &(store->sys_cfg1);
 
 	/* get the size */
-	index = 4;
+	int index = 4;
+	unsigned int size;
 	mb_get_binary_int(MB_YES, &buffer[index], &size);
 	sys_cfg1->sys_cfg1_len = size;
+
+	int status = MB_SUCCESS;
 
 	/* extract the data */
 	if (sys_cfg1->sys_cfg1_data_alloc < size) {
@@ -1083,11 +1054,6 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_mcomment_struct *mcomment;
-	int index;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1097,14 +1063,16 @@ int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	mcomment = &(store->mcomment);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_mcomment_struct *mcomment = &(store->mcomment);
 
 	/* extract the data */
-	index = 16;
+	int index = 16;
 	mb_get_binary_int(MB_YES, &buffer[index], &(mcomment->comment_length));
 	index += 4;
 	memcpy(mcomment->comment_message, &buffer[index], (size_t)mcomment->comment_length);
+
+	int status = MB_SUCCESS;
 
 	/* set kind */
 	if (status == MB_SUCCESS) {
@@ -1136,12 +1104,6 @@ int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_unknown1_struct *unknown1;
-	int index;
-	unsigned int size;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1151,13 +1113,16 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	unknown1 = &(store->unknown1);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_unknown1_struct *unknown1 = &(store->unknown1);
 
 	/* get the size */
-	index = 4;
+	int index = 4;
+	unsigned int size;
 	mb_get_binary_int(MB_YES, &buffer[index], &size);
 	unknown1->unknown1_len = size;
+
+	int status = MB_SUCCESS;
 
 	/* extract the data */
 	if (unknown1->unknown1_data_alloc < size) {
@@ -1199,27 +1164,11 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_genbathy_struct *genbathy;
-	struct mbsys_wassp_corbathy_struct *corbathy;
-	struct mbsys_wassp_rawsonar_struct *rawsonar;
-	struct mbsys_wassp_gen_sens_struct *gen_sens;
-	struct mbsys_wassp_nvupdate_struct *nvupdate;
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi;
-	struct mbsys_wassp_sensprop_struct *sensprop;
-	struct mbsys_wassp_sys_prop_struct *sys_prop;
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
-	struct mbsys_wassp_mcomment_struct *mcomment;
-	char **bufferptr;
-	char *buffer;
-	int *bufferalloc;
 	unsigned int syncvalue;
 	char recordid[12];
 	size_t read_len;
 	int skip;
-	unsigned int *record_size;
 	int reset_beamflags;
-	int done;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1233,28 +1182,28 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
-	corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
-	rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
-	gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
-	nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
-	wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
-	sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
-	sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
-	sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
-	mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_genbathy_struct *genbathy = (struct mbsys_wassp_genbathy_struct *)&(store->genbathy);
+	struct mbsys_wassp_corbathy_struct *corbathy = (struct mbsys_wassp_corbathy_struct *)&(store->corbathy);
+	struct mbsys_wassp_rawsonar_struct *rawsonar = (struct mbsys_wassp_rawsonar_struct *)&(store->rawsonar);
+	struct mbsys_wassp_gen_sens_struct *gen_sens = (struct mbsys_wassp_gen_sens_struct *)&(store->gen_sens);
+	struct mbsys_wassp_nvupdate_struct *nvupdate = (struct mbsys_wassp_nvupdate_struct *)&(store->nvupdate);
+	struct mbsys_wassp_wcd_navi_struct *wcd_navi = (struct mbsys_wassp_wcd_navi_struct *)&(store->wcd_navi);
+	struct mbsys_wassp_sensprop_struct *sensprop = (struct mbsys_wassp_sensprop_struct *)&(store->sensprop);
+	struct mbsys_wassp_sys_prop_struct *sys_prop = (struct mbsys_wassp_sys_prop_struct *)&(store->sys_prop);
+	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = (struct mbsys_wassp_sys_cfg1_struct *)&(store->sys_cfg1);
+	struct mbsys_wassp_mcomment_struct *mcomment = (struct mbsys_wassp_mcomment_struct *)&(store->mcomment);
 
-	bufferptr = (char **)&mb_io_ptr->saveptr1;
-	buffer = (char *)*bufferptr;
-	bufferalloc = (int *)&mb_io_ptr->save6;
-	record_size = (unsigned int *)&buffer[4];
+	char **bufferptr = (char **)&mb_io_ptr->saveptr1;
+	char *buffer = (char *)*bufferptr;
+	int *bufferalloc = (int *)&mb_io_ptr->save6;
+	unsigned int *record_size = (unsigned int *)&buffer[4];
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* loop over reading data until a record is ready for return */
-	done = MB_NO;
+	int done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
 	memset((void *)recordid, 0, (size_t)12);
 	while (done == MB_NO) {
@@ -1439,9 +1388,6 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1458,10 +1404,10 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	/* read next data from file */
-	status = mbr_wasspenl_rd_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_wasspenl_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -1484,8 +1430,6 @@ int mbr_rt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_genbathy_struct *genbathy;
 	char *buffer;
 	int index;
 
@@ -1499,8 +1443,8 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	genbathy = &(store->genbathy);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_genbathy_struct *genbathy = &(store->genbathy);
 	genbathy->version = 3;
 	genbathy->checksum = 0x8806CBA5;
 
@@ -1624,8 +1568,6 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_corbathy_struct *corbathy;
 	char *buffer;
 	int index;
 
@@ -1639,8 +1581,8 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	corbathy = &(store->corbathy);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_corbathy_struct *corbathy = &(store->corbathy);
 	corbathy->version = 4;
 	corbathy->checksum = 0x8806CBA5;
 
@@ -1771,8 +1713,6 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_rawsonar_struct *rawsonar;
 	char *buffer;
 	int index;
 	size_t rawdata_len;
@@ -1787,8 +1727,8 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	rawsonar = &(store->rawsonar);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_rawsonar_struct *rawsonar = &(store->rawsonar);
 	rawsonar->version = 2;
 	rawsonar->checksum = 0x8806CBA5;
 
@@ -1900,8 +1840,6 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_gen_sens_struct *gen_sens;
 	char *buffer;
 	int index;
 
@@ -1915,8 +1853,8 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	gen_sens = &(store->gen_sens);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_gen_sens_struct *gen_sens = &(store->gen_sens);
 	gen_sens->version = 2;
 	gen_sens->checksum = 0x8806CBA5;
 
@@ -1986,8 +1924,6 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 
 int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_nvupdate_struct *nvupdate;
 	char *buffer;
 	int index;
 
@@ -2001,8 +1937,8 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	nvupdate = &(store->nvupdate);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_nvupdate_struct *nvupdate = &(store->nvupdate);
 	nvupdate->version = 4;
 	nvupdate->checksum = 0x8806CBA5;
 
@@ -2087,8 +2023,6 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 
 int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_wcd_navi_struct *wcd_navi;
 	char *buffer;
 	int index;
 
@@ -2102,8 +2036,8 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	wcd_navi = &(store->wcd_navi);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_wcd_navi_struct *wcd_navi = &(store->wcd_navi);
 	wcd_navi->version = 4;
 	wcd_navi->checksum = 0x8806CBA5;
 
@@ -2195,8 +2129,6 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 
 int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_sensprop_struct *sensprop;
 	char *buffer;
 	int index;
 
@@ -2210,8 +2142,8 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	sensprop = &(store->sensprop);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_sensprop_struct *sensprop = &(store->sensprop);
 	sensprop->version = 1;
 	sensprop->checksum = 0x8806CBA5;
 
@@ -2330,8 +2262,6 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 
 int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_sys_prop_struct *sys_prop;
 	char *buffer;
 	int index;
 
@@ -2345,8 +2275,8 @@ int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	sys_prop = &(store->sys_prop);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_sys_prop_struct *sys_prop = &(store->sys_prop);
 	sys_prop->version = 1;
 	sys_prop->checksum = 0x8806CBA5;
 
@@ -2434,8 +2364,6 @@ int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, vo
 
 int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1;
 	char *buffer;
 
 	if (verbose >= 2) {
@@ -2448,8 +2376,8 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	sys_cfg1 = &(store->sys_cfg1);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = &(store->sys_cfg1);
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -2494,8 +2422,6 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 
 int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_mcomment_struct *mcomment;
 	char *buffer;
 	int index;
 
@@ -2509,8 +2435,8 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	mcomment = &(store->mcomment);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_mcomment_struct *mcomment = &(store->mcomment);
 	mcomment->checksum = 0x8806CBA5;
 
 	/* print debug statements */
@@ -2570,8 +2496,6 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 
 int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-	struct mbsys_wassp_unknown1_struct *unknown1;
 	char *buffer;
 
 	if (verbose >= 2) {
@@ -2584,8 +2508,8 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 	}
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
-	unknown1 = &(store->unknown1);
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_unknown1_struct *unknown1 = &(store->unknown1);
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -2629,7 +2553,6 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
 	char **bufferptr;
 	char *buffer;
 	int *bufferalloc;
@@ -2648,7 +2571,7 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 
 	/* get saved values */
 	bufferptr = (char **)&mb_io_ptr->saveptr1;
@@ -2758,9 +2681,6 @@ int mbr_wasspenl_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_wassp_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2773,6 +2693,7 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
+	struct mbsys_wassp_struct *store;
 	store = (struct mbsys_wassp_struct *)store_ptr;
 
 #ifdef MBR_WASSPENLDEBUG
@@ -2780,7 +2701,7 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	/* write next data to file */
-	status = mbr_wasspenl_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_wasspenl_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 #ifdef MBR_WASSPENLDEBUG
 	fprintf(stderr, "Done with mbr_wasspenl_wr_data: status:%d error:%d\n", status, *error);
