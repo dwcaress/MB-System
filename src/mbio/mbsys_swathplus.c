@@ -316,8 +316,7 @@ int mbsys_swathplus_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	struct mbsys_swathplus_struct *store;
-	store = (struct mbsys_swathplus_struct *)store_ptr;
+	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LOGARITHMIC;
@@ -976,10 +975,6 @@ int mbsys_swathplus_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 /*--------------------------------------------------------------------*/
 int mbsys_swathplus_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                           double *receive_gain, int *error) {
-	struct mbsys_swathplus_struct *store;
-	swpls_sxpping *sxp_ping;
-	int type;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -992,12 +987,12 @@ int mbsys_swathplus_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_swathplus_struct *)store_ptr;
-	sxp_ping = (swpls_sxpping *)&(store->sxp_ping);
+	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
+	swpls_sxpping *sxp_ping = (swpls_sxpping *)&(store->sxp_ping);
 
 	/* get data kind */
 	*kind = store->kind;
-	type = store->type;
+	const int type = store->type;
 
 	int status = MB_SUCCESS;
 

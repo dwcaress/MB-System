@@ -35,9 +35,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_netcdf_struct *store;
-	char c;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +49,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_netcdf_struct), (void **)store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)*store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)*store_ptr;
 
 	/* now initialize everything */
 	if (status == MB_SUCCESS) {
@@ -85,6 +82,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		store->mbWestLongitude = 0.;
 		strcpy(store->mbMeridian180, " ");
 		for (int i = 0; i < MBSYS_NETCDF_ATTRIBUTELEN; i++) {
+			char c;
 			if (i < MBSYS_NETCDF_ATTRIBUTELEN - 1)
 				c = ' ';
 			else
@@ -120,6 +118,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 		store->mbMaxDepth = 0.;
 		store->mbCycleCounter = 0;
 		for (int i = 0; i < MBSYS_NETCDF_COMMENTLEN - 1; i++) {
+			char c;
 			if (i < MBSYS_NETCDF_COMMENTLEN - 1)
 				c = ' ';
 			else
@@ -1047,8 +1046,6 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_netcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1061,7 +1058,7 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)*store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)*store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -1197,8 +1194,6 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                             int *error) {
-	struct mbsys_netcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1211,7 +1206,7 @@ int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1253,9 +1248,6 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
                          double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                          double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                          double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_netcdf_struct *store;
-	double depthscale, distancescale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1268,7 +1260,7 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1304,8 +1296,8 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		if (store->mbReflectivity_id >= 0)
 			*namp = store->mbBeamNbr;
 		*nss = 0;
-		depthscale = store->mbDepthScale[0] * store->mbDepthScale_scale_factor;
-		distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
+		const double depthscale = store->mbDepthScale[0] * store->mbDepthScale_scale_factor;
+		const double distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
 		for (int i = 0; i < *nbath; i++) {
 			if (store->mbSFlag[i] == 0)
 				beamflag[i] = MB_FLAG_NULL;
@@ -1426,10 +1418,6 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
                         double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                         double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                         double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_netcdf_struct *store;
-	double depthscale, distancescale;
-	double depthmax, distancemax;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1477,7 +1465,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -1758,16 +1746,16 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		}
 
 		/* get depth and distance scales */
-		depthmax = 0.0;
-		distancemax = 0.0;
+		double depthmax = 0.0;
+		double distancemax = 0.0;
 		for (int i = 0; i < nbath; i++) {
 			if (beamflag[i] != MB_FLAG_NULL) {
 				depthmax = MAX(fabs(bath[i]), depthmax);
 				distancemax = MAX(fabs(bathacrosstrack[i]), distancemax);
 			}
 		}
-		depthscale = 2.1 * depthmax / ((double)store->mbDepth_valid_maximum);
-		distancescale = 2.1 * distancemax / store->mbAcrossDistance_valid_maximum;
+		double depthscale = 2.1 * depthmax / ((double)store->mbDepth_valid_maximum);
+		double distancescale = 2.1 * distancemax / store->mbAcrossDistance_valid_maximum;
 
 		/* put distance, depth, and backscatter values
 		    into data structure */
@@ -1828,8 +1816,6 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                         double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                         double *ssv, int *error) {
-	struct mbsys_netcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1848,7 +1834,7 @@ int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1902,8 +1888,6 @@ int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_netcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1917,7 +1901,7 @@ int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1976,14 +1960,6 @@ int mbsys_netcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                   double *altitude, int *error) {
-	struct mbsys_netcdf_struct *store;
-	double depthscale;
-	double distancescale;
-	double xtrackminbest;
-	double vdepthbest;
-	double xtrackmin;
-	double vdepth;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1996,7 +1972,7 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -2023,12 +1999,12 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 		}
 		else {
 			/* loop over soundings */
-			depthscale = store->mbDepthScale[0] * store->mbDepthScale_scale_factor;
-			distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
-			xtrackminbest = 10000000.0;
-			vdepthbest = 0.0;
-			xtrackmin = 10000000.0;
-			vdepth = 0.0;
+			const double depthscale = store->mbDepthScale[0] * store->mbDepthScale_scale_factor;
+			const double distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
+			double xtrackminbest = 10000000.0;
+			double vdepthbest = 0.0;
+			double xtrackmin = 10000000.0;
+			double vdepth = 0.0;
 			for (int i = 0; i < store->mbBeamNbr; i++) {
 				if (store->mbSFlag[i] == 2) {
 					if (fabs((double)store->mbAcrossDistance[i]) < xtrackminbest) {
@@ -2086,8 +2062,6 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, 
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
                                  int *error) {
-	struct mbsys_netcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2102,7 +2076,7 @@ int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, d
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -2150,8 +2124,6 @@ int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, d
 int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                              double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                              double *pitch, double *heave, int *error) {
-	struct mbsys_netcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2164,7 +2136,7 @@ int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -2274,8 +2246,6 @@ int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                             double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                             int *error) {
-	struct mbsys_netcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2304,7 +2274,7 @@ int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -2381,9 +2351,6 @@ int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int ti
 }
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_netcdf_struct *store;
-	struct mbsys_netcdf_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2397,8 +2364,8 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_p
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_netcdf_struct *)store_ptr;
-	copy = (struct mbsys_netcdf_struct *)copy_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *copy = (struct mbsys_netcdf_struct *)copy_ptr;
 
 	int status = MB_SUCCESS;
 
