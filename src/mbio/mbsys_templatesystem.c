@@ -36,8 +36,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +50,7 @@ int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_templatesystem_struct), (void **)store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)*store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)*store_ptr;
 
 	/* initialize data record kind */
 	store->kind = MB_DATA_NONE;
@@ -79,8 +77,6 @@ int mbsys_templatesystem_alloc(int verbose, void *mbio_ptr, void **store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -90,7 +86,7 @@ int mbsys_templatesystem_deall(int verbose, void *mbio_ptr, void **store_ptr, in
 	}
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)*store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)*store_ptr;
 
 	/* deallocate any arrays or structures contained within the store data structure */
 
@@ -111,8 +107,6 @@ int mbsys_templatesystem_deall(int verbose, void *mbio_ptr, void **store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                     int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -125,7 +119,7 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -162,8 +156,6 @@ int mbsys_templatesystem_dimensions(int verbose, void *mbio_ptr, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -175,7 +167,7 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *p
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)mb_io_ptr->store_data;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)mb_io_ptr->store_data;
 
 	/* extract data from structure */
 	*pingnumber = store->ping_number;
@@ -195,8 +187,6 @@ int mbsys_templatesystem_pingnumber(int verbose, void *mbio_ptr, unsigned int *p
 }
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -209,7 +199,7 @@ int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get sonar type */
 	*sonartype = MB_SONARTYPE_MULTIBEAM;
@@ -229,8 +219,6 @@ int mbsys_templatesystem_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -243,7 +231,7 @@ int mbsys_templatesystem_sidescantype(int verbose, void *mbio_ptr, void *store_p
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LINEAR;
@@ -266,8 +254,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
                                  double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                                  char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                                  double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -280,7 +266,7 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -515,8 +501,6 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
                                 double navlon, double navlat, double speed, double heading, int nbath, int namp, int nss,
                                 char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                                 double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -566,7 +550,7 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -646,7 +630,6 @@ int mbsys_templatesystem_insert(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes,
                                 double *angles, double *angles_forward, double *angles_null, double *heave,
                                 double *alongtrack_offset, double *draft, double *ssv, int *error) {
-	struct mbsys_templatesystem_struct *store;
 	double heave_use, roll, pitch;
 	double alpha, beta, theta, phi;
 
@@ -668,7 +651,7 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -738,8 +721,6 @@ int mbsys_templatesystem_ttimes(int verbose, void *mbio_ptr, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -753,7 +734,7 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -814,8 +795,6 @@ int mbsys_templatesystem_detects(int verbose, void *mbio_ptr, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain,
                                double *pulse_length, double *receive_gain, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -828,7 +807,7 @@ int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -888,7 +867,6 @@ int mbsys_templatesystem_gains(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                           double *altitudev, int *error) {
-	struct mbsys_templatesystem_struct *store;
 	double heave, roll, pitch;
 	double xtrackmin;
 	int altitude_found;
@@ -905,7 +883,7 @@ int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *sto
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -958,8 +936,6 @@ int mbsys_templatesystem_extract_altitude(int verbose, void *mbio_ptr, void *sto
 int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                      double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                      double *pitch, double *heave, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -972,7 +948,7 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1092,7 +1068,6 @@ int mbsys_templatesystem_extract_nav(int verbose, void *mbio_ptr, void *store_pt
 int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
                                       double *time_d, double *navlon, double *navlat, double *speed, double *heading,
                                       double *draft, double *roll, double *pitch, double *heave, int *error) {
-	struct mbsys_templatesystem_struct *store;
 	int inav;
 
 	if (verbose >= 2) {
@@ -1108,7 +1083,7 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1233,8 +1208,6 @@ int mbsys_templatesystem_extract_nnav(int verbose, void *mbio_ptr, void *store_p
 int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                                     double navlat, double speed, double heading, double draft, double roll, double pitch,
                                     double heave, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1263,7 +1236,7 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1336,8 +1309,6 @@ int mbsys_templatesystem_insert_nav(int verbose, void *mbio_ptr, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth,
                                      double *velocity, int *error) {
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1350,7 +1321,7 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1402,9 +1373,6 @@ int mbsys_templatesystem_extract_svp(int verbose, void *mbio_ptr, void *store_pt
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                                     int *error) {
-	struct mbsys_templatesystem_struct *store;
-	s7kr_svp *svp;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1420,7 +1388,8 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
+	/* s7kr_svp *svp; */
 
 	int status = MB_SUCCESS;
 
@@ -1448,9 +1417,6 @@ int mbsys_templatesystem_insert_svp(int verbose, void *mbio_ptr, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbsys_templatesystem_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_templatesystem_struct *store;
-	struct mbsys_templatesystem_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1464,8 +1430,8 @@ int mbsys_templatesystem_copy(int verbose, void *mbio_ptr, void *store_ptr, void
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
-	copy = (struct mbsys_templatesystem_struct *)copy_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *copy = (struct mbsys_templatesystem_struct *)copy_ptr;
 
 	/* copy the data - for many formats memory must be allocated and
 	    sub-structures copied separately */

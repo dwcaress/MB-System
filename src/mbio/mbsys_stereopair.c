@@ -36,8 +36,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +50,7 @@ int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_stereopair_struct), (void **)store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)*store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)*store_ptr;
 
 	/* initialize data record */
 	memset(*store_ptr, 0, sizeof(struct mbsys_stereopair_struct));
@@ -70,8 +68,6 @@ int mbsys_stereopair_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -81,7 +77,7 @@ int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 	}
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)*store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)*store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -106,8 +102,6 @@ int mbsys_stereopair_deall(int verbose, void *mbio_ptr, void **store_ptr, int *e
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                 int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -120,7 +114,7 @@ int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -157,8 +151,6 @@ int mbsys_stereopair_dimensions(int verbose, void *mbio_ptr, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -170,7 +162,7 @@ int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)mb_io_ptr->store_data;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)mb_io_ptr->store_data;
 
 	/* extract data from structure */
 	*pingnumber = 0;
@@ -190,8 +182,6 @@ int mbsys_stereopair_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingn
 }
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -204,7 +194,7 @@ int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_CAMERA;
@@ -224,8 +214,6 @@ int mbsys_stereopair_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -238,7 +226,7 @@ int mbsys_stereopair_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LINEAR;
@@ -261,9 +249,6 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
                              double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                              char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                              double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_stereopair_struct *store;
-	struct mbsys_stereopair_sounding_struct *sounding;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -276,7 +261,7 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -305,7 +290,8 @@ int mbsys_stereopair_extract(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*nbath = store->num_soundings;
 		*namp = 0;
 		for (int i = 0; i < *nbath; i++) {
-			sounding = (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
+			struct mbsys_stereopair_sounding_struct *sounding =
+			    (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
 			bath[i] = sounding->depth + store->sensordepth;
 			beamflag[i] = sounding->beamflag;
 			bathacrosstrack[i] = sounding->acrosstrack;
@@ -478,9 +464,6 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
                             double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
                             double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                             double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_stereopair_struct *store;
-	struct mbsys_stereopair_sounding_struct *sounding;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -530,7 +513,7 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -566,7 +549,7 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 		/* read distance and depth values into storage arrays */
 		store->num_soundings = nbath;
 		for (int i = 0; i < store->num_soundings; i++) {
-			sounding = (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
+			struct mbsys_stereopair_sounding_struct *sounding = (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
 			sounding->depth = bath[i] - store->sensordepth;
 			sounding->beamflag = beamflag[i];
 			sounding->acrosstrack = bathacrosstrack[i];
@@ -616,9 +599,6 @@ int mbsys_stereopair_insert(int verbose, void *mbio_ptr, void *store_ptr, int ki
 int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                             double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                             double *ssv, int *error) {
-	struct mbsys_stereopair_struct *store;
-	struct mbsys_stereopair_sounding_struct *sounding;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -637,7 +617,7 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -655,7 +635,8 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		/* get travel times, angles */
 		*nbeams = store->num_soundings;
 		for (int i = 0; i < store->num_soundings; i++) {
-			sounding = (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
+			struct mbsys_stereopair_sounding_struct *sounding =
+			    (struct mbsys_stereopair_sounding_struct *)&store->soundings[i];
 			ttimes[i] = 0.0;
 			mb_xyz_to_takeoff(verbose, sounding->acrosstrack, sounding->alongtrack, sounding->depth, &angles[i],
 			                  &angles_forward[i], error);
@@ -708,8 +689,6 @@ int mbsys_stereopair_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *k
 }
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -723,7 +702,7 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -785,8 +764,6 @@ int mbsys_stereopair_detects(int verbose, void *mbio_ptr, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                            double *receive_gain, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -799,7 +776,7 @@ int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -859,8 +836,6 @@ int mbsys_stereopair_gains(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                       double *altitude, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -873,7 +848,7 @@ int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -926,8 +901,6 @@ int mbsys_stereopair_extract_altitude(int verbose, void *mbio_ptr, void *store_p
 int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                  double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                  double *pitch, double *heave, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -940,7 +913,7 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1055,8 +1028,6 @@ int mbsys_stereopair_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
                                   double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
                                   double *roll, double *pitch, double *heave, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1070,7 +1041,7 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1189,8 +1160,6 @@ int mbsys_stereopair_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
 int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                                 double navlat, double speed, double heading, double draft, double roll, double pitch,
                                 double heave, int *error) {
-	struct mbsys_stereopair_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1219,7 +1188,7 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
 
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1281,9 +1250,6 @@ int mbsys_stereopair_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_stereopair_struct *store;
-	struct mbsys_stereopair_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1297,8 +1263,8 @@ int mbsys_stereopair_copy(int verbose, void *mbio_ptr, void *store_ptr, void *co
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_stereopair_struct *)store_ptr;
-	copy = (struct mbsys_stereopair_struct *)copy_ptr;
+	struct mbsys_stereopair_struct *store = (struct mbsys_stereopair_struct *)store_ptr;
+	struct mbsys_stereopair_struct *copy = (struct mbsys_stereopair_struct *)copy_ptr;
 
 	/* copy the data - for many formats memory must be allocated and
 	    sub-structures copied separately */

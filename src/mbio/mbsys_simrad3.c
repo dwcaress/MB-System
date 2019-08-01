@@ -82,8 +82,6 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -96,7 +94,7 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	const int status = MB_SUCCESS;
 
@@ -113,8 +111,6 @@ int mbsys_simrad3_survey_alloc(int verbose, void *mbio_ptr, void *store_ptr, int
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -127,7 +123,7 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -152,9 +148,6 @@ int mbsys_simrad3_extraparameters_alloc(int verbose, void *mbio_ptr, void *store
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_watercolumn_struct *wc;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -167,7 +160,7 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -179,7 +172,7 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 	if (status == MB_SUCCESS) {
 
 		/* get data structure pointer */
-		wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
+		struct mbsys_simrad3_watercolumn_struct *wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
 
 		/* initialize everything */
 		wc->wtc_date = 0;       /* date = year*10000 + month*100 + day
@@ -232,9 +225,6 @@ int mbsys_simrad3_wc_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *er
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_attitude_struct *attitude;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -247,7 +237,7 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -259,7 +249,7 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 	if (status == MB_SUCCESS) {
 
 		/* get data structure pointer */
-		attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
+		struct mbsys_simrad3_attitude_struct *attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
 
 		/* initialize everything */
 		attitude->att_date = 0;
@@ -305,9 +295,6 @@ int mbsys_simrad3_attitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, i
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_netattitude_struct *netattitude;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -320,7 +307,7 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -330,9 +317,8 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 		                    (void **)&(store->netattitude), error);
 
 	if (status == MB_SUCCESS) {
-
 		/* get data structure pointer */
-		netattitude = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
+		struct mbsys_simrad3_netattitude_struct *netattitude = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
 
 		/* initialize everything */
 		netattitude->nat_date = 0;
@@ -378,9 +364,6 @@ int mbsys_simrad3_netattitude_alloc(int verbose, void *mbio_ptr, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_heading_struct *heading;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -393,7 +376,7 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -403,9 +386,8 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 		                    error);
 
 	if (status == MB_SUCCESS) {
-
 		/* get data structure pointer */
-		heading = (struct mbsys_simrad3_heading_struct *)store->heading;
+		struct mbsys_simrad3_heading_struct *heading = (struct mbsys_simrad3_heading_struct *)store->heading;
 
 		/* initialize everything */
 		heading->hed_date = 0;
@@ -442,9 +424,6 @@ int mbsys_simrad3_heading_alloc(int verbose, void *mbio_ptr, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ssv_struct *ssv;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -457,7 +436,7 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -466,9 +445,8 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad3_ssv_struct), (void **)&(store->ssv), error);
 
 	if (status == MB_SUCCESS) {
-
 		/* get data structure pointer */
-		ssv = (struct mbsys_simrad3_ssv_struct *)store->ssv;
+		struct mbsys_simrad3_ssv_struct *ssv = (struct mbsys_simrad3_ssv_struct *)store->ssv;
 
 		/* initialize everything */
 		ssv->ssv_date = 0;
@@ -503,9 +481,6 @@ int mbsys_simrad3_ssv_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_tilt_struct *tilt;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -518,7 +493,7 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -528,9 +503,8 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 		    mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad3_tilt_struct), (void **)&(store->tilt), error);
 
 	if (status == MB_SUCCESS) {
-
 		/* get data structure pointer */
-		tilt = (struct mbsys_simrad3_tilt_struct *)store->tilt;
+		struct mbsys_simrad3_tilt_struct *tilt = (struct mbsys_simrad3_tilt_struct *)store->tilt;
 
 		/* initialize everything */
 		tilt->tlt_date = 0;
@@ -565,9 +539,6 @@ int mbsys_simrad3_tilt_alloc(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_extraparameters_struct *extraparameters;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -577,13 +548,14 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	}
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)*store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)*store_ptr;
 
 	int status = MB_SUCCESS;
 
 	/* deallocate memory for extraparameters data structure */
 	if (store->extraparameters != NULL) {
-		extraparameters = (struct mbsys_simrad3_extraparameters_struct *)store->extraparameters;
+		struct mbsys_simrad3_extraparameters_struct *extraparameters =
+		    (struct mbsys_simrad3_extraparameters_struct *)store->extraparameters;
 		if (extraparameters->xtr_data != NULL)
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(extraparameters->xtr_data), error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(store->extraparameters), error);
@@ -628,9 +600,6 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -639,9 +608,9 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 	for (int i = 0; i < MBSYS_SIMRAD3_NUM_PING_STRUCTURES; i++) {
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[i]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[i]);
 
 		ping->png_ss_read = 0;          /* flag indicating actual reading of sidescan record */
 		ping->png_ss_date = 0;          /* date = year*10000 + month*100 + day
@@ -734,9 +703,6 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -749,7 +715,7 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -757,7 +723,7 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get beam and pixel numbers */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 		*nbath = ping->png_nbeams;
 		*namp = *nbath;
 		*nss = MBSYS_SIMRAD3_MAXPIXELS;
@@ -787,9 +753,6 @@ int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -801,10 +764,10 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)mb_io_ptr->store_data;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)mb_io_ptr->store_data;
 
 	/* extract data from structure */
-	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 	*pingnumber = ping->png_count;
 
 	int status = MB_SUCCESS;
@@ -822,8 +785,6 @@ int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	struct mbsys_simrad3_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -836,7 +797,7 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get sonar type */
 	*sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
@@ -856,8 +817,6 @@ int mbsys_simrad3_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	struct mbsys_simrad3_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -870,7 +829,7 @@ int mbsys_simrad3_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get sidescan type */
 	*ss_type = MB_SIDESCAN_LOGARITHMIC;
@@ -893,11 +852,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
                              void *mbio_ptr,  /* in: see mb_io.h:/^struct mb_io_struct/ */
                              void *store_ptr, /* in: see mbsys_reson7k.h:/^struct mbsys_reson7k_struct/ */
                              void *platform_ptr, void *preprocess_pars_ptr, int *error) {
-	struct mbsys_simrad3_struct *store = NULL;
-	struct mbsys_simrad3_ping_struct *ping = NULL;
-	struct mb_platform_struct *platform = NULL;
-	struct mb_preprocess_struct *pars = NULL;
-
 	int time_i[7];
 	double time_d;
 	double transmit_time_d, transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
@@ -946,10 +900,10 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
-	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
-	platform = (struct mb_platform_struct *)platform_ptr;
-	pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+	struct mb_platform_struct *platforms = (struct mb_platform_struct *)platform_ptr;
+	struct mb_preprocess_struct *pars = (struct mb_preprocess_struct *)preprocess_pars_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       target_sensor:              %d\n", pars->target_sensor);
@@ -1386,7 +1340,6 @@ int mbsys_simrad3_preprocess(int verbose,     /* in: verbosity level set on comm
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
 	struct mb_platform_struct *platform;
-	struct mbsys_simrad3_struct *store;
 	int sensor_multibeam;
 	int multibeam_type;
 	int multibeam_offsets;
@@ -1418,7 +1371,7 @@ int mbsys_simrad3_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -2071,8 +2024,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
 	double reflscale;
 	double pixel_size;
 
@@ -2088,7 +2039,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -2096,7 +2047,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get time */
 		time_i[0] = ping->png_date / 10000;
@@ -2323,8 +2274,6 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
 	double reflscale;
 
 	if (verbose >= 2) {
@@ -2374,7 +2323,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -2383,7 +2332,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get time */
 		ping->png_date = 10000 * time_i[0] + 100 * time_i[1] + time_i[2];
@@ -2519,8 +2468,6 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
 	int time_i[7];
 	double ptime_d;
 	double soundspeed;
@@ -2544,7 +2491,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -2554,7 +2501,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get ping time */
 		time_i[0] = ping->png_date / 10000;
@@ -2663,9 +2610,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2679,7 +2623,7 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -2689,7 +2633,7 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		*nbeams = ping->png_nbeams;
 		for (int i = 0; i < ping->png_nbeams; i++) {
@@ -2745,9 +2689,6 @@ int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2761,7 +2702,7 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -2771,7 +2712,7 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		*nbeams = ping->png_nbeams;
 		for (int j = 0; j < ping->png_nbeams; j++) {
@@ -2828,9 +2769,6 @@ int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2843,7 +2781,7 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -2853,7 +2791,7 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get transmit_gain (dB) */
 		*transmit_gain = (double)store->run_tran_pow;
@@ -2906,8 +2844,6 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
 	double altitude_best;
 	double xtrack_min;
 	int found;
@@ -2924,7 +2860,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -2934,7 +2870,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get transducer depth and altitude */
 		*transducer_depth = ping->png_xducer_depth;
@@ -3002,7 +2938,6 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
                                double *time_d, double *navlon, double *navlat, double *speed, double *heading, double *draft,
                                double *roll, double *pitch, double *heave, int *error) {
 	int interp_error = MB_ERROR_NO_ERROR;
-	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	struct mbsys_simrad3_attitude_struct *attitude;
 	struct mbsys_simrad3_netattitude_struct *netattitude;
@@ -3023,7 +2958,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -3267,9 +3202,6 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3282,7 +3214,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -3292,7 +3224,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	/* extract data from ping structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get time */
 		time_i[0] = ping->png_date / 10000;
@@ -3338,7 +3270,7 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	else if (*kind == MB_DATA_NAV || *kind == MB_DATA_NAV1 || *kind == MB_DATA_NAV2 || *kind == MB_DATA_NAV3) {
 		/* get survey data structure */
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get time */
 		time_i[0] = store->pos_date / 10000;
@@ -3438,9 +3370,6 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3469,13 +3398,13 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA) {
 		// fprintf(stderr,"InsertNav: %.6f %12.8f %12.8f   %6.3f km/hr %7.3f deg %10.3f m %5.2f deg %5.2f deg %6.3f m\n\n",
 		//		time_d, navlon, navlat, speed, heading, draft, roll, pitch, heave);
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* get time */
 		ping->png_date = 10000 * time_i[0] + 100 * time_i[1] + time_i[2];
@@ -3571,8 +3500,6 @@ int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
-	struct mbsys_simrad3_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3585,7 +3512,7 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -3637,8 +3564,6 @@ int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
-	struct mbsys_simrad3_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3654,7 +3579,7 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
@@ -3683,8 +3608,6 @@ int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_struct *copy;
 	struct mbsys_simrad3_attitude_struct *attitude_store;
 	struct mbsys_simrad3_attitude_struct *attitude_copy;
 	char *attitude_save;
@@ -3714,8 +3637,8 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
-	copy = (struct mbsys_simrad3_struct *)copy_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *copy = (struct mbsys_simrad3_struct *)copy_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -3835,8 +3758,6 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-	struct mbsys_simrad3_struct *store;
-	struct mbsys_simrad3_ping_struct *ping;
 	double ss[MBSYS_SIMRAD3_MAXPIXELS];
 	int ss_cnt[MBSYS_SIMRAD3_MAXPIXELS];
 	double ssacrosstrack[MBSYS_SIMRAD3_MAXPIXELS];
@@ -3874,12 +3795,12 @@ int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_simrad3_struct *)store_ptr;
+	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
 		/* get survey data structure */
-		ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
+		struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
 		/* zero the sidescan */
 		for (int i = 0; i < MBSYS_SIMRAD3_MAXPIXELS; i++) {
