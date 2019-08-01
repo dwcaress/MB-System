@@ -172,8 +172,6 @@ int mbr_dem_tempform(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_templatesystem_struct *store;
 	int read_kind = MB_DATA_NONE;
 
 	if (verbose >= 2) {
@@ -188,7 +186,7 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 	mbfp = mb_io_ptr->mbfp;
 
 	/* set file position */
@@ -197,6 +195,7 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
 	*error = MB_ERROR_NO_ERROR;
+	int status = MB_SUCCESS;
 	while (done == MB_NO) {
 		/* read the next record header - set read_kind value */
 
@@ -266,10 +265,8 @@ int mbr_tempform_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_tempform(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	int interp_status;
-	int interp_error = MB_ERROR_NO_ERROR;
-	struct mbsys_templatesystem_struct *store;
+	/* int interp_status; */
+	/* int interp_error = MB_ERROR_NO_ERROR; */
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -287,10 +284,10 @@ int mbr_rt_tempform(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 #endif
 
 	/* read next data from file */
-	status = mbr_tempform_rd_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_tempform_rd_data(verbose, mbio_ptr, store_ptr, error);
 
 	/* get pointers to data structures */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -312,10 +309,6 @@ int mbr_rt_tempform(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_tempform_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_templatesystem_struct *store;
-	FILE *mbfp;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -328,8 +321,8 @@ int mbr_tempform_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
-	mbfp = mb_io_ptr->mbfp;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
+	FILE *mbfp = mb_io_ptr->mbfp;
 
 	/* write fileheader if needed (not all formats have distinct fileheaders) */
 
@@ -359,6 +352,8 @@ int mbr_tempform_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	else if (store->kind == MB_DATA_COMMENT) {
 	}
 
+	int status = MB_SUCCESS;
+
 #ifdef MBR_TEMPFORM_DEBUG
 	fprintf(stderr, "TEMPFORM DATA WRITTEN: type:%d status:%d error:%d\n\n", store->kind, status, *error);
 #endif
@@ -375,9 +370,6 @@ int mbr_tempform_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_tempform(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_templatesystem_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -390,14 +382,14 @@ int mbr_wt_tempform(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	store = (struct mbsys_templatesystem_struct *)store_ptr;
+	struct mbsys_templatesystem_struct *store = (struct mbsys_templatesystem_struct *)store_ptr;
 
 #ifdef MBR_TEMPFORM_DEBUG
 	fprintf(stderr, "About to call mbr_tempform_wr_data record kind:%d\n", store->kind);
 #endif
 
 	/* write next data to file */
-	status = mbr_tempform_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_tempform_wr_data(verbose, mbio_ptr, store_ptr, error);
 
 #ifdef MBR_TEMPFORM_DEBUG
 	fprintf(stderr, "Done with mbr_tempform_wr_data: status:%d error:%d\n", status, *error);
