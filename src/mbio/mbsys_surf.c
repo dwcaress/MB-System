@@ -42,8 +42,6 @@ double mbsys_get_depth(SurfMultiBeamDepth *MultiBeamDepth, SurfTransducerParamet
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_surf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -61,7 +59,7 @@ int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 		memset(*store_ptr, 0, sizeof(struct mbsys_surf_struct));
 
 		/* get data structure pointer */
-		store = (struct mbsys_surf_struct *)*store_ptr;
+		struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)*store_ptr;
 
 		/* MBIO data record kind */
 		store->kind = MB_DATA_NONE;
@@ -104,8 +102,6 @@ int mbsys_surf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	struct mbsys_surf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -118,7 +114,7 @@ int mbsys_surf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -158,7 +154,6 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                        double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_surf_struct *store;
 	double v0, tlx, tly, tlz, z0, t0, t2, tn, dt, y;
 
 	if (verbose >= 2) {
@@ -173,7 +168,7 @@ int mbsys_surf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -416,8 +411,6 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
                       double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                       double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                       double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_surf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -463,7 +456,7 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -555,7 +548,6 @@ int mbsys_surf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                       double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                       double *ssv, int *error) {
-	struct mbsys_surf_struct *store;
 	double pitch, angle;
 
 	if (verbose >= 2) {
@@ -576,7 +568,7 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -674,8 +666,6 @@ int mbsys_surf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 }
 /*--------------------------------------------------------------------*/
 int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_surf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -689,7 +679,7 @@ int mbsys_surf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -797,9 +787,6 @@ heave in MB-System is positive down, which conforms to the cartesian
 */
 int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                 double *altitude, int *error) {
-	struct mbsys_surf_struct *store;
-	double bath_best;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -812,7 +799,7 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -823,9 +810,9 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	if (*kind == MB_DATA_DATA) {
 		/* get transducer depth and altitude */
 		*transducer_depth = store->ActualTransducerTable.transducerDepth - store->SoundingData.heaveWhileTransmitting;
-		bath_best = mbsys_get_depth(store->MultiBeamDepth, store->ActualTransducerTable,
+		const double bath_best = mbsys_get_depth(store->MultiBeamDepth, store->ActualTransducerTable,
 		                            store->SoundingData.heaveWhileTransmitting, store->NrBeams);
-		;
+
 		if (bath_best > *transducer_depth) {
 			*altitude = bath_best - *transducer_depth;
 			*error = MB_ERROR_NO_ERROR;
@@ -871,8 +858,6 @@ int mbsys_surf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                            double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                            double *heave, int *error) {
-	struct mbsys_surf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -885,7 +870,7 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -992,8 +977,6 @@ int mbsys_surf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                           double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                           int *error) {
-	struct mbsys_surf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1022,7 +1005,7 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1063,8 +1046,6 @@ int mbsys_surf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 /*--------------------------------------------------------------------*/
 int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                            int *error) {
-	struct mbsys_surf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1077,7 +1058,7 @@ int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1128,9 +1109,6 @@ int mbsys_surf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 }
 /*--------------------------------------------------------------------*/
 int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	struct mbsys_surf_struct *store;
-	int kind;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1146,10 +1124,10 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
 
 	/* get data kind */
-	kind = store->kind;
+	int kind = store->kind;
 
 	/* insert data in structure */
 	if (kind == MB_DATA_DATA && nsvp > 0) {
@@ -1179,9 +1157,6 @@ int mbsys_surf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 }
 /*--------------------------------------------------------------------*/
 int mbsys_surf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_surf_struct *store;
-	struct mbsys_surf_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1195,8 +1170,8 @@ int mbsys_surf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_surf_struct *)store_ptr;
-	copy = (struct mbsys_surf_struct *)copy_ptr;
+	struct mbsys_surf_struct *store = (struct mbsys_surf_struct *)store_ptr;
+	struct mbsys_surf_struct *copy = (struct mbsys_surf_struct *)copy_ptr;
 
 	/* copy the main structure */
 	*copy = *store;
