@@ -323,10 +323,22 @@ MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 
 -----> 5.7.6beta3 (August 2, 2019)
 
+Format MBF_GSFGENMB (format 121, Generic Sensor Format, GSF): The version of
+libgsf used to read and write Generic Sensor Format (GSF) files has been
+updated to version 3.0.9. The libgsf library code is released by Leidos under
+a LGPL2.1 license, and is included directly into the MB-System source code with
+minor changes. For 3.0.9 the only changes required are to avoid redefinition
+of several key system functions (e.g. fseek); these redefinitions are avoided
+using a preprocessor command that is only activated in the MB-System build
+system. The command
+  mbformat -F121
+now outputs the version of the GSF library embedded in MB-System as a part of
+the format description.
+
 Integration with PROJ: The API for the PROJ coordinate transformation library
 libproj has changed with the release of version 6. The build system now tests
 which version of PROJ is installed and builds MB-System using the available
-API.
+API.g
 
 Mbgrid: Mbgrid had an undocumented ability to set the interpolation tension using
 a third argument to the -C option. This has been removed. The tension value is set

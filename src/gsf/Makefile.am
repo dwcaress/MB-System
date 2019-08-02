@@ -17,4 +17,4 @@ dump_gsf_SOURCES = dump_gsf.c
 dump_gsf_LDADD = libmbgsf.la
 
 libmbgsf_la_SOURCES = \
-        gsf.c  gsf_dec.c  gsf_enc.c  gsf_indx.c gsf_info.c
+        gsf.c gsf_compress.c gsf_dec.c gsf_enc.c gsf_indx.c gsf_info.c

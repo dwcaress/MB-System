@@ -21,7 +21,7 @@
  *               APIs for sequential and direct access, now both use gsfRead
  *               and gsfWrite. This is version GSF-v01.01.
  * jsb 11/01/95  Completed modifications to indexing to support increase in
- *               gsf file size after initial index file creation.  The size
+ *               GSF file size after initial index file creation.  The size
  *               of the file is now stored in the index file header. Index
  *               files without the expected header are recreated on the first
  *               open. This is still version GSF-v01.01. Also added a unique
@@ -29,11 +29,11 @@
  * jsb 12/22/95  Added gsfGetMBParams, gsfPutMBParams, gsfIsStarboardPing,
  *               and gsfGetSwathBathyBeamWidths. Also added GSF_APPEND as
  *               a file access mode, and modifed GSF_CREATE access mode so
- *               that files can be updated (read and written). This is gsf
+ *               that files can be updated (read and written). This is GSF
  *               library version GSF-v01.02.
  * hem 08/20/96  Added gsfSingleBeamPing Record structure; added Type III
  *               Seabeam, Echotrac, Bathy200, MGD77, BDB, & NOS HDB subrecord
- *               IDs & subrecords; added gsfStringError.  This is gsf library
+ *               IDs & subrecords; added gsfStringError.  This is GSF library
  *               version GSF-v1.03.
  * jsb 09/27/96  Added support for SeaBeam with amplitude data.
  * jsb 03/24/97  Added gsfSeaBatIISpecific data structure to replace
@@ -57,14 +57,14 @@
  *               GSF-v1.08.
  * wkm 4/1/99    Added CMP_SASS subrecord for Compressed SASS (BOSDAT) data.  This
  *               subrecord should be used in place of the SASS subrecord (TypeIII).
- *               The original has been left in tactc so as to not break existing code.
+ *               The original has been left intact so as to not break existing code.
  * jsb 07/20/99  Completed work on GSF version 1.08.  Added new functions gsfGetSwathBathyArrayMinMax,
  *               and gsfLoadDepthScaleFactorAutoOffset in support of signed depth.
  *               This release addresses the following CRs: GSF-99-002, GSF-99-006, GSF-99-007,
  *               GSF-99-008, GSF-99-009, GSF-99-010, GSF-99-011, GSF-99-012,
  * wkm 7/30/99   Updated SASS specific data subrecord to include 'lntens' and renamed
- *               surface_velocity to 'lfreq'.  These are the original SASS data filed
- *               names and were requested by NAVO to remane in tact.  Added commet block
+ *               surface_velocity to 'lfreq'.  These are the original SASS data field
+ *               names and were requested by NAVO to remane intact.  Added comment block
  *               to document mapping of SASS data fields to GSF.
  * bac 12-22-99  Applications built with GCC that use GSF.DLL require any global data to be explicitly
  *               defined as imported from a DLL.  When this is the case, gsfError gets redefined
@@ -77,7 +77,7 @@
  * bac 07-18-01  Added a sensor specific subrecord for the Reson 8100 series of sonars.  Also
  *               made modifications for use with C++ code.  The typedef for each sensor specific
  *               structure has been modfied to have a different name than the element of the SensorSpecific
- *               union.  Also removed the useage of C++ reserved words "class" and "operator".  These
+ *               union.  Also removed the usage of C++ reserved words "class" and "operator".  These
  *               modifications will potentially require some changes to application code.
  * bac 10-12-01  Added a new attitude record definition.  The attitude record provides a method for
  *               logging full time-series attitude measurements in the GSF file, instead of attitude
@@ -91,7 +91,7 @@
  *               encoded in the process_parameters record.
  * jsb 01-16-02  Added support for Simrad EM120.
  * bac 06-19-03  Added support for bathymetric receive beam time series intensity data (i.e., Simrad
- *               "Seabed image" and Reson "snippets").  Inlcluded RWL updates of 12-19-02 for adding
+ *               "Seabed image" and Reson "snippets").  Included RWL updates of 12-19-02 for adding
  *               sensor-specific singlebeam information to the MB sensor specific subrecords.
  * bac 12-28-04  Added support for Reson Navisound, EM3000D, EM3002, and EM3002D.  Renumbered
  *               singlebeam subrecord IDs to be less than 256, as previous version did not save
@@ -135,11 +135,12 @@
  *
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
- * copyright 2014 Leidos, Inc.
- * There is no charge to use the library, and it may be accessed at: https://www.leidos.com/maritime/gsf
+ * Copyright 2019 Leidos, Inc.
+ * There is no charge to use the library, and it may be accessed at:
+ * https://www.leidos.com/products/ocean-marine#gsf
  * This library may be redistributed and/or modified under the terms of the GNU Lesser General Public License
  * version 2.1, as published by the Free Software Foundation.  A copy of the LGPL 2.1 license is included
- * with the GSF distribution and is avaialbe at: http://opensource.org/licenses/LGPL-2.1.
+ * with the GSF distribution and is available at: http://opensource.org/licenses/LGPL-2.1.
  *
  * Leidos, Inc. configuration manages GSF, and provides GSF releases. Users are strongly encouraged to
  * communicate change requests and change proposals to Leidos, Inc.
@@ -148,7 +149,7 @@
  * the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  ********************************************************************/
 
-#ifndef  __GSF_H__
+#ifndef __GSF_H__
 #define __GSF_H__
 
 /* Get the required standard C library includes */
@@ -160,7 +161,7 @@
 #ifdef __OS2__
 #include <types.h>
 #include <utils.h>
-/* specify OS/2 Optlink linkage in the function prototype */
+/* Specify OS/2 Optlink linkage in the function prototype */
 #ifndef OPTLK
 #define OPTLK _Optlink
 #endif
@@ -175,7 +176,9 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library (MAXIMUM 11 characters) */
-#define GSF_VERSION       "GSF-v03.08"
+#define GSF_MAJOR_VERSION "03"
+#define GSF_MINOR_VERSION "09"
+#define GSF_VERSION      "GSF-v03.09"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    524288
@@ -191,21 +194,22 @@ extern          "C"
 #define GSF_UPDATE_INDEX       5
 #define GSF_APPEND             6
 
-/* Define options for sequential access gsf file pointer manipulation */
+/* Define options for sequential access GSF file pointer manipulation */
 #define GSF_REWIND             1
 #define GSF_END_OF_FILE        2
 #define GSF_PREVIOUS_RECORD    3
 
 /* Typedefs for GSF short and long integers */
-typedef unsigned short gsfuShort;      /* an unsigned 16 bit integer */
-typedef unsigned int   gsfuLong;       /* an unsigned 32 bit integer */
-typedef short          gsfsShort;      /* a signed 16 bit integer */
-typedef int            gsfsLong;       /* a signed 32 bit integer */
+typedef unsigned short gsfuShort;      /* an unsigned 16-bit integer */
+typedef unsigned int   gsfuLong;       /* an unsigned 32-bit integer */
+typedef short          gsfsShort;      /* a signed 16-bit integer */
+typedef int            gsfsLong;       /* a signed 32-bit integer */
+typedef long long      gsfsLongLong;   /* a signed 64-bit integer */
 
 #define GSF_SHORT_SIZE 2
 #define GSF_LONG_SIZE  4
 
-/* redefine gsfError for MINGW applications using gsf.dll, harmless for other compilers */
+/* Redefine gsfError for MinGW applications using gsf.dll, harmless for other compilers */
 #if defined (__MINGW32__) || defined (__MINGW64__)
   #if __GNUC__ < 3
      #ifdef gsf_USE_DLL
@@ -214,16 +218,16 @@ typedef int            gsfsLong;       /* a signed 32 bit integer */
   #endif
 #endif
 
-/* Define the gsf Data Identifier structure */
+/* Define the GSF Data Identifier structure */
 typedef struct t_gsfDataID
 {
     int             checksumFlag;       /* boolean */
     int             reserved;           /* up to 9 bits */
     unsigned int    recordID;           /* bits 00-11 => data type number */
                                         /* bits 12-22 => registry number */
-    int             record_number;      /* specifies the nth occurance of */
+    int             record_number;      /* specifies the nth occurrence of */
                                         /* record type specified by recordID */
-                                        /* relavent only for direct access */
+                                        /* relevant only for direct access */
                                         /* the record_number counts from 1 */
 }
 gsfDataID;
@@ -251,10 +255,10 @@ gsfDataID;
 #define             NUM_REC_TYPES  13
 
 /* Put a ceiling on the maximum number of swath bathymetry ping array
- * subrecords allowed in a gsf file.  This define dimensions the scale
- * factors structure.
+ *  subrecords allowed in a GSF file.  This define dimensions the scale
+ *  factors structure.
  */
-#define GSF_MAX_PING_ARRAY_SUBRECORDS 27
+#define GSF_MAX_PING_ARRAY_SUBRECORDS 30
 
 /* Specify the GSF swath bathymetry ping subrecord identifiers. The beam
  *  data definitions specify the index into the scale factor table, and
@@ -287,6 +291,9 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_SYSTEM_CLEANING_ARRAY        25u
 #define GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY     26u
 #define GSF_SWATH_BATHY_SUBRECORD_SONAR_VERT_UNCERT_ARRAY      27u
+#define GSF_SWATH_BATHY_SUBRECORD_SONAR_HORZ_UNCERT_ARRAY      28u
+#define GSF_SWATH_BATHY_SUBRECORD_DETECTION_WINDOW_ARRAY       29u
+#define GSF_SWATH_BATHY_SUBRECORD_MEAN_ABS_COEF_ARRAY          30u
 
 /* Define the additional swath bathymetry subrecords, to which the scale
  * factors do not apply.
@@ -346,6 +353,9 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC     152u
 #define GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC     153u
 #define GSF_SWATH_BATHY_SUBRECORD_RESON_TSERIES_SPECIFIC    155u
+#define GSF_SWATH_BATHY_SUBRECORD_KMALL_SPECIFIC            156u
+
+
 
 /* GSF Single Beam subrecord IDs */
 #define GSF_SINGLE_BEAM_SUBRECORD_UNKNOWN                     0u
@@ -403,8 +413,8 @@ gsfDataID;
 /* Define macros used to indicate that a certain parameter is not known */
 #define GSF_BEAM_WIDTH_UNKNOWN        -1.0
 
-/* define Posix.4 proposed structure for internal storage of time */
-/* timespec is defined in __MINGW64__ but it appears that they don't set a macro for it.  JCD  */
+/* Define Posix.4 proposed structure for internal storage of time */
+/* timespec is defined in __MINGW64__ but it appears that they don't set a macro for it.  JCD */
 #if (!defined (_STRUCT_TIMESPEC_) && \
      !defined (_TIMESPEC_T) && \
      !defined (_STRUCT_TIMESPEC) && \
@@ -426,8 +436,8 @@ gsfDataID;
 /* MAC OSX is a different bird, and while doesn't have the structures defined */
 /* above, does have the timespec structure defined. __APPLE__ will be set when  */
 /* compiled with Apple's gcc on OSX and other third party compilers, so we use it to */
-/* insure the definition below does not conflict. The same now applyies to VS2015 and above. */
- #if !defined(__APPLE__) && (!defined(_MSC_VER) || (_MSC_VER <= 1800))
+/* insure the definition below does not conflict. */
+ #ifndef __APPLE__
 
     struct timespec
     {
@@ -437,7 +447,7 @@ gsfDataID;
  #endif
 #endif
 
-/* Define a structure for the gsf header record */
+/* Define a structure for the GSF header record */
 #define GSF_VERSION_SIZE 12
 typedef struct t_gsfHeader
 {
@@ -445,7 +455,7 @@ typedef struct t_gsfHeader
 }
 gsfHeader;
 
-/* Define the data structure for the swath bathymety summary record */
+/* Define the data structure for the swath bathymetry summary record */
 typedef struct t_gsfSwathBathySummary
 {
     struct timespec start_time;
@@ -723,7 +733,6 @@ t_gsfReson7100Specific;
 /* Define the Reson T50/20 Series specific data structure */
 typedef struct t_gsfResonTSeriesSpecific
 {
-
     unsigned int       protocol_version;                       /* Obtained from the Data Record Frame (DRF) */
     unsigned int       device_id;                              /* i.e. 7101, 7111, 7125, etc. Obtained from the DRF */
     unsigned int       number_devices;                         /* Number of devices from the 7001 record */
@@ -828,7 +837,6 @@ typedef struct t_gsfResonTSeriesSpecific
 }
 t_gsfResonTSeriesSpecific;
 
-
 /* Define the SeaBeam 2112/36 specific data structure */
 typedef struct t_gsfSeaBeam2112Specific
 {
@@ -927,6 +935,14 @@ typedef struct t_gsfEM3Specific
 }
 t_gsfEM3Specific;
 
+/* Macro definitions for the SeaBat8100Specific mode field */
+#define GSF_8100_WIDE_MODE              0x01 /* set if transmit on receive */
+#define GSF_8100_TWO_HEADS              0x02 /* set if two sonar heads */
+#define GSF_8100_STBD_HEAD              0x04 /* set if starboard ping (seabat head 2) */
+#define GSF_8100_AMPLITUDE              0x08 /* set if beam amplitude is available (RITHETA packet) */
+#define GSF_8100_PITCH_STAB             0x10 /* set if pitch stabilized */
+#define GSF_8100_ROLL_STAB              0x20 /* set if roll stabilized */
+
 /* Define the Reson 8100 specific data structure */
 typedef struct t_gsfReson8100Specific
 {
@@ -960,32 +976,24 @@ typedef struct t_gsfReson8100Specific
 }
 t_gsfReson8100Specific;
 
-/* Macro definitions for the SeaBat8100Specific mode field */
-#define GSF_8100_WIDE_MODE              0x01 /* set if transmit on receiver */
-#define GSF_8100_TWO_HEADS              0x02 /* set if two sonar heads */
-#define GSF_8100_STBD_HEAD              0x04 /* set if starboard ping (seabat head 2) */
-#define GSF_8100_AMPLITUDE              0x08 /* set if beam amplitude is available (RITHETA packet) */
-#define GSF_8100_PITCH_STAB             0x10 /* set if pitch stabilized */
-#define GSF_8100_ROLL_STAB              0x20 /* set if roll stabilized */
-
-/* Define the Echotrac Single-Beam sensor specific data structure. */
-
+/* Macro definitions for the single-beam Echotrac sensor (mpp_source) */
 #define GSF_SB_MPP_SOURCE_UNKNOWN       0x00 /* Unknown MPP source */
 #define GSF_SB_MPP_SOURCE_GPS_3S        0x01 /* GPS 3S */
 #define GSF_SB_MPP_SOURCE_GPS_TASMAN    0x02 /* GPS Tasman */
 #define GSF_SB_MPP_SOURCE_DGPS_TRIMBLE  0x03 /* DGPS Trimble */
 #define GSF_SB_MPP_SOURCE_DGPS_TASMAN   0x04 /* DGPS Tasman */
 #define GSF_SB_MPP_SOURCE_DGPS_MAG      0x05 /* DGPS MagMPPox */
-#define GSF_SB_MPP_SOURCE_RANGE_MFIX    0x06 /* Range/Azimauth - Microfix */
-#define GSF_SB_MPP_SOURCE_RANGE_TRIS    0x07 /* Range/Azimauth - Trisponder */
-#define GSF_SB_MPP_SOURCE_RANGE_OTHER   0x08 /* Range/Azimauth - Other */
+#define GSF_SB_MPP_SOURCE_RANGE_MFIX    0x06 /* Range/Azimuth - Microfix */
+#define GSF_SB_MPP_SOURCE_RANGE_TRIS    0x07 /* Range/Azimuth - Trisponder */
+#define GSF_SB_MPP_SOURCE_RANGE_OTHER   0x08 /* Range/Azimuth - Other */
 
+/* Define the Echotrac Single-Beam sensor specific data structure. */
 typedef struct t_gsfSBEchotracSpecific
 {
     int             navigation_error;
     unsigned short  mpp_source;     /* Flag To determine mpp source - See above */
     unsigned short  tide_source;    /* in GSF Version 2.02+ this is in ping flags */
-    double          dynamic_draft;  /* speed induced draft im meters */
+    double          dynamic_draft;  /* speed induced draft in meters */
     char            spare[4];       /* four bytes of reserved space */
 
 }
@@ -1037,9 +1045,10 @@ typedef struct t_gsfSBNavisoundSpecific
 }
 t_gsfSBNavisoundSpecific;
 
-/* Macro definitions for EM4 series sector data details */
+/* Macro definitions for Kongsberg sector data details */
 #define  GSF_MAX_EM4_SECTORS     9
 #define  GSF_MAX_EM3_SECTORS     20
+#define  GSF_MAX_KMALL_SECTORS   9
 
 /* Define sub-structure for the transmit sectors */
 #define  GSF_EM_WAVEFORM_CW      0
@@ -1060,6 +1069,7 @@ typedef struct t_gsfEM4TxSector
     unsigned char   spare[16];                      /* spare space */
 }
 t_gsfEM4TxSector;
+
 
 typedef struct t_gsfEM3RawTxSector
 {
@@ -1100,7 +1110,7 @@ typedef struct t_gsfEMRunTime
     unsigned char    bsp_status;                    /* Bit mask of status information for BSP status */
     unsigned char    head_transceiver_status;       /* Bit mask of status information for sonar head or sonar transceiver */
     unsigned char    mode;                          /* Bit mask of sonar operating information, see mode bit mask definitions */
-    unsigned char    filter_id;                     /* one byte tit mask for various sonar processing filter settings */
+    unsigned char    filter_id;                     /* One byte bit mask for various sonar processing filter settings */
     double           min_depth;                     /* meters */
     double           max_depth;                     /* meters */
     double           absorption;                    /* dB/km */
@@ -1126,7 +1136,7 @@ typedef struct t_gsfEMRunTime
 }
 t_gsfEMRunTime;
 
-/* Macro definitions for bits of pu_status field */
+/* Macro definitions for bits of pu_status field (sensor_status) */
 #define GSF_EM_VALID_1_PPS      0x0001              /* If set, then 1 PPS timing is valid */
 #define GSF_EM_VALID_POSITION   0x0002              /* If set, then position input is valid */
 #define GSF_EM_VALID_ATTITUDE   0x0004              /* If set, then attitude input is valid */
@@ -1173,24 +1183,150 @@ typedef struct t_gsfEM4Specific
 }
 t_gsfEM4Specific;
 
+
+typedef struct t_gsfKMALLTxSector
+{
+    int             txSectorNumb;                   /* transmit sector number */
+    int             txArrNumber;                    /* transmit array number */
+    int             txSubArray;                     /* transmit sub-array number: 0 = Port, 1 = Middle, 2 = Starboard */
+    double          sectorTransmitDelay_sec;        /* seconds, time difference of midpoint of current tx pulse over first tx pulse of ping (which is equivalent to the datagram header time) */
+    double          tiltAngleReTx_deg;              /* degrees, transmitter beam along ship steering angle wrt. transmitter coordinate system */
+    double          txNominalSourceLevel_dB;        /* decibels, relative 1 microPascal */
+    double          txFocusRange_m;                 /* meters, 0 = no focusing applied */
+    double          centreFreq_Hz;                  /* Hertz, center frequency */
+    double          signalBandWidth_Hz;             /* Hertz, FM mode: effective bandwidth, CW mode: 1/(effective tx pulse length) */
+    double          totalSignalLength_sec;          /* seconds, transmit pulse length */
+    int             pulseShading;                   /* Percent amplitude shading. Shading in time. Cos2 function used for shading */
+    int             signalWaveForm;                 /* 0 = CW, 1 = FM upsweep, 2 = FM downsweep */
+    unsigned char   spare1[20];
+}
+t_gsfKMALLTxSector;
+
+/* Macro definitions for KMALL series extra detections */
+#define  GSF_MAX_KMALL_EXTRA_CLASSES    11
+#define  GSF_MAX_KMALL_EXTRA_DETECT     1024
+
+typedef struct t_gsfKMALLExtraDetClass
+{
+    int             numExtraDetInClass;             /* number of extra detections of this class */
+    int             alarmFlag;                      /* 0 = no alarm, 1 = alarm */
+    unsigned char   spare[32];
+}
+t_gsfKMALLExtraDet;
+
+/* Macro definitions for KMALL series extra detections */
+#define GSF_KMALL_MRZ   1
+
+/* Define sensor specific data structures for the Kongsberg 2040 / SIS 5.0 */
+typedef struct t_gsfKMALLSpecific
+{
+    /* A GSF subrecord version number, here to support potential future growth */
+	int                 gsfKMALLVersion;                /* == 1 for GSF_03.09 */
+    /* values from the header of #MRZ */
+	int                 dgmType;                        /* a one byte integer value: 1 == #MRZ, ... */
+	int                 dgmVersion;                     /* a one byte integer value */
+    int                 systemID;                       /* parameter used to identify datagrams from separate echosounders when multiple echosounders are connected */
+    int                 echoSounderID;                  /* 122, 302, 710, 712, 2040, ... */
+    unsigned char       spare1[8];
+	/* values from the cmnPart of #MRZ */
+    int                 numBytesCmnPart;                /* Size of cmnPart */
+    int                 pingCnt;                        /* (short in kmall) Sequential ping counter, 1 through 65535 */
+    int                 rxFansPerPing;                  /* Number of rx fans per ping, together with swaths per ping determines number of datagrams per swath */
+    int                 rxFanIndex;                     /* Index of rx fan, 0 = aft, port swath */
+    int                 swathsPerPing;                  /* Swaths per ping, swath is a complete set of across track data, may contain several transmit sectors and RX fans */
+    int                 swathAlongPosition;             /* Alongship index for swath in multi-swath mode, 0 = aftmost */
+    int                 txTransducerInd;                /* Transducer used in this rx fan: 0 = TRAI_TX1, 1 = TRAI_TX2, ... */
+    int                 rxTransducerInd;                /* Transducer used in this rx fan: 0 = TRAI_RX1, 1 = TRAI_RX2, ... */
+    int                 numRxTransducers;               /* Total number of recieving units */
+    int                 algorithmType;                  /* Future use. 0 = current, else future */
+    unsigned char       spare2[16];
+	/* values from the pingInfo of #MRZ */
+    int                 numBytesInfoData;               /* Size of ping info structure */
+    double              pingRate_Hz;                    /* Ping rate computed by the sonar */
+    int                 beamSpacing;                    /* 0 = Equidistance, 1 = Equiangle, 2 = High Density */
+    int                 depthMode;                      /* 0 = Very shallow, 1 = Shallow, 2 = Medium, 3 = Deep, 4 = Deeper, 5 = Very Deep, 6 = Extra Deep, 7 = Extreme deep */
+    int                 subDepthMode;                   /* Advanced use for manual depth mode, 0 = unused */
+    int                 distanceBtwSwath;               /* achieved istance between swaths as percentage of requirement: 0=unused, 100=achieved equals required */
+    int                 detectionMode;                  /* Bottom detection: 0 = normal, 1 = waterway, 2 = tracking, 3 = minimum depth */
+    int                 pulseForm;                      /* 0 = CW, 1 = mix, 2 = FM */
+    double              frequencyMode_Hz;               /* A code if < 100, otherwise the transmit frequency Hz. Codes: -1 = not used, 0 = 40-100 khz, 1 = 50-100khz, 2 = 70-100khz, 3 = 50khz, 4 = 40khz */
+    double              freqRangeLowLim_Hz;             /* In hertz, lowest center frequency of swath's sectors */
+    double              freqRangeHighLim_Hz;            /* In hertz, highest center frequency of swath's sectors */
+    double              maxTotalTxPulseLength_sec;      /* In seconds, longest tx pulse of swath's sectors */
+	double              maxEffTxPulseLength_sec;        /* In seconds, longest effective tx pulse of swath's sectors */
+	double              maxEffTxBandWidth_Hz;           /* Effective bandwidth (-3dB envelope) of the sector with the highest bandwidth */
+    double              absCoeff_dBPerkm;               /* Average absorption coefficient, in dB/km for vertical beam at current depth */
+    double              portSectorEdge_deg;             /* Port sector edge, for use by beamformer, referenced to z of SCS */
+	double              starbSectorEdge_deg;            /* Starboard sector edge, for use by beamformer, referenced to z of SCS */
+	double              portMeanCov_deg;                /* Coverage achieved in degrees, corrected for raybending, referenced to z of SCS */
+    double              starbMeanCov_deg;               /* Coverage achieved in degrees, corrected for raybending, referenced to z of SCS */
+    double              portMeanCov_m;                  /* Coverage achieved in meters, corrected for raybending, referenced to z of SCS */
+    double              starbMeanCov_m;                 /* Coverage achieved in meters, corrected for raybending, referenced to z of SCS */
+    int                 modeAndStabilisation;           /* Bit mask: 1 = Pitch, 2 = yaw, 3 = sonar mode, 4 = angular converage mode, 5 = sector mode, 6 = swath along position, 7 & 8 = future use */
+    int                 runtimeFilter1;                 /* Bit mask: 1 = Slope, 2 = Aeration, 3 = Sector, 4 = Interference, 5 = Special Amplitude, 6 - 8 = future use */
+	int                 runtimeFilter2;                 /* Bit mask: 1-4 = range gate, 5-8 = spike filter, 9-12 penetration filter, 13-16 phase ramp */
+    int                 pipeTrackingStatus;             /* Pipe tracking status. Describes how angle and range of top of pipe is determined. 0 = for future use, 1 = PU uses guidance from SIS */
+    double              transmitArraySizeUsed_deg;      /* degrees, transmit array size along ship */
+    double              receiveArraySizeUsed_deg;       /* degrees, receiver array size across ship */
+    double              transmitPower_dB;               /* dB, transmit power relative to maximum (0 dB, -10 dB, -20 dB ...) */
+    int                 SLrampUpTimeRemaining;          /* percentage, time remaining until max source level is acheived */
+    double              yawAngle_deg;                   /* degrees, yaw correction angle */
+    int                 numTxSectors;                   /* The number of transmit sectors for this ping */
+    int                 numBytesPerTxSector;            /* Number of bytes in the EMdgmMRZ_txSectorInfo */
+    double              headingVessel_deg;              /* Degrees, Heading of vessel at time of midpoint of first tx pulse */
+    double              soundSpeedAtTxDepth_mPerSec;    /* Measured sound speed at the transducer depth in m/s at time of midpoint of first tx pulse, (Source set in K-controller) */
+    double              txTransducerDepth_m;            /* meters, the transmit transducer depth in meters re water level at time of midpoint of first tx pulse */
+    double              z_waterLevelReRefPoint_m;       /* meters, the vertical distance between the waterline and vessel reference point, measured in SCS */
+    double              x_kmallToall_m;                 /* meters, distance between *.all reference point and *.kmall reference point, measured in SCS */
+    double              y_kmallToall_m;                 /* meters, distance between *.all reference point and *.kmall reference point, measured in SCS */
+    int                 latLongInfo;                    /* Sensor Position data method: 0 = last position received, 1 = interpolated, 2 = processed*/
+	int                 posSensorStatus;                /* Position sensor status 0 = valid data, 1 = invalid data, 2 = reduced performance (Format TBD) */
+	int                 attitudeSensorStatus;           /* Attitude sensor status 0 = valid data, 1 = invalid data, 2 = reduced performance (Format TBD) */
+    double              latitude_deg;                   /* decimal degrees, location of vessel reference point reported by sensor, determined by method in lat_lon_info */
+    double              longitude_deg;                  /* decimal degrees, location of vessel reference point reported by sensor, determined by method in lat_lon_info */
+    double              ellipsoidHeightReRefPoint_m;    /* meters, height of vessel reference point above ellipsoid, derived from active GGA sensor */
+    unsigned char       spare3[32];
+	/* values from the sectorInfo of #MRZ */
+    t_gsfKMALLTxSector  sector[GSF_MAX_KMALL_SECTORS];  /* Array of structures with transmit sector information */
+	/* values from the rxInfo of #MRZ */
+    int                 numBytesRxInfo;                 /* Size of the rxInfo structure portion of the datagram */
+	int                 numSoundingsMaxMain;            /* Number of beams (valid and non valid) recorded in sounding array */
+    int                 numSoundingsValidMain;          /* Number of beams with a valid bottom detection for this ping */
+    int                 numBytesPerSounding;            /* Bytes per loop of soudings */
+	double              WCSampleRate;                   /* The system digitizing rate in Hz, value retrieved from the imagery datagram */
+	double              seabedImageSampleRate;          /* Sample frequency divided by seabed image decimation factor in hertz */
+	double              BSnormal_dB;                    /* normal incidence BS in dB */
+	double              BSoblique_dB;                   /* oblique incidence BS in dB */
+	int                 extraDetectionAlarmFlag;        /* sum of alarm flags from extra detections */
+    int                 numExtraDetections;             /* The number of extra detections (soundings in water column) */
+    int                 numExtraDetectionClasses;       /* The number of extra detection classes */
+    int                 numBytesPerClass;               /* Size of the extra detection class */
+    unsigned char       spare4[32];
+	/* Values from the extraDetClassInfo array */
+    t_gsfKMALLExtraDet  extraDetClassInfo[GSF_MAX_KMALL_EXTRA_CLASSES];  /* Array of extra detection classes */
+    unsigned char       spare5[32];
+}
+t_gsfKMALLSpecific;
+
+
 /* Define sensor specific data structures for the Kongsberg 3000, etc which use raw range and beam angle */
 typedef struct t_gsfEM3RawSpecific
 {
     /* values from the XYZ datagram and raw range datagram */
-    int              model_number;                  /* ie 3000 ... */
-    int              ping_counter;                  /* Sequential ping counter, 0 through 65535 */
-    int              serial_number;                 /* System unique serial number, 100 - ? */
-    double           surface_velocity;              /* Measured sound speed near the surface in m/s */
-    double           transducer_depth;              /* The transmit transducer depth in meters re water level at ping time */
-    int              valid_detections;              /* number of beams with a valid bottom detection for this ping */
-    double           sampling_frequency;            /* The system digitizing rate in Hz */
-    double           vehicle_depth;                 /* vechicle depth in 0.01 m */
-    double           depth_difference;              /* in meters between sonar heads in em3000d configuration */
-    int              offset_multiplier;             /* transducer depth offset multiplier */
-    unsigned char    spare_1[16];
-    int              transmit_sectors;              /* The number of transmit sectors for this ping */
-    t_gsfEM3RawTxSector sector[GSF_MAX_EM3_SECTORS];   /* Array of structures with transmit sector information */
-    unsigned char    spare_2[16];
+    int             model_number;                   /* ie 3000 ... */
+    int             ping_counter;                   /* Sequential ping counter, 0 through 65535 */
+    int             serial_number;                  /* System unique serial number, 100 - ? */
+    double          surface_velocity;               /* Measured sound speed near the surface in m/s */
+    double          transducer_depth;               /* The transmit transducer depth in meters re water level at ping time */
+    int             valid_detections;               /* Number of beams with a valid bottom detection for this ping */
+    double          sampling_frequency;             /* The system digitizing rate in Hz */
+    double          vehicle_depth;                  /* Vehicle depth in 0.01 m */
+    double          depth_difference;               /* Depth difference in meters between sonar heads in em3000d configuration */
+    int             offset_multiplier;              /* Transducer depth offset multiplier */
+    unsigned char   spare_1[16];
+    int             transmit_sectors;               /* The number of transmit sectors for this ping */
+    t_gsfEM3RawTxSector sector[GSF_MAX_EM3_SECTORS]; /* Array of structures with transmit sector information */
+    unsigned char   spare_2[16];
 
     /* Values from the run-time parameters datagram */
     t_gsfEMRunTime   run_time;
@@ -1201,6 +1337,13 @@ typedef struct t_gsfEM3RawSpecific
 t_gsfEM3RawSpecific;
 
 /*DHG 2006/09/27 Added support for GeoSwath interferometric 250 Khz sonar */
+/* Macro definitions of receiver head side */
+#define PORT_PING 0
+#define STBD_PING 1
+
+#define GSF_GEOSWATH_PLUS_PORT_PING PORT_PING
+#define GSF_GEOSWATH_PLUS_STBD_PING STBD_PING
+
 /* Define the GeoSwath sensor specific data structure */
 typedef struct t_gsfGeoSwathPlusSpecific
 {
@@ -1231,12 +1374,6 @@ typedef struct t_gsfGeoSwathPlusSpecific
     char            spare[32];               /* 32 bytes of reserved space */
 }
 t_gsfGeoSwathPlusSpecific;
-
-#define PORT_PING 0
-#define STBD_PING 1
-
-#define GSF_GEOSWATH_PLUS_PORT_PING PORT_PING
-#define GSF_GEOSWATH_PLUS_STBD_PING STBD_PING
 
 /* Define the Klein 5410 Bathy Sidescan sensor specific data structure */
 typedef struct t_gsfKlein5410BssSpecific
@@ -1382,6 +1519,7 @@ typedef union t_gsfSensorSpecific
     t_gsfDeltaTSpecific       gsfDeltaTSpecific;
     t_gsfEM12Specific         gsfEM12Specific;
     t_gsfR2SonicSpecific      gsfR2SonicSpecific;
+    t_gsfKMALLSpecific        gsfKMALLSpecific;        /* used for KMALL compliant sensors */
 
         /* Single beam sensors added */
     t_gsfSBEchotracSpecific   gsfSBEchotracSpecific;
@@ -1437,9 +1575,7 @@ typedef struct t_gsfNOSHDBSpecific
 }
 t_gsfNOSHDBSpecific;
 
-/* Define a union of the known sensor specific
- * single beam ping subrecords
- */
+/* Define a union of the known sensor specific single beam ping subrecords */
 typedef union t_gsfSBSensorSpecific
 {
     t_gsfEchotracSpecific    gsfEchotracSpecific;
@@ -1449,10 +1585,9 @@ typedef union t_gsfSBSensorSpecific
     t_gsfNOSHDBSpecific      gsfNOSHDBSpecific;
 } gsfSBSensorSpecific;
 
-/* Define the bit flags for the "ping_flags" field of the swath bathymetry
- *  ping record.
- * GSF_IGNORE_PING may be set to indicate to an application to ignore this ping
- * GSF_PING_USER_FLAGS 01-15 may be set/read by application specific software
+/* Define the bit flags for the "ping_flags" field of the swath bathymetry ping record.
+ * GSF_IGNORE_PING may be set to indicate to an application to ignore this ping.
+ * GSF_PING_USER_FLAGS 01-15 may be set/read by application specific software.
  */
 #define GSF_IGNORE_PING       0x0001u
 #define GSF_PING_USER_FLAG_01 0x0002u
@@ -1471,9 +1606,7 @@ typedef union t_gsfSBSensorSpecific
 #define GSF_PING_USER_FLAG_14 0x4000u
 #define GSF_PING_USER_FLAG_15 0x8000u
 
-/* Define a set of macros to set, clear, and test the state of the
- *  ping status flags.
- *  Where:
+/* Define a set of macros to set, clear, and test the state of the ping status flags. Where:
  *     ping_flags: The ping flags field of the gsfSwathBathyPing structure.
  *     usflag:     The definition of the flag to test, set, or clear.
  */
@@ -1481,10 +1614,10 @@ typedef union t_gsfSBSensorSpecific
 #define gsfSetPingStatus(ping_flags, usflag)      ((ping_flags) |= (usflag))
 #define gsfClearPingStatus(ping_flags, usflag)    ((ping_flags) &= (~(usflag)))
 
-/* Define the GSF bit flags flags for the beam status array.
- * The GSF_IGNORE_BEAM flag may be set to indicate that this beam should
- *  not be used by any processing/display software.  The flags
- *  GSF_BEAM_USER_FLAG_01-07 may be set/read by application specific software
+/* Define the bit flags for the "beam_flags" array of the swath bathymetry ping record.
+ * The GSF_IGNORE_BEAM flag may be set to indicate that this beam should not be used
+ * by any processing/display software.  The flags GSF_BEAM_USER_FLAG_01-07 may be
+ * set/read by application specific software.
  */
 #define GSF_IGNORE_BEAM       0x01u
 #define GSF_BEAM_USER_FLAG_01 0x02u
@@ -1526,20 +1659,20 @@ typedef struct t_gsfScaleFactors
 
 /* The low order 4 bits are used to define the compression approach */
 #define GSF_DISABLE_COMPRESSION 0x00  /* no compression to be applied to the beam array data. */
-                                      /* no compression supported in this version, but may be added in a future release */
+#define GSF_ENABLE_COMPRESSION  0x01     /* Compression will be applied to the array data. */
 
 
 typedef struct t_gsfEM3ImagerySpecific
 {
-    unsigned short range_norm;          /* range to normal incidence used to correct sample amplitudes (in samples) */
-    unsigned short start_tvg_ramp;      /* start range sample of TVG ramp if not enough dynamic range (0 else) */
-    unsigned short stop_tvg_ramp;       /* stop range sample of TVG ramp if not enough dynamic range (0 else) */
-    char           bsn;                 /* normal incidence BS in dB */
-    char           bso;                 /* oblique BS in dB */
-    double         mean_absorption;     /* mean absorption coeffiecient in dB/km, resolution of 0.01 dB/km) */
-    short          offset;              /* Value that has been added to all imagery samples to convert to a positive value */
-    short          scale;               /* Manufacturer's specified scale value for each sample. This value is 2 for data from EM3000/EM3002/EM1002/EM300/EM120 */
-    unsigned char  spare[4];            /* spare sensor specific subrecord space, reserved for future expansion */
+    unsigned short  range_norm;          /* range to normal incidence used to correct sample amplitudes (in samples) */
+    unsigned short  start_tvg_ramp;      /* start range sample of TVG ramp if not enough dynamic range (0 else) */
+    unsigned short  stop_tvg_ramp;       /* stop range sample of TVG ramp if not enough dynamic range (0 else) */
+    char            bsn;                 /* normal incidence BS in dB */
+    char            bso;                 /* oblique BS in dB */
+    double          mean_absorption;     /* mean absorption coefficient in dB/km (resolution of 0.01 dB/km) */
+    short           offset;              /* Value that has been added to all imagery samples to convert to a positive value */
+    short           scale;               /* Manufacturer's specified scale value for each sample. This value is 2 for data from EM3000/EM3002/EM1002/EM300/EM120 */
+    unsigned char   spare[4];            /* spare sensor specific subrecord space, reserved for future expansion */
 } t_gsfEM3ImagerySpecific;
 
 typedef struct t_gsfReson7100ImagerySpecific
@@ -1576,6 +1709,12 @@ typedef struct t_gsfEM4ImagerySpecific
     short          scale;               /* Manufacturer's specified scale value for each sample. This value is 10 for data from EM710/EM302/EM122 */
     unsigned char  spare[20];           /* spare sensor specific subrecord space, reserved for future expansion */
 } t_gsfEM4ImagerySpecific;
+
+typedef struct t_gsfKMALLImagerySpecific
+{
+    unsigned char   spare[64];
+} t_gsfKMALLImagerySpecific;
+
 
 typedef struct t_gsfKlein5410BssImagerySpecific
 {
@@ -1626,16 +1765,19 @@ typedef union t_gsfSensorImagery
     t_gsfEM4ImagerySpecific          gsfEM4ImagerySpecific;          /* used for EM122, EM302, EM710 */
     t_gsfKlein5410BssImagerySpecific gsfKlein5410BssImagerySpecific; /* used for Klein 5410 Bathy Sidescan */
     t_gsfR2SonicImagerySpecific      gsfR2SonicImagerySpecific;      /* used for R2Sonic */
+    t_gsfKMALLImagerySpecific        gsfKMALLImagerySpecific;        /* used for KMALL compliant sensors */
 } gsfSensorImagery;
 
 typedef struct gsfTimeSeriesIntensity
 {
     unsigned short sample_count;       /* number of amplitude samples per beam */
     unsigned short detect_sample;      /* index of bottom detection sample for the beam */
-    unsigned char  spare[8];           /* for future use */
+    unsigned short start_range_samples;/* Kmall start of sample index*/
+    unsigned char  spare[6];           /* for future use */
     unsigned int  *samples;            /* Array of per-beam time series intensity samples  */
 } gsfTimeSeriesIntensity;
 
+/* Macro definitions for the BRBIntensity applied_corrections field */
 #define GSF_INTENSITY_LINEAR     0x01u
 #define GSF_INTENSITY_CALIBRATED 0x02u
 #define GSF_INTENSITY_POWER      0x04u
@@ -1643,7 +1785,7 @@ typedef struct gsfTimeSeriesIntensity
 
 typedef struct t_gsfBRBIntensity
 {
-    unsigned char           bits_per_sample;       /* bits per intensity sample */
+    unsigned char           bits_per_sample;       /* bits per intensity sample (8, 12, 16, or 32) */
     unsigned int            applied_corrections;   /* flags to describe corrections applied to intensity values */
     unsigned char           spare[16];             /* spare header space */
     gsfSensorImagery        sensor_imagery;        /* sensor specific per-ping imagery information */
@@ -1698,6 +1840,9 @@ typedef struct t_gsfSwathBathyPing
     unsigned short    *system_cleaning;    /* Array of values that specify data cleaning information from the sensor system */
     double            *doppler_corr;       /* Array of values used to correct the travel times for Doppler when transmission is FM */
     double            *sonar_vert_uncert;  /* vertical uncertainty provided by the sonar */
+    double            *sonar_horz_uncert;  /* horizontal uncertainty provided by the sonar (Added in KMALL) */
+    double            *detection_window;   /* Length of the detection window in seconds provided by the sonar (Added in KMALL) */
+    double            *mean_abs_coeff;     /* Mean absolute coefficient provided by the sonar (Added in KMALL) */
     int                sensor_id;          /* a definition which specifies the sensor */
     gsfSensorSpecific  sensor_data;        /* union of known sensor specific data */
     gsfBRBIntensity   *brb_inten;          /* Structure containing bathymetric receive beam time series intensities */
@@ -1724,16 +1869,16 @@ typedef struct t_gsfSingleBeamPing
 }
 gsfSingleBeamPing;
 
-/* Define the sound velocity profile structure */
+/* Define the sound velocity profile record structure */
 typedef struct t_gsfSVP
 {
-    struct timespec observation_time;   /* time the SVP measurement was made            */
-    struct timespec application_time;   /* time the SVP was used by the sonar           */
-    double          latitude;           /* latitude (degrees) of SVP measurement        */
-    double          longitude;          /* longitude (degrees) of SVP measurement       */
-    int             number_points;      /* number of data points in the profile         */
-    double         *depth;              /* array of profile depth values in meters      */
-    double         *sound_speed;        /* array of profile sound velocity values in m/s*/
+    struct timespec observation_time;   /* Time the SVP measurement was made. */
+    struct timespec application_time;   /* Time the SVP was used by the sonar. */
+    double          latitude;           /* Latitude (degrees) of SVP measurement. */
+    double          longitude;          /* Longitude (degrees) of SVP measurement. */
+    int             number_points;      /* Number of data points in the profile. */
+    double         *depth;              /* Array of profile depth values in meters. */
+    double         *sound_speed;        /* Array of profile sound velocity values in m/s. */
 }
 gsfSVP;
 
@@ -1768,7 +1913,7 @@ typedef struct t_gsfComment
 }
 gsfComment;
 
-/* Define the history record */
+/* Define the history record structure */
 #define GSF_OPERATOR_LENGTH  64
 #define GSF_HOST_NAME_LENGTH 64
 typedef struct t_gsfHistory
@@ -1781,7 +1926,7 @@ typedef struct t_gsfHistory
 }
 gsfHistory;
 
-/* Define the navigation error record
+/* Define the navigation error record structure
  * jsb As of GSF v1.07, this record is replaced by gsfHVNavigationError.
  * All newly created files should be written using gsfHVNavigationError,
  * instead of gsfNavigationError.
@@ -1797,7 +1942,7 @@ gsfNavigationError;
 
 /* jsb As of GSF v1.07, This new navigation error record replaces gsfNavigationError.
  *  The definition of gsfNavigationError will remain in the specification for several
- *  release of GSF for backwards compatability. (The HV stands for Horizontal and Vertical)
+ *  releases of GSF for backwards compatability. (The HV stands for Horizontal and Vertical).
  */
 typedef struct t_gsfHVNavigationError
 {
@@ -1837,7 +1982,7 @@ gsfHVNavigationError;
 #define GSF_POS_TYPE_PLBL "PLBL"   /* Post-processed One or more long-baseline acoustic navigation lines of position */
 #define GSF_POS_TYPE_PSBL "PSBL"   /* Post-processed ultra-short baseline acoustic navigation */
 
-/* Define the data structure for a ping from a swath bathymetric system */
+/* Define the attitude record structure */
 typedef struct t_gsfAttitude
 {
     short            num_measurements;      /* number of attitude measurements in this record */
@@ -1849,7 +1994,7 @@ typedef struct t_gsfAttitude
 }
 gsfAttitude;
 
-/* Define a structure to encapsulate the known gsf records, this
+/* Define a structure to encapsulate the known GSF records, this
  * simplifies the number of arguments to gsfRead, and gsfWrite.
  */
 typedef struct t_gsfRecords
@@ -1868,11 +2013,10 @@ typedef struct t_gsfRecords
     gsfAttitude             attitude;
 } gsfRecords;
 
-/* Define a data structure to hold offsets needed to correct multibeam
- * bathymetric data. Currently gsf supports tracking of up to two pairs
- * of each of the relavent offsets.  This is required for systems such as
- * HydroChart II and Reson 9002 which have two pairs of transmit/receive
- * arrays per installation.
+/* Define a data structure to hold offsets needed to correct multibeam bathymetric data.
+ * Currently GSF supports tracking of up to two sets of each of the relevant offsets.
+ * This is required for systems such as HydroChart II and Reson 9002 which have two sets
+ * of transmit/receive arrays per installation.
  */
 #define GSF_MAX_OFFSETS                2
 #define GSF_COMPENSATED                1
@@ -1886,7 +2030,7 @@ typedef struct t_gsfRecords
 #define GSF_FALSE                      0
 #define GSF_NUMBER_PROCESSING_PARAMS  49
 
-/* Macro definitions for type of platform */
+/* Macro definitions for type of platform (vessel_type) */
 #define GSF_PLATFORM_TYPE_SURFACE_SHIP  0              /*DHG 2008/12/22 Add for AUV vs Surface Ship discrimination */
 #define GSF_PLATFORM_TYPE_AUV           1              /*DHG 2008/12/22 Add for AUV vs Surface Ship discrimination */
 #define GSF_PLATFORM_TYPE_ROTV          2
@@ -2126,6 +2270,8 @@ typedef struct t_gsfMBParams
 #define GSF_OPEN_TEMP_FILE_FAILED                -51
 #define GSF_PARTIAL_RECORD_AT_END_OF_FILE        -52
 #define GSF_QUALITY_FLAGS_DECODE_ERROR           -53
+#define GSF_COMPRESSION_UNSUPPORTED              -55
+#define GSF_COMPRESSION_FAILED                   -56
 
 typedef struct t_gsf_gp{
     double lon;            /* degrees */
@@ -2156,90 +2302,102 @@ typedef struct t_gsf_pos_offsets{
 
 int OPTLK       gsfOpen(const char *filename, const int mode, int *handle);
 /*
- * Description : This function attempts to open a gsf data file.  If the
- *  file exits and is opened readonly or update the gsf header is read
- *  to confirm that this is a gsf data file.  If the file is opened create,
- *  the GSF header containing the version number of the software library is
- *  written into the header.  This function passes an integer handle back to
- *  the calling application.  The handle is used for all further access to the
- *  file. gsfOpen explicitly sets stream bufferring to the value specified
- *  by GSF_STREAM_BUF_SIZE.  The internal file table is searched for an
- *  available entry whose name matches that specified in the argument list, if
- *  no match is found, then the first available entry is used.  Up to
- *  GSF_MAX_OPEN_FILES files may be open by an application at a time.
+ * Description : This function attempts to open a GSF data file.  If the
+ *   file exists and is opened readonly or update, the GSF header is read
+ *   to confirm that this is a GSF data file.  If the file is opened create,
+ *   the GSF header containing the version number of the software library is
+ *   written into the header.  This function passes an integer handle back to
+ *   the calling application.  The handle is used for all further access to the
+ *   file. gsfOpen explicitly sets stream buffering to the value specified
+ *   by GSF_STREAM_BUF_SIZE.  The internal file table is searched for an
+ *   available entry whose name matches that specified in the argument list, if
+ *   no match is found, then the first available entry is used.  Up to
+ *   GSF_MAX_OPEN_FILES files may be open by an application at a time.
  *
  * Inputs :
- *  filename = a fully qualified path to the gsf file to open
- *  mode may have the following values:
+ *   filename = a fully qualified path to the GSF file to open
+ *   mode may have the following values:
  *     GSF_READONLY = open an existing file for read only access
- *     GSF_UPDATE   = open an existing file for reading an writing
- *     GSF_CREATE   = create a new gsf file
+ *     GSF_UPDATE   = open an existing file for reading and writing
+ *     GSF_CREATE   = create a new GSF file
  *     GSF_READONLY_INDEX = open an existing file for read only access with index
- *     GSF_UPDATE_INDEX   = open an existing file for reading an writing with index
- *  handle = a pointer to an integer to be assigned a handle which will be
- *     reference for all future file access.
+ *     GSF_UPDATE_INDEX   = open an existing file for reading and writing with index
+ *   handle = a pointer to an integer to be assigned a handle which will be
+ *     referenced for all future file access.
  *
  * Returns :
- *  This funciton returns zero if successful, or -1 if an error occured.
+ *   This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
- *     GSF_BAD_ACCESS_MODE
- *     GSF_TOO_MANY_OPEN_FILES
- *     GSF_FOPEN_ERROR
- *     GSF_SETVBUF_ERROR
- *     GSF_UNRECOGNIZED_FILE
+ *   GSF_BAD_ACCESS_MODE
+ *   GSF_TOO_MANY_OPEN_FILES
+ *   GSF_FOPEN_ERROR
+ *   GSF_SETVBUF_ERROR
+ *   GSF_UNRECOGNIZED_FILE
+ *   GSF_READ_ERROR
+ *   GSF_FLUSH_ERROR
+ *   GSF_FILE_SEEK_ERROR
+ *   GSF_HEADER_RECORD_ENCODE_FAILED
+ *   GSF_HEADER_RECORD_DECODE_FAILED
+ *   GSF_INDEX_FILE_OPEN_ERROR
  */
 
-int OPTLK       gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size);
+int OPTLK gsfOpenBuffered (const char *filename, const int mode, int *handle, int buf_size);
 /*
- * Description : This function attempts to open a gsf data file.  If the
- *  file exits and is opened readonly or update the gsf header is read
- *  to confirm that this is a gsf data file.  If the file is opened create,
- *  the GSF header containing the version number of the software library is
- *  written into the header.  This function passes an integer handle back to
- *  the calling application.  The handle is used for all further access to the
- *  file. gsfOpenBufferd explicitly sets stream bufferring to the value
- *  specified by the buf_size argument. The internal file table is searched
- *  for an available entry whose name matches that specified in the argument
- *  list, if no match is found, then the first available entry is used.  Up
- *  to GSF_MAX_OPEN_FILES files may be open by an application at a time.
- *  gsfOpenBuffered performs identical processing to gsfOpen, except here,
- *  the caller is allowed to explicitly set the standard system library level
- *  I/O buffer size.
+ * Description : This function attempts to open a GSF data file.  If the
+ *   file exists and is opened readonly or update, the GSF header is read
+ *   to confirm that this is a GSF data file.  If the file is opened create,
+ *   the GSF header containing the version number of the software library is
+ *   written into the header.  This function passes an integer handle back to
+ *   the calling application.  The handle is used for all further access to the
+ *   file. gsfOpenBufferd explicitly sets stream buffering to the value
+ *   specified by the buf_size argument. The internal file table is searched
+ *   for an available entry whose name matches that specified in the argument
+ *   list, if no match is found, then the first available entry is used.  Up
+ *   to GSF_MAX_OPEN_FILES files may be open by an application at a time.
+ *   gsfOpenBuffered performs identical processing to gsfOpen, except here,
+ *   the caller is allowed to explicitly set the standard system library level
+ *   I/O buffer size.
  *
  * Inputs :
- *  filename = a fully qualified path to the gsf file to open
- *  mode may have the following values:
+ *   filename = a fully qualified path to the GSF file to open
+ *   mode may have the following values:
  *     GSF_READONLY = open an existing file for read only access
- *     GSF_UPDATE   = open an existing file for reading an writing
- *     GSF_CREATE   = create a new gsf file
+ *     GSF_UPDATE   = open an existing file for reading and writing
+ *     GSF_CREATE   = create a new GSF file
  *     GSF_READONLY_INDEX = open an existing file for read only access with index
  *     GSF_UPDATE_INDEX   = open an existing file for reading an writing with index
- *  handle = a pointer to an integer to be assigned a handle which will be
+ *   handle = a pointer to an integer to be assigned a handle which will be
  *     reference for all future file access.
  *  buf_size = an integer buffer size in bytes.
  *
  * Returns :
- *  This funciton returns zero if successful, or -1 if an error occured.
+ *   This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
- *     GSF_BAD_ACCESS_MODE
- *     GSF_TOO_MANY_OPEN_FILES
- *     GSF_FOPEN_ERROR
- *     GSF_SETVBUF_ERROR
- *     GSF_UNRECOGNIZED_FILE
+ *   GSF_BAD_ACCESS_MODE
+ *   GSF_TOO_MANY_OPEN_FILES
+ *   GSF_FOPEN_ERROR
+ *   GSF_SETVBUF_ERROR
+ *   GSF_UNRECOGNIZED_FILE
+ *   GSF_READ_ERROR
+ *   GSF_FLUSH_ERROR
+ *   GSF_FILE_SEEK_ERROR
+ *   GSF_HEADER_RECORD_ENCODE_FAILED
+ *   GSF_HEADER_RECORD_DECODE_FAILED
+ *   GSF_INDEX_FILE_OPEN_ERROR
  */
 
 int OPTLK       gsfClose(const int handle);
 /*
- * Description : This function closes a gsf file previously openned
- *  using gsfOpen.
+ * Description : This function closes a GSF file previously opened
+ *   using gsfOpen.
  *
  * Inputs :
- *  handle = the handle of the gsf file to be closed.
+ *   handle = the handle of the GSF file to be closed.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *   This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -2249,66 +2407,67 @@ int OPTLK       gsfClose(const int handle);
 int OPTLK       gsfSeek(int handle, int option);
 /*
  * Description : This function may be used to move the file pointer
- *  for a previously openned gsf file.
+ *   for a previously opened GSF file.
  *
  * Inputs :
- *  handle = the integer handle returned from gsf Open
- *  option = the desired action for moving the file pointer, where:
+ *   handle = the integer handle returned from GSF Open
+ *   option = the desired action for moving the file pointer, where:
  *    GSF_REWIND, move pointer to first record in the file.
  *    GSF_END_OF_FILE, move pointer to the end of the file.
  *    GSF_PREVIOUS_RECORD, backup to the beginning of the record just
  *     written or just read.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *   This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
- *    GSF_BAD_FILE_HANDLE
- *    GSF_FILE_SEEK_ERROR
- *    GSF_BAD_SEEK_OPTION
+ *   GSF_BAD_FILE_HANDLE
+ *   GSF_FLUSH_ERROR
+ *   GSF_FILE_SEEK_ERROR
+ *   GSF_BAD_SEEK_OPTION
  */
 
 int OPTLK       gsfRead(int handle, int desiredRecord, gsfDataID * dataID, gsfRecords * rec, unsigned char *stream, int max_size);
 /* Description : gsfRead supports both direct and sequential access. If the
- *  file is opened for sequential access, this function reads the desired
- *  record from the gsf data file specified by handle.  The "desiredRecord"
- *  argument may be set to GSF_NEXT_RECORD to read the next record in the
- *  data file, or "desiredRecord" record may be set to the id of the record
- *  of interest, in which case the file will be read, skipping past
- *  intermediary records until the desired record is found.  When the desired
- *  record is found, it is read and then decoded from external to internal
- *  form. If the optional checksum is found with the data it will be verified.
- *  All of the fields of the gsfDataID structure, with the exception of the
- *  record_number field will be loaded with the values contained in the GSF
- *  record byte stream.  The record_number field will be undefined.  The
- *  stream and max_size arguments are normally set to NULL, unless the
- *  calling application is interested in a copy of the GSF byte stream.
+ *   file is opened for sequential access, this function reads the desired
+ *   record from the GSF data file specified by handle.  The "desiredRecord"
+ *   argument may be set to GSF_NEXT_RECORD to read the next record in the
+ *   data file, or "desiredRecord" record may be set to specify the record
+ *   of interest, in which case the file will be read, skipping past
+ *   intermediate records until the desired record is found.  When the desired
+ *   record is found, it is read and then decoded from external to internal
+ *   form. If the optional checksum is found with the data it will be verified.
+ *   All of the fields of the gsfDataID structure, with the exception of the
+ *   record_number field will be loaded with the values contained in the GSF
+ *   record byte stream.  The record_number field will be undefined.  The
+ *   stream and max_size arguments are normally set to NULL, unless the
+ *   calling application is interested in a copy of the GSF byte stream.
  *
  *  If the file is opened for direct access, then the combination of the
- *  recordID and the record_number fields of the dataID structure are used
- *  to uniquely identify the record of interest.  The address for this record
- *  is retrieved from the index file, which was created on a previous call
- *  to gsfOpen or gsfOpenBuffered.  If the record of interest is a ping record
- *  for which we need to retrieve new scale factors, then the ping record
- *  containing the scale factors needed is read first, and then the ping
- *  record of interest is read.  Direct access applications should set the
- *  desiredRecord argument equal to the recordID field in the gsfDataID
- *  structure.
+ *   recordID and the record_number fields of the dataID structure are used
+ *   to uniquely identify the record of interest.  The address for this record
+ *   is retrieved from the index file, which was created on a previous call
+ *   to gsfOpen or gsfOpenBuffered.  If the record of interest is a ping record
+ *   for which we need to retrieve new scale factors, then the ping record
+ *   containing the scale factors needed is read first, and then the ping
+ *   record of interest is read.  Direct access applications should set the
+ *   desiredRecord argument equal to the recordID field in the gsfDataID
+ *   structure.
  *
  * Inputs :
  *    handle = the handle to the file as provided by gsfOpen
  *    desiredRecord = the desired record or GSF_NEXT_RECORD
  *    dataID = a pointer to a gsfDataID structure to be populated for the
  *             input record.
- *    rptr = a pointer to a gsfRecords structure to be populated with the
+ *    rec = a pointer to a gsfRecords structure to be populated with the
  *           data from the input record in internal form.
  *    stream = an optional pointer to caller memory to be populated with a copy
- *          of the gsf byte stream for this record.
+ *          of the GSF byte stream for this record.
  *    max_size = an optional maximum size to copy into buf
  *
  * Returns :
- *  This function returns the number of bytes read if successful,
- *  or -1 if an error occured.
+ *   This function returns the number of bytes read if successful,
+ *   or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -2327,6 +2486,13 @@ int OPTLK       gsfRead(int handle, int desiredRecord, gsfDataID * dataID, gsfRe
  *    GSF_COMMENT_RECORD_DECODE_FAILED
  *    GSF_HISTORY_RECORD_DECODE_FAILED
  *    GSF_NAV_ERROR_RECORD_DECODE_FAILED
+ *   GSF_UNRECOGNIZED_SUBRECORD_ID
+ *   GSF_INVALID_NUM_BEAMS
+ *   GSF_MEMORY_ALLOCATION_FAILED
+ *   GSF_TOO_MANY_ARRAY_SUBRECORDS
+ *   GSF_CANNOT_REPRESENT_PRECISION
+ *   GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
+ *   GSF_QUALITY_FLAGS_DECODE_ERROR
  */
 
 int OPTLK       gsfWrite(int handle, gsfDataID * id, gsfRecords * record);
@@ -2352,12 +2518,12 @@ int OPTLK       gsfWrite(int handle, gsfDataID * id, gsfRecords * record);
  *  handle = the handle for this file as returned by gsfOpen
  *  id = a pointer to a gsfDataID containing the record id information for
  *       the record to write.
- *  rptr = a pointer to a gsfRecords structure from which to get the internal
+ *  record = a pointer to a gsfRecords structure from which to get the internal
  *         form of the record to be written to the file.
  *
  * Returns :
- *  This function returns the number of bytes written if successful, or
- *  -1 if an error occured.
+ *   This function returns the number of bytes written if successful,
+ *   or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_BAD_FILE_HANDLE
@@ -2377,26 +2543,28 @@ int OPTLK       gsfWrite(int handle, gsfDataID * id, gsfRecords * record);
 
 int OPTLK       gsfLoadScaleFactor(gsfScaleFactors *sf, unsigned int subrecordID, char c_flag, double precision, int offset);
 /*
- * Description : gsfLoadScaleFactors should be used to load the swath
- *  bathymetry ping record scale factor structure.  This function assures
- *  that the multiplier and offset fields of the scale factor structure
- *  have a precision equal to that which will be stored in the gsf data file.
- *  This function should be called once for each beam array data type
- *  contained in your data.
+ * Description : gsfLoadScaleFactor should be used to load the ping
+ *   record scale factor structure.  This function ensures that the
+ *   multiplier and offset fields of the scale factor structure have
+ *   a precision equal to that which will be stored in the GSF data file.
+ *   This function should be called once for each beam array data type
+ *   contained in your data.
  *
  * Inputs :
  *  sf = a pointer to the gsfScaleFactors structure to be loaded
  *  subrecordID = the subrecord id for the beam array data
  *  c_flag = the compression flag for the beam array
- *  precision = the presision to which the beam array data are to be stored
+ *  precision = the precision to which the beam array data are to be stored
  *              (a value of 0.1 would indicate decimeter precision for depth)
  *  offset = the "DC" offset to scale the data by.
  *
- * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ * Returns : This function returns zero if successful, or
+ *   -1 if an error occurred.
  *
  * Error Conditions :
- *    GSF_TOO_MANY_ARRAY_SUBRECORDS
+ *   GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID
+ *   GSF_TOO_MANY_ARRAY_SUBRECORDS
+ *   GSF_CANNOT_REPRESENT_PRECISION
  */
 
 int OPTLK gsfGetScaleFactor(int handle, unsigned int subrecordID, unsigned char *c_flag, double *multiplier, double *offset);
@@ -2415,11 +2583,12 @@ int OPTLK gsfGetScaleFactor(int handle, unsigned int subrecordID, unsigned char 
  *  offset = the address of a double to contain the scaling DC offset.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *   This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
- *    GSF_TOO_MANY_ARRAY_SUBRECORDS
- *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
+ *   GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID
+ *   GSF_BAD_FILE_HANDLE
+ *   GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
  */
 
 void OPTLK      gsfFree(gsfRecords *rec);
@@ -2429,7 +2598,7 @@ void OPTLK      gsfFree(gsfRecords *rec);
  *    data elements in the structure.
  *
  * Inputs :
- *    gsfRecords *rec = a pointer to ta gsfRecords data structure
+ *   rec = a pointer to a gsfRecords data structure
  *
  * Returns : none
  *
@@ -2468,30 +2637,35 @@ const char *gsfStringError(void);
  *
  * Inputs : none
  *
- * Returns : none
+ * Returns : A pointer to a static string describing the error.
  *
  * Error Conditions : none
  */
 
-int OPTLK       gsfIndexTime(int, int, int, time_t *, long *);
-/* Description : This function returns the time (Posix.4) associated with
- *  a specified record number and type.  It also returns the record number
- *  that was read.
+int OPTLK gsfIndexTime (int handle, int recordID, int record_number, time_t *sec, long *nsec);
+/*
+ * Description : This function returns the time (Posix.4) associated with
+ *   a specified record number and type.  It also returns the record number
+ *   that was read.
  *
  * Inputs :
- *  handle = gsf file handle assigned by gsfOpen or gsfOpenBuffered
- *  record_type = record type to be retrieved
- *  record_number = record number to be retrieved (-1 will get the time
- *                  and record number of the last record of this type)
- *  sec = Posix.4 seconds
- *  nsec = Posix.4 nanoseconds
+ *   handle = GSF file handle assigned by gsfOpen or gsfOpenBuffered
+ *   recordID = record type to be retrieved
+ *   record_number = record number to be retrieved (-1 will get the time
+ *                   and record number of the last record of this type)
+ *   sec = Posix.4 seconds
+ *   nsec = Posix.4 nanoseconds
  *
- * Returns :
- *  This function returns the record number if successful, or -1 if an
- *  error occured.
+ * Returns : This function returns the record number if successful, or
+ *   -1 if an error occurred.
  *
  * Error Conditions :
- *    GSF_RECORD_TYPE_NOT_AVAILABLE
+ *   GSF_BAD_FILE_HANDLE
+ *   GSF_UNRECOGNIZED_RECORD_ID
+ *   GSF_INVALID_RECORD_NUMBER
+ *   GSF_RECORD_TYPE_NOT_AVAILABLE
+ *   GSF_FILE_SEEK_ERROR
+ *   GSF_INDEX_FILE_READ_ERROR
  */
 
 int OPTLK       gsfPercent (int handle);
@@ -2502,7 +2676,7 @@ int OPTLK       gsfPercent (int handle);
  *  when the file is opened.
  *
  * Inputs :
- *  handle = gsf file handle assigned by gsfOpen or gsfOpenBuffered
+ *   handle = GSF file handle assigned by gsfOpen or gsfOpenBuffered
  *
  * Returns :
  *  This function returns the current file position as a percentage of
@@ -2525,13 +2699,14 @@ int OPTLK       gsfGetNumberRecords (int handle, int desiredRecord);
  *    desiredRecord = the desired record or GSF_NEXT_RECORD
  *
  * Returns :
- *  This function returns the number of records of type desiredRecord
- *  contained in the GSF file designated by handle, or -1 if an error
- *  occured.
+ *   This function returns the number of records of type desiredRecord
+ *   contained in the GSF file designated by handle, or -1 if an error
+ *   occurred.
  *
  * Error Conditions :
- *  GSF_BAD_FILE_HANDLE
- *  GSF_BAD_ACCESS_MODE
+ *   GSF_BAD_FILE_HANDLE
+ *   GSF_UNRECOGNIZED_RECORD_ID
+ *   GSF_BAD_ACCESS_MODE
  */
 
 int OPTLK       gsfCopyRecords (gsfRecords *target, const gsfRecords *source);
@@ -2583,8 +2758,10 @@ int OPTLK       gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle
  *  occurs.
  *
  * Error Conditions :
- *     GSF_MEMORY_ALLOCATION_FAILED
- *     GSF_PARAM_SIZE_FIXED
+ *   GSF_BAD_FILE_HANDLE
+ *   GSF_PARAM_SIZE_FIXED
+ *   GSF_PROCESS_PARAM_RECORD_ENCODE_FAILED
+ *   GSF_MEMORY_ALLOCATION_FAILED
  */
 
 int OPTLK       gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays);
@@ -2603,10 +2780,10 @@ int OPTLK       gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numAr
  *
  * Inputs :
  *     rec = a pointer to the gsfRecords data structure from which the
- *         parameters in "KEYWORK=VALUE" form are to be read.
+ *         parameters in "KEYWORD=VALUE" form are to be read.
  *     p = a pointer to the gsfMBParams data structure which will be populated.
  *     numArrays = the integer value specifying the number of pairs of
- *         arrays which need to have seperate parameters tracked.
+ *         arrays which need to have separate parameters tracked.
  *
  * Returns : This function returns zero if successful, or -1 if an error
  *  occurs.
@@ -2634,7 +2811,8 @@ int OPTLK       gsfGetSwathBathyBeamWidths(const gsfRecords *data, double *fore_
  * Returns : This function returns zero if successful, or -1 if an error
  *     occured.
  *
- * Error Conditions : unrecognized sonar id or mode.
+ * Error Conditions :
+ *   GSF_UNRECOGNIZED_SENSOR_ID
  */
 
 int OPTLK gsfIsStarboardPing(const gsfRecords *data);
@@ -2651,7 +2829,7 @@ int OPTLK gsfIsStarboardPing(const gsfRecords *data);
  *     passed data represents a starboard looking ping from a dual headed
  *     sonar installation. Otherwise, zero is returned.
  *
- * Error Conditions : unrecognized sonar id or mode.
+ * Error Conditions : none
  */
 
 int OPTLK gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, unsigned int subrecordID, int reset, double min_depth, double max_depth, double *last_corrector, char c_flag, double precision);
@@ -2665,28 +2843,37 @@ int OPTLK gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, unsigned in
  *  native precision even in deep water.
  *
  * Inputs :
- *  ping = A pointer to the gsfSwathBathyPing which contains the depht
+ *   ping = A pointer to the gsfSwathBathyPing which contains the depth
  *      and tide correction values, and the scale factors data structure.
  *  subrecordID = the subrecord id for the beam array data.  This must be
  *      either GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY, or
- *      GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY
- *  c_flag = The compression flag for the beam array
- *  precision = The presision to which the beam array data are to be stored
- *      (a value of 0.1 would indicate decimeter precision for depth)
- *  reset = An integer value which will cause the internal logic to be
+ *      GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY.
+ *    reset = An integer value which will cause the internal logic to be
  *      refreshed when the value is non-zero.  The first call to this function
  *      should use a non-zero reset, from then on, this value may be passed
  *      as zero.
- *  last_corrector = The address of a double value stored as permanent memory.
+ *    min_depth = A double value which should be set to the minimum depth value
+ *      contained in the depth array specified by subrecordID.  This argument
+ *      exists for completeness, but is currently not used.
+ *    max_depth = A double value which should be set to the maximum depth value
+ *      contained in the depth array specified by subrecordID.  When a depth
+ *      threshold is exceeded, the offset used to support "signed depth" is
+ *      no longer required and will no longer be used.  This approach is
+ *      necessary to avoid an integer overflow when the array data are scaled.
+ *    last_corrector = The address of a double value stored as permanent memory.
  *      Successive calls to this function must pass the same address for this
- *      argument.
+ *      argument.  This function will take care of setting the value at this
+ *      address, but the caller is responsible for ensuring that the same
+ *      permanent memory address is used for each call to this function.
+ *    c_flag = The compression flag for the beam array.
+ *    precision = The precision to which the beam array data are to be stored
+ *      (a value of 0.1 would indicate decimeter precision for depth).
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *   This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
- *    GSF_TOO_MANY_ARRAY_SUBRECORDS
- *
+ *   GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID
  */
 
 int OPTLK gsfGetSwathBathyArrayMinMax(const gsfSwathBathyPing *ping, unsigned int subrecordID, double *min_value, double *max_value);
@@ -2696,7 +2883,7 @@ int OPTLK gsfGetSwathBathyArrayMinMax(const gsfSwathBathyPing *ping, unsigned in
  *  type.
  *
  * Inputs :
- *  ping = A pointer to the gsfSwathBathyPing which contains the depht
+ *   ping = A pointer to the gsfSwathBathyPing which contains the depth
  *      and tide correction values, and the scale factors data structure.
  *  subrecordID = The subrecord id for the beam array data.  This must be
  *      either GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY, or
@@ -2709,7 +2896,7 @@ int OPTLK gsfGetSwathBathyArrayMinMax(const gsfSwathBathyPing *ping, unsigned in
  *      this array type.
  *
  * Returns :
- *  This function returns zero if successful, or -1 if an error occured.
+ *   This function returns zero if successful, or -1 if an error occurred.
  *
  * Error Conditions :
  *    GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID
@@ -2719,9 +2906,11 @@ int OPTLK gsfGetSwathBathyArrayMinMax(const gsfSwathBathyPing *ping, unsigned in
 const char *gsfGetSonarTextName(const gsfSwathBathyPing *ping);
 /* Description : This function is used to return the text of the sonar name.
  *
- * Inputs : The GSF ping
+ * Inputs :
+ *   ping = A pointer to a populated gsfSwathBathyPing structure.
  *
- * Returns : A text string of the sensors name, or "Unknown" if the sensor id is not found
+ * Returns : This function returns a pointer to a character string
+ *   containing the name of the sonar.
  *
  * Error Conditions : none
  */

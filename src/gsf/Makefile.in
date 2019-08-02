@@ -137,8 +137,8 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmbgsf_la_LIBADD =
-am_libmbgsf_la_OBJECTS = gsf.lo gsf_dec.lo gsf_enc.lo gsf_indx.lo \
-	gsf_info.lo
+am_libmbgsf_la_OBJECTS = gsf.lo gsf_compress.lo gsf_dec.lo gsf_enc.lo \
+	gsf_indx.lo gsf_info.lo
 libmbgsf_la_OBJECTS = $(am_libmbgsf_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -166,8 +166,9 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/dump_gsf.Po ./$(DEPDIR)/gsf.Plo \
-	./$(DEPDIR)/gsf_dec.Plo ./$(DEPDIR)/gsf_enc.Plo \
-	./$(DEPDIR)/gsf_indx.Plo ./$(DEPDIR)/gsf_info.Plo
+	./$(DEPDIR)/gsf_compress.Plo ./$(DEPDIR)/gsf_dec.Plo \
+	./$(DEPDIR)/gsf_enc.Plo ./$(DEPDIR)/gsf_indx.Plo \
+	./$(DEPDIR)/gsf_info.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -398,7 +399,7 @@ libmbgsf_la_LDFLAGS = -no-undefined -version-info 0:0:0
 dump_gsf_SOURCES = dump_gsf.c
 dump_gsf_LDADD = libmbgsf.la
 libmbgsf_la_SOURCES = \
-        gsf.c  gsf_dec.c  gsf_enc.c  gsf_indx.c gsf_info.c
+        gsf.c gsf_compress.c gsf_dec.c gsf_enc.c gsf_indx.c gsf_info.c
 
 all: all-am
 
@@ -533,6 +534,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dump_gsf.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf_compress.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf_dec.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf_enc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf_indx.Plo@am__quote@ # am--include-marker
@@ -693,6 +695,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/dump_gsf.Po
 	-rm -f ./$(DEPDIR)/gsf.Plo
+	-rm -f ./$(DEPDIR)/gsf_compress.Plo
 	-rm -f ./$(DEPDIR)/gsf_dec.Plo
 	-rm -f ./$(DEPDIR)/gsf_enc.Plo
 	-rm -f ./$(DEPDIR)/gsf_indx.Plo
@@ -744,6 +747,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/dump_gsf.Po
 	-rm -f ./$(DEPDIR)/gsf.Plo
+	-rm -f ./$(DEPDIR)/gsf_compress.Plo
 	-rm -f ./$(DEPDIR)/gsf_dec.Plo
 	-rm -f ./$(DEPDIR)/gsf_enc.Plo
 	-rm -f ./$(DEPDIR)/gsf_indx.Plo

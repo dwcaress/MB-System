@@ -15,9 +15,9 @@
  *
  * References :
  *
- * copyright 2014 Leidos, Inc.
+ * Copyright 2019 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
- * https://www.leidos.com/maritime/gsf.
+ * https://www.leidos.com/products/ocean-marine#gsf
  * This library may be redistributed and/or modified under the terms of
  * the GNU Lesser General Public License version 2.1, as published by the
  * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
@@ -31,19 +31,10 @@
  * or FITNESS FOR A PARTICULAR PURPOSE.
  ********************************************************************/
 
+/* Standard C Library Includes */
 #include <math.h>
 
-/* rely on the network type definitions of (u_short, and u_int) */
-#include <sys/types.h>
-#if !defined WIN32 && !defined WIN64
-#include <netinet/in.h>
-#else
-#include <winsock.h>
-#endif
-
-#include <math.h>
-
-/* gsf library interface description */
+/* GSF library interface description */
 #include "gsf.h"
 
 /* Global external data defined in this module */
@@ -127,11 +118,11 @@ static void metric (double phi, int k, double *gx, double *gy)
  *
  * Inputs : ref pos, offsets from ref (+x forward, +y starboard, + z down), ref heading (+hdg cw from north), maximum distance step.
  *
- * latitude, longitude (in GSF_POSITION), and heading are in degrees.  Distances and offsests are in meters.
+ * latitude, longitude (in GSF_POSITION), and heading are in degrees.  Distances and offsets are in meters.
  *
  * Returns : new position
  *
- * Error Conditions :
+ * Error Conditions : none
  *
  ********************************************************************/
 
@@ -189,7 +180,7 @@ GSF_POSITION *gsfGetPositionDestination(GSF_POSITION gp, GSF_POSITION_OFFSETS of
  *
  * Returns : offsets from ref (+x forward, +y starboard, + z down)
  *
- * Error Conditions :
+ * Error Conditions : none
  *
  ********************************************************************/
 
