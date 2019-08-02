@@ -848,11 +848,11 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 
 	/* Determine what wesn to pass to map_setup */
 
-#if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION > 3
-	if (!GMT->common.R.active[RSET] && n_grids)
+#if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION <= 3
+	if (!GMT->common.R.active && n_grids)
 		gmt_M_memcpy(GMT->common.R.wesn, Grid_orig[0]->header->wesn, 4, double);
 #else
-	if (!GMT->common.R.active && n_grids)
+	if (!GMT->common.R.active[RSET] && n_grids)
 		gmt_M_memcpy(GMT->common.R.wesn, Grid_orig[0]->header->wesn, 4, double);
 #endif
 	gmt_M_err_fail(GMT, gmt_map_setup(GMT, GMT->common.R.wesn), "");

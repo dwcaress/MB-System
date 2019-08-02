@@ -1538,7 +1538,7 @@ Optional Packages:
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
  --with-otps-dir=DIR    Location of OSU Tidal Prediction Software
-  --with-proj-lib=DIR    Location of PROJ library
+ --with-proj-lib=DIR Location of PROJ library
   --with-proj-include=DIR    Location of PROJ headers
   --with-fftw-lib=DIR    Location of FFTW library
   --with-fftw-include=DIR    Location of FFTW headers
@@ -18665,9 +18665,9 @@ fi
 
 
 
-$as_echo "Check for Proj.4 library libproj"
+$as_echo "Check for PROJ library libproj"
 GOT_PROJ=no
-PROJ_SETTING=no
+FOUND_PROJ_LIB=no
 
 # Check whether --with-proj-lib was given.
 if test "${with_proj_lib+set}" = set; then :
@@ -18680,7 +18680,50 @@ if test "$GOT_PROJ" = "yes" ; then
         $as_echo "PROJ library location specified: $proj_libdir - check if libproj is there..."
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$proj_libdir"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init_plus in -lproj" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
+$as_echo_n "checking for proj_create in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_create+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lproj  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char proj_create ();
+int
+main ()
+{
+return proj_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_proj_proj_create=yes
+else
+  ac_cv_lib_proj_proj_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
+$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
+if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+  FOUND_PROJ_LIB=yes
+else
+  FOUND_PROJ_LIB=no
+fi
+
+    if test "$FOUND_PROJ_LIB" = "no"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init_plus in -lproj" >&5
 $as_echo_n "checking for pj_init_plus in -lproj... " >&6; }
 if ${ac_cv_lib_proj_pj_init_plus+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -18717,13 +18760,14 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_pj_init_plus" >&5
 $as_echo "$ac_cv_lib_proj_pj_init_plus" >&6; }
 if test "x$ac_cv_lib_proj_pj_init_plus" = xyes; then :
-  PROJ_SETTING=yes
+  FOUND_PROJ_LIB=yes
 else
-  PROJ_SETTING=no
+  FOUND_PROJ_LIB=no
 fi
 
+    fi
     LDFLAGS="$save_LDFLAGS"
-    if test "$PROJ_SETTING" = "no"; then
+    if test "$FOUND_PROJ_LIB" = "no"; then
         as_fn_error $? "Did not find libproj according to --with-proj-lib - check the installation!" "$LINENO" 5
     fi
     libproj_LIBS="-L$proj_libdir -R $proj_libdir -lproj"
@@ -18909,24 +18953,67 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$libproj_PKG_ERRORS" >&5
 
-	GOT_PROJ=no
+	FOUND_PROJ_LIB=no
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-	GOT_PROJ=no
+	FOUND_PROJ_LIB=no
 else
 	libproj_CFLAGS=$pkg_cv_libproj_CFLAGS
 	libproj_LIBS=$pkg_cv_libproj_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	GOT_PROJ=yes
+	FOUND_PROJ_LIB=yes
 fi
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""
 fi
-if test "$GOT_PROJ" = "no" ; then
+if test "$FOUND_PROJ_LIB" = "no" ; then
         $as_echo "Did not find PROJ library pkg-config package, looking in the usual places..."
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init_plus in -lproj" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for proj_create in -lproj" >&5
+$as_echo_n "checking for proj_create in -lproj... " >&6; }
+if ${ac_cv_lib_proj_proj_create+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lproj  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char proj_create ();
+int
+main ()
+{
+return proj_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_proj_proj_create=yes
+else
+  ac_cv_lib_proj_proj_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_proj_create" >&5
+$as_echo "$ac_cv_lib_proj_proj_create" >&6; }
+if test "x$ac_cv_lib_proj_proj_create" = xyes; then :
+  FOUND_PROJ_LIB=yes
+else
+  FOUND_PROJ_LIB=no
+fi
+
+    if test "$FOUND_PROJ_LIB" = "no"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pj_init_plus in -lproj" >&5
 $as_echo_n "checking for pj_init_plus in -lproj... " >&6; }
 if ${ac_cv_lib_proj_pj_init_plus+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -18963,14 +19050,14 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_proj_pj_init_plus" >&5
 $as_echo "$ac_cv_lib_proj_pj_init_plus" >&6; }
 if test "x$ac_cv_lib_proj_pj_init_plus" = xyes; then :
-  PROJ_SETTING=yes
+  FOUND_PROJ_LIB=yes
 else
-  PROJ_SETTING=no
+  FOUND_PROJ_LIB=no
 fi
 
-    if test "$PROJ_SETTING" = "yes" ; then
-        GOT_PROJ=yes
-        $as_echo "Using pre-installed libproj..."
+    fi
+    if test "$FOUND_PROJ_LIB" = "yes" ; then
+        $as_echo "Found PROJ library libproj..."
         libproj_LIBS="-lproj"
         libproj_LDFLAGS=""
     else
@@ -18981,7 +19068,7 @@ fi
 
 $as_echo "Check if proj header location specified on the command line"
 GOT_PROJ=no
-PROJ_SETTING=no
+FOUND_PROJ_HEADERS=no
 
 # Check whether --with-proj-include was given.
 if test "${with_proj_include+set}" = set; then :
@@ -18991,50 +19078,52 @@ else
 fi
 
 if test "$GOT_PROJ" = "yes" ; then
-        $as_echo "PROJ header location specified: $libproj_CPPFLAGS - check if proj_api.h is there..."
-    save_CPPFLAGS=$CPPFLAGS
-    save_CFLAGS=$CFLAGS
-    CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
-    CFLAGS="$CFLAGS $libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
-    ac_fn_c_check_header_mongrel "$LINENO" "proj_api.h" "ac_cv_header_proj_api_h" "$ac_includes_default"
-if test "x$ac_cv_header_proj_api_h" = xyes; then :
-  PROJ_SETTING=yes
-else
-  PROJ_SETTING=no
-fi
-
-
-    CPPFLAGS=$save_CPPFLAGS
-    CFLAGS=$save_CFLAGS
-    if test "$PROJ_SETTING" = "no"; then
-       as_fn_error $? "Did not find PROJ headers according to --with-proj-include - check the installation!" "$LINENO" 5
-    fi
+        $as_echo "PROJ header location specified: $libproj_CPPFLAGS - check if proj.h or proj_api.h is there..."
 else
         $as_echo "Looking for PROJ headers in the usual places..."
-    save_CPPFLAGS=$CPPFLAGS
-    save_CFLAGS=$CFLAGS
-    CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
-    CFLAGS="$CFLAGS $libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
-    ac_fn_c_check_header_mongrel "$LINENO" "proj_api.h" "ac_cv_header_proj_api_h" "$ac_includes_default"
-if test "x$ac_cv_header_proj_api_h" = xyes; then :
-  PROJ_SETTING=yes
+fi
+save_CPPFLAGS=$CPPFLAGS
+save_CFLAGS=$CFLAGS
+CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
+CFLAGS="$CFLAGS $libproj_CPPFLAGS"
+ac_fn_c_check_header_mongrel "$LINENO" "proj.h" "ac_cv_header_proj_h" "$ac_includes_default"
+if test "x$ac_cv_header_proj_h" = xyes; then :
+  FOUND_PROJ6=yes
 else
-  PROJ_SETTING=no
+  FOUND_PROJ6=no
 fi
 
 
-    CPPFLAGS=$save_CPPFLAGS
-    CFLAGS=$save_CFLAGS
-    if test "$PROJ_SETTING" = "yes" ; then
-        GOT_PROJ=yes
-        $as_echo "Found PROJ headers..."
+if test "$FOUND_PROJ6" = "yes"; then
+    FOUND_PROJ_HEADERS="yes"
+  $as_echo "Found PROJ6 headers - using the PROJ6 API"
+else
+  ac_fn_c_check_header_mongrel "$LINENO" "proj_api.h" "ac_cv_header_proj_api_h" "$ac_includes_default"
+if test "x$ac_cv_header_proj_api_h" = xyes; then :
+  FOUND_PROJ4=yes
+else
+  FOUND_PROJ4=no
+fi
+
+
+  if test "$FOUND_PROJ4" = "yes"; then
+    FOUND_PROJ_HEADERS="yes"
+    libproj_CPPFLAGS="$libproj_CPPFLAGS -DUSE_PROJ4_API"
+    $as_echo "Found PROJ4 headers - using the deprecated PROJ4 API"
+  else
+    FOUND_PROJ_HEADERS="no"
+    if test "$GOT_PROJ" = "yes" ; then
+      $as_echo "Did not find PROJ headers according to --with-proj-include - check the installation!"
+      as_fn_error $? "Did not find PROJ headers according to --with-proj-include - check the installation!" "$LINENO" 5
     else
-        $as_echo "Did not find PROJ headers anywhere, use --with-proj-include to set the location"
-        as_fn_error $? "Did not find PROJ headers anywhere, use --with-proj-include to set the location" "$LINENO" 5
+      $as_echo "Did not find PROJ headers anywhere, use --with-proj-include to set the location"
+      as_fn_error $? "Did not find PROJ headers anywhere, use --with-proj-include to set the location" "$LINENO" 5
     fi
-fi
 
-libproj_CPPFLAGS="$libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
+  fi
+fi
+CPPFLAGS=$save_CPPFLAGS
+CFLAGS=$save_CFLAGS
 
 libproj_LIBS=$libproj_LIBS
 
@@ -23048,10 +23137,13 @@ if test $BYTESWAP = "yes" ; then
 else
     $as_echo "Byteswapping: Disabled"
 fi
-$as_echo "libgmt_CPPFLAGS:  $libgmt_CPPFLAGS"
-$as_echo "libgmt_LIBS:      $libgmt_LIBS"
-$as_echo "libgmt_LDFLAGS:   $libgmt_LDFLAGS"
-$as_echo "GMT PLUGIN DIR:   $GMT_PLUGINDIR"
+$as_echo "libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"
+$as_echo "libgmt_LIBS:         $libgmt_LIBS"
+$as_echo "libgmt_LDFLAGS:      $libgmt_LDFLAGS"
+$as_echo "GMT PLUGIN DIR:      $GMT_PLUGINDIR"
+$as_echo "libgdal_CPPFLAGS:    $libgdal_CPPFLAGS"
+$as_echo "libgdal_LIBS:        $libgdal_LIBS"
+$as_echo "libgdal_LDFLAGS:     $libgdal_LDFLAGS"
 $as_echo "libnetcdf_CPPFLAGS:  $libnetcdf_CPPFLAGS"
 $as_echo "libnetcdf_LIBS:      $libnetcdf_LIBS"
 $as_echo "libnetcdf_LDFLAGS:   $libnetcdf_LDFLAGS"

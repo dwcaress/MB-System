@@ -134,7 +134,8 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libmbaux_la_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+	$(MBTRNLIB) $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_libmbaux_la_OBJECTS = mb_zgrid.lo mb_surface.lo mb_cheb.lo \
 	mb_delaun.lo mb_track.lo mb_truecont.lo mb_readwritegrd.lo \
 	mb_intersectgrid.lo
@@ -396,14 +397,18 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XGRLIB = libmbxgr.la
-lib_LTLIBRARIES = libmbaux.la $(XGRLIB)
 @BUILD_MOTIF_TRUE@XGRINC = mb_xgraphics.h
+@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+@BUILD_MBTRN_TRUE@MBTRNLIB = $(top_builddir)/src/mbtrn/libmbtrn.la
+lib_LTLIBRARIES = libmbaux.la $(XGRLIB)
 include_HEADERS = mb_aux.h $(XGRINC)
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
+	      $(MBTRNINCDIR) \
 	      ${libgmt_CPPFLAGS} \
+	      ${libgdal_CPPFLAGS} \
 	      ${libnetcdf_CPPFLAGS}
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES = \
 		      mb_zgrid.c mb_surface.c mb_cheb.c \
@@ -411,7 +416,10 @@ libmbaux_la_SOURCES = \
 		      mb_intersectgrid.c
 
 libmbaux_la_LIBADD = ${top_builddir}/src/mbio/libmbio.la \
-			${libgmt_LIBS} ${libnetcdf_LIBS}
+          $(MBTRNLIB) \
+			    ${libgmt_LIBS} \
+			    ${libgdal_LIBS} \
+			    ${libnetcdf_LIBS}
 
 @BUILD_MOTIF_TRUE@libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
 @BUILD_MOTIF_TRUE@libmbxgr_la_SOURCES = mb_xgraphics.c
