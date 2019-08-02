@@ -37,9 +37,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_elac_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -51,10 +48,10 @@ int mbsys_elac_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_elac_struct), store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_elac_struct), store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)*store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)*store_ptr;
 
 	/* initialize everything */
 	store->kind = MB_DATA_NONE;
@@ -203,9 +200,6 @@ int mbsys_elac_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -218,7 +212,7 @@ int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -236,6 +230,8 @@ int mbsys_elac_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*namp = 0;
 		*nss = 0;
 	}
+
+	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -256,10 +252,7 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                        double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
 	double depthscale, dacrscale, daloscale, reflscale;
-	int ibeam;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -273,7 +266,7 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -314,7 +307,7 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		reflscale = 1.0;
 		for (int i = 0; i < store->profile_num; i++)
 			for (int j = 0; j < 8; j++) {
-				ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
+				const int ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
 				if (store->profile[i].quality[j] == 1)
 					beamflag[ibeam] = MB_FLAG_NONE;
 				else if (store->profile[i].quality[j] < 8)
@@ -411,6 +404,9 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -425,9 +421,7 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
                       double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                       double *ssalongtrack, char *comment, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
 	double depthscale, dacrscale, daloscale, reflscale;
-	int ibeam;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -471,7 +465,7 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -503,7 +497,7 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 			reflscale = 1.0;
 			for (int i = 0; i < store->profile_num; i++)
 				for (int j = 0; j < 8; j++) {
-					ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
+					const int ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
 					if (mb_beam_check_flag(beamflag[i])) {
 						if (mb_beam_check_flag_null(beamflag[i]))
 							store->profile[i].quality[j] = 8;
@@ -543,10 +537,7 @@ int mbsys_elac_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                       double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                       double *ssv, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
 	double daloscale, ttscale, angscale;
-	int ibeam;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -566,10 +557,12 @@ int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -593,7 +586,7 @@ int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		angscale = 0.005;
 		for (int i = 0; i < store->profile_num; i++)
 			for (int j = 0; j < 8; j++) {
-				ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
+				const int ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
 				ttimes[ibeam] = ttscale * store->profile[i].tt[j];
 				angles[ibeam] = angscale * store->profile[i].angle[j];
 				if (angles[ibeam] < 0.0) {
@@ -653,10 +646,6 @@ int mbsys_elac_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
-	int ibeam;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -670,10 +659,12 @@ int mbsys_elac_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -683,7 +674,7 @@ int mbsys_elac_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		/* get detects */
 		for (int i = 0; i < store->profile_num; i++)
 			for (int j = 0; j < 8; j++) {
-				ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
+				const int ibeam = (store->profile_num - 1 - i) + store->profile_num * (7 - j);
 				detects[ibeam] = MB_DETECT_AMPLITUDE;
 			}
 
@@ -729,8 +720,6 @@ int mbsys_elac_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                 double *altitude, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
 	double depthscale;
 	double dacrscale;
 	double bath_best;
@@ -748,10 +737,12 @@ int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -824,9 +815,6 @@ int mbsys_elac_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                            double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                            double *heave, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -839,10 +827,12 @@ int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -950,9 +940,6 @@ int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_elac_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                           double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                           int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -981,7 +968,7 @@ int mbsys_elac_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1012,6 +999,8 @@ int mbsys_elac_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 		store->profile[0].heave = 1000 * heave;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1025,9 +1014,6 @@ int mbsys_elac_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 /*--------------------------------------------------------------------*/
 int mbsys_elac_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                            int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1040,10 +1026,12 @@ int mbsys_elac_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1089,9 +1077,6 @@ int mbsys_elac_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1107,7 +1092,7 @@ int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1121,6 +1106,8 @@ int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1133,9 +1120,6 @@ int mbsys_elac_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elac_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elac_struct *store;
-	struct mbsys_elac_struct *copy;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1150,11 +1134,13 @@ int mbsys_elac_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_elac_struct *)store_ptr;
-	copy = (struct mbsys_elac_struct *)copy_ptr;
+	struct mbsys_elac_struct *store = (struct mbsys_elac_struct *)store_ptr;
+	struct mbsys_elac_struct *copy = (struct mbsys_elac_struct *)copy_ptr;
 
 	/* copy the data */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
