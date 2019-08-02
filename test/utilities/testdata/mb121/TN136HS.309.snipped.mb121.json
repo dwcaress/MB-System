@@ -3,8 +3,8 @@
 "swath_data_file": "TN136HS.309.snipped.mb121",
 "mbio_data_format_id": "121",
 "format_name": "MBF_GSFGENMB",
-"informal_description": "SAIC Generic Sensor Format (GSF)",
-"attributes": "variable beams,  bathymetry and amplitude,;                      binary, single files, SAIC. "
+"informal_description": "Leidos Generic Sensor Format (GSF) version GSF-v03.09",
+"attributes": "variable beams,  bathymetry and amplitude,;                      binary, single files, Leidos (formerly SAIC)."
 },
 "data_totals": {
 "number_of_records": "0"
