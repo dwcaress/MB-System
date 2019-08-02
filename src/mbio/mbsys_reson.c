@@ -39,8 +39,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_reson_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -55,7 +53,7 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson_struct), store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)*store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)*store_ptr;
 
 	/* initialize everything */
 	store->kind = MB_DATA_NONE;
@@ -176,7 +174,6 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -200,8 +197,6 @@ int mbsys_reson_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	struct mbsys_reson_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -214,7 +209,7 @@ int mbsys_reson_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -254,9 +249,6 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                         double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                         double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                         double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_reson_struct *store;
-	double depthscale, dacrscale, daloscale, reflscale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -269,7 +261,7 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -304,10 +296,10 @@ int mbsys_reson_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		*nbath = store->beams_bath;
 		*namp = store->beams_bath;
 		*nss = 0;
-		depthscale = 0.01;
-		dacrscale = 0.01;
-		daloscale = 0.01;
-		reflscale = 1.0;
+		const double depthscale = 0.01;
+		const double dacrscale = 0.01;
+		const double daloscale = 0.01;
+		const double reflscale = 1.0;
 		for (int i = 0; i < *nbath; i++) {
 			if (store->quality[i] == 0 || store->bath[i] == 0) {
 				beamflag[i] = MB_FLAG_NULL;
@@ -471,9 +463,6 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                        double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                        double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                        double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_reson_struct *store;
-	double depthscale, dacrscale, daloscale, reflscale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -516,7 +505,7 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -542,10 +531,10 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
 		/* insert distance and depth values into storage arrays */
 		store->beams_bath = nbath;
-		depthscale = 0.01;
-		dacrscale = 0.01;
-		daloscale = 0.01;
-		reflscale = 1.0;
+		const double depthscale = 0.01;
+		const double dacrscale = 0.01;
+		const double daloscale = 0.01;
+		const double reflscale = 1.0;
 		for (int i = 0; i < nbath; i++) {
 			if (beamflag[i] == MB_FLAG_NULL) {
 				store->bath[i] = bath[i] / depthscale;
@@ -608,12 +597,6 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                        double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                        double *ssv, int *error) {
-	struct mbsys_reson_struct *store;
-	double ttscale, angscale;
-	double heave_use;
-	double angle, pitch;
-	int icenter, anglemin;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -632,7 +615,7 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -645,13 +628,13 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		*nbeams = store->beams_bath;
 
 		/* get depth offset (heave + transducer_depth) */
-		heave_use = 0.001 * store->heave;
+		const double heave_use = 0.001 * store->heave;
 		*draft = 0.001 * store->transducer_depth;
 		*ssv = 0.1 * store->sound_vel;
 
 		/* get first starboard angle */
-		icenter = 0;
-		anglemin = 32000;
+		int icenter = 0;
+		int anglemin = 32000;
 		for (int i = 0; i < *nbeams; i++) {
 			if (store->angle[i] != 0 && store->angle[i] < anglemin) {
 				anglemin = store->angle[i];
@@ -664,15 +647,16 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		}
 
 		/* get travel times, angles */
-		ttscale = 0.00001;
-		angscale = 0.005;
+		const double ttscale = 0.00001;
+		const double angscale = 0.005;
 		for (int i = 0; i < *nbeams; i++) {
 			ttimes[i] = ttscale * store->tt[i];
+			double angle;
 			if (i < icenter)
 				angle = 90.0 + angscale * store->angle[i];
 			else
 				angle = 90.0 - angscale * store->angle[i];
-			pitch = angscale * store->pitch;
+			const double pitch = angscale * store->pitch;
 			mb_rollpitch_to_takeoff(verbose, pitch, angle, &angles[i], &angles_forward[i], error);
 			angles_null[i] = angles[i];
 			heave[i] = heave_use;
@@ -723,8 +707,6 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_reson_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -738,7 +720,7 @@ int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -797,11 +779,6 @@ int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                  double *altitude, int *error) {
-	struct mbsys_reson_struct *store;
-	double depthscale;
-	double dacrscale;
-	double bath_best;
-	double xtrack_min;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -815,7 +792,7 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -824,9 +801,10 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
-		bath_best = 0.0;
-		depthscale = 0.01;
-		dacrscale = 0.01;
+		double xtrack_min;
+		double bath_best = 0.0;
+		const double depthscale = 0.01;
+		const double dacrscale = 0.01;
 		if (store->bath[store->beams_bath / 2] != 0 && store->quality[store->beams_bath / 2] >= 3)
 			bath_best = depthscale * store->bath[store->beams_bath / 2];
 		else {
@@ -888,8 +866,6 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                             double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                             double *pitch, double *heave, int *error) {
-	struct mbsys_reson_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -902,7 +878,7 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1069,8 +1045,6 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                            double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                            int *error) {
-	struct mbsys_reson_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1099,7 +1073,7 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1172,8 +1146,6 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 /*--------------------------------------------------------------------*/
 int mbsys_reson_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                             int *error) {
-	struct mbsys_reson_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1186,7 +1158,7 @@ int mbsys_reson_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1237,8 +1209,6 @@ int mbsys_reson_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity, int *error) {
-	struct mbsys_reson_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1254,7 +1224,7 @@ int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1282,9 +1252,6 @@ int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_reson_struct *store;
-	struct mbsys_reson_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1298,8 +1265,8 @@ int mbsys_reson_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_reson_struct *)store_ptr;
-	copy = (struct mbsys_reson_struct *)copy_ptr;
+	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
+	struct mbsys_reson_struct *copy = (struct mbsys_reson_struct *)copy_ptr;
 
 	/* copy the data */
 	*copy = *store;

@@ -41,8 +41,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -54,7 +52,7 @@ int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_image83p_struct), store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_image83p_struct), store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -69,8 +67,6 @@ int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -80,7 +76,7 @@ int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
 	}
 
 	/* deallocate memory for data structure */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
+	const int status = mb_freed(verbose, __FILE__, __LINE__, (void **)store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -95,9 +91,6 @@ int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                               int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -110,7 +103,7 @@ int mbsys_image83p_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -128,6 +121,8 @@ int mbsys_image83p_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 		*namp = 0;
 		*nss = 0;
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -148,9 +143,6 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
                            double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -163,7 +155,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -269,6 +261,9 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			fprintf(stderr, "dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -282,9 +277,6 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
                           double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                           double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                           double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -332,7 +324,7 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -371,6 +363,8 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 		strncpy(store->comment, comment, MBSYS_IMAGE83P_COMMENTLEN);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -385,9 +379,6 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                           double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                           double *ssv, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -406,10 +397,12 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -476,9 +469,6 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 }
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -492,10 +482,12 @@ int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -549,11 +541,6 @@ int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                     double *altitudev, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-	double xtrackmin;
-	int altitude_found;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -566,19 +553,20 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
 
+	int status = MB_SUCCESS;
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
 		/* get transducer depth */
 		*transducer_depth = store->sonar_depth - store->heave;
 
 		/* get altitude from depth closest to nadir */
-		altitude_found = MB_NO;
-		xtrackmin = 999999.9;
+		int altitude_found = MB_NO;
+		double xtrackmin = 999999.9;
 		*altitudev = 0.0;
 		for (int i = 0; i < store->num_proc_beams; i++) {
 			if (mb_beam_ok(store->beamflag[i]) && fabs(store->bathacrosstrack[i]) < xtrackmin) {
@@ -626,9 +614,6 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                double *pitch, double *heave, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -641,10 +626,12 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -747,9 +734,6 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                               double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                               int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -778,7 +762,7 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -806,6 +790,8 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		store->heave = heave;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -819,10 +805,6 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_image83p_struct *store;
-	struct mbsys_image83p_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -836,11 +818,13 @@ int mbsys_image83p_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_image83p_struct *)store_ptr;
-	copy = (struct mbsys_image83p_struct *)copy_ptr;
+	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
+	struct mbsys_image83p_struct *copy = (struct mbsys_image83p_struct *)copy_ptr;
 
 	/* copy the data */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

@@ -374,8 +374,6 @@ int mbr_info_xtfb1624(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -383,7 +381,6 @@ int mbr_info_xtfb1624(int verbose, int *system, int *beams_bath_max, int *beams_
 	}
 
 	/* set format info parameters */
-	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	*system = MB_SYS_BENTHOS;
 	*beams_bath_max = MBSYS_BENTHOS_MAXBEAMS;
@@ -409,6 +406,8 @@ int mbr_info_xtfb1624(int verbose, int *system, int *beams_bath_max, int *beams_
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -442,9 +441,6 @@ int mbr_info_xtfb1624(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_xtfb1624(int verbose, char *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_xtfb1624_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -453,7 +449,7 @@ int mbr_zero_xtfb1624(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_xtfb1624_struct *)data_ptr;
+	struct mbf_xtfb1624_struct *data = (struct mbf_xtfb1624_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -462,7 +458,7 @@ int mbr_zero_xtfb1624(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	if (verbose >= 2) {
@@ -477,11 +473,6 @@ int mbr_zero_xtfb1624(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfb1624(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	int *fileheaderread;
-	double *pixel_size;
-	double *swath_width;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -492,19 +483,16 @@ int mbr_alm_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_xtfb1624_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_benthos_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_benthos_struct), &mb_io_ptr->store_data, error);
 
 	/* set saved flags */
-	fileheaderread = (int *)&(mb_io_ptr->save1);
-	pixel_size = &mb_io_ptr->saved1;
-	swath_width = &mb_io_ptr->saved2;
+	int *fileheaderread = (int *)&(mb_io_ptr->save1);
+	double *pixel_size = &mb_io_ptr->saved1;
+	double *swath_width = &mb_io_ptr->saved2;
 	*fileheaderread = MB_NO;
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
@@ -524,8 +512,6 @@ int mbr_alm_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_xtfb1624(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -537,8 +523,8 @@ int mbr_dem_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -552,28 +538,6 @@ int mbr_dem_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
-	struct mbf_xtfb1624_struct *data;
-	char line[MBF_XTFB1624_MAXLINE];
-	int *fileheaderread;
-	struct mbf_xtfb1624_xtffileheader *fileheader;
-	struct mbf_xtfpacketheader packetheader;
-	struct mbf_xtfattitudeheader *attitudeheader;
-	struct mbf_xtfrawcustomheader *rawcustomheader;
-	struct mbf_xtfpingheader *pingheader;
-	struct mbf_xtfpingchanheader *pingchanportheader;
-	struct mbf_xtfpingchanheader *pingchanstbdheader;
-	int index;
-	int ichan;
-	int done, found;
-	int read_len, read_bytes;
-	int skip;
-	mb_u_char *mb_u_char_ptr;
-	double timetag, heave, roll, pitch, heading;
-	int utm_zone;
-	char projection[MB_NAME_LENGTH];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -585,30 +549,32 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set saved flags */
-	fileheaderread = (int *)&(mb_io_ptr->save1);
+	int *fileheaderread = (int *)&(mb_io_ptr->save1);
 	/* get pointer to raw data structure */
-	data = (struct mbf_xtfb1624_struct *)mb_io_ptr->raw_data;
-	fileheader = (struct mbf_xtfb1624_xtffileheader *)&(data->fileheader);
-	attitudeheader = (struct mbf_xtfattitudeheader *)&(data->attitudeheader);
-	rawcustomheader = (struct mbf_xtfrawcustomheader *)&(data->rawcustomheader);
-	pingheader = (struct mbf_xtfpingheader *)&(data->pingheader);
-	pingchanportheader = (struct mbf_xtfpingchanheader *)&(data->pingchanportheader);
-	pingchanstbdheader = (struct mbf_xtfpingchanheader *)&(data->pingchanstbdheader);
+	struct mbf_xtfb1624_struct *data = (struct mbf_xtfb1624_struct *)mb_io_ptr->raw_data;
+	struct mbf_xtfb1624_xtffileheader *fileheader = (struct mbf_xtfb1624_xtffileheader *)&(data->fileheader);
+	struct mbf_xtfattitudeheader *attitudeheader = (struct mbf_xtfattitudeheader *)&(data->attitudeheader);
+	struct mbf_xtfrawcustomheader *rawcustomheader = (struct mbf_xtfrawcustomheader *)&(data->rawcustomheader);
+	struct mbf_xtfpingheader *pingheader = (struct mbf_xtfpingheader *)&(data->pingheader);
+	struct mbf_xtfpingchanheader *pingchanportheader = (struct mbf_xtfpingchanheader *)&(data->pingchanportheader);
+	struct mbf_xtfpingchanheader *pingchanstbdheader = (struct mbf_xtfpingchanheader *)&(data->pingchanstbdheader);
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
+
+	char line[MBF_XTFB1624_MAXLINE];
 
 	/* read file header if required */
 	if (*fileheaderread == MB_NO) {
-		read_len = fread(line, 1, MBF_XTFB1624_FILEHEADERLEN, mb_io_ptr->mbfp);
+		const int read_len = fread(line, 1, MBF_XTFB1624_FILEHEADERLEN, mb_io_ptr->mbfp);
 		if (read_len == MBF_XTFB1624_FILEHEADERLEN) {
 			/* extract data from buffer */
 			*fileheaderread = MB_YES;
 			status = MB_SUCCESS;
-			index = 0;
+			int index = 0;
 			fileheader->FileFormat = line[index];
 			index++;
 			fileheader->SystemType = line[index];
@@ -680,7 +646,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			index += 4;
 			mb_get_binary_float(MB_YES, &line[index], &(fileheader->MRUOffsetRoll));
 			index += 4;
-			for (ichan = 0; ichan < 6; ichan++) {
+			for (int ichan = 0; ichan < 6; ichan++) {
 				fileheader->chaninfo[ichan].TypeOfChannel = line[index];
 				index++;
 				fileheader->chaninfo[ichan].SubChannelNumber = line[index];
@@ -728,7 +694,8 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			    and set up the projection */
 			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == MB_NO) {
 				/* initialize UTM projection */
-				utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
+				const int utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
+				char projection[MB_NAME_LENGTH];
 				sprintf(projection, "UTM%2.2dN", utm_zone);
 				mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
 				mb_io_ptr->projection_initialized = MB_YES;
@@ -798,13 +765,15 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 	}
 
+	struct mbf_xtfpacketheader packetheader;
+
 	/* look for next recognizable record */
-	done = MB_NO;
+	int done = MB_NO;
 	while (status == MB_SUCCESS && done == MB_NO) {
 		/* find the next packet beginning */
-		found = MB_NO;
-		skip = 0;
-		read_len = fread(line, 1, 2, mb_io_ptr->mbfp);
+		int found = MB_NO;
+		int skip = 0;
+		int read_len = fread(line, 1, 2, mb_io_ptr->mbfp);
 		if (read_len != 2) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
@@ -827,7 +796,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 		read_len = fread(&(line[2]), 1, 12, mb_io_ptr->mbfp);
 		if (read_len == 12) {
 			/* extract data from buffer */
-			index = 0;
+			int index = 0;
 			packetheader.MagicNumber[0] = line[index];
 			index++;
 			packetheader.MagicNumber[1] = line[index];
@@ -883,7 +852,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			read_len = fread(line, 1, 50, mb_io_ptr->mbfp);
 			if (read_len == 50) {
 				/* parse the rest of the attitude record */
-				index = 0;
+				int index = 0;
 				for (int i = 0; i < 4; i++) {
 					mb_get_binary_int(MB_YES, &line[index], (int *)&(attitudeheader->Reserved2[i]));
 					index += 4;
@@ -906,11 +875,11 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				}
 
 				/* add attitude to list for interpolation */
-				timetag = 0.001 * attitudeheader->TimeTag;
-				heave = attitudeheader->Heave;
-				roll = attitudeheader->Roll;
-				pitch = attitudeheader->Pitch;
-				heading = attitudeheader->Heading;
+				const double timetag = 0.001 * attitudeheader->TimeTag;
+				const double heave = attitudeheader->Heave;
+				const double roll = attitudeheader->Roll;
+				const double pitch = attitudeheader->Pitch;
+				const double heading = attitudeheader->Heading;
 
 				/* add latest attitude to list */
 				mb_attint_add(verbose, mbio_ptr, timetag, heave, roll, pitch, error);
@@ -959,7 +928,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			pingheader->packetheader = packetheader;
 			read_len = fread(line, 1, 242, mb_io_ptr->mbfp);
 			if (read_len == 242) {
-				index = 0;
+				int index = 0;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingheader->Year));
 				index += 2;
 				pingheader->Month = line[index];
@@ -1101,7 +1070,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS)
 				read_len = fread(line, 1, 64, mb_io_ptr->mbfp);
 			if (status == MB_SUCCESS && read_len == 64) {
-				index = 0;
+				int index = 0;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->ChannelNumber));
 				index += 2;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->DownsampleMethod));
@@ -1177,6 +1146,8 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			jrenken: SamplesPerChannel not used anymore, value can change dependend on range
 			*/
 			/* read port sidescan data */
+			int read_len;
+			int read_bytes;
 			if (status == MB_SUCCESS) {
 				read_bytes =
 				    pingchanportheader->NumSamples * fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample;
@@ -1185,12 +1156,12 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS && read_len == read_bytes) {
 				if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 1) {
 					for (int i = 0; i < pingchanportheader->NumSamples; i++) {
-						mb_u_char_ptr = (mb_u_char *)&line[i];
+						mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
 						data->ssrawport[i] = (unsigned short)(*mb_u_char_ptr);
 					}
 				}
 				else if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 2) {
-					index = 0;
+					int index = 0;
 					for (int i = 0; i < pingchanportheader->NumSamples; i++) {
 						mb_get_binary_short(MB_YES, &line[index], (short *)&(data->ssrawport[i]));
 						index += 2;
@@ -1207,7 +1178,7 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS)
 				read_len = fread(line, 1, 64, mb_io_ptr->mbfp);
 			if (status == MB_SUCCESS && read_len == 64) {
-				index = 0;
+				int index = 0;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->ChannelNumber));
 				index += 2;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->DownsampleMethod));
@@ -1291,12 +1262,12 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS && read_len == read_bytes) {
 				if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 1) {
 					for (int i = 0; i < pingchanstbdheader->NumSamples; i++) {
-						mb_u_char_ptr = (mb_u_char *)&line[i];
+						mb_u_char *mb_u_char_ptr = (mb_u_char *)&line[i];
 						data->ssrawstbd[i] = (unsigned short)(*mb_u_char_ptr);
 					}
 				}
 				else if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 2) {
-					index = 0;
+					int index = 0;
 					for (int i = 0; i < pingchanstbdheader->NumSamples; i++) {
 						mb_get_binary_short(MB_YES, &line[index], (short *)&(data->ssrawstbd[i]));
 						index += 2;
@@ -1477,17 +1448,6 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-
-	struct mbf_xtfb1624_struct *data;
-	struct mbsys_benthos_struct *store;
-	int nchan;
-	int time_i[7];
-	double time_d, ntime_d, dtime;
-	double *pixel_size, *swath_width;
-	int badtime;
-	double lon, lat;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1498,13 +1458,13 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_xtfb1624_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_benthos_struct *)store_ptr;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
+	struct mbf_xtfb1624_struct *data = (struct mbf_xtfb1624_struct *)mb_io_ptr->raw_data;
+	struct mbsys_benthos_struct *store = (struct mbsys_benthos_struct *)store_ptr;
+	double *pixel_size = (double *)&mb_io_ptr->saved1;
+	double *swath_width = (double *)&mb_io_ptr->saved2;
 
 	/* read next data from file */
-	status = mbr_xtfb1624_rd_data(verbose, mbio_ptr, error);
+	int status = mbr_xtfb1624_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
@@ -1513,6 +1473,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* handle navigation fix delay */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA) {
 		/* get ping time */
+		int time_i[7];
 		time_i[0] = data->pingheader.Year;
 		time_i[1] = data->pingheader.Month;
 		time_i[2] = data->pingheader.Day;
@@ -1520,10 +1481,11 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		time_i[4] = data->pingheader.Minute;
 		time_i[5] = data->pingheader.Second;
 		time_i[6] = 10000 * data->pingheader.HSeconds;
+		double time_d;
 		mb_get_time(verbose, time_i, &time_d);
 
 		/* do check on time here - we sometimes get a bad fix */
-		badtime = MB_NO;
+		int badtime = MB_NO;
 		if (time_i[0] < 1970 && time_i[0] > 2100)
 			badtime = MB_YES;
 		if (time_i[1] < 0 && time_i[1] > 12)
@@ -1539,10 +1501,10 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* get nav time */
-		ntime_d = time_d;
+		double ntime_d = time_d;
 		/* Check if fixtime is valid */
 		if (data->pingheader.FixTimeHour || data->pingheader.FixTimeMinute || data->pingheader.FixTimeSecond) {
-			dtime = 3600.0 * (data->pingheader.FixTimeHour - data->pingheader.Hour) +
+			double dtime = 3600.0 * (data->pingheader.FixTimeHour - data->pingheader.Hour) +
 			        60.0 * (data->pingheader.FixTimeMinute - data->pingheader.Minute) + data->pingheader.FixTimeSecond -
 			        data->pingheader.Second - 0.01 * data->pingheader.HSeconds;
 			if (data->pingheader.FixTimeHour - data->pingheader.Hour > 1)
@@ -1553,6 +1515,8 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		    XTF allows projected coordinates like UTM but the format spec
 		    lists the projection specification values as unused!
 		    Assume UTM zone 1N as we have to assume something */
+		double lon;
+		double lat;
 		if (mb_io_ptr->projection_initialized == MB_YES) {
 			mb_proj_inverse(verbose, mb_io_ptr->pjptr, data->pingheader.SensorXcoordinate, data->pingheader.SensorYcoordinate,
 			                &lon, &lat, error);
@@ -1575,7 +1539,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		store->sonar = data->sonar; /* Type of Reson sonar */
 
 		/* parameter info */
-		nchan = data->fileheader.NumberOfSonarChannels + data->fileheader.NumberOfBathymetryChannels;
+		const int nchan = data->fileheader.NumberOfSonarChannels + data->fileheader.NumberOfBathymetryChannels;
 		for (int i = 0; i < nchan; i++) {
 			if (data->fileheader.chaninfo[i].TypeOfChannel == 3) {
 				store->MBOffsetX = data->fileheader.chaninfo[i].OffsetX;
@@ -1606,6 +1570,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->comment[i] = data->comment[i];
 
 		/* survey data */
+		int time_i[7];
 		time_i[0] = data->pingheader.Year;
 		time_i[1] = data->pingheader.Month;
 		time_i[2] = data->pingheader.Day;
@@ -1853,8 +1818,6 @@ int mbr_wt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1865,7 +1828,7 @@ int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_xtfb1624(
+	const int status = mbr_info_xtfb1624(
 	    verbose, &mb_io_ptr->system, &mb_io_ptr->beams_bath_max, &mb_io_ptr->beams_amp_max, &mb_io_ptr->pixels_ss_max,
 	    mb_io_ptr->format_name, mb_io_ptr->system_name, mb_io_ptr->format_description, &mb_io_ptr->numfile, &mb_io_ptr->filetype,
 	    &mb_io_ptr->variable_beams, &mb_io_ptr->traveltime, &mb_io_ptr->beam_flagging, &mb_io_ptr->platform_source,

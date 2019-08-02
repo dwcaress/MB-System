@@ -114,9 +114,6 @@ int mbr_info_xtfr8101(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_xtfr8101_struct *data;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -125,7 +122,7 @@ int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* get pointer to data descriptor */
-	data = (struct mbf_xtfr8101_struct *)data_ptr;
+	struct mbf_xtfr8101_struct *data = (struct mbf_xtfr8101_struct *)data_ptr;
 
 	/* initialize everything to zeros */
 	if (data != NULL) {
@@ -135,7 +132,7 @@ int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error) {
 	}
 
 	/* assume success */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 
 	if (verbose >= 2) {
@@ -150,11 +147,6 @@ int mbr_zero_xtfr8101(int verbose, char *data_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	int *fileheaderread;
-	double *pixel_size;
-	double *swath_width;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -165,19 +157,16 @@ int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* set initial status */
-	status = MB_SUCCESS;
-
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_xtfr8101_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson8k_struct), &mb_io_ptr->store_data, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, mb_io_ptr->structure_size, &mb_io_ptr->raw_data, error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson8k_struct), &mb_io_ptr->store_data, error);
 
 	/* set saved flags */
-	fileheaderread = (int *)&(mb_io_ptr->save1);
-	pixel_size = &mb_io_ptr->saved1;
-	swath_width = &mb_io_ptr->saved2;
+	int *fileheaderread = (int *)&(mb_io_ptr->save1);
+	double *pixel_size = &mb_io_ptr->saved1;
+	double *swath_width = &mb_io_ptr->saved2;
 	*fileheaderread = MB_NO;
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
@@ -197,8 +186,6 @@ int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_xtfr8101(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -210,8 +197,8 @@ int mbr_dem_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
+	int status = mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->raw_data, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&mb_io_ptr->store_data, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -225,30 +212,6 @@ int mbr_dem_xtfr8101(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_xtfr8101_struct *data;
-	char line[MBF_XTFR8101_MAXLINE];
-	int *fileheaderread;
-	struct mbf_xtfr8101_xtffileheader *fileheader;
-	struct mbf_xtfpacketheader packetheader;
-	struct mbf_xtfattitudeheader *attitudeheader;
-	struct mbf_xtfbathheader *bathheader;
-	struct RESON8100_RIT *reson8100rit;
-	struct mbf_xtfbathheader *sidescanheader;
-	struct mbf_xtfpingchanheader *pingchanportheader;
-	struct mbf_xtfpingchanheader *pingchanstbdheader;
-	int index;
-	int ichan;
-	int done, found;
-	int synch;
-	int read_len, read_bytes;
-	int skip;
-	int quality;
-	mb_u_char *mb_u_char_ptr;
-	double timetag, heave, roll, pitch, heading;
-	int utm_zone;
-	char projection[MB_NAME_LENGTH];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -260,23 +223,34 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* set saved flags */
-	fileheaderread = (int *)&(mb_io_ptr->save1);
+	int *fileheaderread = (int *)&(mb_io_ptr->save1);
 
 	/* get pointer to raw data structure */
-	data = (struct mbf_xtfr8101_struct *)mb_io_ptr->raw_data;
-	fileheader = (struct mbf_xtfr8101_xtffileheader *)&(data->fileheader);
-	attitudeheader = (struct mbf_xtfattitudeheader *)&(data->attitudeheader);
-	bathheader = (struct mbf_xtfbathheader *)&(data->bathheader);
-	reson8100rit = (struct RESON8100_RIT *)&(data->reson8100rit);
-	sidescanheader = (struct mbf_xtfbathheader *)&(data->sidescanheader);
-	pingchanportheader = (struct mbf_xtfpingchanheader *)&(data->pingchanportheader);
-	pingchanstbdheader = (struct mbf_xtfpingchanheader *)&(data->pingchanstbdheader);
+	struct mbf_xtfr8101_struct *data = (struct mbf_xtfr8101_struct *)mb_io_ptr->raw_data;
+	struct mbf_xtfr8101_xtffileheader *fileheader = (struct mbf_xtfr8101_xtffileheader *)&(data->fileheader);
+	struct mbf_xtfattitudeheader *attitudeheader = (struct mbf_xtfattitudeheader *)&(data->attitudeheader);
+	struct mbf_xtfbathheader *bathheader = (struct mbf_xtfbathheader *)&(data->bathheader);
+	struct RESON8100_RIT *reson8100rit = (struct RESON8100_RIT *)&(data->reson8100rit);
+	struct mbf_xtfbathheader *sidescanheader = (struct mbf_xtfbathheader *)&(data->sidescanheader);
+	struct mbf_xtfpingchanheader *pingchanportheader = (struct mbf_xtfpingchanheader *)&(data->pingchanportheader);
+	struct mbf_xtfpingchanheader *pingchanstbdheader = (struct mbf_xtfpingchanheader *)&(data->pingchanstbdheader);
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
+
+	struct mbf_xtfpacketheader packetheader;
+	char line[MBF_XTFR8101_MAXLINE];
+	int ichan;
+	int found;
+	int synch;
+	int read_len, read_bytes;
+	int skip;
+	int quality;
+	mb_u_char *mb_u_char_ptr;
+	double timetag, heave, roll, pitch, heading;
 
 	/* read file header if required */
 	if (*fileheaderread == MB_NO) {
@@ -285,7 +259,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* extract data from buffer */
 			*fileheaderread = MB_YES;
 			status = MB_SUCCESS;
-			index = 0;
+			int index = 0;
 			fileheader->FileFormat = line[index];
 			index++;
 			fileheader->SystemType = line[index];
@@ -405,7 +379,8 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			    and set up the projection */
 			if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == MB_NO) {
 				/* initialize UTM projection */
-				utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
+				const int utm_zone = (int)(((RTD * 0.0 + 183.0) / 6.0) + 0.5);
+                                char projection[MB_NAME_LENGTH];
 				sprintf(projection, "UTM%2.2dN", utm_zone);
 				mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
 				mb_io_ptr->projection_initialized = MB_YES;
@@ -476,7 +451,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 	}
 
 	/* look for next recognizable record */
-	done = MB_NO;
+	int done = MB_NO;
 	while (status == MB_SUCCESS && done == MB_NO) {
 		/* find the next packet beginning */
 		found = MB_NO;
@@ -504,7 +479,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 		read_len = fread(&(line[2]), 1, 12, mb_io_ptr->mbfp);
 		if (read_len == 12) {
 			/* extract data from buffer */
-			index = 0;
+			int index = 0;
 			packetheader.MagicNumber[0] = line[index];
 			index++;
 			packetheader.MagicNumber[1] = line[index];
@@ -560,7 +535,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			read_len = fread(line, 1, 50, mb_io_ptr->mbfp);
 			if (read_len == 50) {
 				/* parse the rest of the attitude record */
-				index = 0;
+				int index = 0;
 				for (int i = 0; i < 4; i++) {
 					mb_get_binary_int(MB_YES, &line[index], (int *)&(attitudeheader->Reserved2[i]));
 					index += 4;
@@ -635,7 +610,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			sidescanheader->packetheader = packetheader;
 			read_len = fread(line, 1, 242, mb_io_ptr->mbfp);
 			if (read_len == 242) {
-				index = 0;
+				int index = 0;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(sidescanheader->Year));
 				index += 2;
 				sidescanheader->Month = line[index];
@@ -777,7 +752,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS)
 				read_len = fread(line, 1, 64, mb_io_ptr->mbfp);
 			if (status == MB_SUCCESS && read_len == 64) {
-				index = 0;
+				int index = 0;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->ChannelNumber));
 				index += 2;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanportheader->DownsampleMethod));
@@ -863,7 +838,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					}
 				}
 				else if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 2) {
-					index = 0;
+					int index = 0;
 					for (int i = 0; i < pingchanportheader->NumSamples; i++) {
 						mb_get_binary_short(MB_YES, &line[index], (short *)&(data->ssrawport[i]));
 						index += 2;
@@ -880,7 +855,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			if (status == MB_SUCCESS)
 				read_len = fread(line, 1, 64, mb_io_ptr->mbfp);
 			if (status == MB_SUCCESS && read_len == 64) {
-				index = 0;
+				int index = 0;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->ChannelNumber));
 				index += 2;
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(pingchanstbdheader->DownsampleMethod));
@@ -966,7 +941,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					}
 				}
 				else if (fileheader->chaninfo[pingchanstbdheader->ChannelNumber].BytesPerSample == 2) {
-					index = 0;
+					int index = 0;
 					for (int i = 0; i < pingchanstbdheader->NumSamples; i++) {
 						mb_get_binary_short(MB_YES, &line[index], (short *)&(data->ssrawstbd[i]));
 						index += 2;
@@ -1120,7 +1095,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 			read_len = fread(line, 1, 242, mb_io_ptr->mbfp);
 			if (read_len == 242) {
 				/* parse the rest of the bathymetry header */
-				index = 0;
+				int index = 0;
 
 				mb_get_binary_short(MB_YES, &line[index], (short int *)&(bathheader->Year));
 				index += 2;
@@ -1266,7 +1241,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 					/* handle RESON_PACKETID_RT_VERY_OLD */
 					else if (line[4] == 0x13) {
-						index = 0;
+						int index = 0;
 						for (int i = 0; i < 4; i++) {
 							reson8100rit->synch_header[i] = line[index];
 							index++;
@@ -1333,7 +1308,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 
 					/* handle RESON_PACKETID_RIT */
 					else if (line[4] == 0x18) {
-						index = 0;
+						int index = 0;
 						for (int i = 0; i < 4; i++) {
 							reson8100rit->synch_header[i] = line[index];
 							index++;
@@ -1626,9 +1601,6 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbf_xtfr8101_struct *data;
-	struct mbsys_reson8k_struct *store;
 	int nchan;
 	int time_i[7];
 	double time_d, ntime_d, dtime, timetag;
@@ -1637,7 +1609,6 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int intensity_max;
 	double angle, theta, phi;
 	double rr, xx, zz;
-	double *pixel_size, *swath_width;
 	double lever_x, lever_y, lever_z;
 	int badtime;
 	double gain_correction;
@@ -1653,13 +1624,13 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* get pointers to mbio descriptor and data structures */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	data = (struct mbf_xtfr8101_struct *)mb_io_ptr->raw_data;
-	store = (struct mbsys_reson8k_struct *)store_ptr;
-	pixel_size = (double *)&mb_io_ptr->saved1;
-	swath_width = (double *)&mb_io_ptr->saved2;
+	struct mbf_xtfr8101_struct *data = (struct mbf_xtfr8101_struct *)mb_io_ptr->raw_data;
+	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
+	double *pixel_size = (double *)&mb_io_ptr->saved1;
+	double *swath_width = (double *)&mb_io_ptr->saved2;
 
 	/* read next data from file */
-	status = mbr_xtfr8101_rd_data(verbose, mbio_ptr, error);
+	int status = mbr_xtfr8101_rd_data(verbose, mbio_ptr, error);
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;

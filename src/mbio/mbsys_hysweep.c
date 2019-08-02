@@ -39,11 +39,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-	struct mbsys_hysweep_device_struct *device;
-	struct mbsys_hysweep_device_offset_struct *offset;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -55,10 +50,10 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hysweep_struct), (void **)store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hysweep_struct), (void **)store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)*store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)*store_ptr;
 
 	/* initialize everything */
 
@@ -110,7 +105,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	/* HYSWEEP devices */
 	store->num_devices = 0; /* number of devices defined */
 	for (int i = 0; i < MBSYS_HYSWEEP_DEVICE_NUM_MAX; i++) {
-		device = (struct mbsys_hysweep_device_struct *)&(store->devices[i]);
+		struct mbsys_hysweep_device_struct *device = (struct mbsys_hysweep_device_struct *)&(store->devices[i]);
 
 		/* DEV: first line of device declaration
 		    DEV dn dc "name"
@@ -154,7 +149,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		/* OF2: Hysweep device offsets  */
 		device->num_offsets = 0; /* number of offsets identified for this device */
 		for (int j = 0; j < MBSYS_HYSWEEP_OFFSET_NUM_MAX; j++) {
-			offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[j]);
+			struct mbsys_hysweep_device_offset_struct *offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[j]);
 
 			/* OF2: Hysweep device offsets
 			    OF2 dn on n1 n2 n3 n4 n5 n6 n7 */
@@ -610,9 +605,6 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -622,7 +614,9 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	}
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)*store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)*store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* deallocate arrays */
 	if (store->RMB_beam_ranges != NULL)
@@ -703,9 +697,6 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -718,7 +709,7 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -740,6 +731,8 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*nss = 0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -756,9 +749,6 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -770,10 +760,12 @@ int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)mb_io_ptr->store_data;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)mb_io_ptr->store_data;
 
 	/* extract data from structure */
 	*pingnumber = store->RMB_ping_number;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -788,9 +780,6 @@ int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumb
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -803,7 +792,7 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get sonar type */
 	if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT8101_150    /* Reson Seabat 8101 - 150 Deg - 1 */
@@ -890,6 +879,8 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 		*sonartype = MB_TOPOGRAPHY_TYPE_UNKNOWN;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -903,9 +894,6 @@ int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -918,7 +906,7 @@ int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get sidescan type */
 	if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_2100 /* Seabeam 2100 - 29 */) {
@@ -927,6 +915,8 @@ int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 	else {
 		*ss_type = MB_SIDESCAN_LOGARITHMIC;
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -941,18 +931,13 @@ int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_platform_struct *platform;
-	struct mbsys_hysweep_struct *store;
-	struct mbsys_hysweep_device_struct *device;
-	struct mbsys_hysweep_device_offset_struct *offset;
 	mb_longname sensor_name;
 	int sensor_capability1, sensor_capability2;
 	int sensor_type;
 	int num_offsets = 0;
 	int num_time_latency = 0;
 	int sensor_multibeam = -1;
-	int idevice, isensor, ioffset;
+	int isensor, ioffset;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -966,7 +951,9 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
+
+	int status = MB_SUCCESS;
 
 	/* if needed allocate a new platform structure */
 	if (*platform_ptr == NULL) {
@@ -976,16 +963,16 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract sensor offsets from installation record */
 	if (*platform_ptr != NULL) {
 		/* get pointer to platform structure */
-		platform = (struct mb_platform_struct *)(*platform_ptr);
+		struct mb_platform_struct *platform = (struct mb_platform_struct *)(*platform_ptr);
 
 		/* copy info */
 		strcpy(platform->name, store->INF_boat);
 		strcpy(platform->organization, store->INF_surveyor);
 
 		/* loop over devices in Hysweep header */
-		for (idevice = 0; idevice < store->num_devices; idevice++) {
+		for (int idevice = 0; idevice < store->num_devices; idevice++) {
 			/* get device structure */
-			device = (struct mbsys_hysweep_device_struct *)&(store->devices[idevice]);
+			struct mbsys_hysweep_device_struct *device = (struct mbsys_hysweep_device_struct *)&(store->devices[idevice]);
 
 			/* add sensors with appropriate types, capabilities, and offsets */
 			isensor = platform->num_sensors;
@@ -995,7 +982,7 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 			num_offsets = device->num_offsets;
 			num_time_latency = 0;
 			if (num_offsets > 0) {
-				offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[0]);
+				struct mbsys_hysweep_device_offset_struct *offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[0]);
 				if (offset->OF2_offset_time != 0.0)
 					num_time_latency = 1;
 			}
@@ -1216,7 +1203,7 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 
 			if (status == MB_SUCCESS) {
 				for (ioffset = 0; ioffset < num_offsets; ioffset++) {
-					offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[ioffset]);
+					struct mbsys_hysweep_device_offset_struct *offset = (struct mbsys_hysweep_device_offset_struct *)&(device->offsets[ioffset]);
 					status = mb_platform_set_sensor_offset(
 					    verbose, (void *)platform, isensor, ioffset, MB_SENSOR_POSITION_OFFSET_STATIC,
 					    (double)offset->OF2_offset_starboard, (double)offset->OF2_offset_forward,
@@ -1235,7 +1222,7 @@ int mbsys_hysweep_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
 		if (store->primary_nav_device >= 0 && store->primary_nav_device < store->num_devices) {
 			/* get device structure */
 			isensor = store->primary_nav_device;
-			device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->primary_nav_device]);
+			struct mbsys_hysweep_device_struct *device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->primary_nav_device]);
 
 			if (device->DV2_device_capability & 0x0004)
 				platform->source_position = store->primary_nav_device;
@@ -1281,9 +1268,6 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1296,7 +1280,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1548,6 +1532,9 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1561,9 +1548,6 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1611,10 +1595,12 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
+
+	int status = MB_SUCCESS;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1720,9 +1706,6 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-	struct mbsys_hysweep_device_struct *device;
 	double alpha, beta, theta, phi;
 
 	if (verbose >= 2) {
@@ -1743,10 +1726,12 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -1758,7 +1743,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 
 		/* get travel times, angles */
 		*nbeams = store->RMB_num_beams;
-		device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->RMB_device_number]);
+		struct mbsys_hysweep_device_struct *device = (struct mbsys_hysweep_device_struct *)&(store->devices[store->RMB_device_number]);
 		for (int i = 0; i < store->RMB_num_beams; i++) {
 			ttimes[i] = 2.0 * store->RMB_beam_ranges[i] / (*ssv);
 			if (store->RMB_sounding_takeoffangles != NULL && store->RMB_sounding_azimuthalangles != NULL) {
@@ -1836,9 +1821,6 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1852,10 +1834,12 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -1907,9 +1891,6 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1922,10 +1903,12 @@ int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -1980,11 +1963,6 @@ int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitudev, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-	double xtrackmin;
-	int altitude_found;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1997,10 +1975,12 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -2008,14 +1988,14 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		*transducer_depth = store->RMBint_draft + store->RMBint_heave;
 
 		/* get altitude */
-		altitude_found = MB_NO;
+		int altitude_found = MB_NO;
 		if (mb_io_ptr->naltitude > 0) {
 			mb_altint_interp(verbose, mbio_ptr, store->time_d, altitudev, error);
 			altitude_found = MB_YES;
 		}
 		if (altitude_found == MB_NO) {
 			/* get depth closest to nadir */
-			xtrackmin = 999999.9;
+			double xtrackmin = 999999.9;
 			for (int i = 0; i < store->RMB_num_beams; i++) {
 				if ((store->RMB_sounding_flags[i] == MB_FLAG_NONE) && fabs((double)store->RMB_sounding_across[i]) < xtrackmin) {
 					*altitudev = store->RMB_sounding_depths[i] - *transducer_depth;
@@ -2066,9 +2046,6 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2081,10 +2058,12 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from ping structure */
 	if (*kind == MB_DATA_DATA) {
@@ -2246,9 +2225,6 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2277,7 +2253,7 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* insert data in ping structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -2330,6 +2306,8 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 		/* get roll pitch and heave */
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -2342,9 +2320,6 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
-	struct mbsys_hysweep_struct *copy;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2359,8 +2334,8 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
-	copy = (struct mbsys_hysweep_struct *)copy_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *copy = (struct mbsys_hysweep_struct *)copy_ptr;
 
 	/* copy over structures, allocating memory where necessary */
 	(*copy) = (*store);
@@ -2379,6 +2354,9 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	copy->RMB_sounding_intensities = NULL;     /* beam intensities */
 	copy->RMB_sounding_quality = NULL;         /* beam quality codes (from sonar unit) */
 	copy->RMB_sounding_flags = NULL;           /* beam edit flags */
+
+	int status = MB_SUCCESS;
+
 	if (copy->RMB_num_beams > 0) {
 		if (store->RMB_beam_ranges != NULL)
 			status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(double),
@@ -2441,7 +2419,6 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
 	int status = MB_SUCCESS;
-	struct mbsys_hysweep_struct *store;
 	int nbathsort;
 	double pixel_size_calc;
 	double ss_spacing;
@@ -2475,7 +2452,7 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hysweep_struct *)store_ptr;
+	struct mbsys_hysweep_struct *store = (struct mbsys_hysweep_struct *)store_ptr;
 
 	/* generate processed sidescan if multibeam and sidescan records both exist */
 	if (store->RMB_ping_number > 0 &&

@@ -2693,8 +2693,7 @@ int mbr_wt_wasspenl(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get pointer to raw data structure */
-	struct mbsys_wassp_struct *store;
-	store = (struct mbsys_wassp_struct *)store_ptr;
+	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 
 #ifdef MBR_WASSPENLDEBUG
 	fprintf(stderr, "About to call mbr_wasspenl_wr_data record kind:%d\n", store->kind);
