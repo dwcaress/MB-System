@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
-  Version 5.7.6beta3     August 2, 2019
+  Version 5.7.6beta4     August 2, 2019
   Version 5.7.6beta2     July 25, 2019
   Version 5.7.6beta1     July 6, 2019
 * Version 5.7.5          June 26, 2019
@@ -321,7 +321,7 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.7.6beta3 (August 2, 2019)
+-----> 5.7.6beta4 (August 2, 2019)
 
 Format MBF_GSFGENMB (format 121, Generic Sensor Format, GSF): The version of
 libgsf used to read and write Generic Sensor Format (GSF) files has been
