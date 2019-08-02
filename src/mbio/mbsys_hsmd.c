@@ -39,8 +39,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +50,7 @@ int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsmd_struct), store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_hsmd_struct), store_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -92,9 +90,6 @@ int mbsys_hsmd_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -107,7 +102,7 @@ int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -125,6 +120,8 @@ int mbsys_hsmd_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		*namp = 0;
 		*nss = 0;
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -145,8 +142,6 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
                        double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                        double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                        double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -160,7 +155,7 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -347,6 +342,9 @@ int mbsys_hsmd_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		for (int i = 0; i < *nss; i++)
 			fprintf(stderr, "dbg2       ss[%d]:   %f  ssdist[%d]:   %f\n", i, ss[i], i, ssacrosstrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -360,10 +358,6 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
                       double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                       double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                       double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
-	int first;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -409,7 +403,7 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -434,7 +428,7 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		store->heading_tx = heading;
 
 		/* figure out if port or starboard ping */
-		first = -1;
+		int first = -1;
 		for (int i = 0; i < nbath; i++) {
 			if (first == -1 && bath[i] != 0.0)
 				first = i;
@@ -500,6 +494,8 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		strcpy(store->comment, comment);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -514,10 +510,6 @@ int mbsys_hsmd_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                       double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                       double *ssv, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
-	double scale;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -536,10 +528,12 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -557,6 +551,7 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 		}
 
 		/* get travel times, angles */
+		double scale;
 		if (store->skals)
 			scale = 0.00015;
 		else
@@ -640,9 +635,6 @@ int mbsys_hsmd_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -656,10 +648,12 @@ int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -713,11 +707,6 @@ int mbsys_hsmd_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                 double *altitude, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
-	double bath_best;
-	double xtrack_min;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -731,18 +720,20 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
 
+	int status = MB_SUCCESS;
+
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
-		bath_best = 0.0;
+		double bath_best = 0.0;
 		if (store->depth[0] > 0.0)
 			bath_best = store->depth[0];
 		else {
-			xtrack_min = 99999999.9;
+			double xtrack_min = 99999999.9;
 			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
 				if (store->depth[i] > 0.0 && fabs(store->distance[i]) < xtrack_min) {
 					xtrack_min = fabs(store->distance[i]);
@@ -751,7 +742,7 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 			}
 		}
 		if (bath_best <= 0.0) {
-			xtrack_min = 99999999.9;
+			double xtrack_min = 99999999.9;
 			for (int i = 0; i < MBSYS_HSMD_BEAMS_PING; i++) {
 				if (store->depth[i] < 0.0 && fabs(store->distance[i]) < xtrack_min) {
 					xtrack_min = fabs(store->distance[i]);
@@ -800,9 +791,6 @@ int mbsys_hsmd_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d, double *navlon,
                            double *navlat, double *speed, double *heading, double *draft, double *roll, double *pitch,
                            double *heave, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -815,10 +803,12 @@ int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA || *kind == MB_DATA_NAV) {
@@ -926,9 +916,6 @@ int mbsys_hsmd_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                           double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                           int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -957,7 +944,7 @@ int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -989,6 +976,8 @@ int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 		store->heave = heave;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1001,10 +990,6 @@ int mbsys_hsmd_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_hsmd_struct *store;
-	struct mbsys_hsmd_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1018,11 +1003,13 @@ int mbsys_hsmd_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_hsmd_struct *)store_ptr;
-	copy = (struct mbsys_hsmd_struct *)copy_ptr;
+	struct mbsys_hsmd_struct *store = (struct mbsys_hsmd_struct *)store_ptr;
+	struct mbsys_hsmd_struct *copy = (struct mbsys_hsmd_struct *)copy_ptr;
 
 	/* copy the data */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
