@@ -37,9 +37,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -51,10 +48,10 @@ int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_elacmk2_struct), store_ptr, error);
+	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_elacmk2_struct), store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)*store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)*store_ptr;
 
 	/* initialize everything */
 	store->kind = MB_DATA_NONE;
@@ -207,9 +204,6 @@ int mbsys_elacmk2_deall(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                              int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -222,7 +216,7 @@ int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -240,6 +234,8 @@ int mbsys_elacmk2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*namp = 0;
 		*nss = 0;
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -260,8 +256,6 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
                           double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                           double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
 	double depthscale, dacrscale, daloscale, reflscale;
 
 	if (verbose >= 2) {
@@ -276,7 +270,7 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -460,6 +454,9 @@ int mbsys_elacmk2_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 			        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:      %d\n", *nss);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -473,8 +470,6 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
 	double depthscale, dacrscale, daloscale, reflscale;
 
 	if (verbose >= 2) {
@@ -519,7 +514,7 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -599,6 +594,8 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 		strncpy(store->comment, comment, 199);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -613,8 +610,6 @@ int mbsys_elacmk2_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                          double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                          double *ssv, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
 	double angle, pitch;
 	double daloscale, ttscale, angscale;
 
@@ -636,10 +631,12 @@ int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -717,9 +714,6 @@ int mbsys_elacmk2_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -733,10 +727,12 @@ int mbsys_elacmk2_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -790,8 +786,6 @@ int mbsys_elacmk2_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                    double *altitude, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
 	double depthscale;
 	double dacrscale;
 	double bath_best;
@@ -809,10 +803,12 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -881,9 +877,6 @@ int mbsys_elacmk2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                               double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                               double *pitch, double *heave, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -896,10 +889,12 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA) {
@@ -1078,9 +1073,6 @@ int mbsys_elacmk2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1109,7 +1101,7 @@ int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1166,6 +1158,8 @@ int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 		/* get roll pitch and heave */
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1179,9 +1173,6 @@ int mbsys_elacmk2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1194,10 +1185,12 @@ int mbsys_elacmk2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
+
+	int status = MB_SUCCESS;
 
 	/* extract data from structure */
 	if (*kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1244,9 +1237,6 @@ int mbsys_elacmk2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1262,7 +1252,7 @@ int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1276,6 +1266,8 @@ int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return value:\n");
@@ -1288,9 +1280,6 @@ int mbsys_elacmk2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 }
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_elacmk2_struct *store;
-	struct mbsys_elacmk2_struct *copy;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1305,11 +1294,13 @@ int mbsys_elacmk2_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_elacmk2_struct *)store_ptr;
-	copy = (struct mbsys_elacmk2_struct *)copy_ptr;
+	struct mbsys_elacmk2_struct *store = (struct mbsys_elacmk2_struct *)store_ptr;
+	struct mbsys_elacmk2_struct *copy = (struct mbsys_elacmk2_struct *)copy_ptr;
 
 	/* copy the data */
 	*copy = *store;
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
