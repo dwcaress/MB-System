@@ -637,7 +637,7 @@ int main(int argc, char **argv) {
 	}
 
 /* initialize the Postscript plotting */
-#ifdef GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION
+#ifdef GMT_MAJOR_VERSION >= 5 && GMT_MINOR_VERSION
 	ps_plotinit_hires(NULL, 0, orient, x_off, y_off, 1.0, 1.0, 1, 300, 1, gmtdefs.paper_width, gmtdefs.page_rgb,
 	                  gmtdefs.encoding.name, (struct EPS *)GMT_epsinfo(argv[0]));
 #else
@@ -736,7 +736,7 @@ int main(int argc, char **argv) {
 		yl[1] = yl[2] = min_yp * scaling - 1.;
 		yl[0] = yl[3] = yl[1] + 0.1;
 
-#ifdef GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION
+#ifdef GMT_MAJOR_VERSION >= 5 && GMT_MINOR_VERSION
 		ps_line(xl, yl, 4, 3, 0);
 #else
 		ps_line(xl, yl, 4, 3, 0, 0);
@@ -762,7 +762,7 @@ int main(int argc, char **argv) {
 		yl[0] = yl[1] = min_yp * scaling - 1.;
 		yl[2] = yl[3] = yl[0] + zscale_inch;
 
-#ifdef GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION
+#ifdef GMT_MAJOR_VERSION >= 5 && GMT_MINOR_VERSION
 		ps_line(xl, yl, 4, 3, 0);
 #else
 		ps_line(xl, yl, 4, 3, 0, 0);

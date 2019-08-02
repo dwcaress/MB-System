@@ -5,7 +5,6 @@ if BUILD_MBTRN
   MBTRNLIB = $(top_builddir)/src/mbtrn/libmbtrn.la
 endif
 
-
 include_HEADERS = mb_config.h \
         mb_format.h mb_status.h \
         mb_io.h mb_swap.h \

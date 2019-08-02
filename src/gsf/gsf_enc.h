@@ -18,10 +18,9 @@
  *
  * References :
  *
- *
- * copyright 2014 Leidos, Inc.
+ * Copyright 2019 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
- * https://www.leidos.com/maritime/gsf.
+ * https://www.leidos.com/products/ocean-marine#gsf
  * This library may be redistributed and/or modified under the terms of
  * the GNU Lesser General Public License version 2.1, as published by the
  * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
@@ -43,7 +42,7 @@
 
    int OPTLK gsfEncodeHeader(unsigned char *sptr, gsfHeader *header);
    int OPTLK gsfEncodeSwathBathySummary(unsigned char *sptr, gsfSwathBathySummary *sum);
-   int OPTLK gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing *ping, GSF_FILE_TABLE *ft, int handle);
+   int OPTLK gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing *ping, GSF_FILE_TABLE *ft);
    int OPTLK gsfEncodeSoundVelocityProfile(unsigned char *sptr, gsfSVP *svp);
    int OPTLK gsfEncodeProcessingParameters(unsigned char *sptr, gsfProcessingParameters *pparam);
    int OPTLK gsfEncodeSensorParameters(unsigned char *sptr, gsfSensorParameters *sparam);

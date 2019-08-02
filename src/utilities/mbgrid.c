@@ -380,7 +380,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'C':
 		case 'c':
-			n = sscanf(optarg, "%d/%d/%lf", &clip, &clipmode, &tension);
+			n = sscanf(optarg, "%d/%d", &clip, &clipmode);
 			if (n < 1)
 				clipmode = MBGRID_INTERP_NONE;
 			else if (n == 1 && clip > 0)

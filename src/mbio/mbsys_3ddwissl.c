@@ -14,133 +14,319 @@
 /*
  * mbsys_3ddwissl.h defines the MBIO data structures for handling data from
  * the 3DatDepth WiSSL (wide swath lidar) submarine lidar:
- *      MBF_3DDWISSL : MBIO ID 232 - 3DatDepth WiSSL vendor format
+ *      MBF_3DWISSLR : MBIO ID 232 - 3DatDepth WiSSL vendor format
+ *      MBF_3DWISSLP : MBIO ID 233 - 3DatDepth WiSSL processing format
  *
  * Author:  David W. Caress
  * Date:  December 19, 2017
- *
+ * Date:  July 25, 2019 (updated)
  *
  */
 /*
- * Notes on the MBSYS_3DDWISSL data structure:
+ * Notes on the MBSYS_3DATDEPTHWISSL data structure:
  *
  * Vendor format from 3D at Depth for the WiSSL (wide swath lidar) submarine
  * lidar system delivered to MBARI in December 2017.
  *
  * Initial coding done using the WiSSL Wide Swath Subsea LiDAR Software User
  * Manual version 1.2 from December 2017.
+ * Modifications made using the WiSSL Wide Swath Subsea LiDAR Software User
+ * Manual version 1.4 from May 2019.
+ *
+ * Two data formats are supported: all variations of the *.raa files logged by
+ * the WiSSL are supported as MB-System format 232 (MBF_3DWISSLR), and the
+ * processed WiSSL data written by MB-System are supported as format 233 (MBF_3DWISSLP).
+ * The logged data have variants 1.1 and 1.2, with the newer variant changing
+ * the calibration block size from 450 bytes to 407 bytes, and adding a 1-byte
+ * value named diagnostic to each sounding. MB-System has defined an additional
+ * variant 1.3 in which the calibration block of 1.2 is lengthened to 450 bytes
+ * so that the file header size is the same as 1.1. When a logged *.raa file
+ * in the 1.2 variant is read, the data are converted to 1.3. MB-System only
+ * writes newer data in the 1.3 variant. Data in the original 1.1 form remain
+ * in that form.
  *
  *--------------------------------------------------------------------------------
  * Range Angle Angle data format (binary)
+ * 3D at Depth raw WiSSL data format
+ * Supported as format 232 in MB-System
  *              Item                                  Value              Bytes
  * ---------------------------------------------------------------------------------------
- * File Header
+ * File Header Record (923 bytes for 1.1 and 1.3, 837 bytes for 1.2):
+ * ------------------
+ *
+ * File and version ID (8 bytes)
  *           Record ID – WiSSL                             0x3D47   2 (1 UINT16)
  *           File Magic Number                             0x3D08   2 (1 UINT16)
  *           File version                                  1        2 (1 UINT16)
- *           File sub version                              1        2 (1 UINT16)
+ *           File sub version                              1 to 3   2 (1 UINT16)
  *
- * Scan Information
+ * Scan Information (15 bytes)
  *           AZ, Cross track angle start, typical (deg)             4 (1 float32)
  *           AZ, Cross track angle end, typical (deg)               4 (1 float32)
- *           Pulses per cross track, scan line                      2 (1 UINT16)
- *           Number pulses per LOS                                  1 (1 UINT8)
- *           Scan lines per this File, Head A                       2 (1 UINT16)
- *           Scan lines per this File, Head B                       2 (1 UINT16)
+ *           Np, Number pulses per cross track scan line            2 (1 UINT16)
+ *           Nl, Number LOS (soundings) per pulse                   1 (1 UINT8)
+ *           Na, Scan lines per this File, Head A                   2 (1 UINT16)
+ *           Nb, Scan lines per this File, Head B                   2 (1 UINT16)
  *
- * Calibration Information
- *           Calibration Structure, Head A                          Size of calibration structure
- *           Calibration Structure, Head B                          Size of calibration structure
+ * Calibration Information (900 bytes for 1.1 & 1.3, 814 bytes for 1.2)
+ *           Calibration Structure, Head A                          450 bytes for 1.1 & 1.3, 407 bytes for 1.2
+ *           Calibration Structure, Head B                          450 bytes for 1.1 & 1.3, 407 bytes for 1.2
  *
- * Pulse ID and Timestamp ( 1 to n Scans )
+ * ---------------------------------------------------------------------------------------
+ * Scan Record (1 to N = Na + Nb scans):
+ * -----------
+ *
+ * Scan Header (49 bytes)
  *           Record ID – Head A or B              0x3D53, 0x3D54    2 (1 UINT16)
- *           Timestamp year (true year)                             2 (1 UINT16)
- *           Timestamp month (1-12)                                 1 (1 UINT8)
- *           Timestamp day                                          1 (1 UINT8)
- *           Timestamp days since Jan 1                             2 (1 UINT16)
- *           Timestamp hour                                         2 (1 UINT16)
- *           Timestamp minutes                                      1 (1 UINT8)
- *           Timestamp seconds                                      1 (1 UINT8)
- *           Timestamp nano seconds                                 4 (1 UINT32)
- *           Gain (laser power)                                     1 (UINT8)
- *           Digitizer temperature C                                4 (float)
- *           CTD temperature C                                      4 (float)
- *           CTD salinity psu                                       4 (float)
- *           CTD pressure dbar                                      4 (float)
- *           Index                                                  4 (float)
- *           Start processing m                                     4 (float)
- *           End processing m                                       4 (float)
- *           Pulse Count this scan line                             4 (1 UINT32)
+ *           Timestamp (year (true year))                           2 (1 UINT16)
+ *           Timestamp (month (1-12))                               1 (1 UINT8)
+ *           Timestamp (day)                                        1 (1 UINT8)
+ *           Timestamp (days since Jan 1)                           2 (1 UINT16)
+ *           Timestamp (hours)                                      2 (1 UINT16)
+ *           Timestamp (minutes)                                    1 (1 UINT8)
+ *           Timestamp (seconds)                                    1 (1 UINT8)
+ *           Timestamp (nano seconds)                               4 (1 UINT32)
+ *           Gain (laser power)                                     1 (1 UINT8)
+ *           Digitizer temperature (degrees C)                      4 (1 float32)
+ *           CTD temperature (degrees C)                            4 (1 float32)
+ *           CTD salinity (psu)                                     4 (1 float32)
+ *           CTD pressure (dbar)                                    4 (1 float32)
+ *           Index of refraction                                    4 (1 float32)
+ *           Start processing range (meters)                        4 (1 float32)
+ *           End processing range  (meters)                         4 (1 float32)
+ *           Np, Number of pulses in this scan                      4 (1 UINT32)
  *
- * Laser Pulse Data ( 1 to m pulses per scan )
+ * Laser Pulse Data ( 1 to Np pulses per scan, each pulse has Nl soundings )
+ *   Pulse Header (20 bytes)
  *           AZ, Cross track angle (deg)                            4 (1 float32)
  *           EL, Forward track angle (deg)                          4 (1 float32)
  *           AZ, Cross track offset (m)                             4 (1 float32)
  *           EL, Forward track offset (m)                           4 (1 float32)
  *           Pulse time offset (sec)                                4 (1 float32)
- *           LOS Range 1 ( from glass front ) meters                4 (1 float32)
+ *   Values for LOS (6 bytes per sounding for 1.1, 7 bytes per sounding >= 1.2)
+ *           Sounding 1 Range ( from glass front ) meters           4 (1 float32)
  *           ...
- *           LOS Range n ( from glass front ) meters                4 (1 float32)
- *           Amplitude LOS 1 / peak of signal                       2 (1 UINT16)
+ *           Sounding Nl Range ( from glass front ) meters          4 (1 float32)
+ *           Sounding 1 Amplitude / peak of signal                  2 (1 UINT16)
  *           ...
- *           Amplitude LOS n / peak of signal                       2 (1 UINT16)
+ *           Sounding Nl Amplitude / peak of signal                 2 (1 UINT16)
+ *           Sounding 1 Diagnostic value (if version >= 1.2):       1 (1 UINT8)
+ *           ...
+ *           Sounding Nl Diagnostic value (if version >= 1.2):      1 (1 UINT8)
  *
- *
- * Each RAA file begins with a File Header, followed by a “Scan Information”
- * block and a “Calibration Information” block of data. Then, the file contains
- * scan line data. The data for each scan line contains: a Record ID (head
- * designator), a full timestamp, and a” Laser Pulse Data” collection of data.
- * Note, Head A and B scanlines are interleaved in the RAA file per their
- * specific time stamps.
+ * Each RAA file begins with a File Header record that includes a “Scan Information”
+ * block and two “Calibration Information” blocks, one for each optical head.
+ * There may be an arbitrary number of comment records following the File Header,
+ * but before the scan data. The scan line data interleaves the Head A and Head B
+ * scans with no guarentee that the order is consistent with increasing time stamp.
+ * Also, differing scan counts will generally exist for Head A and B.
+ * The data for each scan line contains: a Record ID (head designator), a full
+ * timestamp, and a” Laser Pulse Data” collection of data.
+ * The file suffix of files logged by the WiSSL will be *.raa. Files written by
+ * MB-System will typically have a ".mb232" suffix. Either suffix is valid.
  *
  * For example, if the sensor was configured for 250 pulses per scan line and
  * 3 LOS range measurements per pulse, the following data would be present in
  * the RAA file:
- *      File Header
- *      Scan Information
- *      Calibration Information Head A
- *      Calibration Information Head B
- *          (1) Record ID (A or B)
- *              Pulse Timestamp
- *              Pulse count this scan line
- *                  (1) Laser Pulse Data:
- *                      AZ angle
- *                      EL angle
- *                      AZ offset
- *                      EL offset
- *                      Pulse time offset
- *                      Range Data:
- *                          LOS Range 1
- *                          LOS Range 2
- *                          LOS Range 3
- *                      Intensity Data:
- *                          Intensity 1
- *                          Intensity 2
- *                          Intensity 3
- *                      ...
- *                  (250) Laser Pulse Data:
- *                      AZ angle
- *                      EL angle
- *                      AZ offset
- *                      EL offset
- *                      Pulse time offset
- *                      Range Data:
- *                          LOS Range 1
- *                          LOS Range 2
- *                          LOS Range 3
- *                      Intensity Data:
- *                          Intensity 1
- *                          Intensity 2
- *                          Intensity 3
- *                      ...
+ *      File Header Record
+ *        Scan Information
+ *        Calibration Information Head A (450 bytes for 1.1 & 1.3, 407 bytes for 1.2)
+ *        Calibration Information Head B (450 bytes for 1.1 & 1.3, 407 bytes for 1.2)
+ *      Comment Record 0
+ *      ......
+ *      Comment Record Nc - 1
+ *      Scan Record 1 (A or B)
+ *          Scan Timestamp and characteristics
+ *          Pulse count this scan line
+ *              (1) Laser Pulse Data:
+ *                  AZ angle
+ *                  EL angle
+ *                  AZ offset
+ *                  EL offset
+ *                  Pulse time offset
+ *                  Range Data:
+ *                      Sounding 1 Range
+ *                      Sounding 2 Range
+ *                      Sounding 3 Range
+ *                  Intensity Data:
+ *                      Sounding 1 Intensity
+ *                      Sounding 2 Intensity
+ *                      Sounding 3 Intensity
+ *                  Diagnostic Data (if version >= 1.2):
+ *                      Sounding 1 Diagnostic
+ *                      Sounding 2 Diagnostic
+ *                      Sounding 3 Diagnostic
+ *                  ...
+ *              (250) Laser Pulse Data:
+ *                  AZ angle
+ *                  EL angle
+ *                  AZ offset
+ *                  EL offset
+ *                  Pulse time offset
+ *                  Range Data:
+ *                      Sounding 1 Range
+ *                      Sounding 2 Range
+ *                      Sounding 3 Range
+ *                  Intensity Data:
+ *                      Sounding 1 Intensity
+ *                      Sounding 2 Intensity
+ *                      Sounding 3 Intensity
+ *                  Diagnostic Data (if version >= 1.2):
+ *                      Sounding 1 Diagnostic
+ *                      Sounding 2 Diagnostic
+ *                      Sounding 3 Diagnostic
  *
  * Note: based on laser head performance, differing counts of data sets may
  * exist for Head A and B. The “.raa” file extension is used for the binary file.
  *
+ * ---------------------------------------------------------------------------------------
+ * Comment Record:
+ * --------------
+ *           Record ID – Comment                          0x3D43    2 (1 UINT16)
+ *           Comment length (Nc bytes)                              2 (1 UINT16)
+ *           Comment (null terminated C string)                    Nc (Nc CHAR)
  *--------------------------------------------------------------------------------
  *
+ *--------------------------------------------------------------------------------
+ * Processing WiSSL Data Format
+ * ----------------------------
+ * Supported as format 233 in MB-System
+ * The file header and survey data records differ from those of the raw format
+ * in several respects:
+ *   1) The file magic number is 0x3D09
+ *   2) The file header is 923 bytes long, always.
+ *   3) The scan record id's are 0x3D73, 0x3D74 rather than 0x3D53, 0x3D54
+ *   4) The size in bytes of the scan record, minus 4, is stored as an unsigned
+ *      short int immediately following the record id.
+ *   5) Only non-null soundings as defined by preprocessing are stored - many
+ *      low amplitude picks may be discarded.
+ *   7) The valid pulse headers are stored in a sequential list.
+ *   8) The valid soundings are stored in a separate sequential list following pulses.
+ *   9) The soundings include calculated bathymetry values and the pulse and LOS
+ *      pick numbers.
+ *--------------------------------------------------------------------------------
+ *              Item                                  Value              Bytes
+ * ---------------------------------------------------------------------------------------
+ * File Header Record (923 bytes):
+ * ------------------
+ *
+ * File and version ID (8 bytes)
+ *           Record ID – WiSSL                             0x3D47   2 (1 UINT16)
+ *           File Magic Number                             0x3D09   2 (1 UINT16)
+ *           File version                                  1        2 (1 UINT16)
+ *           File sub version                              1 to 3   2 (1 UINT16)
+ *
+ * Scan Information (15 bytes)
+ *           AZ, Cross track angle start, typical (deg)             4 (1 float32)
+ *           AZ, Cross track angle end, typical (deg)               4 (1 float32)
+ *           Np, Number pulses per cross track scan line            2 (1 UINT16)
+ *           Nl, Number LOS (soundings) per pulse                   1 (1 UINT8)
+ *           Na, Scan lines per this File, Head A                   2 (1 UINT16)
+ *           Nb, Scan lines per this File, Head B                   2 (1 UINT16)
+ *
+ * Calibration Information (900 bytes)
+ *           Calibration Structure, Head A                          450 bytes for 1.1 & 1.3, 407 bytes for 1.2
+ *           Calibration Structure, Head B                          450 bytes for 1.1 & 1.3, 407 bytes for 1.2
+ *
+ * ---------------------------------------------------------------------------------------
+ * Scan Record (0 to N-1 where N = Na + Nb scans):
+ * -----------
+ *
+ * Scan Header (100 bytes)
+ *           Record ID – Head A or B              0x3D73, 0x3D74    2 (1 UINT16)
+ *           Timestamp (year (true year))                           2 (1 UINT16)
+ *           Timestamp (month (1-12))                               1 (1 UINT8)
+ *           Timestamp (day)                                        1 (1 UINT8)
+ *           Timestamp (days since Jan 1)                           2 (1 UINT16)
+ *           Timestamp (hours)                                      2 (1 UINT16)
+ *           Timestamp (minutes)                                    1 (1 UINT8)
+ *           Timestamp (seconds)                                    1 (1 UINT8)
+ *           Timestamp (nano seconds)                               4 (1 UINT32)
+ *           Gain (laser power)                                     1 (1 UINT8)
+ *           Unused                                                 1 (1 UINT8)
+ *           Digitizer temperature (degrees C)                      4 (1 float32)
+ *           CTD temperature (degrees C)                            4 (1 float32)
+ *           CTD salinity (psu)                                     4 (1 float32)
+ *           CTD pressure (dbar)                                    4 (1 float32)
+ *           Index of refraction                                    4 (1 float32)
+ *           Start processing range (meters)                        4 (1 float32)
+ *           End processing range  (meters)                         4 (1 float32)
+ *           Np, Number of pulses in this scan                      4 (1 UINT32)
+ *           Epoch time (seconds since 1970)                        8 (1 double64)
+ *           Scan longitude (degrees)                               8 (1 double64)
+ *           Scan latitude (degrees)                                8 (1 double64)
+ *           Scan sensordepth (meters)                              8 (1 double64)
+ *           Scan speed (m/sec)                                     4 (1 float32)
+ *           Scan heading (degrees)                                 4 (1 float32)
+ *           Scan roll (degrees)                                    4 (1 float32)
+ *           Scan pitch (degrees)                                   4 (1 float32)
+ *           Nv, Number of valid pulses                             2 (1 UINT16)
+ *           Ns, Number of valid soundings                          2 (1 UINT16)
+ *
+ * Pulse Data ( 0 to Nv-1 pulses in this scan, 66 bytes per pulse, each valid pulse has at least 1 valid sounding )
+ *           Ip, pulse id in scan, counted from 0                   2 (1 UINT16)
+ *           AZ, Cross track angle (deg)                            4 (1 float32)
+ *           EL, Forward track angle (deg)                          4 (1 float32)
+ *           AZ, Cross track offset (m)                             4 (1 float32)
+ *           EL, Forward track offset (m)                           4 (1 float32)
+ *           Pulse time offset (sec)                                4 (1 float32)
+ *           Epoch time (seconds since 1970)                        8 (1 double64)
+ *           Navigation Acrosstrack offset (meters)                 8 (1 double64)
+ *           Navigation Alongtrack offset (meters)                  8 (1 double64)
+ *           Navigation Sensordepth offset (meters)                 8 (1 double64)
+ *           Heading offset (degrees)                               4 (1 float32)
+ *           Roll offset (degrees)                                  4 (1 float32)
+ *           Pitch offset (degrees)                                 4 (1 float32)
+ *
+ * Sounding Data ( 0 to Ns-1 soundings in this scan, 22 bytes per sounding for 1.1, 23 bytes per sounding >= 1.2)
+ *           Ip, pulse id in scan, counted from 0                   2 (1 UINT16)
+ *           Is, LOS id in pulse, counted from 0                    1 (1 UINT8)
+ *           Range ( from glass front ) meters                      4 (1 float32)
+ *           Amplitude / peak of signal                             2 (1 UINT16)
+ *           Diagnostic value (if version >= 1.2):                  1 (1 UINT8)
+ *           MB-System beamflag                                     1 (1 UINT8)
+ *           Acrosstrack (meters)                                   4 (1 float32)
+ *           Alongtrack (meters)                                    4 (1 float32)
+ *           Sensordepth (meters)                                   4 (1 float32)
+ *
+ * Each MB-System format 233 file begins with a File Header record that includes
+ * a “Scan Information” block and two “Calibration Information” blocks, one for each
+ * optical head. There may be an arbitrary number of comment records following the
+ * File Header, but before the scan data. The scan line data interleaves the
+ * Head A and Head B scans with no guarentee that the order is consistent with
+ * increasing time stamp. The data for each scan line contains: a Record ID
+ * (head designator), timestamp and navigation, a list of valid pulses (e.g.
+ * pulses with at least one valid sounding), and a list of valid soundings.
+ * The file suffix will typically be ".mb232".
+ *
+ * For example, if the sensor was configured for 250 pulses per scan line and
+ * 3 LOS range measurements per pulse, and 245 pulses had valid soundings resulting
+ * in a list 247 valid soundings, the following data would be present in
+ * the format 233 file:
+ *      File Header Record
+ *        Scan Information
+ *        Calibration Information Head A (450 bytes for 1.1 & 1.3, 407 bytes for 1.2)
+ *        Calibration Information Head B (450 bytes for 1.1 & 1.3, 407 bytes for 1.2)
+ *      Comment Record 0
+ *      ......
+ *      Comment Record Nc - 1
+ *      Scan Record 1 (A or B)
+ *        Scan header
+ *        Pulse 0
+ *        ....
+ *        Pulse Nv - 1
+ *        Sounding 0
+ *        ....
+ *        Sounding Ns - 1
+ *
+ * ---------------------------------------------------------------------------------------
+ * Comment Record:
+ * --------------
+ *           Record ID – Comment                          0x3D43    2 (1 UINT16)
+ *           Comment length (Nc bytes)                              2 (1 UINT16)
+ *           Comment (null terminated C string)                    Nc (Nc CHAR)
+ *--------------------------------------------------------------------------------
  */
-
 
 #include <assert.h>
 #include <math.h>

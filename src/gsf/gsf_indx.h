@@ -5,7 +5,7 @@
  * Author/Date : J. S. Byrne / 23 Aug 1995
  *
  * Description : This header file contains function prototypes and
- *    definitions required for direct access to gsf files.  This header
+ *    definitions required for direct access to GSF files.  This header
  *    file is internal to the library, and none of these functions are
  *    intended to be exported from the library.
  *
@@ -25,10 +25,9 @@
  *
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
- *
- * copyright 2014 Leidos, Inc.
+ * Copyright 2019 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
- * https://www.leidos.com/maritime/gsf.
+ * https://www.leidos.com/products/ocean-marine#gsf
  * This library may be redistributed and/or modified under the terms of
  * the GNU Lesser General Public License version 2.1, as published by the
  * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
@@ -54,7 +53,7 @@ extern "C" {
     /* This header has the GSF File Table structure definition */
     #include "gsf_ft.h"
 
-    /* Define a macro to hold a version tag for gsf index file. Note that
+    /* Define a macro to hold a version tag for GSF index file. Note that
      * the macro definition for the version size defines the number of bytes
      * read/written for the version, so this should NOT be changed.
      */

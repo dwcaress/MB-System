@@ -19,12 +19,12 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta2],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta3],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "25 July 2019", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "2 August 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -317,20 +317,23 @@ dnl--------------------------------------------------------------------
 dnl PROJ Section
 dnl--------------------------------------------------------------------
 
-dnl Check for Proj.4 library libproj
-AS_ECHO(["Check for Proj.4 library libproj"])
+dnl Check for PROJ library libproj
+AS_ECHO(["Check for PROJ library libproj"])
 GOT_PROJ=no
-PROJ_SETTING=no
-AC_ARG_WITH(proj-lib, [  --with-proj-lib=DIR    Location of PROJ library],
+FOUND_PROJ_LIB=no
+AC_ARG_WITH(proj-lib, [ --with-proj-lib=DIR Location of PROJ library],
     [proj_libdir="${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
 if test "$GOT_PROJ" = "yes" ; then
     dnl PROJ library location specified: $proj_libdir - check if libproj is there...
     AS_ECHO(["PROJ library location specified: $proj_libdir - check if libproj is there..."])
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -L$proj_libdir"
-    AC_CHECK_LIB([proj], [pj_init_plus], [PROJ_SETTING=yes], [PROJ_SETTING=no], )
+    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    if test "$FOUND_PROJ_LIB" = "no"; then
+        AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    fi
     LDFLAGS="$save_LDFLAGS"
-    if test "$PROJ_SETTING" = "no"; then
+    if test "$FOUND_PROJ_LIB" = "no"; then
         AC_MSG_ERROR([Did not find libproj according to --with-proj-lib - check the installation!])
     fi
     libproj_LIBS="-L$proj_libdir -R $proj_libdir -lproj"
@@ -338,17 +341,19 @@ if test "$GOT_PROJ" = "yes" ; then
 else
     dnl Look for pkg-config PROJ package...
     AS_ECHO(["Look for pkg-config PROJ package..."])
-    PKG_CHECK_MODULES([libproj], [proj], [GOT_PROJ=yes], [GOT_PROJ=no])
+    PKG_CHECK_MODULES([libproj], [proj], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no])
     libproj_LIBS="-lproj"
     libproj_LDFLAGS=""
 fi
-if test "$GOT_PROJ" = "no" ; then
+if test "$FOUND_PROJ_LIB" = "no" ; then
     dnl Did not find PROJ library pkg-config package, looking in the usual places...
     AS_ECHO(["Did not find PROJ library pkg-config package, looking in the usual places..."])
-    AC_CHECK_LIB([proj], [pj_init_plus], [PROJ_SETTING=yes], [PROJ_SETTING=no],)
-    if test "$PROJ_SETTING" = "yes" ; then
-        GOT_PROJ=yes
-        AS_ECHO(["Using pre-installed libproj..."])
+    AC_CHECK_LIB([proj], [proj_create], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no],)
+    if test "$FOUND_PROJ_LIB" = "no"; then
+        AC_CHECK_LIB([proj], [pj_init_plus], [FOUND_PROJ_LIB=yes], [FOUND_PROJ_LIB=no], )
+    fi
+    if test "$FOUND_PROJ_LIB" = "yes" ; then
+        AS_ECHO(["Found PROJ library libproj..."])
         libproj_LIBS="-lproj"
         libproj_LDFLAGS=""
     else
@@ -356,50 +361,51 @@ if test "$GOT_PROJ" = "no" ; then
         AC_MSG_ERROR([Did not find PROJ library anywhere, use --with-proj-lib to set the location])
     fi
 fi
-dnl Done checking for Proj.4 library libproj
+dnl Done checking for PROJ library libproj
 
 dnl Check if proj header location specified on the command line
 AS_ECHO(["Check if proj header location specified on the command line"])
 GOT_PROJ=no
-PROJ_SETTING=no
+FOUND_PROJ_HEADERS=no
 AC_ARG_WITH(proj-include, [  --with-proj-include=DIR    Location of PROJ headers],
         [libproj_CPPFLAGS="-I${withval}"] [GOT_PROJ=yes], [GOT_PROJ=no])
 if test "$GOT_PROJ" = "yes" ; then
-    dnl PROJ header location specified: $libproj_CPPFLAGS - check if proj_api.h is there...
-    AS_ECHO(["PROJ header location specified: $libproj_CPPFLAGS - check if proj_api.h is there..."])
-    save_CPPFLAGS=$CPPFLAGS
-    save_CFLAGS=$CFLAGS
-    CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
-    CFLAGS="$CFLAGS $libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
-    AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no],)
-    CPPFLAGS=$save_CPPFLAGS
-    CFLAGS=$save_CFLAGS
-    if test "$PROJ_SETTING" = "no"; then
-       AC_MSG_ERROR([Did not find PROJ headers according to --with-proj-include - check the installation!])
-    fi
+    dnl PROJ header location specified: $libproj_CPPFLAGS - check if proj.h or proj_api.h is there...
+    AS_ECHO(["PROJ header location specified: $libproj_CPPFLAGS - check if proj.h or proj_api.h is there..."])
 else
     dnl Looking for PROJ headers in the usual places...
     AS_ECHO(["Looking for PROJ headers in the usual places..."])
-    save_CPPFLAGS=$CPPFLAGS
-    save_CFLAGS=$CFLAGS
-    CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
-    CFLAGS="$CFLAGS $libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
-    AC_CHECK_HEADER(proj_api.h, [PROJ_SETTING=yes], [PROJ_SETTING=no])
-    CPPFLAGS=$save_CPPFLAGS
-    CFLAGS=$save_CFLAGS
-    if test "$PROJ_SETTING" = "yes" ; then
-        GOT_PROJ=yes
-        AS_ECHO(["Found PROJ headers..."])
-    else
-        AS_ECHO(["Did not find PROJ headers anywhere, use --with-proj-include to set the location"])
-        AC_MSG_ERROR([Did not find PROJ headers anywhere, use --with-proj-include to set the location])
-    fi
 fi
-dnl Done checking for PROJ headers
-dnl Done checking for PROJ library libproj and PROJ headers
+save_CPPFLAGS=$CPPFLAGS
+save_CFLAGS=$CFLAGS
+CPPFLAGS="$CPPFLAGS $libproj_CPPFLAGS"
+CFLAGS="$CFLAGS $libproj_CPPFLAGS"
+AC_CHECK_HEADER(proj.h, [FOUND_PROJ6=yes], [FOUND_PROJ6=no],)
+if test "$FOUND_PROJ6" = "yes"; then
+  dnl Found PROJ6 headers
+  FOUND_PROJ_HEADERS="yes"
+  AS_ECHO(["Found PROJ6 headers - using the PROJ6 API"])
+else
+  AC_CHECK_HEADER(proj_api.h, [FOUND_PROJ4=yes], [FOUND_PROJ4=no],)
+  if test "$FOUND_PROJ4" = "yes"; then
+    FOUND_PROJ_HEADERS="yes"
+    libproj_CPPFLAGS="$libproj_CPPFLAGS -DUSE_PROJ4_API"
+    AS_ECHO(["Found PROJ4 headers - using the deprecated PROJ4 API"])
+  else
+    FOUND_PROJ_HEADERS="no"
+    if test "$GOT_PROJ" = "yes" ; then
+      AS_ECHO(["Did not find PROJ headers according to --with-proj-include - check the installation!"])
+      AC_MSG_ERROR([Did not find PROJ headers according to --with-proj-include - check the installation!])
+    else
+      AS_ECHO(["Did not find PROJ headers anywhere, use --with-proj-include to set the location"])
+      AC_MSG_ERROR([Did not find PROJ headers anywhere, use --with-proj-include to set the location])
+    fi
 
-dnl Add -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H to allow building with PROJ6
-libproj_CPPFLAGS="$libproj_CPPFLAGS -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H"
+  fi
+fi
+CPPFLAGS=$save_CPPFLAGS
+CFLAGS=$save_CFLAGS
+dnl Done checking for PROJ library libproj and PROJ headers
 
 dnl Substitute PROJ library and header arguments
 AC_SUBST([libproj_LIBS], [$libproj_LIBS])
@@ -998,10 +1004,13 @@ if test $BYTESWAP = "yes" ; then
 else
     AS_ECHO(["Byteswapping: Disabled"])
 fi
-AS_ECHO(["libgmt_CPPFLAGS:  $libgmt_CPPFLAGS"])
-AS_ECHO(["libgmt_LIBS:      $libgmt_LIBS"])
-AS_ECHO(["libgmt_LDFLAGS:   $libgmt_LDFLAGS"])
-AS_ECHO(["GMT PLUGIN DIR:   $GMT_PLUGINDIR"])
+AS_ECHO(["libgmt_CPPFLAGS:     $libgmt_CPPFLAGS"])
+AS_ECHO(["libgmt_LIBS:         $libgmt_LIBS"])
+AS_ECHO(["libgmt_LDFLAGS:      $libgmt_LDFLAGS"])
+AS_ECHO(["GMT PLUGIN DIR:      $GMT_PLUGINDIR"])
+AS_ECHO(["libgdal_CPPFLAGS:    $libgdal_CPPFLAGS"])
+AS_ECHO(["libgdal_LIBS:        $libgdal_LIBS"])
+AS_ECHO(["libgdal_LDFLAGS:     $libgdal_LDFLAGS"])
 AS_ECHO(["libnetcdf_CPPFLAGS:  $libnetcdf_CPPFLAGS"])
 AS_ECHO(["libnetcdf_LIBS:      $libnetcdf_LIBS"])
 AS_ECHO(["libnetcdf_LDFLAGS:   $libnetcdf_LDFLAGS"])

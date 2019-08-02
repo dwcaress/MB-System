@@ -27,7 +27,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "gmt.h"
+#include "gmt_dev.h"
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_status.h"
@@ -47,7 +47,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	struct GMT_GRID *G = NULL;      /* GMT grid structure pointer */
 	struct GMT_GRID_HEADER *header; /* GMT grid header structure pointer */
 	int modeltype;
-	int projectionid;
+	int epsgid;
 	mb_path projectionname = "";
 	struct stat file_status;
 	int num_tries;
@@ -122,39 +122,39 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 			if (strncmp(&(header->remark[2]), "Projection: ", 12) == 0) {
 				if ((nscan = sscanf(&(header->remark[2]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2) {
 					if (NorS == 'N') {
-						projectionid = 32600 + utmzone;
+						epsgid = 32600 + utmzone;
 					}
 					else if (NorS == 'S') {
-						projectionid = 32700 + utmzone;
+						epsgid = 32700 + utmzone;
 					}
 					else {
-						projectionid = 32600 + utmzone;
+						epsgid = 32600 + utmzone;
 					}
 					modeltype = ModelTypeProjected;
 					sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 					*grid_projection_mode = MB_PROJECTION_PROJECTED;
-					sprintf(grid_projection_id, "epsg%d", projectionid);
+					sprintf(grid_projection_id, "epsg%d", epsgid);
 				}
-				else if ((nscan = sscanf(&(header->remark[2]), "Projection: epsg%d", &projectionid)) == 1) {
-					sprintf(projectionname, "epsg%d", projectionid);
+				else if ((nscan = sscanf(&(header->remark[2]), "Projection: epsg%d", &epsgid)) == 1) {
+					sprintf(projectionname, "epsg%d", epsgid);
 					modeltype = ModelTypeProjected;
 					*grid_projection_mode = MB_PROJECTION_PROJECTED;
-					sprintf(grid_projection_id, "epsg%d", projectionid);
+					sprintf(grid_projection_id, "epsg%d", epsgid);
 				}
 				else {
 					strcpy(projectionname, "Geographic WGS84");
 					modeltype = ModelTypeGeographic;
-					projectionid = GCS_WGS_84;
+					epsgid = GCS_WGS_84;
 					*grid_projection_mode = MB_PROJECTION_GEOGRAPHIC;
-					sprintf(grid_projection_id, "epsg%d", projectionid);
+					sprintf(grid_projection_id, "epsg%d", epsgid);
 				}
 			}
 			else {
 				strcpy(projectionname, "Geographic WGS84");
 				modeltype = ModelTypeGeographic;
-				projectionid = GCS_WGS_84;
+				epsgid = GCS_WGS_84;
 				*grid_projection_mode = MB_PROJECTION_GEOGRAPHIC;
-				sprintf(grid_projection_id, "epsg%d", projectionid);
+				sprintf(grid_projection_id, "epsg%d", epsgid);
 			}
 
 			/* set up internal arrays */
@@ -260,13 +260,13 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 		fprintf(stderr, "  Registration:   %d\n", header->registration);
 		if (modeltype == ModelTypeProjected) {
 			fprintf(stderr, "  Projected Coordinate System Name: %s\n", projectionname);
-			fprintf(stderr, "  Projected Coordinate System ID:   %d\n", projectionid);
+			fprintf(stderr, "  Projected Coordinate System ID:   %d\n", epsgid);
 			fprintf(stderr, "  Easting:    %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
 			fprintf(stderr, "  Northing:   %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
 		}
 		else {
 			fprintf(stderr, "  Geographic Coordinate System Name: %s\n", projectionname);
-			fprintf(stderr, "  Geographic Coordinate System ID:   %d\n", projectionid);
+			fprintf(stderr, "  Geographic Coordinate System ID:   %d\n", epsgid);
 			fprintf(stderr, "  Longitude:  %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
 			fprintf(stderr, "  Latitude:   %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
 		}
@@ -296,13 +296,13 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 		        fprintf(stderr, "dbg2       Dimensions: %d %d\n", header->n_columns, header->n_rows);
 		        if (modeltype == ModelTypeProjected) {
 			        fprintf(stderr, "dbg2       Projected Coordinate System Name: %s\n", projectionname);
-			        fprintf(stderr, "dbg2       Projected Coordinate System ID:   %d\n", projectionid);
+			        fprintf(stderr, "dbg2       Projected Coordinate System ID:   %d\n", epsgid);
 			        fprintf(stderr, "dbg2       Easting:                  %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
 			        fprintf(stderr, "dbg2       Northing:                 %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
 		        }
 		        else {
 			        fprintf(stderr, "dbg2       Geographic Coordinate System Name: %s\n", projectionname);
-			        fprintf(stderr, "dbg2       Geographic Coordinate System ID:   %d\n", projectionid);
+			        fprintf(stderr, "dbg2       Geographic Coordinate System ID:   %d\n", epsgid);
 			        fprintf(stderr, "dbg2       Longitude:                %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
 			        fprintf(stderr, "dbg2       Latitude:                 %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
 		        }
@@ -351,7 +351,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	unsigned int mode = GMT_GRID_ALL;
 
 	int modeltype;
-	int projectionid;
+	int epsgid;
 	int grid_projection_mode;
 	mb_path projectionname = "";
 	mb_path grid_projection_id = "";
@@ -436,32 +436,46 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	/* Get some projection and user info needed for the grid remark field */
 	if ((nscan = sscanf(projection, "UTM%d%c", &utmzone, &NorS)) == 2) {
 		if (NorS == 'N') {
-			projectionid = 32600 + utmzone;
+			epsgid = 32600 + utmzone;
 		}
 		else if (NorS == 'S') {
-			projectionid = 32700 + utmzone;
+			epsgid = 32700 + utmzone;
 		}
 		else {
-			projectionid = 32600 + utmzone;
+			epsgid = 32600 + utmzone;
 		}
 		modeltype = ModelTypeProjected;
 		sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 		grid_projection_mode = MB_PROJECTION_PROJECTED;
-		sprintf(grid_projection_id, "epsg%d", projectionid);
+		sprintf(grid_projection_id, "epsg%d", epsgid);
 	}
-	else if ((nscan = sscanf(projection, "epsg%d", &projectionid)) == 1) {
-		sprintf(projectionname, "epsg%d", projectionid);
+	else if ((nscan = sscanf(projection, "epsg%d", &epsgid)) == 1) {
+		sprintf(projectionname, "epsg%d", epsgid);
 		modeltype = ModelTypeProjected;
 		grid_projection_mode = MB_PROJECTION_PROJECTED;
-		sprintf(grid_projection_id, "epsg%d", projectionid);
+		sprintf(grid_projection_id, "epsg%d", epsgid);
 	}
 	else {
 		strcpy(projectionname, "Geographic WGS84");
 		modeltype = ModelTypeGeographic;
-		projectionid = GCS_WGS_84;
+		epsgid = GCS_WGS_84;
 		grid_projection_mode = MB_PROJECTION_GEOGRAPHIC;
-		sprintf(grid_projection_id, "epsg%d", projectionid);
+		sprintf(grid_projection_id, "epsg%d", epsgid);
 	}
+
+  /* Rely on GDAL to tell us the proj4 string of this EPSG code */
+	header = G->header;
+  OGRErr eErr = OGRERR_NONE;
+  OGRSpatialReferenceH hSRS = OSRNewSpatialReference(NULL);
+  if ((eErr = OSRImportFromEPSG(hSRS, epsgid)) != OGRERR_NONE) {
+  	fprintf(stderr, "Did not get the SRS from input EPSG  %d\n", epsgid);
+  }
+  if ((eErr = OSRExportToProj4(hSRS, &header->ProjRefPROJ4)) != OGRERR_NONE) {
+  	fprintf(stderr, "Failed to convert the SRS to proj4 syntax\n");
+  }
+  OSRDestroySpatialReference(hSRS);
+  fprintf(stderr,"header->ProjRefPROJ4:%s\n", header->ProjRefPROJ4);
+
 	if (argc > 0)
 		strncpy(program_name, argv[0], MB_PATH_MAXLINE);
 	else
@@ -487,7 +501,6 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	        program_name, MB_VERSION, user, host, date);
 
 	/* set grid labels and remark */
-	header = G->header;
 	strcpy(header->command, program_name); /* name of generating command */
 	strcpy(header->x_units, xlab);         /* units in x-direction */
 	strcpy(header->y_units, ylab);         /* units in y-direction */
@@ -543,13 +556,13 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 		fprintf(stderr, "  Registration:   %d\n", header->registration);
 		if (modeltype == ModelTypeProjected) {
 			fprintf(stderr, "  Projected Coordinate System Name: %s\n", projectionname);
-			fprintf(stderr, "  Projected Coordinate System ID:   %d\n", projectionid);
+			fprintf(stderr, "  Projected Coordinate System ID:   %d\n", epsgid);
 			fprintf(stderr, "  Easting:    %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
 			fprintf(stderr, "  Northing:   %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
 		}
 		else {
 			fprintf(stderr, "  Geographic Coordinate System Name: %s\n", projectionname);
-			fprintf(stderr, "  Geographic Coordinate System ID:   %d\n", projectionid);
+			fprintf(stderr, "  Geographic Coordinate System ID:   %d\n", epsgid);
 			fprintf(stderr, "  Longitude:  %f %f  %f\n", header->wesn[0], header->wesn[1], header->inc[0]);
 			fprintf(stderr, "  Latitude:   %f %f  %f\n", header->wesn[2], header->wesn[3], header->inc[1]);
 		}

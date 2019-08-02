@@ -6,7 +6,7 @@
  *
  * Description : This header file contains the data structure definitions
  *    for the library's internal file table.  These definitions are only
- *    needed by the library, and are not intended to be access by any
+ *    needed by the library, and are not intended to be accessed by any
  *    calling applications.
  *
  *
@@ -18,7 +18,7 @@
  * jsb  04-16-97  Added integer fields to GSF_FILE_TABLE for major and
  *                 minor version numbers. Changed type of previous_record
  *                 field from fpos_t to long. This was done so we can
- *                 compair file position contained in previous record with
+ *                 compare file position contained in previous record with
  *                 file position information stored in the index file.
  * bac 06-28-06   Changed structure elements of type long to int, for
  *                 compilation on 64-bit architectures.
@@ -27,10 +27,9 @@
  *
  * References :
  *
- *
- * copyright 2014 Leidos, Inc.
+ * Copyright 2019 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
- * https://www.leidos.com/maritime/gsf.
+ * https://www.leidos.com/products/ocean-marine#gsf
  * This library may be redistributed and/or modified under the terms of
  * the GNU Lesser General Public License version 2.1, as published by the
  * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
@@ -50,9 +49,6 @@
 
 #include <limits.h>
 
-/* Define the size of buffer of ping addresses kept for direct access */
-#define PING_ADDR_BUF_SIZE 1024
-
 /* Macro definitions for the state of the read_write_flag */
 #define LAST_OP_FLUSH          0
 #define LAST_OP_READ           1
@@ -67,7 +63,7 @@ typedef struct
 {
     int             sec;                              /* seconds from the epoch       */
     int             nsec;                             /* nanoseconds of the second    */
-    long long       addr;                             /* address in the gsf file      */
+    long long       addr;                             /* address in the GSF file      */
 }
 INDEX_REC;
 
@@ -81,7 +77,7 @@ typedef struct t_index_data
     long long       start_addr[NUM_REC_TYPES];        /* start address of record type */
     int             number_of_records[NUM_REC_TYPES]; /* number of record type recs   */
     INDEX_REC      *scale_factor_addr;                /* scale factor index array     */
-    int             last_scale_factor_index;          /* last scale index             */
+    int             last_scale_factor_index;          /* last scale factor index      */
 }
 INDEX_DATA;
 
@@ -92,8 +88,8 @@ typedef struct t_gsfFileTable
 {
     FILE           *fp;                            /* File descriptor */
     char            file_name[1024];               /* The file's name */
-    int             major_version_number;          /* The gsf library version ID which created this file */
-    int             minor_version_number;          /* The gsf library version ID which created this file */
+    int             major_version_number;          /* The GSF library version ID which created this file */
+    int             minor_version_number;          /* The GSF library version ID which created this file */
     long long       file_size;                     /* The file's size when gsfOpen is called */
     long long       previous_record;               /* File offset to previous record */
     int             buf_size;                      /* Standard library buffer size */

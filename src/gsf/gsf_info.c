@@ -26,9 +26,9 @@
  *
  * References : DoDBL Generic Sensor Format Sept. 30, 1993
  *
- * copyright 2014 Leidos, Inc.
+ * Copyright 2019 Leidos, Inc.
  * There is no charge to use the library, and it may be accessed at:
- * https://www.leidos.com/maritime/gsf.
+ * https://www.leidos.com/products/ocean-marine#gsf
  * This library may be redistributed and/or modified under the terms of
  * the GNU Lesser General Public License version 2.1, as published by the
  * Free Software Foundation.  A copy of the LGPL 2.1 license is included with
@@ -43,26 +43,16 @@
  *
  ********************************************************************/
 
-/* standard c library includes */
+/* Standard C Library Includes */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-/* rely on the network type definitions of (u_short, and u_int) */
-#include <sys/types.h>
-#if !defined WIN32 && !defined WIN64
-#include <netinet/in.h>
-#else
-#include <winsock.h>
-#endif
-
-/* gsf library interface description */
+/* GSF library interface description */
 #include "gsf.h"
 
 /* Global external data defined in this module */
-extern int      gsfError;                               /* defined in gsf.c */
-
-/* Function prototypes for this file */
+extern int      gsfError;  /* Defined in gsf.c */
 
 /********************************************************************
  *
@@ -237,7 +227,7 @@ gsfFileSupportsRecalculateXYZ(int handle, int *status)
         }
     }
 
-    /* reset the file pointer to where it was when function was called */
+    /* Reset the file pointer to where it was when the function was called. */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
     if (ret)
@@ -394,7 +384,7 @@ gsfFileSupportsRecalculateTPU(int handle, int *status)
         }
     }
 
-    /* reset the file pointer to where it was when function was called */
+    /* Reset the file pointer to where it was when the function was called. */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
     if (ret)
@@ -538,7 +528,7 @@ gsfFileSupportsRecalculateNominalDepth(int handle, int *status)
         }
     }
 
-    /* reset the file pointer to where it was when function was called */
+    /* Reset the file pointer to where it was when the function was called. */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
     if (ret)
@@ -654,7 +644,7 @@ gsfFileContainsMBAmplitude(int handle, int *status)
         }
     }
 
-    /* reset the file pointer to where it was when function was called */
+    /* Reset the file pointer to where it was when the function was called. */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
     if (ret)
@@ -770,7 +760,7 @@ gsfFileContainsMBImagery(int handle, int *status)
         }
     }
 
-    /* reset the file pointer to where it was when function was called */
+    /* Reset the file pointer to where it was when the function was called. */
     /* Rewind the file so that the pointer is at the first record. */
     ret = gsfSeek(handle, GSF_REWIND);
     if (ret)

@@ -60,10 +60,10 @@ int mbr_info_gsfgenmb(int verbose, int *system, int *beams_bath_max, int *beams_
 	*pixels_ss_max = 8192;
 	strncpy(format_name, "GSFGENMB", MB_NAME_LENGTH);
 	strncpy(system_name, "GSF", MB_NAME_LENGTH);
-	strncpy(format_description,
-	        "Format name:          MBF_GSFGENMB\nInformal Description: SAIC Generic Sensor Format (GSF)\nAttributes:           "
-	        "variable beams,  bathymetry and amplitude,\n                      binary, single files, SAIC. \n",
-	        MB_DESCRIPTION_LENGTH);
+	sprintf(format_description,
+	        "Format name:          MBF_GSFGENMB\nInformal Description: Leidos Generic Sensor Format (GSF) version %s\nAttributes:           "
+	        "variable beams,  bathymetry and amplitude,\n                      binary, single files, Leidos (formerly SAIC).\n",
+	        GSF_VERSION);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_GSF;
 	*variable_beams = MB_YES;
