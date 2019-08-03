@@ -463,7 +463,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 			sbp->startDepth = sensordepth / sbp->sampleInterval / 0.00000075;
 			sbp->sonarDepth = 1000 * sensordepth;
 		}
-		
+
 		/* set altitude */
 		if (pars->n_altitude > 1) {
 			sbp->sonarAltitude = (int)(1000 * altitude);
@@ -513,7 +513,7 @@ int mbsys_jstar_preprocess(int verbose,     /* in: verbosity level set on comman
 			ssport->sonarDepth = 1000 * sensordepth;
 			ssstbd->sonarDepth = 1000 * sensordepth;
 		}
-		
+
 		/* set altitude */
 		if (pars->n_altitude > 1) {
 			ssport->sonarAltitude = (int)(1000 * altitude);

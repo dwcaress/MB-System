@@ -13,7 +13,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_jstar2.h  defines the data structure used by MBIO functions
- * to store bathymetry, amplitude and sidescan data read from the 
+ * to store bathymetry, amplitude and sidescan data read from the
  * MBF_EDGJSTAR format (MBIO id 134).
  *
  * Author:	D. W. Caress & C. d. S. Ferreira
@@ -24,7 +24,7 @@
  * Notes on the MBSYS_JSTAR data structure:
  *   1. The J-star data format is used to store raw sidescan data from
  *      Edgetech sidescan and subbottom profiler sonars. This format
- *      is a variant of the SEGY format. More recently the J-star data 
+ *      is a variant of the SEGY format. More recently the J-star data
  *      format can hold bathymetry data.
  *   2. The J-Star variant eliminates the SEGY EGCDIC and binary reel headers,
  *      and adds a message header to the beginning of each trace header.
@@ -86,7 +86,7 @@
 #define MBSYS_JSTAR_TRACEFORMAT_REALANALYTIC 3 /* 2 bytes/sample (signed) */
 #define MBSYS_JSTAR_TRACEFORMAT_PIXEL 4        /* 2 bytes/sample (signed) */
 
-/* Data type definitions */ 
+/* Data type definitions */
 typedef char c8;
 typedef signed char i8;
 typedef unsigned char u8;
@@ -99,7 +99,7 @@ typedef int64_t i64;
 typedef uint64_t u64;
 typedef double f64;
 
-/* Message Header */ 
+/* Message Header */
 struct mbsys_jstar_header_struct {
 	u16 start_marker; /* bytes 0-1,    Marker for the start of header (0x1601) */
 	u8 version;           /* byte  2,      Version of protocol used */
@@ -110,7 +110,7 @@ struct mbsys_jstar_header_struct {
 	u8 subsystem;      /* bytes 7,      Subsystem:
 	                                  0 - subbottom
 	                                 20 - 75 or 120 kHz sidescan
-	                                 21 - 410 kHz sidescan 
+	                                 21 - 410 kHz sidescan
 	                                 22 - 400 - 1600 kHz sidescan
 	                                 100 - Raw Serial/UDP/TCP data
 	                                 101 - Parsed Serial/UDP/TCP data */
@@ -122,18 +122,18 @@ struct mbsys_jstar_header_struct {
 	u32 size;              /* bytes 12-15,  Size of following message in bytes */
 };
 
-/* Message Type 80: Sonar Data Message */ 
+/* Message Type 80: Sonar Data Message */
 struct mbsys_jstar_sonarmessage_struct {
 	/* Header Block */
 	struct mbsys_jstar_header_struct header;
-    
+
 	/* Type 80:  Data Format Block */
     i32 unixtime;            /* bytes 0-3, Time since 1970 */
     u32 start_depth;      /* bytes 4-7, Starting Depth (window offset) in Samples */
     u32 ping_number;   /* bytes 8-11, Ping Number (increases with each ping) */
     i16 reserved[2];       /* bytes 12-15, Reserved */
     u16 msb;                 /* bytes 16-17, MSBs - Most Significant Bits - High order bits to extend 16 bits
-                                         unsigned short values to 20 bits. 
+                                         unsigned short values to 20 bits.
                                          Bits 0 - 3: Start Frequency
                                          Bits 4 - 7: End Frequency
                                          Bits 8 - 11: Samples in this Packet
@@ -156,7 +156,7 @@ struct mbsys_jstar_sonarmessage_struct {
                                          Bit 5: Pitch roll valid
                                          Bit 6: Altitude valid
                                          Bit 7: Reserved
-                                         Bit 8: Water temperature valid 
+                                         Bit 8: Water temperature valid
                                          Bit 9 : Depth valid
                                          Bit 10: Annotation valid
                                          Bit 11: Cable counter valid
@@ -169,25 +169,25 @@ struct mbsys_jstar_sonarmessage_struct {
                                          1 = two shorts per sample - stored as real (one short),
                                          imaginary (one short). The total number of bytes of data to follow is 4 * samples.
                                          2 =one short per sample - before matched filter. The total number of bytes of data to follow is 2 * samples.
-                                         9 = two shorts per sample - stored as real (one short), imaginary (one short), - prior to matched filtering. 
-                                         This is the code for unmatched filtered analytic data, whereas value 1 is intended for match filtered analytic data. 
+                                         9 = two shorts per sample - stored as real (one short), imaginary (one short), - prior to matched filtering.
+                                         This is the code for unmatched filtered analytic data, whereas value 1 is intended for match filtered analytic data.
                                          The total number of bytes of data to follow is 4 * samples. */
     i16 distance_antenna;       /* bytes 36-37, Distance from Antenna to Tow point in Centimeters. Sonar Aft is Positive */
     i16 distance_antenna2;     /* bytes 38-39, Distance from Antenna to Tow Point in Centimeters. Sonar to Starboard is Positive  */
     i16 reserved4[2];               /* bytes 40-43, Reserved */
-    
+
     /* Type 80:  Navigation Data Block */
     f32 pipe_km;                /* bytes 44-47, Kilometers of Pipe. See Validity Flag (bytes 30 – 31). */
     i16 reserved5[16];        /* bytes 48-79, Reserved */
-    i32 longitude;               /* bytes 80-83, Longitude in 10000 * (Minutes of Arc) or X in Millimeters or in Decimeters. 
+    i32 longitude;               /* bytes 80-83, Longitude in 10000 * (Minutes of Arc) or X in Millimeters or in Decimeters.
                                             See Validity Flag (bytes 30 – 31) and Coordinate Units (bytes 88 - 89). */
-    i32 latitude;                  /* bytes 84-87, Latitude in 10000 * (Minutes of Arc) or Y in Millimeters or in Decimeters. 
+    i32 latitude;                  /* bytes 84-87, Latitude in 10000 * (Minutes of Arc) or Y in Millimeters or in Decimeters.
                                             See Validity Flag (bytes 30 – 31) and Coordinate Units (bytes 88 - 89). */
-    i16 coordinates_units; /* bytes 88-89, Coordinate Units 
+    i16 coordinates_units; /* bytes 88-89, Coordinate Units
                                             1 = X, Y in millimeters
-                                            2 = Latitude, longitude in minutes of arc times 10000 
+                                            2 = Latitude, longitude in minutes of arc times 10000
                                             3 = X, Y in decimeters */
-    
+
     /* Type 80:  Pulse Information Block */
     u8 annotation[24];          /* bytes 90-113, Annotation String (ASCII Data) */
     u16 samples;                 /* bytes 114-115, Samples */
@@ -205,7 +205,7 @@ struct mbsys_jstar_sonarmessage_struct {
     i32 altitude;                     /* bytes 144-147, Altitude in Millimeters */
     f32 soundspeed;             /* bytes 148-151, Sound Speed in Meters per Second */
     f32 mixer_frequency;      /* bytes 152-155, Mixer Frequency in Hertz */
-    
+
     /* Type 80:  CPU Time Block */
     i16 year;            /* bytes 156-157, Year Data Recorded (CPU time) e.g. 2009 */
     i16 day;             /* bytes 158-159, Day (1 – 366) (should not be used) */
@@ -213,26 +213,26 @@ struct mbsys_jstar_sonarmessage_struct {
     i16 minute;       /* bytes 162-163, Minute (should not be used) */
     i16 second;      /* bytes 164-165, Second (should not be used) */
     i16 basis;         /* bytes 166-167, Time Basis (always 3) */
-    
+
     /* Type 80:  Weighting Factor Block */
     i16 weighting_factor;   /* bytes 168-169, Weighting Factor for Block Floating Point Expansion - defined as 2 to N Volts for LSB */
     i16 pulses_n;               /* bytes 170-171, Number of Pulses in the Water */
-    
+
     /* Type 80:  Orientation Sensor Data Block */
     u16 compass_heading;    /* bytes 172-173, Compass Heading (0 to 359.99) in units of 1/100 Degree */
     i16 pitch;                           /* bytes 174-175, Pitch [(degrees / 180.0) * 32768.0] maximum resolution */
     i16 roll;                              /* bytes 176-177, Roll [(degrees / 180.0) * 32768.0] maximum resolution */
     i16 reserved6;                   /* bytes 178-179, Reserved */
-    
+
     /* Type 80:  Trigger Information Block */
     i16 reserved7;              /* bytes 180-181, Reserved */
     i16 trigger_source;       /* bytes 182-183, Trigger Source
-                                            0 = Internal 
-                                            1 = External 
+                                            0 = Internal
+                                            1 = External
                                             2 = Coupled */
-    u16 mark_n;                 /* bytes 184-185, Mark Number 
+    u16 mark_n;                 /* bytes 184-185, Mark Number
                                             0 = No Mark */
-    
+
     /* Type 80:  NMEA Navigation Data Block */
     i16 position_hour;          /* bytes 186-187, Position Fix Hour (0 – 23) */
     i16 position_minutes;    /* bytes 188-189, Position Fix Minutes (0 – 59) */
@@ -241,7 +241,7 @@ struct mbsys_jstar_sonarmessage_struct {
     i16 speed;                     /* bytes 194-195, Speed – in Tenths of a Knot */
     i16 position_day;           /* bytes 196-197, Position Fix Day (1 – 366) */
     i16 position_year;          /* bytes 198-199, Position Fix Year */
-    
+
     /* Type 80:  Miscellaneous Data Block */
     u32 miliseconds_today;          /* bytes 200-203, Milliseconds Today (Since Midnight) */
     u16 max_adc;                         /* bytes 204-205, Maximum Absolute Value of ADC Samples in this Packet */
@@ -257,7 +257,7 @@ struct mbsys_jstar_sonarmessage_struct {
     i32 reserved11;                       /* bytes 232-235, Reserved */
     u16 cableout;                          /* bytes 236-237, Cable Out in Decimeters */
     u16 reserved12;                      /* bytes 238-239, Reserved */
-    
+
 	/* -------------------------------------------------------------------- */
 	/* MB-System-only parameters from ???-???               */
 	/* -------------------------------------------------------------------- */
@@ -270,21 +270,21 @@ struct mbsys_jstar_sonarmessage_struct {
 	unsigned short *trace;
 };
 
-/* Message Type 82: Side Scan Data Message */ 
+/* Message Type 82: Side Scan Data Message */
 struct mbsys_jstar_ssmessage_struct {
 	/* Header Block */
 	struct mbsys_jstar_header_struct header;
-    
+
 	/* Sidescan Data Block */
     u16 subsystem;               /* bytes 0-1, The subsystem number determines the source of data; common subsystem assignment are:
                                                 Sub-Bottom (SB) = 0
-                                                Low frequency data of a dual frequency side scan = 20 
-                                                High frequency data of a dual frequency side scan = 21 
-                                                Very High frequency data of a tri-frequency side scan = 22 
+                                                Low frequency data of a dual frequency side scan = 20
+                                                High frequency data of a dual frequency side scan = 21
+                                                Very High frequency data of a tri-frequency side scan = 22
                                                 Raw Serial/UDP/TCP data = 100
                                                 Parsed Serial/UDP/TCP data = 101 */
     u16 channel;                    /* bytes 2-3, Channel for a Multi-Channel Subsystem
-                                                For Side Scan Subsystems: 
+                                                For Side Scan Subsystems:
                                                     0 = Port
                                                     1 = Starboard
                                                 For Serial Ports: this is the logical port number, which often differs from physical COM Port in use.
@@ -292,7 +292,7 @@ struct mbsys_jstar_ssmessage_struct {
     u32 ping_number;           /* bytes 4-7, Ping Number (increments with each ping period) */
     u16 packet_number;       /* bytes 8-9, Packet Number (1..n, each ping starts with packet 1) */
     u16 trigger_source;         /* bytes 10-11, Trigger Source (0 = internal, 1 = external) */
-    u32 samples_packet;      /* bytes 12-15, Samples in this Packet */ 
+    u32 samples_packet;      /* bytes 12-15, Samples in this Packet */
     u32 sample_interval;       /* bytes 16-19, Sample Interval in Nanoseconds of Stored Data */
     u32 start_depth;              /* bytes 20-23, Starting Depth (window offset) in Samples */
     i16 weighting_factor;       /* bytes 24-25, Weighting Factor (defines 2 to N Volts) */
@@ -303,11 +303,11 @@ struct mbsys_jstar_ssmessage_struct {
     u16 mark_n;                   /* bytes 34-35, Mark Number (0 = no mark) */
     u16 data_format;            /* bytes 36-37, Data Format
                                                 0 = one short per sample - envelope data the total number of bytes of data to follow is 2 * samples
-                                                1 = two shorts per sample - stored as real (one short), imaginary (one short), the total number of bytes 
+                                                1 = two shorts per sample - stored as real (one short), imaginary (one short), the total number of bytes
                                                 of data to follow is 4 * samples */
     u8 multiping_n;               /* byte 38, Number of Simultaneous Pulses in the Water */
     u8 reserved;                   /* byte 39, Reserved */
-    
+
 	/* Computer Data / Time Data Block */
 	u32 miliseconds_today;     /* bytes 40-43, Milliseconds Today */
 	i16 year;                             /* bytes 44-45, Year */
@@ -315,7 +315,7 @@ struct mbsys_jstar_ssmessage_struct {
 	u16 hour_day;                    /* bytes 48-49, Hour of day (0 – 23) */
 	u16 minute;                        /* bytes 50-51, Minute (0 – 59) */
 	u16 second;                       /* bytes 52-53, Second (0 – 59) */
-	
+
 	/* Auxiliary Sensor Information Block */
 	u16 compass_heading;    /* bytes 54-55, Compass Heading in Minutes (0 – 359.9) x 60 */
     i16 pitch;                           /* bytes 56-57, Pitch (scale by 180 / 32768 to get degrees, bow up is positive) */
@@ -327,13 +327,13 @@ struct mbsys_jstar_ssmessage_struct {
     i16 reserved2;                  /* bytes 70-71, Reserved */
     i32 altitude;                       /* bytes 72-75, Altitude in Millimeters (or -1 if no valid reading) */
     u8 reserved3[4]                /* bytes 76-79, Reserved */
-    
+
 	/* trace data stored as shorts */
 	unsigned int trace_alloc;
 	unsigned short *trace;
 };
 
-/* Message Type 182: System Information */ 
+/* Message Type 182: System Information */
 struct mbsys_jstar_sysinfo_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -367,7 +367,7 @@ struct mbsys_jstar_sysinfo_struct {
 	c8 sysinfo[MBSYS_JSTAR_SYSINFO_MAX];  /* bytes 24-End, Reserved */
 };
 
-/* Message Type 426: File Timestamp Message */ 
+/* Message Type 426: File Timestamp Message */
 struct mbsys_jstar_filetimestamp_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -377,11 +377,11 @@ struct mbsys_jstar_filetimestamp_struct {
     i32 milliseconds;      /* bytes 4-7, Milliseconds in the Current Second */
 };
 
-/* Message Type 428: File Padding Message */ 
-/* A file padding message is sometimes found at the end of the file. In some implementations files are padded to optimize the write process. 
-    These messages should be ignored. */ 
+/* Message Type 428: File Padding Message */
+/* A file padding message is sometimes found at the end of the file. In some implementations files are padded to optimize the write process.
+    These messages should be ignored. */
 
-/* Message Type 2002: NMEA String */ 
+/* Message Type 2002: NMEA String */
 struct mbsys_jstar_nmea_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -391,7 +391,7 @@ struct mbsys_jstar_nmea_struct {
 	i32 milliseconds;      /* bytes 4-7, Milliseconds in the Current Second */
 	u8 source;               /* bytes 8, Source
 	                                    1 = Sonar
-                                        2 = Discover 
+                                        2 = Discover
                                         3 = ETSI */
 	u8 reserved[3];        /* bytes 9-11, Reserved */
 
@@ -399,7 +399,7 @@ struct mbsys_jstar_nmea_struct {
 	c8 nmea[MB_COMMENT_MAXLINE];  /* bytes 12-End, NMEA String Data */
 };
 
-/* Message Type 2020: Pitch Roll Data */ 
+/* Message Type 2020: Pitch Roll Data */
 struct mbsys_jstar_pitchroll_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -408,7 +408,7 @@ struct mbsys_jstar_pitchroll_struct {
 	i32 seconds;          /* bytes 0-3, Time in Seconds since 1/1/1970 */
 	i32 milliseconds;    /* bytes 4-7, Milliseconds in the Current Second */
 	u8 reserve1[4];       /* bytes 8-11, Reserved */
-    
+
     /* attitude data */
 	i16 accelerationx;       /* bytes 12-13, X acceleration: multiply by (20 * 1.5) / (32768) to get G's */
 	i16 accelerationy;       /* bytes 14-15, Y acceleration: multiply by (20 * 1.5) / (32768) to get G's */
@@ -433,14 +433,14 @@ struct mbsys_jstar_pitchroll_struct {
                                             Bit 7: Roll
                                             Bit 8: Heave
                                             Bit 9: Heading
-                                            Bit 10: Temperature 
-                                            Bit 11: Device Info 
+                                            Bit 10: Temperature
+                                            Bit 11: Device Info
                                             Bit 12: Yaw */
 	i16 yaw;                    /* bytes 40-41, Yaw in units of 0.01 Degrees (0...360) */
 	i16 reserved;            /* bytes 42-42, Reserved */
 };
 
-/* Message Type 2060: Pressure Sensor Reading */ 
+/* Message Type 2060: Pressure Sensor Reading */
 struct mbsys_jstar_pressure_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -449,17 +449,17 @@ struct mbsys_jstar_pressure_struct {
 	i32 seconds;            /* bytes 0-3, Time in Seconds since 1/1/1970 */
 	i32 milliseconds;      /* bytes 4-7, Milliseconds in the Current Second */
 	u8 reserve1[4];        /* bytes 8-11, Reserved */
-    
+
     /* CTD data */
 	i32 pressure;           /* bytes 12-15, Pressure in Units of 1/1000th of a PSI */
 	i32 temperature;      /* bytes 16-19, Temperature in Units of 1/1000th of Degree Celsius */
 	i32 salinity;              /* bytes 20-23, Salinity in Parts Per Million */
 	i32 datavalidflags;   /* bytes 24-27, Validity Data Flag:
                                         Bit 0: Pressure
-                                        Bit 1: Temperature 
+                                        Bit 1: Temperature
                                         Bit 2: Salt PPM
-                                        Bit 3: Conductivity 
-                                        Bit 4: Sound velocity 
+                                        Bit 3: Conductivity
+                                        Bit 4: Sound velocity
                                         Bit 5: Depth */
 	i32 conductivity;       /* bytes 28-31, Conductivity in Micro-Siemens per Centimeter */
 	i32 soundspeed;      /* bytes 32-35, Velocity of Sound in Millimeters per Second */
@@ -467,7 +467,7 @@ struct mbsys_jstar_pressure_struct {
 	i32 reserve2[9];        /* bytes 40-75, Reserved */
 };
 
-/* Message Type 2080: Doppler Velocity Log Data */ 
+/* Message Type 2080: Doppler Velocity Log Data */
 struct mbsys_jstar_dvl_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -476,7 +476,7 @@ struct mbsys_jstar_dvl_struct {
 	i32 seconds;           /* bytes 0-3, Time in Seconds since 1/1/1970 */
 	i32 milliseconds;     /* bytes 4-7, Milliseconds in the Current Second */
 	u8 reserved1[4];     /* bytes 8-11, Reserved */
-    
+
     /* dvl data */
 	u32 datavalidflags; /* bytes 12-15, Validity Data Flags :
                                         Bit 0: X, Y Velocity Present
@@ -513,7 +513,7 @@ struct mbsys_jstar_dvl_struct {
 	i16 reserved2[7];               /* bytes 58-71, Reserved */
 };
 
-/* Message Type 2090: Situation Message */ 
+/* Message Type 2090: Situation Message */
 struct mbsys_jstar_situation_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -522,19 +522,19 @@ struct mbsys_jstar_situation_struct {
 	i32 seconds;            /* bytes 0-3, Time in Seconds since 1/1/1970 */
 	i32 milliseconds;      /* bytes 4-7, Milliseconds in the Current Second */
 	u8 reserve1[4];        /* bytes 8-11, Reserved */
-    
+
     /* navigation and attitude data */
 	u32 datavalidflags; /* bytes 12-15, Validity Data Flags:
-                                        Bit 0: Microsecond Time stamp 
+                                        Bit 0: Microsecond Time stamp
                                         Bit 1: Latitude
                                         Bit 2: Longitude
                                         Bit 3: Depth
                                         Bit 4: Heading
                                         Bit 5: Pitch
                                         Bit 6: Roll
-                                        Bit 7: X Relative Position 
-                                        Bit 8: Y Relative Position 
-                                        Bit 9: Z Relative Position                        
+                                        Bit 7: X Relative Position
+                                        Bit 8: Y Relative Position
+                                        Bit 9: Z Relative Position
                                         Bit 10: X Velocity
                                         Bit 11: Y Velocity
                                         Bit 12: Z Velocity
@@ -547,10 +547,10 @@ struct mbsys_jstar_situation_struct {
                                         Bit 19: X Acceleration
                                         Bit 20: Y Acceleration
                                         Bit 21: Z Acceleration
-                                        Bit 22: Latitude Standard Deviation 
-                                        Bit 23: Longitude Standard Deviation 
+                                        Bit 22: Latitude Standard Deviation
+                                        Bit 23: Longitude Standard Deviation
                                         Bit 24: Depth Standard Deviation
-                                        Bit 25: Heading Standard Deviation 
+                                        Bit 25: Heading Standard Deviation
                                         Bit 26: Pitch Standard Deviation
                                         Bit 27: Roll Standard Deviation */
 	u8 reserve2[4];              /* bytes 16-19, Reserved */
@@ -585,7 +585,7 @@ struct mbsys_jstar_situation_struct {
     u16 reserved3[16];      /* bytes 244-275, Reserved – Do not use */
 };
 
-/* Message Type 2091: Situation Message - Version 2 */ 
+/* Message Type 2091: Situation Message - Version 2 */
 struct mbsys_jstar_situation2_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -594,10 +594,10 @@ struct mbsys_jstar_situation2_struct {
 	i32 seconds;          /* bytes 0-3, Time in Seconds since 1/1/1970 */
 	i32 milliseconds;    /* bytes 4-7, Milliseconds in the Current Second */
 	u8 reserve1[4];      /* bytes 8-11, Reserved */
-    
+
     /* navigation and attitude data */
 	u32 datavalidflags; /* bytes 12-15, Validity Flag:
-                                        Bit 0 : Timestamp Provided by the Source Valid 
+                                        Bit 0 : Timestamp Provided by the Source Valid
                                         Bit 1: Longitude Valid
                                         Bit 2: Latitude Valid
                                         Bit 3: Depth Valid
@@ -609,7 +609,7 @@ struct mbsys_jstar_situation2_struct {
                                         Bit 9 : Roll Valid
                                         Bit 10: Heading Valid
                                         Bit 11: Sound Speed Valid
-                                        Bit 12: Water Temperature Valid 
+                                        Bit 12: Water Temperature Valid
                                         Others: Reserved, Presently 0 */
     u8 velocity12;         /* byte 16, Velocity12 Directions (Velocity1 and Velocity2 Types):
                                         0 = North and East,
@@ -634,7 +634,7 @@ struct mbsys_jstar_situation2_struct {
     f32 reserved3[3];   /* bytes , Reserved – Do not use */
 };
 
-/* Message Type 2100: Cable Counter Data Message */ 
+/* Message Type 2100: Cable Counter Data Message */
 struct mbsys_jstar_cable_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -652,7 +652,7 @@ struct mbsys_jstar_cable_struct {
 	f32 cable_tension;           /* bytes 28-31, Cable Tension in Kilograms */
 };
 
-/* Message Type 2101: Kilometer of Pipe Data */ 
+/* Message Type 2101: Kilometer of Pipe Data */
 struct mbsys_jstar_pipe_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -662,7 +662,7 @@ struct mbsys_jstar_pipe_struct {
 	i32 milliseconds;      /* bytes 4-7, Milliseconds in the Current Second */
     u8 source;               /* byte 8, Source
                                         1 = Sonar
-                                        2 = DISCOVER 
+                                        2 = DISCOVER
                                         3 = ETSI */
     u8 reserved[3];        /* bytes 9-11, Reserved */
     f32 km_pipe;           /* bytes 12-15, Kilometer of Pipe (KP) */
@@ -670,7 +670,7 @@ struct mbsys_jstar_pipe_struct {
     i16 kp_error;           /* bytes 18-19, Flag (KP Report Error) */
 };
 
-/* Message Type 2111: Container Timestamp Message */ 
+/* Message Type 2111: Container Timestamp Message */
 struct mbsys_jstar_container_struct {
 	/* Message Header */
 	struct mbsys_jstar_header_struct header;
@@ -681,7 +681,7 @@ struct mbsys_jstar_container_struct {
     u8 reserved[4];        /* bytes 8-11, Reserved */
 };
 
-/* Message Type 3000: Header Description */ 
+/* Message Type 3000: Header Description */
 struct mbsys_jstar_headerbathy_struct {
     u32 seconds;                        /* bytes 0-3, Time Since 1/1/1970 in seconds */
     u32 nanoseconds;                /* bytes 4-7, Nanosecond Supplement to Time */
@@ -710,7 +710,7 @@ struct mbsys_jstar_headerbathy_struct {
     u8 reserved;                        /* byte 71, Reserved */
     f32 span;                             /* bytes 72-75, Span in Meter or Degrees */
     u32 reserved2;                   /* bytes 76-79, Reserved */
-    
+
     u16 time_delay;                 /* bytes ,  */
     i16 angle;
     u8 amplitude;
@@ -720,7 +720,7 @@ struct mbsys_jstar_headerbathy_struct {
     u32 quality;
 };
 
-/* Message Type 3001: Attitude Message Type */ 
+/* Message Type 3001: Attitude Message Type */
 struct mbsys_jstar_attitudebathy_struct {
 	/* Bathy Message Header */
 	struct mbsys_jstar_headerbathy_struct headerbathy;
@@ -728,11 +728,11 @@ struct mbsys_jstar_attitudebathy_struct {
     /* Attitude Data */
 	u32 seconds;                /* bytes 0-3, Time Since 1/1/1970 in Seconds */
 	u32 nanoseconds;        /* bytes 4-7, Nanosecond Supplement to Time in Nanoseconds */
-    u32 valid_flag;              /* bytes 8-11, Data Valid Flag: 0 - clear, 1 - set 
+    u32 valid_flag;              /* bytes 8-11, Data Valid Flag: 0 - clear, 1 - set
                                                     Bit 0: Heading
-                                                    Bit 1: Heave 
-                                                    Bit 2: Pitch 
-                                                    Bit 3: Roll 
+                                                    Bit 1: Heave
+                                                    Bit 2: Pitch
+                                                    Bit 3: Roll
                                                     Bit 4: Yaw  */
     f32 heading;                 /* bytes 12-15, Heading (0 to 359.9) */
     f32 heave;                    /* bytes 16-19, Heave in Meters */
@@ -741,7 +741,7 @@ struct mbsys_jstar_attitudebathy_struct {
     f32 yaw;                       /* bytes 28-31, Yaw in Degrees */
 };
 
-/* Message Type 3002: Pressure Message Type */ 
+/* Message Type 3002: Pressure Message Type */
 struct mbsys_jstar_pressurebathy_struct {
 	/* Bathy Message Header */
 	struct mbsys_jstar_headerbathy_struct headerbathy;
@@ -749,11 +749,11 @@ struct mbsys_jstar_pressurebathy_struct {
     /* Pressure Data */
 	u32 seconds;                    /* bytes 0-3, Time Since 1/1/1970 in Seconds */
 	u32 nanoseconds;            /* bytes 4-7, Nanosecond Supplement to Time in Nanoseconds */
-    u32 valid_flag;                  /* bytes 8-11, Data Valid Flag: 0 - clear, 1 - set 
+    u32 valid_flag;                  /* bytes 8-11, Data Valid Flag: 0 - clear, 1 - set
                                                     Bit 0: Pressure
-                                                    Bit 1: Water Temperature 
-                                                    Bit 2: Salinity 
-                                                    Bit 3: Conductivity 
+                                                    Bit 1: Water Temperature
+                                                    Bit 2: Salinity
+                                                    Bit 3: Conductivity
                                                     Bit 4: Sound Velocity
                                                     Bit 5: Depth */
     f32 absolute_pressure;     /* bytes 12-15, Absolute Pressure in PSI */
@@ -764,7 +764,7 @@ struct mbsys_jstar_pressurebathy_struct {
     f32 depth;                         /* bytes 32-35, Depth in Meters */
 };
 
-/* Message Type 3003: Altitude Message Type */ 
+/* Message Type 3003: Altitude Message Type */
 struct mbsys_jstar_altitudebathy_struct {
 	/* Bathy Message Header */
 	struct mbsys_jstar_headerbathy_struct headerbathy;
@@ -772,7 +772,7 @@ struct mbsys_jstar_altitudebathy_struct {
     /* Altitude Data */
 	u32 seconds;                /* bytes 0-3, Time Since 1/1/1970 in Seconds */
 	u32 nanoseconds;        /* bytes 4-7, Nanosecond Supplement to Time in Nanoseconds */
-    u32 valid_flag;              /* bytes 8-11, Data Valid Flag: 0 - clear, 1 - set 
+    u32 valid_flag;              /* bytes 8-11, Data Valid Flag: 0 - clear, 1 - set
                                                     Bit 0: Altitude
                                                     Bit 1: Speed
                                                     Bit 2: Heading */
@@ -781,7 +781,7 @@ struct mbsys_jstar_altitudebathy_struct {
     f32 heading;                  /* bytes 20-23, Heading (0 to 359.9) in Degrees */
 };
 
-/* Message Type 3004: Position Message Type */ 
+/* Message Type 3004: Position Message Type */
 struct mbsys_jstar_positionbathy_struct {
 	/* Bathy Message Header */
 	struct mbsys_jstar_headerbathy_struct headerbathy;
@@ -789,12 +789,12 @@ struct mbsys_jstar_positionbathy_struct {
     /* Position Data */
 	u32 seconds;                    /* bytes 0-3, Time Since 1/1/1970 in Seconds */
 	u32 nanoseconds;            /* bytes 4-7, Nanosecond Supplement to Time in Nanoseconds */
-    u16 valid_flag;                  /* bytes 8-9, Data Valid Flag: 0 - clear, 1 - set 
-                                                    Bit 0: UTM Zone 
-                                                    Bit 1: Easting 
-                                                    Bit 2: Northing 
-                                                    Bit 3: Latitude 
-                                                    Bit 4: Longitude 
+    u16 valid_flag;                  /* bytes 8-9, Data Valid Flag: 0 - clear, 1 - set
+                                                    Bit 0: UTM Zone
+                                                    Bit 1: Easting
+                                                    Bit 2: Northing
+                                                    Bit 3: Latitude
+                                                    Bit 4: Longitude
                                                     Bit 5: Speed
                                                     Bit 6: Heading
                                                     Bit 7: Antenna Height */
@@ -808,7 +808,7 @@ struct mbsys_jstar_positionbathy_struct {
     f32 antenna_height;         /* bytes 52-55, Antenna Height in Meters (positive up) */
 };
 
-/* Message Type 3005: Status Message Type */ 
+/* Message Type 3005: Status Message Type */
 struct mbsys_jstar_statusbathy_struct {
 	/* Bathy Message Header */
 	struct mbsys_jstar_headerbathy_struct headerbathy;
@@ -819,7 +819,7 @@ struct mbsys_jstar_statusbathy_struct {
     u16 valid_flag;                  /* bytes 8-9, Data Valid Flag: 0 - clear, 1 - set
                                                     Bit 0: GGA Status
                                                     Bit 1: GGK Status
-                                                    Bit 2: Number of Satellites 
+                                                    Bit 2: Number of Satellites
                                                     Bit 3: Dilution of Precision */
     u8 version;                       /* byte 10, Version */
     u8 gga_status;                 /* byte 11, GGA Status */
@@ -845,7 +845,7 @@ struct mbsys_jstar_struct {
 	/* Sidescan data */
 	struct mbsys_jstar_channel_struct ssport;
 	struct mbsys_jstar_channel_struct ssstbd;
-	
+
 	/* Bathymetry data */
 	struct mbsys_jstar_channel_struct bathy;
 
@@ -857,7 +857,7 @@ struct mbsys_jstar_struct {
 
 	/* NMEA */
 	struct mbsys_jstar_nmea_struct nmea;
-	
+
 	/* Comment */
 	struct mbsys_jstar_comment_struct comment;
 
@@ -872,32 +872,32 @@ struct mbsys_jstar_struct {
 
 	/* Situation data */
 	struct mbsys_jstar_situation_struct situation;
-	
+
 	/* Situation data V2 */
 	struct mbsys_jstar_situation2_struct situation2;
-   
-    /* Cable Counter data */ 
+
+    /* Cable Counter data */
     struct mbsys_jstar_cable_struct cable;
-    
-    /* Kilometer of Pipe data */ 
+
+    /* Kilometer of Pipe data */
     struct mbsys_jstar_pipe_struct pipe;
-    
-    /* Container Timestamp */ 
+
+    /* Container Timestamp */
     struct mbsys_jstar_container_struct container;
-    
-    /* Attitude data */ 
+
+    /* Attitude data */
     struct mbsys_jstar_attitudebathy_struct attitudebathy;
-    
-    /* Pressure data */ 
+
+    /* Pressure data */
     struct mbsys_jstar_pressurebathy_struct pressurebathy;
-    
+
     /* Altitude data */
     struct mbsys_jstar_altitudebathy_struct altitude;
-    
-    /* Position data */ 
+
+    /* Position data */
     struct mbsys_jstar_positionbathy_struct positionbathy;
-    
-    /* Status data */ 
+
+    /* Status data */
     struct mbsys_jstar_statusbathy_struct statusbathy;
 };
 

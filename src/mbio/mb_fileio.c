@@ -166,7 +166,7 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
             int64_t rbytes=-1;
 
             if( (rbytes = mbtrn_read_stripped_frame(mb_io_ptr->mbsp, (byte *) buffer, R7K_MAX_FRAME_BYTES, MBR_NET_STREAM, 0.0, MBTRN_READ_TMOUT_MSEC,  &sync_bytes)) < 0){
-          
+
                 status   = MB_FAILURE;
                 *error   = MB_ERROR_EOF;
                 *size    = (size_t)rbytes;

@@ -103,12 +103,12 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 					sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
 					status = mb_mallocd(verbose, __FILE__, __LINE__, mask_nx * mask_ny * sizeof(int), (void **)&mask, error);
 					for (int j = mask_ny - 1; j >= 0; j--) {
-						char *startptr = NULL; 
+						char *startptr = NULL;
 						if ((startptr = fgets(line, 128, fp)) != NULL) {
 							startptr = &line[6];
 							for (int i = 0; i < mask_nx; i++) {
 								int k = i + j * mask_nx;
-								char *endptr = NULL; 
+								char *endptr = NULL;
 								mask[k] = strtol(startptr, &endptr, 0);
 								startptr = endptr;
 							}

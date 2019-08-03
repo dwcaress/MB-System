@@ -389,7 +389,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
                 } else {
                     obsolete_header = MB_NO;
                 }
-                
+
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(sbp->pingTime));
 				index += 4;
@@ -456,7 +456,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(sbp->endFreq));
 				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(sbp->sweepLength));   
+				mb_get_binary_short(MB_YES, &buffer[index], &(sbp->sweepLength));
 				index += 2;
 				mb_get_binary_int(MB_YES, &buffer[index], &(sbp->pressure));
 				index += 4;
@@ -546,7 +546,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(sbp->reserved14));
 				index += 2;
-                
+
                 /* fix problems created by writing obsolete header */
                 if (obsolete_header == MB_YES) {
                     // set first time value
@@ -659,7 +659,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
                 } else {
                     obsolete_header = MB_NO;
                 }
-                
+
 				index = 0;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->pingTime));
 				index += 4;
@@ -726,7 +726,7 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index += 2;
 				mb_get_binary_short(MB_YES, &buffer[index], &(ss->endFreq));
 				index += 2;
-				mb_get_binary_short(MB_YES, &buffer[index], &(ss->sweepLength));   
+				mb_get_binary_short(MB_YES, &buffer[index], &(ss->sweepLength));
 				index += 2;
 				mb_get_binary_int(MB_YES, &buffer[index], &(ss->pressure));
 				index += 4;

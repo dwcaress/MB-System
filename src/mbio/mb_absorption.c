@@ -12,18 +12,18 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * This file mb_absorption.c includes mbio functions used to calculate 
+ * This file mb_absorption.c includes mbio functions used to calculate
  * water properties from observations and models
  *
  * Original Functions:
  *   int mb_absorption(int verbose, double frequency, double temperature,
  *   					double salinity, double depth,
  *   					double ph, double soundspeed,
- *                		double *absorption, int *error) 
+ *                		double *absorption, int *error)
  *   int mb_potential_temperature(int verbose, double temperature,
  *   					double salinity, double pressure,
  *   					double *potential_temperature, int *error)
- *   					
+ *
  * Author:	D. W. Caress
  * Date:	February 10, 2008
  *          R/V Zephyr
@@ -38,7 +38,7 @@
  *    int mb_seabird_depth(int verbose, double pressure, double latitude, double *depth, int *error);
  *    int mb_seabird_salinity(int verbose, double conductivity, double temperature, double pressure, double *salinity, int *error);
  *    int mb_seabird_soundspeed(int verbose, int algorithm, double salinity, double temperature, double pressure, double *soundspeed, int *error);
- *   					
+ *
  * Author:	D. W. Caress
  * Date:	June 30, 2017
  *          R/V Adolf Jensen
@@ -161,7 +161,7 @@ int mb_absorption(int verbose, double frequency, double temperature, double sali
 	const double Alpham = (Am * Pm * Fm * frequency * frequency) / (Fm * Fm + frequency * frequency);
 
 	/* calculate pure water contribution */
-	const double Aw = 
+	const double Aw =
 		(temperature <= 20.0) ?
 			0.0004937 - 0.0000259 * temperature + 0.000000911 * temperature * temperature -
 				0.000000015 * temperature * temperature * temperature :
@@ -258,7 +258,7 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
  *   temperature: temperature deg C ITPS-68
  *   pressure: pressure in decibars
  *   density: density in kg/m^3
- *   
+ *
  * Use the following constants:
  *   B0 = 8.24493e-1, B1 = -4.0899e-3, B2 = 7.6438e-5, B3 = -8.2467e-7, B4 = 5.3875e-9,
  *   C0 = -5.72466e-3, C1 = 1.0227e-4, C2 = -1.6546e-6,
@@ -308,7 +308,7 @@ int mb_seabird_density(int verbose, double salinity, double temperature, double 
 	const double s32 = pow(salinity, 1.5);
 	pressure /= 10.0;
 	*density = A0 + A1 * temperature + A2 * t2 + A3 * t3 + A4 * t4 + A5 * t5
-			+ (B0 + B1 * temperature + B2 * t2 + B3 * t3 + B4 * t4) * salinity 
+			+ (B0 + B1 * temperature + B2 * t2 + B3 * t3 + B4 * t4) * salinity
 			+ (C0 + C1 * temperature + C2 * t2) * s32 + D0 * salinity * salinity;
 	const double kw = E0 + E1 * temperature + E2 * t2 + E3 * t3 + E4 * t4;
 	const double aw = H0 + H1 * temperature + H2 * t2 + H3 * t3;
@@ -392,7 +392,7 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 	double RT = 0.0;
 	double RP = 0.0;
 	double result;
-	
+
 	/* constants for salinity calculation */
 	const double A1 = 2.070e-5, A2 = -6.370e-10, A3 = 3.989e-15;
 	const double B1 = 3.426e-2, B2 = 4.464e-4, B3 = 4.215e-1, B4 = -3.107e-3;
@@ -402,7 +402,7 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 
 	if (conductivity <= 0.0)
 		result = 0.0;
-	else { 
+	else {
 		conductivity *= 10.0; /* convert Siemens/meter to mmhos/cm */
 		const double R = conductivity / 42.914;
 		double val = 1 + B1 * temperature + B2 * temperature * temperature + B3 * R + B4 * R * temperature;
@@ -458,10 +458,10 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 		fprintf(stderr, "dbg2       temperature:    %f deg C ITPS-68\n", temperature);
 		fprintf(stderr, "dbg2       pressure:       %f dbar\n", pressure);
 	}
-	
+
 	/* algorithm 1: Chen and Millero 1977, JASA,62,1129-1135 */
 	if (algorithm == MB_SOUNDSPEEDALGORITHM_CHENMILLERO) {
-		
+
 		pressure = pressure / 10.0; /* scale pressure to bars */
 		if(salinity < 0.0)
 			salinity = 0.0;
@@ -481,7 +481,7 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 		const double c = ((c3 * pressure + c2) * pressure + c1) * pressure + c0;
 		*soundspeed = c + (a + b * sqrt(salinity) + d * salinity) * salinity;
 	}
-	
+
 	/* algorithm 2: Wilson JASA, 1960, 32, 1357  */
 	else if (algorithm == MB_SOUNDSPEEDALGORITHM_WILSON) {
 		const double pr = 0.1019716 * (pressure + 10.1325);
@@ -497,7 +497,7 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 		a = -1.9646e-10 * temperature + 3.5216e-9;
 		*soundspeed = (((-3.3603e-12 * pr + a) * pr + *soundspeed) * pr + v1) * pr + v0;
 	}
-	
+
 	/* algorithm 3 (default): Delgrosso JASA, Oct. 1974, Vol 56, No 4 */
 	else /* if (algorithm == MB_SOUNDSPEEDALGORITHM_DELGROSSO) */ {
 		const double c000 = 1402.392;

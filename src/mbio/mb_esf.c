@@ -507,11 +507,11 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 		maxtimediff = MB_ESF_MAXTIMEDIFF;
 
 	/* find first and last edits for this ping - take ping multiplicity into account */
-	if (esf->nedit > 0 && esf->startnextsearch > 0 
+	if (esf->nedit > 0 && esf->startnextsearch > 0
 		&& time_d < (esf->edit[esf->startnextsearch].time_d - maxtimediff)
 			&& time_d < (esf->edit[esf->startnextsearch - 1].time_d - maxtimediff))
 		firstedit = 0;
-	else if (esf->nedit > 0 && esf->startnextsearch > 0 
+	else if (esf->nedit > 0 && esf->startnextsearch > 0
 		&& fabs(time_d - esf->edit[esf->startnextsearch - 1].time_d) <= maxtimediff
 		&& (esf->edit[esf->startnextsearch - 1].beam < beamoffset
 				|| esf->edit[esf->startnextsearch-1].beam > beamoffsetmax))
@@ -614,7 +614,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 					}
 				}
 			}
-			
+
 			/* handle implicit default modes:
 			 * if the esf file mode is
 			 *      MB_ESF_MODE_IMPLICIT_NULL == 1

@@ -236,7 +236,7 @@ int mb_get_bounds(char *text, double *bounds) {
  */
 double mb_ddmmss_to_degree(char *text) {
 	int colons = 0;
-	int i = 0;  /* Used after for. */ 
+	int i = 0;  /* Used after for. */
 	for (; text[i]; i++)
 		if (text[i] == ':')
 			colons++;
