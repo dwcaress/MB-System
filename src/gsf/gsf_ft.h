@@ -56,7 +56,13 @@
 
 /* Macro definitions for the limits of the scale factor multipler */
 #define MIN_GSF_SF_MULT_VALUE  1
-#define MAX_GSF_SF_MULT_VALUE  UINT_MAX // Changed from ULONG_MAX for MB-System DW Caress 21 March 2017
+#define MAX_GSF_SF_MULT_VALUE  4294967295 // Changed to hard wired value from
+                                          // ULONG_MAX for MB-System DW Caress 3 August 2019
+                                          // This value is used for limiting scaling and
+                                          // needs to be the same on every system because
+                                          // four byte integers are used for the scaled storage.
+                                          // The value of ULONG_MAX varies amongst 
+                                          // operating system implementations.
 
 /* Typedef structure to hold the record index information */
 typedef struct
