@@ -277,7 +277,7 @@ int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, i
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-    
+
 	/* reset error value */
 	*error = MB_ERROR_NO_ERROR;
 
@@ -363,7 +363,7 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, 
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-    
+
 	/* reset error value */
 	*error = MB_ERROR_NO_ERROR;
 
@@ -551,7 +551,7 @@ int mb_sensorhead(int verbose, void *mbio_ptr, void *store_ptr, int *sensorhead,
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-    
+
 	/* reset error value */
 	*error = MB_ERROR_NO_ERROR;
 
@@ -2135,7 +2135,7 @@ int mb_indextable(int verbose, void *mbio_ptr, int *num_indextable, void **index
 	/* return index table */
 	*num_indextable = mb_io_ptr->num_indextable;
 	*indextable_ptr = (void *) mb_io_ptr->indextable;
-    
+
 	/* return no error */
 	*error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
@@ -2175,7 +2175,7 @@ int mb_indextablefix(int verbose, void *mbio_ptr, int num_indextable, void *inde
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
 	}
-    
+
 	/* return no error */
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;

@@ -171,7 +171,7 @@ struct mbsys_jstar_pitchroll_struct {
 	int seconds; /* seconds since start of time */
 	int milliseconds;    /* milliseconds since start of time */
 	char reserve1[4];
-    
+
     /* attitude data */
 	short accelerationx;       /* x acceleration: multiply by (20 * 1.5) / (32768) to get G's */
 	short accelerationy;       /* y acceleration: multiply by (20 * 1.5) / (32768) to get G's */
@@ -209,7 +209,7 @@ struct mbsys_jstar_pressure_struct {
 	int seconds; /* seconds since start of time */
 	int milliseconds;    /* milliseconds since start of time */
 	char reserve1[4];
-    
+
     /* CTD data */
 	int pressure;       /* 0.001 PSI */
 	int salinity;       /* ppm */
@@ -232,7 +232,7 @@ struct mbsys_jstar_dvl_struct {
 	int seconds; /* seconds since start of time */
 	int milliseconds;    /* milliseconds since start of time */
 	char reserve1[4];
-    
+
     /* dvl data */
 	unsigned int datavalidflags; /* Bit values indicate which values are present:
 	             0: X,Y velocity present
@@ -279,7 +279,7 @@ struct mbsys_jstar_situation_struct {
 	int seconds; /* seconds since start of time */
 	int milliseconds;    /* milliseconds since start of time */
 	char reserve1[4];
-    
+
     /* navigation and attitude data */
 	unsigned int datavalidflags; /* Validity Flags:
                 Validity Flags indicate which of the following fields are valid.
@@ -353,7 +353,7 @@ struct mbsys_jstar_situation2_struct {
 	int seconds; /* seconds since start of time */
 	int milliseconds;    /* milliseconds since start of time */
 	char reserve1[4];
-    
+
     /* navigation and attitude data */
 	unsigned int datavalidflags; /* Validity Flags:
                 Validity Flags indicate which of the following fields are valid.
@@ -493,7 +493,7 @@ struct mbsys_jstar_channel_struct {
                                    *         Application Note for more information.
                                    *
                                    *     Old definitions:
-                                   *         0 = 1 short  per sample  - envelope data 
+                                   *         0 = 1 short  per sample  - envelope data
                                    *         1 = 2 shorts per sample, - stored as real(1), imag(1),
                                    *         2 = 1 short  per sample  - before matched filter
                                    *         3 = 1 short  per sample  - real part analytic signal
@@ -518,7 +518,7 @@ struct mbsys_jstar_channel_struct {
                                   *         2 = X,Y in iminutes of arc times 10000
                                   *         3 = X,Y in decimeters */
 	char annotation[24];         /* 90-113 : Annotation string */
-	unsigned short samples;      /* 114-115 : Samples in this packet  
+	unsigned short samples;      /* 114-115 : Samples in this packet
 	                              *           Large sample sizes require multiple packets.
 	                              *           For protocol versions 0xA and above, the
 	                              *           MSB1 field should include the MSBs
@@ -669,7 +669,7 @@ struct mbsys_jstar_channel_struct {
                                      *           see LSB2 (bytes 20 -21).*/
 	short NMEADay;                  /* 196-197 : Position Fix Day (1 – 366) */
 	short NMEAYear;                 /* 198-199 : Position Fix Year */
-    
+
 	/* -------------------------------------------------------------------- */
 	/* Miscellaneous data                                                   */
 	/* -------------------------------------------------------------------- */
@@ -898,7 +898,7 @@ struct mbsys_jstar_struct {
 
 	/* Situation data */
 	struct mbsys_jstar_situation_struct situation;
-    
+
     /* File timestamp data */
     struct mbsys_jstar_filetimestamp_struct filetimestamp;
 
