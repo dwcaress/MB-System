@@ -5,6 +5,9 @@
 The libgsf library code is released by Leidos under a LGPL2.1 license, and is
 included directly into the MB-System source code with minor changes. 
 
+Starting with release 5.7.6beta4, command `mbformat -F121` outputs the version of the 
+GSF library embedded in MB-System as a part of the format description.
+
 ## Changes required for integration with MB-System
 
 Three changes are required in gsf.c and gsf_indx.c to avoid redefinition of several 
@@ -15,9 +18,6 @@ to set MAX_GSF_SF_MULT_VALUE in gsf_ft.h from ULONG_MAX to a hard-wired value of
 needs to be the same on every system because four byte insigned integers are 
 always used for the scaled storage. The value of ULONG_MAX varies amongst operating 
 system implementations.
-
-Starting with release 5.7.6beta4, command `mbformat -F121` outputs the version of the 
-GSF library embedded in MB-System as a part of the format description.
 
 ## Updating the source files to be consistent with the rest of the repository
 
