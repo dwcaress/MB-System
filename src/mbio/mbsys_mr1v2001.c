@@ -95,24 +95,6 @@ int mbsys_mr1v2001_deall(int verbose, void *mbio_ptr, void **store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                               int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_mr1v2001_struct *store;
-	BSFile *header;
-	Ping *ping;
-	PingSide *pingport;
-	PingSide *pingstbd;
-	PingData *pingdata;
-	float *pbty;
-	unsigned int *pbtyflags;
-	float *pss;
-	unsigned char *pssflags;
-	AuxBeamInfo *pabi;
-	float *sbty;
-	unsigned int *sbtyflags;
-	float *sss;
-	unsigned char *sssflags;
-	AuxBeamInfo *sabi;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -125,24 +107,23 @@ int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_mr1v2001_struct *)store_ptr;
+	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
-	/* get pointers */
-	header = &(store->header);
-	ping = &(store->ping);
-	pingport = &(ping->png_sides[ACP_PORT]);
-	pingstbd = &(ping->png_sides[ACP_STBD]);
-	pingdata = &(store->pingdata);
-	pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
-	pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
-	pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
-	sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
-	sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
-	sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	BSFile *header = &(store->header);
+	Ping *ping = &(store->ping);
+	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
+	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
+	PingData *pingdata = &(store->pingdata);
+	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
+	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
+	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
+	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
+	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
+	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
+	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -163,6 +144,8 @@ int mbsys_mr1v2001_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int 
 		*nss = 0;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -182,26 +165,6 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
                            double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss, char *beamflag,
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	int status = MB_SUCCESS;
-	struct mbsys_mr1v2001_struct *store;
-	BSFile *header;
-	Ping *ping;
-	PingSide *pingport;
-	PingSide *pingstbd;
-	PingData *pingdata;
-	float *pbty;
-	unsigned int *pbtyflags;
-	float *pss;
-	unsigned char *pssflags;
-	AuxBeamInfo *pabi;
-	float *sbty;
-	unsigned int *sbtyflags;
-	float *sss;
-	unsigned char *sssflags;
-	AuxBeamInfo *sabi;
-	int beam_center, pixel_center;
-	double ssyoffset;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -214,24 +177,23 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_mr1v2001_struct *)store_ptr;
+	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 
-	/* get pointers */
-	header = &(store->header);
-	ping = &(store->ping);
-	pingport = &(ping->png_sides[ACP_PORT]);
-	pingstbd = &(ping->png_sides[ACP_STBD]);
-	pingdata = &(store->pingdata);
-	pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
-	pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
-	pss = (float *)(pingdata->pd_ss[ACP_PORT]);
-	pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
-	pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
-	sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
-	sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
-	sss = (float *)(pingdata->pd_ss[ACP_STBD]);
-	sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
-	sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
+	BSFile *header = &(store->header);
+	Ping *ping = &(store->ping);
+	PingSide *pingport = &(ping->png_sides[ACP_PORT]);
+	PingSide *pingstbd = &(ping->png_sides[ACP_STBD]);
+	PingData *pingdata = &(store->pingdata);
+	float *pbty = (float *)(pingdata->pd_bty[ACP_PORT]);
+	unsigned int *pbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_PORT]);
+	float *pss = (float *)(pingdata->pd_ss[ACP_PORT]);
+	unsigned char *pssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_PORT]);
+	AuxBeamInfo *pabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_PORT]);
+	float *sbty = (float *)(pingdata->pd_bty[ACP_STBD]);
+	unsigned int *sbtyflags = (unsigned int *)(pingdata->pd_btyflags[ACP_STBD]);
+	float *sss = (float *)(pingdata->pd_ss[ACP_STBD]);
+	unsigned char *sssflags = (unsigned char *)(pingdata->pd_ssflags[ACP_STBD]);
+	AuxBeamInfo *sabi = (AuxBeamInfo *)(pingdata->pd_abi[ACP_STBD]);
 
 	/* get data kind */
 	*kind = store->kind;
@@ -295,8 +257,8 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*nss = 2 * MAX(pingport->ps_sscount, pingstbd->ps_sscount);
 		if (*nss > 0)
 			*nss += 3;
-		beam_center = *nbath / 2;
-		pixel_center = *nss / 2;
+		const int beam_center = *nbath / 2;
+		const int pixel_center = *nss / 2;
 
 		/* extract bathymetry */
 		if (store->ping.png_flags & PNG_XYZ) {
@@ -353,6 +315,7 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		}
 
 		/* extract sidescan */
+		double ssyoffset;
 		if (!mbbs_isnand(pingport->ps_ssyoffset))
 			ssyoffset = pingport->ps_ssyoffset;
 		else
@@ -459,6 +422,9 @@ int mbsys_mr1v2001_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 			        ssalongtrack[i]);
 	}
+
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
