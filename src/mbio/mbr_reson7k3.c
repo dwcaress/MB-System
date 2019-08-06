@@ -3461,7 +3461,6 @@ int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, voi
   int index;
   int data_size;
   int time_j[5];
-  int j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5029,9 +5028,7 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
   s7k3_time *s7kTime;
   s7k3_bitefield *bitefield;
   size_t nalloc;
-  int index;
   int time_j[5];
-  int i, j, k;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5047,7 +5044,7 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
   header = &(BITE->header);
 
   /* extract the header */
-  index = 0;
+  int index = 0;
   status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
@@ -5131,7 +5128,7 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
 
       mb_get_binary_short(MB_YES, &buffer[index], &(bitefield->field));
       index += 2;
-      for (k = 0; k < 64; k++) {
+      for (int k = 0; k < 64; k++) {
         bitefield->name[k] = buffer[index];
         index++;
       }
@@ -14428,7 +14425,6 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j, k;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14549,7 +14545,7 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
 
         mb_put_binary_short(MB_YES, bitefield->field, &buffer[index]);
         index += 2;
-        for (k = 0; k < 64; k++) {
+        for (int k = 0; k < 64; k++) {
           buffer[index] = bitefield->name[k];
           index++;
         }
