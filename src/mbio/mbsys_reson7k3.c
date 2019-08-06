@@ -2550,7 +2550,6 @@ int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWater
   char *m1ptr, *p1ptr;
   short *m2ptr, *p2ptr;
   int *m4ptr;
-  int i, j, k, l;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2591,8 +2590,8 @@ int mbsys_reson7k3_print_CompressedWaterColumn(int verbose, s7k3_CompressedWater
     fprintf(stderr, "%s     segment_number:             %u\n", first, compressedwatercolumndata->segment_number);
     fprintf(stderr, "%s     samples:                    %u\n", first, compressedwatercolumndata->samples);
     for (int j = 0;j<compressedwatercolumndata->samples;j++) {
-      k = j * samplesize;
-      l = k + CompressedWaterColumn->magsamplesize;
+      const int k = j * samplesize;
+      const int l = k + CompressedWaterColumn->magsamplesize;
       if (CompressedWaterColumn->magsamplesize == 1
           && CompressedWaterColumn->phasesamplesize == 0) {
         m1ptr = (char *)&compressedwatercolumndata->data[k];
@@ -8191,7 +8190,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
   unsigned int *data_uint;
   int first, last, k1, k2;
   mb_u_char *qualitycharptr;
-  int k, kk;
+  int kk;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -8856,7 +8855,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
     /* average the SideScan */
     first = nss;
     last = -1;
-    for (k = 0; k < nss; k++) {
+    for (int k = 0; k < nss; k++) {
       if (ss_cnt[k] > 0) {
         ss[k] /= ss_cnt[k];
         ssalongtrack[k] /= ss_cnt[k];
@@ -8870,7 +8869,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
     /* interpolate the SideScan */
     k1 = first;
     k2 = first;
-    for (k = first + 1; k < last; k++) {
+    for (int k = first + 1; k < last; k++) {
       if (ss_cnt[k] <= 0) {
         if (k2 <= k) {
           k2 = k + 1;
