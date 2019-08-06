@@ -133,20 +133,20 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 					modeltype = ModelTypeProjected;
 					sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 					*grid_projection_mode = MB_PROJECTION_PROJECTED;
-					sprintf(grid_projection_id, "epsg%d", epsgid);
+					sprintf(grid_projection_id, "EPSG:%d", epsgid);
 				}
-				else if ((nscan = sscanf(&(header->remark[2]), "Projection: epsg%d", &epsgid)) == 1) {
-					sprintf(projectionname, "epsg%d", epsgid);
+				else if ((nscan = sscanf(&(header->remark[2]), "Projection: EPSG:%d", &epsgid)) == 1) {
+					sprintf(projectionname, "EPSG:%d", epsgid);
 					modeltype = ModelTypeProjected;
 					*grid_projection_mode = MB_PROJECTION_PROJECTED;
-					sprintf(grid_projection_id, "epsg%d", epsgid);
+					sprintf(grid_projection_id, "EPSG:%d", epsgid);
 				}
 				else {
 					strcpy(projectionname, "Geographic WGS84");
 					modeltype = ModelTypeGeographic;
 					epsgid = GCS_WGS_84;
 					*grid_projection_mode = MB_PROJECTION_GEOGRAPHIC;
-					sprintf(grid_projection_id, "epsg%d", epsgid);
+					sprintf(grid_projection_id, "EPSG:%d", epsgid);
 				}
 			}
 			else {
@@ -154,7 +154,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 				modeltype = ModelTypeGeographic;
 				epsgid = GCS_WGS_84;
 				*grid_projection_mode = MB_PROJECTION_GEOGRAPHIC;
-				sprintf(grid_projection_id, "epsg%d", epsgid);
+				sprintf(grid_projection_id, "EPSG:%d", epsgid);
 			}
 
 			/* set up internal arrays */
@@ -447,12 +447,14 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 		modeltype = ModelTypeProjected;
 		sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
 		grid_projection_mode = MB_PROJECTION_PROJECTED;
+		//sprintf(grid_projection_id, "EPSG:%d", epsgid);
 		sprintf(grid_projection_id, "epsg%d", epsgid);
 	}
-	else if ((nscan = sscanf(projection, "epsg%d", &epsgid)) == 1) {
-		sprintf(projectionname, "epsg%d", epsgid);
+	else if ((nscan = sscanf(projection, "EPSG:%d", &epsgid)) == 1) {
+		sprintf(projectionname, "EPSG:%d", epsgid);
 		modeltype = ModelTypeProjected;
 		grid_projection_mode = MB_PROJECTION_PROJECTED;
+		//sprintf(grid_projection_id, "EPSG:%d", epsgid);
 		sprintf(grid_projection_id, "epsg%d", epsgid);
 	}
 	else {
@@ -460,6 +462,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 		modeltype = ModelTypeGeographic;
 		epsgid = GCS_WGS_84;
 		grid_projection_mode = MB_PROJECTION_GEOGRAPHIC;
+		//sprintf(grid_projection_id, "EPSG:%d", epsgid);
 		sprintf(grid_projection_id, "epsg%d", epsgid);
 	}
 

@@ -70,7 +70,7 @@ GNU General Public License for more details
 /*
 /// @def PRODUCT
 /// @brief header software product name
-#define PRODUCT "MBRT"
+#define PRODUCT "MFRAME"
 
 /// @def COPYRIGHT
 /// @brief header software copyright info
@@ -88,6 +88,114 @@ GNU General Public License for more details
 // Declarations 
 /////////////////////////
 
+/// @var char *mbtrn_ch_names[MBTRN_CH_COUNT]
+/// @brief module channel names
+char *mbtrn_ch_names[MBTRN_CH_COUNT]={
+    "trace.mbtrn",
+    "debug.mbtrn",
+    "warn.mbtrn",
+    "err.mbtrn",
+    "mbtrn.v1",
+    "mbtrn.v2"
+};
+
+/// @var char *r7k_ch_names[R7K_CH_COUNT]
+/// @brief module channel names
+char *r7k_ch_names[R7K_CH_COUNT]={
+    "trace.r7k",
+    "debug.r7k",
+    "warn.r7k",
+    "err.r7k",
+    "r7k.v1",
+    "r7k.v2",
+    "r7k.parser",
+    "r7k.drfcon"
+};
+
+/// @var char *s7k_ch_names[S7K_CH_COUNT]
+/// @brief module channel names
+char *s7k_ch_names[S7K_CH_COUNT]={
+    "trace.mbtrn",
+    "debug.mbtrn",
+    "warn.mbtrn",
+    "err.mbtrn",
+    "s7k.v1",
+    "s7k.v2"
+};
+
+/// @var char *f7k_ch_names[F7K_CH_COUNT]
+/// @brief module channel names
+char *f7k_ch_names[F7K_CH_COUNT]={
+    "trace.mbtrn",
+    "debug.mbtrn",
+    "warn.mbtrn",
+    "err.mbtrn",
+    "f7k.v1",
+    "f7k.v2"
+};
+
+/// @var char *trnc_ch_names[TRNC_CH_COUNT]
+/// @brief module channel names
+char *trnc_ch_names[TRNC_CH_COUNT]={
+    "trace.trnc",
+    "debug.trnc",
+    "warn.trnc",
+    "err.trnc",
+    "trnc.v1",
+    "trnc.v2"
+};
+
+/// @var char *emu7k_ch_names[EMU7K_CH_COUNT]
+/// @brief module channel names
+char *emu7k_ch_names[EMU7K_CH_COUNT]={
+    "trace.emu7k",
+    "debug.emu7k",
+    "warn.emu7k",
+    "err.emu7k",
+    "emu7k.v1",
+    "emu7k.v2"
+    "emu7k.v3"
+    "emu7k.v4"
+    "emu7k.v5"
+};
+
+/// @var char *tbinx_ch_names[TBINX_CH_COUNT]
+/// @brief module channel names
+char *tbinx_ch_names[TBINX_CH_COUNT]={
+    "trace.tbinx",
+    "debug.tbinx",
+    "warn.tbinx",
+    "err.tbinx",
+    "tbinx.v1",
+    "tbinx.v2"
+    "tbinx.v3"
+    "tbinx.v4"
+};
+
+/// @var char *mbtrnpp_ch_names[MBTRNPP_CH_COUNT]
+/// @brief module channel names
+char *mbtrnpp_ch_names[MBTRNPP_CH_COUNT]={
+    "trace.mbtrnpp",
+    "debug.mbtrnpp",
+    "warn.mbtrnpp",
+    "err.mbtrnpp",
+    "mbtrnpp.v1",
+    "mbtrnpp.v2"
+    "mbtrnpp.v3"
+    "mbtrnpp.v4"
+};
+
+static mmd_module_config_t mmd_config_defaults[]={
+    {MOD_MBTRN,"MOD_MBTRN",MBTRN_CH_COUNT,((MM_ERR|MM_WARN)|MBTRN_V1),mbtrn_ch_names},
+    {MOD_R7K,"MOD_R7K",R7K_CH_COUNT,((MM_ERR|MM_WARN)|R7K_V1),r7k_ch_names},
+    {MOD_S7K,"MOD_S7K",S7K_CH_COUNT,((MM_ERR|MM_WARN)),s7k_ch_names},
+    {MOD_F7K,"MOD_F7K",F7K_CH_COUNT,((MM_ERR|MM_WARN)),f7k_ch_names},
+    {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)),trnc_ch_names},
+    {MOD_EMU7K,"MOD_EMU7K",EMU7K_CH_COUNT,((MM_ERR|MM_WARN)),emu7k_ch_names},
+    {MOD_TBINX,"MOD_TBINX",TBINX_CH_COUNT,((MM_ERR|MM_WARN)|TBINX_V1),tbinx_ch_names},
+    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names}
+};
+
 /////////////////////////
 // Imports
 /////////////////////////
@@ -96,49 +204,35 @@ GNU General Public License for more details
 // Module Global Variables
 /////////////////////////
 
-/// @var module_debug_config_t debug_config_dfl[]
-/// @brief application specific module configuration table
-/// Applications should define this table, using module ID enum
-/// defined in mconfig.h
-module_debug_config_t debug_config_dfl[]={
-    {MBTRN,   MDL_ERROR},
-    {R7K,     MDL_ERROR},
-    {MREADER, MDL_ERROR},
-    {RPARSER, MDL_ERROR},
-    {DRFCON,  MDL_ERROR},
-    {APP,     MDL_ERROR},
-    {APP1,    MDL_ERROR},
-    {APP2,    MDL_ERROR},
-    {APP3,    MDL_ERROR},
-    {APP4,    MDL_ERROR},
-    {APP5,    MDL_ERROR},
-    {0, 0}
-};
-
 /////////////////////////
 // Function Definitions
 /////////////////////////
 
-/// @fn void mcfg_configure(module_debug_config_t * dcfg, uint32_t entries)
+/// @fn void mcfg_init()
 /// @brief Application specific module configuration.
-/// @param[in] dcfg configuration data (or NULL to use defaults defined
-/// in mconfig.c)
-/// @param[in] entries number of configuration entries.
 /// @return none
-void mcfg_configure(module_debug_config_t *dcfg, uint32_t entries)
+int mconf_init(void *pargs, void *prtn)
 {
-    if (NULL!=dcfg) {
-        for (uint32_t i=0; i<entries; i++) {
-            mdb_set(dcfg[i].module, dcfg[i].level);
-        }
-    }else{
-        module_debug_config_t *pcfg=debug_config_dfl;
-        while(pcfg->module != 0) {
-            mdb_set(pcfg->module, pcfg->level);
-            pcfg++;
-        }
+	int retval=-1;
+	// User code....
+	int i=0;
+	int test=0;
+	int app_modules =(APP_MODULE_COUNT-MM_MODULE_COUNT);
+	// call mmdebug init (optional)
+	mmd_initialize();
+	// then configure additional modules
+	for(i=0;i<app_modules;i++){
+	    test=mmd_module_configure(&mmd_config_defaults[i]);
+        fprintf(stderr,"%s:%d >>> initializing module[id=%02d] - %10s/%08X [%d]\n",__FUNCTION__,__LINE__,mmd_config_defaults[i].id,mmd_config_defaults[i].name,mmd_get_enmask(mmd_config_defaults[i].id,NULL),test);
     }
+    fprintf(stderr,"%s:%d >>> MM_WARN  %08X\n",__FUNCTION__,__LINE__,MM_WARN);
+    fprintf(stderr,"%s:%d >>> MM_DEBUG %08X\n",__FUNCTION__,__LINE__,MM_DEBUG);
+    fprintf(stderr,"%s:%d >>> MM_ERR   %08X\n",__FUNCTION__,__LINE__,MM_ERR);
+    fprintf(stderr,"%s:%d >>> MM_NONE  %08X\n",__FUNCTION__,__LINE__,MM_NONE);
+    fprintf(stderr,"%s:%d >>> MM_ALL   %08X\n",__FUNCTION__,__LINE__,MM_ALL);
+
+    return retval;
 }
-// End function mcfg_configure
+// End function mcfg_init
 
 

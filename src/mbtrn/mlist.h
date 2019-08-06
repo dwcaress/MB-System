@@ -68,8 +68,11 @@
 /////////////////////////
 // Includes 
 /////////////////////////
+#include "mframe.h"
 
-#include <stdbool.h>
+/////////////////////////
+// Macros
+/////////////////////////
 
 /////////////////////////
 // Type Definitions
@@ -77,18 +80,23 @@
 
 // compare returns true if a,b are
 // in the correct sorting order
-/// @typedef _Bool (*)(void *, void *) mlist_cmp_fn
 /// @brief compare function pointer type
+/// @param[in] a item
+/// @param[in] b item
+/// @return true if a and b are in correct sorting order
 typedef bool (* mlist_cmp_fn)(void *a, void *b);
-// returns true if item i has value v or NULL if not found
-/// @typedef _Bool (*)(void *, void *) mlist_ival_fn
+
 /// @brief item value comparison function type
+/// @param[in] i item
+/// @param[in] v value
+/// @return true if item has value v
 typedef bool (* mlist_ival_fn)(void *i, void *v);
 
 // free function releases all resources
 // pointed to by argument
-/// @typedef void (*)(void *) mlist_free_fn
 /// @brief resource free function type
+/// @param[in] pself mlist reference
+/// @return none
 typedef void (* mlist_free_fn)(void *pself);
 
 /// @struct mlist_s
@@ -144,34 +152,39 @@ struct mlist_s
     size_t size;
 };
 
-/////////////////////////
-// Macros
-/////////////////////////
 
 /////////////////////////
 // Exports
 /////////////////////////
-
-mlist_t *mlist_new();
-void mlist_destroy(mlist_t **pself);
-void mlist_free(void *pself);
-void *mlist_head(mlist_t *self);
-void *mlist_tail(mlist_t *self);
-void *mlist_first(mlist_t *self);
-void *mlist_last(mlist_t *self);
-void *mlist_next(mlist_t *self);
-int mlist_add(mlist_t *self, void *item);
-void mlist_remove(mlist_t *self, void *item);
-int mlist_push(mlist_t *self, void *item);
-void *mlist_pop(mlist_t *self);
-void *mlist_item(mlist_t *self, void *item);
-void *mlist_vlookup(mlist_t *self, void *value, mlist_ival_fn vcompare);
-void mlist_sort(mlist_t *self, mlist_cmp_fn compare);
-void mlist_purge(mlist_t *self);
-void mlist_autofree(mlist_t *self, mlist_free_fn fn);
-void mlist_freefn(mlist_t *self, void *item, mlist_free_fn fn);
-size_t mlist_size(mlist_t *self);
-int mlist_test();
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+    mlist_t *mlist_new();
+    void mlist_destroy(mlist_t **pself);
+    void mlist_free(void *pself);
+    void *mlist_head(mlist_t *self);
+    void *mlist_tail(mlist_t *self);
+    void *mlist_first(mlist_t *self);
+    void *mlist_last(mlist_t *self);
+    void *mlist_next(mlist_t *self);
+    void *mlist_element(mlist_t *self, uint32_t index);
+    int mlist_add(mlist_t *self, void *item);
+    void mlist_remove(mlist_t *self, void *item);
+    int mlist_push(mlist_t *self, void *item);
+    void *mlist_pop(mlist_t *self);
+    void *mlist_item(mlist_t *self, void *item);
+    void *mlist_vlookup(mlist_t *self, void *value, mlist_ival_fn vcompare);
+    void mlist_sort(mlist_t *self, mlist_cmp_fn compare);
+    void mlist_purge(mlist_t *self);
+    void mlist_autofree(mlist_t *self, mlist_free_fn fn);
+    void mlist_freefn(mlist_t *self, void *item, mlist_free_fn fn);
+    size_t mlist_size(mlist_t *self);
+    int mlist_test();
+    
+#ifdef __cplusplus
+}
+#endif
 
 // include guard
 #endif

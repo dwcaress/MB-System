@@ -71,7 +71,7 @@ GNU General Public License for more details
 /*
 /// @def PRODUCT
 /// @brief header software product name
-#define PRODUCT "MBRT"
+#define PRODUCT "MFRAME"
 
 /// @def COPYRIGHT
 /// @brief header software copyright info
@@ -99,6 +99,7 @@ GNU General Public License for more details
 
 int me_errno=ME_OK;
 static const char *err_undef="UNDEFINED_ERR";
+static me_error_str_func_t *me_strerror_ext=NULL;
 
 /////////////////////////
 // Function Definitions
@@ -113,60 +114,71 @@ const char *me_strerror(int merrno)
 {
     const char *retval = err_undef;
     switch (merrno) {
-        case ME_EUNKNOWN:
-            retval="EUNKNOWN";
-            break;
         case ME_OK:
             retval="OK";
             break;
-        case ME_ECREATE:
+        case ME_EINVAL:
+            retval="EINVAL";
+            break;
+        case ME_EPARSE:
+            retval="EPARSE";
+            break;
+        case ME_ETMOUT:
+            retval="ETMOUT";
+            break;
+        case ME_EPOLL:
+            retval="EPOLL";
+            break;
+        case ME_ESELECT:
+            retval="ESELECT";
+            break;
+        case ME_ESOCK:
+            retval="ESOCK";
+            break;
+        case ME_ESERIAL:
+            retval="ESERIAL";
+            break;
+       case ME_ECREATE:
             retval="ECREATE";
             break;
         case ME_ECONNECT:
             retval="ECONNECT";
             break;
-        case ME_ESUB:
-            retval="ESUB";
-            break;
         case ME_EREAD:
             retval="EREAD";
             break;
-        case ME_EPOLL:
-            retval="EPOLL";
-            break;
-        case ME_EPARSE:
-            retval="EPARSE";
-            break;
-        case ME_EINVAL:
-            retval="EINVAL";
-            break;
-        case ME_ETMOUT:
-            retval="ETMOUT";
-            break;
-        case ME_EINC:
-            retval="EINC";
-            break;
-        case ME_ERCV:
-            retval="ERCV";
-            break;
-        case ME_ESOCK:
-            retval="ESOCK";
-            break;
-        case ME_ENOMEM:
-            retval="ENOMEM";
-            break;
-        case ME_ENOSPACE:
-            retval="ENOSPACE";
+        case ME_EWRITE:
+            retval="EWRITE";
             break;
         case ME_EOF:
             retval="EOF";
             break;
-            
+        case ME_ENOSPACE:
+            retval="ENOSPACE";
+            break;
+        case ME_ENOMEM:
+            retval="ENOMEM";
+            break;
         default:
+            if (NULL != me_strerror_ext) {
+                retval = (*me_strerror_ext)(merrno);
+            }
             break;
     }
     return retval;
 }
 // End function me_strerror
+
+/// @fn void me_set_strerror_func(me_error_str_t *func)
+/// @brief extend/replace me_strerror with function.
+/// When users call me_strerror, if the error is not found
+/// the user defined error string function is called if set.
+/// @param[in] func pointer to error function pointer
+/// @return none
+void me_set_strerror_func(me_error_str_func_t *func)
+{
+    me_strerror_ext = func;
+}
+// End function me_set_strerror_func
 
 

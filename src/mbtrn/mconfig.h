@@ -70,112 +70,220 @@
 // Includes 
 /////////////////////////
 
-#include <stdlib.h>
-#include <stdint.h>
-#include "mdebug.h"
+#include "mframe.h"
+
+// User Includes
+#include "mmdebug.h"
+//#include "mbtrn.h"
+//#include "r7kc.h"
+//#include "stream7k.h"
+//#include "frames7k.h"
 
 /////////////////////////
 // Type Definitions
 /////////////////////////
 
-/// @def MBTRN
-/// @brief debug module ID.use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define MBTRN      1
-/// @def MBTRNV
-/// @brief debug module ID.use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define MBTRNV     2
-/// @def R7K
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define R7K        3
-/// @def MREADER
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define MREADER    4
-/// @def RPARSER
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define RPARSER    5
-/// @def DRFCON
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define DRFCON     6
-/// @def IOW
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define IOW        7
-/// @def APP
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define APP        8
-/// @def APP1
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define APP1       9
-/// @def APP2
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define APP2       10
-/// @def APP3
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define APP3       11
-/// @def APP4
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define APP4       12
-/// @def APP5
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define APP5       13
-/// @def MAX_MODULE
-/// @brief debug module ID. use these module IDs with mdebug.h MM* macros (MMDEBUG etc.)
-/// The value 0 is reserved (for global setting); values must be >= 1
-#define MAX_MODULE 14
+typedef enum{
+    MOD_MBTRN=MM_MODULE_COUNT,
+    MOD_R7K,
+    MOD_S7K,
+    MOD_F7K,
+    MOD_TRNC,
+    MOD_EMU7K,
+    MOD_TBINX,
+    MOD_MBTRNPP,
+    APP_MODULE_COUNT
+}app_module_ids;
+
+/// @enum mbtrn_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_MBTRN_V1=MM_CHANNEL_COUNT,
+    ID_MBTRN_V2,
+    MBTRN_CH_COUNT
+}mbtrn_channel_id;
+
+/// @enum mbtrn_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    MBTRN_V1= (1<<ID_MBTRN_V1),
+    MBTRN_V2= (1<<ID_MBTRN_V2)
+}mbtrn_channel_mask;
+
+/// @enum r7k_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_R7K_V1=MM_CHANNEL_COUNT,
+    ID_R7K_V2,
+    ID_R7K_PARSER,
+    ID_R7K_DRFCON,
+    R7K_CH_COUNT
+}r7k_channel_id;
+
+/// @enum r7k_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    R7K_V1= (1<<ID_R7K_V1),
+    R7K_V2= (1<<ID_R7K_V2),
+    R7K_PARSER= (1<<ID_R7K_PARSER),
+    R7K_DRFCON= (1<<ID_R7K_DRFCON)
+}r7k_channel_mask;
+
+/// @enum s7k_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_S7K_V1=MM_CHANNEL_COUNT,
+    ID_S7K_V2,
+    S7K_CH_COUNT
+}s7k_channel_id;
+
+/// @enum s7k_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    S7K_V1= (1<<ID_S7K_V1),
+    S7K_V2= (1<<ID_S7K_V2)
+}s7k_channel_mask;
+
+/// @enum f7k_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_F7K_V1=MM_CHANNEL_COUNT,
+    ID_F7K_V2,
+    F7K_CH_COUNT
+}f7k_channel_id;
+
+/// @enum f7k_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    F7K_V1= (1<<ID_F7K_V1),
+    F7K_V2= (1<<ID_F7K_V2)
+}f7k_channel_mask;
+
+/// @enum trnc_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_TRNC_V1=MM_CHANNEL_COUNT,
+    ID_TRNC_V2,
+    TRNC_CH_COUNT
+}trnc_channel_id;
+
+/// @enum trnc_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    TRNC_V1= (1<<ID_TRNC_V1),
+    TRNC_V2= (1<<ID_TRNC_V2)
+}trnc_channel_mask;
+
+/// @enum emu7k_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_EMU7K_V1=MM_CHANNEL_COUNT,
+    ID_EMU7K_V2,
+    ID_EMU7K_V3,
+    ID_EMU7K_V4,
+    ID_EMU7K_V5,
+    EMU7K_CH_COUNT
+}emu7k_channel_id;
+
+/// @enum emu7k_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    EMU7K_V1= (1<<ID_EMU7K_V1),
+    EMU7K_V2= (1<<ID_EMU7K_V2),
+    EMU7K_V3= (1<<ID_EMU7K_V3),
+    EMU7K_V4= (1<<ID_EMU7K_V4),
+    EMU7K_V5= (1<<ID_EMU7K_V5)
+}emu7k_channel_mask;
+
+/// @enum tbinx_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_TBINX_V1=MM_CHANNEL_COUNT,
+    ID_TBINX_V2,
+    ID_TBINX_V3,
+    ID_TBINX_V4,
+    TBINX_CH_COUNT
+}tbinx_channel_id;
+
+/// @enum tbinx_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    TBINX_V1= (1<<ID_TBINX_V1),
+    TBINX_V2= (1<<ID_TBINX_V2),
+    TBINX_V3= (1<<ID_TBINX_V3),
+    TBINX_V4= (1<<ID_TBINX_V4)
+}tbinx_channel_mask;
+
+/// @enum mbtrnpp_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_MBTRNPP_V1=MM_CHANNEL_COUNT,
+    ID_MBTRNPP_V2,
+    ID_MBTRNPP_V3,
+    ID_MBTRNPP_V4,
+    ID_MBTRNPP_V5,
+    ID_MBTRNPP_V6,
+    MBTRNPP_CH_COUNT
+}mbtrnpp_channel_id;
+
+/// @enum mbtrnpp_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    MBTRNPP_V1= (1<<ID_MBTRNPP_V1),
+    MBTRNPP_V2= (1<<ID_MBTRNPP_V2),
+    MBTRNPP_V3= (1<<ID_MBTRNPP_V3),
+    MBTRNPP_V4= (1<<ID_MBTRNPP_V4),
+    MBTRNPP_V5= (1<<ID_MBTRNPP_V5),
+    MBTRNPP_V6= (1<<ID_MBTRNPP_V6)
+}mbtrnpp_channel_mask;
 
 /////////////////////////
 // Macros
 /////////////////////////
 
-/// @def MBTRN_TIMING
-/// @brief enable timing output measurements and console output
-/// [iowrap-posix.c, mbtrn.c...]
-#undef MBTRN_TIMING
+/// @def MTIME_STOPWATCH_EN
+/// @brief enable stopwatch macros
+//#ifndef MTIME_STOPWATCH_EN
+//#define MTIME_STOPWATCH_EN
+//#endif
 
-/// @def MBTR_STATS_EN
-/// @brief enable statistics measurements and logging
-/// [mbtrnpreprocess.c, mbtrn.c...]
-#define MBTR_STATS_EN
+/// @def MST_STATS_EN
+/// @brief enable stats macros
+//#ifndef MST_STATS_EN
+//#define MST_STATS_EN
+//#endif
+
 /// @def MBTRNPP_STAT_PERIOD_SEC
-/// @brief default period at which to log statistics measurements
-/// may set on mbtrnpreprocess command line using --statsec option
-/// [mbtrnpreprocess.c, mbtrn.c...]
 #define MBTRNPP_STAT_PERIOD_SEC ((double)20.0)
-
-/// @def MC_DFL_LEVEL
-/// @brief default debug level
-#define MC_DFL_LEVEL MDL_ERROR
 
 /////////////////////////
 // Exports
 /////////////////////////
 
-// this may be defined and called once at startup by the main project module
-// implementation should initialize module(s) default values
-// void mcfg_init();
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/// @def mcfg_init
-/// @brief One-time application initialization (not implemented by default)
-/// this may be defined and called once at startup by the main project module
-/// implementation should initialize module(s) default values
-#define mcfg_init()
+// exported config functions here
 
-// define and call to set module debug configuration(s) at run time
-// call using dcfg=NULL to use compile-time default values defined in mconfig.c
+/// @fn int mconf_init(void *pargs, void *prtn)
+/// @brief app-specific init (user defined in mconfig.c)
+/// @param[in]  pargs arguments
+/// @param[out] prtn  return value
+/// @return 0 on success, -1 otherwise
+int mconf_init(void *pargs, void *prtn);
 
-void mcfg_configure(module_debug_config_t *dcfg, uint32_t entries);
+#ifdef __cplusplus
+}
+#endif
 
 // include guard
 #endif

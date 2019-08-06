@@ -59,17 +59,12 @@
 // Headers
 /////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <getopt.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <signal.h>
 
-#include "iowrap.h"
+#include <getopt.h>
+
+#include "msocket.h"
 #include "mbtrn.h"
-#include "mdebug.h"
+#include "medebug.h"
 
 /////////////////////////
 // Macros
@@ -266,11 +261,11 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-    MDEBUG("verbose [%s]\n",(cfg->verbose?"Y":"N"));
-    MDEBUG("host    [%s]\n",cfg->host);
-    MDEBUG("port    [%d]\n",cfg->port);
-    MDEBUG("block   [%s]\n",(cfg->blocking==0?"N":"Y"));
-    MDEBUG("cycles  [%d]\n",cfg->cycles);
+    PDPRINT((stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
+    PDPRINT((stderr,"host    [%s]\n",cfg->host));
+    PDPRINT((stderr,"port    [%d]\n",cfg->port));
+    PDPRINT((stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
+    PDPRINT((stderr,"cycles  [%d]\n",cfg->cycles));
 }
 // End function parse_args
 
@@ -284,7 +279,7 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            MDEBUG("sig received[%d]\n",signum);
+            PDPRINT((stderr,"sig received[%d]\n",signum));
             g_interrupt=true;
             break;
         default:
@@ -294,12 +289,12 @@ static void s_termination_handler (int signum)
 }
 // End function termination_handler
 
-/// @fn int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
+/// @fn int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
 /// @brief upd client main entry point.
 /// @param[in] s socket reference (ready to connect)
 /// @param[in] cfg app config reference
 /// @return 0 on success, -1 otherwise
-static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
+static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
 {
     int retval=-1;
     
@@ -309,23 +304,23 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
         int cycles=cfg->cycles;
         bool done=false;
         
-        MDEBUG("connect [%s:%d]\n",cfg->host,cfg->port);
-        if ( (test=iow_connect(s))==0) {
+        PDPRINT((stderr,"connect [%s:%d]\n",cfg->host,cfg->port));
+        if ( (test=msock_connect(s))==0) {
             do{
-                if( (test=iow_sendto(s,NULL,(byte *)"REQ",4,0))>0){
-                    MDEBUG("sendto OK [%d]\n",test);
+                if( (test=msock_sendto(s,NULL,(byte *)"REQ",4,0))>0){
+                    PDPRINT((stderr,"sendto OK [%d]\n",test));
                     retval=0;
                     memset(buf,0,128);
                     
-                    MDEBUG("fd[%d] waiting for server (%s)...\n",s->fd,(cfg->blocking==0?"non-blocking":"blocking"));
-                    test = iow_recvfrom(s, NULL, buf, UDPC_BUF_LEN);
+                    PDPRINT((stderr,"fd[%d] waiting for server (%s)...\n",s->fd,(cfg->blocking==0?"non-blocking":"blocking")));
+                    test = msock_recvfrom(s, NULL, buf, UDPC_BUF_LEN,0);
                     switch (test) {
                         case 0:
-                            MDEBUG("iow_recvfrom returned 0; peer socket closed\n");
+                            PDPRINT((stderr,"msock_recvfrom returned 0; peer socket closed\n"));
                             retval=-1;
                             break;
                         case -1:
-                            MDEBUG("iow_recvfrom returned -1 [%d/%s]\n",errno,strerror(errno));
+                            PDPRINT((stderr,"msock_recvfrom returned -1 [%d/%s]\n",errno,strerror(errno)));
                             
                             switch (errno) {
                                 case ENOTCONN:
@@ -336,13 +331,13 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
                                     break;
                                     
                                 default:
-                                    MDEBUG("iow_recvfrom error [%d/%s]\n",errno,strerror(errno));
+                                    PDPRINT((stderr,"msock_recvfrom error [%d/%s]\n",errno,strerror(errno)));
                                     break;
                             }
                             break;
                             
                         default:
-                            MDEBUG("fd[%d] received %d bytes\n",s->fd,test);
+                            PDPRINT((stderr,"fd[%d] received %d bytes\n",s->fd,test));
                             break;
                     }
                     // check cycles or wait
@@ -354,11 +349,11 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
                 }
             }while( !done && !g_interrupt);
         }else{
-            MERROR("connect failed [%d]\n",test);
+            PEPRINT((stderr,"connect failed [%d]\n",test));
         }
         
     }else{
-        MERROR("ERR - invalid argument\n");
+        PEPRINT((stderr,"ERR - invalid argument\n"));
     }
     
     return retval;
@@ -400,8 +395,8 @@ int main(int argc, char **argv)
     parse_args(argc, argv, cfg);
     
     // create socket
-    iow_socket_t *s = iow_socket_new(cfg->host, cfg->port, ST_UDP);
-    iow_set_blocking(s,(cfg->blocking==0?false:true));
+    msock_socket_t *s = msock_socket_new(cfg->host, cfg->port, ST_UDP);
+    msock_set_blocking(s,(cfg->blocking==0?false:true));
     //    struct linger so_linger={0};
     //    setsockopt(s->fd,SOL_SOCKET,SO_LINGER,&so_linger,sizeof(so_linger));
     
@@ -411,8 +406,8 @@ int main(int argc, char **argv)
     
     // release resources
     free(cfg->host);
-    iow_socket_destroy(&s);
-    MDEBUG("done\n\n");
+    msock_socket_destroy(&s);
+    PDPRINT((stderr,"done\n\n"));
     return retval;
 }
 // End function main

@@ -1,9 +1,10 @@
 ///
-/// @file mbrt-net.c
+/// @file mtime.c
 /// @authors k. Headley
 /// @date 01 jan 2018
  
-/// MBRT platform-independent socket wrappers
+/// mframe cross-platform time wrappers implementation
+/// for *nix/Cygwin
 
 /////////////////////////
 // Terms of use 
@@ -58,11 +59,8 @@ GNU General Public License for more details
 /////////////////////////
 // Headers 
 /////////////////////////
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/poll.h>
-#include <netinet/in.h>
+#include "mframe.h"
+#include "mtime.h"
 
 /////////////////////////
 // Macros
@@ -73,7 +71,7 @@ GNU General Public License for more details
 /*
 /// @def PRODUCT
 /// @brief header software product name
-#define PRODUCT "MBRT"
+#define PRODUCT "MFRAME"
 
 /// @def COPYRIGHT
 /// @brief header software copyright info
@@ -103,80 +101,91 @@ GNU General Public License for more details
 // Function Definitions
 /////////////////////////
 
-/// @fn int listen_posix()
-/// @brief TBD.
-/// @return TBD
-static int listen_posix()
+/// @fn double mtime_dtime()
+/// @brief get system time as a double
+/// @return system time as double, with usec precision
+///  if supported by platform
+double mtime_dtime()
 {
-    return -1;
-}
-// End function listen_posix
+    double retval=0.0;
+    struct timespec now={0};
 
-/// @fn int connect_posix()
-/// @brief TBD.
-/// @return TBD
-static int connect_posix()
+#if defined(__linux__) || defined(__CYGWIN__)
+    clock_gettime(CLOCK_MONOTONIC, &now); //CLOCK_REALTIME, CLOCK_MONOTONIC_RAW, CLOCK_PROCESS_CPUTIME_ID
+    retval=((double)now.tv_sec+((double)now.tv_nsec/(double)1.0e9));
+#elif defined(__MACH__)
+    clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    now.tv_sec = mts.tv_sec;
+    now.tv_nsec = mts.tv_nsec;
+    retval=((double)now.tv_sec+((double)now.tv_nsec/(double)1.0e9));
+#else
+    fprintf(stderr,"mtime_dtime - not implemented\n");
+#endif
+
+    
+    return retval;
+}
+// End function mtime_dtime
+
+/// @fn double mtime_mdtime(double mod)
+/// @brief get system time as a double
+/// @return system time as double, with usec precision
+///  if supported by platform
+double mtime_mdtime(double mod)
 {
-    return -1;
+    double retval = 0.0;
+    double now = mtime_dtime();
+
+    if (mod>0.0) {
+        retval = fmod(now,mod);
+    }else{
+        retval =  now;
+    }
+  
+    return retval;
 }
-// End function connect_posix
+// End function mtime_mdtime
 
-
-/// @fn int listen_win()
-/// @brief TBD.
-/// @return TBD
-static int listen_win()
+/// @fn void mtime_delay_ns(uint32_t nsec)
+/// @brief delay for specied period
+/// @param[in] nsec delay period (nsec)
+/// @return none
+void mtime_delay_ns(uint32_t nsec)
 {
-    return -1;
-}
-// End function listen_win
 
-/// @fn int connect_win()
-/// @brief TBD.
-/// @return TBD
-static int connect_win()
+    long lnsec = nsec;
+    struct timespec delay;
+    struct timespec rem;
+    delay.tv_sec= (lnsec/1000000000);
+    delay.tv_nsec=(lnsec%1000000000);
+
+    memset(&rem,0,sizeof(struct timespec));
+//    fprintf(stderr,"%s:%d - s[%ld] ns[%ld]\r\n",__FUNCTION__,__LINE__,delay.tv_sec,delay.tv_nsec);
+    while ( nanosleep(&delay,&rem)!=0) {
+        memcpy(&delay,&rem,sizeof(struct timespec));
+        memset(&rem,0,sizeof(struct timespec));
+    }
+}
+
+// End function mtime_delay_nsec
+/// @fn void mtime_delay_ms(uint32_t msec)
+/// @brief delay for specied period
+/// @param[in] msec delay period (msec)
+/// @return none
+void mtime_delay_ms(uint32_t msec)
 {
-    return -1;
+
+    uint32_t sec = msec/1000;
+    uint32_t nsec = (msec%1000)*1000000;
+//    fprintf(stderr,"%s:%d - s[%"PRIu32"] ns[%"PRIu32"]\r\n",__FUNCTION__,__LINE__,
+//            sec,nsec);
+	uint32_t i=0;
+    for(i=0;i<sec;i++)mtime_delay_ns(1e9);
+    if(nsec>0)
+    mtime_delay_ns(nsec);
 }
-// End function connect_win
-
-
-// socket Allocate a socket descriptor
-// bind Associate a socket with an IP address and port number
-// listen Tell a socket to listen for incoming connections
-// accept Accept an incoming connection on a listening socket
-// connect Connect a socket to a server
-// close Close a socket descriptor
-// setsockopt(), getsockopt() Set various options for a socket
-// recv(), recvfrom() Receive data on a socket
-// send(), sendto() Send data out over a socket
-//  getaddrinfo(), freeaddrinfo(), gai_strerror(), Get information about a host name and/or service and load up a struct sockaddr with the result
-// getnameinfo Look up the host name and service name information for a given struct sockaddr.
-// gethostname Returns the name of the system
-// gethostbyname, gethostbyaddr Get an IP address for a hostname, or vice-versa
-// getpeername Return address info about the remote side of the connection
-// fcntl Control socket descriptors
-// htons(), htonl(), ntohs(), ntohl() Convert multi-byte integer types from host byte order to network byte order
-// inet_ntoa(), inet_aton(), inet_addr Convert IP addresses from a dots-and-number string to a struct in_addr and back
-// inet_ntop(), inet_pton() Convert IP addresses to human-readable form and back.
-// poll Test for events on multiple sockets simultaneously
-// select Check if sockets descriptors are ready to read/write
-// perror(), strerror() Print an error as a human-readable string
-
-
-/// @fn int listen()
-/// @brief TBD.
-/// @return TBD
-int listen()
-{}
-// End function listen
-
-
-/// @fn int connect()
-/// @brief TBD.
-/// @return TBD
-int connect()
-{}
-// End function connect
-
-
+// End function mtime_delay_ms

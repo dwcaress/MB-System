@@ -15,24 +15,24 @@
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2000-2018 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
  express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
@@ -40,7 +40,7 @@
  assume the entire risk associated with use of the code, and you agree to be
  responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
  incidental or consequential damages, arising out of your use of the software,
  including, but not limited to, the loss or corruption of your data or damages
@@ -50,11 +50,11 @@
  liability or expense, including attorneys' fees, resulting from loss of or
  damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
+
  The MBARI software is provided without obligation on the part of the
  Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
+
  MBARI assumes no responsibility or liability for any third party and/or
  commercial software required for the database or applications. Licensee agrees
  to obtain and maintain valid licenses for any additional third party software
@@ -70,15 +70,21 @@
 /////////////////////////
 // Includes
 /////////////////////////
+//#include <stdint.h>
+//#include <stdbool.h>
+//#include <float.h>
+//#include "iowrap.h"
+//#include "cbuffer.h"
+//#include "r7kc.h"
+//#include "mlog.h"
+//#include "mconfig.h"
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <float.h>
-#include "iowrap.h"
-#include "cbuffer.h"
-#include "r7kc.h"
+#include "mframe.h"
 #include "mlog.h"
+#include "msocket.h"
+#include "mfile.h"
 #include "mconfig.h"
+#include "r7kc.h"
 
 /////////////////////////
 // Type Definitions
@@ -318,10 +324,10 @@ typedef struct mbtrn_reader_s
 {
     /// @var mbtrn_reader_s::sockif
     /// @brief socket interface
-    iow_socket_t *sockif;
+    msock_socket_t *sockif;
     /// @var mbtrn_reader_s::fileif
     /// @brief file interface
-    iow_file_t *fileif;
+    mfile_file_t *fileif;
     /// @var mbtrn_reader_s::fc
     /// @brief Data Record Frame container component
     r7k_drf_container_t *fc;
@@ -336,7 +342,7 @@ typedef struct mbtrn_reader_s
     uint32_t *sub_list;
     /// @var mbtrn_reader_s::log
     /// @brief log (for binary data)
-	mlog_t *log;
+//    mlog_t *log;
     /// @var mbtrn_reader_s::log_id
     /// @brief log ID (for binary data)
     mlog_id_t log_id;
@@ -515,6 +521,7 @@ typedef struct mbtrn_reader_s
 /////////////////////////
 // Exports
 /////////////////////////
+//mmd_module_config_t *mmd_mbtrn_config;
 
 // mbtrn utility API
 const char *mbtrn_get_version();
@@ -524,19 +531,19 @@ void mbtrn_show_app_version(const char *app_name, const char *app_version);
 
 // mbtrn reader API
 mbtrn_reader_t *mbtrn_reader_new(const char *host, int port, uint32_t capacity, uint32_t *slist,  uint32_t slist_len);
-mbtrn_reader_t *mbtrn_freader_new(iow_file_t *file, uint32_t capacity, uint32_t *slist,  uint32_t slist_len);
+mbtrn_reader_t *mbtrn_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t *slist,  uint32_t slist_len);
 void mbtrn_reader_destroy(mbtrn_reader_t **pself);
 int mbtrn_reader_connect(mbtrn_reader_t *self, bool replace_socket);
-void mbtrn_reader_set_log(mbtrn_reader_t *self, mlog_t *log, mlog_id_t id, char *desc);
+void mbtrn_reader_set_log(mbtrn_reader_t *self, mlog_id_t id);
 void mbtrn_reader_set_logstream(mbtrn_reader_t *self, FILE *log);
 mbtr_stats_t *mbtrn_reader_get_stats(mbtrn_reader_t *self);
-iow_socket_t *mbtrn_reader_sockif(mbtrn_reader_t *self);
-iow_file_t *mbtrn_reader_fileif(mbtrn_reader_t *self);
+msock_socket_t *mbtrn_reader_sockif(mbtrn_reader_t *self);
+mfile_file_t *mbtrn_reader_fileif(mbtrn_reader_t *self);
 void mbtrn_reader_show(mbtrn_reader_t *self, bool verbose, uint16_t indent);
 const char *mbtrn_strstate(mbtrn_state_t state);
 bool mbtrn_reader_issub(mbtrn_reader_t *self, uint32_t record_type);
 void mbtrn_reader_reset_socket(mbtrn_reader_t *self);
-int mbtrn_reader_set_file(mbtrn_reader_t *self, iow_file_t *file);
+int mbtrn_reader_set_file(mbtrn_reader_t *self, mfile_file_t *file);
 
 
 

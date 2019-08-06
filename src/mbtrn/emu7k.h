@@ -71,12 +71,19 @@
 // Includes 
 /////////////////////////
 
-#include <pthread.h>
-#include "iowrap.h"
+//#include <pthread.h>
+//#include "iowrap.h"
+//#include "r7kc.h"
+//#include "mbtrn.h"
+//#include "mlist.h"
+//#include "mconfig.h"
+
+#include "mthread.h"
+#include "msocket.h"
+#include "mfile.h"
 #include "r7kc.h"
 #include "mbtrn.h"
 #include "mlist.h"
-#include "mconfig.h"
 
 /////////////////////////
 // Type Definitions
@@ -174,7 +181,7 @@ typedef struct emu7k_client_s
 {
     /// @var emu7k_client_s::sock_if
     /// @brief connection socket wrapper
-    iow_socket_t *sock_if;
+    msock_socket_t *sock_if;
     /// @var emu7k_client_s::fd
     /// @brief connection file descriptor
     int fd;
@@ -192,13 +199,13 @@ typedef struct emu7k_s
 {
     /// @var emu7k_s::sock_if
     /// @brief socket interface
-    iow_socket_t *sock_if;
+    msock_socket_t *sock_if;
     /// @var emu7k_s::t
     /// @brief server thread
-    iow_thread_t *t;
+    mthread_thread_t *t;
     /// @var emu7k_s::w
     /// @brief worker thread
-    iow_thread_t *w;
+    mthread_thread_t *w;
     /// @var emu7k_s::reader
     /// @brief s7k stream reader
     mbtrn_reader_t *reader;
@@ -279,8 +286,8 @@ typedef enum {REQ=1,SUB,STOP}server_req_id;
 emu7k_client_t *emu7k_client_new(int fd, uint32_t nsubs, int32_t *subs);
 void emu7k_client_destroy(emu7k_client_t **pself);
 
-emu7k_t *emu7k_new(iow_socket_t *s, iow_file_t *mb_data, app_cfg_t *cfg);
-emu7k_t *emu7k_lnew(iow_socket_t *s, mlist_t *path_list, app_cfg_t *cfg);
+emu7k_t *emu7k_new(msock_socket_t *s, mfile_file_t *mb_data, app_cfg_t *cfg);
+emu7k_t *emu7k_lnew(msock_socket_t *s, mlist_t *path_list, app_cfg_t *cfg);
 void emu7k_destroy(emu7k_t **pself);
 
 void emu7k_show(emu7k_t *self, bool verbose, uint16_t indent);

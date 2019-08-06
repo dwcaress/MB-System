@@ -1,11 +1,9 @@
 ///
-/// @file mbtrn-server.h
+/// @file mfile.h
 /// @authors k. headley
 /// @date 06 nov 2012
  
-/// Test server for mbtrn
-/// Reads MB data from a file and writes
-/// it to a socket (e.g. emulates reson 7k center source)
+/// mframe cross-platform file IO wrappers
  
 /// @sa doxygen-examples.c for more examples of Doxygen markup
  
@@ -62,66 +60,116 @@
  */
 
 // include guard
-#ifndef MBTRN_SERVER_H
-/// @def MBTRN_SERVER_H
+#ifndef MFLAG_H
+/// @def MFLAG_H
 /// @brief include guard
-#define MBTRN_SERVER_H
+#define MFLAG_H
 
 /////////////////////////
 // Includes 
 /////////////////////////
-
-//#include <pthread.h>
-//#include "iowrap.h"
-//#include "r7kc.h"
-
-#include "mframe.h"
-#include "msocket.h"
-#include "mfile.h"
-#include "mthread.h"
-#include "r7kc.h"
-
-/////////////////////////
-// Type Definitions
-/////////////////////////
-
-/// @typedef struct mbtrn_server_s mbtrn_server_t
-/// @brief test server structure
-typedef struct mbtrn_server_s
-{
-    /// @var mbtrn_server_s::sock_if
-    /// @brief socket interface
-    msock_socket_t *sock_if;
-    /// @var mbtrn_server_s::in_file
-    /// @brief file interface
-    mfile_file_t *in_file;
-    /// @var mbtrn_server_s::t
-    /// @brief server thread
-    mthread_thread_t *t;
-    /// @var mbtrn_server_s::auto_free
-    /// @brief autofree file/socket resources
-    bool auto_free;
-    /// @var mbtrn_server_s::stop
-    /// @brief stop flag (allows caller to stop server thread)
-    bool stop;
-}mbtrn_server_t;
 
 /////////////////////////
 // Macros
 /////////////////////////
 
 /////////////////////////
-// Exports
+// Type Definitions
 /////////////////////////
 
-mbtrn_server_t *mbtrn_server_new(msock_socket_t *s, mfile_file_t *mb_data);
-void mbtrn_server_destroy(mbtrn_server_t **pself);
+/// @struct mfile_file_s
+/// @brief wrapped file representation (posix implementation)
+struct mfile_file_s;
 
+/// @typedef struct mfile_file_s mfile_file_t
+/// @brief wrapped file typedef
+typedef struct mfile_file_s mfile_file_t;
 
-// start test server to emulate reson
-// using data from file
-int mbtrn_server_start(mbtrn_server_t *self);
-int mbtrn_server_stop(mbtrn_server_t *self);
+/// @struct mfile_file_s
+/// @brief wrapped file representation (posix implementation)
+struct mfile_file_s
+{
+    /// @var mfile_file_s::path
+    /// @brief file path
+    char *path;
+    /// @var mfile_file_s::fd
+    /// @brief file descriptor
+    int fd;
+    /// @var mfile_file_s::flags
+    /// @brief file attribute flags
+    int flags;
+    /// @var mfile_file_s::mode
+    /// @brief file permissions flags
+    mode_t mode;
+};
+
+/// @typedef enum mfile_flags_t mfile_flags_t
+/// @brief file attribute flags
+typedef enum {
+    MFILE_RONLY=0x1,
+    MFILE_WONLY=0x2,
+    MFILE_RDWR=0x4,
+    MFILE_APPEND=0x8,
+    MFILE_CREATE=0x10,
+    MFILE_TRUNC=0x20,
+    MFILE_NONBLOCK=0x40,
+    MFILE_SYNC=0x80,
+    MFILE_RSYNC=0x100,
+    MFILE_DSYNC=0x200,
+    MFILE_ASYNC=0x400,
+    MFILE_EXCL=0x400
+//    MFILE_DIRECT=0x800
+} mfile_flags_t;
+
+/// @typedef enum mfile_mode_t mfile_mode_t
+/// @brief file permission flags
+typedef enum{
+    MFILE_RWXU=0x800,
+    MFILE_RU=0x400,
+    MFILE_WU=0x200,
+    MFILE_XU=0x100,
+    MFILE_RWXG=0x80,
+    MFILE_RG=0x40,
+    MFILE_WG=0x20,
+    MFILE_XG=0x10,
+    MFILE_RWXO=0x8,
+    MFILE_RO=0x4,
+    MFILE_WO=0x2,
+    MFILE_XO=0x1
+} mfile_mode_t;
+
+/// @typedef enum mfile_mode_t mfile_whence_t
+/// @brief file seek flags
+typedef enum{MFILE_SET=0, MFILE_CUR, MFILE_END} mfile_whence_t;
+
+/////////////////////////
+// Exports
+/////////////////////////
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+mfile_file_t *mfile_file_new(const char *path);
+void mfile_file_destroy(mfile_file_t **pself);
+void mfile_file_show(mfile_file_t *self, bool verbose, uint16_t indent);
+
+int mfile_open(mfile_file_t *self,mfile_flags_t flags);
+int mfile_close(mfile_file_t *self);
+int mfile_mopen(mfile_file_t *self,mfile_flags_t flags,mfile_mode_t mode );
+int64_t mfile_seek(mfile_file_t *self, uint32_t ofs, mfile_whence_t whence);
+int64_t mfile_read(mfile_file_t *self, byte *dest, uint32_t len);
+int64_t mfile_write(mfile_file_t *self, byte *src, uint32_t len);
+int mfile_ftruncate(mfile_file_t *self, uint32_t len);
+int mfile_fprintf(mfile_file_t *self, char *fmt, ...);
+int mfile_vfprintf(mfile_file_t *self, char *fmt, va_list args);
+int mfile_flush(mfile_file_t *self);
+int64_t mfile_fsize(mfile_file_t *self);
+time_t mfile_mtime(const char *path);
+int mfile_rename(mfile_file_t *self,const char *path);
+    
+#ifdef __cplusplus
+}
+#endif
 
 // include guard
 #endif

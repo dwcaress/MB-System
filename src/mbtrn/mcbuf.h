@@ -1,5 +1,5 @@
 ///
-/// @file cbuffer.h
+/// @file mcbuf.h
 /// @authors k. headley
 /// @date 06 nov 2012
  
@@ -60,113 +60,120 @@
  */
 
 // include guard
-#ifndef CBUFFER_H
-/// @def CBUFFER_H
+#ifndef MCBUF_H
+/// @def MCBUF_H
 /// @brief TBD
-#define CBUFFER_H
+#define MCBUF_H
 
 /////////////////////////
 // Includes 
 /////////////////////////
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "iowrap.h"
-
-/////////////////////////
-// Type Definitions
-/////////////////////////
-
-/// @typedef uint32_t cbuf_flags_t
-/// @brief cbuffer behavior flags
-/// CB_NONE          no flags (0)
-/// CB_ALLOW_PARTIAL allow partial reads (otherwise, return error if
-///                  request exceeds available data
-typedef uint32_t cbuf_flags_t;
-/// @typedef enum cbuf_flag_t cbuf_flag_t
-/// @brief cbuffer flag values
-typedef enum {CB_NONE=0,CB_ALLOW_PARTIAL=0x1} cbuf_flag_t;
-/// @typedef enum cbuf_status_t cbuf_status_t
-/// @brief cbuffer status/error values
-/// CB_OK    success
-/// CB_UFLOW underflow (e.g. read request exceeds available)
-/// CB_EMPTY buffer empty
-/// CB_OFLOW overflow  (e.g. write request exceeds available space)
-typedef enum {CB_OK=0,CB_UFLOW, CB_EMPTY, CB_FULL, CB_OFLOW} cbuf_status_t;
-
-/// @typedef struct cbuffer_s cbuffer_t
-/// @brief circular buffer structure. cbuffer is thread safe.
-typedef struct cbuffer_s{
-    /// @var cbuffer_s::capacity
-    /// @brief buffer capacity
-    uint32_t capacity;
-    /// @var cbuffer_s::size
-    /// @brief number of bytes currently in buffer
-    uint32_t size;
-    /// @var cbuffer_s::mutex
-    /// @brief mutex
-    iow_mutex_t *mutex;
-    /// @var cbuffer_s::pwrite
-    /// @brief write (input) pointer
-    byte *pwrite;
-    /// @var cbuffer_s::pread
-    /// @brief read (output) pointer
-    byte *pread;
-    /// @var cbuffer_s::data
-    /// @brief data buffer memory
-    byte *data;
-}cbuffer_t;
+#include "mframe.h"
+#include "mthread.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
 
-/// @def CB_OFLAG_RETURN_AVAIL
+/// @def MCB_OFLAG_RETURN_AVAIL
 /// @brief unused
-#define CB_OFLAG_RETURN_AVAIL 0x10
-/// @def CB_OFLAG_BLOCK
+#define MCB_OFLAG_RETURN_AVAIL 0x10
+/// @def MCB_OFLAG_BLOCK
 /// @brief unused
-#define CB_OFLAG_BLOCK        0x20
-/// @def CBUF_END(c)
+#define MCB_OFLAG_BLOCK        0x20
+/// @def MCBUF_END(c)
 /// @brief return byte pointer to end of buffer
 /// @param[in] c cbuffer reference
-#define CBUF_END(c)        ( (byte *)(c->data+c->capacity-1))
-/// @def CBUF_IS_EMPTY(c)
+#define MCBUF_END(c)        ( (byte *)(c->data+c->capacity-1))
+/// @def MCBUF_IS_EMPTY(c)
 /// @brief returns true if buffer is empty
 /// @param[in] c cbuffer reference
-#define CBUF_IS_EMPTY(c)   (c->size==0 ? true : false)
-//#define CBUF_RWRAP(c)      ( ((c->data+c->capacity) - c->pread) + (self->pwrite - self->data) )
-//#define CBUF_WWRAP(c)      ( ((c->data+c->capacity) - c->pwrite) + (self->pread - self->data) )
-//#define CBUF_I2O(c)        (c->pwrite - c->pread)
-//#define CBUF_O2I(c)        (c->pread - c->pwrite)
-//#define CBUF_I2E(c)        ( c->data + c->capacity - c->pwrite)
-//#define CBUF_O2E(c)        ( c->data + c->capacity - c->pread)
-//#define CBUF_B2I(c)        ( c->pwrite - c->data )
-//#define CBUF_B2O(c)        ( c->pread - c->data )
-//#define CBUF_IS_WRAPPED(c) (c->pread > c->pwrite ? true : false)
+#define MCBUF_IS_EMPTY(c)   (c->size==0 ? true : false)
+//#define MCBUF_RWRAP(c)      ( ((c->data+c->capacity) - c->pread) + (self->pwrite - self->data) )
+//#define MCBUF_WWRAP(c)      ( ((c->data+c->capacity) - c->pwrite) + (self->pread - self->data) )
+//#define MCBUF_I2O(c)        (c->pwrite - c->pread)
+//#define MCBUF_O2I(c)        (c->pread - c->pwrite)
+//#define MCBUF_I2E(c)        ( c->data + c->capacity - c->pwrite)
+//#define MCBUF_O2E(c)        ( c->data + c->capacity - c->pread)
+//#define MCBUF_B2I(c)        ( c->pwrite - c->data )
+//#define MCBUF_B2O(c)        ( c->pread - c->data )
+//#define MCBUF_IS_WRAPPED(c) (c->pread > c->pwrite ? true : false)
+
+/////////////////////////
+// Type Definitions
+/////////////////////////
+
+/// @typedef uint32_t mcbuf_flags_t
+/// @brief cbuffer behavior flags
+/// MCB_NONE          no flags (0)
+/// MCB_ALLOW_PARTIAL allow partial reads (otherwise, return error if
+///                  request exceeds available data
+typedef uint32_t mcbuf_flags_t;
+/// @typedef enum mcbuf_flag_t mcbuf_flag_t
+/// @brief cbuffer flag values
+typedef enum {MCB_NONE=0,MCB_ALLOW_PARTIAL=0x1} mcbuf_flag_t;
+/// @typedef enum mcbuf_status_t mcbuf_status_t
+/// @brief cbuffer status/error values
+/// MCB_OK    success
+/// MCB_UFLOW underflow (e.g. read request exceeds available)
+/// MCB_EMPTY buffer empty
+/// MCB_OFLOW overflow  (e.g. write request exceeds available space)
+typedef enum {MCB_OK=0,MCB_UFLOW, MCB_EMPTY, MCB_FULL, MCB_OFLOW} mcbuf_status_t;
+
+/// @typedef struct mcbuffer_s mcbuffer_t
+/// @brief circular buffer structure. cbuffer is thread safe.
+typedef struct mcbuffer_s{
+    /// @var mcbuffer_s::capacity
+    /// @brief buffer capacity
+    uint32_t capacity;
+    /// @var mcbuffer_s::size
+    /// @brief number of bytes currently in buffer
+    uint32_t size;
+    /// @var mcbuffer_s::mutex
+    /// @brief mutex
+    mthread_mutex_t *mutex;
+    /// @var mcbuffer_s::pwrite
+    /// @brief write (input) pointer
+    byte *pwrite;
+    /// @var mcbuffer_s::pread
+    /// @brief read (output) pointer
+    byte *pread;
+    /// @var mcbuffer_s::data
+    /// @brief data buffer memory
+    byte *data;
+}mcbuffer_t;
+
 
 /////////////////////////
 // Exports
 /////////////////////////
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Circular Buffer API
-cbuffer_t *cbuf_new(uint32_t capacity);
-void cbuf_destroy(cbuffer_t **pself);
-void cbuf_show(cbuffer_t *self, bool verbose, uint16_t indent);
+mcbuffer_t *mcbuf_new(uint32_t capacity);
+void mcbuf_destroy(mcbuffer_t **pself);
+void mcbuf_show(mcbuffer_t *self, bool verbose, uint16_t indent);
 
-int cbuf_read(cbuffer_t *self, byte *dest, uint32_t len, cbuf_flag_t flags, int *status);
-int cbuf_write(cbuffer_t *self, byte *src, uint32_t len, cbuf_flag_t flags, int *status);
-uint32_t cbuf_available(cbuffer_t *self);
-uint32_t cbuf_space(cbuffer_t *self);
-int cbuf_clear(cbuffer_t *self);
+int mcbuf_read(mcbuffer_t *self, byte *dest, uint32_t len, mcbuf_flag_t flags, int *status);
+int mcbuf_write(mcbuffer_t *self, byte *src, uint32_t len, mcbuf_flag_t flags, int *status);
+uint32_t mcbuf_available(mcbuffer_t *self);
+uint32_t mcbuf_space(mcbuffer_t *self);
+int mcbuf_clear(mcbuffer_t *self);
 
-// cbuf_set( from, to, value)
-// cbuf_clearr( from, to, value)
-//int cbuf_dup(cbuffer_t *self, cbuffer_t *dest);
+// mcbuf_set( from, to, value)
+// mcbuf_clearr( from, to, value)
+//int mcbuf_dup(mcbuffer_t *self, mcbuffer_t *dest);
 
-//int cbuf_resize(cbuffer_t *self, uint32_t len);
-//int cbuf_oflush(cbuffer_t *self);
-int cbuf_test();
+//int mcbuf_resize(mcbuffer_t *self, uint32_t len);
+//int mcbuf_oflush(mcbuffer_t *self);
+int mcbuf_test();
+    
+#ifdef __cplusplus
+}
+#endif
 
 // include guard
 #endif

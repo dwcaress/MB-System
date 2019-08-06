@@ -31,9 +31,12 @@
 #ifdef MBTRN_ENABLED
 #include "mbtrn.h"
 #include "r7kc.h"
-#include "iowrap.h"
-#include "cbuffer.h"
-#include "mdebug.h"
+//#include "iowrap.h"
+#include "msocket.h"
+#include "mfile.h"
+#include "merror.h"
+//#include "mcbuf.h"
+//#include "mdebug.h"
 #endif
 
 /* ---------------------------------------------------------------------------*/

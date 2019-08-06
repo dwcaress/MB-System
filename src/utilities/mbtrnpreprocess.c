@@ -46,9 +46,13 @@
 #include "mconfig.h"
 #include "mbtrn.h"
 #include "r7kc.h"
-#include "iowrap.h"
+//#include "iowrap.h"
+#include "msocket.h"
+#include "mtime.h"
 #include "mlist.h"
 #include "mlog.h"
+#include "mconfig.h"
+#include "medebug.h"
 
 /* ping structure definition */
 struct mbtrnpreprocess_ping_struct {
@@ -149,9 +153,9 @@ uint32_t reader_capacity=RESON_READER_CAPACITY_DFL;
 typedef enum{INPUT_MODE_SOCKET=1,INPUT_MODE_FILE=2}input_mode_t;
 input_mode_t input_mode;
 
-iow_peer_t *trn_peer = NULL;
+msock_connection_t *trn_peer = NULL;
 mlist_t *trn_plist = NULL;
-iow_socket_t *trn_osocket = NULL;
+msock_socket_t *trn_osocket = NULL;
 int trn_oport=TRN_PORT_DFL;
 char *trn_ohost=TRN_HOST_DFL;
 int trn_hbtok = TRN_HBTOK_DFL;
@@ -168,9 +172,13 @@ int trn_hbtok = TRN_HBTOK_DFL;
 #define TRN_CMD_LINE_BYTES 2048
 #define TRN_STATUS_INTERVAL_SEC_DFL 30
 
-mlog_id_t BLOG_ID=0x1;
-mlog_id_t MLOG_ID=0x2;
-mlog_id_t RLOG_ID=0x3;
+mlog_id_t trn_blog_id=MLOG_ID_INVALID;
+mlog_id_t trn_mlog_id=MLOG_ID_INVALID;
+mlog_id_t mbr_blog_id=MLOG_ID_INVALID;
+
+//mlog_id_t BLOG_ID=0x1;
+//mlog_id_t MLOG_ID=0x2;
+//mlog_id_t RLOG_ID=0x3;
 
 mlog_config_t blog_conf = {
     100*SZ_1M, ML_NOLIMIT, ML_NOLIMIT,
@@ -192,10 +200,11 @@ char session_date[32]={0};
 char *trn_blog_path=NULL;
 char *trn_mlog_path=NULL;
 
-mlog_t *trn_blog=NULL;
-mlog_t *trn_mlog=NULL;
-iow_flags_t flags = IOW_RDWR|IOW_APPEND|IOW_CREATE;
-iow_mode_t mode = IOW_RU|IOW_WU|IOW_RG|IOW_WG;
+//mlog_t *trn_blog=NULL;
+//mlog_t *trn_mlog=NULL;
+
+mfile_flags_t flags = MFILE_RDWR|MFILE_APPEND|MFILE_CREATE;
+mfile_mode_t mode = MFILE_RU|MFILE_WU|MFILE_RG|MFILE_WG;
 bool trn_blog_en = true;
 bool trn_mlog_en = true;
 int64_t trn_pub_delay_msec=0;
@@ -204,7 +213,7 @@ char *g_log_dir=NULL;
 
 char *mbr_blog_path=NULL;
 bool mbr_blog_en=true;
-mlog_t *mbr_blog=NULL;
+//mlog_t *mbr_blog=NULL;
 FILE *mbr_blogs=NULL;
 
 typedef enum{
@@ -837,7 +846,7 @@ int main(int argc, char **argv) {
     struct timeval stv={0};
     gettimeofday(&stv,NULL);
     double start_sys_time = (double)stv.tv_sec+((double)stv.tv_usec/1000000.0)+(7*3600);
-    fprintf(stderr,"%11.5lf systime %.4lf\n",iow_dtime(), start_sys_time);
+    fprintf(stderr,"%11.5lf systime %.4lf\n",mtime_dtime(), start_sys_time);
 #endif
 
     mbtrnpreprocess_init_debug(verbose);
@@ -880,25 +889,29 @@ int main(int argc, char **argv) {
     /* insert option to recognize and initialize ipc with TRN */
     /* else open ipc to TRN */
     else if (output_mode == MBTRNPREPROCESS_OUTPUT_TRN) {
-        md_level_t olvl;
+//        md_level_t olvl;
+        mmd_en_mask_t olvl;
         if (verbose!=0) {
-            olvl = mdb_get(APP,NULL);
-            mdb_set(APP,MDL_DEBUG);
+        	olvl = mmd_get_enmask(MOD_MBTRNPP, NULL);
+            mmd_channel_en(MOD_MBTRNPP,MM_DEBUG);
+//            olvl = mdb_get(APP,NULL);
+//            mdb_set(APP,MDL_DEBUG);
         }
-        trn_peer=iow_peer_new();
+        trn_peer=msock_connection_new();
         trn_plist = mlist_new();
-        mlist_autofree(trn_plist,iow_peer_free);
-        MMDEBUG(APP,"configuring TRN host using %s:%d\n",trn_ohost,trn_oport);
-        trn_osocket = iow_socket_new(trn_ohost, trn_oport, ST_UDP);
-        iow_set_blocking(trn_osocket,false);
+        mlist_autofree(trn_plist,msock_connection_free);
+        PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring TRN host using %s:%d\n",trn_ohost,trn_oport));
+        trn_osocket = msock_socket_new(trn_ohost, trn_oport, ST_UDP);
+        msock_set_blocking(trn_osocket,false);
         int test=-1;
-        if ( (test=iow_bind(trn_osocket))==0) {
-            MMDEBUG(APP,"TRN host socket bind OK [%s:%d]\n",TRN_HOST_DFL,TRN_PORT_DFL);
+        if ( (test=msock_bind(trn_osocket))==0) {
+            PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"TRN host socket bind OK [%s:%d]\n",TRN_HOST_DFL,TRN_PORT_DFL));
         }else{
             fprintf(stderr, "\nTRN host socket bind failed [%d] [%d %s]\n",test,errno,strerror(errno));
         }
         if (verbose!=0) {
-        mdb_set(APP,olvl);
+        mmd_channel_set(MOD_MBTRNPP,olvl);
+//        mdb_set(APP,olvl);
         }
     }
     /* else open output file in which the binary data otherwise communicated
@@ -954,8 +967,8 @@ int main(int argc, char **argv) {
 	}
     // kick off the first cycle here
     // future cycles start and end in the stats update
-    MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], iow_dtime());
-    MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], iow_dtime());
+    MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], mtime_dtime());
+    MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], mtime_dtime());
 	/* loop over all files to be read */
 	while (read_data == MB_YES) {
 
@@ -1212,7 +1225,7 @@ int main(int argc, char **argv) {
 			/* read the next data */
 			error = MB_ERROR_NO_ERROR;
 
-            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBGETALL_XT], iow_dtime());
+            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBGETALL_XT], mtime_dtime());
             status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, ping[idataread].time_i, &ping[idataread].time_d,
                                 &ping[idataread].navlon, &ping[idataread].navlat, &ping[idataread].speed, &ping[idataread].heading,
                                 &ping[idataread].distance, &ping[idataread].altitude, &ping[idataread].sonardepth,
@@ -1220,9 +1233,9 @@ int main(int argc, char **argv) {
                                 ping[idataread].bath, ping[idataread].amp, ping[idataread].bathacrosstrack, ping[idataread].bathalongtrack,
                                 ping[idataread].ss, ping[idataread].ssacrosstrack, ping[idataread].ssalongtrack, comment, &error);
 
-//            MMDEBUG(APP4,"mb_get_all - status[%d] kind[%d] err[%d]\n",status, kind, error);
-            MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBGETALL_XT], iow_dtime());
-            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBPING_XT], iow_dtime());
+//            PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all - status[%d] kind[%d] err[%d]\n",status, kind, error));
+            MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBGETALL_XT], mtime_dtime());
+            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBPING_XT], mtime_dtime());
 
             if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
                 ping[idataread].count = ndata;
@@ -1393,7 +1406,7 @@ int main(int argc, char **argv) {
 
                         mb_put_binary_int(MB_YES, n_output, &output_buffer[index]); index += 4;
 
-                        MMDEBUG(APP,"\nts[%.3lf] beams[%03d] ping[%06u]\nlat[%.4lf] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\nv[%+6.2lf] p/r/y[%.3lf / %.3lf / %.3lf]\n",\
+                        PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"\nts[%.3lf] beams[%03d] ping[%06u]\nlat[%.4lf] lon[%.4lf] hdg[%6.2lf] sd[%7.2lf]\nv[%+6.2lf] p/r/y[%.3lf / %.3lf / %.3lf]\n",\
                                 ping[i_ping_process].time_d,
                                 n_output,
                                 ping_number,
@@ -1405,7 +1418,7 @@ int main(int argc, char **argv) {
                                 ping[i_ping_process].pitch,
                                 ping[i_ping_process].roll,
                                 ping[i_ping_process].heave
-                                );
+                                ));
 
                         for (j = 0; j < ping[i_ping_process].beams_bath; j++) {
                             if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j])) {
@@ -1419,11 +1432,11 @@ int main(int argc, char **argv) {
                                 mb_put_binary_double(MB_YES, (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth), &output_buffer[index]);
                                 index += 8;
 
-                                    MMDEBUG(APP1,"n[%03d] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n",
+                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V1,(stderr,"n[%03d] atrk/X[%+10.3lf] ctrk/Y[%+10.3lf] dpth/Z[%+10.3lf]\n",
                                            j,
                                             ping[i_ping_process].bathalongtrack[j],
                                             ping[i_ping_process].bathacrosstrack[j],
-                                           (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth));
+                                           (ping[i_ping_process].bath[j] - ping[i_ping_process].sonardepth)));
 
                             }
                         }
@@ -1435,11 +1448,12 @@ int main(int argc, char **argv) {
 //                            checksum += (unsigned int) output_buffer[j];
                             checksum += (unsigned int) (*cp++);
                         }
-                        MMDEBUG(APP1,"before put : chk[%08X/%u] idx[%zu] mb1sz[%zu]\n",checksum,checksum,index,mb1_size);
+                        PMPRINT(MOD_MBTRNPP,MBTRNPP_V1,(stderr,"before put : chk[%08X/%u] idx[%zu] mb1sz[%zu]\n",checksum,checksum,index,mb1_size));
                         mb_put_binary_int(MB_YES, checksum, &output_buffer[index]); index += 4;
-                        MMDEBUG(APP1,"after put : chk[%08X] idx[%zu] mb1sz[%zu]\n",checksum,index,mb1_size);
+                        PMPRINT(MOD_MBTRNPP,MBTRNPP_V1,(stderr,"after put : chk[%08X] idx[%zu] mb1sz[%zu]\n",checksum,index,mb1_size));
 
-                        MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBPING_XT], iow_dtime());
+
+                        MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBPING_XT], mtime_dtime());
 
                         /* send the packet to TRN */
                         if (output_mode == MBTRNPREPROCESS_OUTPUT_TRN) {
@@ -1455,23 +1469,23 @@ int main(int argc, char **argv) {
 
                             // log current TRN message
                             if(trn_blog_en){
-                                mlog_write(BLOG_ID,(byte *)output_buffer,mb1_size);
+                                mlog_write(trn_blog_id,(byte *)output_buffer,mb1_size);
                             }
 
                             // send output to TRN clients
                             MBTR_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
-                            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_TRNTX_XT], iow_dtime());
+                            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_TRNTX_XT], mtime_dtime());
 
                             int iobytes = 0;
                             int test = -1;
                             int idx=-1;
-                           iow_peer_t *psub = (iow_peer_t *)mlist_first(trn_plist);
+                           msock_connection_t *psub = (msock_connection_t *)mlist_first(trn_plist);
                             idx=0;
                             while (psub != NULL) {
 
                                 psub->heartbeat--;
 
-                                iobytes = iow_sendto(trn_osocket, psub->addr, (byte *)output_buffer, mb1_size, 0 );
+                                iobytes = msock_sendto(trn_osocket, psub->addr, (byte *)output_buffer, mb1_size, 0 );
 
                                 if (  iobytes > 0) {
                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_TXN]);
@@ -1480,49 +1494,49 @@ int main(int argc, char **argv) {
                                     MBTR_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_PUB_BYTES],iobytes);
 
 
-                                    MMDEBUG(APP4,"tx TRN [%5d]b cli[%d/%s:%s] hb[%d]\n", iobytes, idx, psub->chost, psub->service, psub->heartbeat);
+                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"tx TRN [%5d]b cli[%d/%s:%s] hb[%d]\n", iobytes, idx, psub->chost, psub->service, psub->heartbeat));
 
                                 }else{
-                                    MERROR("err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
-                                    mlog_tprintf(MLOG_ID,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
+                                    PEPRINT((stderr,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno)));
+                                    mlog_tprintf(trn_mlog_id,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRN_TX]);
                                 }
 
                                 // check heartbeat, remove expired peers
                                 if (NULL!=psub && psub->heartbeat==0) {
-                                    MMDEBUG(APP4,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id);
-                                    mlog_tprintf(MLOG_ID,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id);
+                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id));
+                                    mlog_tprintf(trn_mlog_id,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id);
                                     mlist_remove(trn_plist,psub);
                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_DISN]);
                                     MBTR_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
                                 }
-                                psub=(iow_peer_t *)mlist_next(trn_plist);
+                                psub=(msock_connection_t *)mlist_next(trn_plist);
                                 idx++;
                             }// while psub
 
-                            MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_TRNTX_XT], iow_dtime());
+                            MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_TRNTX_XT], mtime_dtime());
 
                             // check trn socket for client messages (connection, heartbeat)
                             byte cmsg[TRN_MSG_CON_LEN];
                              int svc=0;
 
-                            MMDEBUG(APP4,"checking trn host socket\n");
+                            PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"checking trn host socket\n"));
                             bool trn_recv_pending=true;
                             do{
-                                MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_TRNRX_XT], iow_dtime());
+                                MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_TRNRX_XT], mtime_dtime());
 
-                                iobytes = iow_recvfrom(trn_osocket, trn_peer->addr, cmsg, TRN_MSG_CON_LEN);
+                                iobytes = msock_recvfrom(trn_osocket, trn_peer->addr, cmsg, TRN_MSG_CON_LEN,0);
 
-                                MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_TRNRX_XT], iow_dtime());
+                                MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_TRNRX_XT], mtime_dtime());
 
                                 switch (iobytes) {
                                     case 0:
                                         // no bytes returned (socket closed)
-                                        MMINFO(APP,"err - recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id);
-                                        mlog_tprintf(MLOG_ID,"recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id);
+                                        PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"err - recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id));
+                                        mlog_tprintf(trn_mlog_id,"recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id);
                                         // remove from list
                                         if(sscanf(trn_peer->service,"%d",&svc)==1){
-                                            iow_peer_t *peer = (iow_peer_t *)mlist_vlookup(trn_plist, &svc, mbtrn_peer_vcmp);
+                                            msock_connection_t *peer = (msock_connection_t *)mlist_vlookup(trn_plist, &svc, mbtrn_peer_vcmp);
                                             if (peer!=NULL) {
                                                 mlist_remove(trn_plist,peer);
                                             }
@@ -1533,7 +1547,7 @@ int main(int argc, char **argv) {
                                     case -1:
                                         // error (usually nothing to read)
                                         if (errno!=EAGAIN && errno!=EWOULDBLOCK) {
-                                            MMDEBUG(APP4,"err - recvfrom cli[%d] ret -1 [%d/%s]\n",trn_peer->id,errno,strerror(errno));
+                                            PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"err - recvfrom cli[%d] ret -1 [%d/%s]\n",trn_peer->id,errno,strerror(errno)));
                                         }
                                         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXE]);
                                         trn_recv_pending=false;
@@ -1552,7 +1566,7 @@ int main(int argc, char **argv) {
                                             NULL != trn_peer->addr->ainfo->ai_addr) {
 
                                             psin = (struct sockaddr_in *)trn_peer->addr->ainfo->ai_addr;
-                                            ctest = inet_ntop(AF_INET, &psin->sin_addr, trn_peer->chost, IOW_ADDR_LEN);
+                                            ctest = inet_ntop(AF_INET, &psin->sin_addr, trn_peer->chost, MSOCK_ADDR_LEN);
                                             if (NULL!=ctest) {
 
                                                 port = ntohs(psin->sin_port);
@@ -1560,15 +1574,15 @@ int main(int argc, char **argv) {
                                                 svc = port;
                                                 snprintf(trn_peer->service,NI_MAXSERV,"%d",svc);
 
-                                                iow_peer_t *pclient=NULL;
-                                                pclient = (iow_peer_t *)mlist_vlookup(trn_plist,&svc,mbtrn_peer_vcmp);
+                                                msock_connection_t *pclient=NULL;
+                                                pclient = (msock_connection_t *)mlist_vlookup(trn_plist,&svc,mbtrn_peer_vcmp);
                                                 if (pclient!=NULL) {
-                                                    // MMINFO(APP,"updating hbeat id[%d] plist[%p/%d]\n",svc,pp,pp->id);
+                                                    // PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"updating hbeat id[%d] plist[%p/%d]\n",svc,pp,pp->id));
                                                     // client exists, update heartbeat tokens
                                                     // [could make additive, i.e. +=]
                                                     pclient->heartbeat = trn_hbtok;
                                                 }else{
-                                                    MMINFO(APP3,"adding to client list id[%d] addr[%p]\n",svc,trn_peer);
+                                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"adding to client list id[%d] addr[%p]\n",svc,trn_peer));
                                                     // client doesn't exist
                                                     // initialze and add to list
                                                     trn_peer->id = svc;
@@ -1578,37 +1592,37 @@ int main(int argc, char **argv) {
                                                     // save pointer to finish up (send ACK, update hbeat)
                                                     pclient=trn_peer;
                                                     // create a new peer for next read
-                                                    trn_peer = iow_peer_new();
+                                                    trn_peer = msock_connection_new();
 
-                                                    mlog_tprintf(MLOG_ID,"client connected id[%d] addr[%p]\n",svc,trn_peer);
+                                                    mlog_tprintf(trn_mlog_id,"client connected id[%d] addr[%p]\n",svc,trn_peer);
                                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_CONN]);
                                                 }
 
-                                                MMINFO(APP2,"rx [%d]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service);
-                                                // mlog_tprintf(MLOG_ID,"rx [%zd]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service);
+                                                PMPRINT(MOD_MBTRNPP,MBTRNPP_V2,(stderr,"rx [%d]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service));
+                                                // mlog_tprintf(trn_mlog_id,"rx [%zd]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service);
 
                                                 // send ACK to client
-                                                iobytes = iow_sendto(trn_osocket, pclient->addr, (byte *)"ACK", 4, 0 );
+                                                iobytes = msock_sendto(trn_osocket, pclient->addr, (byte *)"ACK", 4, 0 );
                                                 if ( (NULL!=pclient) && ( iobytes > 0) ) {
 
-                                                    MMDEBUG(APP4,"tx ACK [%d]b cli[%d/%s:%s]\n", iobytes, svc, pclient->chost, pclient->service);
-                                                    // mlog_tprintf(MLOG_ID,"tx ACK [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service);
+                                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"tx ACK [%d]b cli[%d/%s:%s]\n", iobytes, svc, pclient->chost, pclient->service));
+                                                    // mlog_tprintf(trn_mlog_id,"tx ACK [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service);
                                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_ACKN]);
                                                     MBTR_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_ACK_BYTES],iobytes);
 
                                                 }else{
                                                     // ACK failed
-                                                    mlog_tprintf(MLOG_ID,"tx cli[%d] failed pclient[%p] iobytes[%zd] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
+                                                    mlog_tprintf(trn_mlog_id,"tx cli[%d] failed pclient[%p] iobytes[%zd] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
                                                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_ACK]);
                                                 }
                                             }else{
-                                                mlog_tprintf(MLOG_ID,"err - inet_ntop failed [%d/%s]\n",errno,strerror(errno));
+                                                mlog_tprintf(trn_mlog_id,"err - inet_ntop failed [%d/%s]\n",errno,strerror(errno));
                                                 MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ENTOP]);
                                             }
                                         }else{
                                             // invalid sockaddr
-                                            MMERROR(APP2,"err - NULL cliaddr(rx) cli[%d]\n",trn_peer->id);
-                                            mlog_tprintf(MLOG_ID,"err - NULL cliaddr(rx) cli[%d]\n",trn_peer->id);
+                                            PMPRINT(MOD_MBTRNPP,MBTRNPP_V2,(stderr,"err - NULL cliaddr(rx) cli[%d]\n",trn_peer->id));
+                                            mlog_tprintf(trn_mlog_id,"err - NULL cliaddr(rx) cli[%d]\n",trn_peer->id);
                                             MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLIADDR_RX]);
                                         }
 
@@ -1621,15 +1635,15 @@ int main(int argc, char **argv) {
                                 struct timespec rem={0};
                                 delay.tv_sec = trn_pub_delay_msec/1000;
                                 delay.tv_nsec = (trn_pub_delay_msec%1000)*1000000L;
-                                MMDEBUG(APP5,"delaying msec[%lld] sec:nsec[%ld:%ld]\n",trn_pub_delay_msec,delay.tv_sec,delay.tv_nsec);
+                                PMPRINT(MOD_MBTRNPP,MBTRNPP_V5,(stderr,"delaying msec[%lld] sec:nsec[%ld:%ld]\n",trn_pub_delay_msec,delay.tv_sec,delay.tv_nsec));
                                 while (nanosleep(&delay,&rem)<0) {
-                                    MMDEBUG(APP5,"sleep interrupted\n");
+                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V5,(stderr,"sleep interrupted\n"));
                                     delay.tv_sec=rem.tv_sec;
                                     delay.tv_nsec=rem.tv_nsec;
                                 }
                             }
 
-                            MBTRNPP_UPDATE_STATS(app_stats, MLOG_ID, MBTRNPP_STAT_FLAGS);
+                            MBTRNPP_UPDATE_STATS(app_stats, trn_mlog_id, MBTRNPP_STAT_FLAGS);
 
                         }// end MBTRNPREPROCESS_OUTPUT_TRN
 
@@ -1657,8 +1671,8 @@ int main(int argc, char **argv) {
                 }
             }else{
 
-                MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBGETFAIL_XT], iow_dtime());
-               MMINFO(APP4,"mb_get_all failed: status[%d] kind[%d] err[%d]\n",status, kind, error);
+                MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBGETFAIL_XT], mtime_dtime());
+                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all failed: status[%d] kind[%d] err[%d]\n",status, kind, error));
 
                 if ( (status == MB_FAILURE) && (error==MB_ERROR_EOF) && (input_mode == INPUT_MODE_SOCKET)) {
 
@@ -1677,15 +1691,15 @@ int main(int argc, char **argv) {
                         // empty the reader's record frame container
                         mbtrn_reader_purge(reader);
                         fprintf(stderr,"mbtrnpp: input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
-                        mlog_tprintf(MLOG_ID,"mbtrnpp: input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
+                        mlog_tprintf(trn_mlog_id,"mbtrnpp: input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
                         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_DISN]);
                         if (mbtrn_reader_connect(reader,true)==0) {
                             fprintf(stderr,"mbtrnpp: input socket connected status[%s]\n",mbtrn_strstate(reader->state));
-                            mlog_tprintf(MLOG_ID,"mbtrnpp: input socket connected status[%s]\n",mbtrn_strstate(reader->state));
+                            mlog_tprintf(trn_mlog_id,"mbtrnpp: input socket connected status[%s]\n",mbtrn_strstate(reader->state));
                             MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
                         }else{
                             fprintf(stderr,"mbtrnpp: input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
-                            mlog_tprintf(MLOG_ID,"mbtrnpp: input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
+                            mlog_tprintf(trn_mlog_id,"mbtrnpp: input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
                             MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ESRC_CON]);
 
                             struct timespec twait={0},trem={0};
@@ -1694,16 +1708,16 @@ int main(int argc, char **argv) {
                         }
                     }
                 }
-                MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBGETFAIL_XT], iow_dtime());
+                MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBGETFAIL_XT], mtime_dtime());
 
            }
 
-            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBPOST_XT], iow_dtime());
+            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBPOST_XT], mtime_dtime());
 
             if (status == MB_FAILURE) {
 
                 // if libmbtrn ESOCK error, then keep going
-                if ( (me_errno==ME_ESOCK) || (me_errno==ME_EOF) || (me_errno==ME_ERCV)) {
+                if ( (me_errno==ME_ESOCK) || (me_errno==ME_EOF) || (me_errno==ME_ERECV)) {
                     fprintf(stderr,"mbtrnpp: MB_FAILURE - me_error[%d/%s] (input socket may be disconnected)\n",me_errno,me_strerror(me_errno));
                     // try to reconnect to server
                     mbtrn_reader_t *reader = ((struct mb_io_struct *)imbio_ptr)->mbsp;
@@ -1711,17 +1725,17 @@ int main(int argc, char **argv) {
                     mbtrn_reader_purge(reader);
 
                     fprintf(stderr,"mbtrnpp: MB_FAILURE - input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
-                    mlog_tprintf(MLOG_ID,"input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
+                    mlog_tprintf(trn_mlog_id,"input socket disconnected status[%s]\n",mbtrn_strstate(reader->state));
 
                     MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_DISN]);
 
                     if (mbtrn_reader_connect(reader,true)==0) {
                         fprintf(stderr,"mbtrnpp: MB_FAILURE - input socket connected status[%s]\n",mbtrn_strstate(reader->state));
-                        mlog_tprintf(MLOG_ID,"mbtrnpp: input socket connected status[%s]\n",mbtrn_strstate(reader->state));
+                        mlog_tprintf(trn_mlog_id,"mbtrnpp: input socket connected status[%s]\n",mbtrn_strstate(reader->state));
                         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
                     }else{
                         fprintf(stderr,"mbtrnpp: MB_FAILURE - input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
-                        mlog_tprintf(MLOG_ID,"mbtrnpp: MB_FAILURE - input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
+                        mlog_tprintf(trn_mlog_id,"mbtrnpp: MB_FAILURE - input socket reconnect failed status[%s]\n",mbtrn_strstate(reader->state));
                         MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ESRC_CON]);
 
                         struct timespec twait={0},trem={0};
@@ -1736,7 +1750,7 @@ int main(int argc, char **argv) {
                     }
                 }
             }
-            MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBPOST_XT], iow_dtime());
+            MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBPOST_XT], mtime_dtime());
 	}
 
 		/* close the files */
@@ -1771,14 +1785,14 @@ int main(int argc, char **argv) {
             /* figure out whether and what to read next */
             if (read_datalist == MB_YES) {
                 if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS){
-                    MDEBUG("read_datalist status[%d] - continuing\n",status);
+                    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"read_datalist status[%d] - continuing\n",status));
                     read_data = MB_YES;
                 }else{
-                    MDEBUG("read_datalist status[%d] - done\n",status);
+                    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"read_datalist status[%d] - done\n",status));
                     read_data = MB_NO;
                 }
             }else {
-                MDEBUG("read_datalist == NO\n");
+                PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"read_datalist == NO\n"));
                 read_data = MB_NO;
             }
         }
@@ -1854,14 +1868,14 @@ int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, in
 	int status = MB_SUCCESS;
 
 	/* time, user, host variables */
-    struct timeval timeofday;
-    struct timezone timezone;
-    double time_d;
-    int time_i[7];
+  struct timeval timeofday;
+  struct timezone timezone;
+  double time_d;
+  int time_i[7];
 	char date[32], user[128], *user_ptr;
-    mb_path host;
-    mb_path log_file;
-    mb_path log_message;
+  mb_path host;
+  mb_path log_file;
+  mb_path log_message;
 
 	/* print input debug statements */
 	if (verbose >= 2) {
@@ -2190,7 +2204,7 @@ int mbtrnpreprocess_logstatistics(int verbose,
 int mbtrnpreprocess_log_min(mbtrn_stat_chan_t *stats)
 {
     if (NULL!=stats) {
-        mlog_tprintf(MLOG_ID,"ut[%lu] src[%d/%d] cli[%d/%d/%d] tx[%d/%d] rx[%d/%d]\n",
+        mlog_tprintf(trn_mlog_id,"ut[%lu] src[%d/%d] cli[%d/%d/%d] tx[%d/%d] rx[%d/%d]\n",
                      app_stats->uptime,
                      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_SRC_CONN]),
                      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_SRC_DISN]),
@@ -2209,13 +2223,13 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
 {
 
     if (NULL!=stats) {
-        double stats_now = iow_dtime();
+        double stats_now = mtime_dtime();
 
         if (log_clock_res) {
             // log the timing clock resolution (once)
             struct timespec res;
             clock_getres(CLOCK_MONOTONIC, &res);
-            mlog_tprintf(MLOG_ID,"%.3lf,i,clkres_mono,s[%ld] ns[%ld]\n",stats_now,res.tv_sec,res.tv_nsec);
+            mlog_tprintf(trn_mlog_id,"%.3lf,i,clkres_mono,s[%ld] ns[%ld]\n",stats_now,res.tv_sec,res.tv_nsec);
             log_clock_res=false;
         }
 
@@ -2235,8 +2249,8 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
         MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], stats_now);
 
         // measure dtime execution time (twice), while we're at it
-        MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], iow_dtime());
-        MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], iow_dtime());
+        MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], mtime_dtime());
+        MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], mtime_dtime());
         MBTR_SW_DIV(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], 2.0);
 
         // update uptime
@@ -2282,9 +2296,9 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
             ((stats_now - stats->stats->stat_period_start) >  stats->stats->stat_period_sec)) {
 
             // start log execution timer
-            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_LOG_XT], iow_dtime());
+            MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_LOG_XT], mtime_dtime());
 
-            mlog_tprintf(MLOG_ID,"%.3lf,i,uptime,%0.3lf\n",stats_now,stats->uptime);
+            mlog_tprintf(trn_mlog_id,"%.3lf,i,uptime,%0.3lf\n",stats_now,stats->uptime);
             mbtrn_log_stats(stats->stats, stats_now, log_id, flags);
 
             if (flags&MBTF_READER) {
@@ -2299,15 +2313,15 @@ int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_
             stats->stats->stat_period_start = stats_now;
 
             // stop log execution timer
-            MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_LOG_XT], iow_dtime());
+            MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_LOG_XT], mtime_dtime());
         }
 
         // start cycle timer
-        MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], iow_dtime());
+        MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], mtime_dtime());
 
         // update stats execution time variables
         stats_prev_start=stats_now;
-        stats_prev_end=iow_dtime();
+        stats_prev_end=mtime_dtime();
     }else{
         fprintf(stderr,"mbtrnpreprocess_update_stats: invalid argument\n");
     }
@@ -2318,7 +2332,7 @@ mbtrnpp_stats_t *mbtrnpreprocess_stats_new(uint32_t ev_counters, uint32_t status
 {
     mbtrnpp_stats_t *self =(mbtrnpp_stats_t *)malloc(sizeof(mbtrnpp_stats_t));
     if (self) {
-        self->session_start = iow_dtime();
+        self->session_start = mtime_dtime();
         self->uptime = 0.0;
         self->stats = mbtrn_stats_new(ev_counters, status_counters, tm_channels, mbtrnpp_stats_labels);
 
@@ -2337,10 +2351,63 @@ int mbtrnpreprocess_init_debug(int verbose)
      * Store the relevant pointers and parameters within the
      * mb_io_struct structure *mb_io_ptr. */
 
+	mmd_initialize();
+    mconf_init(NULL,NULL);
+//    mmd_channel_set(MOD_MBTRNPP,MM_ERR|MM_DEBUG);
+//    mmd_channel_set(MOD_R7K,MM_ERR);
+//    mmd_channel_set(MOD_MBTRN,MM_ERR);
+//    mmd_channel_set(MOD_MSOCK,MM_ERR);
+    fprintf(stderr,"%s:%d >>> MOD_MBTRNPP[id=%d]  %08X\n",__FUNCTION__,__LINE__,MOD_MBTRNPP,mmd_get_enmask(MOD_MBTRNPP,NULL));
+
+    switch (verbose) {
+        case 0:
+            mmd_channel_set(MOD_MBTRNPP,MM_NONE);
+            mmd_channel_set(MOD_R7K,MM_NONE);
+            mmd_channel_set(MOD_MBTRN,MM_NONE);
+            mmd_channel_set(MOD_MSOCK,MM_NONE);
+            break;
+        case 1:
+            mmd_channel_en(MOD_MBTRNPP,MBTRNPP_V1);
+            mmd_channel_en(MOD_MBTRN,MBTRN_V1);
+            break;
+        case 2:
+            mmd_channel_en(MOD_MBTRNPP,MM_DEBUG);
+            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7K,R7K_PARSER);
+            break;
+        case -1:
+            mmd_channel_en(MOD_MBTRNPP,MBTRNPP_V1);
+            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+        	break;
+        case -2:
+            mmd_channel_en(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2);
+            break;
+        case -3:
+            mmd_channel_en(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2);
+            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7K,MM_WARN|R7K_PARSER);
+            break;
+        case -4:
+            mmd_channel_en(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2);
+            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7K,MM_WARN|R7K_PARSER|R7K_DRFCON);
+            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+            break;
+        case -5:
+            mmd_channel_en(MOD_MBTRNPP,MM_ALL);
+            mmd_channel_en(MOD_MBTRN,MM_ALL);
+            mmd_channel_en(MOD_R7K,MM_ALL);
+            mmd_channel_en(MOD_MSOCK,MM_ALL);
+            break;
+       default:
+            break;
+    }
+    fprintf(stderr,"%s:%d >>> MOD_MBTRNPP  %08X\n",__FUNCTION__,__LINE__,mmd_get_enmask(MOD_MBTRNPP,NULL));
+
     // initialize reader
     // create and open socket connection
-    mcfg_configure(NULL,0);
-    mdb_set_name(APP,"mbtrnpreprocess");
+//    mcfg_configure(NULL,0);
+//    mdb_set_name(APP,"mbtrnpreprocess");
 
     // use MDI_ALL to globally set module debug output
     // may also set per module basis using module IDs
@@ -2352,96 +2419,98 @@ int mbtrnpreprocess_init_debug(int verbose)
     // MDL_FATAL, MDL_ERROR, MDL_WARN
     // MDL_INFO, MDL_DEBUG
 
-    mdb_set(MDI_ALL,MDL_NONE);
-    switch (verbose) {
-        case 0:
-            mdb_set(APP,MDL_NONE);
-            break;
-        case 1:
-            mdb_set(APP,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_INFO);
-            break;
-        case 2:
-            mdb_set(APP,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_DEBUG);
-            mdb_set(R7K,MDL_DEBUG);
-            mdb_set(RPARSER,MDL_DEBUG);
-            break;
-        case -1:
-            mdb_set(APP,MDL_DEBUG);
-            break;
-        case -2:
-            mdb_set(APP,MDL_DEBUG);
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            break;
-        case -3:
-            mdb_set(APP,MDL_DEBUG);
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            mdb_set(APP3,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_DEBUG);
-            mdb_set(R7K,MDL_WARN);
-            mdb_set(RPARSER,MDL_WARN);
-            break;
-        case -4:
-            mdb_set(APP,MDL_DEBUG);
-            //            mdb_set(APP1,MDL_DEBUG);
-            //            mdb_set(APP2,MDL_DEBUG);
-            //            mdb_set(APP3,MDL_DEBUG);
-            mdb_set(APP4,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_DEBUG);
-            mdb_set(R7K,MDL_DEBUG);
-            mdb_set(RPARSER,MDL_DEBUG);
-            mdb_set(IOW,MDL_DEBUG);
-            mdb_set(DRFCON,MDL_DEBUG);
-            break;
-        case -5:
-            mdb_set(APP,MDL_DEBUG);
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            mdb_set(APP3,MDL_DEBUG);
-            mdb_set(APP4,MDL_DEBUG);
-            mdb_set(APP5,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_DEBUG);
-            mdb_set(R7K,MDL_DEBUG);
-            mdb_set(RPARSER,MDL_DEBUG);
-            mdb_set(IOW,MDL_DEBUG);
-            mdb_set(DRFCON,MDL_DEBUG);
-            break;
-        default:
-            mdb_set(APP,MDL_DEBUG);
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_DEBUG);
-            mdb_set(MREADER,MDL_DEBUG);
-            mdb_set(DRFCON,MDL_DEBUG);
-            mdb_set(R7K,MDL_DEBUG);
-            mdb_set(RPARSER,MDL_DEBUG);
-            break;
-    }
+//    mdb_set(MDI_ALL,MDL_NONE);
+//    switch (verbose) {
+//        case 0:
+//            mdb_set(APP,MDL_NONE);
+//            break;
+//        case 1:
+//            mdb_set(APP,MDL_DEBUG);
+//            mdb_set(MBTRN,MDL_INFO);
+//            break;
+//        case 2:
+//            mdb_set(APP,MDL_DEBUG);
+//            mdb_set(MBTRN,MDL_DEBUG);
+//            mdb_set(R7K,MDL_DEBUG);
+//            mdb_set(RPARSER,MDL_DEBUG);
+//            break;
+//        case -1:
+//            mdb_set(APP,MDL_DEBUG);
+//            break;
+//        case -2:
+//            mdb_set(APP,MDL_DEBUG);
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            break;
+//        case -3:
+//            mdb_set(APP,MDL_DEBUG);
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            mdb_set(APP3,MDL_DEBUG);
+//            mdb_set(MBTRN,MDL_DEBUG);
+//            mdb_set(R7K,MDL_WARN);
+//            mdb_set(RPARSER,MDL_WARN);
+//            break;
+//        case -4:
+//            mdb_set(APP,MDL_DEBUG);
+//            //            mdb_set(APP1,MDL_DEBUG);
+//            //            mdb_set(APP2,MDL_DEBUG);
+//            //            mdb_set(APP3,MDL_DEBUG);
+//            mdb_set(APP4,MDL_DEBUG);
+//            mdb_set(MBTRN,MDL_DEBUG);
+//            mdb_set(R7K,MDL_DEBUG);
+//            mdb_set(RPARSER,MDL_DEBUG);
+//            mdb_set(IOW,MDL_DEBUG);
+//            mdb_set(DRFCON,MDL_DEBUG);
+//            break;
+//        case -5:
+//            mdb_set(APP,MDL_DEBUG);
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            mdb_set(APP3,MDL_DEBUG);
+//            mdb_set(APP4,MDL_DEBUG);
+//            mdb_set(APP5,MDL_DEBUG);
+//            mdb_set(MBTRN,MDL_DEBUG);
+//            mdb_set(R7K,MDL_DEBUG);
+//            mdb_set(RPARSER,MDL_DEBUG);
+//            mdb_set(IOW,MDL_DEBUG);
+//            mdb_set(DRFCON,MDL_DEBUG);
+//            break;
+//        default:
+//            mdb_set(APP,MDL_DEBUG);
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            mdb_set(MBTRN,MDL_DEBUG);
+//            mdb_set(MREADER,MDL_DEBUG);
+//            mdb_set(DRFCON,MDL_DEBUG);
+//            mdb_set(R7K,MDL_DEBUG);
+//            mdb_set(RPARSER,MDL_DEBUG);
+//            break;
+//    }
 
 
     // open trn data log
     if (trn_blog_en) {
         trn_blog_path = (char *)malloc(512);
         sprintf(trn_blog_path,"%s//%s-%s%s",g_log_dir,TRN_BLOG_NAME,session_date,TRN_LOG_EXT);
-        trn_blog = mlog_new(trn_blog_path,&blog_conf);
-        mlog_show(trn_blog,true,5);
-        mlog_open(trn_blog, flags, mode);
-        mlog_add(trn_blog,BLOG_ID,TRN_BLOG_DESC);
+//        trn_blog = mlog_new(trn_blog_path,&blog_conf);
+        trn_blog_id = mlog_get_instance(trn_blog_path,&blog_conf, TRN_BLOG_NAME);
+        mlog_show(trn_blog_id,true,5);
+        mlog_open(trn_blog_id, flags, mode);
+//        mlog_add(trn_blog,trn_blog_id,TRN_BLOG_DESC);
     }
     // open trn message log
     if (trn_mlog_en) {
         trn_mlog_path = (char *)malloc(512);
         sprintf(trn_mlog_path,"%s//%s-%s%s",g_log_dir,TRN_MLOG_NAME,session_date,TRN_LOG_EXT);
-        trn_mlog = mlog_new(trn_mlog_path,&mlog_conf);
-        mlog_show(trn_mlog,true,5);
-        mlog_open(trn_mlog, flags, mode);
-        mlog_add(trn_mlog,MLOG_ID,TRN_MLOG_DESC);
-		mlog_tprintf(MLOG_ID,"*** mbtrn session start ***\n");
-        mlog_tprintf(MLOG_ID,"cmdline [%s]\n",g_cmd_line);
-        mlog_tprintf(MLOG_ID,"libmbtrn v[%s] build[%s]\n",mbtrn_get_version(),mbtrn_get_build());
+//        trn_mlog = mlog_new(trn_mlog_path,&mlog_conf);
+         trn_mlog_id = mlog_get_instance(trn_mlog_path,&mlog_conf, TRN_MLOG_NAME);
+       mlog_show(trn_mlog_id,true,5);
+        mlog_open(trn_mlog_id, flags, mode);
+//        mlog_add(trn_mlog,trn_mlog_id,TRN_MLOG_DESC);
+		mlog_tprintf(trn_mlog_id,"*** mbtrn session start ***\n");
+        mlog_tprintf(trn_mlog_id,"cmdline [%s]\n",g_cmd_line);
+        mlog_tprintf(trn_mlog_id,"libmbtrn v[%s] build[%s]\n",mbtrn_get_version(),mbtrn_get_build());
     }else{
         fprintf(stderr,"*** mbtrn session start ***\n");
         fprintf(stderr,"cmdline [%s]\n",g_cmd_line);
@@ -2450,7 +2519,7 @@ int mbtrnpreprocess_init_debug(int verbose)
     app_stats = mbtrnpreprocess_stats_new(MBTPP_EV_COUNT,
                                           MBTPP_STA_COUNT,
                                           MBTPP_CH_COUNT,
-                                          iow_dtime(),
+                                          mtime_dtime(),
                                           trn_status_interval_sec);
 
     return 0;
@@ -2483,7 +2552,7 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
      * Store the relevant pointers and parameters within the
      * mb_io_struct structure *mb_io_ptr. */
 
-    MMDEBUG(APP,"configuring mbtrn_reader using %s:%d\n",reson_hostname,reson_port);
+    PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring mbtrn_reader using %s:%d\n",reson_hostname,reson_port));
     mb_io_ptr->mbsp = mbtrn_reader_new(reson_hostname,reson_port,reader_capacity, reson_subs, reson_nsubs);
 
     if (mb_io_ptr->mbsp->state==MBS_CONNECTED || mb_io_ptr->mbsp->state==MBS_SUBSCRIBED) {
@@ -2500,12 +2569,14 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
         mbr_blog_path = (char *)malloc(512);
         sprintf(mbr_blog_path,"%s//%s-%s%s",g_log_dir,MBR_BLOG_NAME,session_date,TRN_LOG_EXT);
 
-        mbr_blog = mlog_new(mbr_blog_path,&mbrlog_conf);
-        mlog_show(mbr_blog,true,5);
-        mlog_open(mbr_blog, flags, mode);
+//        mbr_blog = mlog_new(mbr_blog_path,&mbrlog_conf);
+        mbr_blog_id = mlog_get_instance(mbr_blog_path,&mbrlog_conf, MBR_BLOG_NAME);
+
+        mlog_show(mbr_blog_id,true,5);
+        mlog_open(mbr_blog_id, flags, mode);
 
 
-        mbtrn_reader_set_log(mb_io_ptr->mbsp,mbr_blog,RLOG_ID,MBR_BLOG_DESC);
+        mbtrn_reader_set_log(mb_io_ptr->mbsp,mbr_blog_id);
 
 //        mbr_blogs = fopen(mbr_blog_path,"a+");
 //        mbtrn_reader_set_logstream(mb_io_ptr->mbsp,mbr_blogs);

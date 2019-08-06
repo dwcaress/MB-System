@@ -59,18 +59,7 @@ GNU General Public License for more details
 // Headers 
 /////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <stdint.h>
-#include <memory.h>
-// assert only used in test
-#include <assert.h>
-// string only used in test
-#include <string.h>
-
 #include "mlist.h"
-#include "mdebug.h"
 
 /////////////////////////
 // Macros
@@ -81,7 +70,7 @@ GNU General Public License for more details
 /*
 /// @def PRODUCT
 /// @brief header software product name
-#define PRODUCT "MBRT"
+#define PRODUCT "MFRAME"
 
 /// @def COPYRIGHT
 /// @brief header software copyright info
@@ -124,7 +113,7 @@ static mlist_item_t *s_mlist_partition(mlist_item_t *head, mlist_item_t *end,
 {
     mlist_item_t *pivot = end;
     mlist_item_t *prev = NULL, *cur = head, *tail = pivot;
-    
+    mlist_item_t *tmp = NULL;
     // During partition, both the head and end of the list might change
     // which is updated in the newHead and newEnd variables
     while (cur != pivot){
@@ -141,7 +130,7 @@ static mlist_item_t *s_mlist_partition(mlist_item_t *head, mlist_item_t *end,
             // Move cur node to next of tail, and change tail
             if (prev)
                 prev->next = cur->next;
-            mlist_item_t *tmp = cur->next;
+            tmp = cur->next;
             cur->next = NULL;
             tail->next = cur;
             tail = cur;
@@ -172,16 +161,21 @@ static mlist_item_t *s_mlist_partition(mlist_item_t *head, mlist_item_t *end,
 static mlist_item_t *s_mlist_rsort(mlist_item_t *head, mlist_item_t *tail, mlist_cmp_fn compare)
 {
     mlist_item_t *retval=head;
+     mlist_item_t *newHead = NULL,*newTail = NULL;
+     mlist_item_t *pivot = NULL;
+     mlist_item_t *cur=NULL;
+    
     if (NULL!=head && NULL!=compare) {
         // base condition
         if (NULL==head || head == tail)
             return head;
         
-        mlist_item_t *newHead = NULL, *newTail = NULL;
+        newHead = NULL;
+        newTail = NULL;
         
         // Partition the list, newHead and newEnd will be updated
         // by the partition function
-        mlist_item_t *pivot = s_mlist_partition(head, tail, &newHead, &newTail,compare);
+        pivot = s_mlist_partition(head, tail, &newHead, &newTail,compare);
         
         // If pivot is the smallest element - no need to recur for
         // the left part.
@@ -197,7 +191,7 @@ static mlist_item_t *s_mlist_rsort(mlist_item_t *head, mlist_item_t *tail, mlist
             newHead = s_mlist_rsort(newHead, tmp, compare);
             
             // Change next of last node of the left half to pivot
-            mlist_item_t *cur=newHead;
+            cur=newHead;
             while (cur != NULL && cur->next != NULL){
                 cur = cur->next;
             }
@@ -233,7 +227,7 @@ mlist_item_t *mlist_item_new(void *item)
         self->free_fn = NULL;
         self->next    = NULL;
     }else{
-        MERROR("malloc failed\n");
+        fprintf(stderr,"malloc failed\n");
     }
     return self;
 }
@@ -443,6 +437,27 @@ void *mlist_next(mlist_t *self)
 }
 // End function mlist_next
 
+/// @fn void * mlist_element(mlist_t * self, uint32_t index)
+/// @brief get ith list item data.
+/// @param[in] self mlist reference
+/// @param[in] index element index
+/// @return list item data pointer on success, NULL otherwise
+void *mlist_element(mlist_t *self, uint32_t index)
+{
+    void *retval=NULL;
+    if ( (NULL!=self && self->size>0) )  {
+        mlist_item_t *pitem=self->head;
+        uint32_t i=0;
+        retval=pitem->data;
+        while(pitem!=NULL && (i<self->size) && (i<=index)){
+            retval=pitem->data;
+            pitem=pitem->next;
+            i++;
+        }
+    }
+    return retval;
+}
+// End function mlist_element
 
 /// @fn void mlist_add(mlist_t * self, void * item)
 /// @brief add an item to mlist.
@@ -472,7 +487,7 @@ int mlist_add(mlist_t *self, void *item)
             self->size++;
             retval=0;
         }else{
-            MERROR("mlist_item_new failed\n");
+            fprintf(stderr,"mlist_item_new failed\n");
         }
     }
     return retval;
@@ -524,7 +539,7 @@ void mlist_remove(mlist_t *self, void *item)
                         }
                     }
 
-                    //MDEBUG("freeing item[%p] plist[%p] w/ destroy\n",plist->data,plist);
+                    //fprintf(stderr,"freeing item[%p] plist[%p] w/ destroy\n",plist->data,plist);
                     // free item, list entry
                     if (plist->free_fn!=NULL) {
                         plist->free_fn(plist->data);
@@ -583,7 +598,7 @@ void *mlist_pop(mlist_t *self)
 {
     void *retval=NULL;
     if (NULL!=self && NULL!=self->head && self->size>0) {
-        
+        mlist_item_t *pdel =NULL;
         retval = self->head->data;
         
         if (self->head==self->tail) {
@@ -594,7 +609,7 @@ void *mlist_pop(mlist_t *self)
             self->head=NULL;
         }else{
             self->cursor = (self->cursor==self->head?self->head->next:self->cursor);
-            mlist_item_t *pdel = self->head;
+            pdel = self->head;
         	self->head = self->head->next;
             free(pdel);
         }
@@ -642,7 +657,7 @@ void *mlist_vlookup(mlist_t *self, void *value, mlist_ival_fn vcompare)
     if (NULL!=self && NULL!=vcompare) {
         // check whether list contains item
         mlist_item_t *plist=self->head;
-//        MDEBUG("plist[%p] self[%p] head[%p] vc[%p] v[%p]\n",plist,self,(self!=NULL?self->head:NULL),vcompare,value);
+//        fprintf(stderr,"plist[%p] self[%p] head[%p] vc[%p] v[%p]\n",plist,self,(self!=NULL?self->head:NULL),vcompare,value);
         while (NULL!=plist) {
             if (vcompare(plist->data,value)) {
                 retval=plist->data;
@@ -721,6 +736,7 @@ void mlist_autofree(mlist_t *self, mlist_free_fn fn)
 /// @brief set per-item free function function. If set, will be used to release
 /// item resources. Overrides autofree function.
 /// @param[in] self mlist reference
+/// @param[in] item data item
 /// @param[in] fn free function
 /// @return none
 void mlist_freefn(mlist_t *self, void *item, mlist_free_fn fn)
@@ -765,7 +781,7 @@ static bool s_testcmp(void *a, void *b)
     char *sa=(char *)a;
     char *sb=(char *)b;
     int cmp=strcmp(sa,sb);
-//    MDEBUG("a[%s] vs b[%s] -> [%d]\n",sa,sb,cmp);
+//    fprintf(stderr,"a[%s] vs b[%s] -> [%d]\n",sa,sb,cmp);
     return (cmp<0?true:false);
 }
 // End function s_testcmp
@@ -778,17 +794,18 @@ int mlist_test()
 {
     int retval=-1;
     char *dp=NULL;
-
+    char *xp=NULL;
+    int i=0;
     // test new
     mlist_t *list = mlist_new();
     assert(list!=NULL);
-    MDEBUG("test new          OK\n");
+    fprintf(stderr,"test new          OK\n");
 
     // test add
     mlist_add(list,"wine");
     mlist_add(list,"cheese");
     mlist_add(list,"bread");
-    MDEBUG("test add          OK\n");
+    fprintf(stderr,"test add          OK\n");
 
     // test size
     assert(mlist_size(list)==3);
@@ -798,24 +815,23 @@ int mlist_test()
     assert(strcmp(dp,"wine")==0);
     dp = (char *)mlist_tail(list);
     assert(strcmp(dp,"bread")==0);
-    MDEBUG("test head/tail    OK\n");
+    fprintf(stderr,"test head/tail    OK\n");
 
     dp = (char *)mlist_first(list);
     assert(strcmp(dp,"wine")==0);
     dp = (char *)mlist_last(list);
     assert(strcmp(dp,"bread")==0);
-    MDEBUG("test first/last   OK\n");
+    fprintf(stderr,"test first/last   OK\n");
     
     
-    char *xp=NULL;
     
     // test sort
     mlist_sort(list,s_testcmp);
-    MDEBUG("test sort         OK\n");
+    fprintf(stderr,"test sort         OK\n");
     
     // test iterator
     xp = (char *)mlist_first(list);
-    int i=0;
+
     while (xp!=NULL) {
         switch (i) {
             case 0:
@@ -834,20 +850,20 @@ int mlist_test()
         xp=(char *)mlist_next(list);
         i++;
     }
-    MDEBUG("test next         OK\n");
+    fprintf(stderr,"test next         OK\n");
     
     // test pop
     xp=(char *)mlist_pop(list);
-//    MDEBUG("pop :%s\n",xp);
+//    fprintf(stderr,"pop :%s\n",xp);
     assert(strcmp(xp,"bread")==0);
     xp=(char *)mlist_pop(list);
-//    MDEBUG("pop :%s\n",xp);
+//    fprintf(stderr,"pop :%s\n",xp);
     assert(strcmp(xp,"cheese")==0);
     xp=(char *)mlist_pop(list);
-//    MDEBUG("pop :%s\n",xp);
+//    fprintf(stderr,"pop :%s\n",xp);
     assert(strcmp(xp,"wine")==0);
     assert(mlist_size(list)==0);
-    MDEBUG("test pop          OK\n");
+    fprintf(stderr,"test pop          OK\n");
     // test push
     // be careful about using constants
     // to look them up, the address pointers must match
@@ -858,7 +874,7 @@ int mlist_test()
     assert(mlist_size(list)==2);
     assert(strcmp("this",mlist_item(list,"this"))==0);
     assert(strcmp("that",mlist_item(list,"that"))==0);
-    MDEBUG("test push         OK\n");
+    fprintf(stderr,"test push         OK\n");
     
     // this item is dynamically allocated
     // and a reference is retained.
@@ -870,11 +886,11 @@ int mlist_test()
     // test freefn
     mlist_freefn(list,dp, free);
     assert(mlist_size(list)==3);
-    MDEBUG("test freefn       OK\n");
+    fprintf(stderr,"test freefn       OK\n");
    
     // test item lookup
     assert(strcmp((char *)mlist_item(list,dp),dp)==0);
-    MDEBUG("test item         OK\n");
+    fprintf(stderr,"test item         OK\n");
 
     // release resources
     mlist_destroy(&list);

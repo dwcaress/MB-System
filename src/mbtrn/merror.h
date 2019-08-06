@@ -70,47 +70,54 @@
 /////////////////////////
 // Includes 
 /////////////////////////
-
-/////////////////////////
-// Type Definitions
-/////////////////////////
-
-/// @typedef enum m_err_t m_err_t
-/// @brief Application specific error definitions.
-/// Applications should define these values and implement
-/// the me_strerror function.
-/// @sa merror.c
-typedef enum{
-    ME_EUNKNOWN=-1,
-    ME_OK=0,
-    ME_ECREATE=0x1,
-    ME_ECONNECT=0x2,
-    ME_ESUB=0x4,
-    ME_EREAD=0x8,
-    ME_EPOLL=0x10,
-    ME_EPARSE=0x20,
-    ME_EINVAL=0x40,
-    ME_ETMOUT=0x100,
-    ME_EINC=0x200,
-    ME_ERCV=0x400,
-    ME_ESOCK=0x800,
-    ME_ENOMEM=0x1000,
-    ME_ENOSPACE=0x2000,
-    ME_EWRITE=0x4000,
-    ME_EOF=0x8000
-} m_err_t;
+#include "mframe.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
 
+#define ME_ERRORNO_BASE 8675309
+
+#define ME_OK       (ME_ERRORNO_BASE+0)
+#define ME_EINVAL   (ME_ERRORNO_BASE+1)
+#define ME_EPARSE   (ME_ERRORNO_BASE+2)
+#define ME_ETMOUT   (ME_ERRORNO_BASE+3)
+#define ME_ESELECT  (ME_ERRORNO_BASE+4)
+#define ME_EPOLL    (ME_ERRORNO_BASE+5)
+#define ME_ESOCK    (ME_ERRORNO_BASE+6)
+#define ME_ESERIAL  (ME_ERRORNO_BASE+7)
+#define ME_ECREATE  (ME_ERRORNO_BASE+8)
+#define ME_ECONNECT (ME_ERRORNO_BASE+9)
+#define ME_EREAD    (ME_ERRORNO_BASE+10)
+#define ME_EWRITE   (ME_ERRORNO_BASE+11)
+#define ME_EOF      (ME_ERRORNO_BASE+12)
+#define ME_ENOSPACE (ME_ERRORNO_BASE+13)
+#define ME_ENOMEM   (ME_ERRORNO_BASE+14)
+#define ME_ESUB     (ME_ERRORNO_BASE+15)
+#define ME_ERECV    (ME_ERRORNO_BASE+16)
+
+/////////////////////////
+// Type Definitions
+/////////////////////////
+
+typedef const char * (* me_error_str_func_t)(int enumber);
+
 /////////////////////////
 // Exports
 /////////////////////////
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// @var int me_errno
 /// @brief application specific global error value.
 extern int me_errno;
 const char *me_strerror(int m_errno);
+void me_set_strerror_func(me_error_str_func_t *func);
+    
+#ifdef __cplusplus
+}
+#endif
 
 // include guard
 #endif

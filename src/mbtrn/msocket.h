@@ -1,11 +1,10 @@
 ///
-/// @file iowrap-posix.h
+/// @file msocket.h
 /// @authors k. headley
 /// @date 06 nov 2012
  
-/// MBRTN platform-dependent IO wrappers implementation
-/// for *nix/Cygwin
-
+/// mframe cross-platform socket IO wrappers
+ 
 /// @sa doxygen-examples.c for more examples of Doxygen markup
  
 
@@ -61,85 +60,39 @@
  */
 
 // include guard
-#ifndef IOW_POSIX_H
-/// @def IOW_POSIX_H
-/// @brief TBD
-#define IOW_POSIX_H
+#ifndef MSOCKET_H
+/// @def MSOCKET_H
+/// @brief include guard
+#define MSOCKET_H
 
 /////////////////////////
 // Includes 
 /////////////////////////
-
-#include <sys/types.h>
-#ifdef _WIN32
-#	include <winsock2.h>
-#else
-#	include <sys/socket.h>
-#	include <netinet/in.h>
-#	include <netdb.h>
-#endif
-#include <pthread.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-
-#ifdef _WIN32
-#	include <sys/stat.h>
-#   include <io.h>
-
-typedef int mode_t;
-
-/// @Note If STRICT_UGO_PERMISSIONS is not defined, then setting Read for any
-///       of User, Group, or Other will set Read for User and setting Write
-///       will set Write for User.  Otherwise, Read and Write for Group and
-///       Other are ignored.
-///
-/// @Note For the POSIX modes that do not have a Windows equivalent, the modes
-///       defined here use the POSIX values left shifted 16 bits.
-
-static const mode_t S_ISUID      = 0x08000000;           ///< does nothing
-static const mode_t S_ISGID      = 0x04000000;           ///< does nothing
-static const mode_t S_ISVTX      = 0x02000000;           ///< does nothing
-static const mode_t S_IRUSR      = (mode_t)(_S_IREAD);     ///< read by user
-#ifdef _MSC_VER		// No idea why I have to jump this one (and redefine back in iowrap-posix.c).  JL
-static const mode_t S_IWUSR_     = (mode_t)(_S_IWRITE);    ///< write by user
-#else
-static const mode_t S_IWUSR      = (mode_t)(_S_IWRITE);    ///< write by user
-#endif
-static const mode_t S_IXUSR      = 0x00400000;           ///< does nothing
-#   ifndef STRICT_UGO_PERMISSIONS
-static const mode_t S_IRGRP      = (mode_t)(_S_IREAD);     ///< read by *USER*
-static const mode_t S_IWGRP      = (mode_t)(_S_IWRITE);    ///< write by *USER*
-static const mode_t S_IXGRP      = 0x00080000;           ///< does nothing
-static const mode_t S_IROTH      = (mode_t)(_S_IREAD);     ///< read by *USER*
-static const mode_t S_IWOTH      = (mode_t)(_S_IWRITE);    ///< write by *USER*
-static const mode_t S_IXOTH      = 0x00010000;           ///< does nothing
-#   else
-static const mode_t S_IRGRP      = 0x00200000;           ///< does nothing
-static const mode_t S_IWGRP      = 0x00100000;           ///< does nothing
-static const mode_t S_IXGRP      = 0x00080000;           ///< does nothing
-static const mode_t S_IROTH      = 0x00040000;           ///< does nothing
-static const mode_t S_IWOTH      = 0x00020000;           ///< does nothing
-static const mode_t S_IXOTH      = 0x00010000;           ///< does nothing
-#   endif
-static const mode_t MS_MODE_MASK = 0x0000ffff;           ///< low word
-
-#if !defined (S_IRWXU)
-#	define S_IRWXU 00700         /* read, write, execute: owner. */
-#endif /* !S_IRWXU */
-#if !defined (S_IRWXG)
-#	define S_IRWXG 00070
-#endif /* S_IRWXG */
-#if !defined (S_IRWXO)
-#	define S_IRWXO 00007
-#endif /* S_IRWXO */
-
-#endif
+#include "mframe.h"
 
 
 /////////////////////////
-// Type Definitions
+// Macros
 /////////////////////////
+
+#if defined(__unix__) || defined(__APPLE__) || defined(__CYGWIN__)
+//#pragma message "Compiling __unix__"
+/// @def MSOCK_ADDR_LEN
+/// @brief address structure size
+#define MSOCK_ADDR_LEN (sizeof(struct sockaddr_in))
+#elif defined(__WIN32)
+//#pragma message "Compiling __WIN32"
+//define something for Windows (32-bit and 64-bit, this part is common)
+#ifdef _WIN64
+//define something for Windows (64-bit only)
+#else
+//define something for Windows (32-bit only)
+#endif
+#endif
+
+/// @def MSOCK_MAX_QUEUE
+/// @brief max client connections
+#define MSOCK_MAX_QUEUE 8
 
 /// @def MAX_ADDR_BYTES
 /// @brief address length
@@ -167,9 +120,58 @@ static const mode_t MS_MODE_MASK = 0x0000ffff;           ///< low word
 /// @brief time conversion
 #define MSEC_PER_SEC 1000L
 
-/// @typedef struct ip_addr_s iow_addr_t
+/////////////////////////
+// Type Definitions
+/////////////////////////
+
+/// @struct ip_addr_s
 /// @brief IP address structure
- struct ip_addr_s
+struct ip_addr_s;
+/// @typedef struct ip_addr_s msock_addr_t
+/// @brief IP address typedef
+typedef struct ip_addr_s msock_addr_t;
+
+/// @struct msock_socket_s
+/// @brief wrapped socket structure
+struct msock_socket_s;
+/// @typedef struct msock_socket_s msock_socket_t
+/// @brief socket struct typedef
+typedef struct msock_socket_s msock_socket_t;
+
+/// @struct msock_pstats_s
+/// @brief connection statistics
+struct msock_pstats_s;
+/// @typedef struct msock_pstats_s msock_pstats_t
+/// @brief typedef for connection statistics
+typedef struct msock_pstats_s msock_pstats_t;
+
+/// @struct msock_connection_s
+/// @brief connection (client) connection structure
+struct msock_connection_s;
+/// @typedef struct msock_connection_s msock_connection_t
+/// @brief connection (client) connection typedef
+typedef struct msock_connection_s msock_connection_t;
+
+/// @typedef enum msock_socket_ctype msock_socket_ctype
+/// @brief socket connection types (TCP, UDP)
+typedef enum {ST_TCP=1,ST_UDP}msock_socket_ctype;
+
+/// @typedef enum msock_status_t msock_status_t
+/// @brief socket states
+typedef enum {
+SS_ERROR=-1,
+SS_CREATED,
+SS_CONFIGURED,
+SS_BOUND,
+SS_LISTENING,
+SS_LISTENOK,
+SS_CONNECTED
+} msock_status_t;
+
+
+/// @typedef struct ip_addr_s msock_addr_t
+/// @brief IP address structure
+struct ip_addr_s
 {
     /// @var ip_addr_s::hints
     /// @brief address for opening a socket
@@ -191,31 +193,28 @@ static const mode_t MS_MODE_MASK = 0x0000ffff;           ///< low word
     char portstr[PORTSTR_BYTES];
 };
 
-/// @struct iow_socket_s
+/// @struct msock_socket_s
 /// @brief wrapped socket
-struct iow_socket_s
+struct msock_socket_s
 {
-    /// @var iow_socket_s::addr
+    /// @var msock_socket_s::addr
     /// @brief socket endpoint address
     struct ip_addr_s *addr;
-    /// @var iow_socket_s::type
+    /// @var msock_socket_s::type
     /// @brief socket type (ST_TCP, ST_UDP)
     int type;
-    /// @var iow_socket_s::fd
+    /// @var msock_socket_s::fd
     /// @brief underlying socket file descriptor
     int fd;
-    /// @var iow_socket_s::qlen
-    /// @brief number of clients
-    uint16_t qlen;
-    /// @var iow_socket_s::status
+    /// @var msock_socket_s::status
     /// @brief socket status
-    /// @sa iowrap.h
+    /// @sa msocket.h
     int status;
 };
 
-/// @struct iow_pstats_s
+/// @struct msock_pstats_s
 /// @brief peer connection statistics
-struct iow_pstats_s
+struct msock_pstats_s
 {
     time_t t_connect;
     time_t t_disconnect;
@@ -227,84 +226,83 @@ struct iow_pstats_s
     uint32_t err_count;
 };
 
-/// @struct iow_peer_s
+/// @struct msock_connection_s
 /// @brief peer connection structure definition
-struct iow_peer_s
+struct msock_connection_s
 {
-    /// @var iow_peer_s::addr
+
+    /// @var msock_connection_s::s
+    /// @brief socket (fd wrapper)
+    msock_socket_t *sock;
+    /// @var msock_connection_s::addr
     /// @brief IP address
     struct ip_addr_s *addr;
-    /// @var iow_peer_s::chost
+    /// @var msock_connection_s::chost
     /// @brief peer hostname
     char chost[NI_MAXHOST];
-    /// @var iow_peer_s::service
+    /// @var msock_connection_s::service
     /// @brief peer IP port/service (string)
     char service[NI_MAXSERV];
-    /// @var iow_peer_s::id
+    /// @var msock_connection_s::id
     /// @brief peer port/service (int)
     int id;
-    /// @var iow_peer_s::heartbeat
+    /// @var msock_connection_s::heartbeat
     /// @brief heartbeat value
     /// applications may use to track UDP connection status
     uint16_t heartbeat;
-    /// @var iow_peer_s::stats
+    double hbtime;
+    /// @var msock_connection_s::stats
     /// @brief connection statistics
-    struct iow_pstats_s stats;
-    /// @var iow_peer_s::next
+    struct msock_pstats_s stats;
+    /// @var msock_connection_s::next
     /// @brief applications may use to form linked lists
     /// @sa mlist.h
-    struct iow_peer_s *next;
+    struct msock_connection_s *next;
 };
-
-/// @struct iow_file_s
-/// @brief wrapped file representation (posix implementation)
-struct iow_file_s
-{
-    /// @var iow_file_s::path
-    /// @brief file path
-    char *path;
-    /// @var iow_file_s::fd
-    /// @brief file descriptor
-    int fd;
-    /// @var iow_file_s::flags
-    /// @brief file attribute flags
-    int flags;
-    /// @var iow_file_s::mode
-    /// @brief file permissions flags
-    mode_t mode;
-};
-
-/// @typedef struct iow_thread_s iow_thread_t
-/// @brief wrapped thread representation (posix implementation)
-struct iow_thread_s
-{
-    /// @var iow_thread_s::t
-    /// @brief posix thread
-    pthread_t t;
-    /// @var iow_thread_s::attr
-    /// @brief thread attributes
-    pthread_attr_t attr;
-    /// @var iow_thread_s::status
-    /// @brief thread exit status
-    void **status;
-};
-
-/// @typedef struct iow_mutex_s iow_mutex_t
-/// @brief wrapped mutex representation (posix implementation)
-struct iow_mutex_s
-{
-    /// @var iow_mutex_s::m
-    /// @brief posix mutex
-    pthread_mutex_t m;
-};
-
-/////////////////////////
-// Macros
-/////////////////////////
 
 /////////////////////////
 // Exports
 /////////////////////////
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+// iow socket API
+
+msock_socket_t *msock_socket_new(const char *host, int port, msock_socket_ctype type);
+void msock_socket_destroy(msock_socket_t **pself);
+// pass in NULL socket to create dynamically
+int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_ctype type);
+int msock_set_blocking(msock_socket_t *s, bool enabled);
+int msock_bind(msock_socket_t *s);
+int msock_connect(msock_socket_t *s);
+int msock_listen(msock_socket_t *s, int queue);
+    int msock_accept(msock_socket_t *s, msock_addr_t *addr);
+
+int64_t msock_send(msock_socket_t *s,byte *buf, uint32_t len);
+int64_t msock_recv(msock_socket_t *s, byte *buf, uint32_t len,int flags);
+int64_t msock_sendto(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_t len, int32_t flags);
+int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_t len,int flags);
+int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t timeout_msec);
+char *msock_addr2str(msock_socket_t *s, char *dest, size_t len);
+    int msock_close(msock_socket_t *self);
+msock_socket_t *msock_wrap_fd(int fd);
+
+msock_addr_t *msock_addr_new();
+void msock_addr_destroy(msock_addr_t **pself);
+void msock_addr_init(msock_addr_t *self);
+msock_connection_t *msock_connection_new();
+void msock_connection_destroy(msock_connection_t **pself);
+void msock_connection_free(void *pself);
+
+    int msock_connection_addr2str(msock_connection_t *self);
+
+void msock_pstats_show(msock_pstats_t *self, bool verbose, uint16_t indent);
+int msock_test();
+    
+#ifdef __cplusplus
+}
+#endif
 
 // include guard
 #endif

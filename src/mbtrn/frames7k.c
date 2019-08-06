@@ -59,16 +59,25 @@
 // Headers
 /////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <inttypes.h>
+//#include <getopt.h>
+//#include <stdarg.h>
+//#include <signal.h>
+//#include "r7kc.h"
+//#include "iowrap.h"
+//#include "mdebug.h"
+//#include "mbtrn.h"
+//#include "mconfig.h"
+
 #include <getopt.h>
-#include <stdarg.h>
-#include <signal.h>
 #include "r7kc.h"
-#include "iowrap.h"
-#include "mdebug.h"
+#include "msocket.h"
+#include "medebug.h"
+#include "mmdebug.h"
 #include "mbtrn.h"
+#include "merror.h"
 #include "mconfig.h"
 
 /////////////////////////
@@ -110,6 +119,43 @@
 /////////////////////////
 // Declarations
 /////////////////////////
+
+/// @enum frames7k_module_ids
+/// @brief application module IDs
+/// [note : starting above reserved mframe module IDs]
+//typedef enum{
+//    MOD_S7K=MM_MODULE_COUNT,
+//    APP_MODULE_COUNT
+//}frames7k_module_ids;
+
+///// @enum f7k_channel_id
+///// @brief test module channel IDs
+///// [note : starting above reserved mframe channel IDs]
+//typedef enum{
+//    ID_F7K_V1=MM_CHANNEL_COUNT,
+//    ID_F7K_V2,
+//    F7K_CH_COUNT
+//}f7k_channel_id;
+//
+///// @enum f7k_channel_mask
+///// @brief test module channel masks
+//typedef enum{
+//    F7K_V1= (1<<ID_F7K_V1),
+//    F7K_V2= (1<<ID_F7K_V2)
+//}f7k_channel_mask;
+//
+///// @var char *mmd_test_m1_ch_names[F7K_CH_COUNT]
+///// @brief test module channel names
+//char *f7k_ch_names[F7K_CH_COUNT]={
+//    "trace.mbtrn",
+//    "debug.mbtrn",
+//    "warn.mbtrn",
+//    "err.mbtrn",
+//    "f7k.v1",
+//    "f7k.v2"
+//};
+//
+//static mmd_module_config_t mmd_config_default={MOD_F7K,"MOD_F7K",F7K_CH_COUNT,((MM_ERR|MM_WARN)),f7k_ch_names};
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -231,30 +277,59 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
     }// while
 
-    mcfg_configure(NULL,0);
-    mdb_set(MDI_ALL,MDL_UNSET);
-    mdb_set(IOW,MDL_ERROR);
-    mdb_set(R7K,MDL_ERROR);
-    mdb_set(MBTRN,MDL_ERROR);
+    mconf_init(NULL,NULL);
+    mmd_channel_set(MOD_F7K,MM_ERR);
+    mmd_channel_set(MOD_R7K,MM_ERR);
+    mmd_channel_set(MOD_MBTRN,MM_ERR);
+    mmd_channel_set(MOD_MSOCK,MM_ERR);
+
     switch (cfg->verbose) {
         case 0:
-            mdb_set(MDI_ALL,MDL_UNSET);
+            mmd_channel_set(MOD_F7K,0);
+            mmd_channel_set(MOD_R7K,0);
+            mmd_channel_set(MOD_MBTRN,0);
+            mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
-            mdb_set(APP1,MDL_DEBUG);
+            mmd_channel_en(MOD_F7K,S7K_V1);
+            mmd_channel_en(MOD_F7K,MM_DEBUG);
             break;
         case 2:
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            mdb_set(IOW,MDL_DEBUG);
-            mdb_set(R7K,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_DEBUG);
+            mmd_channel_en(MOD_F7K,S7K_V1);
+            mmd_channel_en(MOD_F7K,S7K_V2);
+            mmd_channel_en(MOD_F7K,MM_DEBUG);
+            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+            mmd_channel_en(MOD_R7K,MM_DEBUG);
+            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
             break;
         default:
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
             break;
     }
+
+//    mcfg_configure(NULL,0);
+//    mdb_set(MDI_ALL,MDL_UNSET);
+//    mdb_set(IOW,MDL_ERROR);
+//    mdb_set(R7K,MDL_ERROR);
+//    mdb_set(MBTRN,MDL_ERROR);
+//    switch (cfg->verbose) {
+//        case 0:
+//            mdb_set(MDI_ALL,MDL_UNSET);
+//            break;
+//        case 1:
+//            mdb_set(APP1,MDL_DEBUG);
+//            break;
+//        case 2:
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            mdb_set(IOW,MDL_DEBUG);
+//            mdb_set(R7K,MDL_DEBUG);
+//            mdb_set(MBTRN,MDL_DEBUG);
+//            break;
+//        default:
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            break;
+//    }
 
 }
 // End function parse_args
@@ -269,11 +344,11 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            MMDEBUG(APP2,"received sig[%d]\n",signum);
+            PMPRINT(MOD_F7K,F7K_V2,(stderr,"received sig[%d]\n",signum));
             g_stop_flag=true;
             break;
         default:
-            MERROR("unhandled signal[%d]\n",signum);
+            PEPRINT((stderr,"unhandled signal[%d]\n",signum));
             break;
     }
 }
@@ -312,7 +387,7 @@ static int s_app_main (app_cfg_t *cfg)
         // test mbtrn_read_frame
         byte frame_buf[MAX_FRAME_BYTES_7K]={0};
         
-        MMDEBUG(APP2,"connecting reader [%s/%d]\n",cfg->host,R7K_7KCENTER_PORT);
+        PMPRINT(MOD_F7K,F7K_V2,(stderr,"connecting reader [%s/%d]\n",cfg->host,R7K_7KCENTER_PORT));
         
         retval=0;
         while ( (forever || (count<cfg->cycles)) && !g_stop_flag) {
@@ -322,25 +397,25 @@ static int s_app_main (app_cfg_t *cfg)
             // read frame
             if( (istat = mbtrn_read_frame(reader, frame_buf, MAX_FRAME_BYTES_7K, MBR_NET_STREAM, 0.0, MBTRN_READ_TMOUT_MSEC,&lost_bytes )) > 0){
                 
-                MMDEBUG(APP1,"mbtrn_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n",count,cfg->cycles,istat,lost_bytes);
+                PMPRINT(MOD_F7K,F7K_V1,(stderr,"mbtrn_read_frame cycle[%d/%d] ret[%d] lost[%"PRIu32"]\n",count,cfg->cycles,istat,lost_bytes));
                 // show contents
                 if (cfg->verbose>=1) {
                     r7k_nf_t *nf = (r7k_nf_t *)(frame_buf);
                     r7k_drf_t *drf = (r7k_drf_t *)(frame_buf+R7K_NF_BYTES);
-                    MMDEBUG(APP1,"NF:\n");
+                    PMPRINT(MOD_F7K,F7K_V1,(stderr,"NF:\n"));
                     r7k_nf_show(nf,false,5);
-                    MMDEBUG(APP1,"DRF:\n");
+                    PMPRINT(MOD_F7K,F7K_V1,(stderr,"DRF:\n"));
                     r7k_drf_show(drf,false,5);
-                    MMDEBUG(APP1,"data:\n");
+                    PMPRINT(MOD_F7K,F7K_V1,(stderr,"data:\n"));
                     if (istat>0 && cfg->verbose>1) {
                         r7k_hex_show(frame_buf,istat,16,true,5);
                     }
                 }
             }else{
                 // read error
-                MERROR("ERR - mbtrn_read_frame - cycle[%d/%d] ret[%d] lost[%d]\n",count+1,cfg->cycles,istat,lost_bytes);
-                if (me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERCV) {
-                    MERROR("socket closed - reconnecting in 5 sec\n");
+                PEPRINT((stderr,"ERR - mbtrn_read_frame - cycle[%d/%d] ret[%d] lost[%d]\n",count+1,cfg->cycles,istat,lost_bytes));
+                if (me_errno==ME_ESOCK || me_errno==ME_EOF || me_errno==ME_ERECV) {
+                    PEPRINT((stderr,"socket closed - reconnecting in 5 sec\n"));
                     sleep(5);
                     mbtrn_reader_connect(reader,true);
                 }
@@ -348,9 +423,9 @@ static int s_app_main (app_cfg_t *cfg)
         }
         
         if (g_stop_flag) {
-            MMDEBUG(APP2,"interrupted - exiting cycles[%d/%d]\n",count,cfg->cycles);
+            PMPRINT(MOD_F7K,F7K_V2,(stderr,"interrupted - exiting cycles[%d/%d]\n",count,cfg->cycles));
         }else{
-            MMDEBUG(APP2,"cycles[%d/%d]\n",count,cfg->cycles);
+            PMPRINT(MOD_F7K,F7K_V2,(stderr,"cycles[%d/%d]\n",count,cfg->cycles));
         }
     }// else invalid argument
     return retval;

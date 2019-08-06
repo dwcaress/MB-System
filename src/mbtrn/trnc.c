@@ -60,18 +60,26 @@
 // Headers
 /////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <getopt.h>
+//#include <stdarg.h>
+//#include <string.h>
+//#include <errno.h>
+//#include <inttypes.h>
+//#include <signal.h>
+//#include "iowrap.h"
+//#include "r7kc.h"
+//#include "mbtrn.h"
+//#include "mdebug.h"
+//#include "mbtrn-utils.h"
+
 #include <getopt.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <signal.h>
-#include "iowrap.h"
+#include "msocket.h"
 #include "r7kc.h"
 #include "mbtrn.h"
-#include "mdebug.h"
+#include "mmdebug.h"
+#include "medebug.h"
 #include "mbtrn-utils.h"
 
 /////////////////////////
@@ -140,6 +148,35 @@
 /////////////////////////
 // Declarations
 /////////////////////////
+
+///// @enum trnc_channel_id
+///// @brief test module channel IDs
+///// [note : starting above reserved mframe channel IDs]
+//typedef enum{
+//    ID_TRNC_V1=MM_CHANNEL_COUNT,
+//    ID_TRNC_V2,
+//    TRNC_CH_COUNT
+//}trnc_channel_id;
+//
+///// @enum trnc_channel_mask
+///// @brief test module channel masks
+//typedef enum{
+//    TRNC_V1= (1<<ID_TRNC_V1),
+//    TRNC_V2= (1<<ID_TRNC_V2)
+//}trnc_channel_mask;
+//
+//
+///// @var char *trnc_ch_names[TRNC_CH_COUNT]
+///// @brief module channel names
+//char *trnc_ch_names[TRNC_CH_COUNT]={
+//    "trace.trnc",
+//    "debug.trnc",
+//    "warn.trnc",
+//    "err.trnc",
+//    "trnc.v1",
+//    "trnc.v2"
+//};
+//static mmd_module_config_t mmd_config_default= {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)|TRNC_1),trnc_ch_names};
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -309,36 +346,42 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
     }// while
     
-    // configure debug output
+    mconf_init(NULL,NULL);
+    mmd_channel_set(MOD_TRNC,MM_ERR);
+    mmd_channel_set(MOD_R7K,MM_ERR);
+    mmd_channel_set(MOD_MBTRN,MM_ERR);
+    mmd_channel_set(MOD_MSOCK,MM_ERR);
+
     switch (cfg->verbose) {
         case 0:
-            mdb_set(ID_APP,MDL_INFO);
+            mmd_channel_set(MOD_TRNC,0);
+            mmd_channel_set(MOD_R7K,0);
+            mmd_channel_set(MOD_MBTRN,0);
+            mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
-            mdb_set(ID_APP,MDL_DEBUG);
+            mmd_channel_en(MOD_TRNC,TRNC_V1);
+            mmd_channel_en(MOD_S7K,MM_DEBUG);
             break;
         case 2:
-            mdb_set(ID_APP,MDL_DEBUG);
-            mdb_set(ID_APP2,MDL_DEBUG);
-            break;
-        case 3:
-            mdb_set(ID_APP,MDL_DEBUG);
-            mdb_set(ID_APP2,MDL_DEBUG);
-            mdb_set(ID_APP3,MDL_DEBUG);
+            mmd_channel_en(MOD_TRNC,TRNC_V1);
+            mmd_channel_en(MOD_TRNC,TRNC_V2);
+            mmd_channel_en(MOD_TRNC,MM_DEBUG);
+            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+            mmd_channel_en(MOD_R7K,MM_DEBUG);
+            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
             break;
         default:
-            mdb_set(ID_APP,MDL_ERROR);
             break;
     }
     
-    
-    MMDEBUG(ID_APP,"verbose [%s]\n",(cfg->verbose?"Y":"N"));
-    MMDEBUG(ID_APP,"host    [%s]\n",cfg->host);
-    MMDEBUG(ID_APP,"port    [%d]\n",cfg->port);
-    MMDEBUG(ID_APP,"hbeat   [%d]\n",cfg->hbeat);
-    MMDEBUG(ID_APP,"block   [%s]\n",(cfg->blocking==0?"N":"Y"));
-    MMDEBUG(ID_APP,"cycles  [%d]\n",cfg->cycles);
-    MMDEBUG(ID_APP,"bsize   [%d]\n",cfg->bsize);
+    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
+    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"host    [%s]\n",cfg->host));
+    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"port    [%d]\n",cfg->port));
+    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"hbeat   [%d]\n",cfg->hbeat));
+    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
+    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"cycles  [%d]\n",cfg->cycles));
+    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"bsize   [%d]\n",cfg->bsize));
 }
 // End function parse_args
 
@@ -352,7 +395,7 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            MMDEBUG(ID_APP,"\nsig received[%d]\n",signum);
+            PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"\nsig received[%d]\n",signum));
             g_interrupt=true;
             break;
         default:
@@ -362,12 +405,12 @@ static void s_termination_handler (int signum)
 }
 // End function termination_handler
 
-/// @fn int s_trnc_state_machine(iow_socket_t *s, app_cfg_t *cfg)
+/// @fn int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 /// @brief state machine implementation
-/// @param[in] s iow_socket_t reference
+/// @param[in] s msock_socket_t reference
 /// @param[in] cfg app_cfg reference
 /// @return none
-static int s_trnc_state_machine(iow_socket_t *s, app_cfg_t *cfg)
+static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
 {
     int retval=-1;
     int scycles=cfg->cycles;
@@ -423,28 +466,28 @@ static int s_trnc_state_machine(iow_socket_t *s, app_cfg_t *cfg)
             
             // action: connect
             if (action == AT_CONNECT) {
-                MMDEBUG(ID_APP,"connecting [%s:%d]\n",cfg->host,cfg->port);
-                if( (test=iow_connect(s))==0 ) {
-                    MMDEBUG(ID_APP,"connect OK\n");
+                PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"connecting [%s:%d]\n",cfg->host,cfg->port));
+                if( (test=msock_connect(s))==0 ) {
+                    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"connect OK fd[%d]\n",s->fd));
                     state=ST_CONNECTED;
                 }else{
-                    MERROR("connect failed [%"PRId64"]\n",test);
+                    PEPRINT((stderr,"connect failed [%"PRId64"]\n",test));
                 }
             }
             
             // action: write request
             if (action == AT_WR_REQ) {
                 
-                test=iow_sendto(s,NULL,(byte *)reqstr,4,0);
+                test=msock_sendto(s,NULL,(byte *)reqstr,4,0);
                 
-                MMDEBUG(ID_APP,"sendto REQ ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno));
+                PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"sendto REQ ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
                 
                 if( test>0 ){
                     trn_tx_count++;
                     trn_tx_bytes+=test;
                     state=ST_REQ_PENDING;
                 }else{
-                    MMDEBUG(ID_APP,"sendto failed ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno));
+                    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"sendto failed ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
                 }
             }
             
@@ -453,18 +496,18 @@ static int s_trnc_state_machine(iow_socket_t *s, app_cfg_t *cfg)
                 pread = (byte *)&message;
                 readlen = MBTRN_MAX_MSG_BYTES;
                 // request message
-                if ((test = iow_recvfrom(s, NULL, pread, readlen))>0) {
+                if ((test = msock_recvfrom(s, NULL, pread, readlen,0))>0) {
                     
                     trn_rx_bytes+=test;
                     trn_rx_count++;
                     
                     // check message type
                     if (pheader->type==MBTRN_MSGTYPE_ACK) {
-                        MMDEBUG(ID_APP,"received ACK ret[%"PRId64"] [%08X]\n",test,pheader->type);
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received ACK ret[%"PRId64"] [%08X]\n",test,pheader->type));
                         hbeat_counter=0;
                         state=ST_SUBSCRIBED;
                     }else if (pheader->type==MBTRN_MSGTYPE_MB1) {
-                        MMDEBUG(ID_APP,"received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",test,pheader->type,pheader->size,psounding->ping_number);
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",test,pheader->type,pheader->size,psounding->ping_number));
                         trn_msg_count++;
                         trn_msg_bytes+=test;
                         
@@ -476,35 +519,35 @@ static int s_trnc_state_machine(iow_socket_t *s, app_cfg_t *cfg)
                             state=ST_SUBSCRIBED;
                         }
                         hbeat_counter++;
-                        MMDEBUG(ID_APP,"hbeat[%d/%d]\n",hbeat_counter,cfg->hbeat);
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"hbeat[%d/%d]\n",hbeat_counter,cfg->hbeat));
                         if ( (hbeat_counter!=0) && (hbeat_counter%cfg->hbeat==0)) {
                             state=ST_HBEAT_EXPIRED;
                         }
                     }else{
                         // response not recognized
-                        MMDEBUG(ID_APP,"invalid message [%08X]\n",pheader->type);
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"invalid message [%08X]\n",pheader->type));
                     }
                 }else{
                     // read returned error
-                    //  MMDEBUG(ID_APP,"invalid message [%d]\n",test);
+                    //  PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"invalid message [%d]\n",test));
                     switch (errno) {
                         case EWOULDBLOCK:
                             // nothing to read
-                            //   MMDEBUG(ID_APP,"err - [%d/%s]\n",errno, strerror(errno));
+                            //   PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"err - [%d/%s]\n",errno, strerror(errno)));
                             break;
                         case ENOTCONN:
                         case ECONNREFUSED:
                             // host disconnected
-                            MMDEBUG(ID_APP,"err - server not connected [%d/%s]\n",errno, strerror(errno));
-                            iow_socket_destroy(&s);
-                            s = iow_socket_new(cfg->host, cfg->port, ST_UDP);
-                            iow_set_blocking(s,(cfg->blocking==0?false:true));
+                            PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"err - server not connected [%d/%s]\n",errno, strerror(errno)));
+                            msock_socket_destroy(&s);
+                            s = msock_socket_new(cfg->host, cfg->port, ST_UDP);
+                            msock_set_blocking(s,(cfg->blocking==0?false:true));
                             sleep(5);
                             state=ST_INIT;
                             retval=-1;
                             break;
                         default:
-                            MMDEBUG(ID_APP,"err ? [%d/%s]\n",errno, strerror(errno));
+                            PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"err ? [%d/%s]\n",errno, strerror(errno)));
                             break;
                     }//switch
                 }
@@ -512,22 +555,22 @@ static int s_trnc_state_machine(iow_socket_t *s, app_cfg_t *cfg)
             
             // action: show message
             if (action == AT_SHOW_MSG) {
-                MMDEBUG(ID_APP,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
+                PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
                         psounding->ts,
                         psounding->ping_number,
                         psounding->lat,
                         psounding->lon,
                         psounding->depth,
                         psounding->hdg,
-                        (uint32_t)psounding->nbeams);
+                        (uint32_t)psounding->nbeams));
                 uint32_t j=0;
                 struct mbtrn_beam_data *bd=psounding->beams;
                 for (j=0; j<psounding->nbeams; j++,bd++){
-                    MMDEBUG(ID_APP,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
+                    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
                             (uint32_t)bd->beam_num,
                             bd->rhox,
                             bd->rhoy,
-                            bd->rhoz);
+                            bd->rhoz));
                 }
             }
             
@@ -539,13 +582,13 @@ static int s_trnc_state_machine(iow_socket_t *s, app_cfg_t *cfg)
             // check cycles and signals
             scycles--;
             if(scycles==0){
-                MTRACE();
+                PTRACE();
                 retval=0;
                 state=ST_DONE;
             }
             
             if(g_interrupt){
-                MTRACE();
+                PTRACE();
                 retval=-1;
                 state=ST_DONE;
             }
@@ -553,9 +596,9 @@ static int s_trnc_state_machine(iow_socket_t *s, app_cfg_t *cfg)
         }// while !ST_DONE
     }//else invalid arg
     
-    MMINFO(ID_APP,"tx count/bytes[%d/%d]\n",trn_tx_count,trn_tx_bytes);
-    MMINFO(ID_APP,"rx count/bytes[%d/%d]\n",trn_rx_count,trn_rx_bytes);
-    MMINFO(ID_APP,"trn count/bytes[%d/%d]\n",trn_msg_count,trn_msg_bytes);
+    PMPRINT(MOD_TRNC,TRNC_V1,(stderr,"tx count/bytes[%d/%d]\n",trn_tx_count,trn_tx_bytes));
+    PMPRINT(MOD_TRNC,TRNC_V1,(stderr,"rx count/bytes[%d/%d]\n",trn_rx_count,trn_rx_bytes));
+    PMPRINT(MOD_TRNC,TRNC_V1,(stderr,"trn count/bytes[%d/%d]\n",trn_msg_count,trn_msg_bytes));
     
     return retval;
 }
@@ -574,8 +617,8 @@ static int s_app_main(app_cfg_t *cfg)
     memset(buf,0,cfg->bsize);
 
     // create socket
-    iow_socket_t *s = iow_socket_new(cfg->host, cfg->port, ST_UDP);
-    iow_set_blocking(s,(cfg->blocking==0?false:true));
+    msock_socket_t *s = msock_socket_new(cfg->host, cfg->port, ST_UDP);
+    msock_set_blocking(s,(cfg->blocking==0?false:true));
  
 // these options are used by mbtrnrcv
 // setting these options is only for debug

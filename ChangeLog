@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+  Version 5.7.6beta5     August 6, 2019
   Version 5.7.6beta4     August 2, 2019
   Version 5.7.6beta2     July 25, 2019
   Version 5.7.6beta1     July 6, 2019
@@ -320,6 +321,16 @@ announced releases.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta5 (August 6, 2019)
+
+Integration with PROJ: Reverted to use of deprecated PROJ4 API due to problems
+with use of projections by the mbview library. This will get fixed, but it's more
+complicated than first thought.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
 
 -----> 5.7.6beta4 (August 2, 2019)
 

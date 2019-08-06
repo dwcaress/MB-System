@@ -59,19 +59,25 @@
 // Headers
 /////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <getopt.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <arpa/inet.h>
-#include <signal.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <getopt.h>
+//#include <stdarg.h>
+//#include <string.h>
+//#include <errno.h>
+//#include <inttypes.h>
+//#include <arpa/inet.h>
+//#include <signal.h>
+//
+//#include "iowrap.h"
+//#include "mbtrn.h"
+//#include "mdebug.h"
 
-#include "iowrap.h"
+#include <getopt.h>
+#include "msocket.h"
+#include "mtime.h"
 #include "mbtrn.h"
-#include "mdebug.h"
+#include "medebug.h"
 
 /////////////////////////
 // Macros
@@ -297,12 +303,12 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             exit(0);
         }
     }// while
-    MDEBUG("verbose [%s]\n",(cfg->verbose?"Y":"N"));
-    MDEBUG("host    [%s]\n",cfg->host);
-    MDEBUG("port    [%d]\n",cfg->port);
-    MDEBUG("block   [%s]\n",(cfg->blocking==0?"N":"Y"));
-    MDEBUG("cycles  [%d]\n",cfg->cycles);
-    MDEBUG("conn    [%"PRIu32"]\n",cfg->connections);
+    PDPRINT((stderr,"verbose [%s]\n",(cfg->verbose?"Y":"N")));
+    PDPRINT((stderr,"host    [%s]\n",cfg->host));
+    PDPRINT((stderr,"port    [%d]\n",cfg->port));
+    PDPRINT((stderr,"block   [%s]\n",(cfg->blocking==0?"N":"Y")));
+    PDPRINT((stderr,"cycles  [%d]\n",cfg->cycles));
+    PDPRINT((stderr,"conn    [%"PRIu32"]\n",cfg->connections));
 }
 // End function parse_args
 
@@ -316,7 +322,7 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            MDEBUG("sig received[%d]\n",signum);
+            PDPRINT((stderr,"sig received[%d]\n",signum));
             g_interrupt=true;
             break;
         default:
@@ -326,17 +332,17 @@ static void s_termination_handler (int signum)
 }
 // End function termination_handler
 
-/// @fn int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
+/// @fn int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
 /// @brief upd server main entry point.
 /// @param[in] s socket reference (ready to bind)
 /// @param[in] cfg app config reference
 /// @return 0 on success, -1 otherwise
-static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
+static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
 {
     int retval=-1;
     
     if (NULL!=cfg && NULL!=s) {
-        iow_peer_t **connections=(iow_peer_t **)malloc(cfg->connections*sizeof(iow_peer_t));
+        msock_connection_t **connections=(msock_connection_t **)malloc(cfg->connections*sizeof(msock_connection_t));
         uint32_t con_idx=0;
         byte buf[UDPS_BUF_LEN]={0};
         
@@ -347,40 +353,40 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
         static struct timespec rem={0};
         // init connection address info
         for (i=0; i<(int)cfg->connections; i++) {
-            connections[i]=iow_peer_new();
-            MDEBUG("connections[%p] peer[%02d] peer@[%p]  ainfo[%p] ai_addr[%p]\n",connections,i,connections[i],connections[i]->addr->ainfo,connections[i]->addr->ainfo->ai_addr);
+            connections[i]=msock_connection_new();
+            PDPRINT((stderr,"connections[%p] peer[%02d] peer@[%p]  ainfo[%p] ai_addr[%p]\n",connections,i,connections[i],connections[i]->addr->ainfo,connections[i]->addr->ainfo->ai_addr));
         }
         
         // bind to port
-        MDEBUG("binding [%s] fd[%d]\n",cfg->host,s->fd);
-        if ( (iobytes=iow_bind(s))==0) {
+        PDPRINT((stderr,"binding [%s] fd[%d]\n",cfg->host,s->fd));
+        if ( (iobytes=msock_bind(s))==0) {
             retval=0;
             do{
                 // clear buffers
-                MDEBUG("waiting to receive (%s)...\n",(cfg->blocking==0?"non-blocking":"blocking"));
+                PDPRINT((stderr,"waiting to receive (%s)...\n",(cfg->blocking==0?"non-blocking":"blocking")));
                 
                 // clear buffer
                 memset(buf,0,UDPS_BUF_LEN);
                 
                 // read client socket
-                iobytes = iow_recvfrom(s, connections[con_idx]->addr, buf, UDPS_BUF_LEN);
+                iobytes = msock_recvfrom(s, connections[con_idx]->addr, buf, UDPS_BUF_LEN,0);
                 // record arrival time
-                double tarrival = iow_dtime();
+                double tarrival = mtime_dtime();
                 
                 const char *ctest=NULL;
                 struct sockaddr_in *psin = NULL;
-                iow_peer_t *trn_peer=connections[con_idx];
+                msock_connection_t *trn_peer=connections[con_idx];
                 uint16_t port=0xFFFF;
                 int svc=0;
                 
                 switch (iobytes) {
                     case 0:
-                        MDEBUG("iow_recvfrom peer[%d] returned 0; peer socket closed\n",con_idx);
+                        PDPRINT((stderr,"msock_recvfrom peer[%d] returned 0; peer socket closed\n",con_idx));
                         retval=-1;
                         break;
                     case -1:
                         if (cfg->verbose) {
-                            MDEBUG("iow_recvfrom peer[%d] returned -1 [%d/%s]\n",con_idx,errno,strerror(errno));
+                            PDPRINT((stderr,"msock_recvfrom peer[%d] returned -1 [%d/%s]\n",con_idx,errno,strerror(errno)));
                         }
                         sleep(UDPS_RCVERR_DELAY_SEC);
                         break;
@@ -393,7 +399,7 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
                             NULL != trn_peer->addr->ainfo->ai_addr) {
                             
                             psin = (struct sockaddr_in *)trn_peer->addr->ainfo->ai_addr;
-                            ctest = inet_ntop(AF_INET, &psin->sin_addr, trn_peer->chost, IOW_ADDR_LEN);
+                            ctest = inet_ntop(AF_INET, &psin->sin_addr, trn_peer->chost, MSOCK_ADDR_LEN);
                             if (NULL!=ctest) {
                                 
                                 port = ntohs(psin->sin_port);
@@ -401,22 +407,22 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
                                 svc = port;
                                 snprintf(trn_peer->service,NI_MAXSERV,"%d",svc);
                                 
-                                MDEBUG("%11.3f Received %d bytes from peer[%d] %s:%s\n",
-                                       tarrival,iobytes, con_idx, trn_peer->chost, trn_peer->service);
+                                PDPRINT((stderr,"%11.3f Received %d bytes from peer[%d] %s:%s\n",
+                                       tarrival,iobytes, con_idx, trn_peer->chost, trn_peer->service));
                                 
                                 // send reply data to requesting peer
-                                if ( (iobytes = iow_sendto(s, trn_peer->addr, buf, UDPS_BUF_LEN, 0 )) > 0) {
+                                if ( (iobytes = msock_sendto(s, trn_peer->addr, buf, UDPS_BUF_LEN, 0 )) > 0) {
                                     
-                                    MDEBUG("%11.3f Sent %d bytes to peer[%d] %s:%s\n",
-                                           iow_dtime(),iobytes, con_idx, trn_peer->chost, trn_peer->service);
+                                    PDPRINT((stderr,"%11.3f Sent %d bytes to peer[%d] %s:%s\n",
+                                           mtime_dtime(),iobytes, con_idx, trn_peer->chost, trn_peer->service));
                                     
                                 }else{
-                                    MDEBUG("send peer[%d] failed [%d]\n",i,iobytes);
+                                    PDPRINT((stderr,"send peer[%d] failed [%d]\n",i,iobytes));
                                 }
                                 
                             }else{
-                                MDEBUG("inet_ntop (recv) failed peer[%d] [%d %s]\n",con_idx,errno,strerror(errno));
-                                MDEBUG("peer[%d] received %d bytes\n",con_idx,iobytes);
+                                PDPRINT((stderr,"inet_ntop (recv) failed peer[%d] [%d %s]\n",con_idx,errno,strerror(errno)));
+                                PDPRINT((stderr,"peer[%d] received %d bytes\n",con_idx,iobytes));
                             }
                         }
                         
@@ -433,11 +439,11 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
                 // option: send messages to all connections
                 // instead of req/res
                 //                for (i=0; i<=(con_idx-1); i++) {
-                //                    if ( (iobytes = iow_sendto(s, connections[i]->addr, buf, UDPS_BUF_LEN, 0 )) > 0) {
-                //                        MDEBUG("%11.3f Sent %zd bytes to connection[%d] %s:%s\n",
-                //                               iow_dtime(),iobytes, i, connections[i]->chost, connections[i]->service);
+                //                    if ( (iobytes = msock_sendto(s, connections[i]->addr, buf, UDPS_BUF_LEN, 0 )) > 0) {
+                //                        PDPRINT((stderr,"%11.3f Sent %zd bytes to connection[%d] %s:%s\n",
+                //                               mtime_dtime(),iobytes, i, connections[i]->chost, connections[i]->service));
                 //                    }else{
-                //                        MDEBUG("send connection[%d] failed [%d]\n",i,iobytes);
+                //                        PDPRINT((stderr,"send connection[%d] failed [%d]\n",i,iobytes));
                 //                    }
                 //                }
                 
@@ -446,7 +452,7 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
                     delay.tv_sec = cfg->delay_msec/1000;
                     delay.tv_nsec = (cfg->delay_msec%1000)*1000000L;
                     while (nanosleep(&delay,&rem)<0) {
-                        MDEBUG("sleep interrupted\n");
+                        PDPRINT((stderr,"sleep interrupted\n"));
                         delay.tv_sec=rem.tv_sec;
                         delay.tv_nsec=rem.tv_nsec;
                     }
@@ -454,18 +460,18 @@ static int s_app_main(iow_socket_t *s, app_cfg_t *cfg)
             }while ( (--cfg->cycles != 0) && !g_interrupt);
             
         }else{
-            MERROR("bind failed [%d]\n",test);
+            PEPRINT((stderr,"bind failed [%d]\n",test));
         }
         
         // free connections
         for (i=0; i<(int)cfg->connections; i++) {
-            iow_peer_destroy(&connections[i]);
+            msock_connection_destroy(&connections[i]);
         }
         // free connections array
         free(connections);
         
     }else{
-        MERROR("ERR - invalid argument\n");
+        PEPRINT((stderr,"ERR - invalid argument\n"));
     }
     return retval;
 }
@@ -509,8 +515,8 @@ int main(int argc, char **argv)
     parse_args(argc, argv, cfg);
     
     // create socket
-    iow_socket_t *s = iow_socket_new(cfg->host, cfg->port, ST_UDP);
-    iow_set_blocking(s,(cfg->blocking==0?false:true));
+    msock_socket_t *s = msock_socket_new(cfg->host, cfg->port, ST_UDP);
+    msock_set_blocking(s,(cfg->blocking==0?false:true));
     //    int so_reuseaddr=0;
     //    setsockopt(s->fd,SOL_SOCKET,SO_REUSEADDR,&so_reuseaddr,sizeof(int));
     //    int so_reuseport=0;
@@ -522,10 +528,10 @@ int main(int argc, char **argv)
     retval=s_app_main(s, cfg);
     
     // release resources
-    iow_socket_destroy(&s);
+    msock_socket_destroy(&s);
     free(cfg->host);
     
-    MDEBUG("done\n\n");
+    PDPRINT((stderr,"done\n\n"));
     return retval;
 }
 // End function main

@@ -14991,7 +14991,7 @@ int mbnavadjust_open_visualization(int which_grid) {
           projectionid = 32600 + utmzone;
         else
           projectionid = 32700 + utmzone;
-        sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+        sprintf(mbv_display_projection_id, "EPSG:%d", projectionid);
       }
 
       /* else if grid geographic and more northerly than 84 deg N then use
@@ -14999,7 +14999,7 @@ int mbnavadjust_open_visualization(int which_grid) {
       else if (mbv_primary_ymin > 84.0) {
         mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
         projectionid = 32661;
-        sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+        sprintf(mbv_display_projection_id, "EPSG:%d", projectionid);
       }
 
       /* else if grid geographic and more southerly than 80 deg S then use
@@ -15007,13 +15007,13 @@ int mbnavadjust_open_visualization(int which_grid) {
       else if (mbv_primary_ymax < 80.0) {
         mbv_display_projection_mode = MBV_PROJECTION_PROJECTED;
         projectionid = 32761;
-        sprintf(mbv_display_projection_id, "epsg%d", projectionid);
+        sprintf(mbv_display_projection_id, "EPSG:%d", projectionid);
       }
 
       /* else just use geographic */
       else {
         mbv_display_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
-        sprintf(mbv_display_projection_id, "epsg%d", GCS_WGS_84);
+        sprintf(mbv_display_projection_id, "EPSG:%d", GCS_WGS_84);
       }
     }
 

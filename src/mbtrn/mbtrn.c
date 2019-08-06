@@ -58,33 +58,31 @@
 /////////////////////////
 // Headers
 /////////////////////////
-#if defined(__CYGWIN__)
-//#define _XOPEN_SOURCE
-//#define __USE_XOPEN
-//#define _GNU_SOURCE
-#include <Windows.h>
-#endif
-
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <time.h>
-#ifndef _WIN32
-#include <sys/time.h>
-#endif
-#include <math.h>
-#include <errno.h>
-
+//#if defined(__CYGWIN__)
+////#define _XOPEN_SOURCE
+////#define __USE_XOPEN
+////#define _GNU_SOURCE
+//#include <Windows.h>
+//#endif
+//
+//
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <inttypes.h>
+//#include <time.h>
+//#include <sys/time.h>
+//#include <math.h>
+//#include <errno.h>
+//
+//#include "mbtrn.h"
+//#include "iowrap.h"
+//#include "mconfig.h"
+//#include "mdebug.h"
+//#include "merror.h"
 #include "mbtrn.h"
-#include "iowrap.h"
-#include "mconfig.h"
-#include "mdebug.h"
+#include "mmdebug.h"
+#include "medebug.h"
 #include "merror.h"
-
-#ifdef _WIN32
-#	define gmtime_r gmtime
-#endif
 
 /////////////////////////
 // Macros
@@ -112,6 +110,46 @@
 /////////////////////////
 // Declarations
 /////////////////////////
+
+/// @enum app_module_ids
+/// @brief application module IDs
+/// [note : starting above reserved mframe module IDs]
+//typedef enum{
+//    MOD_MBTRN=MM_MODULE_COUNT,
+//    APP_MODULE_COUNT
+//}mbtrn_module_ids;
+
+///// @enum mbtrn_channel_id
+///// @brief test module channel IDs
+///// [note : starting above reserved mframe channel IDs]
+//typedef enum{
+//    ID_MBTRN_V1=MM_CHANNEL_COUNT,
+//    ID_MBTRN_V2,
+//    APP_CH_COUNT
+//}mbtrn_channel_id;
+//
+///// @enum mbtrn_channel_mask
+///// @brief test module channel masks
+//typedef enum{
+//    MBTRN_V1= (1<<ID_MBTRN_V1),
+//    MBTRN_V2= (1<<ID_MBTRN_V2)
+//}mbtrn_channel_mask;
+//
+///// @var char *mmd_test_m1_ch_names[APP_CH_COUNT]
+///// @brief test module channel names
+//char *mbtrn_ch_names[APP_CH_COUNT]={
+//    "trace.mbtrn",
+//    "debug.mbtrn",
+//    "warn.mbtrn",
+//    "err.mbtrn",
+//    "mbtrn.1",
+//    "mbtrnv"
+//};
+//
+//static mmd_module_config_t mmd_config_defaults[]={
+//    {MOD_MBTRN,"MOD_MBTRN",APP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRN_V1),mbtrn_ch_names}
+//};
+//mmd_module_config_t *mmd_mbtrn_config = mmd_config_defaults;
 
 /////////////////////////
 // Imports
@@ -215,27 +253,27 @@ int mbtrn_reader_connect(mbtrn_reader_t *self, bool replace_socket)
         int port = self->sockif->addr->port;
 
         if (replace_socket) {
-            MMDEBUG(MBTRN,"destroying socket\n");
-            iow_socket_destroy(&self->sockif);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"destroying socket\n"));
+            msock_socket_destroy(&self->sockif);
             
-            MMDEBUG(MBTRN,"building socket\n");
-            self->sockif = iow_socket_new(host,port,ST_TCP);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"building socket\n"));
+            self->sockif = msock_socket_new(host,port,ST_TCP);
         }
 
-        MMDEBUG(MBTRN,"connecting to 7k center [%s]\n",self->sockif->addr->host);
-        if(iow_connect(self->sockif)==0){
+        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"connecting to 7k center [%s]\n",self->sockif->addr->host));
+        if(msock_connect(self->sockif)==0){
             self->state=MBS_CONNECTED;
-            MMDEBUG(MBTRN,"subscribing to 7k center [%s]\n",self->sockif->addr->host);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"subscribing to 7k center [%s]\n",self->sockif->addr->host));
             if (r7k_subscribe(mbtrn_reader_sockif(self),self->sub_list,self->sub_count)==0) {
                 self->state=MBS_SUBSCRIBED;
                 retval=0;
             }else{
-                MMDEBUG(MBTRN,"subscribe failed [%s]\n",self->sockif->addr->host);
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"subscribe failed [%s]\n",self->sockif->addr->host));
                 me_errno=ME_ESUB;
                 self->state=MBS_INITIALIZED;
             }
         }else{
-            MMDEBUG(MBTRN,"connect failed [%s]\n",self->sockif->addr->host);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"connect failed [%s]\n",self->sockif->addr->host));
             me_errno=ME_ECONNECT;
             self->state=MBS_INITIALIZED;
             mbtrn_reader_reset_socket(self);
@@ -260,13 +298,13 @@ mbtrn_reader_t *mbtrn_reader_new(const char *host, int port, uint32_t capacity, 
         
         self->state=MBS_NEW;
         self->fileif=NULL;
-        self->sockif = iow_socket_new(host,port,ST_TCP);
+        self->sockif = msock_socket_new(host,port,ST_TCP);
         self->sub_list = (uint32_t *)malloc(slist_len*sizeof(uint32_t));
         memset(self->sub_list,0,slist_len*sizeof(uint32_t));
         self->sub_count = slist_len;
         memcpy(self->sub_list,slist,slist_len*sizeof(uint32_t));
         self->fc = r7k_drfcon_new(capacity);
-        self->log=NULL;
+        self->log_id=MLOG_ID_INVALID;
         self->logstream=NULL;
         self->state=MBS_INITIALIZED;
         
@@ -282,14 +320,14 @@ mbtrn_reader_t *mbtrn_reader_new(const char *host, int port, uint32_t capacity, 
 }
 // End function mbtrn_reader_create
 
-/// @fn mbtrn_reader_t * mbtrn_freader_new(iow_file_t *file, uint32_t capacity, uint32_t * slist, uint32_t slist_len)
+/// @fn mbtrn_reader_t * mbtrn_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t * slist, uint32_t slist_len)
 /// @brief create new reson 7k reader. connect and subscribe to reson data.
 /// @param[in] path input file path
 /// @param[in] capacity input buffer capacity (bytes)
 /// @param[in] slist 7k center message subscription list
 /// @param[in] slist_len length of subscription list
 /// @return new reson reader reference on success, NULL otherwise
-mbtrn_reader_t *mbtrn_freader_new(iow_file_t *file, uint32_t capacity, uint32_t *slist,  uint32_t slist_len)
+mbtrn_reader_t *mbtrn_freader_new(mfile_file_t *file, uint32_t capacity, uint32_t *slist,  uint32_t slist_len)
 {
     mbtrn_reader_t *self = (mbtrn_reader_t *)malloc(sizeof(mbtrn_reader_t));
     if (NULL != self) {
@@ -298,14 +336,14 @@ mbtrn_reader_t *mbtrn_freader_new(iow_file_t *file, uint32_t capacity, uint32_t 
         self->sockif = NULL;
         self->fileif = file;
         if (NULL!=file) {
-            if (iow_open(self->fileif, IOW_RONLY)<=0) {
+            if (mfile_open(self->fileif, MFILE_RONLY)<=0) {
                 fprintf(stderr,"ERR - could not open file [%s] [%d/%s]\n",self->fileif->path,errno,strerror(errno));
             }
             
             fprintf(stderr,"wrapping fd %d for file %s in socket\n",self->fileif->fd,self->fileif->path);
             // wrap file descriptor in socket
             // so it can be passed to read
-            self->sockif = iow_wrap_fd(self->fileif->fd);
+            self->sockif = msock_wrap_fd(self->fileif->fd);
         }
         
         self->sub_list = (uint32_t *)malloc(slist_len*sizeof(uint32_t));
@@ -369,18 +407,15 @@ void mbtrn_reader_reset_socket(mbtrn_reader_t *self)
 /// @param[in] self pointer to instance
 /// @param[in] log  pointer to log instance
 /// @return none
-void mbtrn_reader_set_log(mbtrn_reader_t *self, mlog_t *log, mlog_id_t id, char *desc)
+void mbtrn_reader_set_log(mbtrn_reader_t *self, mlog_id_t id)
 {
     if (NULL!=self) {
-        if (self->log!=NULL) {
-            mlog_delete(self->log_id);
-            mlog_destroy(&self->log);
-            self->log=NULL;
+        if (self->log_id!=MLOG_ID_INVALID) {
+            mlog_delete_instance(self->log_id);
+            self->log_id=MLOG_ID_INVALID;
         }
-        self->log=log;
         self->log_id=id;
-        mlog_add(self->log,id,desc);
-    }
+     }
     return;
 }
 // End function mbtrn_reader_set_log
@@ -393,7 +428,7 @@ void mbtrn_reader_set_log(mbtrn_reader_t *self, mlog_t *log, mlog_id_t id, char 
 void mbtrn_reader_set_logstream(mbtrn_reader_t *self, FILE *log)
 {
     if (NULL!=self) {
-        if (self->log!=NULL) {
+        if (self->log_id != MLOG_ID_INVALID) {
             fclose(self->logstream);
         }
         self->logstream=log;
@@ -402,27 +437,27 @@ void mbtrn_reader_set_logstream(mbtrn_reader_t *self, FILE *log)
 }
 // End function mbtrn_reader_set_logstream
 
-/// @fn int mbtrn_reader_set_file(mbtrn_reader_t *self, iow_file_t *file)
+/// @fn int mbtrn_reader_set_file(mbtrn_reader_t *self, mfile_file_t *file)
 /// @brief set current reader file
 /// @param[in] self pointer to instance
 /// @param[in] file  pointer to file
 /// @return none
-int mbtrn_reader_set_file(mbtrn_reader_t *self, iow_file_t *file)
+int mbtrn_reader_set_file(mbtrn_reader_t *self, mfile_file_t *file)
 {
     int retval=-1;
 
     if (NULL!=self && NULL!=file) {
-        iow_close(self->fileif);
-        iow_socket_destroy(&self->sockif);
+        mfile_close(self->fileif);
+        msock_socket_destroy(&self->sockif);
         self->sockif=NULL;
         self->fileif=file;
-        if (iow_open(self->fileif, IOW_RONLY)>0){
+        if (mfile_open(self->fileif, MFILE_RONLY)>0){
             // wrap file descriptor in socket
             // so it can be passed to read
-            self->sockif = iow_wrap_fd(self->fileif->fd);
+            self->sockif = msock_wrap_fd(self->fileif->fd);
             retval=0;
         }else{
-            MMERROR(MBTRN,"ERR - could not open file [%s] [%d/%s]\n",self->fileif->path,errno,strerror(errno));
+            PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"ERR - could not open file [%s] [%d/%s]\n",self->fileif->path,errno,strerror(errno)));
         }
     }
     return retval;
@@ -670,21 +705,21 @@ int mbtrn_update_stats(mbtr_stats_t *stats, uint32_t channels, mbtr_stat_flags f
 }
 // End function mbtrn_update_stats
 
-/// @fn iow_socket_t * mbtrn_reader_sockif(mbtrn_reader_t * self)
+/// @fn msock_socket_t * mbtrn_reader_sockif(mbtrn_reader_t * self)
 /// @brief get reader socket interface.
 /// @param[in] self reader reference
 /// @return socket reference on success, NULL otherwise.
-iow_socket_t *mbtrn_reader_sockif(mbtrn_reader_t *self)
+msock_socket_t *mbtrn_reader_sockif(mbtrn_reader_t *self)
 {
     return (NULL!=self ? self->sockif : NULL);
 }
 // End function mbtrn_reader_sockif
 
-/// @fn iow_file_t * mbtrn_reader_fileif(mbtrn_reader_t * self)
+/// @fn mfile_file_t * mbtrn_reader_fileif(mbtrn_reader_t * self)
 /// @brief get reader file interface.
 /// @param[in] self reader reference
 /// @return socket reference on success, NULL otherwise.
-iow_file_t *mbtrn_reader_fileif(mbtrn_reader_t *self)
+mfile_file_t *mbtrn_reader_fileif(mbtrn_reader_t *self)
 {
     return (NULL!=self ? self->fileif : NULL);
 }
@@ -772,20 +807,13 @@ void mbtrn_reader_flush(mbtrn_reader_t *self, uint32_t len, int32_t retries, uin
 {
     if (NULL != self) {
         // read until timeout
-#ifdef _WIN32
-        byte *buf;
-#else
         byte buf[len];
-#endif
         int64_t x=0;
         uint32_t n=0;
         bool use_retries = (retries>0 ? true : false);
 
-#ifdef _WIN32
-		buf = (byte *)malloc(len);
-#endif
         do{
-           x=iow_read_tmout(mbtrn_reader_sockif(self), buf, len, tmout_ms);
+           x=msock_read_tmout(mbtrn_reader_sockif(self), buf, len, tmout_ms);
            n++;
             if (use_retries) {
                 if (retries-- ==0) {
@@ -793,9 +821,6 @@ void mbtrn_reader_flush(mbtrn_reader_t *self, uint32_t len, int32_t retries, uin
                 }
             }
         }while ( (x!=-1) && (me_errno!=(int)ME_ETMOUT));
-#ifdef _WIN32
-        free(buf);
-#endif
 //        MMDEBUG(MBTRN,"EXIT - retries[%d/%s] x[%lld] e[%d/%s] n[%u]\n",retries,(use_retries?"true":"false"),x,
 //               me_errno,me_strerror(me_errno),n);
     }
@@ -828,24 +853,24 @@ int64_t mbtrn_reader_poll(mbtrn_reader_t *self, byte *dest, uint32_t len, uint32
         // read up to len bytes or timeout
         // use len=MBTRN_TRN_PING_BYTES and MBTRN_TRN_PING_MSEC
         // to get a ping
-        if ((rbytes=iow_read_tmout(mbtrn_reader_sockif(self), dest, len, tmout_ms)) > 0 ) {
+        if ((rbytes=msock_read_tmout(mbtrn_reader_sockif(self), dest, len, tmout_ms)) > 0 ) {
             
             if ( (me_errno==ME_OK || me_errno==ME_ETMOUT) ) {
                 retval = rbytes;
                 
-//                MMDEBUG(MBTRN,"buf[%p] req[%d] rd[%lld] to[%u]\n",dest,len,rbytes,tmout_ms);
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"buf[%p] req[%d] rd[%lld] to[%u]\n",dest,len,rbytes,tmout_ms));
             }else{
                 // error
-                MMDEBUG(MBTRN,"read err1 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n",tmout_ms,me_errno,me_strerror(me_errno),rbytes);
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read err1 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n",tmout_ms,me_errno,me_strerror(me_errno),rbytes));
                 retval=-1;
             }
         }else{
             // error
-            MMDEBUG(MBTRN,"read err2 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n",tmout_ms,me_errno,me_strerror(me_errno),rbytes);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read err2 to[%"PRIu32"] merr[%d/%s] rb[%"PRId64"]\n",tmout_ms,me_errno,me_strerror(me_errno),rbytes));
             retval=-1;
         }
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
     }
 
     return retval;
@@ -876,14 +901,14 @@ int64_t mbtrn_reader_parse(mbtrn_reader_t *self, byte *src, uint32_t len, r7k_dr
         if ( (parsed_bytes = r7k_parse(src, len, (dest==NULL ? self->fc : dest), status)) > 0) {
             retval=status->parsed_records;
         }else{
-            MMDEBUG(MBTRN,"parse_raw err [%d]\n",status->status);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"parse_raw err [%d]\n",status->status));
         }
     }
     else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
     }
     
-    MMDEBUG(MBTRN,"returning [%0x]\n",status->status);
+    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"returning [%0x]\n",status->status));
     return retval;
 }
 // End function mbtrn_reader_parse
@@ -930,7 +955,7 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
             switch (state) {
                     
                 case MBR_STATE_START:
-//                    MMDEBUG(MBTRN,"MBR_STATE_START\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_START\n"));
                     read_len       = R7K_NF_BYTES;
                     pbuf           = dest;
                     header_pending = true;
@@ -940,7 +965,7 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     break;
                     
                 case MBR_STATE_READING:
-//                    MMDEBUG(MBTRN,"MBR_STATE_READING\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_READING\n"));
                     // don't touch inputs
                     action   = MBR_ACTION_READ;
                     break;
@@ -948,7 +973,7 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 case MBR_STATE_READ_OK:
                     pnf   = (r7k_nf_t *)dest;
                     if (header_pending) {
-//                        MMDEBUG(MBTRN,"MBR_STATE_READ_OK header\n");
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_READ_OK header\n"));
                         header_pending=false;
                         action = MBR_ACTION_VALIDATE_HEADER;
                     }
@@ -957,20 +982,20 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 case MBR_STATE_HEADER_VALID:
                     state = MBR_STATE_NF_VALID;
                     action = MBR_ACTION_QUIT;
-//                    MMDEBUG(MBTRN,"MBR_STATE_HEADER_VALID/NF_VALID\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_HEADER_VALID/NF_VALID\n"));
                     break;
                     
                 case MBR_STATE_NF_INVALID:
-                    MMDEBUG(MBTRNV,"MBR_STATE_NF_INVALID\n");
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"MBR_STATE_NF_INVALID\n"));
                     if ( (flags&MBR_RESYNC_NF)!=0 ) {
                         // pbuf points to end of input...
                         // psync points 1 byte into invalid frame
-                        MMDEBUG(MBTRN,">>>>> RESYNC: NRF buffer:\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,">>>>> RESYNC: NRF buffer:\n"));
                         r7k_hex_show(dest,R7K_NF_BYTES,16,true,5);
-                        MMDEBUG(MBTRN,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest));
-                        MMDEBUG(MBTRN,"read_len[%"PRIu32"]\n",read_len);
-                        MMDEBUG(MBTRN,"frame_bytes[%"PRId64"]\n",frame_bytes);
-                        MMDEBUG(MBTRN,"lost_bytes[%"PRId64"]\n",lost_bytes);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest)));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read_len[%"PRIu32"]\n",read_len));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"frame_bytes[%"PRId64"]\n",frame_bytes));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"lost_bytes[%"PRId64"]\n",lost_bytes));
 
                         psync = dest+1;
                         lost_bytes+=1;
@@ -984,33 +1009,33 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     break;
                     
                 case MBR_STATE_READ_ERR:
-                    MMDEBUG(MBTRNV,"MBR_STATE_READ_ERR\n");
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"MBR_STATE_READ_ERR\n"));
                     if (me_errno==ME_ESOCK) {
-                        MMDEBUG(MBTRN,"socket disconnected - quitting\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"socket disconnected - quitting\n"));
                     }else if (me_errno==ME_EOF) {
-                        MMERROR(MBTRN,"end of file\n");
+                        PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"end of file\n"));
                     }else if (me_errno==ME_ENOSPACE) {
-                        MMERROR(MBTRN,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len);
+                        PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len));
                     }else{
-                        MMDEBUG(MBTRN,"read error [%d/%s]\n",me_errno,me_strerror(me_errno));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read error [%d/%s]\n",me_errno,me_strerror(me_errno)));
                     }
                     action   = MBR_ACTION_QUIT;
                     break;
                     
                 default:
-                    MMERROR(MBTRN,"ERR - unknown state[%d]\n",state);
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"ERR - unknown state[%d]\n",state));
                     break;
             }
             
-//            MMDEBUG(MBTRN,">>> ACTION=[%d]\n",action);
+//            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,">>> ACTION=[%d]\n",action));
             
             if (action==MBR_ACTION_READ) {
                 // inputs: pbuf, read_len
-//                MMDEBUG(MBTRN,"MBR_ACTION_READ rlen[%"PRIu32"]\n",read_len);
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_ACTION_READ rlen[%"PRIu32"]\n",read_len));
                 read_bytes=0;
                 while (read_bytes<read_len) {
-                    if ( (read_bytes=iow_read_tmout(mbtrn_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
-//                        MMDEBUG(MBTRN,"read OK [%"PRId64"]\n",read_bytes);
+                    if ( (read_bytes=msock_read_tmout(mbtrn_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read OK [%"PRId64"]\n",read_bytes));
                         
                         pnf = (r7k_nf_t *)dest;
                         pbuf += read_bytes;
@@ -1048,32 +1073,32 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
             }
             
             if (action==MBR_ACTION_VALIDATE_HEADER) {
-//                MMDEBUG(MBTRN,"MBR_ACTION_VALIDATE_HEADER\n");
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_ACTION_VALIDATE_HEADER\n"));
                 // inputs: pnf
                 state=MBR_STATE_NF_INVALID;
                 if (pnf->protocol_version == R7K_NF_PROTO_VER) {
-//                    MMDEBUG(MBTRN,"nf version valid\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf version valid\n"));
                     if (pnf->offset >= (R7K_NF_BYTES)) {
-//                        MMDEBUG(MBTRN,"nf offset valid\n");
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf offset valid\n"));
                         if (pnf->packet_size == (pnf->total_size+R7K_NF_BYTES)) {
-//                            MMDEBUG(MBTRN,"nf packet_size valid [%"PRIu32"]\n",pnf->packet_size);
+//                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf packet_size valid [%"PRIu32"]\n",pnf->packet_size));
                             if (pnf->total_records == 1) {
-//                                MMDEBUG(MBTRN,"nf total_records valid\n");
+//                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf total_records valid\n"));
                                 state = MBR_STATE_HEADER_VALID;
                             }else{
-                                MMDEBUG(MBTRN,"INFO - nf total_records invalid[%"PRIu16"/%"PRIu16"]\n",pnf->total_records,(uint16_t)1);
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - nf total_records invalid[%"PRIu16"/%"PRIu16"]\n",pnf->total_records,(uint16_t)1));
                                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFTOTALREC]);
                             }
                         }else{
-                            MMDEBUG(MBTRN,"INFO - nf packet_size invalid[%"PRIu32"/%"PRIu32"]\n",pnf->packet_size,(pnf->total_size+R7K_NF_BYTES));
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - nf packet_size invalid[%"PRIu32"/%"PRIu32"]\n",pnf->packet_size,(pnf->total_size+R7K_NF_BYTES)));
                             MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFPACKETSZ]);
                         }
                     }else{
-                        MMDEBUG(MBTRN,"INFO - nf offset invalid [%"PRIu16"/%"PRIu16"]\n",pnf->offset,(uint16_t)R7K_NF_BYTES);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - nf offset invalid [%"PRIu16"/%"PRIu16"]\n",pnf->offset,(uint16_t)R7K_NF_BYTES));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFOFFSET]);
                     }
                 }else{
-                    MMDEBUG(MBTRN,"INFO - nf proto_version invalid [%"PRIu16"/%"PRIu16"]\n",pnf->protocol_version,(uint16_t)R7K_NF_PROTO_VER);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - nf proto_version invalid [%"PRIu16"/%"PRIu16"]\n",pnf->protocol_version,(uint16_t)R7K_NF_PROTO_VER));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFVER]);
                 }
             }
@@ -1087,13 +1112,13 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_NF_RESYNC]);
                 
                 if( psync >= (pbuf-R7K_NF_PROTO_BYTES)){
-                    MMDEBUG(MBTRN,"WARN - pending bytes > found frame\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"WARN - pending bytes > found frame\n"));
                 }
                 
                 // look until end of buffer (or sync found)
                 while (  (psync < (pbuf-R7K_NF_PROTO_BYTES)) && (sync_found==false) ) {
                     
-                    MMDEBUG(MBTRNV,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest));
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest)));
                    pframe = (r7k_nf_t *)psync;
                     // match only proto version...
                     // we'll be back if other parts are invalid, and
@@ -1124,14 +1149,14 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                         
                         // return to the state machine
                         sync_found     = true;
-                        MMDEBUG(MBTRNV,"sync found\n");
-                        MMDEBUG(MBTRNV,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest));
-                        MMDEBUG(MBTRNV,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest));
-                        MMDEBUG(MBTRNV,"pending_bytes[%"PRIu32"]\n",pending_bytes);
-                        MMDEBUG(MBTRNV,"read_len[%"PRIu32"]\n",read_len);
-                        MMDEBUG(MBTRNV,"frame_bytes[%"PRId64"]\n",frame_bytes);
-                        MMDEBUG(MBTRNV,"frame_bytes+read_len[%"PRId64"]\n",(int64_t)(frame_bytes+read_len));
-                        MMDEBUG(MBTRNV,"lost_bytes[%"PRId64"]\n",lost_bytes);
+                        PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"sync found\n"));
+                        PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest)));
+                        PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest)));
+                        PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"pending_bytes[%"PRIu32"]\n",pending_bytes));
+                        PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"read_len[%"PRIu32"]\n",read_len));
+                        PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"frame_bytes[%"PRId64"]\n",frame_bytes));
+                        PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"frame_bytes+read_len[%"PRId64"]\n",(int64_t)(frame_bytes+read_len)));
+                        PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"lost_bytes[%"PRId64"]\n",lost_bytes));
                         //r7k_hex_show(dest,len,16,true,5);
 
                         break;
@@ -1147,28 +1172,28 @@ int64_t mbtrn_read_nf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 if (sync_found==false) {
                     // proto_version not found - restart
                     lost_bytes+=(pbuf-psync);
-                    MMDEBUG(MBTRNV,"nf proto_ver not found - restart lost_bytes[%"PRId64"]\n",lost_bytes);
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"nf proto_ver not found - restart lost_bytes[%"PRId64"]\n",lost_bytes));
                     state=MBR_STATE_START;
-                    MMDEBUG(MBTRNV,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest));
-                    MMDEBUG(MBTRNV,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest));
-                    MMDEBUG(MBTRNV,"pending_bytes[%"PRIu32"]\n",pending_bytes);
-                    MMDEBUG(MBTRNV,"read_len[%"PRIu32"]\n",read_len);
-                    MMDEBUG(MBTRNV,"frame_bytes[%"PRId64"]\n",frame_bytes);
-                    MMDEBUG(MBTRNV,"frame_bytes+read_len[%"PRId64"]\n",(frame_bytes+read_len));
-                    MMDEBUG(MBTRNV,"lost_bytes[%"PRId64"]\n",lost_bytes);
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"dest[%p] pbuf[%p] ofs[%"PRId32"]\n",dest,pbuf,(int32_t)(pbuf-dest)));
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"psync[%p] ofs[%"PRId32"]\n",psync,(int32_t)(psync-dest)));
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"pending_bytes[%"PRIu32"]\n",pending_bytes));
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"read_len[%"PRIu32"]\n",read_len));
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"frame_bytes[%"PRId64"]\n",frame_bytes));
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"frame_bytes+read_len[%"PRId64"]\n",(frame_bytes+read_len)));
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"lost_bytes[%"PRId64"]\n",lost_bytes));
                 }
             }
             
             if (action==MBR_ACTION_QUIT) {
                 
-//                MMDEBUG(MBTRN,"ACTION_QUIT\n");
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"ACTION_QUIT\n"));
                 if (state==MBR_STATE_NF_VALID) {
                     retval = frame_bytes;
-                    MMDEBUG(MBTRNV,"NF valid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes);
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"NF valid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_NF_VALID]);
                     MBTR_COUNTER_ADD(self->stats->status[MBTR_STA_NF_VAL_BYTES],frame_bytes);
                 }else{
-                    MMDEBUG(MBTRNV,"NF invalid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes);
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"NF invalid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_NF_INVALID]);
                     MBTR_COUNTER_ADD(self->stats->status[MBTR_STA_NF_INVAL_BYTES],lost_bytes);
                 }
@@ -1227,7 +1252,7 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
             switch (state) {
                     
                 case MBR_STATE_START:
-//                    MMDEBUG(MBTRN,"MBR_STATE_START\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_START\n"));
                    read_len = R7K_DRF_BYTES;
                     pbuf     = dest;
                     memset(dest,0,len);
@@ -1238,7 +1263,7 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     break;
                     
                 case MBR_STATE_READING:
-//                    MMDEBUG(MBTRN,"MBR_STATE_READING\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_READING\n"));
                     // don't touch inputs
                     action   = MBR_ACTION_READ;
                     break;
@@ -1246,11 +1271,11 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 case MBR_STATE_READ_OK:
                     pdrf   = (r7k_drf_t *)dest;
                     if (header_pending) {
-//                        MMDEBUG(MBTRN,"MBR_STATE_READ_OK header\n");
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_READ_OK header\n"));
                         header_pending=false;
                         action = MBR_ACTION_VALIDATE_HEADER;
                     }else if (data_pending) {
-//                        MMDEBUG(MBTRN,"MBR_STATE_READ_OK data\n");
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_READ_OK data\n"));
                         data_pending=false;
                         action = MBR_ACTION_VALIDATE_CHECKSUM;
                     }
@@ -1260,28 +1285,28 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     data_pending=true;
                     read_len = pdrf->size-R7K_DRF_BYTES;
                     action = MBR_ACTION_READ;
-//                    MMDEBUG(MBTRN,"MBR_STATE_HEADER_VALID data read_len[%"PRIu32"]\n",read_len);
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_HEADER_VALID data read_len[%"PRIu32"]\n",read_len));
                     break;
                     
                 case MBR_STATE_CHECKSUM_VALID:
-//                    MMDEBUG(MBTRN,"MBR_STATE_CHECKSUM_VALID\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_CHECKSUM_VALID\n"));
                     action = MBR_ACTION_VALIDATE_TIMESTAMP;
                     break;
                     
                 case MBR_STATE_TIMESTAMP_VALID:
-//                    MMDEBUG(MBTRN,"MBR_STATE_TIMESTAMP_VALID\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_TIMESTAMP_VALID\n"));
                     state = MBR_STATE_DRF_VALID;
                     action = MBR_ACTION_QUIT;
                     break;
                     
                 case MBR_STATE_DRF_REJECTED:
-                    MMDEBUG(MBTRN,"MBR_STATE_DRF_REJECTED\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_DRF_REJECTED\n"));
                     // start over with new frame
                     state = MBR_STATE_START;
                     break;
                     
                 case MBR_STATE_DRF_INVALID:
-                    MMDEBUG(MBTRN,"MBR_STATE_DRF_INVALID\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_DRF_INVALID\n"));
                     if ( (flags&MBR_RESYNC_DRF)!=0 ) {
                         // pbuf points to end of input...
                         // psync points 1 byte into invalid frame
@@ -1297,33 +1322,33 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     break;
                     
                 case MBR_STATE_READ_ERR:
-                    MMDEBUG(MBTRN,"MBR_STATE_READ_ERR\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_READ_ERR\n"));
                     if (me_errno==ME_ESOCK) {
-                        MMDEBUG(MBTRN,"socket disconnected - quitting\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"socket disconnected - quitting\n"));
                     }else if (me_errno==ME_EOF) {
-                        MMERROR(MBTRN,"end of file\n");
+                        PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"end of file\n"));
                     }else if (me_errno==ME_ENOSPACE) {
-                        MMERROR(MBTRN,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len);
+                        PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len));
                     }else{
-                            MMDEBUG(MBTRN,"read error [%d/%s]\n",me_errno,me_strerror(me_errno));
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read error [%d/%s]\n",me_errno,me_strerror(me_errno)));
                     }
                     action   = MBR_ACTION_QUIT;
                     break;
                     
                 default:
-                    MMERROR(MBTRN,"ERR - unknown state[%d]\n",state);
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"ERR - unknown state[%d]\n",state));
                     break;
             }
 
-//            MMDEBUG(MBTRN,">>> ACTION=[%d]\n",action);
+//            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,">>> ACTION=[%d]\n",action));
           
             if (action==MBR_ACTION_READ) {
                 // inputs: pbuf, read_len
-//                MMDEBUG(MBTRN,"MBR_ACTION_READ rlen[%"PRIu32"]\n",read_len);
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_ACTION_READ rlen[%"PRIu32"]\n",read_len));
                 read_bytes=0;
                 while (read_bytes<read_len) {
-                    if ( (read_bytes=iow_read_tmout(mbtrn_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
-//                        MMDEBUG(MBTRN,"read OK [%"PRId64"]\n",read_bytes);
+                    if ( (read_bytes=msock_read_tmout(mbtrn_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read OK [%"PRId64"]\n",read_bytes));
                         
                         pdrf = (r7k_drf_t *)dest;
                         pbuf += read_bytes;
@@ -1361,30 +1386,30 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
             }
             
             if (action==MBR_ACTION_VALIDATE_HEADER) {
-//                MMDEBUG(MBTRN,"MBR_ACTION_VALIDATE_HEADER\n");
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_ACTION_VALIDATE_HEADER\n"));
                 // inputs: pdrf
                 state=MBR_STATE_DRF_INVALID;
                 if (pdrf->protocol_version == R7K_DRF_PROTO_VER) {
-//                    MMDEBUG(MBTRN,"drf protocol version valid [0x%0X]\n",pdrf->protocol_version);
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf protocol version valid [0x%0X]\n",pdrf->protocol_version));
                     if (pdrf->sync_pattern == R7K_DRF_SYNC_PATTERN) {
-//                        MMDEBUG(MBTRN,"drf sync_pattern valid [0x%0X]\n",pdrf->sync_pattern);
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf sync_pattern valid [0x%0X]\n",pdrf->sync_pattern));
                         if (pdrf->size <= R7K_MAX_FRAME_BYTES) {
-//                            MMDEBUG(MBTRN,"drf size < max frame valid [0x%"PRIu32"]\n",pdrf->size);
+//                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf size < max frame valid [0x%"PRIu32"]\n",pdrf->size));
                             
                             // conditionally validate
                             // (pending optional nf size)
                             state=MBR_STATE_HEADER_VALID;
 //                            
                         }else{
-                            MMDEBUG(MBTRN,"INFO - drf size<max frame invalid [%"PRIu32"]\n",pdrf->size);
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - drf size<max frame invalid [%"PRIu32"]\n",pdrf->size));
                             MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFSIZE]);
                         }
                     }else{
-                        MMDEBUG(MBTRN,"INFO - drf sync pattern invalid [0x%0X/0x%0X]\n",pdrf->sync_pattern, R7K_DRF_SYNC_PATTERN);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - drf sync pattern invalid [0x%0X/0x%0X]\n",pdrf->sync_pattern, R7K_DRF_SYNC_PATTERN));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFSYNC]);
                     }
                 }else{
-                    MMDEBUG(MBTRN,"INFO - drf protocol version invalid [0x%0X/0x%0X]\n",pdrf->protocol_version, R7K_DRF_PROTO_VER);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - drf protocol version invalid [0x%0X/0x%0X]\n",pdrf->protocol_version, R7K_DRF_PROTO_VER));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFPROTO]);
                 }
             }
@@ -1397,7 +1422,7 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 // only if flag set
                 if ( (pdrf->flags&0x1)==0 ){
                     // skip checksum constraint
-//                    MMDEBUG(MBTRN,"drf chksum valid (unchecked)\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf chksum valid (unchecked)\n"));
                     state=MBR_STATE_CHECKSUM_VALID;
                 }else{
                     // buffer/checksum boundary checked on entry
@@ -1408,10 +1433,10 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     uint32_t *pchk = (uint32_t *)pd;
                     
                     if (vchk == (uint32_t)(*pchk) ) {
-//                        MMDEBUG(MBTRN,"drf chksum valid [0x%08X]\n",vchk);
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf chksum valid [0x%08X]\n",vchk));
                         state=MBR_STATE_CHECKSUM_VALID;
                     }else{
-                        MMDEBUG(MBTRN,"INFO - drf chksum invalid [0x%08X/0x%08X]\n",vchk, (uint32_t)(*pchk));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - drf chksum invalid [0x%08X/0x%08X]\n",vchk, (uint32_t)(*pchk)));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFCHK]);
                     }
                 }
@@ -1424,7 +1449,7 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 // optional, per newer_than value
                 if (newer_than<=0.0){
                     // skip timestamp constraint
-//                    MMDEBUG(MBTRN,"drf time valid (unchecked)\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf time valid (unchecked)\n"));
                     state=MBR_STATE_TIMESTAMP_VALID;
                 }else{
                     double dtime = 0.0;
@@ -1433,10 +1458,10 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     dtime += pdrf->_7ktime.minutes*SEC_PER_MIN;
                     dtime += pdrf->_7ktime.seconds;
                     if (dtime>newer_than) {
-//                        MMDEBUG(MBTRN,"drf time valid\n");
+//                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf time valid\n"));
                         state=MBR_STATE_TIMESTAMP_VALID;
                     }else{
-                        MMDEBUG(MBTRN,"INFO - drf time invalid [%.4lf/%.4lf]\n",dtime,newer_than);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - drf time invalid [%.4lf/%.4lf]\n",dtime,newer_than));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFTIME]);
                     }
                 }
@@ -1451,7 +1476,7 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_DRF_RESYNC]);
 	
                 if( psync >= (pbuf-R7K_DRF_PROTO_BYTES)){
-                    MMDEBUG(MBTRN,"WARN - pending bytes > found frame\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"WARN - pending bytes > found frame\n"));
                 }
 
                 // look until end of buffer (or sync found)
@@ -1569,7 +1594,7 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                 
                 if (sync_found==false) {
                     // proto_version not found - restart
-                    MMDEBUG(MBTRN,"INFO - drf proto_ver not found - restart\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"INFO - drf proto_ver not found - restart\n"));
                     state=MBR_STATE_START;
                     lost_bytes+=(pbuf-psync);
                 }
@@ -1577,11 +1602,11 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
             
             if (action==MBR_ACTION_QUIT) {
                 
-//                MMDEBUG(MBTRN,"ACTION_QUIT\n");
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"ACTION_QUIT\n"));
                 if (state==MBR_STATE_DRF_VALID) {
                     retval = frame_bytes;
                     
-                    MMDEBUG(MBTRNV,"DRF valid - returning[%"PRId64"] lost[%"PRId64"] type[%"PRIu32"]\n",retval,lost_bytes,pdrf->record_type_id);
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"DRF valid - returning[%"PRId64"] lost[%"PRId64"] type[%"PRIu32"]\n",retval,lost_bytes,pdrf->record_type_id));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_DRF_VALID]);
                     MBTR_COUNTER_ADD(self->stats->status[MBTR_STA_DRF_VAL_BYTES],frame_bytes);
 #ifdef MBTRN_TIMING
@@ -1612,7 +1637,7 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     
 //                    struct timespec res;
 //                    clock_getres(CLOCK_MONOTONIC, &res);
-//                    fprintf(stderr,"%11.5lf cskew %+0.4e\n",iow_dtime(),(double)(stime-ptime));
+//                    fprintf(stderr,"%11.5lf cskew %+0.4e\n",mtime_dtime(),(double)(stime-ptime));
                     MBTR_SW_SET(self->stats->measurements[MBTR_CH_7KFRAME_SKEW],(stime-ptime));
                     
 #else
@@ -1634,14 +1659,14 @@ int64_t mbtrn_read_drf(mbtrn_reader_t *self, byte *dest, uint32_t len,
                     //                fprintf(stderr,"lrdfr : [%s] ptime[%.3lf] stime[%.3lf] (s-p)[%+6.3lf]\n",tstr,ptime,stime,(double)(stime-ptime));
 //                    struct timespec res;
 //                    clock_getres(CLOCK_MONOTONIC, &res);
-//                    fprintf(stderr,"%11.5lf lskew %+0.4e\n",iow_dtime(), (double)(stime-ptime));
+//                    fprintf(stderr,"%11.5lf lskew %+0.4e\n",mtime_dtime(), (double)(stime-ptime));
                     MBTR_SW_SET(self->stats->measurements[MBTR_CH_7KFRAME_SKEW],(stime-ptime));
 #endif
 #endif
                     
 
                 }else{
-                    MMDEBUG(MBTRNV,"DRF invalid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes);
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"DRF invalid - returning[%"PRId64"] lost[%"PRId64"]\n",retval,lost_bytes));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_DRF_INVALID]);
                     MBTR_COUNTER_ADD(self->stats->status[MBTR_STA_DRF_INVAL_BYTES],lost_bytes);
 
@@ -1757,7 +1782,7 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
 
     mbtrn_parse_state_t state = MBR_STATE_START;
     mbtrn_parse_action_t action = MBR_ACTION_QUIT;
-    iow_socket_t *sockif =mbtrn_reader_sockif(self);
+    msock_socket_t *sockif =mbtrn_reader_sockif(self);
     if (NULL!=self && NULL!=dest &&
         ( (flags&MBR_NF_STREAM) || (flags&MBR_DRF_STREAM) || (flags&MBR_NET_STREAM) ) &&
         NULL!=sockif && sockif->fd>0
@@ -1768,7 +1793,7 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
             switch (state) {
                     
                 case MBR_STATE_START:
-//                    MMDEBUG(MBTRN,"MBR_STATE_START\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_START\n"));
                     if (flags&MBR_NET_STREAM) {
                         read_len = R7K_NF_BYTES;
                         rflags   = MBR_RESYNC_NF;
@@ -1791,7 +1816,7 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
                     break;
                     
                 case MBR_STATE_NF_VALID:
-//                    MMDEBUG(MBTRN,"MBR_STATE_NF_VALID\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_NF_VALID\n"));
                     if (flags&MBR_NET_STREAM) {
                         // next, read the DRF
                         read_len = len-R7K_NF_BYTES;
@@ -1801,7 +1826,7 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
                     }else if (flags&MBR_DRF_STREAM) {
                         // drf only (e.g. s7k)
                         // shouldn't be here
-                        MMDEBUG(MBTRN,"ERR - invalid condition: NF_VALID for DRF stream\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"ERR - invalid condition: NF_VALID for DRF stream\n"));
                     }else {
                         // net frames only
                         // done
@@ -1811,52 +1836,52 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
                     break;
                     
                 case MBR_STATE_DRF_VALID:
-//                    MMDEBUG(MBTRN,"MBR_STATE_DRF_VALID\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_DRF_VALID\n"));
                     if (flags&MBR_NET_STREAM || flags&MBR_DRF_STREAM) {
                         // done
                         state  = MBR_STATE_FRAME_VALID;
                         action = MBR_ACTION_QUIT;
                     }else {
                         // net frames only (unlikely)
-                        MMDEBUG(MBTRN,"ERR - invalid condition: DRF_VALID for NF stream\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"ERR - invalid condition: DRF_VALID for NF stream\n"));
                     }
                     break;
                   
                 case MBR_STATE_NF_INVALID:
-//                    MMDEBUG(MBTRN,"MBR_STATE_NF_INVALID (retrying)\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_NF_INVALID (retrying)\n"));
                     state  = MBR_STATE_START;
                     action = MBR_ACTION_NOOP;
                     break;
 
                 case MBR_STATE_DRF_INVALID:
-                    MMDEBUG(MBTRN,"MBR_STATE_DRF_INVALID (retrying)\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_DRF_INVALID (retrying)\n"));
                     state  = MBR_STATE_START;
                     action = MBR_ACTION_NOOP;
                     break;
 
                 case MBR_STATE_READ_ERR:
-                    MMDEBUG(MBTRN,"MBR_STATE_READ_ERR\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"MBR_STATE_READ_ERR\n"));
                     if (me_errno==ME_ESOCK) {
-                        MMDEBUG(MBTRN,"socket disconnected - quitting\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"socket disconnected - quitting\n"));
                     }else if (me_errno==ME_EOF) {
-                        MMERROR(MBTRN,"end of file\n");
+                        PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"end of file\n"));
                     }else if (me_errno==ME_ENOSPACE) {
-                            MMERROR(MBTRN,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len);
+                            PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"buffer full [%"PRIu32"/%"PRIu32"]\n",(uint32_t)(pbuf+read_len-dest),len));
                     }else{
-                        MMDEBUG(MBTRN,"read error [%d/%s]\n",me_errno,me_strerror(me_errno));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read error [%d/%s]\n",me_errno,me_strerror(me_errno)));
                     }
                     action   = MBR_ACTION_QUIT;
                     break;
 
                default:
-                    MMERROR(MBTRN,"ERR - unknown state[%d]\n",state);
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"ERR - unknown state[%d]\n",state));
                     break;
             }
 
             if (action==MBR_ACTION_READ_NF) {
                 if ( (read_bytes=mbtrn_read_nf(self, pbuf, read_len, rflags, newer_than, timeout_msec, sync_bytes)) == R7K_NF_BYTES) {
                     
-//                    MMDEBUG(MBTRN,"nf read OK\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf read OK\n"));
                     // update pointers
                     pbuf        += read_bytes;
                     nf_bytes    += read_bytes;
@@ -1864,7 +1889,7 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
                     
                     state = MBR_STATE_NF_VALID;
                 }else{
-                    MMERROR(MBTRN,"ERR - mbtrn_read_nf read_bytes[%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno));
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"ERR - mbtrn_read_nf read_bytes[%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno)));
                     state = MBR_STATE_READ_ERR;
                 }
             }
@@ -1872,7 +1897,7 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
             if (action==MBR_ACTION_READ_DRF) {
                 if ( (read_bytes=mbtrn_read_drf(self, pbuf, read_len, rflags, newer_than, timeout_msec, sync_bytes)) > R7K_DRF_BYTES) {
                     
-//                    MMDEBUG(MBTRN,"drf read OK\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf read OK\n"));
                     // update pointers
                     pbuf        += read_bytes;
                     drf_bytes   += read_bytes;
@@ -1880,16 +1905,16 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
                     
                     state = MBR_STATE_DRF_VALID;
                 }else{
-                    MMERROR(MBTRN,"ERR - mbtrn_read_nf read_bytes[%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno));
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"ERR - mbtrn_read_nf read_bytes[%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno)));
                     state = MBR_STATE_READ_ERR;
                 }
             }
             if (action==MBR_ACTION_QUIT) {
                 
-//                MMDEBUG(MBTRN,"ACTION_QUIT\n");
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"ACTION_QUIT\n"));
                 if (state==MBR_STATE_FRAME_VALID) {
                     retval = frame_bytes;
-                    MMDEBUG(MBTRNV,"Frame valid - returning[%"PRId64"]\n",retval);
+                    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"Frame valid - returning[%"PRId64"]\n",retval));
                     MBTR_COUNTER_ADD(self->stats->status[MBTR_STA_FRAME_VAL_BYTES],frame_bytes);
                     
 
@@ -1897,17 +1922,17 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
 //                    r7k_nf_show((r7k_nf_t *)dest,false,5);
 //                    r7k_drf_show((r7k_drf_t *)(dest+R7K_NF_BYTES),false,5);
 //                    r7k_hex_show(dest,frame_bytes,16,true,5);
-//                    if (NULL!=self->logstream) {
+//                    if (self->log_id!=MLOG_ID_INVALIDstream) {
 //                       // TODO : replace with plain file
 //                        fwrite(dest,frame_bytes,1,self->logstream);
 //                    }
                     
-                    if (NULL!=self->log) {
+                    if (self->log_id!=MLOG_ID_INVALID) {
                         mlog_write(self->log_id,dest,frame_bytes);
                     }
 
                 }else{
-                    MMDEBUG(MBTRN,"Frame invalid [%d/%s] retval[%"PRId64"]\n",me_errno,me_strerror(me_errno),retval);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"Frame invalid [%d/%s] retval[%"PRId64"]\n",me_errno,me_strerror(me_errno),retval));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_FRAME_INVALID]);
                 }
                 // quit and return
@@ -1916,9 +1941,9 @@ int64_t mbtrn_read_frame(mbtrn_reader_t *self, byte *dest,
         }// while frame invalid
         
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
     }
-    MMDEBUG(MBTRNV,"returning [%lld]\n",retval);
+    PMPRINT(MOD_MBTRN,MBTRN_V2,(stderr,"returning [%lld]\n",retval));
     return retval;
  }
 // End function mbtrn_read_frame
@@ -1954,22 +1979,22 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
         while (nf_valid==false) {
             
             do_resync=true;
-            //            MMDEBUG(MBTRN,"reading read_len[%"PRIu32"] to pbuf[%p]\n",read_len,pbuf);
-            if ( (read_bytes=iow_read_tmout(mbtrn_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
+            //            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"reading read_len[%"PRIu32"] to pbuf[%p]\n",read_len,pbuf));
+            if ( (read_bytes=msock_read_tmout(mbtrn_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
                 
                 pbuf=wbuf;
                 
                 pnf=(r7k_nf_t *)wbuf;
                 
                 if (pnf->protocol_version == R7K_NF_PROTO_VER) {
-                    MMDEBUG(MBTRN,"nf version valid\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf version valid\n"));
                     if (pnf->offset >= (R7K_NF_BYTES)) {
-                        MMDEBUG(MBTRN,"nf offset valid\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf offset valid\n"));
                         if (pnf->packet_size == (pnf->total_size+R7K_NF_BYTES)) {
-                            MMDEBUG(MBTRN,"nf packet_size valid [%"PRIu32"]\n",pnf->packet_size);
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf packet_size valid [%"PRIu32"]\n",pnf->packet_size));
                             if (pnf->total_records == 1) {
-                                MMDEBUG(MBTRN,"nf total_records valid\n");
-                                MMDEBUG(MBTRN,">>>>> NF VALID >>>>>\n");
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf total_records valid\n"));
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,">>>>> NF VALID >>>>>\n"));
                                 nf_valid=true;
                                 do_resync=false;
                                 pbuf = wbuf+R7K_NF_BYTES;
@@ -1977,24 +2002,24 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
                                 retval = 0;
                                 break;
                             }else{
-                                MMDEBUG(MBTRN,"err - nf total_records invalid[%"PRIu16"/%"PRIu16"]\n",pnf->total_records,(uint16_t)1);
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"err - nf total_records invalid[%"PRIu16"/%"PRIu16"]\n",pnf->total_records,(uint16_t)1));
                                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFTOTALREC]);
                             }
                         }else{
-                            MMDEBUG(MBTRN,"err - nf packet_size invalid[%"PRIu32"/%"PRIu32"]\n",pnf->packet_size,(pnf->total_size+R7K_NF_BYTES));
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"err - nf packet_size invalid[%"PRIu32"/%"PRIu32"]\n",pnf->packet_size,(pnf->total_size+R7K_NF_BYTES)));
                             MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFPACKETSZ]);
                         }
                     }else{
-                        MMDEBUG(MBTRN,"err - nf offset invalid [%"PRIu16"/%"PRIu16"]\n",pnf->offset,(uint16_t)R7K_NF_BYTES);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"err - nf offset invalid [%"PRIu16"/%"PRIu16"]\n",pnf->offset,(uint16_t)R7K_NF_BYTES));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFOFFSET]);
                     }
                 }else{
-                    MMDEBUG(MBTRN,"err - nf proto_version invalid [%"PRIu16"/%"PRIu16"]\n",pnf->protocol_version,(uint16_t)R7K_NF_PROTO_VER);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"err - nf proto_version invalid [%"PRIu16"/%"PRIu16"]\n",pnf->protocol_version,(uint16_t)R7K_NF_PROTO_VER));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFVER]);
                 }
             }else{
                 
-                //                MMDEBUG(MBTRN,"err - nf read read_bytes[%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno));
+                //                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"err - nf read read_bytes[%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno)));
                 
                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_NF_SHORT_READ]);
                 if (read_bytes>=0) {
@@ -2003,10 +2028,10 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
                     read_len -= read_bytes;
                     pbuf += read_bytes;
                     do_resync=false;
-                    //                    MMDEBUG(MBTRN,"retrying read [%"PRIu32"]\n",read_len);
+                    //                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"retrying read [%"PRIu32"]\n",read_len));
                     
                     if (me_errno==ME_ESOCK) {
-                        MMDEBUG(MBTRN,"socket closed: setting ESOCK and returning\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"socket closed: setting ESOCK and returning\n"));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ESOCK]);
                         break;
                     }
@@ -2027,7 +2052,7 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
                     
                 }else{
                     // error
-                    MMERROR(MBTRN,"read error [%d/%s]\n",me_errno,me_strerror(me_errno));
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"read error [%d/%s]\n",me_errno,me_strerror(me_errno)));
                     // let errorno bubble up
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ENFREAD]);
                     break;
@@ -2036,7 +2061,7 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
             
             if (do_resync==true) {
                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_NF_RESYNC]);
-                //                MMDEBUG(MBTRN,"start nf resync\n");
+                //                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"start nf resync\n"));
                 // find a possibly valid proto version
                 byte *pb = wbuf+1;
                 r7k_nf_t *pn = NULL;
@@ -2057,8 +2082,8 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
                         memset(pbuf,0,fill_bytes);
                         read_len   = fill_bytes;
                         sync_found = true;
-                        MMDEBUG(MBTRN,"nf proto_ver found wb[%p] pb[%p] rlen[%"PRIu32"]\n",wbuf,pb,read_len);
-                        MMDEBUG(MBTRN,"mb[%"PRIu32"] fb[%"PRIu32"]\n",move_bytes,fill_bytes);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf proto_ver found wb[%p] pb[%p] rlen[%"PRIu32"]\n",wbuf,pb,read_len));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"mb[%"PRIu32"] fb[%"PRIu32"]\n",move_bytes,fill_bytes));
                         break;
                     }
                     pb++;
@@ -2070,7 +2095,7 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
                 if (sync_found==false) {
                     // nf proto_version found
                     // start over
-                    MMDEBUG(MBTRN,"nf proto_ver not found - restart\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf proto_ver not found - restart\n"));
                     pbuf = wbuf;
                     read_len=R7K_NF_BYTES;
                     memset(wbuf,0,R7K_NF_BYTES);
@@ -2079,7 +2104,7 @@ int mbtrn_read_nf_dep(mbtrn_reader_t *self, byte *dest, uint32_t *sync_bytes, ui
         }// while !nf_valid
         
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         me_errno = ME_EINVAL;
     }
     
@@ -2122,13 +2147,13 @@ int64_t mbtrn_read_drf_dep(mbtrn_reader_t *self, byte *dest, uint32_t len, r7k_n
         
         while (read_bytes<read_len) {
             
-            if ( (read_bytes=iow_read_tmout(mbtrn_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
-                MMDEBUG(MBTRN,"drf read OK [%"PRId64"]\n",read_bytes);
+            if ( (read_bytes=msock_read_tmout(mbtrn_reader_sockif(self), pbuf, read_len, timeout_msec)) == read_len) {
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf read OK [%"PRId64"]\n",read_bytes));
                 pdrf = (r7k_drf_t *)pbuf;
                 if (pdrf->sync_pattern == R7K_DRF_SYNC_PATTERN) {
-                    MMDEBUG(MBTRN,"drf sync_pattern valid [0x%0X]\n",pdrf->sync_pattern);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf sync_pattern valid [0x%0X]\n",pdrf->sync_pattern));
                     if (pdrf->size == (nf->total_size)) {
-                        MMDEBUG(MBTRN,"drf size valid [%"PRIu32"]\n",pdrf->size);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf size valid [%"PRIu32"]\n",pdrf->size));
                         
                         // conditionally validate
                         // (pending optional time, checksum)
@@ -2144,15 +2169,15 @@ int64_t mbtrn_read_drf_dep(mbtrn_reader_t *self, byte *dest, uint32_t len, r7k_n
                             uint32_t *pchk = (uint32_t *)pd;
                             
                             if (vchk == (uint32_t)(*pchk) ) {
-                                MMDEBUG(MBTRN,"drf chksum valid [0x%08X]\n",vchk);
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf chksum valid [0x%08X]\n",vchk));
                             }else{
-                                MMDEBUG(MBTRN," err - drf chksum invalid [0x%08X/0x%08X]\n",vchk, (uint32_t)(*pchk));
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr," err - drf chksum invalid [0x%08X/0x%08X]\n",vchk, (uint32_t)(*pchk)));
                                 drf_valid=false;
                                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFCHK]);
                             }
                         }else{
                             // skip checksum constraint
-                            MMDEBUG(MBTRN,"drf chksum valid (unchecked)\n");
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf chksum valid (unchecked)\n"));
                         }
                         
                         // validate timestamp
@@ -2164,26 +2189,26 @@ int64_t mbtrn_read_drf_dep(mbtrn_reader_t *self, byte *dest, uint32_t len, r7k_n
                             dtime += pdrf->_7ktime.minutes*SEC_PER_MIN;
                             dtime += pdrf->_7ktime.seconds;
                             if (dtime>newer_than) {
-                                MMDEBUG(MBTRN,"drf time valid\n");
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf time valid\n"));
                             }else{
-                                MMDEBUG(MBTRN," err - drf time invalid [%.4lf/%.4lf]\n",dtime,newer_than);
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr," err - drf time invalid [%.4lf/%.4lf]\n",dtime,newer_than));
                                 drf_valid=false;
                                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFTIME]);
                             }
                         }else{
                             // skip timestamp constraint
-                            MMDEBUG(MBTRN,"drf time valid (unchecked)\n");
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf time valid (unchecked)\n"));
                         }
                         if (drf_valid) {
-                            MMDEBUG(MBTRN,">>>>> DRF VALID >>>>>\n");
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,">>>>> DRF VALID >>>>>\n"));
                         }
                         
                     }else{
-                        MMDEBUG(MBTRN," err - drf size invalid [%"PRIu32"/%"PRIu32"]\n",pdrf->size , (nf->packet_size-R7K_NF_BYTES));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr," err - drf size invalid [%"PRIu32"/%"PRIu32"]\n",pdrf->size , (nf->packet_size-R7K_NF_BYTES)));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFSIZE]);
                     }
                 }else{
-                    MMDEBUG(MBTRN," err - drf sync pattern invalid [0x%0X/0x%0X]\n",pdrf->sync_pattern, R7K_DRF_SYNC_PATTERN);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr," err - drf sync pattern invalid [0x%0X/0x%0X]\n",pdrf->sync_pattern, R7K_DRF_SYNC_PATTERN));
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFSYNC]);
                 }
             }else{
@@ -2194,13 +2219,13 @@ int64_t mbtrn_read_drf_dep(mbtrn_reader_t *self, byte *dest, uint32_t len, r7k_n
                     pbuf += read_bytes;
                     
                     if (me_errno==ME_ESOCK) {
-                        MMDEBUG(MBTRN,"socket closed: setting ESOCK and returning\n");
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"socket closed: setting ESOCK and returning\n"));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_ESOCK]);
                         break;
                     }
                 }else{
                     // error
-                    MMERROR(MBTRN,"read error [%d/%s]\n",me_errno,me_strerror(me_errno));
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"read error [%d/%s]\n",me_errno,me_strerror(me_errno)));
                     // let errorno bubble up
                     MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EDRFREAD]);
                     break;
@@ -2220,7 +2245,7 @@ int64_t mbtrn_read_drf_dep(mbtrn_reader_t *self, byte *dest, uint32_t len, r7k_n
             }
         }
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
     }
     
     
@@ -2266,27 +2291,27 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
         int64_t read_bytes=0;
     
         if (flags&MBR_NET_STREAM) {
-            MMDEBUG(MBTRN,"reading NF flags[%d]\n",flags);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"reading NF flags[%d]\n",flags));
             if (mbtrn_read_nf_dep(self, pbuf, &sync_bytes, timeout_msec) == 0) {
                 
-                MMDEBUG(MBTRN,"nf read OK\n");
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf read OK\n"));
                 // update pointers
                 pbuf = buf+R7K_NF_BYTES;
                 pnf = (r7k_nf_t *)buf;
                 nf_bytes+=R7K_NF_BYTES;
                 total_bytes+=R7K_NF_BYTES;
             }else{
-                MMERROR(MBTRN,"err - mbtrn_read_nf [%d/%s]\n",me_errno,me_strerror(me_errno));
+                PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"err - mbtrn_read_nf [%d/%s]\n",me_errno,me_strerror(me_errno)));
                 //me_errno=ME_EREAD;
             }
         }else{
-            MMDEBUG(MBTRN,"skipping NF flags[%d]\n",flags);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"skipping NF flags[%d]\n",flags));
         }
         
         if (me_errno==ME_OK) {
             if ((read_bytes=mbtrn_read_drf_dep(self, pbuf, (R7K_MAX_FRAME_BYTES-R7K_NF_BYTES), pnf, newer_than, &sync_bytes, timeout_msec)) > 0) {
   
-                MMDEBUG(MBTRN,"drf read OK [%"PRId64"]\n",read_bytes);
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf read OK [%"PRId64"]\n",read_bytes));
                 pdrf = (r7k_drf_t *)(buf+R7K_NF_BYTES);
                 
                 drf_bytes+=read_bytes;
@@ -2321,7 +2346,7 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
 
                 struct timespec res;
                 clock_getres(CLOCK_MONOTONIC, &res);
-                fprintf(stderr,"%11.5lf cskew %+0.4e\n",iow_dtime(),(double)(stime-ptime));
+                fprintf(stderr,"%11.5lf cskew %+0.4e\n",mtime_dtime(),(double)(stime-ptime));
                 }
 
 #elif defined(__linux__)
@@ -2344,7 +2369,7 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
 //                fprintf(stderr,"lrdfr : [%s] ptime[%.3lf] stime[%.3lf] (s-p)[%+6.3lf]\n",tstr,ptime,stime,(double)(stime-ptime));
                 struct timespec res;
                 clock_getres(CLOCK_MONOTONIC, &res);
-                fprintf(stderr,"%11.5lf lskew %+0.4e\n",iow_dtime(), (double)(stime-ptime));
+                fprintf(stderr,"%11.5lf lskew %+0.4e\n",mtime_dtime(), (double)(stime-ptime));
                 }
 
 #else
@@ -2356,7 +2381,7 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
 
 
             }else{
-                MMERROR(MBTRN,"err - mbtrn_read_drf [%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno));
+                PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"err - mbtrn_read_drf [%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno)));
                 me_errno=ME_EREAD;
            }
        }
@@ -2365,17 +2390,17 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
             // check destination buffer space
             if ((len-nf_bytes) >= drf_bytes) {
                 retval=0;
-                MMDEBUG(MBTRN,"buf len OK\n");
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"buf len OK\n"));
                 
                 if (flags&MBR_NET_STREAM) {
-                    MMDEBUG(MBTRN,"copying NF\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"copying NF\n"));
                     // if full frame, write NF header
                     memcpy(pdest,psrc,nf_bytes);
                     pdest+=nf_bytes;
                     psrc+=nf_bytes;
                     retval+=nf_bytes;
                 }
-                MMDEBUG(MBTRN,"copying DRF\n");
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"copying DRF\n"));
                 // write DRF header
                 memcpy(pdest,psrc,drf_bytes);
                 retval += drf_bytes;
@@ -2383,7 +2408,7 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
                 // fill out info
                 // [all pointers are byte pointers]
 //                if (NULL != info) {
-//                    MMDEBUG(MBTRN,"filling INFO\n");
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"filling INFO\n"));
 //                   info->total_len = total_bytes;
 //                    info->data_len  = pdrf->size - (R7K_DRF_BYTES + R7K_CHECKSUM_BYTES);
 //                    if (flags&MBR_NET_STREAM) {
@@ -2396,16 +2421,16 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
 //                    info->data = ( info->drf+R7K_DRF_BYTES);
 //                    info->checksum = (info->data + pdrf->size);
 //                    info->timestamp = R7K_R7KTIME2D(pdrf->_7ktime);
-//                    MMDEBUG(MBTRN,"nf[%p] drf[%p] dest[%p]\n",info->nf,info->drf,dest);
+//                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf[%p] drf[%p] dest[%p]\n",info->nf,info->drf,dest));
 //               }
             }else{
-                MMERROR(MBTRN,"err - insufficient buffer len [%"PRIu32"/%"PRIu32"]\n",(len-nf_bytes),drf_bytes);
+                PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"err - insufficient buffer len [%"PRIu32"/%"PRIu32"]\n",(len-nf_bytes),drf_bytes));
                 me_errno=ME_EWRITE;
             }
         }
 
-        if (me_errno==ME_ESOCK || me_errno==ME_ERCV ) {
-            MMERROR(MBTRN,"socket closed\n");
+        if (me_errno==ME_ESOCK || me_errno==ME_ERECV ) {
+            PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"socket closed\n"));
         }
         memset(buf,0,R7K_MAX_FRAME_BYTES);
         pbuf=buf;
@@ -2415,9 +2440,9 @@ int64_t mbtrn_read_frame_dep(mbtrn_reader_t *self, byte *dest,
         }
         
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
     }
-    MMDEBUG(MBTRN,"returning [%lld]\n",retval);
+    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"returning [%lld]\n",retval));
     return retval;
 }
 // End function mbtrn_read_frame_dep
@@ -2453,7 +2478,7 @@ int64_t mbtrn_read_frames_dep(mbtrn_reader_t *self, uint32_t nframes, double new
 
             if (mbtrn_read_nf_dep(self, pbuf, &sync_bytes, timeout_msec) == 0) {
                 
-                MMDEBUG(MBTRN,"nf read OK\n");
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf read OK\n"));
                 // update pointers
                 pbuf = buf+R7K_NF_BYTES;
                 pnf = (r7k_nf_t *)buf;
@@ -2462,13 +2487,13 @@ int64_t mbtrn_read_frames_dep(mbtrn_reader_t *self, uint32_t nframes, double new
                 
                 if ( (read_bytes=mbtrn_read_drf_dep(self, pbuf, (R7K_MAX_FRAME_BYTES-R7K_NF_BYTES), pnf, newer_than, &sync_bytes, timeout_msec)) > 0) {
                     
-                    MMDEBUG(MBTRN,"drf read OK [%"PRId64"]\n",read_bytes);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drf read OK [%"PRId64"]\n",read_bytes));
                     pdrf = (r7k_drf_t *)(buf+R7K_NF_BYTES);
                     if(r7k_drfcon_add(self->fc,(byte *)pdrf, (uint32_t)read_bytes)==0){
                         frame_count++;
                         drf_bytes+=read_bytes;
                         total_bytes+=read_bytes;
-                        MMDEBUG(MBTRN,">>>>> DRF ADD [%"PRIu32"/%"PRIu32"/%"PRId64"] >>>>>\n",frame_count, nframes,read_bytes);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,">>>>> DRF ADD [%"PRIu32"/%"PRIu32"/%"PRId64"] >>>>>\n",frame_count, nframes,read_bytes));
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_FRAME_VALID]);
                         MBTR_COUNTER_ADD(self->stats->status[MBTR_STA_NF_VAL_BYTES],nf_bytes);
                         MBTR_COUNTER_ADD(self->stats->status[MBTR_STA_DRF_VAL_BYTES],drf_bytes);
@@ -2477,7 +2502,7 @@ int64_t mbtrn_read_frames_dep(mbtrn_reader_t *self, uint32_t nframes, double new
                             MBTR_COUNTER_INC(self->stats->status[MBTR_STA_SUB_FRAMES]);
                         }
                         
-                        if (NULL!=self->log) {
+                        if (self->log_id!=MLOG_ID_INVALID) {
                             mlog_write(self->log_id,buf,total_bytes);
                         }
 //                        r7k_nf_show(pnf,true,5);
@@ -2502,18 +2527,18 @@ int64_t mbtrn_read_frames_dep(mbtrn_reader_t *self, uint32_t nframes, double new
 
                         retval=total_bytes;
                     }else{
-                        MMERROR(MBTRN,"err - r7k_drfcon_add [%d/%s]\n",me_errno,me_strerror(me_errno));
+                        PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"err - r7k_drfcon_add [%d/%s]\n",me_errno,me_strerror(me_errno)));
                         me_errno=ME_EWRITE;
                         MBTR_COUNTER_INC(self->stats->events[MBTR_EV_EFCWR]);
                     }
                 }else{
-                    MMERROR(MBTRN,"err - mbtrn_read_drf [%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno));
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"err - mbtrn_read_drf [%"PRId64"] [%d/%s]\n",read_bytes,me_errno,me_strerror(me_errno)));
                 }
             }else{
-                MMERROR(MBTRN,"err - mbtrn_read_nf [%d/%s]\n",me_errno,me_strerror(me_errno));
+                PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"err - mbtrn_read_nf [%d/%s]\n",me_errno,me_strerror(me_errno)));
             }
-            if (me_errno==ME_ESOCK || me_errno==ME_ERCV ) {
-                MMERROR(MBTRN,"socket closed\n");
+            if (me_errno==ME_ESOCK || me_errno==ME_ERECV ) {
+                PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"socket closed\n"));
                 break;
             }
             memset(buf,0,R7K_MAX_FRAME_BYTES);
@@ -2522,12 +2547,12 @@ int64_t mbtrn_read_frames_dep(mbtrn_reader_t *self, uint32_t nframes, double new
             pdrf=NULL;
         }// while
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         me_errno = ME_EINVAL;
     }
-    MMDEBUG(MBTRN,"nframes[%"PRIu32"] frame_count[%"PRIu32"] space[%"PRIu32"]\n",nframes,frame_count,r7k_drfcon_space(self->fc));
-    MMDEBUG(MBTRN,"sync_bytes[%"PRIu32"] total_bytes[%"PRIu32"]\n",sync_bytes,total_bytes);
-    MMDEBUG(MBTRN,"nf_bytes[%"PRIu32"] drf_bytes[%"PRIu32"]\n",nf_bytes,drf_bytes);
+    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nframes[%"PRIu32"] frame_count[%"PRIu32"] space[%"PRIu32"]\n",nframes,frame_count,r7k_drfcon_space(self->fc)));
+    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"sync_bytes[%"PRIu32"] total_bytes[%"PRIu32"]\n",sync_bytes,total_bytes));
+    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"nf_bytes[%"PRIu32"] drf_bytes[%"PRIu32"]\n",nf_bytes,drf_bytes));
 
     return retval;
 }
@@ -2572,7 +2597,7 @@ int64_t mbtrn_refill(mbtrn_reader_t *self, uint32_t max_age_ms, uint32_t timeout
 
         retval=0;
         if( (read_bytes=mbtrn_read_frames_dep(self, MBTRN_REFILL_FRAMES, newer_than, timeout_msec)) >= 0){
-            MMDEBUG(MBTRN,"fill drfcon - frames[%"PRIu32"] read_bytes[%"PRId64"]\n",r7k_drfcon_frames(self->fc),read_bytes);
+            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"fill drfcon - frames[%"PRIu32"] read_bytes[%"PRId64"]\n",r7k_drfcon_frames(self->fc),read_bytes));
             retval=read_bytes;
 
 
@@ -2580,9 +2605,9 @@ int64_t mbtrn_refill(mbtrn_reader_t *self, uint32_t max_age_ms, uint32_t timeout
             
             MBTR_COUNTER_INC(self->stats->events[MBTR_EV_FRAME_INVALID]);
 
-            MMERROR(MBTRN,"read_frames returned error [%d/%s]\n",me_errno,me_strerror(me_errno));
-            if (me_errno==ME_ESOCK|| me_errno==ME_ERCV) {
-                MMERROR(MBTRN,"socket closed\n");
+            PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"read_frames returned error [%d/%s]\n",me_errno,me_strerror(me_errno)));
+            if (me_errno==ME_ESOCK|| me_errno==ME_ERECV) {
+                PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"socket closed\n"));
                 retval=-1;
             }
         }
@@ -2591,19 +2616,19 @@ int64_t mbtrn_refill(mbtrn_reader_t *self, uint32_t max_age_ms, uint32_t timeout
 //            // use nframes<=0 to fill container
 //            // use newer_than <=0 to ignore age
 //            if( (read_bytes=mbtrn_read_frames(self,0,newer_than)) >= 0){
-//                MMDEBUG(MBTRN,"fill drfcon - frames[%"PRIu32"] read_bytes[%"PRId64"]\n",r7k_drfcon_frames(self->fc),read_bytes);
+//                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"fill drfcon - frames[%"PRIu32"] read_bytes[%"PRId64"]\n",r7k_drfcon_frames(self->fc),read_bytes));
 //                retval+=read_bytes;
 //            }else{
-//                MMERROR(MBTRN,"read_frames returned error [%d/%s]\n",me_errno,me_strerror(me_errno));
-//                if (me_errno==ME_ESOCK|| me_errno==ME_ERCV) {
-//                    MMERROR(MBTRN,"socket closed\n");
+//                PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"read_frames returned error [%d/%s]\n",me_errno,me_strerror(me_errno)));
+//                if (me_errno==ME_ESOCK|| me_errno==ME_ERECV) {
+//                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"socket closed\n"));
 //                    retval=-1;
 //                    break;
 //                }
 //            }
 //        }
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         me_errno = ME_EINVAL;
     }
     return retval;
@@ -2646,10 +2671,10 @@ int64_t mbtrn_reader_xread(mbtrn_reader_t *self, byte *dest, uint32_t len, uint3
             
             if( (read_bytes = r7k_drfcon_read(self->fc,dest,len)) >= 0){
                 MBTR_COUNTER_INC(self->stats->events[MBTR_EV_FC_READ]);
-               MMDEBUG(MBTRN,"drfcon req<pend OK [%"PRId64"]\n",read_bytes);
+               PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drfcon req<pend OK [%"PRId64"]\n",read_bytes));
                 retval = read_bytes;
             }else{
-                MMDEBUG(MBTRN,"drfcon read failed\n");
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drfcon read failed\n"));
                 me_errno=ME_EREAD;
             }
             
@@ -2673,9 +2698,9 @@ int64_t mbtrn_reader_xread(mbtrn_reader_t *self, byte *dest, uint32_t len, uint3
                     total_bytes += read_bytes;
                     // update remaining
                     rem_bytes -= read_bytes;
-                    MMDEBUG(MBTRN,"read from drfcon - read_bytes[%"PRId64"] rem[%"PRId64"]\n",read_bytes,(rem_bytes));
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read from drfcon - read_bytes[%"PRId64"] rem[%"PRId64"]\n",read_bytes,(rem_bytes)));
                 }else{
-                    MMDEBUG(MBTRN,"drfcon read failed\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drfcon read failed\n"));
                     retval = -1;
                     me_errno=ME_EREAD;
                 }
@@ -2684,31 +2709,31 @@ int64_t mbtrn_reader_xread(mbtrn_reader_t *self, byte *dest, uint32_t len, uint3
                 if ( (pending=r7k_drfcon_pending(self->fc))==0) {
                     int rstat=0;
 					
-                    MMDEBUG(MBTRN,"refilling drfcon \n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"refilling drfcon \n"));
 
-//                    MBTR_SW_START(self->stats->measurements[MBTR_CH_MBTRN_REFILL_XT],iow_dtime());
+//                    MBTR_SW_START(self->stats->measurements[MBTR_CH_MBTRN_REFILL_XT],mtime_dtime());
 
                    if( (rstat=mbtrn_refill(self, max_age_ms, tmout_ms ))<=0){
                         // quit if socket closed, else keep trying
                         if (rstat<0) {
-                            MMERROR(MBTRN,"refill error [%d/%s]\n",me_errno,me_strerror(me_errno));
+                            PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"refill error [%d/%s]\n",me_errno,me_strerror(me_errno)));
                         }
-                        if (me_errno==ME_ESOCK|| me_errno==ME_ERCV) {
-                            MMERROR(MBTRN,"socket closed - quitting\n");
+                        if (me_errno==ME_ESOCK|| me_errno==ME_ERECV) {
+                            PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"socket closed - quitting\n"));
                             break;
                         }
                     }
-//                    MBTR_SW_LAP(self->stats->measurements[MBTR_CH_MBTRN_REFILL_XT],iow_dtime());
+//                    MBTR_SW_LAP(self->stats->measurements[MBTR_CH_MBTRN_REFILL_XT],mtime_dtime());
                 }
           
                 // break if done
                 if (rem_bytes==0) {
-                    MMDEBUG(MBTRN,"drfcon read complete\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drfcon read complete\n"));
                     retval=total_bytes;
                     break;
                 }else if(rem_bytes<0) {
                     // this should never happen
-                    MMERROR(MBTRN,"rem_bytes<0 [%"PRId64"]\n",rem_bytes);
+                    PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"rem_bytes<0 [%"PRId64"]\n",rem_bytes));
                     me_errno=ME_EREAD;
                     break;
                 }
@@ -2716,7 +2741,7 @@ int64_t mbtrn_reader_xread(mbtrn_reader_t *self, byte *dest, uint32_t len, uint3
         }
         
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -2790,7 +2815,7 @@ int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, 
                 r7k_parse_stat_t stats_s = {0}, *stat = &stats_s;
                 
                 if(r7k_parse(buf,read_len,self->fc,stat)==0){
-                    MERROR("r7k_parse failed [%0x]\n",stat->status);
+                    PEPRINT((stderr,"r7k_parse failed [%0x]\n",stat->status));
                     me_errno=ME_EPARSE;
                 }
             }else{
@@ -2801,7 +2826,7 @@ int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, 
         if ( r7k_drfcon_pending(self->fc) >= len ) {
             // if it's available, read it and return
             retval = r7k_drfcon_read(self->fc,dest,len);
-//            MMDEBUG(MBTRN,"read OK [%lld]\n",retval);
+//            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"read OK [%lld]\n",retval));
             
         }else{
             if ( (flags&MBR_ALLOW_PARTIAL) ) {
@@ -2809,10 +2834,10 @@ int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, 
                 // read what's available, if any
 
                 if( (read_bytes = r7k_drfcon_read(self->fc,dest,len)) >= 0){
-                    MMDEBUG(MBTRN,"drfcon read OK [%"PRId64"]\n",read_bytes);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drfcon read OK [%"PRId64"]\n",read_bytes));
                     retval = read_bytes;
                 }else{
-                    MMDEBUG(MBTRN,"drfcon read failed\n");
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"drfcon read failed\n"));
                     retval = -1;
                     me_errno=ME_EREAD;
                 }
@@ -2821,9 +2846,9 @@ int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, 
                 // [to make room for more]
                 if (r7k_drfcon_pending(self->fc)==0) {
                     if (r7k_drfcon_flush(self->fc)==0) {
-                        MMDEBUG(MBTRN,"fc flush OK - size/length/pending %u/%u/%u\n",r7k_drfcon_size(self->fc),r7k_drfcon_length(self->fc),r7k_drfcon_pending(self->fc));
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"fc flush OK - size/length/pending %u/%u/%u\n",r7k_drfcon_size(self->fc),r7k_drfcon_length(self->fc),r7k_drfcon_pending(self->fc)));
                     }else{
-                        MMERROR(MBTRN,"fc flush failed\n");
+                        PMPRINT(MOD_MBTRN,MM_ERR,(stderr,"fc flush failed\n"));
                     }
                 }
                 
@@ -2831,10 +2856,10 @@ int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, 
                 memset(buf,0,MBTRN_TRN_PING_BYTES);
                 if( (poll_bytes=mbtrn_reader_poll(self,buf,MBTRN_TRN_PING_BYTES,3*MBTRN_PING_INTERVAL_MSEC) ) > 0){
                     
-                    MMDEBUG(MBTRN,"poll OK [%"PRId64"/%u]\n",poll_bytes,(uint32_t)MBTRN_TRN_PING_BYTES);
+                    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"poll OK [%"PRId64"/%u]\n",poll_bytes,(uint32_t)MBTRN_TRN_PING_BYTES));
                     if( (parse_bytes=r7k_parse(buf,poll_bytes,self->fc,&stats))>0){
                     	// success
-                        MMDEBUG(MBTRN,"parse OK[%"PRId64"/%"PRId64"]\n",parse_bytes,poll_bytes);
+                        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"parse OK[%"PRId64"/%"PRId64"]\n",parse_bytes,poll_bytes));
                         
                         // re-read if partial read or error before
                         if (read_bytes<len) {
@@ -2848,24 +2873,24 @@ int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, 
                                 read_len = len-read_bytes;
                                 pdest = dest+read_bytes;
                             }
-                            MMDEBUG(MBTRN,"re-read retval[%"PRId64"] read_bytes[%"PRId64"] req(read_len)[%"PRId64"]\n",retval,read_bytes,read_len);
-//                            MMDEBUG(MBTRN,"retry read\n");
+                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"re-read retval[%"PRId64"] read_bytes[%"PRId64"] req(read_len)[%"PRId64"]\n",retval,read_bytes,read_len));
+//                            PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"retry read\n"));
                             if( (read_bytes = r7k_drfcon_read(self->fc,pdest,read_len)) >= 0){
                                 retval+=read_bytes;
-                                MMDEBUG(MBTRN,"re-read OK [%"PRId64"/%"PRId64"]\n",retval,read_len);
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"re-read OK [%"PRId64"/%"PRId64"]\n",retval,read_len));
                             }else{
-                                MMDEBUG(MBTRN,"re-=read failed\n");
+                                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"re-=read failed\n"));
                                 retval = -1;
                                 me_errno=ME_EREAD;
                             }
                         }
                     }else{
-                        MERROR("parse failed [%0x]\n",parstat->status);
+                        PEPRINT((stderr,"parse failed [%0x]\n",parstat->status));
                         me_errno=ME_EPARSE;
                     }
                     
                 }else{
-                    MERROR("poll failed [%0x] [%d/%s]\n",pstat,me_errno,me_strerror(me_errno));
+                    PEPRINT((stderr,"poll failed [%0x] [%d/%s]\n",pstat,me_errno,me_strerror(me_errno)));
                     if (me_errno==ME_ESOCK) {
                         self->state=MBS_INITIALIZED;
                         self->sockif->fd=-1;
@@ -2873,15 +2898,15 @@ int64_t mbtrn_reader_xread_orig(mbtrn_reader_t *self, byte *dest, uint32_t len, 
                 }
                 
             }else{
-                MMDEBUG(MBTRN,"full read only - skipping\n");
+                PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"full read only - skipping\n"));
             }
         }
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         retval=-1;
         me_errno = ME_EINVAL;
     }
-//    MMDEBUG(MBTRN,"retval[%lld] merr[%d/%s]\n",retval,me_errno,me_strerror(me_errno));
+//    PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"retval[%lld] merr[%d/%s]\n",retval,me_errno,me_strerror(me_errno)));
     return retval;
 }
 // End function mbtrn_reader_xread_orig
@@ -2898,7 +2923,7 @@ int64_t mbtrn_reader_read(mbtrn_reader_t *self, byte *dest, uint32_t len)
     if (NULL != self && NULL != dest) {
         return r7k_drfcon_read(self->fc,dest,len);
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -2917,7 +2942,7 @@ int64_t mbtrn_reader_seek(mbtrn_reader_t *self, uint32_t ofs)
     if (NULL != self) {
         return r7k_drfcon_seek(self->fc, ofs);
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -2935,7 +2960,7 @@ int64_t mbtrn_reader_tell(mbtrn_reader_t *self)
     if (NULL != self) {
         return r7k_drfcon_tell(self->fc);
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -2953,7 +2978,7 @@ uint32_t mbtrn_reader_frames(mbtrn_reader_t *self)
     if (NULL != self) {
         return r7k_drfcon_frames(self->fc);
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
         retval=-1;
         me_errno = ME_EINVAL;
     }
@@ -2971,7 +2996,7 @@ r7k_drf_t *mbtrn_reader_enumerate(mbtrn_reader_t *self)
     if (NULL != self) {
         return r7k_drfcon_enumerate(self->fc);
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
     }
     return retval;
 }
@@ -2988,7 +3013,7 @@ r7k_drf_t    *mbtrn_reader_next(mbtrn_reader_t *self)
     if (NULL != self) {
         return r7k_drfcon_next(self->fc);
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
     }
     return retval;
 }
@@ -3014,16 +3039,16 @@ bool mbtrn_reader_issub(mbtrn_reader_t *self, uint32_t record_type)
 
 
 /// @fn _Bool mbtrn_peer_cmp(void * a, void * b)
-/// @brief compare iow_peer_t IDs. Used by mlist.
-/// @param[in] a void pointer to iow_peer_t
-/// @param[in] b void pointer to iow_peer_t
+/// @brief compare msock_connection_t IDs. Used by mlist.
+/// @param[in] a void pointer to msock_connection_t
+/// @param[in] b void pointer to msock_connection_t
 /// @return true if peer id's are equal, false otherwise
 bool mbtrn_peer_cmp(void *a, void *b)
 {
     bool retval=false;
     if (a!=NULL && b!=NULL) {
-        iow_peer_t *pa = (iow_peer_t *)a;
-        iow_peer_t *pb = (iow_peer_t *)b;
+        msock_connection_t *pa = (msock_connection_t *)a;
+        msock_connection_t *pb = (msock_connection_t *)b;
         retval = (pa->id == pb->id);
     }
     return retval;
@@ -3032,17 +3057,17 @@ bool mbtrn_peer_cmp(void *a, void *b)
 
 
 /// @fn _Bool mbtrn_peer_vcmp(void * item, void * value)
-/// @brief compare iow_peer_t ID to specified value. Used by mlist.
-/// @param[in] item void pointer to iow_peer_t
+/// @brief compare msock_connection_t ID to specified value. Used by mlist.
+/// @param[in] item void pointer to msock_connection_t
 /// @param[in] value void pointer to integer (id value)
 /// @return returns true if the specified peer has the specified ID. false otherwise
 bool mbtrn_peer_vcmp(void *item, void *value)
 {
     bool retval=false;
     if (NULL!=item && NULL!=value) {
-        iow_peer_t *peer = (iow_peer_t *)item;
+        msock_connection_t *peer = (msock_connection_t *)item;
         int svc = *((int *)value);
-//        MMDEBUG(MBTRN,"peer[%p] id[%d] svc[%d]\n",peer,peer->id,svc);
+//        PMPRINT(MOD_MBTRN,MM_DEBUG,(stderr,"peer[%p] id[%d] svc[%d]\n",peer,peer->id,svc));
         retval = (peer->id == svc);
     }
     return retval;
