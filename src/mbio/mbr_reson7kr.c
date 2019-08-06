@@ -597,7 +597,6 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, int *pi
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *header, int *error) {
   int status = MB_SUCCESS;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -645,11 +644,11 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
         *index += 4;
     mb_get_binary_int(MB_YES, &buffer[*index], &(header->RecordNumber));
         *index += 4;
-    for (i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       header->PreviousRecord[i] = buffer[*index];
       (*index)++;
     }
-    for (i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       header->NextRecord[i] = buffer[*index];
       (*index)++;
     }
@@ -674,7 +673,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
         *index += 2;
         mb_get_binary_short(MB_YES, &buffer[*index], &(header->Reserved3));
         *index += 2;
-        for (i=0;i<8;i++) {
+        for (int i = 0; i < 8; i++) {
             header->PreviousRecord[i] = 0;
             header->NextRecord[i] = 0;
         }
@@ -700,7 +699,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
     *index += 4;
     mb_get_binary_int(MB_YES, &buffer[*index], &(header->FragmentNumber));
     *index += 4;
-        for (i=0;i<8;i++) {
+        for (int i = 0; i < 8; i++) {
             header->PreviousRecord[i] = 0;
             header->NextRecord[i] = 0;
         }
@@ -723,7 +722,6 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, s7k_header *he
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_reference *reference;
   int index;
@@ -738,7 +736,7 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   reference = &(store->reference);
   header = &(reference->header);
 
@@ -804,7 +802,6 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_sensoruncal *sensoruncal;
   int index;
@@ -819,7 +816,7 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   sensoruncal = &(store->sensoruncal);
   header = &(sensoruncal->header);
 
@@ -889,7 +886,6 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_sensorcal *sensorcal;
   int index;
@@ -904,7 +900,7 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   sensorcal = &(store->sensorcal);
   header = &(sensorcal->header);
 
@@ -974,7 +970,6 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_position *position;
   int index;
@@ -989,7 +984,7 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   position = &(store->position);
   header = &(position->header);
 
@@ -1065,13 +1060,11 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_customattitude *customattitude;
   int data_size;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1082,7 +1075,7 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   customattitude = &(store->customattitude);
   header = &(customattitude->header);
 
@@ -1129,42 +1122,42 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
   }
 
   if (customattitude->bitfield & 1)
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->pitch[i]));
       index += 4;
     }
   if (customattitude->bitfield & 2)
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->roll[i]));
       index += 4;
     }
   if (customattitude->bitfield & 4)
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->heading[i]));
       index += 4;
     }
   if (customattitude->bitfield & 8)
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->heave[i]));
       index += 4;
     }
   if (customattitude->bitfield & 16)
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->pitchrate[i]));
       index += 4;
     }
   if (customattitude->bitfield & 32)
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->rollrate[i]));
       index += 4;
     }
   if (customattitude->bitfield & 64)
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->headingrate[i]));
       index += 4;
     }
   if (customattitude->bitfield & 128)
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->heaverate[i]));
       index += 4;
     }
@@ -1216,7 +1209,6 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_tide *tide;
   int index;
@@ -1231,7 +1223,7 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   tide = &(store->tide);
   header = &(tide->header);
 
@@ -1311,7 +1303,6 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_altitude *altitude;
   int index;
@@ -1326,7 +1317,7 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   altitude = &(store->altitude);
   header = &(altitude->header);
 
@@ -1386,13 +1377,11 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_motion *motion;
   int data_size;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1403,7 +1392,7 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   motion = &(store->motion);
   header = &(motion->header);
 
@@ -1446,29 +1435,29 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
   }
 
   if (motion->bitfield & 1) {
-    for (i = 0; i < motion->n; i++) {
+    for (int i = 0; i < motion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(motion->x[i]));
       index += 4;
     }
-    for (i = 0; i < motion->n; i++) {
+    for (int i = 0; i < motion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(motion->y[i]));
       index += 4;
     }
-    for (i = 0; i < motion->n; i++) {
+    for (int i = 0; i < motion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(motion->z[i]));
       index += 4;
     }
   }
   if (motion->bitfield & 2) {
-    for (i = 0; i < motion->n; i++) {
+    for (int i = 0; i < motion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(motion->xa[i]));
       index += 4;
     }
-    for (i = 0; i < motion->n; i++) {
+    for (int i = 0; i < motion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(motion->ya[i]));
       index += 4;
     }
-    for (i = 0; i < motion->n; i++) {
+    for (int i = 0; i < motion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(motion->za[i]));
       index += 4;
     }
@@ -1521,7 +1510,6 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_depth *depth;
   int index;
@@ -1536,7 +1524,7 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   depth = &(store->depth);
   header = &(depth->header);
 
@@ -1602,13 +1590,11 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_svp *svp;
   int data_size;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1619,7 +1605,7 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error) 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   svp = &(store->svp);
   header = &(svp->header);
 
@@ -1657,7 +1643,7 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error) 
     }
   }
 
-  for (i = 0; i < svp->n; i++) {
+  for (int i = 0; i < svp->n; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(svp->depth[i]));
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(svp->sound_velocity[i]));
@@ -1711,13 +1697,11 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error) 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_ctd *ctd;
   int data_size;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1728,7 +1712,7 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error) 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   ctd = &(store->ctd);
   header = &(ctd->header);
 
@@ -1784,7 +1768,7 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error) 
     }
   }
 
-  for (i = 0; i < ctd->n; i++) {
+  for (int i = 0; i < ctd->n; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(ctd->conductivity_salinity[i]));
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(ctd->temperature[i]));
@@ -1844,12 +1828,10 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error) 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_geodesy *geodesy;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1860,7 +1842,7 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   geodesy = &(store->geodesy);
   header = &(geodesy->header);
 
@@ -1870,7 +1852,7 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the data */
   index = header->Offset + 4;
-  for (i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) {
     geodesy->spheroid[i] = (mb_u_char)buffer[index];
     index++;
   }
@@ -1878,11 +1860,11 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
   index += 8;
   mb_get_binary_double(MB_YES, &buffer[index], &(geodesy->flattening));
   index += 8;
-  for (i = 0; i < 16; i++) {
+  for (int i = 0; i < 16; i++) {
     geodesy->reserved1[i] = (mb_u_char)buffer[index];
     index++;
   }
-  for (i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) {
     geodesy->datum[i] = (mb_u_char)buffer[index];
     index++;
   }
@@ -1904,11 +1886,11 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
   index += 8;
   mb_get_binary_double(MB_YES, &buffer[index], &(geodesy->scale));
   index += 8;
-  for (i = 0; i < 35; i++) {
+  for (int i = 0; i < 35; i++) {
     geodesy->reserved2[i] = (mb_u_char)buffer[index];
     index++;
   }
-  for (i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) {
     geodesy->grid_name[i] = (mb_u_char)buffer[index];
     index++;
   }
@@ -1928,7 +1910,7 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
   index += 8;
   mb_get_binary_int(MB_YES, &buffer[index], &(geodesy->custum_identifier));
   index += 4;
-  for (i = 0; i < 50; i++) {
+  for (int i = 0; i < 50; i++) {
     geodesy->reserved3[i] = (mb_u_char)buffer[index];
     index++;
   }
@@ -1980,7 +1962,6 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_rollpitchheave *rollpitchheave;
   int index;
@@ -1995,7 +1976,7 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   rollpitchheave = &(store->rollpitchheave);
   header = &(rollpitchheave->header);
 
@@ -2059,7 +2040,6 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_heading *heading;
   int index;
@@ -2074,7 +2054,7 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   heading = &(store->heading);
   header = &(heading->header);
 
@@ -2134,13 +2114,11 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_surveyline *surveyline;
   int data_size;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2151,7 +2129,7 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   surveyline = &(store->surveyline);
   header = &(surveyline->header);
 
@@ -2167,7 +2145,7 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
   index += 2;
   mb_get_binary_float(MB_YES, &buffer[index], &(surveyline->turnradius));
   index += 4;
-  for (i = 0; i < 64; i++) {
+  for (int i = 0; i < 64; i++) {
     surveyline->name[i] = (char)buffer[index];
     index++;
   }
@@ -2187,7 +2165,7 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
     }
   }
 
-  for (i = 0; i < surveyline->n; i++) {
+  for (int i = 0; i < surveyline->n; i++) {
     mb_get_binary_double(MB_YES, &buffer[index], &(surveyline->latitude[i]));
     index += 8;
     mb_get_binary_double(MB_YES, &buffer[index], &(surveyline->longitude[i]));
@@ -2241,7 +2219,6 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_navigation *navigation;
   int index;
@@ -2256,7 +2233,7 @@ int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   navigation = &(store->navigation);
   header = &(navigation->header);
 
@@ -2332,13 +2309,11 @@ int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_attitude *attitude;
   int data_size;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2349,7 +2324,7 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   attitude = &(store->attitude);
   header = &(attitude->header);
 
@@ -2384,7 +2359,7 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
     }
   }
 
-  for (i = 0; i < attitude->n; i++) {
+  for (int i = 0; i < attitude->n; i++) {
     mb_get_binary_short(MB_YES, &buffer[index], &(attitude->delta_time[i]));
     index += 2;
     mb_get_binary_float(MB_YES, &buffer[index], &(attitude->roll[i]));
@@ -2444,12 +2419,10 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_rec1022 *rec1022;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2460,7 +2433,7 @@ int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   rec1022 = &(store->rec1022);
   header = &(rec1022->header);
 
@@ -2470,7 +2443,7 @@ int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the data */
   index = header->Offset + 4;
-  for (i = 0; i < R7KHDRSIZE_Rec1022; i++) {
+  for (int i = 0; i < R7KHDRSIZE_Rec1022; i++) {
     rec1022->data[i] = (mb_u_char)buffer[index];
     index++;
   }
@@ -2525,7 +2498,6 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
   int status = MB_SUCCESS;
   int data_size;
   short *shortptr;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2548,7 +2520,7 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
   (*index)++;
   fsdwchannel->bytespersample = (mb_u_char)buffer[*index];
   (*index)++;
-  for (i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     fsdwchannel->reserved1[i] = buffer[*index];
     (*index)++;
   }
@@ -2562,11 +2534,11 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
   *index += 4;
   mb_get_binary_float(MB_YES, &buffer[*index], &(fsdwchannel->voltage));
   *index += 4;
-  for (i = 0; i < 16; i++) {
+  for (int i = 0; i < 16; i++) {
     fsdwchannel->name[i] = buffer[*index];
     (*index)++;
   }
-  for (i = 0; i < 20; i++) {
+  for (int i = 0; i < 20; i++) {
     fsdwchannel->reserved2[i] = buffer[*index];
     (*index)++;
   }
@@ -2584,14 +2556,14 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
   /* copy over the data */
   if (status == MB_SUCCESS) {
     if (fsdwchannel->bytespersample == 1) {
-      for (i = 0; i < fsdwchannel->number_samples; i++) {
+      for (int i = 0; i < fsdwchannel->number_samples; i++) {
         fsdwchannel->data[i] = buffer[*index];
         (*index)++;
       }
     }
     else if (fsdwchannel->bytespersample == 2) {
       shortptr = (short *)fsdwchannel->data;
-      for (i = 0; i < fsdwchannel->number_samples; i++) {
+      for (int i = 0; i < fsdwchannel->number_samples; i++) {
         /*srptr = (short *) &(buffer[*index]);
         urptr = (unsigned short *) &(buffer[*index]);*/
         mb_get_binary_short(MB_YES, &(buffer[*index]), &(shortptr[i]));
@@ -2604,7 +2576,7 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
     }
     else if (fsdwchannel->bytespersample == 4) {
       shortptr = (short *)fsdwchannel->data;
-      for (i = 0; i < fsdwchannel->number_samples; i++) {
+      for (int i = 0; i < fsdwchannel->number_samples; i++) {
         /*srptr = (short *) &(buffer[*index]);
         urptr = (unsigned short *) &(buffer[*index]);*/
         mb_get_binary_short(MB_YES, &(buffer[*index]), &(shortptr[2 * i]));
@@ -2642,7 +2614,6 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdwssheader *fsdwssheader, int *error) {
   int status = MB_SUCCESS;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2712,7 +2683,7 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdw
   *index += 4;
   mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->temperature));
   *index += 2;
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     fsdwssheader->reserved2[i] = buffer[*index];
     (*index)++;
   }
@@ -2738,7 +2709,6 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdw
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fsdwsegyheader *fsdwsegyheader, int *error) {
   int status = MB_SUCCESS;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2758,13 +2728,13 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 4;
   mb_get_binary_int(MB_YES, &buffer[*index], &(fsdwsegyheader->channelNum));
   *index += 4;
-  for (i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++) {
     mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->unused1[i]));
     *index += 2;
   }
   mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->traceIDCode));
   *index += 2;
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->unused2[i]));
     *index += 2;
   }
@@ -2774,7 +2744,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->NMEAantennaeO));
   *index += 2;
-  for (i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) {
     fsdwsegyheader->RS232[i] = buffer[*index];
     (*index)++;
   }
@@ -2788,7 +2758,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 4;
   mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->coordUnits));
   *index += 2;
-  for (i = 0; i < 24; i++) {
+  for (int i = 0; i < 24; i++) {
     fsdwsegyheader->annotation[i] = buffer[*index];
     (*index)++;
   }
@@ -2808,7 +2778,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->sweepLength));
   *index += 2;
-  for (i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
     mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->unused7[i]));
     *index += 2;
   }
@@ -2816,7 +2786,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->pulseID));
   *index += 2;
-  for (i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++) {
     mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->unused8[i]));
     *index += 2;
   }
@@ -2872,7 +2842,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->vehicleID));
   *index += 2;
-  for (i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++) {
     fsdwsegyheader->softwareVersion[i] = buffer[*index];
     (*index)++;
   }
@@ -2884,7 +2854,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->decimation));
   *index += 2;
-  for (i = 0; i < 7; i++) {
+  for (int i = 0; i < 7; i++) {
     mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->unuseda[i]));
     *index += 2;
   }
@@ -2906,7 +2876,6 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fsdwss *fsdwsslo;
   s7k_fsdwchannel *fsdwchannel;
@@ -2916,7 +2885,6 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
   int index;
   int time_i[7], time_j[5];
   double edgetech_time_d, s7k_time_d, bathy_time_d;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2927,7 +2895,7 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   fsdwsslo = &(store->fsdwsslo);
   header = &(fsdwsslo->header);
   bathymetry = &(store->bathymetry);
@@ -2950,14 +2918,14 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
   mb_get_binary_int(MB_YES, &buffer[index], &(fsdwsslo->data_format));
   index += 4;
   index += 12;
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     fsdwchannel = &(fsdwsslo->channel[i]);
     mbr_reson7kr_rd_fsdwchannel(verbose, fsdwsslo->data_format, buffer, &index, fsdwchannel, error);
   }
   /*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsslo: index:%d OffsetToOptionalData:%d\n",
   index, header->OffsetToOptionalData);
       index = header->OffsetToOptionalData;*/
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     fsdwssheader = &(fsdwsslo->ssheader[i]);
     mbr_reson7kr_rd_fsdwssheader(verbose, buffer, &index, fsdwssheader, error);
   }
@@ -3038,7 +3006,7 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 
 /* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-  for (i = 0; i < fsdwsslo->number_channels; i++) {
+  for (int i = 0; i < fsdwsslo->number_channels; i++) {
     mb_get_date(verbose, s7k_time_d, time_i);
     fsdwchannel = &(fsdwsslo->channel[i]);
     fsdwssheader = &(fsdwsslo->ssheader[i]);
@@ -3209,7 +3177,6 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fsdwss *fsdwsshi;
   s7k_fsdwchannel *fsdwchannel;
@@ -3218,7 +3185,6 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
   int index;
   int time_i[7], time_j[5];
   double edgetech_time_d, s7k_time_d, bathy_time_d;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3229,7 +3195,7 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   fsdwsshi = &(store->fsdwsshi);
   header = &(fsdwsshi->header);
   bathymetry = &(store->bathymetry);
@@ -3251,14 +3217,14 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
   mb_get_binary_int(MB_YES, &buffer[index], &(fsdwsshi->data_format));
   index += 4;
   index += 12;
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     fsdwchannel = &(fsdwsshi->channel[i]);
     mbr_reson7kr_rd_fsdwchannel(verbose, fsdwsshi->data_format, buffer, &index, fsdwchannel, error);
   }
   /*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsshi: index:%d OffsetToOptionalData:%d\n",
   index, header->OffsetToOptionalData);
       index = header->OffsetToOptionalData;*/
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     fsdwssheader = &(fsdwsshi->ssheader[i]);
     mbr_reson7kr_rd_fsdwssheader(verbose, buffer, &index, fsdwssheader, error);
   }
@@ -3339,7 +3305,7 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 
 /* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-  for (i = 0; i < fsdwsshi->number_channels; i++) {
+  for (int i = 0; i < fsdwsshi->number_channels; i++) {
     mb_get_date(verbose, s7k_time_d, time_i);
     fsdwchannel = &(fsdwsshi->channel[i]);
     fsdwssheader = &(fsdwsshi->ssheader[i]);
@@ -3373,7 +3339,6 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fsdwsb *fsdwsb;
   s7k_fsdwchannel *fsdwchannel;
@@ -3382,9 +3347,6 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
   int index;
   int time_i[7], time_j[5];
   double edgetech_time_d, s7k_time_d, bathy_time_d;
-#ifdef MBR_RESON7KR_DEBUG
-  int i;
-#endif
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3395,7 +3357,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   fsdwsb = &(store->fsdwsb);
   header = &(fsdwsb->header);
   bathymetry = &store->bathymetry;
@@ -3502,7 +3464,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 
 /* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
-  for (i = 0; i < fsdwsb->number_channels; i++) {
+  for (int i = 0; i < fsdwsb->number_channels; i++) {
     mb_get_date(verbose, s7k_time_d, time_i);
     fsdwchannel = &(fsdwsb->channel);
     fsdwsegyheader = &(fsdwsb->segyheader);
@@ -3536,14 +3498,12 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_bluefin *bluefin;
   int index;
   int time_j[5];
   double time_d;
   int timeproblem;
-  int i, j;
 #ifdef MBR_RESON7KR_DEBUG2
   int time_i[7];
 #endif
@@ -3556,7 +3516,7 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   bluefin = &(store->bluefin);
   header = &(bluefin->header);
 
@@ -3583,7 +3543,7 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
   index += 4;
   mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->data_format));
   index += 4;
-  for (i = 0; i < 16; i++) {
+  for (int i = 0; i < 16; i++) {
     bluefin->reserved[i] = buffer[index];
     index++;
   }
@@ -3606,7 +3566,7 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the nav or environmental data */
   if (bluefin->data_format == R7KRECID_BluefinNav) {
-    for (i = 0; i < bluefin->number_frames; i++) {
+    for (int i = 0; i < bluefin->number_frames; i++) {
       mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->nav[i].packet_size));
       index += 4;
       mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->nav[i].version));
@@ -3719,7 +3679,7 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
     if (bluefin->number_frames > 1) {
       /* figure out if there is a time problem */
       timeproblem = MB_NO;
-      for (i = 1; i < bluefin->number_frames; i++) {
+      for (int i = 1; i < bluefin->number_frames; i++) {
         if (bluefin->nav[i].position_time == bluefin->nav[i - 1].position_time)
           timeproblem = MB_YES;
       }
@@ -3728,7 +3688,7 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
       /* figure out if the time changes anywhere */
       if (timeproblem == MB_YES) {
         /* change unix times to use 7k time */
-        for (i = 0; i < bluefin->number_frames; i++) {
+        for (int i = 0; i < bluefin->number_frames; i++) {
 /* get the time  */
 #ifdef MBR_RESON7KR_DEBUG2
           fprintf(stderr, "CHANGE TIMESTAMP: %d %2.2d:%2.2d:%6.3f %12f", i, bluefin->nav[i].s7kTime.Hours,
@@ -3751,7 +3711,7 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
     }
   }
   else if (bluefin->data_format == R7KRECID_BluefinEnvironmental) {
-    for (i = 0; i < bluefin->number_frames; i++) {
+    for (int i = 0; i < bluefin->number_frames; i++) {
       mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->environmental[i].packet_size));
       index += 4;
       mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].version));
@@ -3822,7 +3782,7 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
       index += 2;
       mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor8));
       index += 2;
-      for (j = 0; j < 8; j++) {
+      for (int j = 0; j < 8; j++) {
         bluefin->environmental[i].reserved2[j] = buffer[index];
         index++;
       }
@@ -3849,7 +3809,7 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
     if (bluefin->number_frames > 1) {
       /* figure out if there is a time problem */
       timeproblem = MB_NO;
-      for (i = 1; i < bluefin->number_frames; i++) {
+      for (int i = 1; i < bluefin->number_frames; i++) {
         if (bluefin->environmental[i].ctd_time == bluefin->environmental[i - 1].ctd_time ||
             bluefin->environmental[i].ctd_time < 10000000.0)
           timeproblem = MB_YES;
@@ -3859,7 +3819,7 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
       /* figure out if the time changes anywhere */
       if (timeproblem == MB_YES) {
         /* change unix times to use 7k time */
-        for (i = 0; i < bluefin->number_frames; i++) {
+        for (int i = 0; i < bluefin->number_frames; i++) {
 /* get the time  */
 #ifdef MBR_RESON7KR_DEBUG2
           fprintf(stderr, "CHANGE TIMESTAMP: %d %2.2d:%2.2d:%6.3f %12f", i, bluefin->environmental[i].s7kTime.Hours,
@@ -3956,12 +3916,10 @@ fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].dept
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_processedsidescan *processedsidescan;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3972,7 +3930,7 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   processedsidescan = &(store->processedsidescan);
   header = &(processedsidescan->header);
 
@@ -4004,11 +3962,11 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
   index += 8;
 
   /* extract the data */
-  for (i = 0; i < processedsidescan->number_pixels; i++) {
+  for (int i = 0; i < processedsidescan->number_pixels; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(processedsidescan->sidescan[i]));
     index += 4;
   }
-  for (i = 0; i < processedsidescan->number_pixels; i++) {
+  for (int i = 0; i < processedsidescan->number_pixels; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(processedsidescan->alongtrack[i]));
     index += 4;
   }
@@ -4060,7 +4018,6 @@ int mbr_reson7kr_rd_processedsidescan(int verbose, char *buffer, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_volatilesettings *volatilesettings;
   int index;
@@ -4075,7 +4032,7 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   volatilesettings = &(store->volatilesettings);
   header = &(volatilesettings->header);
 
@@ -4211,14 +4168,12 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_configuration *configuration;
   s7k_device *device;
   int data_size;
   int index;
   int time_j[5];
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4229,7 +4184,7 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   configuration = &(store->configuration);
   header = &(configuration->header);
 
@@ -4245,11 +4200,11 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
   index += 4;
 
   /* extract the data for each device */
-  for (i = 0; i < configuration->number_devices; i++) {
+  for (int i = 0; i < configuration->number_devices; i++) {
     device = &(configuration->device[i]);
     mb_get_binary_int(MB_YES, &buffer[index], &(device->magic_number));
     index += 4;
-    for (j = 0; j < 64; j++) {
+    for (int j = 0; j < 64; j++) {
       device->description[j] = buffer[index];
       index++;
     }
@@ -4271,7 +4226,7 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
       }
     }
 
-    for (j = 0; j < device->info_length; j++) {
+    for (int j = 0; j < device->info_length; j++) {
       device->info[j] = buffer[index];
       index++;
     }
@@ -4324,7 +4279,6 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_matchfilter *matchfilter;
   int index;
@@ -4339,7 +4293,7 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   matchfilter = &(store->matchfilter);
   header = &(matchfilter->header);
 
@@ -4407,13 +4361,11 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration;
   int index;
   int data_size;
   int time_j[5];
-  int j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4424,7 +4376,7 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2firmwarehardwareconfiguration = &(store->v2firmwarehardwareconfiguration);
   header = &(v2firmwarehardwareconfiguration->header);
 
@@ -4452,7 +4404,7 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
     }
   }
 
-  for (j = 0; j < v2firmwarehardwareconfiguration->info_length; j++) {
+  for (int j = 0; j < v2firmwarehardwareconfiguration->info_length; j++) {
     v2firmwarehardwareconfiguration->info[j] = buffer[index];
     index++;
   }
@@ -4504,12 +4456,10 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_beamgeometry *beamgeometry;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4520,7 +4470,7 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   beamgeometry = &(store->beamgeometry);
   header = &(beamgeometry->header);
 
@@ -4536,19 +4486,19 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
   index += 4;
 
   /* extract the data */
-  for (i = 0; i < beamgeometry->number_beams; i++) {
+  for (int i = 0; i < beamgeometry->number_beams; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(beamgeometry->angle_alongtrack[i]));
     index += 4;
   }
-  for (i = 0; i < beamgeometry->number_beams; i++) {
+  for (int i = 0; i < beamgeometry->number_beams; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(beamgeometry->angle_acrosstrack[i]));
     index += 4;
   }
-  for (i = 0; i < beamgeometry->number_beams; i++) {
+  for (int i = 0; i < beamgeometry->number_beams; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(beamgeometry->beamwidth_alongtrack[i]));
     index += 4;
   }
-  for (i = 0; i < beamgeometry->number_beams; i++) {
+  for (int i = 0; i < beamgeometry->number_beams; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(beamgeometry->beamwidth_acrosstrack[i]));
     index += 4;
   }
@@ -4600,12 +4550,10 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_calibration *calibration;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4616,7 +4564,7 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   calibration = &(store->calibration);
   header = &(calibration->header);
 
@@ -4632,11 +4580,11 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
   index += 2;
 
   /* extract the data */
-  for (i = 0; i < calibration->number_channels; i++) {
+  for (int i = 0; i < calibration->number_channels; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(calibration->gain[i]));
     index += 4;
   }
-  for (i = 0; i < calibration->number_channels; i++) {
+  for (int i = 0; i < calibration->number_channels; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(calibration->phase[i]));
     index += 4;
   }
@@ -4688,13 +4636,11 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_bathymetry *bathymetry;
   int index;
   int time_j[5];
   double acrosstrackmax, alongtrackmax;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4705,7 +4651,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   bathymetry = &(store->bathymetry);
   header = &(bathymetry->header);
 
@@ -4740,25 +4686,25 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* extract the data */
-  for (i = 0; i < bathymetry->number_beams; i++) {
+  for (int i = 0; i < bathymetry->number_beams; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->range[i]));
     index += 4;
   }
-  for (i = 0; i < bathymetry->number_beams; i++) {
+  for (int i = 0; i < bathymetry->number_beams; i++) {
     bathymetry->quality[i] = buffer[index];
     index++;
   }
-  for (i = 0; i < bathymetry->number_beams; i++) {
+  for (int i = 0; i < bathymetry->number_beams; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->intensity[i]));
     index += 4;
   }
   if ((header->OffsetToOptionalData == 0 && header->Size >= 92 + 17 * bathymetry->number_beams) ||
       (header->OffsetToOptionalData > 0 && header->Size >= 137 + 37 * bathymetry->number_beams)) {
-    for (i = 0; i < bathymetry->number_beams; i++) {
+    for (int i = 0; i < bathymetry->number_beams; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->min_depth_gate[i]));
       index += 4;
     }
-    for (i = 0; i < bathymetry->number_beams; i++) {
+    for (int i = 0; i < bathymetry->number_beams; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->max_depth_gate[i]));
       index += 4;
     }
@@ -4788,7 +4734,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->vehicle_height));
     index += 4;
-    for (i = 0; i < bathymetry->number_beams; i++) {
+    for (int i = 0; i < bathymetry->number_beams; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->depth[i]));
       index += 4;
       mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->alongtrack[i]));
@@ -4809,7 +4755,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
     if (bathymetry->acrossalongerror == MB_MAYBE) {
       acrosstrackmax = 0.0;
       alongtrackmax = 0.0;
-      for (i = 0; i < bathymetry->number_beams; i++) {
+      for (int i = 0; i < bathymetry->number_beams; i++) {
         acrosstrackmax = MAX(acrosstrackmax, fabs(bathymetry->acrosstrack[i]));
         alongtrackmax = MAX(alongtrackmax, fabs(bathymetry->alongtrack[i]));
       }
@@ -4828,7 +4774,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
     }
     if (bathymetry->acrossalongerror == MB_YES ||
         (bathymetry->acrossalongerror == MB_MAYBE && alongtrackmax > acrosstrackmax)) {
-      for (i = 0; i < bathymetry->number_beams; i++) {
+      for (int i = 0; i < bathymetry->number_beams; i++) {
         acrosstrackmax = bathymetry->acrosstrack[i];
         bathymetry->acrosstrack[i] = bathymetry->alongtrack[i];
         bathymetry->alongtrack[i] = acrosstrackmax;
@@ -4847,7 +4793,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
     bathymetry->pitch = 0.0;
     bathymetry->heave = 0.0;
     bathymetry->vehicle_height = 0.0;
-    for (i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
+    for (int i = 0; i < MBSYS_RESON7K_MAX_BEAMS; i++) {
       bathymetry->depth[i] = 0.0;
       bathymetry->acrosstrack[i] = 0.0;
       bathymetry->alongtrack[i] = 0.0;
@@ -4903,7 +4849,6 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_backscatter *backscatter;
   int data_size;
@@ -4911,7 +4856,6 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
   int time_j[5];
   short *short_ptr;
   int *int_ptr;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4922,7 +4866,7 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   backscatter = &(store->backscatter);
   header = &(backscatter->header);
 
@@ -4986,35 +4930,35 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 
   /* extract backscatter data */
   if (backscatter->sample_size == 1) {
-    for (i = 0; i < backscatter->number_samples; i++) {
+    for (int i = 0; i < backscatter->number_samples; i++) {
       backscatter->port_data[i] = buffer[index];
       index++;
     }
-    for (i = 0; i < backscatter->number_samples; i++) {
+    for (int i = 0; i < backscatter->number_samples; i++) {
       backscatter->stbd_data[i] = buffer[index];
       index++;
     }
   }
   else if (backscatter->sample_size == 2) {
     short_ptr = (short *)backscatter->port_data;
-    for (i = 0; i < backscatter->number_samples; i++) {
+    for (int i = 0; i < backscatter->number_samples; i++) {
       mb_get_binary_short(MB_YES, &buffer[index], &(short_ptr[i]));
       index += 2;
     }
     short_ptr = (short *)backscatter->stbd_data;
-    for (i = 0; i < backscatter->number_samples; i++) {
+    for (int i = 0; i < backscatter->number_samples; i++) {
       mb_get_binary_short(MB_YES, &buffer[index], &(short_ptr[i]));
       index += 2;
     }
   }
   else if (backscatter->sample_size == 4) {
     int_ptr = (int *)backscatter->port_data;
-    for (i = 0; i < backscatter->number_samples; i++) {
+    for (int i = 0; i < backscatter->number_samples; i++) {
       mb_get_binary_int(MB_YES, &buffer[index], &(int_ptr[i]));
       index += 4;
     }
     int_ptr = (int *)backscatter->stbd_data;
-    for (i = 0; i < backscatter->number_samples; i++) {
+    for (int i = 0; i < backscatter->number_samples; i++) {
       mb_get_binary_int(MB_YES, &buffer[index], &(int_ptr[i]));
       index += 4;
     }
@@ -5091,7 +5035,6 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_beam *beam;
   s7kr_snippet *snippet;
@@ -5110,8 +5053,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
   short *shortptrphase;
   int *intptramp;
   int *intptrphase;
-  int i, j;
-
+  
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5121,7 +5063,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   beam = &(store->beam);
   header = &(beam->header);
 
@@ -5154,7 +5096,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
   sample_type_amp = beam->sample_type & 15;
   sample_type_phase = (beam->sample_type >> 4) & 15;
   sample_type_iandq = (beam->sample_type >> 8) & 15;
-  for (i = 0; i < beam->number_beams; i++) {
+  for (int i = 0; i < beam->number_beams; i++) {
     snippet = &beam->snippets[i];
     mb_get_binary_short(MB_YES, &buffer[index], &(snippet->beam_number));
     index += 2;
@@ -5164,7 +5106,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
     index += 4;
   }
 
-  for (i = 0; i < beam->number_beams; i++) {
+  for (int i = 0; i < beam->number_beams; i++) {
     /* allocate memory for snippet if needed */
     snippet = &beam->snippets[i];
     nalloc_amp = 0;
@@ -5207,7 +5149,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
     /* extract snippet or beam data */
     if (status == MB_SUCCESS) {
       nsamples = snippet->end_sample - snippet->begin_sample + 1;
-      for (j = 0; j < nsamples; j++) {
+      for (int j = 0; j < nsamples; j++) {
         if (sample_type_amp == 1) {
           charptr = (char *)snippet->amplitude;
           charptr[j] = buffer[index];
@@ -5305,7 +5247,6 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_verticaldepth *verticaldepth;
   int index;
@@ -5320,7 +5261,7 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   verticaldepth = &(store->verticaldepth);
   header = &(verticaldepth->header);
 
@@ -5396,13 +5337,11 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_tvg *tvg;
   int index;
   int time_j[5];
   int nalloc;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5413,7 +5352,7 @@ int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error) 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   tvg = &(store->tvg);
   header = &(tvg->header);
 
@@ -5431,7 +5370,7 @@ int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error) 
   index += 2;
   mb_get_binary_int(MB_YES, &buffer[index], &(tvg->n));
   index += 4;
-  for (i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i++) {
     mb_get_binary_int(MB_YES, &buffer[index], &(tvg->reserved[i]));
     index += 4;
   }
@@ -5497,7 +5436,6 @@ int mbr_reson7kr_rd_tvg(int verbose, char *buffer, void *store_ptr, int *error) 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_image *image;
   int index;
@@ -5506,7 +5444,6 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
   char *charptr;
   unsigned short *ushortptr;
   unsigned int *uintptr;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5517,7 +5454,7 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   image = &(store->image);
   header = &(image->header);
 
@@ -5558,21 +5495,21 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
   /* extract image data */
   if (image->color_depth == 1) {
     charptr = (char *)image->image;
-    for (i = 0; i < image->width * image->height; i++) {
+    for (int i = 0; i < image->width * image->height; i++) {
       charptr[i] = buffer[index];
       index++;
     }
   }
   else if (image->color_depth == 2) {
     ushortptr = (unsigned short *)image->image;
-    for (i = 0; i < image->width * image->height; i++) {
+    for (int i = 0; i < image->width * image->height; i++) {
       mb_get_binary_short(MB_YES, &buffer[index], &(ushortptr[i]));
       index += 2;
     }
   }
   else if (image->color_depth == 4) {
     uintptr = (unsigned int *)image->image;
-    for (i = 0; i < image->width * image->height; i++) {
+    for (int i = 0; i < image->width * image->height; i++) {
       mb_get_binary_int(MB_YES, &buffer[index], &(uintptr[i]));
       index += 4;
     }
@@ -5625,12 +5562,10 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2pingmotion *v2pingmotion;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5641,7 +5576,7 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2pingmotion = &(store->v2pingmotion);
   header = &(v2pingmotion->header);
 
@@ -5692,35 +5627,35 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 
   /* extract v2pingmotion data */
   if (v2pingmotion->flags & 2) {
-    for (i = 0; i < v2pingmotion->n; i++) {
+    for (int i = 0; i < v2pingmotion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(v2pingmotion->roll[i]));
       index += 4;
     }
   }
   else {
-    for (i = 0; i < v2pingmotion->n; i++) {
+    for (int i = 0; i < v2pingmotion->n; i++) {
       v2pingmotion->roll[i] = 0.0;
     }
   }
   if (v2pingmotion->flags & 4) {
-    for (i = 0; i < v2pingmotion->n; i++) {
+    for (int i = 0; i < v2pingmotion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(v2pingmotion->heading[i]));
       index += 4;
     }
   }
   else {
-    for (i = 0; i < v2pingmotion->n; i++) {
+    for (int i = 0; i < v2pingmotion->n; i++) {
       v2pingmotion->heading[i] = 0.0;
     }
   }
   if (v2pingmotion->flags & 8) {
-    for (i = 0; i < v2pingmotion->n; i++) {
+    for (int i = 0; i < v2pingmotion->n; i++) {
       mb_get_binary_float(MB_YES, &buffer[index], &(v2pingmotion->heave[i]));
       index += 4;
     }
   }
   else {
-    for (i = 0; i < v2pingmotion->n; i++) {
+    for (int i = 0; i < v2pingmotion->n; i++) {
       v2pingmotion->heave[i] = 0.0;
     }
   }
@@ -5772,12 +5707,10 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2detectionsetup *v2detectionsetup;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5788,7 +5721,7 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2detectionsetup = &(store->v2detectionsetup);
   header = &(v2detectionsetup->header);
 
@@ -5830,13 +5763,13 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
   index += 4;
   mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->depth_gate_tilt));
   index += 4;
-  for (i = 0; i < 14; i++) {
+  for (int i = 0; i < 14; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->reserved[i]));
     index += 4;
   }
 
   /* extract v2detectionsetup data */
-  for (i = 0; i < v2detectionsetup->number_beams; i++) {
+  for (int i = 0; i < v2detectionsetup->number_beams; i++) {
     mb_get_binary_short(MB_YES, &buffer[index], &(v2detectionsetup->beam_descriptor[i]));
     index += 2;
     mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->detection_point[i]));
@@ -5909,13 +5842,11 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2beamformed *v2beamformed;
   s7kr_v2amplitudephase *v2amplitudephase;
   int index;
   int time_j[5];
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5926,7 +5857,7 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2beamformed = &(store->v2beamformed);
   header = &(v2beamformed->header);
 
@@ -5946,13 +5877,13 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
   index += 2;
   mb_get_binary_int(MB_YES, &buffer[index], &(v2beamformed->number_samples));
   index += 4;
-  for (i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) {
     v2beamformed->reserved[i] = buffer[index];
     index++;
   }
 
   /* loop over all beams */
-  for (i = 0; i < v2beamformed->number_beams; i++) {
+  for (int i = 0; i < v2beamformed->number_beams; i++) {
     v2amplitudephase = &(v2beamformed->amplitudephase[i]);
 
     /* allocate memory for v2beamformed if needed */
@@ -5973,7 +5904,7 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
     }
 
     /* extract v2beamformed data */
-    for (j = 0; j < v2beamformed->number_samples; j++) {
+    for (int j = 0; j < v2beamformed->number_samples; j++) {
       mb_get_binary_short(MB_YES, &buffer[index], &(v2amplitudephase->amplitude[j]));
       index += 2;
       mb_get_binary_short(MB_YES, &buffer[index], &(v2amplitudephase->phase[j]));
@@ -6030,7 +5961,6 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2bite *v2bite;
   s7kr_v2bitereport *report;
@@ -6038,7 +5968,6 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
   s7kr_v2bitefield *bitefield;
   int index;
   int time_j[5];
-  int i, j, k;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6049,7 +5978,7 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2bite = &(store->v2bite);
   header = &(v2bite->header);
 
@@ -6073,10 +6002,10 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
   }
 
   /* loop over all bite reports */
-  for (i = 0; i < v2bite->number_reports; i++) {
+  for (int i = 0; i < v2bite->number_reports; i++) {
     report = &(v2bite->reports[i]);
 
-    for (j = 0; j < 64; j++) {
+    for (int j = 0; j < 64; j++) {
       report->source_name[j] = buffer[index];
       index++;
     }
@@ -6127,18 +6056,18 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
     index++;
     mb_get_binary_short(MB_YES, &buffer[index], &(report->number_bite));
     index += 2;
-    for (j = 0; j < 32; j++) {
+    for (int j = 0; j < 32; j++) {
       report->bite_status[j] = buffer[index];
       index++;
     }
 
     /* loop over all bite fields */
-    for (j = 0; j < report->number_bite; j++) {
+    for (int j = 0; j < report->number_bite; j++) {
       bitefield = &(report->bitefield[j]);
 
       mb_get_binary_short(MB_YES, &buffer[index], &(bitefield->reserved));
       index += 2;
-      for (k = 0; k < 64; k++) {
+      for (int k = 0; k < 64; k++) {
         bitefield->name[k] = buffer[index];
         index++;
       }
@@ -6200,12 +6129,10 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v27kcenterversion *v27kcenterversion;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6216,7 +6143,7 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v27kcenterversion = &(store->v27kcenterversion);
   header = &(v27kcenterversion->header);
 
@@ -6226,7 +6153,7 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
 
   /* extract the data */
   index = header->Offset + 4;
-  for (i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) {
     v27kcenterversion->version[i] = buffer[index];
     index++;
   }
@@ -6278,12 +6205,10 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v28kwetendversion *v28kwetendversion;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6294,7 +6219,7 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v28kwetendversion = &(store->v28kwetendversion);
   header = &(v28kwetendversion->header);
 
@@ -6304,7 +6229,7 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
 
   /* extract the data */
   index = header->Offset + 4;
-  for (i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) {
     v28kwetendversion->version[i] = buffer[index];
     index++;
   }
@@ -6356,12 +6281,10 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2detection *v2detection;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6372,7 +6295,7 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2detection = &(store->v2detection);
   header = &(v2detection->header);
 
@@ -6398,13 +6321,13 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
   index++;
   mb_get_binary_int(MB_YES, &buffer[index], &(v2detection->flags));
   index += 4;
-  for (i = 0; i < 64; i++) {
+  for (int i = 0; i < 64; i++) {
     v2detection->reserved[i] = buffer[index];
     index++;
   }
 
   /* extract the data */
-  for (i = 0; i < v2detection->number_beams; i++) {
+  for (int i = 0; i < v2detection->number_beams; i++) {
     mb_get_binary_float(MB_YES, &buffer[index], &(v2detection->range[i]));
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(v2detection->angle_x[i]));
@@ -6470,14 +6393,12 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2rawdetection *v2rawdetection;
   s7kr_bathymetry *bathymetry;
     s7kr_beamgeometry *beamgeometry;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6488,7 +6409,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2rawdetection = &(store->v2rawdetection);
   header = &(v2rawdetection->header);
   bathymetry = &(store->bathymetry);
@@ -6518,13 +6439,13 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
   index += 4;
   mb_get_binary_float(MB_YES, &buffer[index], &(v2rawdetection->tx_angle));
   index += 4;
-  for (i = 0; i < 64; i++) {
+  for (int i = 0; i < 64; i++) {
     v2rawdetection->reserved[i] = buffer[index];
     index++;
   }
 
   /* extract the data */
-  for (i = 0; i < v2rawdetection->number_beams; i++) {
+  for (int i = 0; i < v2rawdetection->number_beams; i++) {
     mb_get_binary_short(MB_YES, &buffer[index], &(v2rawdetection->beam_descriptor[i]));
     index += 2;
     mb_get_binary_float(MB_YES, &buffer[index], &(v2rawdetection->detection_point[i]));
@@ -6563,7 +6484,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* check for broken record */
-  for (i = 0; i < v2rawdetection->number_beams; i++) {
+  for (int i = 0; i < v2rawdetection->number_beams; i++) {
     if ((v2rawdetection->beam_descriptor[i] > MBSYS_RESON7K_MAX_BEAMS) ||
         (store->read_bathymetry == MB_YES && v2rawdetection->beam_descriptor[i] > bathymetry->number_beams) ||
         (store->read_beamgeometry == MB_YES && v2rawdetection->beam_descriptor[i] > beamgeometry->number_beams)) {
@@ -6600,13 +6521,11 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2snippet *v2snippet;
   s7kr_v2snippettimeseries *snippettimeseries;
   int index;
   int time_j[5];
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6617,7 +6536,7 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2snippet = &(store->v2snippet);
   header = &(v2snippet->header);
 
@@ -6639,13 +6558,13 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
   index++;
   v2snippet->control_flags = buffer[index];
   index++;
-  for (i = 0; i < 28; i++) {
+  for (int i = 0; i < 28; i++) {
     v2snippet->reserved[i] = buffer[index];
     index++;
   }
 
   /* loop over all beams to get snippet parameters */
-  for (i = 0; i < v2snippet->number_beams; i++) {
+  for (int i = 0; i < v2snippet->number_beams; i++) {
     snippettimeseries = &(v2snippet->snippettimeseries[i]);
 
     /* extract snippettimeseries data */
@@ -6673,9 +6592,9 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 
   /* loop over all beams to get snippet data */
   if (status == MB_SUCCESS)
-    for (i = 0; i < v2snippet->number_beams; i++) {
+    for (int i = 0; i < v2snippet->number_beams; i++) {
       snippettimeseries = &(v2snippet->snippettimeseries[i]);
-      for (j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
+      for (int j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
         mb_get_binary_short(MB_YES, &buffer[index], &(snippettimeseries->amplitude[j]));
         index += 2;
       }
@@ -6728,13 +6647,11 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_calibratedsnippet *calibratedsnippet;
   s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
   int index;
   int time_j[5];
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6745,7 +6662,7 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   calibratedsnippet = &(store->calibratedsnippet);
   header = &(calibratedsnippet->header);
 
@@ -6767,13 +6684,13 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
   index++;
   mb_get_binary_int(MB_YES, &buffer[index], &(calibratedsnippet->control_flags));
   index += 4;
-  for (i = 0; i < 28; i++) {
+  for (int i = 0; i < 28; i++) {
     calibratedsnippet->reserved[i] = buffer[index];
     index++;
   }
 
   /* loop over all beams to get snippet parameters */
-  for (i = 0; i < calibratedsnippet->number_beams; i++) {
+  for (int i = 0; i < calibratedsnippet->number_beams; i++) {
     calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
 
     /* extract snippettimeseries data */
@@ -6803,9 +6720,9 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
 
   /* loop over all beams to get snippet data */
   if (status == MB_SUCCESS)
-    for (i = 0; i < calibratedsnippet->number_beams; i++) {
+    for (int i = 0; i < calibratedsnippet->number_beams; i++) {
       calibratedsnippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
-      for (j = 0; j < (calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1); j++) {
+      for (int j = 0; j < (calibratedsnippettimeseries->end_sample - calibratedsnippettimeseries->begin_sample + 1); j++) {
         mb_get_binary_float(MB_YES, &buffer[index], &(calibratedsnippettimeseries->amplitude[j]));
         index += 4;
       }
@@ -6858,12 +6775,10 @@ int mbr_reson7kr_rd_calibratedsnippet(int verbose, char *buffer, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_installation *installation;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6874,7 +6789,7 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   installation = &(store->installation);
   header = &(installation->header);
 
@@ -6888,25 +6803,25 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
   index += 4;
   mb_get_binary_short(MB_YES, &buffer[index], &(installation->firmware_version_len));
   index += 2;
-  for (i = 0; i < 128; i++) {
+  for (int i = 0; i < 128; i++) {
     installation->firmware_version[i] = buffer[index];
     index++;
   }
   mb_get_binary_short(MB_YES, &buffer[index], &(installation->software_version_len));
   index += 2;
-  for (i = 0; i < 128; i++) {
+  for (int i = 0; i < 128; i++) {
     installation->software_version[i] = buffer[index];
     index++;
   }
   mb_get_binary_short(MB_YES, &buffer[index], &(installation->s7k_version_len));
   index += 2;
-  for (i = 0; i < 128; i++) {
+  for (int i = 0; i < 128; i++) {
     installation->s7k_version[i] = buffer[index];
     index++;
   }
   mb_get_binary_short(MB_YES, &buffer[index], &(installation->protocal_version_len));
   index += 2;
-  for (i = 0; i < 128; i++) {
+  for (int i = 0; i < 128; i++) {
     installation->protocal_version[i] = buffer[index];
     index++;
   }
@@ -7006,13 +6921,11 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fileheader *fileheader;
   s7kr_subsystem *subsystem;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7023,7 +6936,7 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   fileheader = &(store->fileheader);
   header = &(fileheader->header);
 
@@ -7033,7 +6946,7 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
 
   /* extract the data */
   index = header->Offset + 4;
-  for (i = 0; i < 16; i++) {
+  for (int i = 0; i < 16; i++) {
     fileheader->file_identifier[i] = buffer[index];
     index++;
   }
@@ -7041,7 +6954,7 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
   index += 2;
   mb_get_binary_short(MB_YES, &buffer[index], &(fileheader->reserved));
   index += 2;
-  for (i = 0; i < 16; i++) {
+  for (int i = 0; i < 16; i++) {
     fileheader->session_identifier[i] = buffer[index];
     index++;
   }
@@ -7049,23 +6962,23 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
   index += 4;
   mb_get_binary_int(MB_YES, &buffer[index], &(fileheader->number_subsystems));
   index += 4;
-  for (i = 0; i < 64; i++) {
+  for (int i = 0; i < 64; i++) {
     fileheader->recording_name[i] = buffer[index];
     index++;
   }
-  for (i = 0; i < 16; i++) {
+  for (int i = 0; i < 16; i++) {
     fileheader->recording_version[i] = buffer[index];
     index++;
   }
-  for (i = 0; i < 64; i++) {
+  for (int i = 0; i < 64; i++) {
     fileheader->user_defined_name[i] = buffer[index];
     index++;
   }
-  for (i = 0; i < 128; i++) {
+  for (int i = 0; i < 128; i++) {
     fileheader->notes[i] = buffer[index];
     index++;
   }
-  for (i = 0; i < fileheader->number_subsystems; i++) {
+  for (int i = 0; i < fileheader->number_subsystems; i++) {
     subsystem = &(fileheader->subsystem[i]);
     mb_get_binary_int(MB_YES, &buffer[index], &(subsystem->device_identifier));
     index += 4;
@@ -7123,13 +7036,11 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_systemeventmessage *systemeventmessage;
   int data_size;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7140,7 +7051,7 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   systemeventmessage = &(store->systemeventmessage);
   header = &(systemeventmessage->header);
 
@@ -7173,7 +7084,7 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
   }
 
   /* extract the data */
-  for (i = 0; i < systemeventmessage->message_length; i++) {
+  for (int i = 0; i < systemeventmessage->message_length; i++) {
     systemeventmessage->message[i] = buffer[index];
     index++;
   }
@@ -7225,12 +7136,10 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_remotecontrolsettings *remotecontrolsettings;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7241,7 +7150,7 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   remotecontrolsettings = &(store->remotecontrolsettings);
   header = &(remotecontrolsettings->header);
 
@@ -7353,7 +7262,7 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
     index += 4;
     mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->gate_depth_max));
     index += 4;
-    for (i = 0; i < 35; i++) {
+    for (int i = 0; i < 35; i++) {
       mb_get_binary_short(MB_YES, &buffer[index], &(remotecontrolsettings->reserved2[i]));
       index += 2;
     }
@@ -7406,12 +7315,10 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_reserved *reserved;
   int index;
   int time_j[5];
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7422,7 +7329,7 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   reserved = &(store->reserved);
   header = &(reserved->header);
 
@@ -7432,7 +7339,7 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
 
   /* extract the data */
   index = header->Offset + 4;
-  for (i = 0; i < R7KHDRSIZE_7kReserved; i++) {
+  for (int i = 0; i < R7KHDRSIZE_7kReserved; i++) {
     reserved->reserved[i] = buffer[index];
     index++;
   }
@@ -7484,7 +7391,6 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_roll *roll;
   int index;
@@ -7499,7 +7405,7 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   roll = &(store->roll);
   header = &(roll->header);
 
@@ -7559,7 +7465,6 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_pitch *pitch;
   int index;
@@ -7574,7 +7479,7 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   pitch = &(store->pitch);
   header = &(pitch->header);
 
@@ -7634,7 +7539,6 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_soundvelocity *soundvelocity;
   int index;
@@ -7649,7 +7553,7 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   soundvelocity = &(store->soundvelocity);
   header = &(soundvelocity->header);
 
@@ -7709,7 +7613,6 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_absorptionloss *absorptionloss;
   int index;
@@ -7724,7 +7627,7 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   absorptionloss = &(store->absorptionloss);
   header = &(absorptionloss->header);
 
@@ -7784,7 +7687,6 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_spreadingloss *spreadingloss;
   int index;
@@ -7799,7 +7701,7 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   spreadingloss = &(store->spreadingloss);
   header = &(spreadingloss->header);
 
@@ -7859,7 +7761,6 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fsdwss *fsdwsslo;
   s7kr_fsdwss *fsdwsshi;
@@ -7901,7 +7802,6 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   double time_d;
   int nscan;
   int version_major, version_minor, version_svn;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7915,7 +7815,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   mbfp = mb_io_ptr->mbfp;
 
   /* get saved values */
@@ -7951,7 +7851,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     if (*save_flag == MB_YES) {
       *save_flag = MB_NO;
       mbr_reson7kr_chk_header(verbose, mbio_ptr, buffersave, recordid, deviceid, enumerator, size);
-      for (i = 0; i < *size; i++)
+      for (int i = 0; i < *size; i++)
         buffer[i] = buffersave[i];
     }
 
@@ -7982,7 +7882,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       while (status == MB_SUCCESS &&
              mbr_reson7kr_chk_header(verbose, mbio_ptr, buffer, recordid, deviceid, enumerator, size) != MB_SUCCESS) {
         /* get next byte */
-        for (i = 0; i < MBSYS_RESON7K_VERSIONSYNCSIZE - 1; i++)
+        for (int i = 0; i < MBSYS_RESON7K_VERSIONSYNCSIZE - 1; i++)
           buffer[i] = buffer[i + 1];
         read_len = (size_t)1;
         status = mb_fileio_get(verbose, mbio_ptr, &buffer[MBSYS_RESON7K_VERSIONSYNCSIZE - 1], &read_len, error);
@@ -8085,7 +7985,7 @@ Have a nice day...\n");
             *save_flag = MB_YES;
             *current_ping = *last_ping;
             *last_ping = -1;
-            for (i = 0; i < *size; i++)
+            for (int i = 0; i < *size; i++)
               buffersave[i] = buffer[i];
 
             /* get the time */
@@ -8107,7 +8007,7 @@ Have a nice day...\n");
             *save_flag = MB_YES;
             *current_ping = *last_ping;
             *last_ping = -1;
-            for (i = 0; i < *size; i++)
+            for (int i = 0; i < *size; i++)
               buffersave[i] = buffer[i];
 
             /* get the time */
@@ -8129,7 +8029,7 @@ Have a nice day...\n");
             *save_flag = MB_YES;
             *current_ping = *last_ping;
             *last_ping = -1;
-            for (i = 0; i < *size; i++)
+            for (int i = 0; i < *size; i++)
               buffersave[i] = buffer[i];
 
             /* get the time */
@@ -9086,7 +8986,6 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
   int interp_status;
   int interp_error = MB_ERROR_NO_ERROR;
-  struct mbsys_reson7k_struct *store;
   s7kr_position *position;
   s7kr_navigation *navigation;
   s7kr_attitude *attitude;
@@ -9114,7 +9013,6 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   double soundspeed, alpha, beta, theta, phi;
   double rr, xx, zz;
   double *pixel_size, *swath_width;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -9131,7 +9029,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   status = mbr_reson7kr_rd_data(verbose, mbio_ptr, store_ptr, error);
 
   /* get pointers to data structures */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   position = &store->position;
   attitude = &store->attitude;
   volatilesettings = &store->volatilesettings;
@@ -9167,7 +9065,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   if (status == MB_SUCCESS && store->kind == MB_DATA_NAV2) {
     /* add latest fix */
     bluefin = &(store->bluefin);
-    for (i = 0; i < bluefin->number_frames; i++) {
+    for (int i = 0; i < bluefin->number_frames; i++) {
       /* if (bluefin->nav[i].timedelay != 0)
       fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->nav[i].timedelay);*/
       mb_navint_add(verbose, mbio_ptr, (double)(bluefin->nav[i].position_time), (double)(RTD * bluefin->nav[i].longitude),
@@ -9204,7 +9102,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     attitude = &(store->attitude);
 
     /* add latest attitude samples */
-    for (i = 0; i < attitude->n; i++) {
+    for (int i = 0; i < attitude->n; i++) {
       mb_attint_add(verbose, mbio_ptr, (double)(store->time_d + 0.001 * ((double)attitude->delta_time[i])),
                     (double)(attitude->heave[i]), (double)(RTD * attitude->roll[i]), (double)(RTD * attitude->pitch[i]),
                     error);
@@ -9229,7 +9127,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     customattitude = &(store->customattitude);
 
     /* add latest attitude samples */
-    for (i = 0; i < customattitude->n; i++) {
+    for (int i = 0; i < customattitude->n; i++) {
       mb_attint_add(verbose, mbio_ptr, (double)(store->time_d + ((double)i) / ((double)customattitude->frequency)),
                     (double)(customattitude->heave[i]), (double)(RTD * customattitude->roll[i]),
                     (double)(RTD * customattitude->pitch[i]), error);
@@ -9420,7 +9318,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     /* case of v2rawdetection record */
     if (store->read_v2rawdetection == MB_YES) {
       /* initialize all of the beams */
-      for (i = 0; i < bathymetry->number_beams; i++) {
+      for (int i = 0; i < bathymetry->number_beams; i++) {
         bathymetry->quality[i] = 0;
         bathymetry->depth[i] = 0.0;
         bathymetry->acrosstrack[i] = 0.0;
@@ -9430,8 +9328,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
       }
 
       /* now loop over the detects */
-      for (j = 0; j < v2rawdetection->number_beams; j++) {
-        i = v2rawdetection->beam_descriptor[j];
+      for (int j = 0; j < v2rawdetection->number_beams; j++) {
+        const int i = v2rawdetection->beam_descriptor[j];
         bathymetry->range[i] = v2rawdetection->detection_point[j] / v2rawdetection->sampling_rate;
         bathymetry->quality[i] = v2rawdetection->quality[j];
         alpha = RTD * (bathymetry->pitch + v2rawdetection->tx_angle);
@@ -9455,8 +9353,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     /* case of v2detection record with v2detectionsetup */
     else if (store->read_v2detection == MB_YES && store->read_v2detectionsetup == MB_YES) {
       /* now loop over the detects */
-      for (j = 0; j < v2detection->number_beams; j++) {
-        i = v2detectionsetup->beam_descriptor[j];
+      for (int j = 0; j < v2detection->number_beams; j++) {
+        const int i = v2detectionsetup->beam_descriptor[j];
 
         bathymetry->range[i] = v2detection->range[j];
         alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch + volatilesettings->steering_vertical);
@@ -9480,8 +9378,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     /* case of v2detection record alone */
     else if (store->read_v2detection == MB_YES) {
       /* now loop over the detects */
-      for (j = 0; j < v2detection->number_beams; j++) {
-        i = j;
+      for (int j = 0; j < v2detection->number_beams; j++) {
+        const int i = j;
 
         bathymetry->range[i] = v2detection->range[j];
         alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch + volatilesettings->steering_vertical);
@@ -9506,7 +9404,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     else {
       /* loop over all beams */
             bathymetry->number_beams = beamgeometry->number_beams;
-      for (i = 0; i < bathymetry->number_beams; i++) {
+      for (int i = 0; i < bathymetry->number_beams; i++) {
         if ((bathymetry->quality[i] & 15) > 0) {
           alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch + volatilesettings->steering_vertical);
           beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - bathymetry->roll);
@@ -9578,7 +9476,6 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index, s7k_header *header, int *error) {
   int status = MB_SUCCESS;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -9594,7 +9491,7 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index, s7k_header *he
   header->Offset = 60;
   header->SyncPattern = 0x0000ffff;
   header->Reserved = 0;
-  for (i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; i++) {
     header->PreviousRecord[i] = -1;
     header->NextRecord[i] = -1;
   }
@@ -9669,13 +9566,11 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index, s7k_header *he
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_reference *reference;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -9687,7 +9582,7 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   reference = &(store->reference);
   header = &(reference->header);
 
@@ -9738,7 +9633,7 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -9767,13 +9662,11 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_sensoruncal *sensoruncal;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -9785,7 +9678,7 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   sensoruncal = &(store->sensoruncal);
   header = &(sensoruncal->header);
 
@@ -9841,7 +9734,7 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -9870,13 +9763,11 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_sensorcal *sensorcal;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -9888,7 +9779,7 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   sensorcal = &(store->sensorcal);
   header = &(sensorcal->header);
 
@@ -9944,7 +9835,7 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -9973,13 +9864,11 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_position *position;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -9991,7 +9880,7 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   position = &(store->position);
   header = &(position->header);
 
@@ -10053,7 +9942,7 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -10082,13 +9971,11 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_customattitude *customattitude;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10100,7 +9987,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   customattitude = &(store->customattitude);
   header = &(customattitude->header);
 
@@ -10164,42 +10051,42 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
     index += 4;
 
     if (customattitude->bitfield & 1)
-      for (i = 0; i < customattitude->n; i++) {
+      for (int i = 0; i < customattitude->n; i++) {
         mb_put_binary_float(MB_YES, customattitude->pitch[i], &buffer[index]);
         index += 4;
       }
     if (customattitude->bitfield & 2)
-      for (i = 0; i < customattitude->n; i++) {
+      for (int i = 0; i < customattitude->n; i++) {
         mb_put_binary_float(MB_YES, customattitude->roll[i], &buffer[index]);
         index += 4;
       }
     if (customattitude->bitfield & 4)
-      for (i = 0; i < customattitude->n; i++) {
+      for (int i = 0; i < customattitude->n; i++) {
         mb_put_binary_float(MB_YES, customattitude->heading[i], &buffer[index]);
         index += 4;
       }
     if (customattitude->bitfield & 8)
-      for (i = 0; i < customattitude->n; i++) {
+      for (int i = 0; i < customattitude->n; i++) {
         mb_put_binary_float(MB_YES, customattitude->heave[i], &buffer[index]);
         index += 4;
       }
     if (customattitude->bitfield & 16)
-      for (i = 0; i < customattitude->n; i++) {
+      for (int i = 0; i < customattitude->n; i++) {
         mb_put_binary_float(MB_YES, customattitude->pitchrate[i], &buffer[index]);
         index += 4;
       }
     if (customattitude->bitfield & 32)
-      for (i = 0; i < customattitude->n; i++) {
+      for (int i = 0; i < customattitude->n; i++) {
         mb_put_binary_float(MB_YES, customattitude->rollrate[i], &buffer[index]);
         index += 4;
       }
     if (customattitude->bitfield & 64)
-      for (i = 0; i < customattitude->n; i++) {
+      for (int i = 0; i < customattitude->n; i++) {
         mb_put_binary_float(MB_YES, customattitude->headingrate[i], &buffer[index]);
         index += 4;
       }
     if (customattitude->bitfield & 128)
-      for (i = 0; i < customattitude->n; i++) {
+      for (int i = 0; i < customattitude->n; i++) {
         mb_put_binary_float(MB_YES, customattitude->heaverate[i], &buffer[index]);
         index += 4;
       }
@@ -10209,7 +10096,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -10238,13 +10125,11 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_tide *tide;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10256,7 +10141,7 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   tide = &(store->tide);
   header = &(tide->header);
 
@@ -10322,7 +10207,7 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -10351,13 +10236,11 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_altitude *altitude;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10369,7 +10252,7 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   altitude = &(store->altitude);
   header = &(altitude->header);
 
@@ -10415,7 +10298,7 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -10444,13 +10327,11 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_motion *motion;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10462,7 +10343,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   motion = &(store->motion);
   header = &(motion->header);
 
@@ -10514,29 +10395,29 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
     index += 4;
 
     if (motion->bitfield & 1) {
-      for (i = 0; i < motion->n; i++) {
+      for (int i = 0; i < motion->n; i++) {
         mb_put_binary_float(MB_YES, motion->x[i], &buffer[index]);
         index += 4;
       }
-      for (i = 0; i < motion->n; i++) {
+      for (int i = 0; i < motion->n; i++) {
         mb_put_binary_float(MB_YES, motion->y[i], &buffer[index]);
         index += 4;
       }
-      for (i = 0; i < motion->n; i++) {
+      for (int i = 0; i < motion->n; i++) {
         mb_put_binary_float(MB_YES, motion->z[i], &buffer[index]);
         index += 4;
       }
     }
     if (motion->bitfield & 2) {
-      for (i = 0; i < motion->n; i++) {
+      for (int i = 0; i < motion->n; i++) {
         mb_put_binary_float(MB_YES, motion->xa[i], &buffer[index]);
         index += 4;
       }
-      for (i = 0; i < motion->n; i++) {
+      for (int i = 0; i < motion->n; i++) {
         mb_put_binary_float(MB_YES, motion->ya[i], &buffer[index]);
         index += 4;
       }
-      for (i = 0; i < motion->n; i++) {
+      for (int i = 0; i < motion->n; i++) {
         mb_put_binary_float(MB_YES, motion->za[i], &buffer[index]);
         index += 4;
       }
@@ -10547,7 +10428,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -10576,13 +10457,11 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_depth *depth;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10594,7 +10473,7 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   depth = &(store->depth);
   header = &(depth->header);
 
@@ -10646,7 +10525,7 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -10675,13 +10554,11 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_svp *svp;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10693,7 +10570,7 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   svp = &(store->svp);
   header = &(svp->header);
 
@@ -10745,7 +10622,7 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, svp->n, &buffer[index]);
     index += 4;
 
-    for (i = 0; i < svp->n; i++) {
+    for (int i = 0; i < svp->n; i++) {
       mb_put_binary_float(MB_YES, svp->depth[i], &buffer[index]);
       index += 4;
       mb_put_binary_float(MB_YES, svp->sound_velocity[i], &buffer[index]);
@@ -10757,7 +10634,7 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -10786,13 +10663,11 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_ctd *ctd;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10804,7 +10679,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   ctd = &(store->ctd);
   header = &(ctd->header);
 
@@ -10868,7 +10743,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_int(MB_YES, ctd->n, &buffer[index]);
     index += 4;
 
-    for (i = 0; i < ctd->n; i++) {
+    for (int i = 0; i < ctd->n; i++) {
       mb_put_binary_float(MB_YES, ctd->conductivity_salinity[i], &buffer[index]);
       index += 4;
       mb_put_binary_float(MB_YES, ctd->temperature[i], &buffer[index]);
@@ -10886,7 +10761,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -10915,13 +10790,11 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_geodesy *geodesy;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -10933,7 +10806,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   geodesy = &(store->geodesy);
   header = &(geodesy->header);
 
@@ -10971,7 +10844,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 
     /* insert the data */
     index = header->Offset + 4;
-    for (i = 0; i < 32; i++) {
+    for (int i = 0; i < 32; i++) {
       geodesy->spheroid[i] = (mb_u_char)buffer[index];
       index++;
     }
@@ -10979,11 +10852,11 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
     index += 8;
     mb_put_binary_double(MB_YES, geodesy->flattening, &buffer[index]);
     index += 8;
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       geodesy->reserved1[i] = (mb_u_char)buffer[index];
       index++;
     }
-    for (i = 0; i < 32; i++) {
+    for (int i = 0; i < 32; i++) {
       geodesy->datum[i] = (mb_u_char)buffer[index];
       index++;
     }
@@ -11005,11 +10878,11 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
     index += 8;
     mb_put_binary_double(MB_YES, geodesy->scale, &buffer[index]);
     index += 8;
-    for (i = 0; i < 35; i++) {
+    for (int i = 0; i < 35; i++) {
       geodesy->reserved2[i] = (mb_u_char)buffer[index];
       index++;
     }
-    for (i = 0; i < 32; i++) {
+    for (int i = 0; i < 32; i++) {
       geodesy->grid_name[i] = (mb_u_char)buffer[index];
       index++;
     }
@@ -11029,7 +10902,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
     index += 8;
     mb_put_binary_int(MB_YES, geodesy->custum_identifier, &buffer[index]);
     index += 4;
-    for (i = 0; i < 50; i++) {
+    for (int i = 0; i < 50; i++) {
       geodesy->reserved3[i] = (mb_u_char)buffer[index];
       index++;
     }
@@ -11039,7 +10912,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -11066,13 +10939,11 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_rollpitchheave *rollpitchheave;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11084,7 +10955,7 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   rollpitchheave = &(store->rollpitchheave);
   header = &(rollpitchheave->header);
 
@@ -11134,7 +11005,7 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -11161,13 +11032,11 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_heading *heading;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11179,7 +11048,7 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   heading = &(store->heading);
   header = &(heading->header);
 
@@ -11225,7 +11094,7 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -11252,13 +11121,11 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_surveyline *surveyline;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11270,7 +11137,7 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   surveyline = &(store->surveyline);
   header = &(surveyline->header);
 
@@ -11315,11 +11182,11 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
     index += 2;
     mb_put_binary_float(MB_YES, surveyline->turnradius, &buffer[index]);
     index += 4;
-    for (i = 0; i < 64; i++) {
+    for (int i = 0; i < 64; i++) {
       buffer[index] = (char)surveyline->name[i];
       index++;
     }
-    for (i = 0; i < surveyline->n; i++) {
+    for (int i = 0; i < surveyline->n; i++) {
       mb_put_binary_double(MB_YES, surveyline->latitude[i], &buffer[index]);
       index += 8;
       mb_put_binary_double(MB_YES, surveyline->longitude[i], &buffer[index]);
@@ -11331,7 +11198,7 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -11358,13 +11225,11 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_navigation *navigation;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11376,7 +11241,7 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   navigation = &(store->navigation);
   header = &(navigation->header);
 
@@ -11438,7 +11303,7 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -11465,13 +11330,11 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_attitude *attitude;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11483,7 +11346,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   attitude = &(store->attitude);
   header = &(attitude->header);
 
@@ -11524,7 +11387,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
     index = header->Offset + 4;
     buffer[index] = attitude->n;
     index++;
-    for (i = 0; i < attitude->n; i++) {
+    for (int i = 0; i < attitude->n; i++) {
       mb_put_binary_short(MB_YES, attitude->delta_time[i], &buffer[index]);
       index += 2;
       mb_put_binary_float(MB_YES, attitude->roll[i], &buffer[index]);
@@ -11542,7 +11405,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -11569,13 +11432,11 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_rec1022 *rec1022;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11587,7 +11448,7 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   rec1022 = &(store->rec1022);
   header = &(rec1022->header);
 
@@ -11625,7 +11486,7 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
 
     /* insert the data */
     index = header->Offset + 4;
-    for (i = 0; i < R7KHDRSIZE_Rec1022; i++) {
+    for (int i = 0; i < R7KHDRSIZE_Rec1022; i++) {
       buffer[index] = rec1022->data[i];
       index++;
     }
@@ -11635,7 +11496,7 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -11664,7 +11525,6 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
                                 int *error) {
   int status = MB_SUCCESS;
   short *shortptr;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11689,7 +11549,7 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
   (*index)++;
   buffer[*index] = fsdwchannel->bytespersample;
   (*index)++;
-  for (i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     buffer[*index] = fsdwchannel->reserved1[i];
     (*index)++;
   }
@@ -11703,11 +11563,11 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
   *index += 4;
   mb_put_binary_float(MB_YES, fsdwchannel->voltage, &buffer[*index]);
   *index += 4;
-  for (i = 0; i < 16; i++) {
+  for (int i = 0; i < 16; i++) {
     buffer[*index] = fsdwchannel->name[i];
     (*index)++;
   }
-  for (i = 0; i < 20; i++) {
+  for (int i = 0; i < 20; i++) {
     buffer[*index] = fsdwchannel->reserved2[i];
     (*index)++;
   }
@@ -11715,14 +11575,14 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
   /* copy over the data */
   if (status == MB_SUCCESS) {
     if (fsdwchannel->bytespersample == 1) {
-      for (i = 0; i < fsdwchannel->number_samples; i++) {
+      for (int i = 0; i < fsdwchannel->number_samples; i++) {
         buffer[*index] = fsdwchannel->data[i];
         (*index)++;
       }
     }
     else if (fsdwchannel->bytespersample == 2) {
       shortptr = (short *)fsdwchannel->data;
-      for (i = 0; i < fsdwchannel->number_samples; i++) {
+      for (int i = 0; i < fsdwchannel->number_samples; i++) {
         /*srptr = (short *) &(buffer[*index]);
         urptr = (unsigned short *) &(buffer[*index]);*/
         mb_put_binary_short(MB_YES, shortptr[i], &buffer[*index]);
@@ -11735,7 +11595,7 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
     }
     else if (fsdwchannel->bytespersample == 4) {
       shortptr = (short *)fsdwchannel->data;
-      for (i = 0; i < fsdwchannel->number_samples; i++) {
+      for (int i = 0; i < fsdwchannel->number_samples; i++) {
         /*srptr = (short *) &(buffer[*index]);
         urptr = (unsigned short *) &(buffer[*index]);*/
         mb_put_binary_short(MB_YES, shortptr[2 * i], &buffer[*index]);
@@ -11770,7 +11630,6 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdwssheader *fsdwssheader, int *error) {
   int status = MB_SUCCESS;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11843,7 +11702,7 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdw
   *index += 4;
   mb_put_binary_short(MB_YES, fsdwssheader->temperature, &buffer[*index]);
   *index += 2;
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     buffer[*index] = fsdwssheader->reserved2[i];
     (*index)++;
   }
@@ -11866,7 +11725,6 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdw
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fsdwsegyheader *fsdwsegyheader, int *error) {
   int status = MB_SUCCESS;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -11889,13 +11747,13 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 4;
   mb_put_binary_int(MB_YES, fsdwsegyheader->channelNum, &buffer[*index]);
   *index += 4;
-  for (i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++) {
     mb_put_binary_short(MB_YES, fsdwsegyheader->unused1[i], &buffer[*index]);
     *index += 2;
   }
   mb_put_binary_short(MB_YES, fsdwsegyheader->traceIDCode, &buffer[*index]);
   *index += 2;
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     mb_put_binary_short(MB_YES, fsdwsegyheader->unused2[i], &buffer[*index]);
     *index += 2;
   }
@@ -11905,7 +11763,7 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_put_binary_short(MB_YES, fsdwsegyheader->NMEAantennaeO, &buffer[*index]);
   *index += 2;
-  for (i = 0; i < 32; i++) {
+  for (int i = 0; i < 32; i++) {
     buffer[*index] = fsdwsegyheader->RS232[i];
     (*index)++;
   }
@@ -11919,7 +11777,7 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 4;
   mb_put_binary_short(MB_YES, fsdwsegyheader->coordUnits, &buffer[*index]);
   *index += 2;
-  for (i = 0; i < 24; i++) {
+  for (int i = 0; i < 24; i++) {
     buffer[*index] = fsdwsegyheader->annotation[i];
     (*index)++;
   }
@@ -11939,7 +11797,7 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_put_binary_short(MB_YES, fsdwsegyheader->sweepLength, &buffer[*index]);
   *index += 2;
-  for (i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; i++) {
     mb_put_binary_short(MB_YES, fsdwsegyheader->unused7[i], &buffer[*index]);
     *index += 2;
   }
@@ -11947,7 +11805,7 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_put_binary_short(MB_YES, fsdwsegyheader->pulseID, &buffer[*index]);
   *index += 2;
-  for (i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++) {
     mb_put_binary_short(MB_YES, fsdwsegyheader->unused8[i], &buffer[*index]);
     *index += 2;
   }
@@ -12003,7 +11861,7 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_put_binary_short(MB_YES, fsdwsegyheader->vehicleID, &buffer[*index]);
   *index += 2;
-  for (i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++) {
     buffer[*index] = fsdwsegyheader->softwareVersion[i];
     (*index)++;
   }
@@ -12015,7 +11873,7 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
   *index += 2;
   mb_put_binary_short(MB_YES, fsdwsegyheader->decimation, &buffer[*index]);
   *index += 2;
-  for (i = 0; i < 7; i++) {
+  for (int i = 0; i < 7; i++) {
     mb_put_binary_short(MB_YES, fsdwsegyheader->unuseda[i], &buffer[*index]);
     *index += 2;
   }
@@ -12034,7 +11892,6 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, s7k_fs
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fsdwss *fsdwsslo;
   s7k_fsdwchannel *fsdwchannel;
@@ -12044,7 +11901,6 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -12056,7 +11912,7 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   fsdwsslo = &(store->fsdwsslo);
   header = &(fsdwsslo->header);
   bathymetry = &(store->bathymetry);
@@ -12070,7 +11926,7 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
 #endif
     mbsys_reson7k_print_fsdwss(verbose, fsdwsslo, error);
 #ifdef MBR_RESON7KR_DEBUG2
-  for (i = 0; i < fsdwsslo->number_channels; i++) {
+  for (int i = 0; i < fsdwsslo->number_channels; i++) {
     fsdwchannel = &(fsdwsslo->channel[i]);
     fsdwssheader = &(fsdwsslo->ssheader[i]);
     fprintf(stderr,
@@ -12087,7 +11943,7 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_FSDWsidescan;
-  for (i = 0; i < fsdwsslo->number_channels; i++) {
+  for (int i = 0; i < fsdwsslo->number_channels; i++) {
     *size += R7KHDRSIZE_FSDWchannelinfo;
     *size += R7KHDRSIZE_FSDWssheader;
     fsdwchannel = &(fsdwsslo->channel[i]);
@@ -12127,14 +11983,14 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
     mb_put_binary_int(MB_YES, fsdwsslo->data_format, &buffer[index]);
     index += 4;
     index += 12;
-    for (i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
       fsdwchannel = &(fsdwsslo->channel[i]);
       mbr_reson7kr_wr_fsdwchannel(verbose, fsdwsslo->data_format, buffer, &index, fsdwchannel, error);
     }
     /*fprintf(stderr,"In mbr_reson7kr_wr_fsdwsslo: index:%d OffsetToOptionalData:%d\n",
     index, header->OffsetToOptionalData);
         index = header->OffsetToOptionalData;*/
-    for (i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
       fsdwssheader = &(fsdwsslo->ssheader[i]);
       mbr_reson7kr_wr_fsdwssheader(verbose, buffer, &index, fsdwssheader, error);
     }
@@ -12144,7 +12000,7 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -12173,7 +12029,6 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fsdwss *fsdwsshi;
   s7k_fsdwchannel *fsdwchannel;
@@ -12181,7 +12036,6 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -12193,7 +12047,7 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   fsdwsshi = &(store->fsdwsshi);
   header = &(fsdwsshi->header);
 
@@ -12205,7 +12059,7 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
 #endif
     mbsys_reson7k_print_fsdwss(verbose, fsdwsshi, error);
 #ifdef MBR_RESON7KR_DEBUG2
-  for (i = 0; i < fsdwsshi->number_channels; i++) {
+  for (int i = 0; i < fsdwsshi->number_channels; i++) {
     fsdwchannel = &(fsdwsshi->channel[i]);
     fsdwssheader = &(fsdwsshi->ssheader[i]);
     fprintf(stderr,
@@ -12222,7 +12076,7 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_FSDWsidescan;
-  for (i = 0; i < fsdwsshi->number_channels; i++) {
+  for (int i = 0; i < fsdwsshi->number_channels; i++) {
     *size += R7KHDRSIZE_FSDWchannelinfo;
     *size += R7KHDRSIZE_FSDWssheader;
     fsdwchannel = &(fsdwsshi->channel[i]);
@@ -12262,14 +12116,14 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
     mb_put_binary_int(MB_YES, fsdwsshi->data_format, &buffer[index]);
     index += 4;
     index += 12;
-    for (i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
       fsdwchannel = &(fsdwsshi->channel[i]);
       mbr_reson7kr_wr_fsdwchannel(verbose, fsdwsshi->data_format, buffer, &index, fsdwchannel, error);
     }
     /*fprintf(stderr,"In mbr_reson7kr_wr_fsdwsshi: index:%d OffsetToOptionalData:%d\n",
     index, header->OffsetToOptionalData);
         index = header->OffsetToOptionalData;*/
-    for (i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
       fsdwssheader = &(fsdwsshi->ssheader[i]);
       mbr_reson7kr_wr_fsdwssheader(verbose, buffer, &index, fsdwssheader, error);
     }
@@ -12279,7 +12133,7 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -12308,7 +12162,6 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fsdwsb *fsdwsb;
   s7k_fsdwchannel *fsdwchannel;
@@ -12316,7 +12169,6 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -12328,7 +12180,7 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   fsdwsb = &(store->fsdwsb);
   header = &(fsdwsb->header);
 
@@ -12340,7 +12192,7 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
 #endif
     mbsys_reson7k_print_fsdwsb(verbose, fsdwsb, error);
 #ifdef MBR_RESON7KR_DEBUG2
-  for (i = 0; i < fsdwsb->number_channels; i++) {
+  for (int i = 0; i < fsdwsb->number_channels; i++) {
     fsdwchannel = &(fsdwsb->channel);
     fsdwsegyheader = &(fsdwsb->segyheader);
     fprintf(stderr,
@@ -12362,7 +12214,7 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_FSDWsubbottom;
-  for (i = 0; i < fsdwsb->number_channels; i++) {
+  for (int i = 0; i < fsdwsb->number_channels; i++) {
     *size += R7KHDRSIZE_FSDWchannelinfo;
     *size += R7KHDRSIZE_FSDWsbheader;
     fsdwchannel = &(fsdwsb->channel);
@@ -12413,7 +12265,7 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -12442,13 +12294,11 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_bluefin *bluefin;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -12460,7 +12310,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   bluefin = &(store->bluefin);
   header = &(bluefin->header);
 
@@ -12507,12 +12357,12 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
     index += 4;
     mb_put_binary_int(MB_YES, bluefin->data_format, &buffer[index]);
     index += 4;
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       buffer[index] = bluefin->reserved[i];
       index++;
     }
     if (bluefin->data_format == R7KRECID_BluefinNav) {
-      for (i = 0; i < bluefin->number_frames; i++) {
+      for (int i = 0; i < bluefin->number_frames; i++) {
         mb_put_binary_int(MB_YES, bluefin->nav[i].packet_size, &buffer[index]);
         index += 4;
         mb_put_binary_short(MB_YES, bluefin->nav[i].version, &buffer[index]);
@@ -12576,7 +12426,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
       }
     }
     else if (bluefin->data_format == R7KRECID_BluefinEnvironmental) {
-      for (i = 0; i < bluefin->number_frames; i++) {
+      for (int i = 0; i < bluefin->number_frames; i++) {
         mb_put_binary_int(MB_YES, bluefin->environmental[i].packet_size, &buffer[index]);
         index += 4;
         mb_put_binary_short(MB_YES, bluefin->environmental[i].version, &buffer[index]);
@@ -12647,7 +12497,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
         index += 2;
         mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor8, &buffer[index]);
         index += 2;
-        for (j = 0; j < 8; j++) {
+        for (int j = 0; j < 8; j++) {
           buffer[index] = bluefin->environmental[i].reserved2[j];
           index++;
         }
@@ -12659,7 +12509,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -12688,13 +12538,11 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_processedsidescan *processedsidescan;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -12706,7 +12554,7 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   processedsidescan = &(store->processedsidescan);
   header = &(processedsidescan->header);
 
@@ -12769,11 +12617,11 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
     index += 8;
 
     /* insert the data */
-    for (i = 0; i < processedsidescan->number_pixels; i++) {
+    for (int i = 0; i < processedsidescan->number_pixels; i++) {
       mb_put_binary_float(MB_YES, processedsidescan->sidescan[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < processedsidescan->number_pixels; i++) {
+    for (int i = 0; i < processedsidescan->number_pixels; i++) {
       mb_put_binary_float(MB_YES, processedsidescan->alongtrack[i], &buffer[index]);
       index += 4;
     }
@@ -12783,7 +12631,7 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -12813,13 +12661,11 @@ int mbr_reson7kr_wr_processedsidescan(int verbose, int *bufferalloc, char **buff
 int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_volatilesettings *volatilesettings;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -12831,7 +12677,7 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   volatilesettings = &(store->volatilesettings);
   header = &(volatilesettings->header);
 
@@ -12953,7 +12799,7 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -12982,14 +12828,12 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_configuration *configuration;
   s7k_device *device;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -13001,7 +12845,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   configuration = &(store->configuration);
   header = &(configuration->header);
 
@@ -13016,7 +12860,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_7kConfiguration;
-  for (i = 0; i < configuration->number_devices; i++) {
+  for (int i = 0; i < configuration->number_devices; i++) {
     *size += 80;
     device = &(configuration->device[i]);
     *size += device->info_length;
@@ -13050,11 +12894,11 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
     index += 4;
 
     /* extract the data for each device */
-    for (i = 0; i < configuration->number_devices; i++) {
+    for (int i = 0; i < configuration->number_devices; i++) {
       device = &(configuration->device[i]);
       mb_put_binary_int(MB_YES, device->magic_number, &buffer[index]);
       index += 4;
-      for (j = 0; j < 64; j++) {
+      for (int j = 0; j < 64; j++) {
         buffer[index] = device->description[j];
         index++;
       }
@@ -13063,7 +12907,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
       mb_put_binary_int(MB_YES, device->info_length, &buffer[index]);
       index += 4;
 
-      for (j = 0; j < device->info_length; j++) {
+      for (int j = 0; j < device->info_length; j++) {
         buffer[index] = device->info[j];
         index++;
       }
@@ -13074,7 +12918,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -13103,13 +12947,11 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_matchfilter *matchfilter;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -13121,7 +12963,7 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   matchfilter = &(store->matchfilter);
   header = &(matchfilter->header);
 
@@ -13175,7 +13017,7 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -13205,13 +13047,11 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                                     int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -13223,7 +13063,7 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2firmwarehardwareconfiguration = &(store->v2firmwarehardwareconfiguration);
   header = &(v2firmwarehardwareconfiguration->header);
 
@@ -13268,7 +13108,7 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
     index += 4;
 
     /* extract the info */
-    for (i = 0; i < v2firmwarehardwareconfiguration->info_length; i++) {
+    for (int i = 0; i < v2firmwarehardwareconfiguration->info_length; i++) {
       buffer[index] = v2firmwarehardwareconfiguration->info[i];
       index++;
     }
@@ -13278,7 +13118,7 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -13307,13 +13147,11 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_beamgeometry *beamgeometry;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -13325,7 +13163,7 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   beamgeometry = &(store->beamgeometry);
   header = &(beamgeometry->header);
 
@@ -13370,19 +13208,19 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
     index += 4;
 
     /* insert the data */
-    for (i = 0; i < beamgeometry->number_beams; i++) {
+    for (int i = 0; i < beamgeometry->number_beams; i++) {
       mb_put_binary_float(MB_YES, beamgeometry->angle_alongtrack[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < beamgeometry->number_beams; i++) {
+    for (int i = 0; i < beamgeometry->number_beams; i++) {
       mb_put_binary_float(MB_YES, beamgeometry->angle_acrosstrack[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < beamgeometry->number_beams; i++) {
+    for (int i = 0; i < beamgeometry->number_beams; i++) {
       mb_put_binary_float(MB_YES, beamgeometry->beamwidth_alongtrack[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < beamgeometry->number_beams; i++) {
+    for (int i = 0; i < beamgeometry->number_beams; i++) {
       mb_put_binary_float(MB_YES, beamgeometry->beamwidth_acrosstrack[i], &buffer[index]);
       index += 4;
     }
@@ -13392,7 +13230,7 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -13421,13 +13259,11 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_calibration *calibration;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -13439,7 +13275,7 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   calibration = &(store->calibration);
   header = &(calibration->header);
 
@@ -13484,11 +13320,11 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
     index += 2;
 
     /* insert the data */
-    for (i = 0; i < calibration->number_channels; i++) {
+    for (int i = 0; i < calibration->number_channels; i++) {
       mb_put_binary_float(MB_YES, calibration->gain[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < calibration->number_channels; i++) {
+    for (int i = 0; i < calibration->number_channels; i++) {
       mb_put_binary_float(MB_YES, calibration->phase[i], &buffer[index]);
       index += 4;
     }
@@ -13498,7 +13334,7 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -13527,13 +13363,11 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_bathymetry *bathymetry;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -13545,7 +13379,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   bathymetry = &(store->bathymetry);
   header = &(bathymetry->header);
 
@@ -13612,23 +13446,23 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
     index += 4;
 
     /* insert the data */
-    for (i = 0; i < bathymetry->number_beams; i++) {
+    for (int i = 0; i < bathymetry->number_beams; i++) {
       mb_put_binary_float(MB_YES, bathymetry->range[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < bathymetry->number_beams; i++) {
+    for (int i = 0; i < bathymetry->number_beams; i++) {
       buffer[index] = bathymetry->quality[i];
       index++;
     }
-    for (i = 0; i < bathymetry->number_beams; i++) {
+    for (int i = 0; i < bathymetry->number_beams; i++) {
       mb_put_binary_float(MB_YES, bathymetry->intensity[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < bathymetry->number_beams; i++) {
+    for (int i = 0; i < bathymetry->number_beams; i++) {
       mb_put_binary_float(MB_YES, bathymetry->min_depth_gate[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < bathymetry->number_beams; i++) {
+    for (int i = 0; i < bathymetry->number_beams; i++) {
       mb_put_binary_float(MB_YES, bathymetry->max_depth_gate[i], &buffer[index]);
       index += 4;
     }
@@ -13655,7 +13489,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
       index += 4;
       mb_put_binary_float(MB_YES, bathymetry->vehicle_height, &buffer[index]);
       index += 4;
-      for (i = 0; i < bathymetry->number_beams; i++) {
+      for (int i = 0; i < bathymetry->number_beams; i++) {
         mb_put_binary_float(MB_YES, bathymetry->depth[i], &buffer[index]);
         index += 4;
         mb_put_binary_float(MB_YES, bathymetry->alongtrack[i], &buffer[index]);
@@ -13676,7 +13510,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -13705,7 +13539,6 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_backscatter *backscatter;
   int data_size;
@@ -13714,7 +13547,6 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
   char *buffer;
   short *short_ptr;
   int *int_ptr;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -13726,7 +13558,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   backscatter = &(store->backscatter);
   header = &(backscatter->header);
 
@@ -13822,35 +13654,35 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 
     /* extract backscatter data */
     if (backscatter->sample_size == 1) {
-      for (i = 0; i < backscatter->number_samples; i++) {
+      for (int i = 0; i < backscatter->number_samples; i++) {
         buffer[index] = backscatter->port_data[i];
         index++;
       }
-      for (i = 0; i < backscatter->number_samples; i++) {
+      for (int i = 0; i < backscatter->number_samples; i++) {
         buffer[index] = backscatter->stbd_data[i];
         index++;
       }
     }
     else if (backscatter->sample_size == 2) {
       short_ptr = (short *)backscatter->port_data;
-      for (i = 0; i < backscatter->number_samples; i++) {
+      for (int i = 0; i < backscatter->number_samples; i++) {
         mb_put_binary_short(MB_YES, short_ptr[i], &buffer[index]);
         index += 2;
       }
       short_ptr = (short *)backscatter->stbd_data;
-      for (i = 0; i < backscatter->number_samples; i++) {
+      for (int i = 0; i < backscatter->number_samples; i++) {
         mb_put_binary_short(MB_YES, short_ptr[i], &buffer[index]);
         index += 2;
       }
     }
     else if (backscatter->sample_size == 4) {
       int_ptr = (int *)backscatter->port_data;
-      for (i = 0; i < backscatter->number_samples; i++) {
+      for (int i = 0; i < backscatter->number_samples; i++) {
         mb_put_binary_int(MB_YES, int_ptr[i], &buffer[index]);
         index += 4;
       }
       int_ptr = (int *)backscatter->stbd_data;
-      for (i = 0; i < backscatter->number_samples; i++) {
+      for (int i = 0; i < backscatter->number_samples; i++) {
         mb_put_binary_int(MB_YES, int_ptr[i], &buffer[index]);
         index += 4;
       }
@@ -13885,7 +13717,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -13914,7 +13746,6 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_beam *beam;
   s7kr_snippet *snippet;
@@ -13933,7 +13764,6 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
   short *shortptrphase;
   int *intptramp;
   int *intptrphase;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -13945,7 +13775,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   beam = &(store->beam);
   header = &(beam->header);
 
@@ -13980,7 +13810,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
     sample_size += 4;
   else if (sample_type_iandq == 2)
     sample_size += 8;
-  for (i = 0; i < beam->number_beams; i++) {
+  for (int i = 0; i < beam->number_beams; i++) {
     snippet = &beam->snippets[i];
     *size += 10 + sample_size * (snippet->end_sample - snippet->begin_sample + 1);
   }
@@ -14030,7 +13860,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
     index += 2;
     mb_put_binary_int(MB_YES, beam->sample_type, &buffer[index]);
     index += 4;
-    for (i = 0; i < beam->number_beams; i++) {
+    for (int i = 0; i < beam->number_beams; i++) {
       snippet = &beam->snippets[i];
       mb_put_binary_short(MB_YES, snippet->beam_number, &buffer[index]);
       index += 2;
@@ -14040,11 +13870,11 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
       index += 4;
     }
 
-    for (i = 0; i < beam->number_beams; i++) {
+    for (int i = 0; i < beam->number_beams; i++) {
       /* extract snippet or beam data data */
       if (status == MB_SUCCESS) {
         nsamples = snippet->end_sample - snippet->begin_sample + 1;
-        for (j = 0; j < nsamples; j++) {
+        for (int j = 0; j < nsamples; j++) {
           if (sample_type_amp == 1) {
             charptr = (char *)snippet->amplitude;
             buffer[index] = charptr[j];
@@ -14100,7 +13930,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -14129,13 +13959,11 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_verticaldepth *verticaldepth;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14147,7 +13975,7 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   verticaldepth = &(store->verticaldepth);
   header = &(verticaldepth->header);
 
@@ -14209,7 +14037,7 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -14238,13 +14066,11 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_tvg *tvg;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14256,7 +14082,7 @@ int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   tvg = &(store->tvg);
   header = &(tvg->header);
 
@@ -14303,7 +14129,7 @@ int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *s
     index += 2;
     mb_put_binary_int(MB_YES, tvg->n, &buffer[index]);
     index += 4;
-    for (i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       mb_put_binary_int(MB_YES, tvg->reserved[i], &buffer[index]);
       index += 4;
     }
@@ -14317,7 +14143,7 @@ int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *s
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -14346,7 +14172,6 @@ int mbr_reson7kr_wr_tvg(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_image *image;
   unsigned int checksum;
@@ -14356,7 +14181,6 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
   char *charptr;
   unsigned short *ushortptr;
   unsigned int *uintptr;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14368,7 +14192,7 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   image = &(store->image);
   header = &(image->header);
 
@@ -14438,21 +14262,21 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
     /* extract image data */
     if (image->color_depth == 1) {
       charptr = (char *)image->image;
-      for (i = 0; i < image->width * image->height; i++) {
+      for (int i = 0; i < image->width * image->height; i++) {
         buffer[index] = charptr[i];
         index++;
       }
     }
     else if (image->color_depth == 2) {
       ushortptr = (unsigned short *)image->image;
-      for (i = 0; i < image->width * image->height; i++) {
+      for (int i = 0; i < image->width * image->height; i++) {
         mb_put_binary_short(MB_YES, ushortptr[i], &buffer[index]);
         index += 2;
       }
     }
     else if (image->color_depth == 4) {
       uintptr = (unsigned int *)image->image;
-      for (i = 0; i < image->width * image->height; i++) {
+      for (int i = 0; i < image->width * image->height; i++) {
         mb_put_binary_int(MB_YES, uintptr[i], &buffer[index]);
         index += 4;
       }
@@ -14463,7 +14287,7 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -14492,13 +14316,11 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2pingmotion *v2pingmotion;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14510,7 +14332,7 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2pingmotion = &(store->v2pingmotion);
   header = &(v2pingmotion->header);
 
@@ -14575,19 +14397,19 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
       index += 4;
     }
     if (v2pingmotion->flags & 2) {
-      for (i = 0; i < v2pingmotion->n; i++) {
+      for (int i = 0; i < v2pingmotion->n; i++) {
         mb_put_binary_float(MB_YES, v2pingmotion->roll[i], &buffer[index]);
         index += 4;
       }
     }
     if (v2pingmotion->flags & 4) {
-      for (i = 0; i < v2pingmotion->n; i++) {
+      for (int i = 0; i < v2pingmotion->n; i++) {
         mb_put_binary_float(MB_YES, v2pingmotion->heading[i], &buffer[index]);
         index += 4;
       }
     }
     if (v2pingmotion->flags & 8) {
-      for (i = 0; i < v2pingmotion->n; i++) {
+      for (int i = 0; i < v2pingmotion->n; i++) {
         mb_put_binary_float(MB_YES, v2pingmotion->heave[i], &buffer[index]);
         index += 4;
       }
@@ -14598,7 +14420,7 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -14625,13 +14447,11 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2detectionsetup *v2detectionsetup;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14643,7 +14463,7 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2detectionsetup = &(store->v2detectionsetup);
   header = &(v2detectionsetup->header);
 
@@ -14714,11 +14534,11 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
     index += 4;
     mb_put_binary_float(MB_YES, v2detectionsetup->depth_gate_tilt, &buffer[index]);
     index += 4;
-    for (i = 0; i < 14; i++) {
+    for (int i = 0; i < 14; i++) {
       mb_put_binary_float(MB_YES, v2detectionsetup->reserved[i], &buffer[index]);
       index += 4;
     }
-    for (i = 0; i < v2detectionsetup->number_beams; i++) {
+    for (int i = 0; i < v2detectionsetup->number_beams; i++) {
       mb_put_binary_short(MB_YES, v2detectionsetup->beam_descriptor[i], &buffer[index]);
       index += 2;
       mb_put_binary_float(MB_YES, v2detectionsetup->detection_point[i], &buffer[index]);
@@ -14746,7 +14566,7 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -14773,14 +14593,12 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2beamformed *v2beamformed;
   s7kr_v2amplitudephase *v2amplitudephase;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14792,7 +14610,7 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2beamformed = &(store->v2beamformed);
   header = &(v2beamformed->header);
 
@@ -14841,15 +14659,15 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
     index += 2;
     mb_put_binary_int(MB_YES, v2beamformed->number_samples, &buffer[index]);
     index += 4;
-    for (i = 0; i < 32; i++) {
+    for (int i = 0; i < 32; i++) {
       buffer[index] = v2beamformed->reserved[i];
       index++;
     }
-    for (i = 0; i < v2beamformed->number_beams; i++) {
+    for (int i = 0; i < v2beamformed->number_beams; i++) {
       v2amplitudephase = &(v2beamformed->amplitudephase[i]);
 
       /* insert v2beamformed data */
-      for (j = 0; j < v2beamformed->number_samples; j++) {
+      for (int j = 0; j < v2beamformed->number_samples; j++) {
         mb_put_binary_short(MB_YES, v2amplitudephase->amplitude[j], &buffer[index]);
         index += 2;
         mb_put_binary_short(MB_YES, v2amplitudephase->phase[j], &buffer[index]);
@@ -14862,7 +14680,7 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -14889,7 +14707,6 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2bite *v2bite;
   s7kr_v2bitereport *report;
@@ -14898,7 +14715,6 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j, k;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14910,7 +14726,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2bite = &(store->v2bite);
   header = &(v2bite->header);
 
@@ -14925,7 +14741,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_7kV2BITEData;
-  for (i = 0; i < v2bite->number_reports; i++) {
+  for (int i = 0; i < v2bite->number_reports; i++) {
     report = &(v2bite->reports[i]);
     *size += R7KRDTSIZE_7kV2BITERecordData + report->number_bite * R7KRDTSIZE_7kV2BITEFieldData;
   }
@@ -14954,10 +14770,10 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
     index = header->Offset + 4;
     mb_put_binary_short(MB_YES, v2bite->number_reports, &buffer[index]);
     index += 2;
-    for (i = 0; i < v2bite->number_reports; i++) {
+    for (int i = 0; i < v2bite->number_reports; i++) {
       report = &(v2bite->reports[i]);
 
-      for (j = 0; j < 64; j++) {
+      for (int j = 0; j < 64; j++) {
         buffer[index] = report->source_name[j];
         index++;
       }
@@ -15008,18 +14824,18 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
       index++;
       mb_put_binary_short(MB_YES, report->number_bite, &buffer[index]);
       index += 2;
-      for (j = 0; j < 32; j++) {
+      for (int j = 0; j < 32; j++) {
         buffer[index] = report->bite_status[j];
         index++;
       }
 
       /* loop over all bite fields */
-      for (j = 0; j < report->number_bite; j++) {
+      for (int j = 0; j < report->number_bite; j++) {
         bitefield = &(report->bitefield[j]);
 
         mb_put_binary_short(MB_YES, bitefield->reserved, &buffer[index]);
         index += 2;
-        for (k = 0; k < 64; k++) {
+        for (int k = 0; k < 64; k++) {
           buffer[index] = bitefield->name[k];
           index++;
         }
@@ -15039,7 +14855,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -15066,13 +14882,11 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v27kcenterversion *v27kcenterversion;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -15084,7 +14898,7 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v27kcenterversion = &(store->v27kcenterversion);
   header = &(v27kcenterversion->header);
 
@@ -15122,7 +14936,7 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
 
     /* insert the data */
     index = header->Offset + 4;
-    for (i = 0; i < 32; i++) {
+    for (int i = 0; i < 32; i++) {
       buffer[index] = v27kcenterversion->version[i];
       index++;
     }
@@ -15132,7 +14946,7 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -15159,13 +14973,11 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v28kwetendversion *v28kwetendversion;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -15177,7 +14989,7 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v28kwetendversion = &(store->v28kwetendversion);
   header = &(v28kwetendversion->header);
 
@@ -15215,7 +15027,7 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 
     /* insert the data */
     index = header->Offset + 4;
-    for (i = 0; i < 32; i++) {
+    for (int i = 0; i < 32; i++) {
       buffer[index] = v28kwetendversion->version[i];
       index++;
     }
@@ -15225,7 +15037,7 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -15252,13 +15064,11 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2detection *v2detection;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -15270,7 +15080,7 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2detection = &(store->v2detection);
   header = &(v2detection->header);
 
@@ -15327,13 +15137,13 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
     index++;
     mb_put_binary_int(MB_YES, v2detection->flags, &buffer[index]);
     index += 4;
-    for (i = 0; i < 64; i++) {
+    for (int i = 0; i < 64; i++) {
       buffer[index] = v2detection->reserved[i];
       index++;
     }
 
     /* insert the data */
-    for (i = 0; i < v2detection->number_beams; i++) {
+    for (int i = 0; i < v2detection->number_beams; i++) {
       mb_put_binary_float(MB_YES, v2detection->range[i], &buffer[index]);
       index += 4;
       mb_put_binary_float(MB_YES, v2detection->angle_x[i], &buffer[index]);
@@ -15347,7 +15157,7 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
       mb_put_binary_float(MB_YES, v2detection->angle_y_error[i], &buffer[index]);
       index += 4;
       if (v2detection->data_field_size > 24)
-        for (j = 0; j < v2detection->data_field_size - 24; j++) {
+        for (int j = 0; j < v2detection->data_field_size - 24; j++) {
           buffer[index] = 0;
           index++;
         }
@@ -15358,7 +15168,7 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -15387,13 +15197,11 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2rawdetection *v2rawdetection;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -15405,7 +15213,7 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2rawdetection = &(store->v2rawdetection);
   header = &(v2rawdetection->header);
 
@@ -15464,13 +15272,13 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
     index += 4;
     mb_put_binary_float(MB_YES, v2rawdetection->tx_angle, &buffer[index]);
     index += 4;
-    for (i = 0; i < 64; i++) {
+    for (int i = 0; i < 64; i++) {
       buffer[index] = v2rawdetection->reserved[i];
       index++;
     }
 
     /* insert the data */
-    for (i = 0; i < v2rawdetection->number_beams; i++) {
+    for (int i = 0; i < v2rawdetection->number_beams; i++) {
       mb_put_binary_short(MB_YES, v2rawdetection->beam_descriptor[i], &buffer[index]);
       index += 2;
       mb_put_binary_float(MB_YES, v2rawdetection->detection_point[i], &buffer[index]);
@@ -15484,7 +15292,7 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
       mb_put_binary_float(MB_YES, v2rawdetection->uncertainty[i], &buffer[index]);
       index += 4;
       if (v2rawdetection->data_field_size > 22)
-        for (j = 0; j < v2rawdetection->data_field_size - 22; j++) {
+        for (int j = 0; j < v2rawdetection->data_field_size - 22; j++) {
           buffer[index] = 0;
           index++;
         }
@@ -15495,7 +15303,7 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -15524,14 +15332,12 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_v2snippet *v2snippet;
   s7kr_v2snippettimeseries *snippettimeseries;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -15543,14 +15349,14 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   v2snippet = &(store->v2snippet);
   header = &(v2snippet->header);
 
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_7kV2SnippetData;
-  for (i = 0; i < v2snippet->number_beams; i++) {
+  for (int i = 0; i < v2snippet->number_beams; i++) {
     snippettimeseries = &(v2snippet->snippettimeseries[i]);
 
     *size += R7KRDTSIZE_7kV2SnippetTimeseries +
@@ -15601,13 +15407,13 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
     index++;
     buffer[index] = v2snippet->control_flags;
     index++;
-    for (i = 0; i < 28; i++) {
+    for (int i = 0; i < 28; i++) {
       buffer[index] = v2snippet->reserved[i];
       index++;
     }
 
     /* insert the snippet parameters */
-    for (i = 0; i < v2snippet->number_beams; i++) {
+    for (int i = 0; i < v2snippet->number_beams; i++) {
       snippettimeseries = &(v2snippet->snippettimeseries[i]);
 
       /* extract snippettimeseries data */
@@ -15622,9 +15428,9 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
     }
 
     /* loop over all beams to insert snippet data */
-    for (i = 0; i < v2snippet->number_beams; i++) {
+    for (int i = 0; i < v2snippet->number_beams; i++) {
       snippettimeseries = &(v2snippet->snippettimeseries[i]);
-      for (j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
+      for (int j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
         mb_put_binary_short(MB_YES, snippettimeseries->amplitude[j], &buffer[index]);
         index += 2;
       }
@@ -15635,7 +15441,7 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -15664,14 +15470,12 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_calibratedsnippet *calibratedsnippet;
   s7kr_calibratedsnippettimeseries *snippettimeseries;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -15683,14 +15487,14 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   calibratedsnippet = &(store->calibratedsnippet);
   header = &(calibratedsnippet->header);
 
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_7kCalibratedSnippetData;
-  for (i = 0; i < calibratedsnippet->number_beams; i++) {
+  for (int i = 0; i < calibratedsnippet->number_beams; i++) {
     snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
 
     *size += R7KRDTSIZE_7kCalibratedSnippetTimeseries +
@@ -15741,13 +15545,13 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
     index++;
     mb_put_binary_int(MB_YES, calibratedsnippet->control_flags, &buffer[index]);
     index += 4;
-    for (i = 0; i < 28; i++) {
+    for (int i = 0; i < 28; i++) {
       buffer[index] = calibratedsnippet->reserved[i];
       index++;
     }
 
     /* insert the snippet parameters */
-    for (i = 0; i < calibratedsnippet->number_beams; i++) {
+    for (int i = 0; i < calibratedsnippet->number_beams; i++) {
       snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
 
       /* extract snippettimeseries data */
@@ -15762,9 +15566,9 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
     }
 
     /* loop over all beams to insert snippet data */
-    for (i = 0; i < calibratedsnippet->number_beams; i++) {
+    for (int i = 0; i < calibratedsnippet->number_beams; i++) {
       snippettimeseries = &(calibratedsnippet->calibratedsnippettimeseries[i]);
-      for (j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
+      for (int j = 0; j < (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1); j++) {
         mb_put_binary_float(MB_YES, snippettimeseries->amplitude[j], &buffer[index]);
         index += 4;
       }
@@ -15775,7 +15579,7 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -15803,13 +15607,11 @@ int mbr_reson7kr_wr_calibratedsnippet(int verbose, int *bufferalloc, char **buff
 } /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_installation *installation;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -15821,7 +15623,7 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   installation = &(store->installation);
   header = &(installation->header);
 
@@ -15863,25 +15665,25 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
     index += 4;
     mb_put_binary_short(MB_YES, installation->firmware_version_len, &buffer[index]);
     index += 2;
-    for (i = 0; i < 128; i++) {
+    for (int i = 0; i < 128; i++) {
       buffer[index] = installation->firmware_version[i];
       index++;
     }
     mb_put_binary_short(MB_YES, installation->software_version_len, &buffer[index]);
     index += 2;
-    for (i = 0; i < 128; i++) {
+    for (int i = 0; i < 128; i++) {
       buffer[index] = installation->software_version[i];
       index++;
     }
     mb_put_binary_short(MB_YES, installation->s7k_version_len, &buffer[index]);
     index += 2;
-    for (i = 0; i < 128; i++) {
+    for (int i = 0; i < 128; i++) {
       buffer[index] = installation->s7k_version[i];
       index++;
     }
     mb_put_binary_short(MB_YES, installation->protocal_version_len, &buffer[index]);
     index += 2;
-    for (i = 0; i < 128; i++) {
+    for (int i = 0; i < 128; i++) {
       buffer[index] = installation->protocal_version[i];
       index++;
     }
@@ -15939,7 +15741,7 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -15968,14 +15770,12 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_fileheader *fileheader;
   s7kr_subsystem *subsystem;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -15987,7 +15787,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   fileheader = &(store->fileheader);
   header = &(fileheader->header);
 
@@ -16012,7 +15812,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
     header->SystemEnumerator = 0;
     header->DataSetNumber = 0;
     header->RecordNumber = 0;
-    for (i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
       header->PreviousRecord[i] = -1;
       header->NextRecord[i] = -1;
     }
@@ -16034,7 +15834,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
   /* figure out size of output record */
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_7kFileHeader + R7KRDTSIZE_7kFileHeader;
-  for (i = 0; i < fileheader->number_subsystems; i++)
+  for (int i = 0; i < fileheader->number_subsystems; i++)
     *size += 6;
 
   /* allocate memory to write rest of record if necessary */
@@ -16059,7 +15859,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 
     /* insert the data */
     index = header->Offset + 4;
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       buffer[index] = fileheader->file_identifier[i];
       index++;
     }
@@ -16067,7 +15867,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
     index += 2;
     mb_put_binary_short(MB_YES, fileheader->reserved, &buffer[index]);
     index += 2;
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       buffer[index] = fileheader->session_identifier[i];
       index++;
     }
@@ -16075,23 +15875,23 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
     index += 4;
     mb_put_binary_int(MB_YES, fileheader->number_subsystems, &buffer[index]);
     index += 4;
-    for (i = 0; i < 64; i++) {
+    for (int i = 0; i < 64; i++) {
       buffer[index] = fileheader->recording_name[i];
       index++;
     }
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       buffer[index] = fileheader->recording_version[i];
       index++;
     }
-    for (i = 0; i < 64; i++) {
+    for (int i = 0; i < 64; i++) {
       buffer[index] = fileheader->user_defined_name[i];
       index++;
     }
-    for (i = 0; i < 128; i++) {
+    for (int i = 0; i < 128; i++) {
       buffer[index] = fileheader->notes[i];
       index++;
     }
-    for (i = 0; i < fileheader->number_subsystems; i++) {
+    for (int i = 0; i < fileheader->number_subsystems; i++) {
       subsystem = &(fileheader->subsystem[i]);
       mb_put_binary_int(MB_YES, subsystem->device_identifier, &buffer[index]);
       index += 4;
@@ -16104,7 +15904,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16133,13 +15933,11 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_systemeventmessage *systemeventmessage;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -16151,7 +15949,7 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   systemeventmessage = &(store->systemeventmessage);
   header = &(systemeventmessage->header);
 
@@ -16200,7 +15998,7 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
     index += 2;
 
     /* insert the data */
-    for (i = 0; i < systemeventmessage->message_length; i++) {
+    for (int i = 0; i < systemeventmessage->message_length; i++) {
       buffer[index] = systemeventmessage->message[i];
       index++;
     }
@@ -16210,7 +16008,7 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16240,13 +16038,11 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_remotecontrolsettings *remotecontrolsettings;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -16258,7 +16054,7 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   remotecontrolsettings = &(store->remotecontrolsettings);
   header = &(remotecontrolsettings->header);
 
@@ -16396,7 +16192,7 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
     index += 4;
     mb_put_binary_float(MB_YES, remotecontrolsettings->gate_depth_max, &buffer[index]);
     index += 4;
-    for (i = 0; i < 35; i++) {
+    for (int i = 0; i < 35; i++) {
       mb_put_binary_short(MB_YES, remotecontrolsettings->reserved2[i], &buffer[index]);
       index += 2;
     }
@@ -16406,7 +16202,7 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16435,13 +16231,11 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_reserved *reserved;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -16453,7 +16247,7 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   reserved = &(store->reserved);
   header = &(reserved->header);
 
@@ -16491,7 +16285,7 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
 
     /* insert the data */
     index = header->Offset + 4;
-    for (i = 0; i < R7KHDRSIZE_7kReserved; i++) {
+    for (int i = 0; i < R7KHDRSIZE_7kReserved; i++) {
       buffer[index] = reserved->reserved[i];
       index++;
     }
@@ -16501,7 +16295,7 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16530,13 +16324,11 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_roll *roll;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -16548,7 +16340,7 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   roll = &(store->roll);
   header = &(roll->header);
 
@@ -16594,7 +16386,7 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16623,13 +16415,11 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_pitch *pitch;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -16641,7 +16431,7 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   pitch = &(store->pitch);
   header = &(pitch->header);
 
@@ -16687,7 +16477,7 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16716,13 +16506,11 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_soundvelocity *soundvelocity;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -16734,7 +16522,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   soundvelocity = &(store->soundvelocity);
   header = &(soundvelocity->header);
 
@@ -16780,7 +16568,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16809,13 +16597,11 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_absorptionloss *absorptionloss;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -16827,7 +16613,7 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   absorptionloss = &(store->absorptionloss);
   header = &(absorptionloss->header);
 
@@ -16873,7 +16659,7 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16902,13 +16688,11 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   s7k_header *header;
   s7kr_spreadingloss *spreadingloss;
   unsigned int checksum;
   int index;
   char *buffer;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -16920,7 +16704,7 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   spreadingloss = &(store->spreadingloss);
   header = &(spreadingloss->header);
 
@@ -16966,7 +16750,7 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 
     /* now add the checksum */
     checksum = 0;
-    for (i = 0; i < index; i++)
+    for (int i = 0; i < index; i++)
       checksum += (unsigned char)buffer[i];
     mb_put_binary_int(MB_YES, checksum, &buffer[index]);
     index += 4;
@@ -16995,7 +16779,6 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
   FILE *mbfp;
   char **bufferptr;
   char *buffer;
@@ -17016,7 +16799,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
   mbfp = mb_io_ptr->mbfp;
 
   /* get saved values */
@@ -17619,7 +17402,6 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k_struct *store;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -17633,7 +17415,7 @@ int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k_struct *)store_ptr;
+  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
   /* write next data to file */
   status = mbr_reson7kr_wr_data(verbose, mbio_ptr, store_ptr, error);

@@ -35,9 +35,6 @@
 
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-	char c;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -52,7 +49,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_navnetcdf_struct), store_ptr, error);
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)*store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)*store_ptr;
 
 	/* now initialize everything */
 	if (status == MB_SUCCESS) {
@@ -79,6 +76,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 		store->mbWestLongitude = 0.;
 		strcpy(store->mbMeridian180, " ");
 		for (int i = 0; i < MBSYS_NAVNETCDF_ATTRIBUTELEN; i++) {
+		       	char c;
 			if (i < MBSYS_NAVNETCDF_ATTRIBUTELEN - 1)
 				c = ' ';
 			else
@@ -95,6 +93,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 			store->mbProjParameterValue[i] = 0.;
 		store->mbPointCounter = 0;
 		for (int i = 0; i < MBSYS_NAVNETCDF_COMMENTLEN - 1; i++) {
+		       	char c;
 			if (i < MBSYS_NAVNETCDF_COMMENTLEN - 1)
 				c = ' ';
 			else
@@ -354,8 +353,6 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -368,7 +365,7 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)*store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)*store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -402,8 +399,6 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -416,7 +411,7 @@ int mbsys_navnetcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -458,8 +453,6 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
                             double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                             char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                             double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -472,7 +465,7 @@ int mbsys_navnetcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -598,8 +591,6 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
                            double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag,
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -630,7 +621,7 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	/* set data kind */
 	store->kind = kind;
@@ -672,8 +663,6 @@ int mbsys_navnetcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, int kin
 int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes, double *angles,
                            double *angles_forward, double *angles_null, double *heave, double *alongtrack_offset, double *draft,
                            double *ssv, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -692,7 +681,7 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -746,8 +735,6 @@ int mbsys_navnetcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 }
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -761,7 +748,7 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -815,8 +802,6 @@ int mbsys_navnetcdf_detects(int verbose, void *mbio_ptr, void *store_ptr, int *k
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                      double *altitude, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -829,7 +814,7 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -877,8 +862,6 @@ int mbsys_navnetcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_pt
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr, double transducer_depth, double altitude,
                                     int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -893,7 +876,7 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	int status = MB_SUCCESS;
 
@@ -936,8 +919,6 @@ int mbsys_navnetcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                 double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                 double *pitch, double *heave, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -950,7 +931,7 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	/* get data kind */
 	*kind = store->kind;
@@ -1060,8 +1041,6 @@ int mbsys_navnetcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, in
 int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                                double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                                int *error) {
-	struct mbsys_navnetcdf_struct *store;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1090,7 +1069,7 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
 
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA) {
@@ -1128,9 +1107,6 @@ int mbsys_navnetcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-	struct mbsys_navnetcdf_struct *store;
-	struct mbsys_navnetcdf_struct *copy;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1144,8 +1120,8 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr, void *store_ptr, void *cop
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointers */
-	store = (struct mbsys_navnetcdf_struct *)store_ptr;
-	copy = (struct mbsys_navnetcdf_struct *)copy_ptr;
+	struct mbsys_navnetcdf_struct *store = (struct mbsys_navnetcdf_struct *)store_ptr;
+	struct mbsys_navnetcdf_struct *copy = (struct mbsys_navnetcdf_struct *)copy_ptr;
 
 	int status = MB_SUCCESS;
 

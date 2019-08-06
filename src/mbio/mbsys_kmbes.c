@@ -71,9 +71,6 @@ int clock_gettime(int dummy, struct timespec *ct) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -85,7 +82,7 @@ int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* allocate memory for data structure */
-  status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_kmbes_struct), (void **)store_ptr, error);
+  const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_kmbes_struct), (void **)store_ptr, error);
 
     /* initialize allocated structure to zero */
     if (status == MB_SUCCESS) {
@@ -93,7 +90,7 @@ int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
     }
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)*store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)*store_ptr;
 
   /* initialize data record kind */
   store->kind = MB_DATA_NONE;
@@ -116,9 +113,6 @@ int mbsys_kmbes_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -128,7 +122,8 @@ int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
   }
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)*store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)*store_ptr;
+  int status = MB_SUCCESS;
 
   /* deallocate any arrays or structures contained within the store data structure */
   for (int i = 0; i < MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++) {
@@ -177,9 +172,6 @@ int mbsys_kmbes_deall(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbath, int *namp, int *nss,
                                     int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -192,7 +184,7 @@ int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
@@ -211,6 +203,8 @@ int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
     *nss = 0;
   }
 
+  const int status = MB_SUCCESS;
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -228,9 +222,6 @@ int mbsys_kmbes_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -242,12 +233,14 @@ int mbsys_kmbes_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)mb_io_ptr->store_data;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)mb_io_ptr->store_data;
 
   /* extract data from structure */
   if (store->kind == MB_DATA_DATA) {
     *pingnumber = store->mrz[0].cmnPart.pingCnt;
   }
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -263,9 +256,6 @@ int mbsys_kmbes_pingnumber(int verbose, void *mbio_ptr, unsigned int *pingnumber
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *sonartype, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -278,10 +268,12 @@ int mbsys_kmbes_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *son
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* get sonar type */
   *sonartype = MB_TOPOGRAPHY_TYPE_ECHOSOUNDER;  // TODO: review this setting
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -297,9 +289,6 @@ int mbsys_kmbes_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *son
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *ss_type, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -312,10 +301,12 @@ int mbsys_kmbes_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int *
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* get sidescan type */
   *ss_type = MB_SIDESCAN_LINEAR; // TODO: review this setting
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -334,19 +325,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
                                  double *navlon, double *navlat, double *speed, double *heading, int *nbath, int *namp, int *nss,
                                  char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                                  double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mwc *mwc = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  struct mbsys_kmbes_spo *spo = NULL;
-  struct mbsys_kmbes_skm *skm = NULL;
-  struct mbsys_kmbes_cpo *cpo = NULL;
-  struct mbsys_kmbes_xmc *xmc = NULL;
-  struct mbsys_kmbes_xms *xms = NULL;
-  double pixel_size;
-  int numSoundings = 0;
-  int imrz;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -359,13 +337,13 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-  spo = (struct mbsys_kmbes_spo *)&store->spo;
-  skm = (struct mbsys_kmbes_skm *)&store->skm;
-  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
-  xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
-  xms = (struct mbsys_kmbes_xms *)&store->xms;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
+  struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
+  struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
+  struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
 
   /* get data kind */
   *kind = store->kind;
@@ -398,8 +376,8 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *nbath = 0;
     *namp = 0;
     *nss = 0;
-    numSoundings = 0;
-    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
+    int numSoundings = 0;
+    for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       for (int i = 0;
@@ -418,7 +396,7 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *namp = numSoundings;
     *nss = MIN(xms->pixels_ss, MBSYS_KMBES_MAX_PIXELS);
     store->num_pixels = *nss;
-    pixel_size = xms->pixel_size;
+    double pixel_size = xms->pixel_size;
     for (int i = 0; i < MBSYS_KMBES_MAX_PIXELS; i++) {
       if (xms->ss[i] == MBSYS_KMBES_INVALID_SS
         || (xms->ss[i] == MBSYS_KMBES_INVALID_AMP && xms->ss_alongtrack[i] == 0.0)) {
@@ -699,6 +677,9 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
       fprintf(stderr, "dbg2        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
               ssalongtrack[i]);
   }
+
+  const int status = MB_SUCCESS;
+
   if (verbose >= 2) {
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
@@ -713,20 +694,6 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
                                 double navlon, double navlat, double speed, double heading, int nbath, int namp, int nss,
                                 char *beamflag, double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack,
                                 double *ss, double *ssacrosstrack, double *ssalongtrack, char *comment, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mwc *mwc = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  struct mbsys_kmbes_spo *spo = NULL;
-  struct mbsys_kmbes_skm *skm = NULL;
-  struct mbsys_kmbes_cpo *cpo = NULL;
-  struct mbsys_kmbes_xmc *xmc = NULL;
-  struct mbsys_kmbes_xms *xms = NULL;
-  int numSoundings;
-  int imrz;
-  struct timespec right_now_nsec;
-  int numBytesComment;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -776,13 +743,14 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-  spo = (struct mbsys_kmbes_spo *)&store->spo;
-  skm = (struct mbsys_kmbes_skm *)&store->skm;
-  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
-  xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
-  xms = (struct mbsys_kmbes_xms *)&store->xms;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
+  struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
+  struct mbsys_kmbes_xmc *xmc = (struct mbsys_kmbes_xmc *)&store->xmc;
+  struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
 
   /* set data kind */
   store->kind = kind;
@@ -796,8 +764,8 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
     /* loop over all sub-pings */
     /* read distance and depth values into storage arrays */
-    numSoundings = 0;
-    for(imrz = 0; imrz < store->n_mrz_read; imrz++) {
+    int numSoundings = 0;
+    for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       mrz->pingInfo.longitude_deg = navlon;
@@ -891,7 +859,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     store->xmc.comment[MB_COMMENT_MAXLINE-1] = '\0';
 
     /* have to construct this record now */
-    numBytesComment = strlen(store->xmc.comment) + (strlen(store->xmc.comment) % 2);
+    const int numBytesComment = strlen(store->xmc.comment) + (strlen(store->xmc.comment) % 2);
     store->xmc.header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + numBytesComment + 36;
     strncpy((char *)store->xmc.header.dgmType, "#XMC", 4);
     store->xmc.header.dgmVersion = 0;
@@ -900,6 +868,7 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 
     /* insert current time as timestamp if needed (time_d close to zero) */
     if (fabs(time_d) < 1.0) {
+      struct timespec right_now_nsec;
       clock_gettime(CLOCK_REALTIME, &right_now_nsec);
       time_d = right_now_nsec.tv_sec + 0.000000001 * right_now_nsec.tv_nsec;
       mb_get_date(verbose, time_d, time_i);
@@ -910,6 +879,8 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
     store->xmc.header.time_sec = (int)time_d;
     store->xmc.header.time_nanosec = (time_d - floor(time_d)) * 1.0e9;
   }
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -926,15 +897,6 @@ int mbsys_kmbes_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, double *ttimes,
                                 double *angles, double *angles_forward, double *angles_null, double *heave,
                                 double *alongtrack_offset, double *draft, double *ssv, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mwc *mwc = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  struct mbsys_kmbes_mrz_tx_sector_info *sectorInfo;
-  struct mbsys_kmbes_mrz_sounding *sounding;
-  int numSoundings = 0;
-  int imrz;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -953,11 +915,13 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
 
   /* get data kind */
   *kind = store->kind;
+
+  int status = MB_SUCCESS;
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
@@ -968,16 +932,16 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
     *draft = mrz->pingInfo.z_waterLevelReRefPoint_m;
 
     /* read distance and depth values from all sub-pings into storage arrays */
-    numSoundings = 0;
-    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
+    int numSoundings = 0;
+    for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
 
       mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       for (int i = 0;
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
             i++) {
-        sounding = &mrz->sounding[i];
-        sectorInfo = &mrz->sectorInfo[sounding->txSectorNumb];
+        struct mbsys_kmbes_mrz_sounding *sounding = &mrz->sounding[i];
+        struct mbsys_kmbes_mrz_tx_sector_info *sectorInfo = &mrz->sectorInfo[sounding->txSectorNumb];
 
         ttimes[numSoundings] = sounding->twoWayTravelTime_sec;
         angles[numSoundings] = sounding->beamAngleReRx_deg;
@@ -1035,12 +999,6 @@ int mbsys_kmbes_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  int numSoundings = 0;
-  int imrz;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1054,10 +1012,12 @@ int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
+
+  int status = MB_SUCCESS;
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
@@ -1066,9 +1026,9 @@ int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
         MB_DETECT_AMPLITUDE
         MB_DETECT_PHASE
         MB_DETECT_UNKNOWN */
-    numSoundings = 0;
-    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+    int numSoundings = 0;
+    for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       for (int i = 0;
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
@@ -1127,12 +1087,6 @@ int mbsys_kmbes_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *pulses, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  int numSoundings = 0;
-  int imrz;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1146,10 +1100,12 @@ int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* get data kind */
   *kind = store->kind;
+
+  int status = MB_SUCCESS;
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
@@ -1160,9 +1116,9 @@ int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
           MB_PULSE_UPCHIRP 2
           MB_PULSE_DOWNCHIRP 3
           MB_PULSE_LIDAR 4 */
-    numSoundings = 0;
-    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+    int numSoundings = 0;
+    for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       for (int i = 0;
             i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections);
@@ -1224,11 +1180,6 @@ int mbsys_kmbes_pulses(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain,
                                double *pulse_length, double *receive_gain, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  int numSoundings = 0;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1241,14 +1192,16 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+
+  int status = MB_SUCCESS;
 
   /* get data kind */
   *kind = store->kind;
 
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
-    mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+    struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
 
     /* get transmit_gain (dB) */
     *transmit_gain = mrz->pingInfo.transmitPower_dB;
@@ -1302,14 +1255,6 @@ int mbsys_kmbes_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, d
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                           double *altitudev, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mwc *mwc = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  double xtrackmin;
-  int altitude_found = MB_NO;
-  int imrz, i;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1322,8 +1267,10 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+
+  int status = MB_SUCCESS;
 
   /* get data kind */
   *kind = store->kind;
@@ -1336,8 +1283,8 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 
     /* get altitude using valid depth closest to nadir */
     *altitudev = 0.0;
-    xtrackmin = 999999.9;
-    for (imrz = 0; imrz < store->n_mrz_read; imrz++) {
+    double xtrackmin = 999999.9;
+    for (int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       for (int i = 0;
@@ -1391,14 +1338,6 @@ int mbsys_kmbes_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int time_i[7], double *time_d,
                                      double *navlon, double *navlat, double *speed, double *heading, double *draft, double *roll,
                                      double *pitch, double *heave, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mwc *mwc = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  struct mbsys_kmbes_spo *spo = NULL;
-  struct mbsys_kmbes_skm *skm = NULL;
-  struct mbsys_kmbes_cpo *cpo = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1411,14 +1350,16 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-  spo = (struct mbsys_kmbes_spo *)&store->spo;
-  skm = (struct mbsys_kmbes_skm *)&store->skm;
-  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
+  struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
 
   /* get data kind */
   *kind = store->kind;
+
+  int status = MB_SUCCESS;
 
   /* extract data from survey record */
   if (*kind == MB_DATA_DATA) {
@@ -1591,15 +1532,6 @@ int mbsys_kmbes_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int nmax, int *kind, int *n, int *time_i,
                                       double *time_d, double *navlon, double *navlat, double *speed, double *heading,
                                       double *draft, double *roll, double *pitch, double *heave, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_mwc *mwc = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  struct mbsys_kmbes_spo *spo = NULL;
-  struct mbsys_kmbes_skm *skm = NULL;
-  struct mbsys_kmbes_cpo *cpo = NULL;
-  int i, inav;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1613,14 +1545,16 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-  spo = (struct mbsys_kmbes_spo *)&store->spo;
-  skm = (struct mbsys_kmbes_skm *)&store->skm;
-  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
+  struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
 
   /* get data kind */
   *kind = store->kind;
+
+  int status = MB_SUCCESS;
 
   /* extract data from survey record */
   if (*kind == MB_DATA_DATA) {
@@ -1767,7 +1701,7 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       kind:       %d\n", *kind);
     fprintf(stderr, "dbg2       n:          %d\n", *n);
-    for (inav = 0; inav < *n; inav++) {
+    for (int inav = 0; inav < *n; inav++) {
       for (int i = 0; i < 7; i++)
         fprintf(stderr, "dbg2       %d time_i[%d]:     %d\n", inav, i, time_i[inav * 7 + i]);
       fprintf(stderr, "dbg2       %d time_d:        %f\n", inav, time_d[inav]);
@@ -1792,15 +1726,6 @@ int mbsys_kmbes_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int n
 int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                                     double navlat, double speed, double heading, double draft, double roll, double pitch,
                                     double heave, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store;
-  struct mbsys_kmbes_mwc *mwc = NULL;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  struct mbsys_kmbes_spo *spo = NULL;
-  struct mbsys_kmbes_skm *skm = NULL;
-  struct mbsys_kmbes_cpo *cpo = NULL;
-  int imrz;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1829,11 +1754,13 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-  spo = (struct mbsys_kmbes_spo *)&store->spo;
-  skm = (struct mbsys_kmbes_skm *)&store->skm;
-  cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+  struct mbsys_kmbes_spo *spo = (struct mbsys_kmbes_spo *)&store->spo;
+  struct mbsys_kmbes_skm *skm = (struct mbsys_kmbes_skm *)&store->skm;
+  struct mbsys_kmbes_cpo *cpo = (struct mbsys_kmbes_cpo *)&store->cpo;
+
+  int status = MB_SUCCESS;
 
   /* insert data in structure */
   if (store->kind == MB_DATA_DATA) {
@@ -1843,7 +1770,7 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
     store->time_d = time_d;
 
     /* loop over all sub-pings */
-    for(imrz = 0; imrz < store->n_mrz_read; imrz++) {
+    for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
       mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       mrz->pingInfo.longitude_deg = navlon;
@@ -1919,10 +1846,6 @@ int mbsys_kmbes_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth,
                                      double *velocity, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_svp *svp = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1935,11 +1858,13 @@ int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  svp = (struct mbsys_kmbes_svp *)&store->svp;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_svp *svp = (struct mbsys_kmbes_svp *)&store->svp;
 
   /* get data kind */
   *kind = store->kind;
+
+  int status = MB_SUCCESS;
 
   /* extract data from structure */
   if (*kind == MB_DATA_VELOCITY_PROFILE) {
@@ -1987,10 +1912,6 @@ int mbsys_kmbes_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                                     int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_svp *svp = NULL;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2006,8 +1927,8 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  svp = (struct mbsys_kmbes_svp *)&store->svp;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_svp *svp = (struct mbsys_kmbes_svp *)&store->svp;
 
   /* insert data in structure */
   if (store->kind == MB_DATA_VELOCITY_PROFILE) {
@@ -2022,6 +1943,8 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
       }
   }
 
+  const int status = MB_SUCCESS;
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return value:\n");
@@ -2035,16 +1958,6 @@ int mbsys_kmbes_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 }
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store = NULL;
-  struct mbsys_kmbes_struct *copy = NULL;
-  struct mbsys_kmbes_mwc *copy_mwc = NULL;
-  struct mbsys_kmbes_mwc *store_mwc = NULL;
-  struct mbsys_kmbes_mwc_rx_beam_data *copy_beamData_p;
-  struct mbsys_kmbes_mwc_rx_beam_data *store_beamData_p;
-  size_t alloc_size;
-  int i, j;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2058,15 +1971,15 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
-  copy = (struct mbsys_kmbes_struct *)copy_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *copy = (struct mbsys_kmbes_struct *)copy_ptr;
 
   /* copy the data - for many formats memory must be allocated and
       sub-structures copied separately */
   //*copy = *store;
   copy->kind = store->kind;
   copy->time_d = store->time_d;
-  for (i=0;i<7;i++) {
+  for (int i = 0; i < 7; i++) {
     copy->time_i[i] = store->time_i[i];
   }
   copy->num_soundings = store->num_soundings;
@@ -2082,26 +1995,29 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
   copy->sha = store->sha;
   copy->n_mrz_read = store->n_mrz_read;
   copy->n_mrz_needed = store->n_mrz_needed;
-  for (i=0;i<MBSYS_KMBES_MAX_NUM_MRZ_DGMS;i++) {
+  for (int i = 0; i < MBSYS_KMBES_MAX_NUM_MRZ_DGMS; i++) {
     copy->mrz[i] = store->mrz[i];
   }
   copy->xms = store->xms;
   copy->n_mwc_read = store->n_mwc_read;
   copy->n_mwc_needed = store->n_mwc_needed;
-  for (i=0;i<MBSYS_KMBES_MAX_NUM_MWC_DGMS;i++) {
-    copy_mwc = &copy->mwc[i];
-    store_mwc = &store->mwc[i];
+
+  int status = MB_SUCCESS;
+
+  for (int i = 0; i < MBSYS_KMBES_MAX_NUM_MWC_DGMS; i++) {
+    struct mbsys_kmbes_mwc *copy_mwc = &copy->mwc[i];
+    struct mbsys_kmbes_mwc *store_mwc = &store->mwc[i];
 
     copy_mwc->header = store_mwc->header;
     copy_mwc->partition = store_mwc->partition;
     copy_mwc->cmnPart = store_mwc->cmnPart;
     copy_mwc->txInfo = store_mwc->txInfo;
-    for (j=0;j<MBSYS_KMBES_MAX_NUM_TX_PULSES;j++) {
+    for (int j = 0; j < MBSYS_KMBES_MAX_NUM_TX_PULSES; j++) {
       copy_mwc->sectorData[j] = store_mwc->sectorData[j];
     }
     copy_mwc->rxInfo = store_mwc->rxInfo;
 
-    alloc_size = (size_t)(store_mwc->rxInfo.numBeams * sizeof(struct mbsys_kmbes_mwc_rx_beam_data));
+    size_t alloc_size = (size_t)(store_mwc->rxInfo.numBeams * sizeof(struct mbsys_kmbes_mwc_rx_beam_data));
     if (copy_mwc->beamData_p_alloc_size < alloc_size || copy_mwc->beamData_p == NULL) {
       status = mb_reallocd(verbose, __FILE__, __LINE__, alloc_size,
                             (void **)&(copy_mwc->beamData_p), error);
@@ -2114,9 +2030,9 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
       }
     }
     if (status == MB_SUCCESS) {
-      for (j=0;j<store_mwc->rxInfo.numBeams;j++) {
-        copy_beamData_p = &copy_mwc->beamData_p[j];
-        store_beamData_p = &store_mwc->beamData_p[j];
+      for (int j = 0; j < store_mwc->rxInfo.numBeams; j++) {
+        struct mbsys_kmbes_mwc_rx_beam_data *copy_beamData_p = &copy_mwc->beamData_p[j];
+        struct mbsys_kmbes_mwc_rx_beam_data *store_beamData_p = &store_mwc->beamData_p[j];
 
         copy_beamData_p->beamPointAngReVertical_deg = store_beamData_p->beamPointAngReVertical_deg;
         copy_beamData_p->startRangeSampleNum = store_beamData_p->startRangeSampleNum;
@@ -2208,10 +2124,6 @@ int mbsys_kmbes_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 /*--------------------------------------------------------------------*/
 int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_size_set, double *pixel_size,
              int swath_width_set, double *swath_width, int pixel_int, int *error) {
-  int status = MB_SUCCESS;
-  struct mbsys_kmbes_struct *store;
-  struct mbsys_kmbes_mrz *mrz = NULL;
-  struct mbsys_kmbes_xms *xms = NULL;
   double ss[MBSYS_KMBES_MAX_PIXELS];
   int ss_cnt[MBSYS_KMBES_MAX_PIXELS];
   double ssacrosstrack[MBSYS_KMBES_MAX_PIXELS];
@@ -2225,8 +2137,6 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
   int pixel_int_use;
   int first, last, k1, kc, k2;
   double dx1, dx2, dx, xx;
-  int imrz;
-  int i, k, kk;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2245,13 +2155,13 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_kmbes_struct *)store_ptr;
+  struct mbsys_kmbes_struct *store = (struct mbsys_kmbes_struct *)store_ptr;
 
   /* insert data in structure */
   if (store->kind == MB_DATA_DATA) {
 
     /* initialize the sidescan binning arrays */
-    for (i=0;i<MBSYS_KMBES_MAX_PIXELS;i++) {
+    for (int i = 0; i < MBSYS_KMBES_MAX_PIXELS; i++) {
       ss[i] = 0.0;
       ss_cnt[i] = 0;
       ssacrosstrack[i] = 0.0;
@@ -2269,10 +2179,10 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
 
       /* loop over sub-ping datagrams */
       nbathsort = 0;
-      for(imrz = 0; imrz < store->n_mrz_read; imrz++) {
+      for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
 
         /* get the current MRZ datagram */
-        mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+        struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
         /* loop over all soundings to get the median altitude for this ping */
         for (int i = 0; i < (mrz->rxInfo.numSoundingsMaxMain + mrz->rxInfo.numExtraDetections); i++) {
@@ -2301,10 +2211,10 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
     }
 
     /* loop over all valid soundings, binning the raw backscatter samples into the sidescan */
-    for(imrz = 0; imrz < store->n_mrz_read; imrz++) {
+    for(int imrz = 0; imrz < store->n_mrz_read; imrz++) {
 
       /* get the current MRZ datagram */
-      mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
+      struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[imrz];
 
       /* get raw sample size */
       sample_size_m = 750.0 / mrz->rxInfo.seabedImageSampleRate;
@@ -2339,18 +2249,18 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
             if (i == nsoundings - 1) {
               dx2 = dx1;
             }
-            for (k=k1;k<kc;k++) {
+            for (int k = k1; k < kc; k++) {
               xx = mrz->sounding[i].y_reRefPoint_m - dx2 * (k - kc);
-              kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
+              const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
               if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS) {
                 ss[kk] += 10.0 * mrz->SIsample_desidB[k];
                 ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
                 ss_cnt[kk]++;
               }
             }
-            for (k=kc;k<=k2;k++) {
+            for (int k = kc; k <= k2; k++) {
               xx = mrz->sounding[i].y_reRefPoint_m - dx1 * (k - kc);
-              kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
+              const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
               if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS) {
                 ss[kk] += 10.0 * mrz->SIsample_desidB[k];
                 ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
@@ -2375,18 +2285,18 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
             if (i == nsoundings - 1) {
               dx2 = dx1;
             }
-            for (k=k1;k<kc;k++) {
+            for (int k = k1; k < kc; k++) {
               xx = mrz->sounding[i].y_reRefPoint_m + dx1 * (k - kc);
-              kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
+              const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
               if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS) {
                 ss[kk] += 10.0 * mrz->SIsample_desidB[k];
                 ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
                 ss_cnt[kk]++;
               }
             }
-            for (k=kc;k<=k2;k++) {
+            for (int k = kc; k <= k2; k++) {
               xx = mrz->sounding[i].y_reRefPoint_m + dx2 * (k - kc);
-              kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
+              const int kk = MBSYS_KMBES_MAX_PIXELS / 2 + (int)(xx / (*pixel_size));
               if (kk > 0 && kk < MBSYS_KMBES_MAX_PIXELS) {
                 ss[kk] += 10.0 * mrz->SIsample_desidB[k];
                 ssalongtrack[kk] += mrz->sounding[i].x_reRefPoint_m;
@@ -2405,7 +2315,7 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
 		/* average the sidescan */
 		first = MBSYS_KMBES_MAX_PIXELS;
 		last = -1;
-		for (k = 0; k < MBSYS_KMBES_MAX_PIXELS; k++) {
+		for (int k = 0; k < MBSYS_KMBES_MAX_PIXELS; k++) {
 			if (ss_cnt[k] > 0) {
 				ss[k] /= ss_cnt[k];
 				ssalongtrack[k] /= ss_cnt[k];
@@ -2420,7 +2330,7 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
 		/* interpolate the sidescan */
 		k1 = first;
 		k2 = first;
-		for (k = first + 1; k < last; k++) {
+		for (int k = first + 1; k < last; k++) {
 			if (ss_cnt[k] <= 0) {
 				if (k2 <= k) {
 					k2 = k + 1;
@@ -2441,8 +2351,8 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
 
     /* insert the pseudosidescan into the data structure for an XMS datagram */
     store->num_pixels = MBSYS_KMBES_MAX_PIXELS;
-    mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
-    xms = (struct mbsys_kmbes_xms *)&store->xms;
+    struct mbsys_kmbes_mrz *mrz = (struct mbsys_kmbes_mrz *)&store->mrz[0];
+    struct mbsys_kmbes_xms *xms = (struct mbsys_kmbes_xms *)&store->xms;
     xms->header = mrz->header;
     xms->header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + 8 * MBSYS_KMBES_MAX_PIXELS + 48;
     strncpy((char *)xms->header.dgmType, "#XMS", 4);
@@ -2451,12 +2361,13 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
     xms->pixel_size = *pixel_size;
     xms->pixels_ss = MBSYS_KMBES_MAX_PIXELS;
     memset((char *)xms->unused, 0, 32);
-    for (k=0;k<xms->pixels_ss;k++) {
+    for (int k = 0; k < xms->pixels_ss; k++) {
       xms->ss[k] = ss[k];
       xms->ss_alongtrack[k] = ssalongtrack[k];
     }
-
   }
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);

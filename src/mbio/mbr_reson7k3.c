@@ -424,7 +424,6 @@ int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   char **bufferptr = NULL;
   char *buffer = NULL;
   int *bufferalloc = NULL;
@@ -448,7 +447,7 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointers to buffers */
-  store = (struct mbsys_reson7k3_struct *) &mb_io_ptr->store_data;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *) &mb_io_ptr->store_data;
   bufferptr = (char **)&mb_io_ptr->saveptr1;
   buffer = (char *)*bufferptr;
   bufferalloc = (int *)&mb_io_ptr->save6;
@@ -1072,7 +1071,6 @@ int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *h
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_ReferencePoint *ReferencePoint;
   int index;
@@ -1087,7 +1085,7 @@ int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   ReferencePoint = &(store->ReferencePoint);
   header = &(ReferencePoint->header);
 
@@ -1153,7 +1151,6 @@ int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_UncalibratedSensorOffset *UncalibratedSensorOffset;
   int index;
@@ -1168,7 +1165,7 @@ int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *st
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   UncalibratedSensorOffset = &(store->UncalibratedSensorOffset);
   header = &(UncalibratedSensorOffset->header);
 
@@ -1238,7 +1235,6 @@ int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *st
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CalibratedSensorOffset *CalibratedSensorOffset;
   int index;
@@ -1253,7 +1249,7 @@ int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *stor
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CalibratedSensorOffset = &(store->CalibratedSensorOffset);
   header = &(CalibratedSensorOffset->header);
 
@@ -1323,7 +1319,6 @@ int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *stor
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Position *Position;
   int index;
@@ -1338,7 +1333,7 @@ int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Position = &(store->Position);
   header = &(Position->header);
 
@@ -1416,7 +1411,6 @@ int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CustomAttitude *CustomAttitude;
   int data_size;
@@ -1432,7 +1426,7 @@ int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CustomAttitude = &(store->CustomAttitude);
   header = &(CustomAttitude->header);
 
@@ -1566,7 +1560,6 @@ int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Tide *Tide;
   int index;
@@ -1581,7 +1574,7 @@ int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error)
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Tide = &(store->Tide);
   header = &(Tide->header);
 
@@ -1661,7 +1654,6 @@ int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Altitude *Altitude;
   int index;
@@ -1676,7 +1668,7 @@ int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Altitude = &(store->Altitude);
   header = &(Altitude->header);
 
@@ -1736,7 +1728,6 @@ int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_MotionOverGround *MotionOverGround;
   int data_size;
@@ -1752,7 +1743,7 @@ int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   MotionOverGround = &(store->MotionOverGround);
   header = &(MotionOverGround->header);
 
@@ -1870,7 +1861,6 @@ int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Depth *Depth;
   int index;
@@ -1885,7 +1875,7 @@ int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Depth = &(store->Depth);
   header = &(Depth->header);
 
@@ -1951,7 +1941,6 @@ int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SoundVelocityProfile *SoundVelocityProfile;
   int data_size;
@@ -1967,7 +1956,7 @@ int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SoundVelocityProfile = &(store->SoundVelocityProfile);
   header = &(SoundVelocityProfile->header);
 
@@ -2059,7 +2048,6 @@ int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CTD *CTD;
   int data_size;
@@ -2075,7 +2063,7 @@ int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CTD = &(store->CTD);
   header = &(CTD->header);
 
@@ -2191,7 +2179,6 @@ int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Geodesy *Geodesy;
   int index;
@@ -2206,7 +2193,7 @@ int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Geodesy = &(store->Geodesy);
   header = &(Geodesy->header);
 
@@ -2326,7 +2313,6 @@ int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RollPitchHeave *RollPitchHeave;
   int index;
@@ -2341,7 +2327,7 @@ int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RollPitchHeave = &(store->RollPitchHeave);
   header = &(RollPitchHeave->header);
 
@@ -2405,7 +2391,6 @@ int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Heading *Heading;
   int index;
@@ -2420,7 +2405,7 @@ int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Heading = &(store->Heading);
   header = &(Heading->header);
 
@@ -2480,7 +2465,6 @@ int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SurveyLine *SurveyLine;
   int data_size;
@@ -2496,7 +2480,7 @@ int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SurveyLine = &(store->SurveyLine);
   header = &(SurveyLine->header);
 
@@ -2586,7 +2570,6 @@ int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Navigation *Navigation;
   int index;
@@ -2601,7 +2584,7 @@ int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Navigation = &(store->Navigation);
   header = &(Navigation->header);
 
@@ -2677,7 +2660,6 @@ int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Attitude *Attitude;
   int data_size;
@@ -2693,7 +2675,7 @@ int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Attitude = &(store->Attitude);
   header = &(Attitude->header);
 
@@ -2789,7 +2771,6 @@ int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_PanTilt *PanTilt;
   int index;
@@ -2803,7 +2784,7 @@ int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   PanTilt = &(store->PanTilt);
   header = &(PanTilt->header);
 
@@ -2828,7 +2809,6 @@ int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarInstallationIDs *SonarInstallationIDs;
   int index;
@@ -2842,7 +2822,7 @@ int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarInstallationIDs = &(store->SonarInstallationIDs);
   header = &(SonarInstallationIDs->header);
 
@@ -2867,7 +2847,6 @@ int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Mystery *Mystery;
   int index;
@@ -2882,7 +2861,7 @@ int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Mystery = &(store->Mystery);
   header = &(Mystery->header);
 
@@ -2944,7 +2923,6 @@ int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarPipeEnvironment *SonarPipeEnvironment;
   int index;
@@ -2958,7 +2936,7 @@ int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarPipeEnvironment = &(store->SonarPipeEnvironment);
   header = &(SonarPipeEnvironment->header);
 
@@ -2983,7 +2961,6 @@ int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_ContactOutput *ContactOutput;
   int index;
@@ -2997,7 +2974,7 @@ int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   ContactOutput = &(store->ContactOutput);
   header = &(ContactOutput->header);
 
@@ -3021,7 +2998,6 @@ int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_ProcessedSideScan *ProcessedSideScan;
   int index;
@@ -3036,7 +3012,7 @@ int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   ProcessedSideScan = &(store->ProcessedSideScan);
   header = &(ProcessedSideScan->header);
 
@@ -3125,7 +3101,6 @@ int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarSettings *SonarSettings;
   int index;
@@ -3140,7 +3115,7 @@ int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarSettings = &(store->SonarSettings);
   header = &(SonarSettings->header);
 
@@ -3276,7 +3251,6 @@ int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Configuration *Configuration;
   s7k3_device *device;
@@ -3293,7 +3267,7 @@ int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Configuration = &(store->Configuration);
   header = &(Configuration->header);
 
@@ -3390,7 +3364,6 @@ int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_MatchFilter *MatchFilter;
   int index;
@@ -3405,7 +3378,7 @@ int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   MatchFilter = &(store->MatchFilter);
   header = &(MatchFilter->header);
 
@@ -3483,13 +3456,11 @@ int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_FirmwareHardwareConfiguration *FirmwareHardwareConfiguration;
   int index;
   int data_size;
   int time_j[5];
-  int j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3500,7 +3471,7 @@ int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   FirmwareHardwareConfiguration = &(store->FirmwareHardwareConfiguration);
   header = &(FirmwareHardwareConfiguration->header);
 
@@ -3580,7 +3551,6 @@ int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_BeamGeometry *BeamGeometry;
   int index;
@@ -3595,7 +3565,7 @@ int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   BeamGeometry = &(store->BeamGeometry);
   header = &(BeamGeometry->header);
 
@@ -3675,7 +3645,6 @@ int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Bathymetry *Bathymetry;
   int index;
@@ -3691,7 +3660,7 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Bathymetry = &(store->Bathymetry);
   header = &(Bathymetry->header);
 
@@ -3857,7 +3826,6 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SideScan *SideScan;
   int data_size;
@@ -3875,7 +3843,7 @@ int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SideScan = &(store->SideScan);
   header = &(SideScan->header);
 
@@ -4037,7 +4005,6 @@ int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *er
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_WaterColumn *WaterColumn;
   s7k3_wcd *wcd;
@@ -4066,7 +4033,7 @@ int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   WaterColumn = &(store->WaterColumn);
   header = &(WaterColumn->header);
 
@@ -4250,7 +4217,6 @@ int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_VerticalDepth(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_VerticalDepth *VerticalDepth;
   int index;
@@ -4265,7 +4231,7 @@ int mbr_reson7k3_rd_VerticalDepth(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   VerticalDepth = &(store->VerticalDepth);
   header = &(VerticalDepth->header);
 
@@ -4341,7 +4307,6 @@ int mbr_reson7k3_rd_VerticalDepth(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_TVG(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_TVG *TVG;
   int index;
@@ -4357,7 +4322,7 @@ int mbr_reson7k3_rd_TVG(int verbose, char *buffer, void *store_ptr, int *error) 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   TVG = &(store->TVG);
   header = &(TVG->header);
 
@@ -4441,7 +4406,6 @@ int mbr_reson7k3_rd_TVG(int verbose, char *buffer, void *store_ptr, int *error) 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Image(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Image *Image;
   int index;
@@ -4460,7 +4424,7 @@ int mbr_reson7k3_rd_Image(int verbose, char *buffer, void *store_ptr, int *error
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Image = &(store->Image);
   header = &(Image->header);
 
@@ -4578,7 +4542,6 @@ int mbr_reson7k3_rd_Image(int verbose, char *buffer, void *store_ptr, int *error
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_PingMotion *PingMotion;
   int index;
@@ -4593,7 +4556,7 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   PingMotion = &(store->PingMotion);
   header = &(PingMotion->header);
 
@@ -4724,7 +4687,6 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_AdaptiveGate(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_AdaptiveGate *AdaptiveGate;
   int index;
@@ -4738,7 +4700,7 @@ int mbr_reson7k3_rd_AdaptiveGate(int verbose, char *buffer, void *store_ptr, int
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   AdaptiveGate = &(store->AdaptiveGate);
   header = &(AdaptiveGate->header);
 
@@ -4763,7 +4725,6 @@ int mbr_reson7k3_rd_AdaptiveGate(int verbose, char *buffer, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_DetectionDataSetup(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_DetectionDataSetup *DetectionDataSetup;
   int index;
@@ -4778,7 +4739,7 @@ int mbr_reson7k3_rd_DetectionDataSetup(int verbose, char *buffer, void *store_pt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   DetectionDataSetup = &(store->DetectionDataSetup);
   header = &(DetectionDataSetup->header);
 
@@ -4904,7 +4865,6 @@ int mbr_reson7k3_rd_DetectionDataSetup(int verbose, char *buffer, void *store_pt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Beamformed *Beamformed;
   s7k3_amplitudephase *amplitudephase;
@@ -4920,7 +4880,7 @@ int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Beamformed = &(store->Beamformed);
   header = &(Beamformed->header);
 
@@ -5024,7 +4984,6 @@ int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_VernierProcessingDataRaw(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_VernierProcessingDataRaw *VernierProcessingDataRaw;
   int index;
@@ -5038,7 +4997,7 @@ int mbr_reson7k3_rd_VernierProcessingDataRaw(int verbose, char *buffer, void *st
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   VernierProcessingDataRaw = &(store->VernierProcessingDataRaw);
   header = &(VernierProcessingDataRaw->header);
 
@@ -5063,16 +5022,13 @@ int mbr_reson7k3_rd_VernierProcessingDataRaw(int verbose, char *buffer, void *st
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_BITE *BITE;
   s7k3_bitereport *bitereport;
   s7k3_time *s7kTime;
   s7k3_bitefield *bitefield;
   size_t nalloc;
-  int index;
   int time_j[5];
-  int i, j, k;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -5083,12 +5039,12 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   BITE = &(store->BITE);
   header = &(BITE->header);
 
   /* extract the header */
-  index = 0;
+  int index = 0;
   status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
@@ -5172,7 +5128,7 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
 
       mb_get_binary_short(MB_YES, &buffer[index], &(bitefield->field));
       index += 2;
-      for (k = 0; k < 64; k++) {
+      for (int k = 0; k < 64; k++) {
         bitefield->name[k] = buffer[index];
         index++;
       }
@@ -5234,7 +5190,6 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarSourceVersion(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarSourceVersion *SonarSourceVersion;
   int index;
@@ -5249,7 +5204,7 @@ int mbr_reson7k3_rd_SonarSourceVersion(int verbose, char *buffer, void *store_pt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarSourceVersion = &(store->SonarSourceVersion);
   header = &(SonarSourceVersion->header);
 
@@ -5311,7 +5266,6 @@ int mbr_reson7k3_rd_SonarSourceVersion(int verbose, char *buffer, void *store_pt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_WetEndVersion8k(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_WetEndVersion8k *WetEndVersion8k;
   int index;
@@ -5326,7 +5280,7 @@ int mbr_reson7k3_rd_WetEndVersion8k(int verbose, char *buffer, void *store_ptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   WetEndVersion8k = &(store->WetEndVersion8k);
   header = &(WetEndVersion8k->header);
 
@@ -5388,7 +5342,6 @@ int mbr_reson7k3_rd_WetEndVersion8k(int verbose, char *buffer, void *store_ptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RawDetection(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RawDetection *RawDetection;
   s7k3_rawdetectiondata *rawdetectiondata;
@@ -5405,7 +5358,7 @@ int mbr_reson7k3_rd_RawDetection(int verbose, char *buffer, void *store_ptr, int
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RawDetection = &(store->RawDetection);
   header = &(RawDetection->header);
 
@@ -5574,7 +5527,6 @@ int mbr_reson7k3_rd_RawDetection(int verbose, char *buffer, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Snippet *Snippet;
   s7k3_snippetdata *snippetdata;
@@ -5594,7 +5546,7 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Snippet = &(store->Snippet);
   header = &(Snippet->header);
 
@@ -5755,7 +5707,6 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_VernierProcessingDataFiltered(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_VernierProcessingDataFiltered *VernierProcessingDataFiltered;
   int index;
@@ -5769,7 +5720,7 @@ int mbr_reson7k3_rd_VernierProcessingDataFiltered(int verbose, char *buffer, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   VernierProcessingDataFiltered = &(store->VernierProcessingDataFiltered);
   header = &(VernierProcessingDataFiltered->header);
 
@@ -5794,7 +5745,6 @@ int mbr_reson7k3_rd_VernierProcessingDataFiltered(int verbose, char *buffer, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_InstallationParameters(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_InstallationParameters *InstallationParameters;
   int index;
@@ -5809,7 +5759,7 @@ int mbr_reson7k3_rd_InstallationParameters(int verbose, char *buffer, void *stor
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   InstallationParameters = &(store->InstallationParameters);
   header = &(InstallationParameters->header);
 
@@ -5941,7 +5891,6 @@ int mbr_reson7k3_rd_InstallationParameters(int verbose, char *buffer, void *stor
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_BITESummary(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_BITESummary *BITESummary;
   int index;
@@ -5955,7 +5904,7 @@ int mbr_reson7k3_rd_BITESummary(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   BITESummary = &(store->BITESummary);
   header = &(BITESummary->header);
 
@@ -5980,7 +5929,6 @@ int mbr_reson7k3_rd_BITESummary(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CompressedBeamformedMagnitude *CompressedBeamformedMagnitude;
   int index;
@@ -5994,7 +5942,7 @@ int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CompressedBeamformedMagnitude = &(store->CompressedBeamformedMagnitude);
   header = &(CompressedBeamformedMagnitude->header);
 
@@ -6019,7 +5967,6 @@ int mbr_reson7k3_rd_CompressedBeamformedMagnitude(int verbose, char *buffer, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_compressedwatercolumndata *compressedwatercolumndata;
   s7k3_CompressedWaterColumn *CompressedWaterColumn;
@@ -6035,7 +5982,7 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
   int firstsamplerxdelay;
   int index;
   int time_j[5];
-char *first = "TEST";
+  char *first = "TEST";
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -6046,7 +5993,7 @@ char *first = "TEST";
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CompressedWaterColumn = &(store->CompressedWaterColumn);
   header = &(CompressedWaterColumn->header);
 
@@ -6242,7 +6189,6 @@ char *first = "TEST";
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SegmentedRawDetection *SegmentedRawDetection;
   s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata;
@@ -6260,7 +6206,7 @@ int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SegmentedRawDetection = &(store->SegmentedRawDetection);
   header = &(SegmentedRawDetection->header);
 
@@ -6457,7 +6403,6 @@ int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibratedBeam(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CalibratedBeam *CalibratedBeam;
   int index;
@@ -6471,7 +6416,7 @@ int mbr_reson7k3_rd_CalibratedBeam(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CalibratedBeam = &(store->CalibratedBeam);
   header = &(CalibratedBeam->header);
 
@@ -6496,7 +6441,6 @@ int mbr_reson7k3_rd_CalibratedBeam(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SystemEvents(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SystemEvents *SystemEvents;
   int index;
@@ -6510,7 +6454,7 @@ int mbr_reson7k3_rd_SystemEvents(int verbose, char *buffer, void *store_ptr, int
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SystemEvents = &(store->SystemEvents);
   header = &(SystemEvents->header);
 
@@ -6535,7 +6479,6 @@ int mbr_reson7k3_rd_SystemEvents(int verbose, char *buffer, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SystemEventMessage(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SystemEventMessage *SystemEventMessage;
   int data_size;
@@ -6551,7 +6494,7 @@ int mbr_reson7k3_rd_SystemEventMessage(int verbose, char *buffer, void *store_pt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SystemEventMessage = &(store->SystemEventMessage);
   header = &(SystemEventMessage->header);
 
@@ -6636,7 +6579,6 @@ int mbr_reson7k3_rd_SystemEventMessage(int verbose, char *buffer, void *store_pt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RDRRecordingStatus(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RDRRecordingStatus *RDRRecordingStatus;
   int index;
@@ -6650,7 +6592,7 @@ int mbr_reson7k3_rd_RDRRecordingStatus(int verbose, char *buffer, void *store_pt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RDRRecordingStatus = &(store->RDRRecordingStatus);
   header = &(RDRRecordingStatus->header);
 
@@ -6675,7 +6617,6 @@ int mbr_reson7k3_rd_RDRRecordingStatus(int verbose, char *buffer, void *store_pt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Subscriptions(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Subscriptions *Subscriptions;
   int index;
@@ -6689,7 +6630,7 @@ int mbr_reson7k3_rd_Subscriptions(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Subscriptions = &(store->Subscriptions);
   header = &(Subscriptions->header);
 
@@ -6714,7 +6655,6 @@ int mbr_reson7k3_rd_Subscriptions(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RDRStorageRecording(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RDRStorageRecording *RDRStorageRecording;
   int index;
@@ -6728,7 +6668,7 @@ int mbr_reson7k3_rd_RDRStorageRecording(int verbose, char *buffer, void *store_p
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RDRStorageRecording = &(store->RDRStorageRecording);
   header = &(RDRStorageRecording->header);
 
@@ -6753,7 +6693,6 @@ int mbr_reson7k3_rd_RDRStorageRecording(int verbose, char *buffer, void *store_p
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibrationStatus(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CalibrationStatus *CalibrationStatus;
   int index;
@@ -6767,7 +6706,7 @@ int mbr_reson7k3_rd_CalibrationStatus(int verbose, char *buffer, void *store_ptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CalibrationStatus = &(store->CalibrationStatus);
   header = &(CalibrationStatus->header);
 
@@ -6792,7 +6731,6 @@ int mbr_reson7k3_rd_CalibrationStatus(int verbose, char *buffer, void *store_ptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibratedSideScan(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CalibratedSideScan *CalibratedSideScan;
   int index;
@@ -6806,7 +6744,7 @@ int mbr_reson7k3_rd_CalibratedSideScan(int verbose, char *buffer, void *store_pt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CalibratedSideScan = &(store->CalibratedSideScan);
   header = &(CalibratedSideScan->header);
 
@@ -6831,7 +6769,6 @@ int mbr_reson7k3_rd_CalibratedSideScan(int verbose, char *buffer, void *store_pt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SnippetBackscatteringStrength(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SnippetBackscatteringStrength *SnippetBackscatteringStrength;
   int index;
@@ -6845,7 +6782,7 @@ int mbr_reson7k3_rd_SnippetBackscatteringStrength(int verbose, char *buffer, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SnippetBackscatteringStrength = &(store->SnippetBackscatteringStrength);
   header = &(SnippetBackscatteringStrength->header);
 
@@ -6870,7 +6807,6 @@ int mbr_reson7k3_rd_SnippetBackscatteringStrength(int verbose, char *buffer, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_MB2Status(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_MB2Status *MB2Status;
   int index;
@@ -6884,7 +6820,7 @@ int mbr_reson7k3_rd_MB2Status(int verbose, char *buffer, void *store_ptr, int *e
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   MB2Status = &(store->MB2Status);
   header = &(MB2Status->header);
 
@@ -6909,7 +6845,6 @@ int mbr_reson7k3_rd_MB2Status(int verbose, char *buffer, void *store_ptr, int *e
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_FileHeader *FileHeader;
   s7k3_subsystem *subsystem;
@@ -6925,7 +6860,7 @@ int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   FileHeader = &(store->FileHeader);
   header = &(FileHeader->header);
 
@@ -7290,7 +7225,6 @@ int mbr_reson7k3_FileCatalog_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_FileCatalog *FileCatalog;
   s7k3_filecatalogdata *filecatalogdata;
@@ -7306,7 +7240,7 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   FileCatalog = &(store->FileCatalog_read);
   header = &(FileCatalog->header);
 
@@ -7434,7 +7368,6 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_TimeMessage(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_TimeMessage *TimeMessage;
   int index;
@@ -7448,7 +7381,7 @@ int mbr_reson7k3_rd_TimeMessage(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   TimeMessage = &(store->TimeMessage);
   header = &(TimeMessage->header);
 
@@ -7473,7 +7406,6 @@ int mbr_reson7k3_rd_TimeMessage(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RemoteControl(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RemoteControl *RemoteControl;
   int index;
@@ -7487,7 +7419,7 @@ int mbr_reson7k3_rd_RemoteControl(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RemoteControl = &(store->RemoteControl);
   header = &(RemoteControl->header);
 
@@ -7512,7 +7444,6 @@ int mbr_reson7k3_rd_RemoteControl(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RemoteControlAcknowledge(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RemoteControlAcknowledge *RemoteControlAcknowledge;
   int index;
@@ -7526,7 +7457,7 @@ int mbr_reson7k3_rd_RemoteControlAcknowledge(int verbose, char *buffer, void *st
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RemoteControlAcknowledge = &(store->RemoteControlAcknowledge);
   header = &(RemoteControlAcknowledge->header);
 
@@ -7551,7 +7482,6 @@ int mbr_reson7k3_rd_RemoteControlAcknowledge(int verbose, char *buffer, void *st
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RemoteControlNotAcknowledge(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RemoteControlNotAcknowledge *RemoteControlNotAcknowledge;
   int index;
@@ -7565,7 +7495,7 @@ int mbr_reson7k3_rd_RemoteControlNotAcknowledge(int verbose, char *buffer, void 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RemoteControlNotAcknowledge = &(store->RemoteControlNotAcknowledge);
   header = &(RemoteControlNotAcknowledge->header);
 
@@ -7590,7 +7520,6 @@ int mbr_reson7k3_rd_RemoteControlNotAcknowledge(int verbose, char *buffer, void 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RemoteControlSonarSettings *RemoteControlSonarSettings;
   int index;
@@ -7605,7 +7534,7 @@ int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RemoteControlSonarSettings = &(store->RemoteControlSonarSettings);
   header = &(RemoteControlSonarSettings->header);
 
@@ -7804,7 +7733,6 @@ int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CommonSystemSettings *CommonSystemSettings;
   int index;
@@ -7819,7 +7747,7 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CommonSystemSettings = &(store->CommonSystemSettings);
   header = &(CommonSystemSettings->header);
 
@@ -7999,7 +7927,6 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SVFiltering(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SVFiltering *SVFiltering;
   int index;
@@ -8013,7 +7940,7 @@ int mbr_reson7k3_rd_SVFiltering(int verbose, char *buffer, void *store_ptr, int 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SVFiltering = &(store->SVFiltering);
   header = &(SVFiltering->header);
 
@@ -8038,7 +7965,6 @@ int mbr_reson7k3_rd_SVFiltering(int verbose, char *buffer, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SystemLockStatus(int verbose, char *buffer, void *store_ptr, int *error){
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SystemLockStatus *SystemLockStatus;
   int index;
@@ -8052,7 +7978,7 @@ int mbr_reson7k3_rd_SystemLockStatus(int verbose, char *buffer, void *store_ptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SystemLockStatus = &(store->SystemLockStatus);
   header = &(SystemLockStatus->header);
 
@@ -8077,7 +8003,6 @@ int mbr_reson7k3_rd_SystemLockStatus(int verbose, char *buffer, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SoundVelocity(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SoundVelocity *SoundVelocity;
   int index;
@@ -8092,7 +8017,7 @@ int mbr_reson7k3_rd_SoundVelocity(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SoundVelocity = &(store->SoundVelocity);
   header = &(SoundVelocity->header);
 
@@ -8152,7 +8077,6 @@ int mbr_reson7k3_rd_SoundVelocity(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_AbsorptionLoss(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_AbsorptionLoss *AbsorptionLoss;
   int index;
@@ -8167,7 +8091,7 @@ int mbr_reson7k3_rd_AbsorptionLoss(int verbose, char *buffer, void *store_ptr, i
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   AbsorptionLoss = &(store->AbsorptionLoss);
   header = &(AbsorptionLoss->header);
 
@@ -8227,7 +8151,6 @@ int mbr_reson7k3_rd_AbsorptionLoss(int verbose, char *buffer, void *store_ptr, i
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   struct mbsys_reson7k3_struct *ostore = NULL;
   s7k3_header *header = NULL;
   s7k3_SpreadingLoss *SpreadingLoss;
@@ -8243,7 +8166,7 @@ int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, in
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SpreadingLoss = &(store->SpreadingLoss);
   header = &(SpreadingLoss->header);
 
@@ -8303,7 +8226,6 @@ int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, in
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RawDetection *RawDetection;
   s7k3_SegmentedRawDetection *SegmentedRawDetection;
@@ -8345,7 +8267,7 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
 
   /* get saved values */
   save_flag = (int *)&mb_io_ptr->save_flag;
@@ -9459,7 +9381,6 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
   int interp_status;
   int interp_error = MB_ERROR_NO_ERROR;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_Position *Position;
   s7k3_CustomAttitude *CustomAttitude;
   s7k3_Altitude *Altitude;
@@ -9501,7 +9422,7 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
 
   /* read next data from file */
   status = mbr_reson7k3_rd_data(verbose, mbio_ptr, store_ptr, error);
@@ -9843,7 +9764,6 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr, int size, void *header_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_FileCatalog *FileCatalog = NULL;
   s7k3_filecatalogdata *filecatalogdata = NULL;
@@ -9869,7 +9789,7 @@ int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
 
   /* get pointers to data structures */
   header = (s7k3_header *)header_ptr;
@@ -9932,7 +9852,6 @@ fprintf(stderr, "^^>Update FileCatalog list: File %s Line %d type:%d n:%d\n", __
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_ReferencePoint(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_ReferencePoint *ReferencePoint;
   unsigned int checksum;
@@ -9949,7 +9868,7 @@ int mbr_reson7k3_wr_ReferencePoint(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   ReferencePoint = &(store->ReferencePoint);
   header = &(ReferencePoint->header);
 
@@ -10029,7 +9948,6 @@ int mbr_reson7k3_wr_ReferencePoint(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_UncalibratedSensorOffset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_UncalibratedSensorOffset *UncalibratedSensorOffset;
   unsigned int checksum;
@@ -10046,7 +9964,7 @@ int mbr_reson7k3_wr_UncalibratedSensorOffset(int verbose, int *bufferalloc, char
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   UncalibratedSensorOffset = &(store->UncalibratedSensorOffset);
   header = &(UncalibratedSensorOffset->header);
 
@@ -10131,7 +10049,6 @@ int mbr_reson7k3_wr_UncalibratedSensorOffset(int verbose, int *bufferalloc, char
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CalibratedSensorOffset(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CalibratedSensorOffset *CalibratedSensorOffset;
   unsigned int checksum;
@@ -10148,7 +10065,7 @@ int mbr_reson7k3_wr_CalibratedSensorOffset(int verbose, int *bufferalloc, char *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CalibratedSensorOffset = &(store->CalibratedSensorOffset);
   header = &(CalibratedSensorOffset->header);
 
@@ -10233,7 +10150,6 @@ int mbr_reson7k3_wr_CalibratedSensorOffset(int verbose, int *bufferalloc, char *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Position(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Position *Position;
   unsigned int checksum;
@@ -10250,7 +10166,7 @@ int mbr_reson7k3_wr_Position(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Position = &(store->Position);
   header = &(Position->header);
 
@@ -10343,7 +10259,6 @@ int mbr_reson7k3_wr_Position(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CustomAttitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CustomAttitude *CustomAttitude;
   unsigned int checksum;
@@ -10360,7 +10275,7 @@ int mbr_reson7k3_wr_CustomAttitude(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CustomAttitude = &(store->CustomAttitude);
   header = &(CustomAttitude->header);
 
@@ -10498,7 +10413,6 @@ int mbr_reson7k3_wr_CustomAttitude(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Tide *Tide;
   unsigned int checksum;
@@ -10515,7 +10429,7 @@ int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Tide = &(store->Tide);
   header = &(Tide->header);
 
@@ -10610,7 +10524,6 @@ int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Altitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Altitude *Altitude;
   unsigned int checksum;
@@ -10627,7 +10540,7 @@ int mbr_reson7k3_wr_Altitude(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Altitude = &(store->Altitude);
   header = &(Altitude->header);
 
@@ -10702,7 +10615,6 @@ int mbr_reson7k3_wr_Altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_MotionOverGround(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_MotionOverGround *MotionOverGround;
   unsigned int checksum;
@@ -10719,7 +10631,7 @@ int mbr_reson7k3_wr_MotionOverGround(int verbose, int *bufferalloc, char **buffe
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   MotionOverGround = &(store->MotionOverGround);
   header = &(MotionOverGround->header);
 
@@ -10833,7 +10745,6 @@ int mbr_reson7k3_wr_MotionOverGround(int verbose, int *bufferalloc, char **buffe
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Depth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Depth *Depth;
   unsigned int checksum;
@@ -10850,7 +10761,7 @@ int mbr_reson7k3_wr_Depth(int verbose, int *bufferalloc, char **bufferptr, void 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Depth = &(store->Depth);
   header = &(Depth->header);
 
@@ -10931,7 +10842,6 @@ int mbr_reson7k3_wr_Depth(int verbose, int *bufferalloc, char **bufferptr, void 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SoundVelocityProfile(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SoundVelocityProfile *SoundVelocityProfile;
   unsigned int checksum;
@@ -10948,7 +10858,7 @@ int mbr_reson7k3_wr_SoundVelocityProfile(int verbose, int *bufferalloc, char **b
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SoundVelocityProfile = &(store->SoundVelocityProfile);
   header = &(SoundVelocityProfile->header);
 
@@ -11041,7 +10951,6 @@ int mbr_reson7k3_wr_SoundVelocityProfile(int verbose, int *bufferalloc, char **b
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CTD(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CTD *CTD;
   unsigned int checksum;
@@ -11058,7 +10967,7 @@ int mbr_reson7k3_wr_CTD(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CTD = &(store->CTD);
   header = &(CTD->header);
 
@@ -11169,7 +11078,6 @@ int mbr_reson7k3_wr_CTD(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Geodesy *Geodesy;
   unsigned int checksum;
@@ -11186,7 +11094,7 @@ int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Geodesy = &(store->Geodesy);
   header = &(Geodesy->header);
 
@@ -11319,7 +11227,6 @@ int mbr_reson7k3_wr_Geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RollPitchHeave(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RollPitchHeave *RollPitchHeave;
   unsigned int checksum;
@@ -11336,7 +11243,7 @@ int mbr_reson7k3_wr_RollPitchHeave(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RollPitchHeave = &(store->RollPitchHeave);
   header = &(RollPitchHeave->header);
 
@@ -11413,7 +11320,6 @@ int mbr_reson7k3_wr_RollPitchHeave(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Heading(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Heading *Heading;
   unsigned int checksum;
@@ -11430,7 +11336,7 @@ int mbr_reson7k3_wr_Heading(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Heading = &(store->Heading);
   header = &(Heading->header);
 
@@ -11503,7 +11409,6 @@ int mbr_reson7k3_wr_Heading(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SurveyLine(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SurveyLine *SurveyLine;
   unsigned int checksum;
@@ -11520,7 +11425,7 @@ int mbr_reson7k3_wr_SurveyLine(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SurveyLine = &(store->SurveyLine);
   header = &(SurveyLine->header);
 
@@ -11608,7 +11513,6 @@ int mbr_reson7k3_wr_SurveyLine(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Navigation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Navigation *Navigation;
   unsigned int checksum;
@@ -11625,7 +11529,7 @@ int mbr_reson7k3_wr_Navigation(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Navigation = &(store->Navigation);
   header = &(Navigation->header);
 
@@ -11714,7 +11618,6 @@ int mbr_reson7k3_wr_Navigation(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Attitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Attitude *Attitude;
   unsigned int checksum;
@@ -11731,7 +11634,7 @@ int mbr_reson7k3_wr_Attitude(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Attitude = &(store->Attitude);
   header = &(Attitude->header);
 
@@ -11817,7 +11720,6 @@ int mbr_reson7k3_wr_Attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_PanTilt(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_PanTilt *PanTilt;
   unsigned int checksum;
@@ -11834,7 +11736,7 @@ int mbr_reson7k3_wr_PanTilt(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   PanTilt = &(store->PanTilt);
   header = &(PanTilt->header);
 
@@ -11905,7 +11807,6 @@ int mbr_reson7k3_wr_PanTilt(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SonarInstallationIDs(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarInstallationIDs *SonarInstallationIDs;
   unsigned int checksum;
@@ -11922,7 +11823,7 @@ int mbr_reson7k3_wr_SonarInstallationIDs(int verbose, int *bufferalloc, char **b
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarInstallationIDs = &(store->SonarInstallationIDs);
   header = &(SonarInstallationIDs->header);
 
@@ -11993,7 +11894,6 @@ int mbr_reson7k3_wr_SonarInstallationIDs(int verbose, int *bufferalloc, char **b
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Mystery(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Mystery *Mystery;
   unsigned int checksum;
@@ -12010,7 +11910,7 @@ int mbr_reson7k3_wr_Mystery(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Mystery = &(store->Mystery);
   header = &(Mystery->header);
 
@@ -12085,7 +11985,6 @@ int mbr_reson7k3_wr_Mystery(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SonarPipeEnvironment(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarPipeEnvironment *SonarPipeEnvironment;
   unsigned int checksum;
@@ -12102,7 +12001,7 @@ int mbr_reson7k3_wr_SonarPipeEnvironment(int verbose, int *bufferalloc, char **b
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarPipeEnvironment = &(store->SonarPipeEnvironment);
   header = &(SonarPipeEnvironment->header);
 
@@ -12174,7 +12073,6 @@ int mbr_reson7k3_wr_SonarPipeEnvironment(int verbose, int *bufferalloc, char **b
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_ContactOutput(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_ContactOutput *ContactOutput;
   unsigned int checksum;
@@ -12191,7 +12089,7 @@ int mbr_reson7k3_wr_ContactOutput(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   ContactOutput = &(store->ContactOutput);
   header = &(ContactOutput->header);
 
@@ -12262,7 +12160,6 @@ int mbr_reson7k3_wr_ContactOutput(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_ProcessedSideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_ProcessedSideScan *ProcessedSideScan;
   unsigned int checksum;
@@ -12279,7 +12176,7 @@ int mbr_reson7k3_wr_ProcessedSideScan(int verbose, int *bufferalloc, char **buff
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   ProcessedSideScan = &(store->ProcessedSideScan);
   header = &(ProcessedSideScan->header);
 
@@ -12382,7 +12279,6 @@ int mbr_reson7k3_wr_ProcessedSideScan(int verbose, int *bufferalloc, char **buff
 int mbr_reson7k3_wr_SonarSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarSettings *SonarSettings;
   unsigned int checksum;
@@ -12399,7 +12295,7 @@ int mbr_reson7k3_wr_SonarSettings(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarSettings = &(store->SonarSettings);
   header = &(SonarSettings->header);
 
@@ -12550,7 +12446,6 @@ int mbr_reson7k3_wr_SonarSettings(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Configuration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Configuration *Configuration;
   s7k3_device *device;
@@ -12568,7 +12463,7 @@ int mbr_reson7k3_wr_Configuration(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Configuration = &(store->Configuration);
   header = &(Configuration->header);
 
@@ -12672,7 +12567,6 @@ int mbr_reson7k3_wr_Configuration(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_MatchFilter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_MatchFilter *MatchFilter;
   unsigned int checksum;
@@ -12689,7 +12583,7 @@ int mbr_reson7k3_wr_MatchFilter(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   MatchFilter = &(store->MatchFilter);
   header = &(MatchFilter->header);
 
@@ -12783,7 +12677,6 @@ int mbr_reson7k3_wr_MatchFilter(int verbose, int *bufferalloc, char **bufferptr,
 int mbr_reson7k3_wr_FirmwareHardwareConfiguration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                                     int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_FirmwareHardwareConfiguration *FirmwareHardwareConfiguration;
   unsigned int checksum;
@@ -12800,7 +12693,7 @@ int mbr_reson7k3_wr_FirmwareHardwareConfiguration(int verbose, int *bufferalloc,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   FirmwareHardwareConfiguration = &(store->FirmwareHardwareConfiguration);
   header = &(FirmwareHardwareConfiguration->header);
 
@@ -12884,7 +12777,6 @@ int mbr_reson7k3_wr_FirmwareHardwareConfiguration(int verbose, int *bufferalloc,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_BeamGeometry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_BeamGeometry *BeamGeometry;
   unsigned int checksum;
@@ -12901,7 +12793,7 @@ int mbr_reson7k3_wr_BeamGeometry(int verbose, int *bufferalloc, char **bufferptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   BeamGeometry = &(store->BeamGeometry);
   header = &(BeamGeometry->header);
 
@@ -12997,7 +12889,6 @@ int mbr_reson7k3_wr_BeamGeometry(int verbose, int *bufferalloc, char **bufferptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Bathymetry *Bathymetry;
   unsigned int checksum;
@@ -13014,7 +12905,7 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Bathymetry = &(store->Bathymetry);
   header = &(Bathymetry->header);
 
@@ -13174,7 +13065,6 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SideScan *SideScan;
   int data_size;
@@ -13194,7 +13084,7 @@ int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, vo
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SideScan = &(store->SideScan);
   header = &(SideScan->header);
 
@@ -13376,7 +13266,6 @@ int mbr_reson7k3_wr_SideScan(int verbose, int *bufferalloc, char **bufferptr, vo
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_WaterColumn *WaterColumn;
   s7k3_wcd *wcd;
@@ -13406,7 +13295,7 @@ int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   WaterColumn = &(store->WaterColumn);
   header = &(WaterColumn->header);
 
@@ -13591,7 +13480,6 @@ int mbr_reson7k3_wr_WaterColumn(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_VerticalDepth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_VerticalDepth *VerticalDepth;
   unsigned int checksum;
@@ -13608,7 +13496,7 @@ int mbr_reson7k3_wr_VerticalDepth(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   VerticalDepth = &(store->VerticalDepth);
   header = &(VerticalDepth->header);
 
@@ -13699,7 +13587,6 @@ int mbr_reson7k3_wr_VerticalDepth(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_TVG(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_TVG *TVG;
   unsigned int checksum;
@@ -13716,7 +13603,7 @@ int mbr_reson7k3_wr_TVG(int verbose, int *bufferalloc, char **bufferptr, void *s
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   TVG = &(store->TVG);
   header = &(TVG->header);
 
@@ -13806,7 +13693,6 @@ int mbr_reson7k3_wr_TVG(int verbose, int *bufferalloc, char **bufferptr, void *s
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Image(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Image *Image;
   unsigned int checksum;
@@ -13827,7 +13713,7 @@ int mbr_reson7k3_wr_Image(int verbose, int *bufferalloc, char **bufferptr, void 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Image = &(store->Image);
   header = &(Image->header);
 
@@ -13961,7 +13847,6 @@ int mbr_reson7k3_wr_Image(int verbose, int *bufferalloc, char **bufferptr, void 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_PingMotion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_PingMotion *PingMotion;
   unsigned int checksum;
@@ -13978,7 +13863,7 @@ int mbr_reson7k3_wr_PingMotion(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   PingMotion = &(store->PingMotion);
   header = &(PingMotion->header);
 
@@ -14093,7 +13978,6 @@ int mbr_reson7k3_wr_PingMotion(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_AdaptiveGate(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_AdaptiveGate *AdaptiveGate;
   unsigned int checksum;
@@ -14110,7 +13994,7 @@ int mbr_reson7k3_wr_AdaptiveGate(int verbose, int *bufferalloc, char **bufferptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   AdaptiveGate = &(store->AdaptiveGate);
   header = &(AdaptiveGate->header);
 
@@ -14182,7 +14066,6 @@ int mbr_reson7k3_wr_AdaptiveGate(int verbose, int *bufferalloc, char **bufferptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_DetectionDataSetup(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_DetectionDataSetup *DetectionDataSetup;
   unsigned int checksum;
@@ -14199,7 +14082,7 @@ int mbr_reson7k3_wr_DetectionDataSetup(int verbose, int *bufferalloc, char **buf
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   DetectionDataSetup = &(store->DetectionDataSetup);
   header = &(DetectionDataSetup->header);
 
@@ -14333,7 +14216,6 @@ int mbr_reson7k3_wr_DetectionDataSetup(int verbose, int *bufferalloc, char **buf
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Beamformed(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Beamformed *Beamformed;
   s7k3_amplitudephase *amplitudephase;
@@ -14351,7 +14233,7 @@ int mbr_reson7k3_wr_Beamformed(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Beamformed = &(store->Beamformed);
   header = &(Beamformed->header);
 
@@ -14448,7 +14330,6 @@ int mbr_reson7k3_wr_Beamformed(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_VernierProcessingDataRaw(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_VernierProcessingDataRaw *VernierProcessingDataRaw;
   unsigned int checksum;
@@ -14465,7 +14346,7 @@ int mbr_reson7k3_wr_VernierProcessingDataRaw(int verbose, int *bufferalloc, char
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   VernierProcessingDataRaw = &(store->VernierProcessingDataRaw);
   header = &(VernierProcessingDataRaw->header);
 
@@ -14536,7 +14417,6 @@ int mbr_reson7k3_wr_VernierProcessingDataRaw(int verbose, int *bufferalloc, char
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_BITE *BITE;
   s7k3_bitereport *bitereport;
@@ -14545,7 +14425,6 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
   unsigned int checksum;
   int index;
   char *buffer;
-  int i, j, k;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -14557,7 +14436,7 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   BITE = &(store->BITE);
   header = &(BITE->header);
 
@@ -14666,7 +14545,7 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
 
         mb_put_binary_short(MB_YES, bitefield->field, &buffer[index]);
         index += 2;
-        for (k = 0; k < 64; k++) {
+        for (int k = 0; k < 64; k++) {
           buffer[index] = bitefield->name[k];
           index++;
         }
@@ -14714,7 +14593,6 @@ int mbr_reson7k3_wr_BITE(int verbose, int *bufferalloc, char **bufferptr, void *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SonarSourceVersion(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SonarSourceVersion *SonarSourceVersion;
   unsigned int checksum;
@@ -14731,7 +14609,7 @@ int mbr_reson7k3_wr_SonarSourceVersion(int verbose, int *bufferalloc, char **buf
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarSourceVersion = &(store->SonarSourceVersion);
   header = &(SonarSourceVersion->header);
 
@@ -14806,7 +14684,6 @@ int mbr_reson7k3_wr_SonarSourceVersion(int verbose, int *bufferalloc, char **buf
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_WetEndVersion8k(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_WetEndVersion8k *WetEndVersion8k;
   unsigned int checksum;
@@ -14823,7 +14700,7 @@ int mbr_reson7k3_wr_WetEndVersion8k(int verbose, int *bufferalloc, char **buffer
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   WetEndVersion8k = &(store->WetEndVersion8k);
   header = &(WetEndVersion8k->header);
 
@@ -14898,7 +14775,6 @@ int mbr_reson7k3_wr_WetEndVersion8k(int verbose, int *bufferalloc, char **buffer
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RawDetection *RawDetection;
   s7k3_rawdetectiondata *rawdetectiondata;
@@ -14917,7 +14793,7 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RawDetection = &(store->RawDetection);
   header = &(RawDetection->header);
 
@@ -15099,7 +14975,6 @@ int mbr_reson7k3_wr_RawDetection(int verbose, int *bufferalloc, char **bufferptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Snippet *Snippet;
   s7k3_snippetdata *snippetdata;
@@ -15120,7 +14995,7 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Snippet = &(store->Snippet);
   header = &(Snippet->header);
 
@@ -15287,7 +15162,6 @@ int mbr_reson7k3_wr_Snippet(int verbose, int *bufferalloc, char **bufferptr, voi
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_VernierProcessingDataFiltered(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_VernierProcessingDataFiltered *VernierProcessingDataFiltered;
   unsigned int checksum;
@@ -15304,7 +15178,7 @@ int mbr_reson7k3_wr_VernierProcessingDataFiltered(int verbose, int *bufferalloc,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   VernierProcessingDataFiltered = &(store->VernierProcessingDataFiltered);
   header = &(VernierProcessingDataFiltered->header);
 
@@ -15376,7 +15250,6 @@ int mbr_reson7k3_wr_VernierProcessingDataFiltered(int verbose, int *bufferalloc,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_InstallationParameters(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_InstallationParameters *InstallationParameters;
   unsigned int checksum;
@@ -15393,7 +15266,7 @@ int mbr_reson7k3_wr_InstallationParameters(int verbose, int *bufferalloc, char *
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   InstallationParameters = &(store->InstallationParameters);
   header = &(InstallationParameters->header);
 
@@ -15540,7 +15413,6 @@ int mbr_reson7k3_wr_InstallationParameters(int verbose, int *bufferalloc, char *
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_BITESummary(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_BITESummary *BITESummary;
   unsigned int checksum;
@@ -15557,7 +15429,7 @@ int mbr_reson7k3_wr_BITESummary(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   BITESummary = &(store->BITESummary);
   header = &(BITESummary->header);
 
@@ -15628,7 +15500,6 @@ int mbr_reson7k3_wr_BITESummary(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CompressedBeamformedMagnitude *CompressedBeamformedMagnitude;
   unsigned int checksum;
@@ -15645,7 +15516,7 @@ int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CompressedBeamformedMagnitude = &(store->CompressedBeamformedMagnitude);
   header = &(CompressedBeamformedMagnitude->header);
 
@@ -15717,7 +15588,6 @@ int mbr_reson7k3_wr_CompressedBeamformedMagnitude(int verbose, int *bufferalloc,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CompressedWaterColumn *CompressedWaterColumn;
   s7k3_compressedwatercolumndata *compressedwatercolumndata;
@@ -15737,7 +15607,7 @@ int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CompressedWaterColumn = &(store->CompressedWaterColumn);
   header = &(CompressedWaterColumn->header);
 
@@ -15859,7 +15729,6 @@ int mbr_reson7k3_wr_CompressedWaterColumn(int verbose, int *bufferalloc, char **
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SegmentedRawDetection *SegmentedRawDetection;
   s7k3_segmentedrawdetectiontxdata *segmentedrawdetectiontxdata;
@@ -15879,7 +15748,7 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SegmentedRawDetection = &(store->SegmentedRawDetection);
   header = &(SegmentedRawDetection->header);
 
@@ -16089,7 +15958,6 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CalibratedBeam(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CalibratedBeam *CalibratedBeam;
   unsigned int checksum;
@@ -16106,7 +15974,7 @@ int mbr_reson7k3_wr_CalibratedBeam(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CalibratedBeam = &(store->CalibratedBeam);
   header = &(CalibratedBeam->header);
 
@@ -16178,7 +16046,6 @@ int mbr_reson7k3_wr_CalibratedBeam(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SystemEvents(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SystemEvents *SystemEvents;
   unsigned int checksum;
@@ -16195,7 +16062,7 @@ int mbr_reson7k3_wr_SystemEvents(int verbose, int *bufferalloc, char **bufferptr
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SystemEvents = &(store->SystemEvents);
   header = &(SystemEvents->header);
 
@@ -16267,7 +16134,6 @@ int mbr_reson7k3_wr_SystemEvents(int verbose, int *bufferalloc, char **bufferptr
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SystemEventMessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SystemEventMessage *SystemEventMessage;
   unsigned int checksum;
@@ -16284,7 +16150,7 @@ int mbr_reson7k3_wr_SystemEventMessage(int verbose, int *bufferalloc, char **buf
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SystemEventMessage = &(store->SystemEventMessage);
   header = &(SystemEventMessage->header);
 
@@ -16372,7 +16238,6 @@ int mbr_reson7k3_wr_SystemEventMessage(int verbose, int *bufferalloc, char **buf
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RDRRecordingStatus *RDRRecordingStatus;
   unsigned int checksum;
@@ -16389,7 +16254,7 @@ int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **buf
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RDRRecordingStatus = &(store->RDRRecordingStatus);
   header = &(RDRRecordingStatus->header);
 
@@ -16461,7 +16326,6 @@ int mbr_reson7k3_wr_RDRRecordingStatus(int verbose, int *bufferalloc, char **buf
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_Subscriptions *Subscriptions;
   unsigned int checksum;
@@ -16478,7 +16342,7 @@ int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   Subscriptions = &(store->Subscriptions);
   header = &(Subscriptions->header);
 
@@ -16550,7 +16414,6 @@ int mbr_reson7k3_wr_Subscriptions(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RDRStorageRecording(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RDRStorageRecording *RDRStorageRecording;
   unsigned int checksum;
@@ -16567,7 +16430,7 @@ int mbr_reson7k3_wr_RDRStorageRecording(int verbose, int *bufferalloc, char **bu
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RDRStorageRecording = &(store->RDRStorageRecording);
   header = &(RDRStorageRecording->header);
 
@@ -16638,7 +16501,6 @@ int mbr_reson7k3_wr_RDRStorageRecording(int verbose, int *bufferalloc, char **bu
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CalibrationStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CalibrationStatus *CalibrationStatus;
   unsigned int checksum;
@@ -16655,7 +16517,7 @@ int mbr_reson7k3_wr_CalibrationStatus(int verbose, int *bufferalloc, char **buff
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CalibrationStatus = &(store->CalibrationStatus);
   header = &(CalibrationStatus->header);
 
@@ -16726,7 +16588,6 @@ int mbr_reson7k3_wr_CalibrationStatus(int verbose, int *bufferalloc, char **buff
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CalibratedSideScan(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CalibratedSideScan *CalibratedSideScan;
   unsigned int checksum;
@@ -16743,7 +16604,7 @@ int mbr_reson7k3_wr_CalibratedSideScan(int verbose, int *bufferalloc, char **buf
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CalibratedSideScan = &(store->CalibratedSideScan);
   header = &(CalibratedSideScan->header);
 
@@ -16815,7 +16676,6 @@ int mbr_reson7k3_wr_CalibratedSideScan(int verbose, int *bufferalloc, char **buf
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SnippetBackscatteringStrength(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SnippetBackscatteringStrength *SnippetBackscatteringStrength;
   unsigned int checksum;
@@ -16832,7 +16692,7 @@ int mbr_reson7k3_wr_SnippetBackscatteringStrength(int verbose, int *bufferalloc,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SnippetBackscatteringStrength = &(store->SnippetBackscatteringStrength);
   header = &(SnippetBackscatteringStrength->header);
 
@@ -16904,7 +16764,6 @@ int mbr_reson7k3_wr_SnippetBackscatteringStrength(int verbose, int *bufferalloc,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_MB2Status(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_MB2Status *MB2Status;
   unsigned int checksum;
@@ -16921,7 +16780,7 @@ int mbr_reson7k3_wr_MB2Status(int verbose, int *bufferalloc, char **bufferptr, v
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   MB2Status = &(store->MB2Status);
   header = &(MB2Status->header);
 
@@ -16992,7 +16851,6 @@ int mbr_reson7k3_wr_MB2Status(int verbose, int *bufferalloc, char **bufferptr, v
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_FileHeader *FileHeader;
   s7k3_subsystem *subsystem;
@@ -17010,7 +16868,7 @@ int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, 
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   FileHeader = &(store->FileHeader);
   header = &(FileHeader->header);
 
@@ -17145,7 +17003,6 @@ int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_TimeMessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_TimeMessage *TimeMessage;
   unsigned int checksum;
@@ -17162,7 +17019,7 @@ int mbr_reson7k3_wr_TimeMessage(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   TimeMessage = &(store->TimeMessage);
   header = &(TimeMessage->header);
 
@@ -17233,7 +17090,6 @@ int mbr_reson7k3_wr_TimeMessage(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RemoteControl *RemoteControl;
   unsigned int checksum;
@@ -17250,7 +17106,7 @@ int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RemoteControl = &(store->RemoteControl);
   header = &(RemoteControl->header);
 
@@ -17321,7 +17177,6 @@ int mbr_reson7k3_wr_RemoteControl(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RemoteControlAcknowledge *RemoteControlAcknowledge;
   unsigned int checksum;
@@ -17338,7 +17193,7 @@ int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RemoteControlAcknowledge = &(store->RemoteControlAcknowledge);
   header = &(RemoteControlAcknowledge->header);
 
@@ -17409,7 +17264,6 @@ int mbr_reson7k3_wr_RemoteControlAcknowledge(int verbose, int *bufferalloc, char
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RemoteControlNotAcknowledge *RemoteControlNotAcknowledge;
   unsigned int checksum;
@@ -17426,7 +17280,7 @@ int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, c
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RemoteControlNotAcknowledge = &(store->RemoteControlNotAcknowledge);
   header = &(RemoteControlNotAcknowledge->header);
 
@@ -17498,7 +17352,6 @@ int mbr_reson7k3_wr_RemoteControlNotAcknowledge(int verbose, int *bufferalloc, c
 int mbr_reson7k3_wr_RemoteControlSonarSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size,
                                           int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_RemoteControlSonarSettings *RemoteControlSonarSettings;
   unsigned int checksum;
@@ -17515,7 +17368,7 @@ int mbr_reson7k3_wr_RemoteControlSonarSettings(int verbose, int *bufferalloc, ch
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   RemoteControlSonarSettings = &(store->RemoteControlSonarSettings);
   header = &(RemoteControlSonarSettings->header);
 
@@ -17729,7 +17582,6 @@ int mbr_reson7k3_wr_RemoteControlSonarSettings(int verbose, int *bufferalloc, ch
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_CommonSystemSettings *CommonSystemSettings;
   unsigned int checksum;
@@ -17746,7 +17598,7 @@ int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **b
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CommonSystemSettings = &(store->CommonSystemSettings);
   header = &(CommonSystemSettings->header);
 
@@ -17937,7 +17789,6 @@ int mbr_reson7k3_wr_CommonSystemSettings(int verbose, int *bufferalloc, char **b
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SVFiltering(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SVFiltering *SVFiltering;
   unsigned int checksum;
@@ -17954,7 +17805,7 @@ int mbr_reson7k3_wr_SVFiltering(int verbose, int *bufferalloc, char **bufferptr,
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SVFiltering = &(store->SVFiltering);
   header = &(SVFiltering->header);
 
@@ -18025,7 +17876,6 @@ int mbr_reson7k3_wr_SVFiltering(int verbose, int *bufferalloc, char **bufferptr,
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SystemLockStatus(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SystemLockStatus *SystemLockStatus;
   unsigned int checksum;
@@ -18042,7 +17892,7 @@ int mbr_reson7k3_wr_SystemLockStatus(int verbose, int *bufferalloc, char **buffe
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SystemLockStatus = &(store->SystemLockStatus);
   header = &(SystemLockStatus->header);
 
@@ -18113,7 +17963,6 @@ int mbr_reson7k3_wr_SystemLockStatus(int verbose, int *bufferalloc, char **buffe
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SoundVelocity(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SoundVelocity *SoundVelocity;
   unsigned int checksum;
@@ -18130,7 +17979,7 @@ int mbr_reson7k3_wr_SoundVelocity(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SoundVelocity = &(store->SoundVelocity);
   header = &(SoundVelocity->header);
 
@@ -18205,7 +18054,6 @@ int mbr_reson7k3_wr_SoundVelocity(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_AbsorptionLoss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_AbsorptionLoss *AbsorptionLoss;
   unsigned int checksum;
@@ -18222,7 +18070,7 @@ int mbr_reson7k3_wr_AbsorptionLoss(int verbose, int *bufferalloc, char **bufferp
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   AbsorptionLoss = &(store->AbsorptionLoss);
   header = &(AbsorptionLoss->header);
 
@@ -18297,7 +18145,6 @@ int mbr_reson7k3_wr_AbsorptionLoss(int verbose, int *bufferalloc, char **bufferp
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_SpreadingLoss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_header *header = NULL;
   s7k3_SpreadingLoss *SpreadingLoss;
   unsigned int checksum;
@@ -18314,7 +18161,7 @@ int mbr_reson7k3_wr_SpreadingLoss(int verbose, int *bufferalloc, char **bufferpt
   }
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SpreadingLoss = &(store->SpreadingLoss);
   header = &(SpreadingLoss->header);
 
@@ -18389,7 +18236,6 @@ int mbr_reson7k3_wr_SpreadingLoss(int verbose, int *bufferalloc, char **bufferpt
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
   struct mbsys_reson7k3_struct *ostore = NULL;
   FILE *mbfp = NULL;
   char **bufferptr = NULL;
@@ -18412,7 +18258,7 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   ostore = (struct mbsys_reson7k3_struct *)mb_io_ptr->store_data;
   mbfp = mb_io_ptr->mbfp;
 
@@ -19423,7 +19269,6 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 /*--------------------------------------------------------------------*/
 int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  struct mbsys_reson7k3_struct *store = NULL;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -19437,7 +19282,7 @@ int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
 
   /* write next data to file */
   status = mbr_reson7k3_wr_data(verbose, mbio_ptr, store_ptr, error);
