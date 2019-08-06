@@ -2434,9 +2434,6 @@ int mbsys_3ddwissl_print_store
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
   int status;
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int ipulse, isounding;
 
   if (verbose >= 2)
@@ -2458,6 +2455,9 @@ int mbsys_3ddwissl_print_store
   struct mbsys_3ddwissl_struct *store = (struct mbsys_3ddwissl_struct *)store_ptr;
 
   /* print 3DDWISSL store structure contents */
+  static const char debug_str[] = "dbg2  ";
+  static const char nodebug_str[] = "  ";
+  const char *first;
   if (verbose >= 2)
     {
     first = debug_str;
