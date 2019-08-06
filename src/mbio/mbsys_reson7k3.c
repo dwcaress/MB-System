@@ -7244,7 +7244,6 @@ int mbsys_reson7k3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_reson7k3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-  struct mbsys_reson7k3_struct *store;
   s7k3_SonarSettings *SonarSettings;
   s7k3_BeamGeometry *BeamGeometry;
   s7k3_RawDetection *RawDetection;
@@ -7279,7 +7278,7 @@ int mbsys_reson7k3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarSettings = (s7k3_SonarSettings *)&(store->SonarSettings);
   BeamGeometry = (s7k3_BeamGeometry *)&(store->BeamGeometry);
   RawDetection = (s7k3_RawDetection *)&store->RawDetection;
@@ -7367,7 +7366,6 @@ int mbsys_reson7k3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
-  struct mbsys_reson7k3_struct *store;
   s7k3_SoundVelocityProfile *SoundVelocityProfile;
 
   if (verbose >= 2) {
@@ -7382,7 +7380,7 @@ int mbsys_reson7k3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SoundVelocityProfile = (s7k3_SoundVelocityProfile *)&(store->SoundVelocityProfile);
 
   /* get data kind */
@@ -7435,7 +7433,6 @@ int mbsys_reson7k3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
-  struct mbsys_reson7k3_struct *store;
   s7k3_SoundVelocityProfile *SoundVelocityProfile;
 
   if (verbose >= 2) {
@@ -7453,7 +7450,7 @@ int mbsys_reson7k3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SoundVelocityProfile = (s7k3_SoundVelocityProfile *)&(store->SoundVelocityProfile);
 
   int status = MB_SUCCESS;
@@ -7496,7 +7493,6 @@ int mbsys_reson7k3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
                       double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
-  struct mbsys_reson7k3_struct *store;
   s7k3_header *header;
   s7k3_CTD *CTD;
   int time_j[5];
@@ -7514,7 +7510,7 @@ int mbsys_reson7k3_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get pointer to raw data structure */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   CTD = (s7k3_CTD *)&(store->CTD);
 
   /* get data kind */
@@ -7635,8 +7631,6 @@ int mbsys_reson7k3_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-  struct mbsys_reson7k3_struct *store;
-  struct mbsys_reson7k3_struct *copy;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -7651,8 +7645,8 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointers */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
-  copy = (struct mbsys_reson7k3_struct *)copy_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *copy = (struct mbsys_reson7k3_struct *)copy_ptr;
 
   /* copy over structures, allocating memory where necessary */
 
@@ -8293,7 +8287,6 @@ int mbsys_reson7k3_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-  struct mbsys_reson7k3_struct *store = NULL;
   s7k3_SonarSettings *SonarSettings = NULL;
   s7k3_BeamGeometry *BeamGeometry = NULL;
   s7k3_bathydata *bathydata = NULL;
@@ -8359,7 +8352,7 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
   /* get data structure pointer */
-  store = (struct mbsys_reson7k3_struct *)store_ptr;
+  struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
   SonarSettings = (s7k3_SonarSettings *)&store->SonarSettings;
   BeamGeometry = (s7k3_BeamGeometry *)&store->BeamGeometry;
   RawDetection = (s7k3_RawDetection *)&store->RawDetection;
