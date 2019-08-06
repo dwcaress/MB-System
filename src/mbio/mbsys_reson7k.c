@@ -43,6 +43,9 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
+static const char debug_str[] = "dbg2  ";
+static const char nodebug_str[] = "  ";
+
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header *header, int *error) {
   int i;
@@ -1444,9 +1447,6 @@ int mbsys_reson7k_checkheader(s7k_header header) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -1457,6 +1457,7 @@ int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
   }
 
   /* print Reson 7k data record header information */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1507,10 +1508,6 @@ int mbsys_reson7k_print_header(int verbose, s7k_header *header, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1522,6 +1519,7 @@ int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *e
   mbsys_reson7k_print_header(verbose, &reference->header, error);
 
   /* print Reference point information (record 1000) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1549,10 +1547,6 @@ int mbsys_reson7k_print_reference(int verbose, s7kr_reference *reference, int *e
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_sensoruncal(int verbose, s7kr_sensoruncal *sensoruncal, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1564,6 +1558,7 @@ int mbsys_reson7k_print_sensoruncal(int verbose, s7kr_sensoruncal *sensoruncal, 
   mbsys_reson7k_print_header(verbose, &sensoruncal->header, error);
 
   /* print Sensor uncalibrated offset position information (record 1001) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1593,10 +1588,6 @@ int mbsys_reson7k_print_sensoruncal(int verbose, s7kr_sensoruncal *sensoruncal, 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_sensorcal(int verbose, s7kr_sensorcal *sensorcal, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1608,6 +1599,7 @@ int mbsys_reson7k_print_sensorcal(int verbose, s7kr_sensorcal *sensorcal, int *e
   mbsys_reson7k_print_header(verbose, &sensorcal->header, error);
 
   /* print Sensor Calibrated offset position information (record 1001) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1636,10 +1628,6 @@ int mbsys_reson7k_print_sensorcal(int verbose, s7kr_sensorcal *sensorcal, int *e
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1651,6 +1639,7 @@ int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *erro
   mbsys_reson7k_print_header(verbose, &position->header, error);
 
   /* print Sensor Calibrated offset position information (record 1001) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1683,9 +1672,6 @@ int mbsys_reson7k_print_position(int verbose, s7kr_position *position, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_customattitude(int verbose, s7kr_customattitude *customattitude, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -1699,6 +1685,7 @@ int mbsys_reson7k_print_customattitude(int verbose, s7kr_customattitude *customa
   mbsys_reson7k_print_header(verbose, &customattitude->header, error);
 
   /* print Custom attitude (record 1004) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1734,10 +1721,6 @@ int mbsys_reson7k_print_customattitude(int verbose, s7kr_customattitude *customa
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1749,6 +1732,7 @@ int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
   mbsys_reson7k_print_header(verbose, &tide->header, error);
 
   /* print Tide (record 1005) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1783,10 +1767,6 @@ int mbsys_reson7k_print_tide(int verbose, s7kr_tide *tide, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_altitude(int verbose, s7kr_altitude *altitude, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1798,6 +1778,7 @@ int mbsys_reson7k_print_altitude(int verbose, s7kr_altitude *altitude, int *erro
   mbsys_reson7k_print_header(verbose, &altitude->header, error);
 
   /* print Altitude (record 1006) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1822,9 +1803,6 @@ int mbsys_reson7k_print_altitude(int verbose, s7kr_altitude *altitude, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_motion(int verbose, s7kr_motion *motion, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -1838,6 +1816,7 @@ int mbsys_reson7k_print_motion(int verbose, s7kr_motion *motion, int *error) {
   mbsys_reson7k_print_header(verbose, &motion->header, error);
 
   /* print Motion over ground (record 1007) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1868,10 +1847,6 @@ int mbsys_reson7k_print_motion(int verbose, s7kr_motion *motion, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_depth(int verbose, s7kr_depth *depth, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1883,6 +1858,7 @@ int mbsys_reson7k_print_depth(int verbose, s7kr_depth *depth, int *error) {
   mbsys_reson7k_print_header(verbose, &depth->header, error);
 
   /* print Depth (record 1008) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1910,9 +1886,6 @@ int mbsys_reson7k_print_depth(int verbose, s7kr_depth *depth, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -1926,6 +1899,7 @@ int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
   mbsys_reson7k_print_header(verbose, &svp->header, error);
 
   /* print Sound velocity profile (record 1009) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -1958,9 +1932,6 @@ int mbsys_reson7k_print_svp(int verbose, s7kr_svp *svp, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -1974,6 +1945,7 @@ int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
   mbsys_reson7k_print_header(verbose, &ctd->header, error);
 
   /* print CTD (record 1010) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2014,9 +1986,6 @@ int mbsys_reson7k_print_ctd(int verbose, s7kr_ctd *ctd, int *error) {
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2029,6 +1998,7 @@ int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) 
   mbsys_reson7k_print_header(verbose, &geodesy->header, error);
 
   /* print Geodesy (record 1011) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2077,10 +2047,6 @@ int mbsys_reson7k_print_geodesy(int verbose, s7kr_geodesy *geodesy, int *error) 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_rollpitchheave(int verbose, s7kr_rollpitchheave *rollpitchheave, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2092,6 +2058,7 @@ int mbsys_reson7k_print_rollpitchheave(int verbose, s7kr_rollpitchheave *rollpit
   mbsys_reson7k_print_header(verbose, &rollpitchheave->header, error);
 
   /* print Roll pitch heave (record 1012) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2118,10 +2085,6 @@ int mbsys_reson7k_print_rollpitchheave(int verbose, s7kr_rollpitchheave *rollpit
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_heading(int verbose, s7kr_heading *heading, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2133,6 +2096,7 @@ int mbsys_reson7k_print_heading(int verbose, s7kr_heading *heading, int *error) 
   mbsys_reson7k_print_header(verbose, &heading->header, error);
 
   /* print Heading (record 1013) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2157,9 +2121,6 @@ int mbsys_reson7k_print_heading(int verbose, s7kr_heading *heading, int *error) 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_surveyline(int verbose, s7kr_surveyline *surveyline, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -2173,6 +2134,7 @@ int mbsys_reson7k_print_surveyline(int verbose, s7kr_surveyline *surveyline, int
   mbsys_reson7k_print_header(verbose, &surveyline->header, error);
 
   /* print Survey Line (record 1014) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2203,10 +2165,6 @@ int mbsys_reson7k_print_surveyline(int verbose, s7kr_surveyline *surveyline, int
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_navigation(int verbose, s7kr_navigation *navigation, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2218,6 +2176,7 @@ int mbsys_reson7k_print_navigation(int verbose, s7kr_navigation *navigation, int
   mbsys_reson7k_print_header(verbose, &navigation->header, error);
 
   /* print Navigation (record 1015) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2250,9 +2209,6 @@ int mbsys_reson7k_print_navigation(int verbose, s7kr_navigation *navigation, int
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_attitude(int verbose, s7kr_attitude *attitude, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -2266,6 +2222,7 @@ int mbsys_reson7k_print_attitude(int verbose, s7kr_attitude *attitude, int *erro
   mbsys_reson7k_print_header(verbose, &attitude->header, error);
 
   /* print Attitude (record 1016) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2294,9 +2251,6 @@ int mbsys_reson7k_print_attitude(int verbose, s7kr_attitude *attitude, int *erro
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_rec1022(int verbose, s7kr_rec1022 *rec1022, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -2310,6 +2264,7 @@ int mbsys_reson7k_print_rec1022(int verbose, s7kr_rec1022 *rec1022, int *error) 
   mbsys_reson7k_print_header(verbose, &rec1022->header, error);
 
   /* print Attitude (record 1016) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2338,9 +2293,6 @@ int mbsys_reson7k_print_rec1022(int verbose, s7kr_rec1022 *rec1022, int *error) 
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchannel *fsdwchannel, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   short *shortptr;
   unsigned short *ushortptr;
   int i;
@@ -2354,6 +2306,7 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchanne
   }
 
   /* print Edgetech sidescan or subbottom channel header data */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2407,9 +2360,6 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format, s7k_fsdwchanne
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -2420,6 +2370,7 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
   }
 
   /* print Edgetech sidescan or subbottom channel header data */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2476,9 +2427,6 @@ int mbsys_reson7k_print_fsdwssheader(int verbose, s7k_fsdwssheader *fsdwssheader
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwsegyheader(int verbose, s7k_fsdwsegyheader *fsdwsegyheader, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -2489,6 +2437,7 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose, s7k_fsdwsegyheader *fsdwsegy
   }
 
   /* print Edgetech sidescan or subbottom channel header data */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2579,9 +2528,6 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose, s7k_fsdwsegyheader *fsdwsegy
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwss(int verbose, s7kr_fsdwss *fsdwss, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -2595,6 +2541,7 @@ int mbsys_reson7k_print_fsdwss(int verbose, s7kr_fsdwss *fsdwss, int *error) {
   mbsys_reson7k_print_header(verbose, &fsdwss->header, error);
 
   /* print Edgetech FS-DW sidescan (record 3000) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2626,10 +2573,6 @@ int mbsys_reson7k_print_fsdwss(int verbose, s7kr_fsdwss *fsdwss, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwsb(int verbose, s7kr_fsdwsb *fsdwsb, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2641,6 +2584,7 @@ int mbsys_reson7k_print_fsdwsb(int verbose, s7kr_fsdwsb *fsdwsb, int *error) {
   mbsys_reson7k_print_header(verbose, &fsdwsb->header, error);
 
   /* print Edgetech FS-DW subbottom (record 3001) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2670,9 +2614,6 @@ int mbsys_reson7k_print_fsdwsb(int verbose, s7kr_fsdwsb *fsdwsb, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_bluefin(int verbose, s7kr_bluefin *bluefin, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i, j;
 
   if (verbose >= 2) {
@@ -2686,6 +2627,7 @@ int mbsys_reson7k_print_bluefin(int verbose, s7kr_bluefin *bluefin, int *error) 
   mbsys_reson7k_print_header(verbose, &bluefin->header, error);
 
   /* print Bluefin data frames (record 3100) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2793,9 +2735,6 @@ int mbsys_reson7k_print_bluefin(int verbose, s7kr_bluefin *bluefin, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *processedsidescan, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -2809,6 +2748,7 @@ int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *p
   mbsys_reson7k_print_header(verbose, &processedsidescan->header, error);
 
   /* print Reson 7k beam geometry (record 7004) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2843,10 +2783,6 @@ int mbsys_reson7k_print_processedsidescan(int verbose, s7kr_processedsidescan *p
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *volatilesettings, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2858,6 +2794,7 @@ int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *vol
   mbsys_reson7k_print_header(verbose, &volatilesettings->header, error);
 
   /* print Reson 7k volatile sonar settings (record 7000) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2919,10 +2856,6 @@ int mbsys_reson7k_print_volatilesettings(int verbose, s7kr_volatilesettings *vol
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2931,6 +2864,7 @@ int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error) {
   }
 
   /* print Reson 7k device configuration structure */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -2959,9 +2893,6 @@ int mbsys_reson7k_print_device(int verbose, s7k_device *device, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configuration, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -2975,6 +2906,7 @@ int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configura
   mbsys_reson7k_print_header(verbose, &configuration->header, error);
 
   /* print Reson 7k configuration (record 7001) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3001,10 +2933,6 @@ int mbsys_reson7k_print_configuration(int verbose, s7kr_configuration *configura
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3016,6 +2944,7 @@ int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, 
   mbsys_reson7k_print_header(verbose, &matchfilter->header, error);
 
   /* print Reson 7k match filter (record 7002) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3045,10 +2974,6 @@ int mbsys_reson7k_print_matchfilter(int verbose, s7kr_matchfilter *matchfilter, 
 int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose,
                                                         s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration,
                                                         int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3060,6 +2985,7 @@ int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose,
   mbsys_reson7k_print_header(verbose, &v2firmwarehardwareconfiguration->header, error);
 
   /* print Reson 7k match filter (record 7002) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3086,9 +3012,6 @@ int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_beamgeometry(int verbose, s7kr_beamgeometry *beamgeometry, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -3102,6 +3025,7 @@ int mbsys_reson7k_print_beamgeometry(int verbose, s7kr_beamgeometry *beamgeometr
   mbsys_reson7k_print_header(verbose, &beamgeometry->header, error);
 
   /* print Reson 7k beam geometry (record 7004) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3131,9 +3055,6 @@ int mbsys_reson7k_print_beamgeometry(int verbose, s7kr_beamgeometry *beamgeometr
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_calibration(int verbose, s7kr_calibration *calibration, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -3147,6 +3068,7 @@ int mbsys_reson7k_print_calibration(int verbose, s7kr_calibration *calibration, 
   mbsys_reson7k_print_header(verbose, &calibration->header, error);
 
   /* print Reson 7k calibration data (record 7005) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3173,9 +3095,6 @@ int mbsys_reson7k_print_calibration(int verbose, s7kr_calibration *calibration, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -3189,6 +3108,7 @@ int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int
   mbsys_reson7k_print_header(verbose, &bathymetry->header, error);
 
   /* print Reson 7k bathymetry (record 7006) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3237,9 +3157,6 @@ int mbsys_reson7k_print_bathymetry(int verbose, s7kr_bathymetry *bathymetry, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   mb_s_char *charptr;
   short *shortptr;
   int *intptr;
@@ -3256,6 +3173,7 @@ int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, 
   mbsys_reson7k_print_header(verbose, &backscatter->header, error);
 
   /* print Reson 7k backscatter imagery data (record 7007) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3328,9 +3246,6 @@ int mbsys_reson7k_print_backscatter(int verbose, s7kr_backscatter *backscatter, 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
   s7kr_snippet *snippet;
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int sample_type_amp;
   int sample_type_phase;
   int sample_type_iandq;
@@ -3353,6 +3268,7 @@ int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
   mbsys_reson7k_print_header(verbose, &beam->header, error);
 
   /* print Reson 7k beam data (record 7007) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3428,10 +3344,6 @@ int mbsys_reson7k_print_beam(int verbose, s7kr_beam *beam, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticaldepth, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3443,6 +3355,7 @@ int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticald
   mbsys_reson7k_print_header(verbose, &verticaldepth->header, error);
 
   /* print Reson 7k vertical depth data (record 7009) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3474,9 +3387,6 @@ int mbsys_reson7k_print_verticaldepth(int verbose, s7kr_verticaldepth *verticald
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   float *tvg_float;
   int i;
 
@@ -3491,6 +3401,7 @@ int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
   mbsys_reson7k_print_header(verbose, &tvg->header, error);
 
   /* print Reson 7k tvg data (record 7010) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3523,9 +3434,6 @@ int mbsys_reson7k_print_tvg(int verbose, s7kr_tvg *tvg, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   mb_s_char *charptr;
   short *shortptr;
   int *intptr;
@@ -3542,6 +3450,7 @@ int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
   mbsys_reson7k_print_header(verbose, &image->header, error);
 
   /* print Reson 7k image imagery data (record 7007) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3587,9 +3496,6 @@ int mbsys_reson7k_print_image(int verbose, s7kr_image *image, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2pingmotion(int verbose, s7kr_v2pingmotion *v2pingmotion, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -3603,6 +3509,7 @@ int mbsys_reson7k_print_v2pingmotion(int verbose, s7kr_v2pingmotion *v2pingmotio
   mbsys_reson7k_print_header(verbose, &v2pingmotion->header, error);
 
   /* print Reson 7k ping motion (record 7012) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3640,9 +3547,6 @@ int mbsys_reson7k_print_v2pingmotion(int verbose, s7kr_v2pingmotion *v2pingmotio
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2detectionsetup(int verbose, s7kr_v2detectionsetup *v2detectionsetup, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -3656,6 +3560,7 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose, s7kr_v2detectionsetup *v2d
   mbsys_reson7k_print_header(verbose, &v2detectionsetup->header, error);
 
   /* print Reson 7k detection setup (record 7017) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3706,9 +3611,6 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose, s7kr_v2detectionsetup *v2d
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamformed, int *error) {
   s7kr_v2amplitudephase *v2amplitudephase;
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i, j;
 
   if (verbose >= 2) {
@@ -3722,6 +3624,7 @@ int mbsys_reson7k_print_v2beamformed(int verbose, s7kr_v2beamformed *v2beamforme
   mbsys_reson7k_print_header(verbose, &v2beamformed->header, error);
 
   /* print Reson 7k detection setup (record 7017) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3765,9 +3668,6 @@ int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
   s7kr_v2bitereport *v2bitereport;
   s7kr_v2bitefield *v2bitefield;
   s7k_time *s7ktime;
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i, j;
 
   if (verbose >= 2) {
@@ -3781,6 +3681,7 @@ int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
   mbsys_reson7k_print_header(verbose, &v2bite->header, error);
 
   /* Reson 7k BITE (record 7021) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3835,10 +3736,6 @@ int mbsys_reson7k_print_v2bite(int verbose, s7kr_v2bite *v2bite, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v27kcenterversion(int verbose, s7kr_v27kcenterversion *v27kcenterversion, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3850,6 +3747,7 @@ int mbsys_reson7k_print_v27kcenterversion(int verbose, s7kr_v27kcenterversion *v
   mbsys_reson7k_print_header(verbose, &v27kcenterversion->header, error);
 
   /* Reson 7k center version (record 7022) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3873,10 +3771,6 @@ int mbsys_reson7k_print_v27kcenterversion(int verbose, s7kr_v27kcenterversion *v
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v28kwetendversion(int verbose, s7kr_v28kwetendversion *v28kwetendversion, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3888,6 +3782,7 @@ int mbsys_reson7k_print_v28kwetendversion(int verbose, s7kr_v28kwetendversion *v
   mbsys_reson7k_print_header(verbose, &v28kwetendversion->header, error);
 
   /* Reson 7k 8k wet end version (record 7023) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3911,9 +3806,6 @@ int mbsys_reson7k_print_v28kwetendversion(int verbose, s7kr_v28kwetendversion *v
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2detection(int verbose, s7kr_v2detection *v2detection, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -3927,6 +3819,7 @@ int mbsys_reson7k_print_v2detection(int verbose, s7kr_v2detection *v2detection, 
   mbsys_reson7k_print_header(verbose, &v2detection->header, error);
 
   /* print Reson 7k version 2 detection (record 7026) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -3966,9 +3859,6 @@ int mbsys_reson7k_print_v2detection(int verbose, s7kr_v2detection *v2detection, 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawdetection, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -3982,6 +3872,7 @@ int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawde
   mbsys_reson7k_print_header(verbose, &v2rawdetection->header, error);
 
   /* print Reson 7k version 2 raw detection (record 7027) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4024,9 +3915,6 @@ int mbsys_reson7k_print_v2rawdetection(int verbose, s7kr_v2rawdetection *v2rawde
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *error) {
   s7kr_v2snippettimeseries *v2snippettimeseries;
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i, j;
 
   if (verbose >= 2) {
@@ -4040,6 +3928,7 @@ int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *e
   mbsys_reson7k_print_header(verbose, &v2snippet->header, error);
 
   /* print Reson 7k version 2 snippet (record 7028) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4079,9 +3968,6 @@ int mbsys_reson7k_print_v2snippet(int verbose, s7kr_v2snippet *v2snippet, int *e
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *calibratedsnippet, int *error) {
   s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i, j;
 
   if (verbose >= 2) {
@@ -4095,6 +3981,7 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
   mbsys_reson7k_print_header(verbose, &calibratedsnippet->header, error);
 
   /* print Reson 7k version 2 snippet (record 7028) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4134,10 +4021,6 @@ int mbsys_reson7k_print_calibratedsnippet(int verbose, s7kr_calibratedsnippet *c
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installation, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4149,6 +4032,7 @@ int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installatio
   mbsys_reson7k_print_header(verbose, &installation->header, error);
 
   /* print Reson 7k sonar installation parameters (record 7051) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4210,10 +4094,6 @@ int mbsys_reson7k_print_installation(int verbose, s7kr_installation *installatio
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_systemeventmessage(int verbose, s7kr_systemeventmessage *systemeventmessage, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4225,6 +4105,7 @@ int mbsys_reson7k_print_systemeventmessage(int verbose, s7kr_systemeventmessage 
   mbsys_reson7k_print_header(verbose, &systemeventmessage->header, error);
 
   /* print Reson 7k system event (record 7051) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4253,10 +4134,6 @@ int mbsys_reson7k_print_systemeventmessage(int verbose, s7kr_systemeventmessage 
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_subsystem(int verbose, s7kr_subsystem *subsystem, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4265,6 +4142,7 @@ int mbsys_reson7k_print_subsystem(int verbose, s7kr_subsystem *subsystem, int *e
   }
 
   /* print Reson 7k subsystem structure */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4289,9 +4167,6 @@ int mbsys_reson7k_print_subsystem(int verbose, s7kr_subsystem *subsystem, int *e
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fileheader(int verbose, s7kr_fileheader *fileheader, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -4305,6 +4180,7 @@ int mbsys_reson7k_print_fileheader(int verbose, s7kr_fileheader *fileheader, int
   mbsys_reson7k_print_header(verbose, &fileheader->header, error);
 
   /* print Reson 7k system event (record 7051) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4342,9 +4218,6 @@ int mbsys_reson7k_print_fileheader(int verbose, s7kr_fileheader *fileheader, int
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_remotecontrolsettings(int verbose, s7kr_remotecontrolsettings *remotecontrolsettings, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -4358,6 +4231,7 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose, s7kr_remotecontrolset
   mbsys_reson7k_print_header(verbose, &remotecontrolsettings->header, error);
 
   /* print Reson 7k remote control sonar settings (record 7503) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4432,9 +4306,6 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose, s7kr_remotecontrolset
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_reserved(int verbose, s7kr_reserved *reserved, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
   int i;
 
   if (verbose >= 2) {
@@ -4448,6 +4319,7 @@ int mbsys_reson7k_print_reserved(int verbose, s7kr_reserved *reserved, int *erro
   mbsys_reson7k_print_header(verbose, &reserved->header, error);
 
   /* print Reson 7k Reserved (well, unknown really...) (record 7504) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4472,10 +4344,6 @@ int mbsys_reson7k_print_reserved(int verbose, s7kr_reserved *reserved, int *erro
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_roll(int verbose, s7kr_roll *roll, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4487,6 +4355,7 @@ int mbsys_reson7k_print_roll(int verbose, s7kr_roll *roll, int *error) {
   mbsys_reson7k_print_header(verbose, &roll->header, error);
 
   /* print Reson 7k Roll (record 7600) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4510,10 +4379,6 @@ int mbsys_reson7k_print_roll(int verbose, s7kr_roll *roll, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4525,6 +4390,7 @@ int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error) {
   mbsys_reson7k_print_header(verbose, &pitch->header, error);
 
   /* print Reson 7k Pitch (record 7601) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4548,10 +4414,6 @@ int mbsys_reson7k_print_pitch(int verbose, s7kr_pitch *pitch, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelocity, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4563,6 +4425,7 @@ int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelo
   mbsys_reson7k_print_header(verbose, &soundvelocity->header, error);
 
   /* print Reson 7k Sound Velocity (record 7610) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4586,10 +4449,6 @@ int mbsys_reson7k_print_soundvelocity(int verbose, s7kr_soundvelocity *soundvelo
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorptionloss, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4601,6 +4460,7 @@ int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorpt
   mbsys_reson7k_print_header(verbose, &absorptionloss->header, error);
 
   /* print Reson 7k Absorption Loss (record 7611) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
@@ -4624,10 +4484,6 @@ int mbsys_reson7k_print_absorptionloss(int verbose, s7kr_absorptionloss *absorpt
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreadingloss, int *error) {
-  char *debug_str = "dbg2  ";
-  char *nodebug_str = "  ";
-  char *first;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -4639,6 +4495,7 @@ int mbsys_reson7k_print_spreadingloss(int verbose, s7kr_spreadingloss *spreading
   mbsys_reson7k_print_header(verbose, &spreadingloss->header, error);
 
   /* print Reson 7k Spreading Loss (record 7611) */
+  const char *first;
   if (verbose >= 2)
     first = debug_str;
   else {
