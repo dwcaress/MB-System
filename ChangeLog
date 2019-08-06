@@ -328,6 +328,8 @@ Integration with PROJ: Reverted to use of deprecated PROJ4 API due to problems
 with use of projections by the mbview library. This will get fixed, but it's more
 complicated than first thought.
 
+Mbtrn library: Updated to current code written by Kent Headley.
+
 Code stye: Kurt Schwehr is systematically altering the code to conform to best
 practices regarding header inclusion and reduced variable scope, particularly
 for loop indices.
