@@ -184,12 +184,6 @@ int mbr_info_mbncdfxt(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
-	int *dataread;
-	int *commentread;
-	int *recread;
-	double *lastrawtime;
-	int *nrawtimerepeat;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -204,11 +198,11 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 	const int status = mbsys_netcdf_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* initialize values in structure */
-	dataread = (int *)&mb_io_ptr->save1;
-	commentread = (int *)&mb_io_ptr->save2;
-	recread = (int *)&mb_io_ptr->save4;
-	lastrawtime = (double *)&mb_io_ptr->saved1;
-	nrawtimerepeat = (int *)&mb_io_ptr->save5;
+	int *dataread = (int *)&mb_io_ptr->save1;
+	int *commentread = (int *)&mb_io_ptr->save2;
+	int *recread = (int *)&mb_io_ptr->save4;
+	double *lastrawtime = (double *)&mb_io_ptr->saved1;
+	int *nrawtimerepeat = (int *)&mb_io_ptr->save5;
 	*dataread = MB_NO;
 	*commentread = 0;
 	*recread = 0;
@@ -252,22 +246,6 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int *dataread;
-	int *commentread;
-	int *recread;
-	int recreadmax;
-	double *lastrawtime;
-	int *nrawtimerepeat;
-	double time_d;
-	int dim_id;
-	size_t index[3], count[3];
-	int nc_status;
-#ifdef MBNETCDF_DEBUG
-	int nc_verbose = 1;
-#else
-	int nc_verbose = 0;
-#endif
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -279,22 +257,32 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to mbio descriptor and data structure */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
-	dataread = (int *)&mb_io_ptr->save1;
-	commentread = (int *)&mb_io_ptr->save2;
-	recread = (int *)&mb_io_ptr->save4;
-	lastrawtime = (double *)&mb_io_ptr->saved1;
-	nrawtimerepeat = (int *)&mb_io_ptr->save5;
+	int *dataread = (int *)&mb_io_ptr->save1;
+	int *commentread = (int *)&mb_io_ptr->save2;
+	int *recread = (int *)&mb_io_ptr->save4;
+	double *lastrawtime = (double *)&mb_io_ptr->saved1;
+	int *nrawtimerepeat = (int *)&mb_io_ptr->save5;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	int status = MB_SUCCESS;
 
+	size_t index[3];
+	size_t count[3];
+	int nc_status;
+#ifdef MBNETCDF_DEBUG
+	int nc_verbose = 1;
+#else
+	int nc_verbose = 0;
+#endif
+
 	/* if first read then set everything up */
 	if (*dataread == MB_NO) {
 		*dataread = MB_YES;
 
 		/* get dimensions */
+		int dim_id;
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "CIB_BLOCK_DIM", &dim_id);
 		if (nc_status != NC_NOERR) {
 			if (verbose >= 2 || nc_verbose >= 1)
@@ -4442,6 +4430,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	/* set maximum number of pings to read */
+	int recreadmax;
 	if (store->CIB_BLOCK_DIM > 0) {
 		recreadmax = store->CIB_BLOCK_DIM * store->mbCycleNbr;
 	}
@@ -4756,7 +4745,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			        amount of time to subsequent pings
 			    David W. Caress
 			    2 May 2005 */
-			time_d = store->mbDate[0] * SECINDAY + store->mbTime[0] * 0.001;
+			double time_d = store->mbDate[0] * SECINDAY + store->mbTime[0] * 0.001;
 			if (time_d != *lastrawtime) {
 				*nrawtimerepeat = 0;
 				*lastrawtime = time_d;
@@ -4898,9 +4887,28 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	int *datawrite;
-	int *commentwrite;
-	int *recwrite;
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
+		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
+	}
+
+	/* get pointer to mbio descriptor and data storage */
+	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
+	struct mbsys_netcdf_struct *storelocal = (struct mbsys_netcdf_struct *)mb_io_ptr->store_data;
+	int *datawrite = (int *)&mb_io_ptr->save1;
+	int *commentwrite = (int *)&mb_io_ptr->save2;
+	int *recwrite = (int *)&mb_io_ptr->save4;
+
+	int extended = MB_NO;
+	if (mb_io_ptr->format == MBF_MBNCDFXT)
+		extended = MB_YES;
+
+	int status = MB_SUCCESS;
+
 	int nc_status;
 	int CIB_BLOCK_DIM_id;
 	int mbHistoryRecNbr_id;
@@ -4916,33 +4924,11 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *user_ptr;
 	double time_d;
 	int icomment;
-	int extended = MB_NO;
 #ifdef MBNETCDF_DEBUG
 	int nc_verbose = 1;
 #else
 	int nc_verbose = 0;
 #endif
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
-		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
-	}
-
-	/* get pointer to mbio descriptor and data storage */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	struct mbsys_netcdf_struct *store = (struct mbsys_netcdf_struct *)store_ptr;
-	struct mbsys_netcdf_struct *storelocal = (struct mbsys_netcdf_struct *)mb_io_ptr->store_data;
-	datawrite = (int *)&mb_io_ptr->save1;
-	commentwrite = (int *)&mb_io_ptr->save2;
-	recwrite = (int *)&mb_io_ptr->save4;
-
-	if (mb_io_ptr->format == MBF_MBNCDFXT)
-		extended = MB_YES;
-
-	int status = MB_SUCCESS;
 
 	/* if comment and nothing written yet save it */
 	if (store->kind == MB_DATA_COMMENT && *recwrite == 0) {
