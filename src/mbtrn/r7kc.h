@@ -2,60 +2,60 @@
 /// @file r7kc.h
 /// @authors k. headley
 /// @date 06 nov 2012
- 
+
 /// Reson 7k Center data structures and protocol API
- 
+
 /// @sa doxygen-examples.c for more examples of Doxygen markup
- 
+
 
 /////////////////////////
-// Terms of use 
+// Terms of use
 /////////////////////////
 /*
  Copyright Information
- 
+
  Copyright 2000-2018 MBARI
  Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
  Terms of Use
- 
+
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version. You can access the GPLv3 license at
  http://www.gnu.org/licenses/gpl-3.0.html
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details 
+ GNU General Public License for more details
  (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
- express or implied, as to the software, title, non-infringement of third party 
+ express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
- the code, or the performance or results which you may obtain from its use. You 
- assume the entire risk associated with use of the code, and you agree to be 
- responsible for the entire cost of repair or servicing of the program with 
+ the code, or the performance or results which you may obtain from its use. You
+ assume the entire risk associated with use of the code, and you agree to be
+ responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
- incidental or consequential damages, arising out of your use of the software, 
- including, but not limited to, the loss or corruption of your data or damages 
- of any kind resulting from use of the software, any prohibited use, or your 
+ incidental or consequential damages, arising out of your use of the software,
+ including, but not limited to, the loss or corruption of your data or damages
+ of any kind resulting from use of the software, any prohibited use, or your
  inability to use the software. You agree to defend, indemnify and hold harmless
- MBARI and its officers, directors, and employees against any claim, loss, 
- liability or expense, including attorneys' fees, resulting from loss of or 
- damage to property or the injury to or death of any person arising out of the 
+ MBARI and its officers, directors, and employees against any claim, loss,
+ liability or expense, including attorneys' fees, resulting from loss of or
+ damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
- The MBARI software is provided without obligation on the part of the 
- Monterey Bay Aquarium Research Institute to assist in its use, correction, 
+
+ The MBARI software is provided without obligation on the part of the
+ Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
- MBARI assumes no responsibility or liability for any third party and/or 
- commercial software required for the database or applications. Licensee agrees 
- to obtain and maintain valid licenses for any additional third party software 
+
+ MBARI assumes no responsibility or liability for any third party and/or
+ commercial software required for the database or applications. Licensee agrees
+ to obtain and maintain valid licenses for any additional third party software
  required.
  */
 
@@ -66,15 +66,20 @@
 #define MBTRN_RESON_7K_H
 
 /////////////////////////
-// Includes 
+// Includes
 /////////////////////////
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <memory.h>
-#include "iowrap.h"
+//#include <stdint.h>
+//#include <stdbool.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <memory.h>
+//#include "iowrap.h"
+
+#include "msocket.h"
+#include "mmdebug.h"
+
+
 // MB System 7k center structure
 // definitions and record types
 //#include "mbsys_reson7k.h"
@@ -660,17 +665,18 @@ typedef struct r7k_rd_rcnak_s
 /////////////////////////
 // Exports
 /////////////////////////
+// mmd_module_config_t *mmd_r7kc_config;
 
 // R7K utility API
 
-int  r7k_subscribe(iow_socket_t *s, uint32_t *records, uint32_t len);
-int  r7k_unsubscribe(iow_socket_t *s);
+int  r7k_subscribe(msock_socket_t *s, uint32_t *records, uint32_t len);
+int  r7k_unsubscribe(msock_socket_t *s);
 
 uint16_t r7k_txid();
 uint32_t r7k_checksum(byte *pdata, uint32_t len);
 void r7k_update_time(r7k_time_t *t7k);
 void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, uint16_t indent);
-int r7k_stream_show(iow_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt);
+int r7k_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bool *interrupt);
 
 // R7K packet frame (DRF/NF) API
 double r7k_7ktime2d(r7k_time_t *r7kt);
@@ -718,8 +724,8 @@ void r7k_msg_show(r7k_msg_t *self, bool verbose, uint16_t indent);
 uint32_t r7k_msg_size(r7k_msg_t *self);
 uint32_t r7k_msg_set_checksum(r7k_msg_t *self);
 byte* r7k_msg_serialize(r7k_msg_t *self);
-int r7k_msg_send(iow_socket_t *s, r7k_msg_t *self);
-int r7k_msg_receive(iow_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec);
+int r7k_msg_send(msock_socket_t *s, r7k_msg_t *self);
+int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec);
 
 // unit tests
 

@@ -1,9 +1,9 @@
 ///
-/// @file mbrt-net.h
+/// @file mthread.h
 /// @authors k. headley
 /// @date 06 nov 2012
  
-/// MBRT platform-independent socket wrappers
+/// mframe cross-platform thread wrappers
  
 /// @sa doxygen-examples.c for more examples of Doxygen markup
  
@@ -60,60 +60,90 @@
  */
 
 // include guard
-#ifndef MBRT_NET_H
-/// @def MBRT_NET_H
-/// @brief TBD
-#define MBRT_NET_H
+#ifndef MTHREAD_H
+/// @def MTHREAD_H
+/// @brief include guard
+#define MTHREAD_H
 
 /////////////////////////
 // Includes 
 /////////////////////////
-
-/////////////////////////
-// Type Definitions
-/////////////////////////
-/// @def MAX_ADDR_BYTES
-/// @brief TBD
-#define MAX_ADDR_BYTES 64
-/// @def ADDR_OCTETS
-/// @brief TBD
-#define ADDR_OCTETS 4
-
-/// @typedef struct ip_addr_s ip_addr_t
-/// @brief TBD
-typedef struct ip_addr_s{
-    /// @var ip_addr_s::ip
-    /// @brief TBD
-    uint8_t ip[ADDR_OCTETS];
-    /// @var ip_addr_s::port
-    /// @brief TBD
-    uint16_t port;
-    /// @var ip_addr_s::host
-    /// @brief TBD
-    const char *host;
-    /// @var ip_addr_s::addr
-    /// @brief TBD
-    char addr[MAX_ADDR_BYTES];
-}ip_addr_t;
+#include "mframe.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
 
 /////////////////////////
-// Exports
+// Type Definitions
 /////////////////////////
 
-// open socket, return socket fd
-int mbio_sopen(const char *ip_addr, int *fd);
+/// @struct mthread_thread_s
+/// @brief wrapped thread representation (posix implementation)
+struct mthread_thread_s;
+/// @typedef struct mthread_thread_s mthread_thread_t
+/// @brief wrapped thread typedef
+typedef struct mthread_thread_s mthread_thread_t;
 
-int mbio_connect();
-int mbio_listen();
+/// @struct mthread_mutex_s
+/// @brief wrapped mutex representation (posix implementation)
+struct mthread_mutex_s;
+/// @typedef struct mthread_mutex_s mthread_mutex_t
+/// @brief wrapped mutex typedef
+typedef struct mthread_mutex_s mthread_mutex_t;
 
-// open file, return fd
-int mbio_fopen(const char *path, int *fd);
+// @typedef void *(*)(void *) mbtrn_thread_fn
+/// @brief thread function
+/// @param[in] arg data to pass into thread function
+typedef void *(* mthread_thread_fn)(void *arg);
 
-char *mbio_ipaddr2str( char *dest);
+/// @typedef struct mthread_thread_s mthread_thread_t
+/// @brief wrapped thread representation (posix implementation)
+struct mthread_thread_s
+{
+    /// @var mthread_thread_s::t
+    /// @brief posix thread
+    pthread_t t;
+    /// @var mthread_thread_s::attr
+    /// @brief thread attributes
+    pthread_attr_t attr;
+    /// @var mthread_thread_s::status
+    /// @brief thread exit status
+    void **status;
+};
+
+/// @typedef struct mthread_mutex_s mthread_mutex_t
+/// @brief wrapped mutex representation (posix implementation)
+struct mthread_mutex_s
+{
+    /// @var mthread_mutex_s::m
+    /// @brief posix mutex
+    pthread_mutex_t m;
+};
+
+/////////////////////////
+// Exports
+/////////////////////////
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    // mfile thread API (not implemented for QNX)
+mthread_thread_t *mthread_thread_new();
+void mthread_thread_destroy(mthread_thread_t **pself);
+
+int mthread_thread_start(mthread_thread_t *thread, mthread_thread_fn func, void *arg);
+int mthread_thread_join(mthread_thread_t *thread);
+
+// mfile mutex API
+mthread_mutex_t *mthread_mutex_new();
+void mthread_mutex_destroy(mthread_mutex_t **pself);
+int mthread_mutex_lock(mthread_mutex_t *self);
+int mthread_mutex_unlock(mthread_mutex_t *self);
+    
+#ifdef __cplusplus
+}
+#endif
 
 
 // include guard

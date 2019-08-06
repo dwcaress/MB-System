@@ -61,22 +61,31 @@
 // Headers 
 /////////////////////////
 // TODO: clean up server porting
-#if defined(__unix__) || defined(__APPLE__)
-#include <sys/poll.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <errno.h>
-#include <signal.h>
-#endif
-#include <math.h>
+//#if defined(__unix__) || defined(__APPLE__)
+//#include <sys/poll.h>
+//#include <netinet/in.h>
+//#include <string.h>
+//#include <errno.h>
+//#include <signal.h>
+//#endif
+//#include <math.h>
+//#include <getopt.h>
+//#include <stdarg.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <unistd.h>
+//#include <inttypes.h>
+//#include "emu7k.h"
+//#include "mdebug.h"
+
 #include <getopt.h>
 #include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <inttypes.h>
 #include "emu7k.h"
-#include "mdebug.h"
+#include "mframe.h"
+#include "mtime.h"
+#include "medebug.h"
+#include "mmdebug.h"
+#include "merror.h"
 
 /////////////////////////
 // Macros
@@ -124,6 +133,44 @@
 /////////////////////////
 // Declarations 
 /////////////////////////
+
+///// @enum emu7k_channel_id
+///// @brief test module channel IDs
+///// [note : starting above reserved mframe channel IDs]
+//typedef enum{
+//    ID_EMU7K_V1=MM_CHANNEL_COUNT,
+//    ID_EMU7K_V2,
+//    ID_EMU7K_V3,
+//    ID_EMU7K_V4,
+//    ID_EMU7K_V5,
+//    EMU7K_CH_COUNT
+//}emu7k_channel_id;
+//
+///// @enum emu7k_channel_mask
+///// @brief test module channel masks
+//typedef enum{
+//    EMU7K_V1= (1<<ID_EMU7K_V1),
+//    EMU7K_V2= (1<<ID_EMU7K_V2),
+//    EMU7K_V3= (1<<ID_EMU7K_V3),
+//    EMU7K_V4= (1<<ID_EMU7K_V4),
+//    EMU7K_V5= (1<<ID_EMU7K_V5)
+//}emu7k_channel_mask;
+//
+///// @var char *emu7k_ch_names[EMU7K_CH_COUNT]
+///// @brief module channel names
+//char *emu7k_ch_names[EMU7K_CH_COUNT]={
+//    "trace.emu7k",
+//    "debug.emu7k",
+//    "warn.emu7k",
+//    "err.emu7k",
+//    "emu7k.v1",
+//    "emu7k.v2"
+//    "emu7k.v3"
+//    "emu7k.v4"
+//    "emu7k.v5"
+//};
+//static mmd_module_config_t mmd_config_default= {MOD_EMU7K,"MOD_EMU7K",EMU7K_CH_COUNT,((MM_ERR|MM_WARN)|EMU7K_1),emu7k_ch_names};
+
 static void s_show_help();
 static void s_parse_args(int argc, char **argv, app_cfg_t *cfg);
 static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client_fd);
@@ -143,7 +190,7 @@ static int g_verbose=0;
 // Function Definitions
 /////////////////////////
 
-/// @fn emu7k_client_t * emu7k_client_new(iow_socket_t *s, uint32_t nsubs, int32_t *subs)
+/// @fn emu7k_client_t * emu7k_client_new(msock_socket_t *s, uint32_t nsubs, int32_t *subs)
 /// @brief create new emu7k test client
 /// @param[in] s socket reference
 /// @param[in] nsubs number of subscriptions
@@ -175,7 +222,7 @@ void emu7k_client_destroy(emu7k_client_t **pself)
         emu7k_client_t *self = *(pself);
         if (self) {
             if (NULL != self->sock_if) {
-                iow_socket_destroy(&self->sock_if);
+                msock_socket_destroy(&self->sock_if);
             }
             if (NULL != self->sub_list) {
                 free(self->sub_list);
@@ -188,13 +235,13 @@ void emu7k_client_destroy(emu7k_client_t **pself)
 }
 // End function emu7k_client_destroy
 
-/// @fn emu7k_t * emu7k_new(iow_socket_t * s, iow_file_t * mb_data, app_cfg_t *cfg)
+/// @fn emu7k_t * emu7k_new(msock_socket_t * s, mfile_file_t * mb_data, app_cfg_t *cfg)
 /// @brief create new emu7k test server - emulate reson 7k center
 /// @param[in] s socket reference
 /// @param[in] mb_data reson data file
 /// @param[in] cfg app configuration
 /// @return new server reference
-emu7k_t *emu7k_new(iow_socket_t *s, iow_file_t *mb_data, app_cfg_t *cfg)
+emu7k_t *emu7k_new(msock_socket_t *s, mfile_file_t *mb_data, app_cfg_t *cfg)
 {
     emu7k_t *self = (emu7k_t *)malloc(sizeof(emu7k_t));
     if (self) {
@@ -202,8 +249,8 @@ emu7k_t *emu7k_new(iow_socket_t *s, iow_file_t *mb_data, app_cfg_t *cfg)
         self->auto_free = true;
         self->sock_if=s;
         self->stop=false;
-        self->t=iow_thread_new();
-        self->w=iow_thread_new();
+        self->t=mthread_thread_new();
+        self->w=mthread_thread_new();
         self->max_clients=16;
         self->client_count=0;
         self->client_list = mlist_new();
@@ -214,12 +261,12 @@ emu7k_t *emu7k_new(iow_socket_t *s, iow_file_t *mb_data, app_cfg_t *cfg)
 }
 // End function emu7k_new
 
-/// @fn emu7k_t * emu7k_new(iow_socket_t * s, mlist_t *file_list, app_cfg_t *cfg)
+/// @fn emu7k_t * emu7k_new(msock_socket_t * s, mlist_t *file_list, app_cfg_t *cfg)
 /// @brief create new emu7k test server - emulate reson 7k center
 /// @param[in] s socket reference
 /// @param[in] mb_data reson data file (optional)
 /// @return new server reference
-emu7k_t *emu7k_lnew(iow_socket_t *s, mlist_t *path_list, app_cfg_t *cfg)
+emu7k_t *emu7k_lnew(msock_socket_t *s, mlist_t *path_list, app_cfg_t *cfg)
 {
     emu7k_t *self = (emu7k_t *)malloc(sizeof(emu7k_t));
     if (self) {
@@ -227,8 +274,8 @@ emu7k_t *emu7k_lnew(iow_socket_t *s, mlist_t *path_list, app_cfg_t *cfg)
         self->auto_free = true;
         self->sock_if   = s;
         self->stop      = false;
-        self->t         = iow_thread_new();
-        self->w         = iow_thread_new();
+        self->t         = mthread_thread_new();
+        self->w         = mthread_thread_new();
         self->max_clients  = 16;
         self->client_count = 0;
         self->client_list  = mlist_new();
@@ -240,7 +287,7 @@ emu7k_t *emu7k_lnew(iow_socket_t *s, mlist_t *path_list, app_cfg_t *cfg)
             self->file_list = mlist_new();
             char *file_path = (char *)mlist_first(path_list);
             while (file_path!=NULL) {
-                iow_file_t *file = iow_file_new(file_path);
+                mfile_file_t *file = mfile_file_new(file_path);
                 mlist_add(self->file_list,file);
                 file_path = (char *)mlist_next(path_list);
             }
@@ -262,10 +309,10 @@ void emu7k_destroy(emu7k_t **pself)
         emu7k_t *self = *(pself);
         if (self) {
             if (self->auto_free) {
-                MMDEBUG(APP1,"closing server socket[%s:%d] fd[%d]\n",self->sock_if->addr->host,self->sock_if->addr->port,self->sock_if->fd);
-                iow_socket_destroy(&self->sock_if);
-                iow_thread_destroy(&self->t);
-                iow_thread_destroy(&self->w);
+                PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"closing server socket[%s:%d] fd[%d]\n",self->sock_if->addr->host,self->sock_if->addr->port,self->sock_if->fd));
+                msock_socket_destroy(&self->sock_if);
+                mthread_thread_destroy(&self->t);
+                mthread_thread_destroy(&self->w);
                 
                 emu7k_client_t *client = (emu7k_client_t *)mlist_first(self->client_list);
                 while (NULL!=client) {
@@ -276,10 +323,10 @@ void emu7k_destroy(emu7k_t **pself)
 
                 mlist_destroy(&self->client_list);
                 
-                iow_file_t *file = (iow_file_t *)mlist_first(self->file_list);
+                mfile_file_t *file = (mfile_file_t *)mlist_first(self->file_list);
                 while (NULL!=file) {
-                    iow_file_destroy(&file);
-                    file = (iow_file_t *)mlist_next(self->file_list);
+                    mfile_file_destroy(&file);
+                    file = (mfile_file_t *)mlist_next(self->file_list);
                 }
                 mlist_destroy(&self->file_list);
             }
@@ -360,10 +407,10 @@ void emu7k_show(emu7k_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[cfg          %10p]\n",indent,(indent>0?" ":""), self->cfg);
         fprintf(stderr,"%*s[file_list    %10p]\n",indent,(indent>0?" ":""), self->file_list);
         if (verbose) {
-            iow_file_t *file = (iow_file_t *)mlist_first(self->file_list);
+            mfile_file_t *file = (mfile_file_t *)mlist_first(self->file_list);
             while (NULL!=file) {
                 fprintf(stderr,"%*s[file         %s]\n",indent,(indent>0?" ":""), file->path);
-                file = (iow_file_t *)mlist_next(self->file_list);
+                file = (mfile_file_t *)mlist_next(self->file_list);
             }
         }
     }
@@ -382,7 +429,7 @@ static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t 
       
         if( (rbytes = mbtrn_read_frame(self->reader, dest, len, rflags , 0.0, 20, sync_bytes )) >0 ){
             retval=rbytes;
-            MMDEBUG(APP2,"mbtrn_read_frame_new returned %s sz[%"PRId64"] sync[%"PRIu32"/x%X]\n",( (self->cfg->netframe_input) ? "NF" : "DRF" ), rbytes, *sync_bytes,*sync_bytes);
+            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"mbtrn_read_frame_new returned %s sz[%"PRId64"] sync[%"PRIu32"/x%X]\n",( (self->cfg->netframe_input) ? "NF" : "DRF" ), rbytes, *sync_bytes,*sync_bytes));
 //            if (self->cfg->netframe_input) {
 //                r7k_nf_show((r7k_nf_t *)dest,false,5);
 //                r7k_drf_show((r7k_drf_t *)(dest+R7K_NF_BYTES),false,5);
@@ -392,7 +439,7 @@ static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t 
 //            }
         }
     }else{
-        MERROR("invalid argument\n");
+        PEPRINT((stderr,"invalid argument\n"));
     }
     
     return retval;
@@ -408,7 +455,7 @@ static void *s_server_publish(void *arg)
     emu7k_t *svr = (emu7k_t *)arg;
     
     if (NULL!=svr) {
-        iow_socket_t  *s = svr->sock_if;
+        msock_socket_t  *s = svr->sock_if;
         bool stop_req    = true;
         
 #if defined (__APPLE__)
@@ -423,7 +470,7 @@ static void *s_server_publish(void *arg)
 #endif
 
         // iterate over the file list
-        iow_file_t *source_file = (iow_file_t *)mlist_first(svr->file_list);
+        mfile_file_t *source_file = (mfile_file_t *)mlist_first(svr->file_list);
         uint32_t start_offset = svr->cfg->start_offset;
         
         while (NULL!=source_file && !svr->stop) {
@@ -434,10 +481,10 @@ static void *s_server_publish(void *arg)
             double min_delay = ((double)svr->cfg->min_delay)/1000.0;
             double max_delay = MAX_DELAY_DFL_SEC;
 
-            MMDEBUG(APP1,"running file[%s]\n",source_file->path);
-            MMDEBUG(APP1,"min_delay[%.3lf] max_delay[%.3lf]\n",min_delay,max_delay);
+            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"running file[%s]\n",source_file->path));
+            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"min_delay[%.3lf] max_delay[%.3lf]\n",min_delay,max_delay));
             if (mbtrn_reader_set_file(svr->reader,source_file)!=0) {
-                MERROR("mbtrn_reader_set_file failed\n");
+                PEPRINT((stderr,"mbtrn_reader_set_file failed\n"));
                 source_file=NULL;
             }
             
@@ -454,16 +501,16 @@ static void *s_server_publish(void *arg)
                 bool delete_client=false;
                 emu7k_stat_t *stats = &svr->stats;
                 
-                off_t file_end = iow_seek(source_file,0,IOW_END);
+                off_t file_end = mfile_seek(source_file,0,MFILE_END);
                 if ((off_t)start_offset>=file_end) {
-                    iow_seek(source_file,file_end,IOW_SET);
+                    mfile_seek(source_file,file_end,MFILE_SET);
                     start_offset-=file_end;
                 }else{
-                    iow_seek(source_file,start_offset,IOW_SET);
+                    mfile_seek(source_file,start_offset,MFILE_SET);
                     start_offset=0;
                 }
-//                iow_seek(source_file,0,IOW_SET);
-                off_t file_cur = iow_seek(source_file,0,IOW_CUR);
+//                mfile_seek(source_file,0,MFILE_SET);
+                off_t file_cur = mfile_seek(source_file,0,MFILE_CUR);
                 
                 memset((void *)cur_frame,0,R7K_MAX_FRAME_BYTES*sizeof(byte));
                 memset((void *)nxt_frame,0,R7K_MAX_FRAME_BYTES*sizeof(byte));
@@ -484,19 +531,19 @@ static void *s_server_publish(void *arg)
                         stop_req=false;
                         
                     }else{
-                        MERROR("ERR - init next frame failed ret[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno));
+                        PEPRINT((stderr,"ERR - init next frame failed ret[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno)));
                         pdrf[NXT_FRAME] = NULL;
                         pnf[NXT_FRAME] = NULL;
                     }
                 }else{
-                    MERROR("ERR - init current frame failed ret[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno));
+                    PEPRINT((stderr,"ERR - init current frame failed ret[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno)));
                     pdrf[CUR_FRAME] = NULL;
                     pnf[CUR_FRAME] = NULL;
                 }
                 
                 // mark the start of the system and stream times
                 str_start = r7k_7ktime2d(&pdrf[CUR_FRAME]->_7ktime);
-                sys_start = iow_dtime();
+                sys_start = mtime_dtime();
                 
                 while (!stop_req && !svr->stop) {
                     
@@ -537,7 +584,7 @@ static void *s_server_publish(void *arg)
                                     
                                     if (min_delay>=0.0) {
                                         // get current time
-                                        sys_now  = iow_dtime();
+                                        sys_now  = mtime_dtime();
                                         pkt_time = r7k_7ktime2d(&pdrf[CUR_FRAME]->_7ktime);
                                         // compare packet time and real time
                                         // relative to start times
@@ -561,10 +608,10 @@ static void *s_server_publish(void *arg)
                                         }else{
                                             twait = 0.0;
                                         }
-                                        MMDEBUG(APP1,"\n");
-                                        MMDEBUG(APP1,"sys_start[%14.3lf] sys_now [%14.3lf] sys_dif[%14.3lf]\n",sys_start,sys_now,sys_diff);
-                                        MMDEBUG(APP1,"str_start[%14.3lf] pkt_time[%14.3lf] str_dif[%14.3lf]\n",str_start,pkt_time,str_diff);
-                                        MMDEBUG(APP1,"twait[%7.3lf]\n",twait);
+                                        PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"\n"));
+                                        PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"sys_start[%14.3lf] sys_now [%14.3lf] sys_dif[%14.3lf]\n",sys_start,sys_now,sys_diff));
+                                        PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"str_start[%14.3lf] pkt_time[%14.3lf] str_dif[%14.3lf]\n",str_start,pkt_time,str_diff));
+                                        PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"twait[%7.3lf]\n",twait));
                                        // adjust delay max/min constraints
                                         if (min_delay==0.0 && twait>max_delay) {
                                             // max_delay only applied to
@@ -584,17 +631,17 @@ static void *s_server_publish(void *arg)
                                             long lnsec = (dnsec*1.0e9);
                                             delay.tv_sec=lsec;
                                             delay.tv_nsec=lnsec;
-                                            MMDEBUG(APP1,"twait[%.3lf] ds[%.3lf/%.3lf] ls[%ld/%ld] min/max[%.3lf/%.3lf]\n",twait,dsec,dnsec,(long)lsec,lnsec,min_delay,max_delay);
-                                            MMDEBUG(APP1,"delaying %.3lf sec:nsec[%ld:%ld]\n",twait,delay.tv_sec,delay.tv_nsec);
+                                            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"twait[%.3lf] ds[%.3lf/%.3lf] ls[%ld/%ld] min/max[%.3lf/%.3lf]\n",twait,dsec,dnsec,(long)lsec,lnsec,min_delay,max_delay));
+                                            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"delaying %.3lf sec:nsec[%ld:%ld]\n",twait,delay.tv_sec,delay.tv_nsec));
                                             while (nanosleep(&delay,&rem)<0) {
-                                                MMDEBUG(APP5,"sleep interrupted\n");
+                                                PMPRINT(MOD_EMU7K,EMU7K_V5,(stderr,"sleep interrupted\n"));
                                                 delay.tv_sec=rem.tv_sec;
                                                 delay.tv_nsec=rem.tv_nsec;
                                             }
                                         }
                                     }// else no delay
                                                                         
-                                    MMDEBUG(APP1,">>>> sending frame ofs[%"PRId32"] len[%6"PRIu32"] txid[%5"PRIu16"] seq[%"PRIu32"] type[%"PRIu32"] ts[%.3lf]\n",(int32_t)file_cur,pnf[CUR_FRAME]->packet_size,pnf[CUR_FRAME]->tx_id, pnf[CUR_FRAME]->seq_number, pdrf[CUR_FRAME]->record_type_id,pkt_time);
+                                    PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,">>>> sending frame ofs[%"PRId32"] len[%6"PRIu32"] txid[%5"PRIu16"] seq[%"PRIu32"] type[%"PRIu32"] ts[%.3lf]\n",(int32_t)file_cur,pnf[CUR_FRAME]->packet_size,pnf[CUR_FRAME]->tx_id, pnf[CUR_FRAME]->seq_number, pdrf[CUR_FRAME]->record_type_id,pkt_time));
                                     
                                     if( svr->cfg->verbose>=3) {
                                         r7k_nf_show(pnf[CUR_FRAME],false,5);
@@ -603,8 +650,8 @@ static void *s_server_publish(void *arg)
                                     }
                                     
                                     int64_t status=-1;
-                                    if( (status=iow_send(client->sock_if, cur_frame, pnf[CUR_FRAME]->packet_size))<=0){
-                                        MERROR("send failed [%"PRId64"] [%d/%s]\n",status,errno,strerror(errno));
+                                    if( (status=msock_send(client->sock_if, cur_frame, pnf[CUR_FRAME]->packet_size))<=0){
+                                        PEPRINT((stderr,"send failed [%"PRId64"] [%d/%s]\n",status,errno,strerror(errno)));
                                         if ( errno==EPIPE || errno==ECONNRESET ) {
                                             delete_client=true;
                                         }
@@ -614,10 +661,10 @@ static void *s_server_publish(void *arg)
                                     stats->pub_cycle++;
                                     
                                     if (delete_client) {
-                                        MMDEBUG(APP1,"connection broken, deleting client %p fd[%d]\n",client,client->fd);
+                                        PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"connection broken, deleting client %p fd[%d]\n",client,client->fd));
                                         mlist_remove(svr->client_list,client);
                                         emu7k_client_destroy(&client);
-                                        MMDEBUG(APP3,"clients remaining[%"PRIu32"]\n",(uint32_t)mlist_size(svr->client_list));
+                                        PMPRINT(MOD_EMU7K,EMU7K_V3,(stderr,"clients remaining[%"PRIu32"]\n",(uint32_t)mlist_size(svr->client_list)));
                                         client=NULL;
                                         stats->con_active--;
                                     }
@@ -636,7 +683,7 @@ static void *s_server_publish(void *arg)
                                     break;
                                 }else{
                                     if (NULL!=pdrf[CUR_FRAME]) {
-                                        MMDEBUG(APP5,"client[%d] record[%d] not type[%d]\n",client->sock_if->fd,pdrf[CUR_FRAME]->record_type_id,client->sub_list[i]);
+                                        PMPRINT(MOD_EMU7K,EMU7K_V5,(stderr,"client[%d] record[%d] not type[%d]\n",client->sock_if->fd,pdrf[CUR_FRAME]->record_type_id,client->sub_list[i]));
                                     }
                                 }
                                 // if client subscribed
@@ -646,15 +693,15 @@ static void *s_server_publish(void *arg)
                         }// while clients
                         
                         // check for end of input file
-                        file_cur = iow_seek(source_file,0,IOW_CUR);
+                        file_cur = mfile_seek(source_file,0,MFILE_CUR);
                         if (file_cur >= file_end) {
                             stats->cyc_total++;
                             stats->rec_cycle=0;
                             stats->pub_cycle=0;
                             
-                            MMDEBUG(APP2,"reached end of file eof[%"PRId32"] cur[%"PRIu32"]\n",(int32_t)file_end, (uint32_t)file_cur);
+                            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"reached end of file eof[%"PRId32"] cur[%"PRIu32"]\n",(int32_t)file_end, (uint32_t)file_cur));
 
-                            MMDEBUG(APP2,"setting stop_req\n");
+                            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"setting stop_req\n"));
                             stop_req=true;
                         }
                         
@@ -673,12 +720,12 @@ static void *s_server_publish(void *arg)
                             if ( (rbytes=read_s7k_frame(svr, pframe, R7K_MAX_FRAME_BYTES, &sync_bytes)) > 0) {
                                 stop_req=false;
                             }else{
-                                MERROR("ERR - read next returned[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno));
-                                MMDEBUG(APP2,"setting stop_req\n");
+                                PEPRINT((stderr,"ERR - read next returned[%"PRId64"] [%d/%s]\n",rbytes,me_errno,me_strerror(me_errno)));
+                                PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"setting stop_req\n"));
                                 stop_req=true;
                             }
                             
-                            MMDEBUG(APP2,"read frame at ofs[%"PRId32"/x%08X] rbytes[%"PRId64"] sbytes[%"PRIu32"]\n",(int32_t)file_cur,(unsigned int)file_cur,rbytes,sync_bytes);
+                            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"read frame at ofs[%"PRId32"/x%08X] rbytes[%"PRId64"] sbytes[%"PRIu32"]\n",(int32_t)file_cur,(unsigned int)file_cur,rbytes,sync_bytes));
                             
                             if( svr->cfg->verbose>=3) {
                                 if (svr->cfg->netframe_input) {
@@ -695,40 +742,40 @@ static void *s_server_publish(void *arg)
                         if ( (svr->cfg->verbose>=2) &&
                             (svr->cfg->statn>0) &&
                             (stats->rec_total%svr->cfg->statn == 0) ) {
-                            MMDEBUG(APP2,"stats\n");
+                            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"stats\n"));
                             emu7k_stat_show(stats,false,7);
                         }
                         
                     }else{
-//                        MMDEBUG(APP1,"no clients\n");
+//                        PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"no clients\n"));
                         sleep(1);
                     }
                 }// while !stop
                 
                 if(svr->cfg->verbose>=1){
-                    MMDEBUG(APP1,"stopped - stats\n");
+                    PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"stopped - stats\n"));
                     emu7k_stat_show(stats,false,7);
                 }
                 
             }else{
-                MERROR("NULL source file\n");
+                PEPRINT((stderr,"NULL source file\n"));
                 s->status=-1;
             }
             
             // get next file from list
-            source_file = (iow_file_t *)mlist_next(svr->file_list);
+            source_file = (mfile_file_t *)mlist_next(svr->file_list);
             
             // if file is NULL (end of list) and restart set
             // start at beginning of list
             if (NULL==source_file && svr->cfg->restart) {
-                MMDEBUG(APP2,"restarting at beginning of file list\n");
-                source_file = (iow_file_t *)mlist_first(svr->file_list);
+                PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"restarting at beginning of file list\n"));
+                source_file = (mfile_file_t *)mlist_first(svr->file_list);
             }
             
         }// while source_file
         
 
-        MMDEBUG(APP2,"publisher exiting sreq[%c] stop[%c]\n",(stop_req?'Y':'N'),(svr->stop?'Y':'N'));
+        PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"publisher exiting sreq[%c] stop[%c]\n",(stop_req?'Y':'N'),(svr->stop?'Y':'N')));
         
 #if defined (__APPLE__)
         free(cur_frame);
@@ -739,7 +786,7 @@ static void *s_server_publish(void *arg)
         
         return (void *)(&s->status);
     }else{
-        MERROR("NULL server\n");
+        PEPRINT((stderr,"NULL server\n"));
     }
     pthread_exit((void *)NULL);
     
@@ -768,22 +815,22 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
         size_t hdr_len = sizeof(r7k_nf_headers_t)+sizeof(r7k_rth_7500_rc_t);
 
         if (strncmp((const char *)req,"STOP",4)==0) {
-            MMDEBUG(APP1,"STOP received\n");
+            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"STOP received\n"));
             send(client_fd,"ACK",strlen("ACK"),0);
             svr->stop=true;
         }else if(strncmp((const char *)req,"REQ",3)==0){
-            MMDEBUG(APP1,"REQ received\n");
+            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"REQ received\n"));
             send(client_fd,"ACK",strlen("ACK"),0);
         }else if((unsigned long)rlen>=hdr_len){
-            MMDEBUG(APP1,"proto ver      [%d]\n",nf->protocol_version);
-            MMDEBUG(APP1,"record_type_id [%"PRIu32"]\n",drf->record_type_id);
+            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"proto ver      [%d]\n",nf->protocol_version));
+            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"record_type_id [%"PRIu32"]\n",drf->record_type_id));
 
             if(nf->protocol_version == R7K_NF_PROTO_VER &&
                drf->record_type_id == R7K_RT_REMCON &&
                rth->remcon_id == R7K_RTID_SUB){
                 
                 // got 7k center subscription record
-	            MMDEBUG(APP1,"7K SUB request received\n");
+	            PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"7K SUB request received\n"));
                 // create, send SUB ACK message
                 r7k_msg_t *msg = r7k_msg_new(sizeof(r7k_rth_7501_ack_t));
                 r7k_rth_7501_ack_t *prth = (r7k_rth_7501_ack_t *)(msg->data);
@@ -798,11 +845,11 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
                 msg->nf->total_size  = R7K_MSG_NF_TOTAL_SIZE(msg);
                 r7k_msg_set_checksum(msg);
                 
-                MMDEBUG(APP1,"sending SUB ACK:\n");
+                PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"sending SUB ACK:\n"));
                 if(svr->cfg->verbose>=1){
                     r7k_msg_show(msg,true,3);
                 }
-                iow_socket_t *s = iow_wrap_fd(client_fd);
+                msock_socket_t *s = msock_wrap_fd(client_fd);
                 r7k_msg_send(s,msg);
                 r7k_msg_destroy(&msg);
                 
@@ -813,16 +860,16 @@ static int s_server_handle_request(emu7k_t *svr, byte *req, int rlen, int client
 
                 // create client, add to list
                 emu7k_client_t *cli = emu7k_client_new(client_fd, nsubs, subs);
-                MMDEBUG(APP1,"adding client fd[%d] to list\n",client_fd);
+                PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"adding client fd[%d] to list\n",client_fd));
                 mlist_add(svr->client_list, cli);
                 cli->sock_if=s;
             }
         }else{
-            MERROR("ERR - unsupported request\n");
+            PEPRINT((stderr,"ERR - unsupported request\n"));
             retval=-1;
         }
     }else{
-        MERROR("ERR - invalid/NULL request\n");
+        PEPRINT((stderr,"ERR - invalid/NULL request\n"));
         retval=-1;
     }
     return retval;
@@ -853,18 +900,19 @@ void *s_server_main(void *arg)
 
     stats->start_time=time(NULL);
     
-    iow_socket_t  *s = svr->sock_if;
-    iow_set_blocking(s,true);
+    msock_socket_t  *s = svr->sock_if;
+    msock_set_blocking(s,true);
     
     if ( (NULL!=svr) && (NULL!=s)) {
-       	MMDEBUG(APP4,"starting worker thread\n");
-        if(iow_thread_start(svr->w, s_server_publish, (void *)svr)!=0){
-            MERROR("worker thread start failed\n");
+       	PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"starting worker thread\n"));
+        if(mthread_thread_start(svr->w, s_server_publish, (void *)svr)!=0){
+            PEPRINT((stderr,"worker thread start failed\n"));
             stop_req=true;
         }else{
 
-            MMDEBUG(APP2,"server [%s] - starting\n",iow_addr2str(s,buf,ADDRSTR_BYTES));
-            iow_listen(s);
+            msock_bind(s);
+            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"server [%s] - starting\n",msock_addr2str(s,buf,ADDRSTR_BYTES)));
+            msock_listen(s,1);
             
             tv.tv_sec = 3;
             tv.tv_usec = 0;
@@ -886,11 +934,11 @@ void *s_server_main(void *arg)
                             // MMINFO(APP1,"readfs [%d/%d] selected\n",i,fdmax);
                             do_close=true;
                             if (i==s->fd) {
-                                MMDEBUG(APP4,"server main listener [%d] got request\n",i);
+                                PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server main listener [%d] got request\n",i));
 
                                 newfd = accept(s->fd, (struct sockaddr *)&client_addr, &addr_size);
                                 if (newfd != -1) {
-                                    MMDEBUG(APP4,"client connected on socket [%d]\n",newfd);
+                                    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"client connected on socket [%d]\n",newfd));
                                     FD_SET(newfd,&read_fds);
                                     if (newfd>fdmax) {
                                         fdmax=newfd;
@@ -903,9 +951,9 @@ void *s_server_main(void *arg)
                                 }
                             }else{
                                 do_close=false;
-                                MMDEBUG(APP4,"server waiting for client data fd[%d]\n",i);
+                                PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server waiting for client data fd[%d]\n",i));
                                 if (( nbytes = recv(i, iobuf, sizeof iobuf, 0)) <= 0) {
-                                    MMDEBUG(APP4,"handle client data fd[%d] nbytes[%d]\n",i,nbytes);
+                                    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"handle client data fd[%d] nbytes[%d]\n",i,nbytes));
                                     // got error or connection closed by client
                                     if (nbytes == 0) {
                                         // connection closed
@@ -914,7 +962,7 @@ void *s_server_main(void *arg)
                                         fprintf(stderr,"ERR - recv failed socket[%d] [%d/%s]\n",i,errno,strerror(errno));
                                     }
                                 }else{
-                                    MMDEBUG(APP4,"server received request on socket [%d] len[%d]\n",i,nbytes);
+                                    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server received request on socket [%d] len[%d]\n",i,nbytes));
                                     s_server_handle_request(svr,iobuf,nbytes,i);
                                 }
                                 if (do_close) {
@@ -935,19 +983,19 @@ void *s_server_main(void *arg)
             }
 
             if(svr->cfg->verbose>=1){
-                MMDEBUG(APP1,"stats\n");
+                PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"stats\n"));
                 emu7k_stat_show(stats,false,7);
             }
         }
     }
     
     if (stop_req) {
-        MMDEBUG(APP3,"Test server - interrupted - stop flag set\n");
+        PMPRINT(MOD_EMU7K,EMU7K_V3,(stderr,"Test server - interrupted - stop flag set\n"));
         if (NULL!=s) {
             s->status=1;
         }
     }else{
-        MMDEBUG(APP3,"Test server - normal exit\n");
+        PMPRINT(MOD_EMU7K,EMU7K_V3,(stderr,"Test server - normal exit\n"));
         if (NULL!=s) {
         	s->status=0;
         }
@@ -970,7 +1018,7 @@ int emu7k_start(emu7k_t *self)
     int retval=0;
     if (self) {
         self->stop=false;
-        if(iow_thread_start(self->t, s_server_main, (void *)self)!=0){
+        if(mthread_thread_start(self->t, s_server_main, (void *)self)!=0){
             retval=-1;
         }else{
             sleep(1);
@@ -988,10 +1036,10 @@ int emu7k_stop(emu7k_t *self)
 {
     int retval=-1;
     if (NULL!=self) {
-        MMDEBUG(APP2,"stopping server thread\n");
+        PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"stopping server thread\n"));
         self->stop=true;
         
-        while( iow_thread_join(self->t)!=0){
+        while( mthread_thread_join(self->t)!=0){
         	
         }
         retval=0;
@@ -1140,26 +1188,67 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
     }
     
     if (cfg->verbose>0) {
-        MDEBUG("verbose   [%d]\n",cfg->verbose);
-        MDEBUG("host      [%s]\n",cfg->host);
-        MDEBUG("port      [%d]\n",cfg->port);
-        MDEBUG("file      [%s]\n",cfg->file_path);
-        MDEBUG("restart   [%c]\n",(cfg->restart?'Y':'N'));
-        MDEBUG("statn     [%d]\n",cfg->statn);
-        MDEBUG("min-delay [%u]\n",cfg->min_delay);
-        MDEBUG("nf        [%c]\n",(cfg->netframe_input?'Y':'N'));
-        MDEBUG("offset    [%"PRIu32"]\n",cfg->start_offset);
-        MDEBUG("xds       [%d]\n",cfg->xds);
-        MDEBUG("paths     [%p]\n",cfg->file_paths);
-        MDEBUG("files:\n");
+        fprintf(stderr,"verbose   [%d]\n",cfg->verbose);
+        fprintf(stderr,"host      [%s]\n",cfg->host);
+        fprintf(stderr,"port      [%d]\n",cfg->port);
+        fprintf(stderr,"file      [%s]\n",cfg->file_path);
+        fprintf(stderr,"restart   [%c]\n",(cfg->restart?'Y':'N'));
+        fprintf(stderr,"statn     [%d]\n",cfg->statn);
+        fprintf(stderr,"min-delay [%u]\n",cfg->min_delay);
+        fprintf(stderr,"nf        [%c]\n",(cfg->netframe_input?'Y':'N'));
+        fprintf(stderr,"offset    [%"PRIu32"]\n",cfg->start_offset);
+        fprintf(stderr,"xds       [%d]\n",cfg->xds);
+        fprintf(stderr,"paths     [%p]\n",cfg->file_paths);
+        fprintf(stderr,"files:\n");
         char *path=(char *)mlist_first(cfg->file_paths);
         while (NULL!=path) {
-            MDEBUG("path      [%s]\n",path);
+            fprintf(stderr,"path      [%s]\n",path);
             path = (char *)mlist_next(cfg->file_paths);
         }
     }
     
     g_verbose = cfg->verbose;
+    
+    mconf_init(NULL,NULL);
+    mmd_channel_dis(MOD_EMU7K,MM_ALL);
+    mmd_channel_set(MOD_R7K,MM_ERR);
+    mmd_channel_set(MOD_MBTRN,MM_DEBUG);
+    mmd_channel_set(MOD_MSOCK,MM_ERR);
+
+    switch (cfg->verbose) {
+        case 0:
+            mmd_channel_dis(MOD_EMU7K,MM_ALL);
+            break;
+        case 1:
+            mmd_channel_en(MOD_EMU7K,EMU7K_V1);
+            break;
+        case 2:
+            mmd_channel_en(MOD_EMU7K,EMU7K_V1);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V2);
+            break;
+        case 3:
+            mmd_channel_en(MOD_EMU7K,EMU7K_V1);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V2);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V3);
+            break;
+        case 4:
+            mmd_channel_en(MOD_EMU7K,EMU7K_V1);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V2);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V3);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V4);
+            break;
+        case 5:
+            mmd_channel_en(MOD_EMU7K,EMU7K_V1);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V2);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V3);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V4);
+            mmd_channel_en(MOD_EMU7K,EMU7K_V5);
+            break;
+        default:
+		    mmd_channel_set(MOD_EMU7K,MM_ERR);
+           break;
+    }
+
     // use MDI_ALL to globally set module debug output
     // may also set per module basis using module IDs
     // defined in mconfig.h:
@@ -1168,51 +1257,51 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
     // MDL_UNSET,MDL_NONE
     // MDL_FATAL, MDL_ERROR, MDL_WARN
     // MDL_INFO, MDL_DEBUG
-    mcfg_configure(NULL,0);
-    mdb_set(MDI_ALL,MDL_UNSET);
-    mdb_set(IOW,MDL_ERROR);
-    mdb_set(MBTRN,MDL_DEBUG);
-    switch (cfg->verbose) {
-        case 0:
-            mdb_set(APP1,MDL_NONE);
-            mdb_set(APP2,MDL_NONE);
-            mdb_set(APP3,MDL_NONE);
-            mdb_set(APP4,MDL_NONE);
-            mdb_set(APP5,MDL_NONE);
-            break;
-        case 1:
-            mdb_set(APP1,MDL_DEBUG);
-            break;
-        case 2:
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            break;
-        case 3:
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            mdb_set(APP3,MDL_DEBUG);
-            break;
-        case 4:
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            mdb_set(APP3,MDL_DEBUG);
-            mdb_set(APP4,MDL_DEBUG);
-            break;
-        case 5:
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(APP2,MDL_DEBUG);
-            mdb_set(APP3,MDL_DEBUG);
-            mdb_set(APP4,MDL_DEBUG);
-            mdb_set(APP5,MDL_DEBUG);
-            break;
-        default:
-            mdb_set(APP1,MDL_ERROR);
-            mdb_set(APP2,MDL_ERROR);
-            mdb_set(APP3,MDL_ERROR);
-            mdb_set(APP4,MDL_ERROR);
-            mdb_set(APP5,MDL_ERROR);
-            break;
-    }
+//    mcfg_configure(NULL,0);
+//    mdb_set(MDI_ALL,MDL_UNSET);
+//    mdb_set(IOW,MDL_ERROR);
+//    mdb_set(MBTRN,MDL_DEBUG);
+//    switch (cfg->verbose) {
+//        case 0:
+//            mdb_set(APP1,MDL_NONE);
+//            mdb_set(APP2,MDL_NONE);
+//            mdb_set(APP3,MDL_NONE);
+//            mdb_set(APP4,MDL_NONE);
+//            mdb_set(APP5,MDL_NONE);
+//            break;
+//        case 1:
+//            mdb_set(APP1,MDL_DEBUG);
+//            break;
+//        case 2:
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            break;
+//        case 3:
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            mdb_set(APP3,MDL_DEBUG);
+//            break;
+//        case 4:
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            mdb_set(APP3,MDL_DEBUG);
+//            mdb_set(APP4,MDL_DEBUG);
+//            break;
+//        case 5:
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(APP2,MDL_DEBUG);
+//            mdb_set(APP3,MDL_DEBUG);
+//            mdb_set(APP4,MDL_DEBUG);
+//            mdb_set(APP5,MDL_DEBUG);
+//            break;
+//        default:
+//            mdb_set(APP1,MDL_ERROR);
+//            mdb_set(APP2,MDL_ERROR);
+//            mdb_set(APP3,MDL_ERROR);
+//            mdb_set(APP4,MDL_ERROR);
+//            mdb_set(APP5,MDL_ERROR);
+//            break;
+//    }
 }
 // End function parse_args
 
@@ -1226,11 +1315,11 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            MMDEBUG(APP2,"received sig[%d]\n",signum);
+            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"received sig[%d]\n",signum));
             g_interrupt=true;
             break;
         default:
-            MERROR("not handled[%d]\n",signum);
+            PEPRINT((stderr,"not handled[%d]\n",signum));
             break;
     }
 }
@@ -1276,7 +1365,7 @@ int main(int argc, char **argv)
     s_parse_args(argc, argv, &cfg);
 
     // create/configure server socket
-    iow_socket_t *svr_socket = iow_socket_new(cfg.host, cfg.port, ST_TCP);
+    msock_socket_t *svr_socket = msock_socket_new(cfg.host, cfg.port, ST_TCP);
     
     // create/configure server
    // emu7k_t *server = emu7k_new(svr_socket, svr_data, &cfg);
@@ -1290,12 +1379,12 @@ int main(int argc, char **argv)
         sleep(2);
     }
     // stop the server
-    MMDEBUG(APP1,"stopping server...\n");
+    PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"stopping server...\n"));
     emu7k_stop(server);
-    MMDEBUG(APP4,"socket status [%d]\n",svr_socket->status);
+    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"socket status [%d]\n",svr_socket->status));
 
     // release resources
-    MMDEBUG(APP4,"releasing resources...\n");
+    PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"releasing resources...\n"));
     // server will release socket, file resources
     emu7k_destroy(&server);
     mlist_destroy(&file_paths);

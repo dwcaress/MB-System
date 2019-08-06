@@ -38,24 +38,26 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "mb_define.h"
 #include "mb_status.h"
 
 
 // By default use the PROJ6 API
-#ifndef USE_PROJ4_API
+#ifdef USE_PROJ6_API
 
 #include <proj.h>
 
 /*--------------------------------------------------------------------*/
-int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
+int mb_proj_init(int verbose, char *source, char *target, void **pjptr, int *error) {
 
-  if (verbose >= 2) {
+  if (verbose >= 0) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       projection: %s\n", projection);
+    fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
+    fprintf(stderr, "dbg2       source:      %s\n", source);
+    fprintf(stderr, "dbg2       destination: %s\n", destination);
   }
 
   *error = MB_ERROR_NO_ERROR;
@@ -63,7 +65,7 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
 
   /* initialize the projection */
   PJ *p;
-  p = proj_create(PJ_DEFAULT_CTX, projection);
+  p = proj_create_crs_to_crs(PJ_DEFAULT_CTX, source, target, 0);
   *pjptr = (void *)p;
 
   /* check success */
@@ -72,7 +74,7 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
     status = MB_FAILURE;
   }
 
-  if (verbose >= 2) {
+  if (verbose >= 0) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
     fprintf(stderr, "dbg2       pjptr:           %p\n", (void *)*pjptr);
@@ -116,25 +118,25 @@ int mb_proj_free(int verbose, void **pjptr, int *error) {
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *easting, double *northing, int *error) {
+int mb_proj_forward(int verbose, void *pjptr, double u, double v, double *uu, double *vv, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
     fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
     fprintf(stderr, "dbg2       pjptr:      %p\n", (void *)pjptr);
-    fprintf(stderr, "dbg2       lon:        %f\n", lon);
-    fprintf(stderr, "dbg2       lat:        %f\n", lat);
+    fprintf(stderr, "dbg2       u:          %f\n", u);
+    fprintf(stderr, "dbg2       v:          %f\n", v);
   }
 
   /* do forward projection */
   if (pjptr != NULL) {
     PJ *p = (PJ *) pjptr;
     PJ_COORD c;
-    c.lp.lam = proj_torad(lon);
-    c.lp.phi = proj_torad(lat);
+    c.v[0] = u;
+    c.v[1] = v;
     c = proj_trans(p, PJ_FWD, c);
-    *easting = c.xy.x;
-    *northing = c.xy.y;
+    *uu = c.v[0];
+    *vv = c.v[1];
   }
 
   /* assume success */
@@ -154,7 +156,7 @@ int mb_proj_forward(int verbose, void *pjptr, double lon, double lat, double *ea
   return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, double *lon, double *lat, int *error) {
+int mb_proj_inverse(int verbose, void *pjptr, double u, double v, double *uu, double *vv, int *error) {
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -168,11 +170,11 @@ int mb_proj_inverse(int verbose, void *pjptr, double easting, double northing, d
   if (pjptr != NULL) {
     PJ *p = (PJ *) pjptr;
     PJ_COORD c;
-    c.xy.x = easting;
-    c.xy.y = northing;
+    c.v[0] = u;
+    c.v[1] = v;
     c = proj_trans(p, PJ_INV, c);
-    *lon = proj_todeg(c.lp.lam);
-    *lat = proj_todeg(c.lp.phi);
+    *uu = c.v[0];
+    *vv = c.v[1];
   }
 
   /* assume success */
@@ -247,9 +249,18 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
   struct stat file_status;
   int fstat = stat(projectionfile, &file_status);
   if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+
+    mb_path projection_use;
+    if (strncmp("EPSG:", projection, 5) == 0) {
+      sprintf(projection_use, "epsg%s", (char *)&(projection[5]));
+    } else {
+      strcpy(projection_use, projection);
+    }
+//fprintf(stderr,"projection: %s %s\n",projection,projection_use);
+
     /* initialize the projection */
     char pj_init_args[MB_PATH_MAXLINE];
-    sprintf(pj_init_args, "+init=%s:%s", projectionfile, projection);
+    sprintf(pj_init_args, "+init=%s:%s", projectionfile, projection_use);
     projPJ pj = pj_init_plus(pj_init_args);
     *pjptr = (void *)pj;
 

@@ -70,11 +70,7 @@
 /////////////////////////
 // Includes 
 /////////////////////////
-
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "iowrap.h"
+#include "mfile.h"
 
 /////////////////////////
 // Type Definitions
@@ -89,7 +85,8 @@
 /// ML_OSEG    segment log
 /// ML_LIMLEN  limit segments by length
 /// ML_LIMTIME limit segments by time
-typedef enum{ML_NOLIMIT=-1,ML_MONO=0,ML_DIS=0x1,ML_OVWR=0x2,ML_OSEG=0x4,ML_LIMLEN=0x8,ML_LIMTIME=0x10} mlog_flags_t;
+//typedef enum{ML_NOLIMIT=-1,ML_MONO=0,ML_DIS=0x1,ML_OVWR=0x2,ML_OSEG=0x4,ML_LIMLEN=0x8,ML_LIMTIME=0x10} mlog_flags_t;
+typedef enum{ML_NOLIMIT=0x40,ML_MONO=0x20,ML_DIS=0x1,ML_OVWR=0x2,ML_OSEG=0x4,ML_LIMLEN=0x8,ML_LIMTIME=0x10} mlog_flags_t;
 
 /// @typedef enum mlog_dest_t mlog_dest_t
 /// @brief log destination flags. May be logically OR'd to use multiple
@@ -132,7 +129,7 @@ typedef struct mlog_s
 {
     /// @var mlog_s::file
     /// @brief underlying log file
-    iow_file_t *file;
+    mfile_file_t *file;
     /// @var mlog_s::path
     /// @brief log filename path component
     char *path;
@@ -189,7 +186,7 @@ typedef struct log_info_s
 /// @typedef int32_t mlog_id_t
 /// @brief TBD
 typedef int32_t mlog_id_t;
-
+#define MLOG_ID_INVALID -1
 /////////////////////////
 // Macros
 /////////////////////////
@@ -258,34 +255,40 @@ typedef int32_t mlog_id_t;
 /////////////////////////
 // Exports
 /////////////////////////
-
-mlog_config_t *mlog_config_new(const char *tfmt,const char *del,
-                               mlog_flags_t flags, mlog_dest_t dest,
-                               int32_t lim_b, int32_t lim_s, int32_t lim_t);
-
-void mlog_config_destroy(mlog_config_t **pself);
-
-mlog_t *mlog_new(const char *file_path, mlog_config_t *config);
-void mlog_destroy(mlog_t **pself);
-void mlog_release(bool incl_logs);
-
-int mlog_open(mlog_t *self,iow_flags_t flags, iow_mode_t mode);
-int mlog_close(mlog_t *self);
-int mlog_add(mlog_t *self, mlog_id_t id, char *name);
-int mlog_delete(mlog_id_t id);
-mlog_t *mlog_get(mlog_id_t id);
-void mlog_show(mlog_t *self, bool verbose, uint16_t indent);
-
-void mlog_set_dest(mlog_id_t log, mlog_dest_t dest);
-mlog_dest_t mlog_get_dest(mlog_id_t log);
-
-int mlog_flush(mlog_id_t log);
-int mlog_write(mlog_id_t log, byte *data, uint32_t len);
-int mlog_printf(mlog_id_t log, char *fmt, ...);
-int mlog_tprintf(mlog_id_t log, char *fmt, ...);
-int mlog_puts(mlog_id_t log, char *data);
-int mlog_putc(mlog_id_t log, char data);
-int mlog_test();
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+    mlog_config_t *mlog_config_new(const char *tfmt,const char *del,
+                                   mlog_flags_t flags, mlog_dest_t dest,
+                                   int32_t lim_b, int32_t lim_s, int32_t lim_t);
+    
+    void mlog_config_destroy(mlog_config_t **pself);
+    
+    mlog_id_t mlog_get_instance(const char *file_path, mlog_config_t *config, char *name);
+    void mlog_delete_instance(mlog_id_t id);
+    void mlog_delete_list(bool delete_logs);
+    
+    int mlog_open(mlog_id_t id,mfile_flags_t flags, mfile_mode_t mode);
+    int mlog_close(mlog_id_t id);
+    int mlog_delete(mlog_id_t id);
+    mlog_t *mlog_get(mlog_id_t id);
+    void mlog_show(mlog_id_t, bool verbose, uint16_t indent);
+    
+    void mlog_set_dest(mlog_id_t log, mlog_dest_t dest);
+    mlog_dest_t mlog_get_dest(mlog_id_t log);
+    
+    int mlog_flush(mlog_id_t log);
+    int mlog_write(mlog_id_t log, byte *data, uint32_t len);
+    int mlog_printf(mlog_id_t log, char *fmt, ...);
+    int mlog_tprintf(mlog_id_t log, char *fmt, ...);
+    int mlog_puts(mlog_id_t log, char *data);
+    int mlog_putc(mlog_id_t log, char data);
+    int mlog_test();
+    
+#ifdef __cplusplus
+}
+#endif
 
 // include guard
 #endif

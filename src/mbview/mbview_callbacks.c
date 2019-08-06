@@ -3077,7 +3077,15 @@ void do_mbview_set_projection_label(size_t instance) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 		}
+		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
+			strcat(value_text, tmptext);
+		}
 		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
+			strcat(value_text, tmptext);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 		}
@@ -3087,7 +3095,19 @@ void do_mbview_set_projection_label(size_t instance) {
 			        projectionid - 32600);
 			strcat(value_text, tmptext);
 		}
+		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
+		         projectionid < 32700) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->primary_grid_projection_id,
+			        projectionid - 32600);
+			strcat(value_text, tmptext);
+		}
 		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
+		         projectionid < 32800) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->primary_grid_projection_id,
+			        projectionid - 32700);
+			strcat(value_text, tmptext);
+		}
+		else if (sscanf(data->primary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
 		         projectionid < 32800) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->primary_grid_projection_id,
 			        projectionid - 32700);
@@ -3113,7 +3133,15 @@ void do_mbview_set_projection_label(size_t instance) {
 				sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 				strcat(value_text, tmptext);
 			}
+			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
+				sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
+				strcat(value_text, tmptext);
+			}
 			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
+				sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
+				strcat(value_text, tmptext);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
 				sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
 				strcat(value_text, tmptext);
 			}
@@ -3123,7 +3151,19 @@ void do_mbview_set_projection_label(size_t instance) {
 				        projectionid - 32600);
 				strcat(value_text, tmptext);
 			}
+			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
+			         projectionid < 32700) {
+				sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N\"", data->secondary_grid_projection_id,
+				        projectionid - 32600);
+				strcat(value_text, tmptext);
+			}
 			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
+			         projectionid < 32800) {
+				sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->secondary_grid_projection_id,
+				        projectionid - 32700);
+				strcat(value_text, tmptext);
+			}
+			else if (sscanf(data->secondary_grid_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
 			         projectionid < 32800) {
 				sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->secondary_grid_projection_id,
 				        projectionid - 32700);
@@ -3149,7 +3189,15 @@ void do_mbview_set_projection_label(size_t instance) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 		}
+		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32661) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    North Polar Steographic\"", data->secondary_grid_projection_id);
+			strcat(value_text, tmptext);
+		}
 		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid == 32761) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
+			strcat(value_text, tmptext);
+		}
+		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid == 32761) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    South Polar Steographic\"", data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 		}
@@ -3158,7 +3206,17 @@ void do_mbview_set_projection_label(size_t instance) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N", data->display_projection_id, projectionid - 32600);
 			strcat(value_text, tmptext);
 		}
+		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32600 &&
+		         projectionid < 32700) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d N", data->display_projection_id, projectionid - 32600);
+			strcat(value_text, tmptext);
+		}
 		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1 && projectionid >= 32700 &&
+		         projectionid < 32800) {
+			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->display_projection_id, projectionid - 32700);
+			strcat(value_text, tmptext);
+		}
+		else if (sscanf(data->display_projection_id, "EPSG:%d", &projectionid) == 1 && projectionid >= 32700 &&
 		         projectionid < 32800) {
 			sprintf(tmptext, ":t\"  Projected: %s\":t\"    UTM Zone %d S\"", data->display_projection_id, projectionid - 32700);
 			strcat(value_text, tmptext);
@@ -3324,7 +3382,7 @@ void do_mbview_display_utm(Widget w, XtPointer client_data, XtPointer call_data)
 			projectionid = 32600 + utmzone;
 		else
 			projectionid = 32700 + utmzone;
-		sprintf(data->display_projection_id, "epsg%d", projectionid);
+		sprintf(data->display_projection_id, "EPSG:%d", projectionid);
 
 		/* set label */
 		do_mbview_set_projection_label(instance);

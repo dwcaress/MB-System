@@ -63,18 +63,30 @@
 // Headers
 /////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <string.h>
+//#include "mbtrn.h"
+//#include "mbtrn-server.h"
+//#include "r7kc.h"
+//#include "iowrap.h"
+//#include "cbuffer.h"
+//#include "mconfig.h"
+//#include "mlog.h"
+//#include "mlist.h"
+//#include "mdebug.h"
+
+#include "mframe.h"
+#include "mconfig.h"
+#include "mlog.h"
+#include "medebug.h"
+#include "mlist.h"
+#include "mcbuf.h"
+#include "msocket.h"
 #include "mbtrn.h"
 #include "mbtrn-server.h"
 #include "r7kc.h"
-#include "iowrap.h"
-#include "cbuffer.h"
-#include "mconfig.h"
-#include "mlog.h"
-#include "mlist.h"
-#include "mdebug.h"
+
 
 /////////////////////////
 // Macros
@@ -151,16 +163,8 @@ static int s_test_mbtrn(const char *host,const char *file)
     // create and open socket connection
     uint32_t reader_size = 100*SZ_1K;//10*R7K_MAX_RECORD_BYTES
     
-    
-    module_debug_config_t mcfg[]={
-        {MBTRN,MDL_DEBUG}
-    };
-    mcfg_configure(mcfg,1);
-   // mcfg_configure(NULL,0);
-    
     mbtrn_reader_t *reader = mbtrn_reader_new(host,R7K_7KCENTER_PORT,reader_size, subs, nsubs);
  
-    
     // show reader config
     mbtrn_reader_show(reader,true, 5);
     
@@ -170,27 +174,27 @@ static int s_test_mbtrn(const char *host,const char *file)
 
     // flush socket
     int32_t flush_retries=0;//MBTRN_FLUSH_RETRIES
-    MDEBUG("flushing [optional retries[%d]]\n",flush_retries);
+    PDPRINT((stderr,"flushing [optional retries[%d]]\n",flush_retries));
     mbtrn_reader_flush(reader,60000,flush_retries,500);
     usleep(MBTRN_PING_INTERVAL_USEC);
     
     // get a set of data record frames
     // here, separate poll, parse, enumeration and raw buffer reads
-    MDEBUG("polling\n");
+    PDPRINT((stderr,"polling\n"));
     if ( (read_bytes=mbtrn_reader_poll(reader, buf, MBTRN_TRN_PING_BYTES, 350)) > 0){
-        MDEBUG("parsing\n");
+        PDPRINT((stderr,"parsing\n"));
         if(mbtrn_reader_parse(reader,buf,read_bytes,NULL)>0){
-            MDEBUG("enumerating frames\n");
+            PDPRINT((stderr,"enumerating frames\n"));
             // enumerate over the frames, show them
             r7k_drf_t *drfe = mbtrn_reader_enumerate(reader);
             int i=1;
             while (drfe!=NULL) {
-                MDEBUG("\n\nframe [%d/%d]\n",i++,mbtrn_reader_frames(reader));
+                PDPRINT((stderr,"\n\nframe [%d/%d]\n",i++,mbtrn_reader_frames(reader)));
                 r7k_drf_show(drfe,false,5);
                 drfe = mbtrn_reader_next(reader);
             }
             
-            MDEBUG("read raw\n");
+            PDPRINT((stderr,"read raw\n"));
             // alternatively, read the raw buffer
             int32_t ofs = mbtrn_reader_seek(reader, 0);
             uint32_t test=0;
@@ -206,7 +210,7 @@ static int s_test_mbtrn(const char *host,const char *file)
                 memset(buf,0,SZ_1K);
             }
         }else{
-            MDEBUG("parse err\n");
+            PDPRINT((stderr,"parse err\n"));
         }
     }
 
@@ -221,17 +225,17 @@ static int s_test_mbtrn(const char *host,const char *file)
     mbtrn_reader_flush(reader,1024,0,500);
     int istat=0;
     for (int i=0; i<cycles; i++) {
-        MDEBUG("calling xread\n");
+        PDPRINT((stderr,"calling xread\n"));
 //        if( (istat = mbtrn_reader_xread(reader,buf,len,tmout,MBR_ALLOW_PARTIAL)) > 0){
         if( (istat = mbtrn_reader_xread(reader,buf,len,tmout,MBR_BLOCK,0)) > 0){
-            MDEBUG("xread %d/%d OK  [%d] - returned [%d/%d]\n",i+1,cycles,rstat,istat,len);
-          //  MDEBUG("size/length/pending %u/%u/%u\n",r7k_drfcon_size(reader->fc),r7k_drfcon_length(reader->fc),r7k_drfcon_pending(reader->fc));
+            PDPRINT((stderr,"xread %d/%d OK  [%d] - returned [%d/%d]\n",i+1,cycles,rstat,istat,len));
+          //  PDPRINT((stderr,"size/length/pending %u/%u/%u\n",r7k_drfcon_size(reader->fc),r7k_drfcon_length(reader->fc),r7k_drfcon_pending(reader->fc)));
          }else{
-            MERROR("xread %d/%d ERR [%d] - returned [%d/%d]\n",i+1,cycles,rstat,istat,len);
-// MDEBUG("size/length/pending %u/%u/%u\n",r7k_drfcon_size(reader->fc),r7k_drfcon_length(reader->fc),r7k_drfcon_pending(reader->fc));
+            PEPRINT((stderr,"xread %d/%d ERR [%d] - returned [%d/%d]\n",i+1,cycles,rstat,istat,len));
+// PDPRINT((stderr,"size/length/pending %u/%u/%u\n",r7k_drfcon_size(reader->fc),r7k_drfcon_length(reader->fc),r7k_drfcon_pending(reader->fc)));
        }
         r7k_drfcon_show(reader->fc,false,5);
-        MDEBUG("xread - done\n\n");
+        PDPRINT((stderr,"xread - done\n\n"));
     }
 
     mbtrn_reader_destroy(&reader);
@@ -252,9 +256,9 @@ int test(const char *host,char *dfile)
     
     TCLEAR();
     
-    tnames[si]="mdebug_test";
-    tsuccess[si]=0;
-    tstatus[si++]=mdb_test();
+//    tnames[si]="medebug_test";
+//    tsuccess[si]=0;
+//    tstatus[si++]=medebug_test();
 
     tnames[si]="bad_test";
     tsuccess[si]=0;
@@ -268,7 +272,7 @@ int test(const char *host,char *dfile)
 //    iow_socket_t *svr_sock = iow_socket_new("localhost",R7K_7KCENTER_PORT, ST_TCP);
 //    mbtrn_server_t *test_svr    = mbtrn_server_new(svr_sock, mb_data);
 //    
-//    MDEBUG("\nstarting test server [r7k test]\n");
+//    PDPRINT((stderr,"\nstarting test server [r7k test]\n"));
 //    mbtrn_server_start(test_svr);
 //    tnames[si]="test_r7k";
 //    tsuccess[si]=0;

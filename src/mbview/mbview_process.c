@@ -2765,7 +2765,7 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 				}
 			}
 		}
-	
+
 		/* get values for shading */
 		if (view->shade_mode != MBV_SHADE_VIEW_NONE) {
 			if (view->shade_mode == MBV_SHADE_VIEW_ILLUMINATION) {
@@ -2777,7 +2777,7 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 				fprintf(stderr,"intensity:%f  dzdx:%f  dzdy:%f\n",
 				intensity,data->primary_dzdx[k], data->primary_dzdy[k]);
 				*/
-	
+
 				mbview_applyshade(intensity, &data->primary_r[k], &data->primary_g[k], &data->primary_b[k]);
 			}
 			else if (view->shade_mode == MBV_SHADE_VIEW_SLOPE) {
@@ -2798,7 +2798,7 @@ int mbview_colorpoint(struct mbview_world_struct *view, struct mbview_struct *da
 				}
 			}
 		}
-	
+
 		/* set color status bit */
 		data->primary_stat_color[k / 8] = data->primary_stat_color[k / 8] | statmask[k % 8];
 	}

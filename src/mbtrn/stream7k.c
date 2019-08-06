@@ -59,16 +59,26 @@
 // Headers
 /////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <getopt.h>
+//#include <stdarg.h>
+//#include <signal.h>
+//#include "r7kc.h"
+//#include "iowrap.h"
+//#include "merror.h"
+//#include "mbtrn.h"
+//#include "mdebug.h"
+//#include "mconfig.h"
+
 #include <getopt.h>
-#include <stdarg.h>
-#include <signal.h>
 #include "r7kc.h"
-#include "iowrap.h"
+#include "mframe.h"
+#include "msocket.h"
 #include "merror.h"
 #include "mbtrn.h"
-#include "mdebug.h"
+#include "mmdebug.h"
+#include "medebug.h"
 #include "mconfig.h"
 
 /////////////////////////
@@ -110,6 +120,43 @@
 /////////////////////////
 // Declarations
 /////////////////////////
+
+/// @enum stream7k_module_ids
+/// @brief application module IDs
+/// [note : starting above reserved mframe module IDs]
+//typedef enum{
+//    MOD_S7K=MM_MODULE_COUNT,
+//    APP_MODULE_COUNT
+//}stream7k_module_ids;
+
+///// @enum s7k_channel_id
+///// @brief test module channel IDs
+///// [note : starting above reserved mframe channel IDs]
+//typedef enum{
+//    ID_S7K_V1=MM_CHANNEL_COUNT,
+//    ID_S7K_V2,
+//    S7K_CH_COUNT
+//}s7k_channel_id;
+//
+///// @enum s7k_channel_mask
+///// @brief test module channel masks
+//typedef enum{
+//    S7K_V1= (1<<ID_S7K_V1),
+//    S7K_V2= (1<<ID_S7K_V2)
+//}s7k_channel_mask;
+//
+///// @var char *mmd_test_m1_ch_names[S7K_CH_COUNT]
+///// @brief test module channel names
+//char *s7k_ch_names[S7K_CH_COUNT]={
+//    "trace.mbtrn",
+//    "debug.mbtrn",
+//    "warn.mbtrn",
+//    "err.mbtrn",
+//    "s7k.v1",
+//    "s7k.v2"
+//};
+//
+//static mmd_module_config_t mmd_config_default={MOD_S7K,"MOD_S7K",S7K_CH_COUNT,((MM_ERR|MM_WARN)),s7k_ch_names};
 
 /// @typedef struct app_cfg_s app_cfg_t
 /// @brief application configuration parameter structure
@@ -223,27 +270,58 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
         }
     }// while
 
-    mcfg_configure(NULL,0);
-    mdb_set(MDI_ALL,MDL_UNSET);
-    mdb_set(IOW,MDL_ERROR);
-    mdb_set(R7K,MDL_ERROR);
-    mdb_set(MBTRN,MDL_ERROR);
+
+	mconf_init(NULL,NULL);
+    mmd_channel_set(MOD_S7K,MM_ERR);
+    mmd_channel_set(MOD_R7K,MM_ERR);
+    mmd_channel_set(MOD_MBTRN,MM_ERR);
+    mmd_channel_set(MOD_MSOCK,MM_ERR);
+
     switch (cfg->verbose) {
         case 0:
-            mdb_set(MDI_ALL,MDL_UNSET);
+            mmd_channel_set(MOD_S7K,0);
+            mmd_channel_set(MOD_R7K,0);
+            mmd_channel_set(MOD_MBTRN,0);
+            mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
-            mdb_set(APP1,MDL_DEBUG);
+            mmd_channel_en(MOD_S7K,S7K_V1);
+            mmd_channel_en(MOD_S7K,MM_DEBUG);
             break;
         case 2:
-            mdb_set(APP1,MDL_DEBUG);
-            mdb_set(IOW,MDL_DEBUG);
-            mdb_set(R7K,MDL_DEBUG);
-            mdb_set(MBTRN,MDL_DEBUG);
+            mmd_channel_en(MOD_S7K,S7K_V1);
+            mmd_channel_en(MOD_S7K,S7K_V2);
+            mmd_channel_en(MOD_S7K,MM_DEBUG);
+            mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+            mmd_channel_en(MOD_R7K,MM_DEBUG);
+            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
             break;
         default:
             break;
-    }
+	}
+
+//    mcfg_configure(NULL,0);
+//
+//    mdb_set(MDI_ALL,MDL_UNSET);
+//    mdb_set(IOW,MDL_ERROR);
+//    mdb_set(R7K,MDL_ERROR);
+//    mdb_set(MBTRN,MDL_ERROR);
+//    switch (cfg->verbose) {
+//        case 0:
+//            mdb_set(MDI_ALL,MDL_UNSET);
+//            break;
+//        case 1:
+//            mdb_set(APP1,MDL_DEBUG);
+//            break;
+//        case 2:
+//            mdb_set(APP1,MDL_DEBUG);
+//            mdb_set(IOW,MDL_DEBUG);
+//            mdb_set(R7K,MDL_DEBUG);
+//            mdb_set(MBTRN,MDL_DEBUG);
+//            break;
+//        default:
+//            break;
+//    }
 }
 // End function parse_args
 
@@ -257,11 +335,11 @@ static void s_termination_handler (int signum)
         case SIGINT:
         case SIGHUP:
         case SIGTERM:
-            MMDEBUG(APP2,"received sig[%d]\n",signum);
+            PMPRINT(MOD_S7K,S7K_V2,(stderr,"received sig[%d]\n",signum));
             g_stop_flag=true;
             break;
         default:
-            MERROR("not handled[%d]\n",signum);
+            PEPRINT((stderr,"not handled[%d]\n",signum));
             break;
     }
 }
@@ -281,43 +359,43 @@ static int s_app_main (app_cfg_t *cfg)
         uint32_t nsubs=11;
         uint32_t subs[]={1003, 1006, 1008, 1010, 1012, 1013, 1015,
             1016, 7000, 7004, 7027};
-        iow_socket_t *s = NULL;
+        msock_socket_t *s = NULL;
         int cycle_count=0;
         
         while (!g_stop_flag) {
-            s = iow_socket_new(cfg->host, R7K_7KCENTER_PORT, ST_TCP);
+            s = msock_socket_new(cfg->host, R7K_7KCENTER_PORT, ST_TCP);
             if (NULL != s) {
-                MMDEBUG(APP1,"connecting [%s]\n",cfg->host);
-                if (iow_connect(s)==0) {
+                PMPRINT(MOD_S7K,S7K_V1,(stderr,"connecting [%s]\n",cfg->host));
+                if (msock_connect(s)==0) {
                     
                     if(r7k_subscribe(s, subs, nsubs)==0){
-                        int test=iow_set_blocking(s,true);
-                        MMDEBUG(APP1,"set_blocking ret[%d]\n",test);
-                        MMDEBUG(APP1,"subscribing [%u]\n",nsubs);
-                        MMDEBUG(APP1,"streaming c[%d]\n",cfg->cycles);
+                        int test=msock_set_blocking(s,true);
+                        PMPRINT(MOD_S7K,S7K_V1,(stderr,"set_blocking ret[%d]\n",test));
+                        PMPRINT(MOD_S7K,S7K_V1,(stderr,"subscribing [%u]\n",nsubs));
+                        PMPRINT(MOD_S7K,S7K_V1,(stderr,"streaming c[%d]\n",cfg->cycles));
                         r7k_stream_show(s,1024, 350, cfg->cycles,&g_stop_flag);
                         cycle_count++;
                     }else{
-                        MMDEBUG(APP1,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno));
+                        PMPRINT(MOD_S7K,S7K_V1,(stderr,"subscribe failed [%d/%s]\n",me_errno,strerror(me_errno)));
                     }
                 }else{
-                    MMDEBUG(APP1,"connnect failed [%d/%s]\n",me_errno,strerror(me_errno));
+                    PMPRINT(MOD_S7K,S7K_V1,(stderr,"connnect failed [%d/%s]\n",me_errno,strerror(me_errno)));
                 }
             }else{
-                MMDEBUG(APP1,"iow_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno));
+                PMPRINT(MOD_S7K,S7K_V1,(stderr,"msock_socket_new failed [%d/%s]\n",me_errno,strerror(me_errno)));
             }
             if (cfg->cycles>0 && (cycle_count>=cfg->cycles)) {
                 g_stop_flag=true;
             }else{
                 if (!g_stop_flag) {
-                    MMDEBUG(APP1,"retrying connection in 5 s\n");
-                    iow_socket_destroy(&s);
+                    PMPRINT(MOD_S7K,S7K_V1,(stderr,"retrying connection in 5 s\n"));
+                    msock_socket_destroy(&s);
                     sleep(5);
                 }
             }
         }
         if (g_stop_flag) {
-            MMDEBUG(APP2,"stop flag set\n");
+            PMPRINT(MOD_S7K,S7K_V2,(stderr,"stop flag set\n"));
         }
     }// else invalid argument
     return retval;

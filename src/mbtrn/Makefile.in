@@ -141,9 +141,9 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmbtrn_la_DEPENDENCIES =
-am_libmbtrn_la_OBJECTS = cbuffer.lo iowrap.lo iowrap-posix.lo \
-	mbtrn-server.lo mconfig.lo mdebug.lo merror.lo mlog.lo \
-	mlist.lo mbtrn.lo r7kc.lo
+am_libmbtrn_la_OBJECTS = mframe.lo mcbuf.lo msocket.lo mthread.lo \
+	mfile.lo mtime.lo mmdebug.lo mconfig.lo merror.lo mlog.lo \
+	mlist.lo mstats.lo mbtrn.lo mbtrn-server.lo r7kc.lo
 libmbtrn_la_OBJECTS = $(am_libmbtrn_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -192,13 +192,15 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/cbuffer.Plo ./$(DEPDIR)/emu7k.Po \
-	./$(DEPDIR)/frames7k.Po ./$(DEPDIR)/iowrap-posix.Plo \
-	./$(DEPDIR)/iowrap.Plo ./$(DEPDIR)/mbtrn-server.Plo \
-	./$(DEPDIR)/mbtrn-test.Po ./$(DEPDIR)/mbtrn.Plo \
-	./$(DEPDIR)/mconfig.Plo ./$(DEPDIR)/mdebug.Plo \
-	./$(DEPDIR)/merror.Plo ./$(DEPDIR)/mlist.Plo \
-	./$(DEPDIR)/mlog.Plo ./$(DEPDIR)/r7kc.Plo \
+am__depfiles_remade = ./$(DEPDIR)/emu7k.Po ./$(DEPDIR)/frames7k.Po \
+	./$(DEPDIR)/mbtrn-server.Plo ./$(DEPDIR)/mbtrn-test.Po \
+	./$(DEPDIR)/mbtrn.Plo ./$(DEPDIR)/mcbuf.Plo \
+	./$(DEPDIR)/mconfig.Plo ./$(DEPDIR)/merror.Plo \
+	./$(DEPDIR)/mfile.Plo ./$(DEPDIR)/mframe.Plo \
+	./$(DEPDIR)/mlist.Plo ./$(DEPDIR)/mlog.Plo \
+	./$(DEPDIR)/mmdebug.Plo ./$(DEPDIR)/msocket.Plo \
+	./$(DEPDIR)/mstats.Plo ./$(DEPDIR)/mthread.Plo \
+	./$(DEPDIR)/mtime.Plo ./$(DEPDIR)/r7kc.Plo \
 	./$(DEPDIR)/stream7k.Po ./$(DEPDIR)/tbinx.Po \
 	./$(DEPDIR)/trnc.Po ./$(DEPDIR)/udpc.Po ./$(DEPDIR)/udps.Po
 am__mv = mv -f
@@ -425,40 +427,48 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libmbtrn.la
-include_HEADERS = cbuffer.h \
-				iowrap.h \
-				iowrap-posix.h \
-				iowrap-win.h\
-				mbtrn.h \
-				mbtrn-server.h \
-				mbtrn-test.h \
+include_HEADERS = mframe.h \
+				mcbuf.h \
+                msocket.h \
+                mthread.h \
+				mfile.h \
+				mtime.h\
 				mconfig.h \
-				mdebug.h \
+                medebug.h \
+                mmdebug.h \
 				merror.h \
 				mlog.h \
-				mlist.h \
+                mlist.h \
+                mstats.h \
+                mbtrn.h \
+                mbtrn-server.h \
+                mbtrn-test.h \
 				r7kc.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 # add -DMBTRN_VER="<version>" to override version defined in mbtrn.h
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -DHAVE_CONFIG_H  -DWITH_TEST -DMD_OLEVEL=MD_DEBUG -D_GNU_SOURCE -DMBTRN_BUILD="`date +%Y/%m/%dT%H:%M:%S%z`"
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE -DMBTRN_BUILD="`date +%Y/%m/%dT%H:%M:%S%z`"
 libmbtrn_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbtrn_la_SOURCES = \
-				cbuffer.c \
-				iowrap.c \
-				iowrap-posix.c \
-				mbtrn-server.c \
-				mconfig.c \
-				mdebug.c \
-				merror.c \
-				mlog.c \
-				mlist.c \
+				mframe.c \
+                mcbuf.c \
+                msocket.c \
+                mthread.c \
+                mfile.c \
+                mtime.c\
+                mmdebug.c \
+                mconfig.c \
+                merror.c \
+                mlog.c \
+                mlist.c \
+                mstats.c \
 				mbtrn.c \
+                mbtrn-server.c \
 				r7kc.c
 
 libmbtrn_la_LIBADD = -lpthread
-tmbtrn_SOURCES = mbtrn-test.c
+tmbtrn_SOURCES = mbtrn-test.c 
 tmbtrn_LDADD = libmbtrn.la
 stream7k_SOURCES = stream7k.c
 stream7k_LDADD = libmbtrn.la
@@ -671,19 +681,23 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cbuffer.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emu7k.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frames7k.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iowrap-posix.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iowrap.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn-server.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn-test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mcbuf.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mconfig.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mdebug.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merror.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfile.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mframe.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mlist.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mlog.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmdebug.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msocket.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mstats.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mthread.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/r7kc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream7k.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tbinx.Po@am__quote@ # am--include-marker
@@ -846,19 +860,23 @@ clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/cbuffer.Plo
-	-rm -f ./$(DEPDIR)/emu7k.Po
+		-rm -f ./$(DEPDIR)/emu7k.Po
 	-rm -f ./$(DEPDIR)/frames7k.Po
-	-rm -f ./$(DEPDIR)/iowrap-posix.Plo
-	-rm -f ./$(DEPDIR)/iowrap.Plo
 	-rm -f ./$(DEPDIR)/mbtrn-server.Plo
 	-rm -f ./$(DEPDIR)/mbtrn-test.Po
 	-rm -f ./$(DEPDIR)/mbtrn.Plo
+	-rm -f ./$(DEPDIR)/mcbuf.Plo
 	-rm -f ./$(DEPDIR)/mconfig.Plo
-	-rm -f ./$(DEPDIR)/mdebug.Plo
 	-rm -f ./$(DEPDIR)/merror.Plo
+	-rm -f ./$(DEPDIR)/mfile.Plo
+	-rm -f ./$(DEPDIR)/mframe.Plo
 	-rm -f ./$(DEPDIR)/mlist.Plo
 	-rm -f ./$(DEPDIR)/mlog.Plo
+	-rm -f ./$(DEPDIR)/mmdebug.Plo
+	-rm -f ./$(DEPDIR)/msocket.Plo
+	-rm -f ./$(DEPDIR)/mstats.Plo
+	-rm -f ./$(DEPDIR)/mthread.Plo
+	-rm -f ./$(DEPDIR)/mtime.Plo
 	-rm -f ./$(DEPDIR)/r7kc.Plo
 	-rm -f ./$(DEPDIR)/stream7k.Po
 	-rm -f ./$(DEPDIR)/tbinx.Po
@@ -911,19 +929,23 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/cbuffer.Plo
-	-rm -f ./$(DEPDIR)/emu7k.Po
+		-rm -f ./$(DEPDIR)/emu7k.Po
 	-rm -f ./$(DEPDIR)/frames7k.Po
-	-rm -f ./$(DEPDIR)/iowrap-posix.Plo
-	-rm -f ./$(DEPDIR)/iowrap.Plo
 	-rm -f ./$(DEPDIR)/mbtrn-server.Plo
 	-rm -f ./$(DEPDIR)/mbtrn-test.Po
 	-rm -f ./$(DEPDIR)/mbtrn.Plo
+	-rm -f ./$(DEPDIR)/mcbuf.Plo
 	-rm -f ./$(DEPDIR)/mconfig.Plo
-	-rm -f ./$(DEPDIR)/mdebug.Plo
 	-rm -f ./$(DEPDIR)/merror.Plo
+	-rm -f ./$(DEPDIR)/mfile.Plo
+	-rm -f ./$(DEPDIR)/mframe.Plo
 	-rm -f ./$(DEPDIR)/mlist.Plo
 	-rm -f ./$(DEPDIR)/mlog.Plo
+	-rm -f ./$(DEPDIR)/mmdebug.Plo
+	-rm -f ./$(DEPDIR)/msocket.Plo
+	-rm -f ./$(DEPDIR)/mstats.Plo
+	-rm -f ./$(DEPDIR)/mthread.Plo
+	-rm -f ./$(DEPDIR)/mtime.Plo
 	-rm -f ./$(DEPDIR)/r7kc.Plo
 	-rm -f ./$(DEPDIR)/stream7k.Po
 	-rm -f ./$(DEPDIR)/tbinx.Po
@@ -971,6 +993,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dist_binSCRIPTS \
 
 .PRECIOUS: Makefile
 
+
+    WITH_MEDEBUG_DEBUG     : enable medebug debug macros
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

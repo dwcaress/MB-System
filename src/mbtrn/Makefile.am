@@ -1,45 +1,57 @@
 lib_LTLIBRARIES = libmbtrn.la
 
-include_HEADERS = cbuffer.h \
-				iowrap.h \
-				iowrap-posix.h \
-				iowrap-win.h\
-				mbtrn.h \
-				mbtrn-server.h \
-				mbtrn-test.h \
+include_HEADERS = mframe.h \
+				mcbuf.h \
+                msocket.h \
+                mthread.h \
+				mfile.h \
+				mtime.h\
 				mconfig.h \
-				mdebug.h \
+                medebug.h \
+                mmdebug.h \
 				merror.h \
 				mlog.h \
-				mlist.h \
+                mlist.h \
+                mstats.h \
+                mbtrn.h \
+                mbtrn-server.h \
+                mbtrn-test.h \
 				r7kc.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 # add -DMBTRN_VER="<version>" to override version defined in mbtrn.h
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -DHAVE_CONFIG_H  -DWITH_TEST -DMD_OLEVEL=MD_DEBUG -D_GNU_SOURCE -DMBTRN_BUILD="`date +%Y/%m/%dT%H:%M:%S%z`"
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -DHAVE_CONFIG_H  -DWITH_TESTS -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE -DMBTRN_BUILD="`date +%Y/%m/%dT%H:%M:%S%z`"
+
+
+    WITH_MEDEBUG_DEBUG     : enable medebug debug macros
 
 libmbtrn_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
 libmbtrn_la_SOURCES = \
-				cbuffer.c \
-				iowrap.c \
-				iowrap-posix.c \
-				mbtrn-server.c \
-				mconfig.c \
-				mdebug.c \
-				merror.c \
-				mlog.c \
-				mlist.c \
+				mframe.c \
+                mcbuf.c \
+                msocket.c \
+                mthread.c \
+                mfile.c \
+                mtime.c\
+                mmdebug.c \
+                mconfig.c \
+                merror.c \
+                mlog.c \
+                mlist.c \
+                mstats.c \
 				mbtrn.c \
+                mbtrn-server.c \
 				r7kc.c
+
 
 libmbtrn_la_LIBADD = -lpthread
 
 bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k tbinx udps udpc
 
-tmbtrn_SOURCES = mbtrn-test.c
+tmbtrn_SOURCES = mbtrn-test.c 
 tmbtrn_LDADD = libmbtrn.la
 
 stream7k_SOURCES = stream7k.c
