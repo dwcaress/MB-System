@@ -158,9 +158,6 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
     fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
   /* allocate memory for data structure */
   const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson7k_struct), (void **)store_ptr, error);
 
@@ -4463,10 +4460,6 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
   /* get data kind */
@@ -4547,12 +4540,6 @@ int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr, int *s
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
-  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-
   /* get sonar type */
   *sonartype = MB_TOPOGRAPHY_TYPE_MULTIBEAM;
 
@@ -4578,12 +4565,6 @@ int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, int
     fprintf(stderr, "dbg2       mb_ptr:     %p\n", (void *)mbio_ptr);
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
-
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
-  struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
   /* get sidescan type */
   *ss_type = MB_SIDESCAN_LINEAR;
@@ -5858,7 +5839,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr, int *kind, void **platform_ptr, int *error) {
   struct mb_platform_struct *platform;
-  s7kr_installation *installation;
   int sensor_multibeam, sensor_position, sensor_attitude;
   int ntimelag = 0;
   int isensor;
@@ -5873,10 +5853,8 @@ int mbsys_reson7k_extract_platform(int verbose, void *mbio_ptr, void *store_ptr,
     fprintf(stderr, "dbg2       *platform_ptr:  %p\n", (void *)*platform_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  installation = (s7kr_installation *)&store->installation;
+  s7kr_installation *installation = (s7kr_installation *)&store->installation;
 
   int status = MB_SUCCESS;
 
@@ -6584,17 +6562,6 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
                          double navlat, double speed, double heading, int nbath, int namp, int nss, char *beamflag, double *bath,
                          double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss, double *ssacrosstrack,
                          double *ssalongtrack, char *comment, int *error) {
-  s7kr_bluefin *bluefin;
-  s7kr_processedsidescan *processedsidescan;
-  s7kr_volatilesettings *volatilesettings;
-  s7kr_bathymetry *bathymetry;
-  s7kr_backscatter *backscatter;
-  s7kr_beam *beam;
-  s7kr_position *position;
-  s7kr_systemeventmessage *systemeventmessage;
-  s7kr_fsdwsb *fsdwsb;
-  s7kr_fsdwss *fsdwsslo;
-  s7kr_fsdwss *fsdwsshi;
   s7k_fsdwsegyheader *fsdwsegyheader;
   s7k_fsdwssheader *fsdwssheader;
   int msglen;
@@ -6642,22 +6609,18 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
     fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", comment);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  bluefin = (s7kr_bluefin *)&store->bluefin;
-  volatilesettings = (s7kr_volatilesettings *)&store->volatilesettings;
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  backscatter = (s7kr_backscatter *)&store->backscatter;
-  beam = (s7kr_beam *)&store->beam;
-  processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
-  position = (s7kr_position *)&store->position;
-  systemeventmessage = (s7kr_systemeventmessage *)&store->systemeventmessage;
-  fsdwsb = &(store->fsdwsb);
-  fsdwsslo = &(store->fsdwsslo);
-  fsdwsshi = &(store->fsdwsshi);
+  s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
+  s7kr_volatilesettings *volatilesettings = (s7kr_volatilesettings *)&store->volatilesettings;
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  s7kr_backscatter *backscatter = (s7kr_backscatter *)&store->backscatter;
+  s7kr_beam *beam = (s7kr_beam *)&store->beam;
+  s7kr_processedsidescan *processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
+  s7kr_position *position = (s7kr_position *)&store->position;
+  s7kr_systemeventmessage *systemeventmessage = (s7kr_systemeventmessage *)&store->systemeventmessage;
+  s7kr_fsdwsb *fsdwsb = &(store->fsdwsb);
+  s7kr_fsdwss *fsdwsslo = &(store->fsdwsslo);
+  s7kr_fsdwss *fsdwsshi = &(store->fsdwsshi);
 
   /* set data kind */
   store->kind = kind;
@@ -7027,9 +6990,6 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nbeams, int *detects, int *error) {
-  s7kr_bathymetry *bathymetry;
-  mb_u_char detect;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7039,12 +6999,8 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     fprintf(stderr, "dbg2       detects:    %p\n", (void *)detects);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
 
   /* get data kind */
   *kind = store->kind;
@@ -7056,7 +7012,7 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     /* read distance and depth values into storage arrays */
     *nbeams = bathymetry->number_beams;
     for (int i = 0; i < *nbeams; i++) {
-      detect = (bathymetry->quality[i] & 48) >> 4;
+      const mb_u_char detect = (bathymetry->quality[i] & 48) >> 4;
       if (detect == 0)
         detects[i] = MB_DETECT_UNKNOWN;
       else if (detect == 1)
@@ -7109,9 +7065,6 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transmit_gain, double *pulse_length,
                         double *receive_gain, int *error) {
-  s7k_header *header;
-  s7kr_volatilesettings *volatilesettings;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -7120,10 +7073,6 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
   /* get data kind */
@@ -7134,8 +7083,8 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
   /* extract data from structure */
   if (*kind == MB_DATA_DATA) {
     /* get survey data structure */
-    volatilesettings = &(store->volatilesettings);
-    header = &(volatilesettings->header);
+    s7kr_volatilesettings *volatilesettings = &(store->volatilesettings);
+    s7k_header *header = &(volatilesettings->header);
 
     /* get transmit_gain (dB) */
     *transmit_gain = (double)volatilesettings->power_selection;
@@ -8005,12 +7954,6 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, int
 int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int time_i[7], double time_d, double navlon,
                              double navlat, double speed, double heading, double draft, double roll, double pitch, double heave,
                              int *error) {
-  s7kr_bathymetry *bathymetry;
-  s7kr_position *position;
-  s7kr_depth *depth;
-  s7kr_attitude *attitude;
-  s7kr_reference *reference;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8035,16 +7978,12 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
     fprintf(stderr, "dbg2       heave:      %f\n", heave);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  position = (s7kr_position *)&store->position;
-  depth = (s7kr_depth *)&store->depth;
-  attitude = (s7kr_attitude *)&store->attitude;
-  reference = (s7kr_reference *)&store->reference;
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  s7kr_position *position = (s7kr_position *)&store->position;
+  s7kr_depth *depth = (s7kr_depth *)&store->depth;
+  s7kr_attitude *attitude = (s7kr_attitude *)&store->attitude;
+  s7kr_reference *reference = (s7kr_reference *)&store->reference;
 
   /* insert data in ping structure */
   if (store->kind == MB_DATA_DATA) {
@@ -8106,8 +8045,6 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsvp, double *depth, double *velocity,
                               int *error) {
-  s7kr_svp *svp;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8116,12 +8053,8 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  svp = (s7kr_svp *)&store->svp;
+  s7kr_svp *svp = (s7kr_svp *)&store->svp;
 
   /* get data kind */
   *kind = store->kind;
@@ -8173,8 +8106,6 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsvp, double *depth, double *velocity,
                              int *error) {
-  s7kr_svp *svp;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8186,12 +8117,8 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
       fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  svp = (s7kr_svp *)&store->svp;
+  s7kr_svp *svp = (s7kr_svp *)&store->svp;
 
   int status = MB_SUCCESS;
 
@@ -8261,10 +8188,6 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
     fprintf(stderr, "dbg2       segytraceheader_ptr: %p\n", (void *)segytraceheader_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
   /* get data kind */
@@ -8511,9 +8434,6 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
     fprintf(stderr, "dbg2       segydata:          %p\n", (void *)segydata);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
   /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
@@ -8694,24 +8614,6 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int kind, void *segyheader_ptr, float *segydata,
                               int *error) {
-  struct mb_segytraceheader_struct *mb_segytraceheader_ptr;
-  s7k_header *header;
-  s7kr_bathymetry *bathymetry;
-  s7kr_fsdwsb *fsdwsb;
-  s7k_fsdwchannel *fsdwchannel;
-  s7k_fsdwsegyheader *fsdwsegyheader;
-  s7kr_ctd *ctd;
-  double dsonardepth, dsonaraltitude, dwaterdepth;
-  int sonardepth, waterdepth;
-  int watersoundspeed;
-  float fwatertime;
-  int time_j[5];
-  float factor;
-  float datamax;
-  double weight;
-  int data_size;
-  short *shortptr;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8722,10 +8624,6 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     fprintf(stderr, "dbg2       segyheader_ptr: %p\n", (void *)segyheader_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
   /* get data kind */
@@ -8733,28 +8631,34 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
 
   int status = MB_SUCCESS;
 
+  struct mb_segytraceheader_struct *mb_segytraceheader_ptr = NULL;
+
   /* insert data to structure */
   if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
     /* get relevant structures */
     mb_segytraceheader_ptr = (struct mb_segytraceheader_struct *)segyheader_ptr;
-    bathymetry = &(store->bathymetry);
-    ctd = &(store->ctd);
-    fsdwsb = &(store->fsdwsb);
-    header = &(fsdwsb->header);
-    fsdwchannel = &(fsdwsb->channel);
-    fsdwsegyheader = &(fsdwsb->segyheader);
+    s7kr_bathymetry *bathymetry = &(store->bathymetry);
+    s7kr_ctd *ctd = &(store->ctd);
+    s7kr_fsdwsb *fsdwsb = &(store->fsdwsb);
+    s7k_header *header = &(fsdwsb->header);
+    s7k_fsdwchannel *fsdwchannel = &(fsdwsb->channel);
+    s7k_fsdwsegyheader *fsdwsegyheader = &(fsdwsb->segyheader);
 
     /* get needed values */
+    double dsonardepth;
     mb_depint_interp(verbose, mbio_ptr, store->time_d, &dsonardepth, error);
+    double dsonaraltitude;
     mb_altint_interp(verbose, mbio_ptr, store->time_d, &dsonaraltitude, error);
-    dwaterdepth = dsonardepth + dsonaraltitude;
-    sonardepth = (int)(100 * dsonardepth);
-    waterdepth = (int)(100 * dwaterdepth);
+    const double dwaterdepth = dsonardepth + dsonaraltitude;
+    int sonardepth = (int)(100 * dsonardepth);
+    int waterdepth = (int)(100 * dwaterdepth);
+    int watersoundspeed;
     if (ctd->n > 0)
       watersoundspeed = (int)(ctd->sound_velocity[ctd->n - 1]);
     else
       watersoundspeed = 1500;
-    fwatertime = 2.0 * 0.01 * ((double)waterdepth) / ((double)watersoundspeed);
+    const float fwatertime = 2.0 * 0.01 * ((double)waterdepth) / ((double)watersoundspeed);
+    int time_j[5];
     mb_get_jtime(verbose, store->time_i, time_j);
 
     /* extract the data */
@@ -8777,6 +8681,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
       sonardepth = mb_segytraceheader_ptr->src_depth;
     else
       sonardepth = 0;
+    float factor;
     if (mb_segytraceheader_ptr->elev_scalar < 0)
       factor = 1.0 / ((float)(-mb_segytraceheader_ptr->elev_scalar));
     else
@@ -8807,7 +8712,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     header->s7kTime.Minutes = store->time_i[4];
 
     /* get max data value */
-    datamax = 0.0;
+    float datamax = 0.0;
     for (int i = 0; i < mb_segytraceheader_ptr->nsamps; i++) {
       if (fabs(segydata[i]) > datamax)
         datamax = fabs(segydata[i]);
@@ -8817,11 +8722,11 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
     }
     else
       fsdwsegyheader->weightingFactor = 0;
-    weight = pow(2.0, (double)fsdwsegyheader->weightingFactor);
+    const double weight = pow(2.0, (double)fsdwsegyheader->weightingFactor);
     fsdwchannel->bytespersample = 2;
 
     /* make sure enough memory is allocated for channel data */
-    data_size = fsdwchannel->bytespersample * fsdwchannel->number_samples;
+    const int data_size = fsdwchannel->bytespersample * fsdwchannel->number_samples;
     if (fsdwchannel->data_alloc < data_size) {
       status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(fsdwchannel->data), error);
       if (status == MB_SUCCESS) {
@@ -8835,7 +8740,7 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
 
     /* copy over the data */
     if (fsdwchannel->data_alloc >= data_size) {
-      shortptr = (short *)fsdwchannel->data;
+      short *shortptr = (short *)fsdwchannel->data;
       for (int i = 0; i < fsdwchannel->number_samples; i++) {
         shortptr[i] = (short)(segydata[i] * weight);
       }
@@ -8936,10 +8841,6 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr, int 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nctd, double *time_d, double *conductivity,
                       double *temperature, double *depth, double *salinity, double *soundspeed, int *error) {
-  s7k_header *header;
-  s7kr_bluefin *bluefin;
-  s7k_bluefin_environmental *environmental;
-  s7kr_ctd *ctd;
   int time_j[5];
   int time_i[7];
 
@@ -8951,10 +8852,6 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
   /* get data kind */
@@ -8964,12 +8861,12 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
   /* extract ctd data from bluefin environmental SSV record */
   if (*kind == MB_DATA_SSV) {
-    bluefin = &(store->bluefin);
-    header = &(bluefin->header);
+    s7kr_bluefin *bluefin = &(store->bluefin);
+    s7k_header *header = &(bluefin->header);
 
     *nctd = 0;
     for (int i = 0; i < bluefin->number_frames; i++) {
-      environmental = &(bluefin->environmental[i]);
+      s7k_bluefin_environmental *environmental = &(bluefin->environmental[i]);
       if (environmental->ctd_time > 0.0 && *nctd < MB_CTD_MAX) {
         /* get time_d if needed */
         if (environmental->ctd_time < 10000.0) {
@@ -8996,8 +8893,8 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 
   /* extract ctd data from CTD record */
   else if (*kind == MB_DATA_CTD) {
-    ctd = &(store->ctd);
-    header = &(ctd->header);
+    s7kr_ctd *ctd = &(store->ctd);
+    s7k_header *header = &(ctd->header);
 
     /* get time */
     time_j[0] = header->s7kTime.Year;
@@ -9056,10 +8953,6 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr, int *kind, i
 int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *nsamples, double *time_d,
                                    double *sensor1, double *sensor2, double *sensor3, double *sensor4, double *sensor5,
                                    double *sensor6, double *sensor7, double *sensor8, int *error) {
-  s7k_header *header;
-  s7kr_bluefin *bluefin;
-  s7k_bluefin_environmental *environmental;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -9068,10 +8961,6 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
 
   /* get data kind */
@@ -9079,12 +8968,12 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 
   /* extract ctd data from bluefin environmental SSV record */
   if (*kind == MB_DATA_SSV) {
-    bluefin = &(store->bluefin);
-    header = &(bluefin->header);
+    s7kr_bluefin *bluefin = &(store->bluefin);
+    s7k_header *header = &(bluefin->header);
 
     *nsamples = 0;
     for (int i = 0; i < bluefin->number_frames; i++) {
-      environmental = &(bluefin->environmental[i]);
+      s7k_bluefin_environmental *environmental = &(bluefin->environmental[i]);
       time_d[*nsamples] = environmental->sensor_time_sec + 0.000000001 * environmental->sensor_time_nsec;
       sensor1[*nsamples] = -5.0 + ((double)environmental->sensor1) / 6553.6;
       sensor2[*nsamples] = -5.0 + ((double)environmental->sensor2) / 6553.6;
@@ -9135,22 +9024,8 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_ptr, int *error) {
-  struct mbsys_reson7k_struct *copy;
-  s7kr_attitude *attitude;
-  s7kr_motion *motion;
-  s7kr_svp *svp;
-  s7kr_ctd *ctd;
-  s7kr_fsdwss *fsdwsslo;
-  s7kr_fsdwss *fsdwsshi;
-  s7kr_fsdwsb *fsdwsb;
-  s7kr_configuration *configuration;
-  s7kr_backscatter *backscatter;
-  s7kr_beam *beam;
-  s7kr_tvg *tvg;
-  s7kr_image *image;
-  s7kr_systemeventmessage *systemeventmessage;
-  int nalloc;
-  char *charptr, *copycharptr;
+  char *charptr;
+  char *copycharptr;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -9161,12 +9036,8 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
     fprintf(stderr, "dbg2       copy_ptr:   %p\n", (void *)copy_ptr);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointers */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  copy = (struct mbsys_reson7k_struct *)copy_ptr;
+  struct mbsys_reson7k_struct *copy = (struct mbsys_reson7k_struct *)copy_ptr;
 
   /* copy over structures, allocating memory where necessary */
 
@@ -9193,7 +9064,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   copy->position = store->position;
 
   /* Attitude (record 1004) */
-  attitude = &copy->attitude;
+  s7kr_attitude *attitude = &copy->attitude;
   copy->attitude = store->attitude;
   copy->attitude.nalloc = attitude->nalloc;
   copy->attitude.pitch = attitude->pitch;
@@ -9234,7 +9105,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   copy->altitude = store->altitude;
 
   /* Motion over ground (record 1007) */
-  motion = &copy->motion;
+  s7kr_motion *motion = &copy->motion;
   copy->motion = store->motion;
   copy->motion.nalloc = motion->nalloc;
   copy->motion.x = motion->x;
@@ -9277,7 +9148,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   copy->depth = store->depth;
 
   /* Sound velocity profile (record 1009) */
-  svp = &copy->svp;
+  s7kr_svp *svp = &copy->svp;
   copy->svp = store->svp;
   copy->svp.nalloc = svp->nalloc;
   copy->svp.depth = svp->depth;
@@ -9301,7 +9172,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   }
 
   /* CTD (record 1010) */
-  ctd = &copy->ctd;
+  s7kr_ctd *ctd = &copy->ctd;
   copy->ctd = store->ctd;
   copy->ctd.nalloc = ctd->nalloc;
   copy->ctd.conductivity_salinity = ctd->conductivity_salinity;
@@ -9341,7 +9212,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   copy->geodesy = store->geodesy;
 
   /* Edgetech FS-DW low frequency sidescan (record 3000) */
-  fsdwsslo = &copy->fsdwsslo;
+  s7kr_fsdwss *fsdwsslo = &copy->fsdwsslo;
   copy->fsdwsslo = store->fsdwsslo;
   for (int j = 0; j < 2; j++) {
     copy->fsdwsslo.channel[j].data_alloc = fsdwsslo->channel[j].data_alloc;
@@ -9366,7 +9237,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   }
 
   /* Edgetech FS-DW high frequency sidescan (record 3000) */
-  fsdwsshi = &copy->fsdwsshi;
+  s7kr_fsdwss *fsdwsshi = &copy->fsdwsshi;
   copy->fsdwsshi = store->fsdwsshi;
   for (int j = 0; j < 2; j++) {
     copy->fsdwsshi.channel[j].data_alloc = fsdwsshi->channel[j].data_alloc;
@@ -9391,7 +9262,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   }
 
   /* Edgetech FS-DW subbottom (record 3001) */
-  fsdwsb = &copy->fsdwsb;
+  s7kr_fsdwsb *fsdwsb = &copy->fsdwsb;
   copy->fsdwsb = store->fsdwsb;
   copy->fsdwsb.channel.data_alloc = fsdwsb->channel.data_alloc;
   copy->fsdwsb.channel.data = fsdwsb->channel.data;
@@ -9419,7 +9290,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   copy->volatilesettings = store->volatilesettings;
 
   /* Reson 7k configuration (record 7001) */
-  configuration = &copy->configuration;
+  s7kr_configuration *configuration = &copy->configuration;
   copy->configuration = store->configuration;
   for (int j = 0; j < MBSYS_RESON7K_MAX_DEVICE; j++) {
     copy->configuration.device[j].info_alloc = configuration->device[j].info_alloc;
@@ -9451,7 +9322,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   copy->bathymetry = store->bathymetry;
 
   /* Reson 7k backscatter imagery data (record 7007) */
-  backscatter = &copy->backscatter;
+  s7kr_backscatter *backscatter = &copy->backscatter;
   copy->backscatter = store->backscatter;
   copy->backscatter.nalloc = backscatter->nalloc;
   copy->backscatter.port_data = backscatter->port_data;
@@ -9477,7 +9348,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   }
 
   /* Reson 7k beam data (record 7008) */
-  beam = &copy->beam;
+  s7kr_beam *beam = &copy->beam;
   copy->beam = store->beam;
   for (int i = 0; i < MBSYS_RESON7K_MAX_RECEIVERS; i++) {
     copy->beam.snippets[i].nalloc_amp = beam->snippets[i].nalloc_amp;
@@ -9517,11 +9388,11 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   copy->verticaldepth = store->verticaldepth;
 
   /* Reson 7k tvg data (record 7010) */
-  tvg = &copy->tvg;
+  s7kr_tvg *tvg = &copy->tvg;
   copy->tvg = store->tvg;
   copy->tvg.nalloc = tvg->nalloc;
   copy->tvg.tvg = tvg->tvg;
-  nalloc = tvg->n * sizeof(float);
+  int nalloc = tvg->n * sizeof(float);
   if (status == MB_SUCCESS && copy->tvg.nalloc < nalloc) {
     copy->tvg.nalloc = nalloc;
     if (status == MB_SUCCESS)
@@ -9539,7 +9410,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   }
 
   /* Reson 7k image data (record 7011) */
-  image = &copy->image;
+  s7kr_image *image = &copy->image;
   copy->image = store->image;
   copy->image.nalloc = image->nalloc;
   copy->image.image = image->image;
@@ -9563,7 +9434,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
   }
 
   /* Reson 7k system event (record 7051) */
-  systemeventmessage = &copy->systemeventmessage;
+  s7kr_systemeventmessage *systemeventmessage = &copy->systemeventmessage;
   copy->systemeventmessage = store->systemeventmessage;
   copy->systemeventmessage.message_alloc = systemeventmessage->message_alloc;
   copy->systemeventmessage.message = systemeventmessage->message;
@@ -9601,20 +9472,9 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int source, int pixel_size_set, double *pixel_size,
                          int swath_width_set, double *swath_width, int pixel_int, int *error) {
-  s7kr_reference *reference;
-  s7kr_volatilesettings *volatilesettings;
-  s7kr_beamgeometry *beamgeometry;
-  s7kr_bathymetry *bathymetry;
-  s7kr_backscatter *backscatter;
   s7kr_snippet *snippet;
-  s7kr_beam *beam;
   s7kr_v2snippettimeseries *snippettimeseries;
-  s7kr_v2snippet *v2snippet;
   s7kr_calibratedsnippettimeseries *calibratedsnippettimeseries;
-  s7kr_calibratedsnippet *calibratedsnippet;
-  s7kr_processedsidescan *processedsidescan;
-  s7kr_bluefin *bluefin;
-  s7kr_soundvelocity *soundvelocity;
   int nss;
   int ss_cnt[MBSYS_RESON7K_MAX_PIXELS];
   double ss[MBSYS_RESON7K_MAX_PIXELS];
@@ -9659,22 +9519,18 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
     fprintf(stderr, "dbg2       pixel_int:       %d\n", pixel_int);
   }
 
-  /* get mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get data structure pointer */
   struct mbsys_reson7k_struct *store = (struct mbsys_reson7k_struct *)store_ptr;
-  reference = (s7kr_reference *)&store->reference;
-  volatilesettings = (s7kr_volatilesettings *)&store->volatilesettings;
-  beamgeometry = (s7kr_beamgeometry *)&store->beamgeometry;
-  bathymetry = (s7kr_bathymetry *)&store->bathymetry;
-  backscatter = (s7kr_backscatter *)&store->backscatter;
-  v2snippet = (s7kr_v2snippet *)&store->v2snippet;
-  calibratedsnippet = (s7kr_calibratedsnippet *)&store->calibratedsnippet;
-  beam = (s7kr_beam *)&store->beam;
-  processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
-  bluefin = (s7kr_bluefin *)&store->bluefin;
-  soundvelocity = (s7kr_soundvelocity *)&store->soundvelocity;
+  s7kr_reference *reference = (s7kr_reference *)&store->reference;
+  s7kr_volatilesettings *volatilesettings = (s7kr_volatilesettings *)&store->volatilesettings;
+  s7kr_beamgeometry *beamgeometry = (s7kr_beamgeometry *)&store->beamgeometry;
+  s7kr_bathymetry *bathymetry = (s7kr_bathymetry *)&store->bathymetry;
+  s7kr_backscatter *backscatter = (s7kr_backscatter *)&store->backscatter;
+  s7kr_v2snippet *v2snippet = (s7kr_v2snippet *)&store->v2snippet;
+  s7kr_calibratedsnippet *calibratedsnippet = (s7kr_calibratedsnippet *)&store->calibratedsnippet;
+  s7kr_beam *beam = (s7kr_beam *)&store->beam;
+  s7kr_processedsidescan *processedsidescan = (s7kr_processedsidescan *)&store->processedsidescan;
+  s7kr_bluefin *bluefin = (s7kr_bluefin *)&store->bluefin;
+  s7kr_soundvelocity *soundvelocity = (s7kr_soundvelocity *)&store->soundvelocity;
 
   /* if necessary pick a source for the backscatter */
   if (store->kind == MB_DATA_DATA && source == R7KRECID_None) {
