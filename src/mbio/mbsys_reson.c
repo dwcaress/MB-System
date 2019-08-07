@@ -46,9 +46,6 @@ int mbsys_reson_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *error)
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson_struct), store_ptr, error);
 
@@ -205,10 +202,6 @@ int mbsys_reson_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
@@ -501,10 +494,6 @@ int mbsys_reson_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, i
 		fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", comment);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* set data kind */
@@ -611,10 +600,6 @@ int mbsys_reson_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		fprintf(stderr, "dbg2       ltrk_off:   %p\n", (void *)alongtrack_offset);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
@@ -716,10 +701,6 @@ int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		fprintf(stderr, "dbg2       detects:    %p\n", (void *)detects);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
@@ -779,7 +760,6 @@ int mbsys_reson_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 /*--------------------------------------------------------------------*/
 int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, int *kind, double *transducer_depth,
                                  double *altitude, int *error) {
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -788,10 +768,6 @@ int mbsys_reson_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr, i
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
@@ -874,10 +850,6 @@ int mbsys_reson_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
@@ -1069,10 +1041,6 @@ int mbsys_reson_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int tim
 		fprintf(stderr, "dbg2       heave:      %f\n", heave);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* insert data in structure */
@@ -1154,10 +1122,6 @@ int mbsys_reson_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* get data kind */
@@ -1220,10 +1184,6 @@ int mbsys_reson_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int nsv
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 
 	/* insert data in structure */
@@ -1261,10 +1221,6 @@ int mbsys_reson_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_pt
 		fprintf(stderr, "dbg2       copy_ptr:   %p\n", (void *)copy_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointers */
 	struct mbsys_reson_struct *store = (struct mbsys_reson_struct *)store_ptr;
 	struct mbsys_reson_struct *copy = (struct mbsys_reson_struct *)copy_ptr;
 
