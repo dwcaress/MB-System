@@ -51,8 +51,6 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
                       int *traveltime, int *beam_flagging, int *platform_source, int *nav_source, int *sensordepth_source,
                       int *heading_source, int *attitude_source, int *svp_source, double *beamwidth_xtrack,
                       double *beamwidth_ltrack, int *error) {
-  int status = MB_SUCCESS;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -60,7 +58,6 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
   }
 
   /* set format info parameters */
-  status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
   *system = MB_SYS_RESON7K;
   *beams_bath_max = MBSYS_RESON7K_MAX_BEAMS;
@@ -86,6 +83,8 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
   *svp_source = MB_DATA_VELOCITY_PROFILE;
   *beamwidth_xtrack = 1.0;
   *beamwidth_ltrack = 1.0;
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -119,7 +118,6 @@ int mbr_info_reson7k3(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
-  int status = MB_SUCCESS;
   int *current_ping;
   int *last_ping;
   int *save_flag;
@@ -151,13 +149,10 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
   /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* set initial status */
-  status = MB_SUCCESS;
-
   /* allocate memory for data structure */
   mb_io_ptr->structure_size = 0;
   mb_io_ptr->data_structure_size = 0;
-  status = mbsys_reson7k3_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
+  int status = mbsys_reson7k3_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
   save_flag = (int *)&mb_io_ptr->save_flag;
   current_ping = (int *)&mb_io_ptr->save14;
   last_ping = (int *)&mb_io_ptr->save1;
@@ -215,7 +210,6 @@ int mbr_alm_reson7k3(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
-  int status = MB_SUCCESS;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -285,6 +279,8 @@ int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *h
   mb_put_binary_int(MB_YES, header->FragmentNumber, &buffer[*index]);
   *index += 4;
 
+  const int status = MB_SUCCESS;
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -298,7 +294,6 @@ int mbr_reson7k3_wr_header(int verbose, char *buffer, int *index, s7k3_header *h
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error) {
-  int status = MB_SUCCESS;
   s7k3_filecatalogdata *filecatalogdata;
   unsigned int checksum;
   int index;
@@ -331,6 +326,8 @@ int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr,
   *size += R7KHDRSIZE_FileCatalog;
   *size += FileCatalog->n * R7KRDTSIZE_FileCatalog;
 //fprintf(stderr, "File %s Line %d: FileCatalog n:%d size: %d\n", __FILE__, __LINE__, FileCatalog->n, *size);
+
+  int status = MB_SUCCESS;
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -423,7 +420,6 @@ int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
-  int status = MB_SUCCESS;
   char **bufferptr = NULL;
   char *buffer = NULL;
   int *bufferalloc = NULL;
@@ -455,6 +451,8 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
   buffersave = (char *)*buffersaveptr;
   filecatalogoffsetoffset = (int *)&mb_io_ptr->save5;
   platform_ptr = (struct mb_platform_struct **)&mb_io_ptr->saveptr3;
+
+  int status = MB_SUCCESS;
 
   // if this is ordinary file i/o then write the FileCatalog record before
   // deallocating memory
@@ -546,12 +544,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid,
                             int *deviceid, unsigned short *enumerator, int *size) {
-  int status = MB_SUCCESS;
-  unsigned short version;
-  unsigned short offset;
-  unsigned int sync;
-  unsigned short reserved;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -559,10 +551,11 @@ int mbr_reson7k3_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
     fprintf(stderr, "dbg2       mbio_ptr:      %p\n", (void *)mbio_ptr);
   }
 
-  /* get pointer to mbio descriptor */
-  struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
   /* get values to check */
+  unsigned short version;
+  unsigned short offset;
+  unsigned int sync;
+  unsigned short reserved;
   mb_get_binary_short(MB_YES, &buffer[0], &version);
   mb_get_binary_short(MB_YES, &buffer[2], &offset);
   mb_get_binary_int(MB_YES, &buffer[4], &sync);
@@ -586,6 +579,8 @@ int mbr_reson7k3_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
   /* reset enumerator if version 2 */
   if (version == 2)
     *enumerator = reserved;
+
+  int status = MB_SUCCESS;
 
   /* check sync */
   if (sync != 0x0000FFFF) {
@@ -997,8 +992,6 @@ int mbr_reson7k3_chk_pingnumber(int verbose, int recordid, char *buffer, int *pi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *header, int *error) {
-  int status = MB_SUCCESS;
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1057,6 +1050,8 @@ int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *h
   /* print out the results */
   /* mbsys_reson7k3_print_header(verbose, header, error); */
 
+  const int status = MB_SUCCESS;
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1070,7 +1065,6 @@ int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *h
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_ReferencePoint *ReferencePoint;
   int index;
@@ -1091,7 +1085,7 @@ int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, i
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1150,7 +1144,6 @@ int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_UncalibratedSensorOffset *UncalibratedSensorOffset;
   int index;
@@ -1171,7 +1164,7 @@ int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *st
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1234,7 +1227,6 @@ int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *st
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_CalibratedSensorOffset *CalibratedSensorOffset;
   int index;
@@ -1255,7 +1247,7 @@ int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *stor
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1318,7 +1310,6 @@ int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *stor
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Position *Position;
   int index;
@@ -1339,7 +1330,7 @@ int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *er
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1410,7 +1401,6 @@ int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_CustomAttitude *CustomAttitude;
   int data_size;
@@ -1432,7 +1422,7 @@ int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, i
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1559,7 +1549,6 @@ int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Tide *Tide;
   int index;
@@ -1580,7 +1569,7 @@ int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error)
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1653,7 +1642,6 @@ int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Altitude *Altitude;
   int index;
@@ -1674,7 +1662,7 @@ int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *er
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1727,7 +1715,6 @@ int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *er
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_MotionOverGround *MotionOverGround;
   int data_size;
@@ -1749,7 +1736,7 @@ int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr,
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1860,7 +1847,6 @@ int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Depth *Depth;
   int index;
@@ -1881,7 +1867,7 @@ int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -1940,7 +1926,6 @@ int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_SoundVelocityProfile *SoundVelocityProfile;
   int data_size;
@@ -1962,7 +1947,7 @@ int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2047,7 +2032,6 @@ int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_CTD *CTD;
   int data_size;
@@ -2069,7 +2053,7 @@ int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) 
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2178,7 +2162,6 @@ int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Geodesy *Geodesy;
   int index;
@@ -2199,7 +2182,7 @@ int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2312,7 +2295,6 @@ int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_RollPitchHeave *RollPitchHeave;
   int index;
@@ -2333,7 +2315,7 @@ int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, i
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2390,7 +2372,6 @@ int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, i
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Heading *Heading;
   int index;
@@ -2411,7 +2392,7 @@ int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2464,7 +2445,6 @@ int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_SurveyLine *SurveyLine;
   int data_size;
@@ -2486,7 +2466,7 @@ int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2569,7 +2549,6 @@ int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Navigation *Navigation;
   int index;
@@ -2590,7 +2569,7 @@ int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2659,7 +2638,6 @@ int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Attitude *Attitude;
   int data_size;
@@ -2681,7 +2659,7 @@ int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *er
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2770,7 +2748,6 @@ int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *er
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_PanTilt *PanTilt;
   int index;
@@ -2790,7 +2767,7 @@ int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   //Notdone
 
@@ -2808,7 +2785,6 @@ int mbr_reson7k3_rd_PanTilt(int verbose, char *buffer, void *store_ptr, int *err
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_ptr, int *error){
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_SonarInstallationIDs *SonarInstallationIDs;
   int index;
@@ -2828,7 +2804,7 @@ int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   //Notdone
 
@@ -2846,7 +2822,6 @@ int mbr_reson7k3_rd_SonarInstallationIDs(int verbose, char *buffer, void *store_
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Mystery *Mystery;
   int index;
@@ -2867,7 +2842,7 @@ int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -2922,7 +2897,6 @@ int mbr_reson7k3_rd_Mystery(int verbose, char *buffer, void *store_ptr, int *err
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_ptr, int *error){
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_SonarPipeEnvironment *SonarPipeEnvironment;
   int index;
@@ -2942,7 +2916,7 @@ int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   //Notdone
 
@@ -2960,7 +2934,6 @@ int mbr_reson7k3_rd_SonarPipeEnvironment(int verbose, char *buffer, void *store_
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, int *error){
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_ContactOutput *ContactOutput;
   int index;
@@ -2980,7 +2953,7 @@ int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, in
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   //Notdone
 
@@ -2997,7 +2970,6 @@ int mbr_reson7k3_rd_ContactOutput(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_ProcessedSideScan *ProcessedSideScan;
   int index;
@@ -3018,7 +2990,7 @@ int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -3100,7 +3072,6 @@ int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr
 
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_SonarSettings *SonarSettings;
   int index;
@@ -3121,7 +3092,7 @@ int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, in
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -3250,7 +3221,6 @@ int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_Configuration *Configuration;
   s7k3_device *device;
@@ -3273,7 +3243,7 @@ int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, in
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -3363,7 +3333,6 @@ int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, in
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_MatchFilter *MatchFilter;
   int index;
@@ -3384,7 +3353,7 @@ int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int 
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -3455,7 +3424,6 @@ int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int 
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
   s7k3_header *header = NULL;
   s7k3_FirmwareHardwareConfiguration *FirmwareHardwareConfiguration;
   int index;
@@ -3477,7 +3445,7 @@ int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, voi
 
   /* extract the header */
   index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -3550,12 +3518,6 @@ int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, voi
 }
 /*--------------------------------------------------------------------*/
 int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int *error) {
-  int status = MB_SUCCESS;
-  s7k3_header *header = NULL;
-  s7k3_BeamGeometry *BeamGeometry;
-  int index;
-  int time_j[5];
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -3566,12 +3528,12 @@ int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int
 
   /* get pointer to raw data structure */
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
-  BeamGeometry = &(store->BeamGeometry);
-  header = &(BeamGeometry->header);
+  s7k3_BeamGeometry *BeamGeometry = &(store->BeamGeometry);
+  s7k3_header *header = &(BeamGeometry->header);
 
   /* extract the header */
-  index = 0;
-  status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
+  int index = 0;
+  const int status = mbr_reson7k3_rd_header(verbose, buffer, &index, header, error);
 
   /* extract the data */
   index = header->Offset + 4;
@@ -3605,6 +3567,7 @@ int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int
     store->type = R7KRECID_BeamGeometry;
 
     /* get the time */
+    int time_j[5];
     time_j[0] = header->s7kTime.Year;
     time_j[1] = header->s7kTime.Day;
     time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -3649,7 +3612,6 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
   s7k3_Bathymetry *Bathymetry;
   int index;
   int time_j[5];
-  double acrosstrackmax, alongtrackmax;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -8249,9 +8211,7 @@ int mbr_reson7k3_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int *nbadrec;
   int skip;
   int ping_record;
-  int time_j[5], time_i[7];
-  double time_d;
-  int nscan;
+  int time_j[5];
   int done;
   size_t read_len;
 
@@ -9379,7 +9339,6 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
 /*--------------------------------------------------------------------*/
 int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   int status = MB_SUCCESS;
-  int interp_status;
   int interp_error = MB_ERROR_NO_ERROR;
   s7k3_Position *Position;
   s7k3_CustomAttitude *CustomAttitude;
@@ -9767,7 +9726,6 @@ int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr
   s7k3_header *header = NULL;
   s7k3_FileCatalog *FileCatalog = NULL;
   s7k3_filecatalogdata *filecatalogdata = NULL;
-  int nalloc;
   size_t alloc_size = 0;
 
   assert(mbio_ptr != NULL);
@@ -9806,13 +9764,13 @@ int mbr_reson7k3_FileCatalog_update(int verbose, void *mbio_ptr, void *store_ptr
   // Add a new entry for a data record about to be written to the output file
   filecatalogdata = &FileCatalog->filecatalogdata[FileCatalog->n];
   filecatalogdata->sequence = FileCatalog->n;
-  int time_j[5], time_i[7];
-  double time_d;
+  int time_j[5];
   time_j[0] = header->s7kTime.Year;
   time_j[1] = header->s7kTime.Day;
   time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
   time_j[3] = (int)header->s7kTime.Seconds;
   time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
+  int time_i[7];
   mb_get_itime(verbose, time_j, time_i);
   mb_get_time(verbose, time_i, &(filecatalogdata->time_d));
   mbr_reson7k3_chk_pingrecord(verbose, header->RecordType, &filecatalogdata->pingrecord);
@@ -19278,14 +19236,11 @@ int mbr_wt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
     fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
   }
 
-  /* get pointer to mbio descriptor */
   struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* get pointer to raw data structure */
   struct mbsys_reson7k3_struct *store = (struct mbsys_reson7k3_struct *)store_ptr;
 
   /* write next data to file */
-  status = mbr_reson7k3_wr_data(verbose, mbio_ptr, store_ptr, error);
+  status = mbr_reson7k3_wr_data(verbose, mb_io_ptr, store, error);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
