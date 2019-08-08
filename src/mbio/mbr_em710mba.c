@@ -304,6 +304,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 	/* set flag to swap bytes if necessary */
+        // TODO: swap not used?
 	swap = *databyteswapped;
 
 	*type = *((short *)&label[0]);
@@ -3692,7 +3693,6 @@ int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	int int_val;
 	float float_val;
 	size_t read_len;
-	int done;
 	int junk_bytes;
 	int offset;
 	int png_count;
@@ -3894,7 +3894,7 @@ int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = MB_NO;
+		int done = MB_NO;
 		while (done == MB_NO) {
 			read_len = (size_t)1;
 			status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
@@ -4009,7 +4009,6 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	char line[EM3_WC_HEADER_SIZE];
 	short short_val;
 	size_t read_len;
-	int done;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4114,7 +4113,7 @@ int mbr_em710mba_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = MB_NO;
+		int done = MB_NO;
 		while (done == MB_NO) {
 			read_len = (size_t)1;
 			status = mb_fileio_get(verbose, mbio_ptr, (char *)line, &read_len, error);
@@ -8429,17 +8428,6 @@ int mbr_em710mba_wr_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simrad3_struct *store, int *error) {
-	struct mbsys_simrad3_watercolumn_struct *wc;
-	char line[EM3_WC_HEADER_SIZE];
-	short label;
-	char *labelchar;
-	size_t write_len;
-	int write_size;
-	unsigned short checksum;
-	mb_u_char *uchar_ptr;
-	int record_size;
-	int pad;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8450,7 +8438,7 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	}
 
 	/* get storage structure */
-	wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
+	struct mbsys_simrad3_watercolumn_struct *wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -8495,18 +8483,16 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		}
 	}
 
-	/* zero checksum */
-	checksum = 0;
-
 	/* write the record size */
-	record_size = EM3_WC_HEADER_SIZE + EM3_WC_BEAM_SIZE * wc->wtc_nbeam + EM3_WC_TX_SIZE * wc->wtc_ntx + 8;
+	int record_size = EM3_WC_HEADER_SIZE + EM3_WC_BEAM_SIZE * wc->wtc_nbeam + EM3_WC_TX_SIZE * wc->wtc_ntx + 8;
 	for (int i = 0; i < wc->wtc_nbeam; i++) {
 		record_size += wc->beam[i].wtc_beam_samples;
 	}
-	pad = (record_size % 2);
+	int pad = (record_size % 2);
 	record_size += pad;
+	int write_size;
 	mb_put_binary_int(swap, record_size, (void *)&write_size);
-	write_len = 4;
+	size_t write_len = 4;
 	mb_fileio_put(verbose, mbio_ptr, (char *)&write_size, &write_len, error);
 	int status = MB_SUCCESS;
 	if (write_len != 4) {
@@ -8516,9 +8502,13 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	else
 		status = MB_SUCCESS;
 
+	unsigned short checksum = 0;
+	mb_u_char *uchar_ptr;
+	short label;
+
 	/* write the record label */
 	if (status == MB_SUCCESS) {
-		labelchar = (char *)&label;
+		char *labelchar = (char *)&label;
 		labelchar[0] = EM3_START_BYTE;
 		labelchar[1] = EM3_ID_WATERCOLUMN;
 		write_len = 2;
@@ -8539,6 +8529,8 @@ int mbr_em710mba_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 		checksum += uchar_ptr[0];
 		checksum += uchar_ptr[1];
 	}
+
+	char line[EM3_WC_HEADER_SIZE];
 
 	/* output binary header data */
 	if (status == MB_SUCCESS) {
@@ -8649,12 +8641,8 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
-	FILE *mbfp = mb_io_ptr->mbfp;
 
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr, "\nstart of mbr_em710mba_wr_data:\n");
@@ -8664,9 +8652,7 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* figure out which storage structure to use */
 	struct mbsys_simrad3_ping_struct *ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
-	/* set swap flag */
 	int swap = MB_YES;
-
 	int status = MB_SUCCESS;
 
 	if (store->kind == MB_DATA_COMMENT || store->kind == MB_DATA_START || store->kind == MB_DATA_STOP) {
@@ -8945,7 +8931,7 @@ int mbr_wt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	struct mbsys_simrad3_struct *store = (struct mbsys_simrad3_struct *)store_ptr;
 
 	/* write next data to file */
-	const int status = mbr_em710mba_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_em710mba_wr_data(verbose, mb_io_ptr, store, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
