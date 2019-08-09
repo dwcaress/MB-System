@@ -112,10 +112,6 @@ int mbr_info_em300raw(int verbose, int *system, int *beams_bath_max, int *beams_
 }
 /*--------------------------------------------------------------------*/
 int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error) {
-	int *databyteswapped;
-	double *pixel_size;
-	double *swath_width;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -132,9 +128,9 @@ int mbr_alm_em300raw(int verbose, void *mbio_ptr, int *error) {
 	const int status = mbsys_simrad2_alloc(verbose, mbio_ptr, &mb_io_ptr->store_data, error);
 
 	/* initialize saved values */
-	databyteswapped = (int *)&mb_io_ptr->save10;
-	pixel_size = &mb_io_ptr->saved1;
-	swath_width = &mb_io_ptr->saved2;
+	int *databyteswapped = (int *)&mb_io_ptr->save10;
+	double *pixel_size = &mb_io_ptr->saved1;
+	double *swath_width = &mb_io_ptr->saved2;
 	*databyteswapped = -1;
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
@@ -178,11 +174,9 @@ int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error) {
 int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type, short *sonar) {
 	mb_u_char startbyte;
 	mb_u_char typebyte;
-	short *sonar_save = NULL;
 	short sonarunswap = MB_YES;
 	short sonarswap = MB_YES;
-	int swap = MB_YES;
-	int *databyteswapped = NULL;
+	/* int swap = MB_YES; */
 	int typegood = MB_YES;
 	int sonargood = MB_YES;
 	int sonarswapgood = MB_YES;
@@ -198,8 +192,8 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 
 	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	sonar_save = (short *)(&mb_io_ptr->save4);
-	databyteswapped = (int *)&mb_io_ptr->save10;
+	short *sonar_save = (short *)(&mb_io_ptr->save4);
+	int *databyteswapped = (int *)&mb_io_ptr->save10;
 
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr, "Check label: %x|%x|%x|%x\n", label[0], label[1], label[2], label[3]);
@@ -270,7 +264,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 	/* set flag to swap bytes if necessary */
-	swap = *databyteswapped;
+	/* swap = *databyteswapped; */
 
 	*type = *((short *)&label[0]);
 	*sonar = *((short *)&label[2]);
@@ -588,20 +582,20 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 		/* if EM2_END not yet found then the
 		next byte should be EM2_END */
 		if (line[0] != EM2_END) {
-			read_len = fread(&line[0], 1, 1, mbfp);
+			/* read_len = */ fread(&line[0], 1, 1, mbfp);
 		}
 
 		/* if EM2_END not yet found then the
 		next byte should be EM2_END */
 		if (line[0] != EM2_END) {
-			read_len = fread(&line[0], 1, 1, mbfp);
+			/* read_len = */ fread(&line[0], 1, 1, mbfp);
 		}
 
 		/* if we got the end byte then get check sum bytes */
 		if (line[0] == EM2_END) {
 			if (line[0] == EM2_END)
 				*goodend = MB_YES;
-			read_len = fread(&line[1], 2, 1, mbfp);
+			/* read_len = */ fread(&line[1], 2, 1, mbfp);
 /* don't check success of read
 	- return success here even if read fails
 	because all of the
@@ -2155,12 +2149,10 @@ int mbr_em300raw_rd_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *match, short sonar,
                          int version, int *goodend, int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_BATH_HEADER_SIZE];
 	short short_val;
 	int png_count;
 	int png_serial;
-	int head;
 	int read_len;
 
 	if (verbose >= 2) {
@@ -2178,8 +2170,7 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	head = 0;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_DATA;
@@ -2206,7 +2197,6 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 		if (png_count == ping->png_count && png_serial != ping->png_serial) {
 			ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
-			head = 1;
 		}
 	}
 
@@ -2527,8 +2517,6 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	char line[EM2_RAWBEAM2_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int spare;
-
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2593,7 +2581,7 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		mb_get_binary_short(swap, &line[38], &short_val);
 		ping->png_raw_ntx = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[40], &short_val);
-		spare = (int)((unsigned short)short_val);
+		/* spare = (int)((unsigned short)short_val); */
 	}
 
 	/* check for some indicators of a broken record
@@ -2764,7 +2752,6 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	int int_val;
 	int png_raw3_count;
 	int png_raw3_serial;
-	int head;
 	int read_len;
 
 	if (verbose >= 2) {
@@ -2782,7 +2769,6 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	head = 0;
 
 	int status = MB_SUCCESS;
 
@@ -2804,7 +2790,6 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 		if (png_raw3_count == ping->png_raw3_count && png_raw3_serial != ping->png_raw3_serial) {
 			ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
-			head = 1;
 		}
 	}
 
@@ -2982,14 +2967,11 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int length, int *match,
                        int *goodend, int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_SS_HEADER_SIZE];
 	short short_val;
 	int png_ss_count;
 	int png_ss_serial;
-	int head;
 	int read_len;
-	int done;
 	int junk_bytes;
 
 	if (verbose >= 2) {
@@ -3007,8 +2989,7 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	head = 0;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_DATA;
@@ -3036,7 +3017,6 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		if ((png_ss_count == ping->png_ss_count && png_ss_serial != ping->png_ss_serial) ||
 		    (png_ss_count == store->ping2->png_count && png_ss_serial == store->ping2->png_serial)) {
 			ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
-			head = 1;
 		}
 	}
 
@@ -3164,7 +3144,7 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = MB_NO;
+		int done = MB_NO;
 		while (done == MB_NO) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
@@ -3275,8 +3255,6 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	char line[EM2_WC_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int done;
-	int file_bytes;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3298,7 +3276,7 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	store->kind = MB_DATA_WATER_COLUMN;
 	store->type = EM2_WATERCOLUMN;
 	store->sonar = sonar;
-	file_bytes = ftell(mbfp);
+	/* file_bytes = ftell(mbfp); */
 
 	int status = MB_SUCCESS;
 
@@ -3390,7 +3368,7 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = MB_NO;
+		int done = MB_NO;
 		while (done == MB_NO) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
@@ -3481,7 +3459,6 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *databyteswapped;
 	int record_size;
 	int *record_size_save;
-	int bytes_read;
 	char *label;
 	int *label_save_flag;
 	char *record_size_char;
@@ -3499,7 +3476,6 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int *length;
 	int good_end_bytes;
 	int match;
-	int read_len;
 	int skip = 0;
 	char junk;
 
@@ -3573,6 +3549,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		/* if no label saved get next record label */
 		if (*label_save_flag == MB_NO) {
 			/* read four byte record size */
+			int read_len;
 			if ((read_len = fread(&record_size, 1, 4, mb_io_ptr->mbfp)) != 4) {
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
@@ -3594,6 +3571,7 @@ int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				record_size_char[3] = label[0];
 				for (int i = 0; i < 3; i++)
 					label[i] = label[i + 1];
+				int read_len;
 				if ((read_len = fread(&label[3], 1, 1, mb_io_ptr->mbfp)) != 1) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
@@ -4124,6 +4102,7 @@ Have a nice day...\n");
 			fprintf(stderr, "skip over %d bytes of unsupported datagram type %x\n", *record_size_save, type);
 #endif
 			for (int i = 0; i < *record_size_save - 4; i++) {
+				int read_len;
 				if ((read_len = fread(&junk, 1, 1, mb_io_ptr->mbfp)) != 1) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
@@ -4138,12 +4117,13 @@ Have a nice day...\n");
 			done = MB_YES;
 
 		/* if necessary read over unread but expected bytes */
-		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
+		int bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
 		if (*label_save_flag == MB_NO && good_end_bytes == MB_NO && bytes_read < record_size) {
 #ifdef MBR_EM300RAW_DEBUG
 			fprintf(stderr, "skip over %d unread bytes of supported datagram type %x\n", record_size - bytes_read, type);
 #endif
 			for (int i = 0; i < record_size - bytes_read; i++) {
+				int read_len;
 				if ((read_len = fread(&junk, 1, 1, mb_io_ptr->mbfp)) != 1) {
 					status = MB_FAILURE;
 					*error = MB_ERROR_EOF;
@@ -4181,12 +4161,7 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int time_i[7];
 	double ntime_d, ptime_d, atime_d;
 	double bath_time_d, ss_time_d;
-	double rawspeed, pheading;
 	double plon, plat, pspeed, roll, pitch, heave;
-	double att_time_d[MBSYS_SIMRAD2_MAXATTITUDE];
-	double att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
-	double att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
-	double att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -4241,6 +4216,10 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		time_i[6] = (attitude->att_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &atime_d);
 
+		double att_time_d[MBSYS_SIMRAD2_MAXATTITUDE];
+		double att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
+		double att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
+		double att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
 		/* add latest attitude samples */
 		for (int i = 0; i < MIN(attitude->att_ndata, MBSYS_SIMRAD2_MAXATTITUDE); i++) {
 			att_time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
@@ -4355,11 +4334,12 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_time(verbose, time_i, &ptime_d);
 
 		/* interpolate from saved nav */
+		double rawspeed;
 		if (store->pos_speed == 0 || store->pos_speed == EM2_INVALID_SHORT)
 			rawspeed = 0.0;
 		else
 			rawspeed = 0.036 * store->pos_speed;
-		pheading = 0.01 * ping->png_heading;
+		const double pheading = 0.01 * ping->png_heading;
 		mb_navint_interp(verbose, mbio_ptr, ptime_d, pheading, rawspeed, &plon, &plat, &pspeed, error);
 		if (plon == 0.0 && plat == 0.0) {
 			ping->png_longitude = (int)EM2_INVALID_INT;
@@ -4422,7 +4402,6 @@ int mbr_em300raw_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	int buff_len, write_len;
 	int write_size;
 	unsigned short checksum;
-	char *comma_ptr;
 	mb_u_char *uchar_ptr;
 
 	if (verbose >= 2) {
@@ -4688,6 +4667,7 @@ int mbr_em300raw_wr_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	if (strlen(store->par_com) > 0) {
 		/* replace commas (,) with caret (^) values to circumvent
 		   the format's inability to store commas in comments */
+		char *comma_ptr;
 		while ((comma_ptr = strchr(store->par_com, ',')) != NULL) {
 			comma_ptr[0] = '^';
 		}
@@ -8195,14 +8175,11 @@ int mbr_wt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get pointer to mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get pointer to raw data structure */
 	struct mbsys_simrad2_struct *store = (struct mbsys_simrad2_struct *)store_ptr;
 
 	/* write next data to file */
-	const int status = mbr_em300raw_wr_data(verbose, mbio_ptr, store_ptr, error);
+	const int status = mbr_em300raw_wr_data(verbose, mb_io_ptr, store, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
