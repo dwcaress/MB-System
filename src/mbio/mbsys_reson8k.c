@@ -46,9 +46,6 @@ int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, int *erro
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* allocate memory for data structure */
 	const int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_reson8k_struct), store_ptr, error);
 
@@ -245,10 +242,6 @@ int mbsys_reson8k_dimensions(int verbose, void *mbio_ptr, void *store_ptr, int *
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* get data kind */
@@ -522,10 +515,6 @@ int mbsys_reson8k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 		fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", comment);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* set data kind */
@@ -617,10 +606,6 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		fprintf(stderr, "dbg2       ltrk_off:   %p\n", (void *)alongtrack_offset);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* get data kind */
@@ -634,7 +619,7 @@ int mbsys_reson8k_ttimes(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 		*nbeams = store->beams_bath;
 
 		/* get depth offset (heave + transducer_depth) */
-		const double heave_use = store->png_heave;
+		/* const double heave_use = store->png_heave; */
 		*draft = store->MBOffsetZ;
 		*ssv = (double)store->velocity;
 
@@ -705,10 +690,6 @@ int mbsys_reson8k_detects(int verbose, void *mbio_ptr, void *store_ptr, int *kin
 		fprintf(stderr, "dbg2       detects:    %p\n", (void *)detects);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* get data kind */
@@ -791,10 +772,6 @@ int mbsys_reson8k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* get data kind */
@@ -874,10 +851,6 @@ int mbsys_reson8k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* get data kind */
@@ -1058,10 +1031,6 @@ int mbsys_reson8k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr, int t
 		fprintf(stderr, "dbg2       heave:      %f\n", heave);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* insert data in structure */
@@ -1129,10 +1098,6 @@ int mbsys_reson8k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr, int 
 		fprintf(stderr, "dbg2       store_ptr:  %p\n", (void *)store_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* get data kind */
@@ -1196,10 +1161,6 @@ int mbsys_reson8k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr, int n
 			fprintf(stderr, "dbg2       depth[%d]: %f   velocity[%d]: %f\n", i, depth[i], i, velocity[i]);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 
 	/* insert data in structure */
@@ -1237,10 +1198,6 @@ int mbsys_reson8k_copy(int verbose, void *mbio_ptr, void *store_ptr, void *copy_
 		fprintf(stderr, "dbg2       copy_ptr:   %p\n", (void *)copy_ptr);
 	}
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	/* get data structure pointers */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
 	struct mbsys_reson8k_struct *copy = (struct mbsys_reson8k_struct *)copy_ptr;
 
@@ -1273,9 +1230,6 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		fprintf(stderr, "dbg2       swath_width_set: %d\n", swath_width_set);
 		fprintf(stderr, "dbg2       swath_width:     %f\n", *swath_width);
 	}
-
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get data structure pointer */
 	struct mbsys_reson8k_struct *store = (struct mbsys_reson8k_struct *)store_ptr;
@@ -1318,11 +1272,10 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		const double angscale = ((double)store->beam_width_num) / ((double)store->beam_width_denom);
 		const double ttscale = 0.25 / store->sample_rate;
 		const int icenter = store->beams_bath / 2;
-		double anglestart;
-		double angleend;
 		if (swath_width_set == MB_NO && nbathsort > 0) {
-			(*swath_width) = anglestart = fabs((icenter - istart) * angscale + store->png_roll);
-			angleend = fabs((icenter - iend) * angscale + store->png_roll);
+			double anglestart = fabs((icenter - istart) * angscale + store->png_roll);
+			(*swath_width) = anglestart;
+			const double angleend = fabs((icenter - iend) * angscale + store->png_roll);
 			(*swath_width) = MAX(anglestart, angleend);
 			(*swath_width) = MAX((*swath_width), 60.0);
 		}
