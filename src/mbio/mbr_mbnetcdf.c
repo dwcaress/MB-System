@@ -4908,20 +4908,13 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	int nc_status;
-	int CIB_BLOCK_DIM_id;
-	int mbHistoryRecNbr_id;
 	int mbNameLength_id;
 	int mbCommentLength_id;
 	int mbAntennaNbr_id;
 	int mbBeamNbr_id;
 	int mbCycleNbr_id;
-	int mbVelocityProfilNbr_id;
-	int dimsNbr;
-	int dims[3];
-	size_t index[3], count[3];
-	char *user_ptr;
-	double time_d;
-	int icomment;
+	size_t index[3];
+	size_t count[3];
 #ifdef MBNETCDF_DEBUG
 	verbose = MAX(2, verbose);
 #endif
@@ -4957,7 +4950,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* save old comment (from pre-existing netcdf file) */
 		if (store != storelocal) {
 			/* figure out which comment is being passed */
-			icomment = -1;
+			int icomment = -1;
 			for (int i = 0; i < store->mbNbrHistoryRec; i++) {
 				if (strncmp(store->comment, &store->mbHistComment[i * store->mbCommentLength], MBSYS_NETCDF_COMMENTLEN) == 0) {
 					icomment = i;
@@ -4979,7 +4972,8 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* save new comment */
 		else {
-			if ((user_ptr = getenv("USER")) == NULL)
+			char *user_ptr = getenv("USER");
+			if (user_ptr == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)
 				strncpy(&(storelocal->mbHistAutor[(*commentwrite) * storelocal->mbNameLength]), user_ptr, MBSYS_NETCDF_NAMELEN);
@@ -4988,7 +4982,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			strncpy(&(storelocal->mbHistModule[(*commentwrite) * storelocal->mbNameLength]), "MB-System", MBSYS_NETCDF_NAMELEN);
 			strncpy(&(storelocal->mbHistComment[(*commentwrite) * storelocal->mbCommentLength]), store->comment,
 			        MBSYS_NETCDF_COMMENTLEN);
-			time_d = (double)time((time_t *)0);
+			const double time_d = (double)time((time_t *)0);
 			storelocal->mbHistDate[*commentwrite] = (int)(time_d / SECINDAY);
 			storelocal->mbHistTime[*commentwrite] = (int)(1000 * (time_d - storelocal->mbHistDate[*commentwrite] * SECINDAY));
 			storelocal->mbHistCode[*commentwrite] = 1;
@@ -5018,12 +5012,14 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		storelocal->mbVelocityProfilNbr = store->mbVelocityProfilNbr;
 
 		/* define the dimensions */
+		int CIB_BLOCK_DIM_id = 0;
 		if (storelocal->CIB_BLOCK_DIM > 0) {
 			nc_status = nc_def_dim(mb_io_ptr->ncid, "CIB_BLOCK_DIM", storelocal->CIB_BLOCK_DIM, &CIB_BLOCK_DIM_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_dim CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
 			/*fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%lu\n",storelocal->CIB_BLOCK_DIM);*/
 		}
+		int mbHistoryRecNbr_id;
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbHistoryRecNbr", storelocal->mbHistoryRecNbr, &mbHistoryRecNbr_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
@@ -5040,6 +5036,8 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbBeamNbr error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbCycleNbr", NC_UNLIMITED, &mbCycleNbr_id);
+
+		int mbVelocityProfilNbr_id;
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbCycleNbr error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbVelocityProfilNbr", storelocal->mbVelocityProfilNbr, &mbVelocityProfilNbr_id);
@@ -5063,6 +5061,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* define global variables */
+		int dims[3];
 		dims[0] = mbHistoryRecNbr_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbHistDate", NC_INT, 1, dims, &storelocal->mbHistDate_id);
 		if (verbose >= 2 && nc_status != NC_NOERR)
@@ -5091,6 +5090,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbHistComment_id error: %s\n", nc_strerror(nc_status));
 
+		int dimsNbr;
 		/* define per ping variables */
 		if (storelocal->CIB_BLOCK_DIM > 0) {
 			dimsNbr = 3;
