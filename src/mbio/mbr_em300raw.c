@@ -172,16 +172,6 @@ int mbr_dem_em300raw(int verbose, void *mbio_ptr, int *error) {
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type, short *sonar) {
-	mb_u_char startbyte;
-	mb_u_char typebyte;
-	short sonarunswap = MB_YES;
-	short sonarswap = MB_YES;
-	/* int swap = MB_YES; */
-	int typegood = MB_YES;
-	int sonargood = MB_YES;
-	int sonarswapgood = MB_YES;
-	int sonarunswapgood = MB_YES;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -200,8 +190,9 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 #endif
 
 	/* check for valid start byte and type */
-	startbyte = label[0];
-	typebyte = label[1];
+	const mb_u_char startbyte = label[0];
+	const mb_u_char typebyte = label[1];
+	int typegood = MB_YES;
 	if (startbyte == EM2_START_BYTE &&
 	    (typebyte == EM2_ID_STOP2 || typebyte == EM2_ID_OFF || typebyte == EM2_ID_ON || typebyte == EM2_ID_EXTRAPARAMETERS ||
 	     typebyte == EM2_ID_ATTITUDE || typebyte == EM2_ID_CLOCK || typebyte == EM2_ID_BATH || typebyte == EM2_ID_SBDEPTH ||
@@ -217,12 +208,15 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		typegood = MB_NO;
 	}
 
+	int sonargood = MB_YES;
+
 	/* check for data byte swapping if necessary */
 	if (typegood == MB_YES && *databyteswapped == -1) {
-		sonarunswap = *((short *)&label[2]);
-		sonarswap = mb_swap_short(sonarunswap);
+		const short sonarunswap = *((short *)&label[2]);
+		const short sonarswap = mb_swap_short(sonarunswap);
 
 		/* check for valid sonarunswap */
+                int sonarunswapgood = MB_YES;
 		if (sonarunswap == MBSYS_SIMRAD2_EM120 || sonarunswap == MBSYS_SIMRAD2_EM300 || sonarunswap == MBSYS_SIMRAD2_EM1002 ||
 		    sonarunswap == MBSYS_SIMRAD2_EM2000 || sonarunswap == MBSYS_SIMRAD2_EM3000 ||
 		    sonarunswap == MBSYS_SIMRAD2_EM3000D_1 || sonarunswap == MBSYS_SIMRAD2_EM3000D_2 ||
@@ -237,6 +231,7 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		}
 
 		/* check for valid sonarswap */
+		int sonarswapgood = MB_YES;
 		if (sonarswap == MBSYS_SIMRAD2_EM120 || sonarswap == MBSYS_SIMRAD2_EM300 || sonarswap == MBSYS_SIMRAD2_EM1002 ||
 		    sonarswap == MBSYS_SIMRAD2_EM2000 || sonarswap == MBSYS_SIMRAD2_EM3000 || sonarswap == MBSYS_SIMRAD2_EM3000D_1 ||
 		    sonarswap == MBSYS_SIMRAD2_EM3000D_2 || sonarswap == MBSYS_SIMRAD2_EM3000D_3 ||
@@ -331,13 +326,6 @@ int mbr_em300raw_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short type, short sonar,
                           int *version, int *goodend, int *error) {
-	char line[MBSYS_SIMRAD2_BUFFER_SIZE];
-	short short_val;
-	int read_len, len;
-	int done;
-	char *comma_ptr;
-	int i1, i2, i3;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -362,7 +350,8 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	int status = MB_SUCCESS;
 
 	/* read binary values into char array */
-	read_len = fread(line, 1, EM2_START_HEADER_SIZE, mbfp);
+	char line[MBSYS_SIMRAD2_BUFFER_SIZE];
+	int read_len = fread(line, 1, EM2_START_HEADER_SIZE, mbfp);
 	if (read_len == EM2_START_HEADER_SIZE)
 		status = MB_SUCCESS;
 	else {
@@ -376,6 +365,7 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 		store->date = store->par_date;
 		mb_get_binary_int(swap, &line[4], &store->par_msec);
 		store->msec = store->par_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		store->par_line_num = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -390,8 +380,8 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 
 	/* now loop over reading individual characters to
 	    handle ASCII parameter values */
-	done = MB_NO;
-	len = 0;
+	int done = MB_NO;
+	int len = 0;
 	while (status == MB_SUCCESS && done == MB_NO) {
 		read_len = fread(&line[len], 1, 1, mbfp);
 		if (read_len == 1) {
@@ -458,6 +448,9 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 				/* save the processor software version to use
 				   in tracking changes to the data format */
 				strncpy(store->par_psv, &line[4], MIN(len - 5, 15));
+				int i1;
+				int i2;
+				int i3;
 				if (sscanf(store->par_psv, "%d.%d.%d", &i1, &i2, &i3) == 3)
 					*version = i3 + 100 * i2 + 10000 * i1;
 			}
@@ -550,6 +543,7 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 				store->par_com[MIN(len - 5, MBSYS_SIMRAD2_COMMENT_LENGTH - 1)] = 0;
 				/* replace caret (^) values with commas (,) to circumvent
 				   the format's inability to store commas in comments */
+				char *comma_ptr;
 				while ((comma_ptr = strchr(store->par_com, '^')) != NULL) {
 					comma_ptr[0] = ',';
 				}
@@ -704,10 +698,6 @@ file will return error */
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar,
                                   int *goodend, int *error) {
-	char line[EM2_RUN_PARAMETER_SIZE];
-	short short_val;
-	int read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -729,7 +719,8 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 	int status = MB_SUCCESS;
 
 	/* read binary values into char array */
-	read_len = fread(line, 1, EM2_RUN_PARAMETER_SIZE - 4, mbfp);
+	char line[EM2_RUN_PARAMETER_SIZE];
+	int read_len = fread(line, 1, EM2_RUN_PARAMETER_SIZE - 4, mbfp);
 	if (read_len == EM2_RUN_PARAMETER_SIZE - 4)
 		status = MB_SUCCESS;
 	else {
@@ -745,6 +736,7 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 		mb_get_binary_int(swap, &line[4], &store->run_msec);
 		if (store->run_date != 0)
 			store->msec = store->run_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		store->run_ping_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -831,10 +823,6 @@ int mbr_em300raw_rd_run_parameter(int verbose, FILE *mbfp, int swap, struct mbsy
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                           int *error) {
-	char line[EM2_CLOCK_SIZE];
-	short short_val;
-	int read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -856,7 +844,8 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 	int status = MB_SUCCESS;
 
 	/* read binary values into char array */
-	read_len = fread(line, 1, EM2_CLOCK_SIZE - 4, mbfp);
+	char line[EM2_CLOCK_SIZE];
+	int read_len = fread(line, 1, EM2_CLOCK_SIZE - 4, mbfp);
 	if (read_len == EM2_CLOCK_SIZE - 4)
 		status = MB_SUCCESS;
 	else {
@@ -870,6 +859,7 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 		store->date = store->clk_date;
 		mb_get_binary_int(swap, &line[4], &store->clk_msec);
 		store->msec = store->clk_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		store->clk_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -915,10 +905,6 @@ int mbr_em300raw_rd_clock(int verbose, FILE *mbfp, int swap, struct mbsys_simrad
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                          int *error) {
-	char line[EM2_TIDE_SIZE];
-	short short_val;
-	int read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -940,7 +926,8 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	int status = MB_SUCCESS;
 
 	/* read binary values into char array */
-	read_len = fread(line, 1, EM2_TIDE_SIZE - 4, mbfp);
+	char line[EM2_TIDE_SIZE];
+	int read_len = fread(line, 1, EM2_TIDE_SIZE - 4, mbfp);
 	if (read_len == EM2_TIDE_SIZE - 4)
 		status = MB_SUCCESS;
 	else {
@@ -954,6 +941,7 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		store->date = store->tid_date;
 		mb_get_binary_int(swap, &line[4], &store->tid_msec);
 		store->msec = store->tid_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		store->tid_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -1000,10 +988,6 @@ int mbr_em300raw_rd_tide(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                            int *error) {
-	char line[EM2_HEIGHT_SIZE];
-	short short_val;
-	int read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1025,7 +1009,8 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 	int status = MB_SUCCESS;
 
 	/* read binary values into char array */
-	read_len = fread(line, 1, EM2_HEIGHT_SIZE - 4, mbfp);
+	char line[EM2_HEIGHT_SIZE];
+	int read_len = fread(line, 1, EM2_HEIGHT_SIZE - 4, mbfp);
 	if (read_len == EM2_HEIGHT_SIZE - 4)
 		status = MB_SUCCESS;
 	else {
@@ -1039,6 +1024,7 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 		store->date = store->hgt_date;
 		mb_get_binary_int(swap, &line[4], &store->hgt_msec);
 		store->msec = store->hgt_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		store->hgt_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -1082,11 +1068,6 @@ int mbr_em300raw_rd_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                             int *error) {
-	struct mbsys_simrad2_heading_struct *heading;
-	char line[EM2_HEADING_HEADER_SIZE];
-	short short_val;
-	int read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1101,7 +1082,7 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	heading = (struct mbsys_simrad2_heading_struct *)store->heading;
+	struct mbsys_simrad2_heading_struct *heading = (struct mbsys_simrad2_heading_struct *)store->heading;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_HEADING;
@@ -1111,7 +1092,8 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	int status = MB_SUCCESS;
 
 	/* read binary header values into char array */
-	read_len = fread(line, 1, EM2_HEADING_HEADER_SIZE, mbfp);
+	char line[EM2_HEADING_HEADER_SIZE];
+	int read_len = fread(line, 1, EM2_HEADING_HEADER_SIZE, mbfp);
 	if (read_len == EM2_HEADING_HEADER_SIZE)
 		status = MB_SUCCESS;
 	else {
@@ -1125,6 +1107,7 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 		store->date = heading->hed_date;
 		mb_get_binary_int(swap, &line[4], &heading->hed_msec);
 		store->msec = heading->hed_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		heading->hed_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -1139,6 +1122,7 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 			read_len = fread(line, 1, EM2_HEADING_SLICE_SIZE, mbfp);
 			if (read_len == EM2_HEADING_SLICE_SIZE && i < MBSYS_SIMRAD2_MAXHEADING) {
 				status = MB_SUCCESS;
+				short short_val;
 				mb_get_binary_short(swap, &line[0], &short_val);
 				heading->hed_time[i] = (int)((unsigned short)short_val);
 				mb_get_binary_short(swap, &line[2], &short_val);
@@ -1206,11 +1190,6 @@ int mbr_em300raw_rd_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                         int *error) {
-	struct mbsys_simrad2_ssv_struct *ssv;
-	char line[EM2_SSV_HEADER_SIZE];
-	short short_val;
-	int read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1225,7 +1204,7 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	ssv = (struct mbsys_simrad2_ssv_struct *)store->ssv;
+	struct mbsys_simrad2_ssv_struct *ssv = (struct mbsys_simrad2_ssv_struct *)store->ssv;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_SSV;
@@ -1235,7 +1214,8 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	int status = MB_SUCCESS;
 
 	/* read binary header values into char array */
-	read_len = fread(line, 1, EM2_SSV_HEADER_SIZE, mbfp);
+	char line[EM2_SSV_HEADER_SIZE];
+	int read_len = fread(line, 1, EM2_SSV_HEADER_SIZE, mbfp);
 	if (read_len == EM2_SSV_HEADER_SIZE)
 		status = MB_SUCCESS;
 	else {
@@ -1249,6 +1229,7 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 		store->date = ssv->ssv_date;
 		mb_get_binary_int(swap, &line[4], &ssv->ssv_msec);
 		store->msec = ssv->ssv_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		ssv->ssv_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -1263,6 +1244,7 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 			read_len = fread(line, 1, EM2_SSV_SLICE_SIZE, mbfp);
 			if (read_len == EM2_SSV_SLICE_SIZE && i < MBSYS_SIMRAD2_MAXSSV) {
 				status = MB_SUCCESS;
+				short short_val;
 				mb_get_binary_short(swap, &line[0], &short_val);
 				ssv->ssv_time[i] = (int)((unsigned short)short_val);
 				mb_get_binary_short(swap, &line[2], &short_val);
@@ -1328,11 +1310,6 @@ int mbr_em300raw_rd_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                          int *error) {
-	struct mbsys_simrad2_tilt_struct *tilt;
-	char line[EM2_TILT_HEADER_SIZE];
-	short short_val;
-	int read_len;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1347,7 +1324,7 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	tilt = (struct mbsys_simrad2_tilt_struct *)store->tilt;
+	struct mbsys_simrad2_tilt_struct *tilt = (struct mbsys_simrad2_tilt_struct *)store->tilt;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_TILT;
@@ -1357,7 +1334,8 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	int status = MB_SUCCESS;
 
 	/* read binary header values into char array */
-	read_len = fread(line, 1, EM2_TILT_HEADER_SIZE, mbfp);
+	char line[EM2_TILT_HEADER_SIZE];
+	int read_len = fread(line, 1, EM2_TILT_HEADER_SIZE, mbfp);
 	if (read_len == EM2_TILT_HEADER_SIZE)
 		status = MB_SUCCESS;
 	else {
@@ -1371,6 +1349,7 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		store->date = tilt->tlt_date;
 		mb_get_binary_int(swap, &line[4], &tilt->tlt_msec);
 		store->msec = tilt->tlt_msec;
+		short short_val;
 		mb_get_binary_short(swap, &line[8], &short_val);
 		tilt->tlt_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
@@ -1385,6 +1364,7 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 			read_len = fread(line, 1, EM2_TILT_SLICE_SIZE, mbfp);
 			if (read_len == EM2_TILT_SLICE_SIZE && i < MBSYS_SIMRAD2_MAXTILT) {
 				status = MB_SUCCESS;
+				short short_val;
 				mb_get_binary_short(swap, &line[0], &short_val);
 				tilt->tlt_time[i] = (int)((unsigned short)short_val);
 				mb_get_binary_short(swap, &line[2], &short_val);
@@ -1450,7 +1430,6 @@ int mbr_em300raw_rd_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar,
                                     int *goodend, int *error) {
-	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	char line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
 	short short_val;
 	size_t read_len;
@@ -1469,7 +1448,8 @@ int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	extraparameters = (struct mbsys_simrad2_extraparameters_struct *)store->extraparameters;
+	struct mbsys_simrad2_extraparameters_struct *extraparameters =
+	    (struct mbsys_simrad2_extraparameters_struct *)store->extraparameters;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_PARAMETER;
@@ -1595,7 +1575,6 @@ int mbr_em300raw_rd_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                              int *error) {
-	struct mbsys_simrad2_attitude_struct *attitude;
 	char line[EM2_ATTITUDE_HEADER_SIZE];
 	short short_val;
 	int read_len;
@@ -1614,7 +1593,7 @@ int mbr_em300raw_rd_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
+	struct mbsys_simrad2_attitude_struct *attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_ATTITUDE;
@@ -1731,8 +1710,6 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	char line[MBSYS_SIMRAD2_COMMENT_LENGTH];
 	short short_val;
 	int read_len;
-	int done;
-	int navchannel;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1803,7 +1780,7 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS) {
-		done = MB_NO;
+		int done = MB_NO;
 		while (done == MB_NO) {
 			read_len = fread(&line[0], 1, 1, mbfp);
 			if (read_len == 1 && line[0] == EM2_END) {
@@ -1846,7 +1823,7 @@ int mbr_em300raw_rd_pos(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 
 		/* otherwise its from a secondary nav system */
 		else {
-			navchannel = (store->pos_system & 0x03);
+			const int navchannel = (store->pos_system & 0x03);
 			if (navchannel == 1) {
 				store->kind = MB_DATA_NAV1;
 			}
@@ -2151,8 +2128,6 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
                          int version, int *goodend, int *error) {
 	char line[EM2_BATH_HEADER_SIZE];
 	short short_val;
-	int png_count;
-	int png_serial;
 	int read_len;
 
 	if (verbose >= 2) {
@@ -2191,9 +2166,9 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	/* in case of dual head EM2002 check if the data are from the second head and switch ping structure if so */
 	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
 		mb_get_binary_short(swap, &line[8], &short_val);
-		png_count = (int)((unsigned short)short_val);
+		const int png_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
-		png_serial = (int)((unsigned short)short_val);
+		const int png_serial = (int)((unsigned short)short_val);
 
 		if (png_count == ping->png_count && png_serial != ping->png_serial) {
 			ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
@@ -2365,7 +2340,6 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                             int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM_HEADER_SIZE];
 	short short_val;
 	int read_len;
@@ -2384,7 +2358,7 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
 
 	int status = MB_SUCCESS;
 
@@ -2513,7 +2487,6 @@ int mbr_em300raw_rd_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                              int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM2_HEADER_SIZE];
 	short short_val;
 	int read_len;
@@ -2532,7 +2505,7 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
 
 	int status = MB_SUCCESS;
 
@@ -2746,12 +2719,9 @@ int mbr_em300raw_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                              int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM3_HEADER_SIZE];
 	short short_val;
 	int int_val;
-	int png_raw3_count;
-	int png_raw3_serial;
 	int read_len;
 
 	if (verbose >= 2) {
@@ -2768,7 +2738,7 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
 
 	int status = MB_SUCCESS;
 
@@ -2784,9 +2754,9 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	/* in case of dual head EM2002 check if the data are from the second head and if so switch ping structure */
 	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
 		mb_get_binary_short(swap, &line[8], &short_val);
-		png_raw3_count = (int)((unsigned short)short_val);
+		const int png_raw3_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
-		png_raw3_serial = (int)((unsigned short)short_val);
+		const int png_raw3_serial = (int)((unsigned short)short_val);
 
 		if (png_raw3_count == ping->png_raw3_count && png_raw3_serial != ping->png_raw3_serial) {
 			ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
@@ -2969,8 +2939,6 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
                        int *goodend, int *error) {
 	char line[EM2_SS_HEADER_SIZE];
 	short short_val;
-	int png_ss_count;
-	int png_ss_serial;
 	int read_len;
 	int junk_bytes;
 
@@ -3010,9 +2978,9 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	/* in case of dual head EM2002 check if the data are from the second head and if so switch ping structure */
 	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2) {
 		mb_get_binary_short(swap, &line[8], &short_val);
-		png_ss_count = (int)((unsigned short)short_val);
+		const int png_ss_count = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[10], &short_val);
-		png_ss_serial = (int)((unsigned short)short_val);
+		const int png_ss_serial = (int)((unsigned short)short_val);
 
 		if ((png_ss_count == ping->png_ss_count && png_ss_serial != ping->png_ss_serial) ||
 		    (png_ss_count == store->ping2->png_count && png_ss_serial == store->ping2->png_serial)) {
@@ -3251,7 +3219,6 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, short sonar, int *goodend,
                        int *error) {
-	struct mbsys_simrad2_watercolumn_struct *wc;
 	char line[EM2_WC_HEADER_SIZE];
 	short short_val;
 	int read_len;
@@ -3270,7 +3237,7 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	*goodend = MB_NO;
 
 	/* get  storage structure */
-	wc = (struct mbsys_simrad2_watercolumn_struct *)store->wc;
+	struct mbsys_simrad2_watercolumn_struct *wc = (struct mbsys_simrad2_watercolumn_struct *)store->wc;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_WATER_COLUMN;
@@ -3455,7 +3422,6 @@ int mbr_em300raw_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
-	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	int *databyteswapped;
 	int record_size;
 	int *record_size_save;
@@ -3628,7 +3594,8 @@ Have a nice day...\n");
 				status = mbsys_simrad2_extraparameters_alloc(verbose, mbio_ptr, store_ptr, error);
 			}
 			if (status == MB_SUCCESS && store->extraparameters != NULL) {
-				extraparameters = (struct mbsys_simrad2_extraparameters_struct *)store->extraparameters;
+				struct mbsys_simrad2_extraparameters_struct *extraparameters =
+				    (struct mbsys_simrad2_extraparameters_struct *)store->extraparameters;
 				extraparameters->xtr_data_size = *record_size_save - EM2_EXTRAPARAMETERS_HEADER_SIZE - 8;
 				if (extraparameters->xtr_data_size > extraparameters->xtr_nalloc) {
 					status = mb_reallocd(verbose, __FILE__, __LINE__, extraparameters->xtr_data_size,
@@ -5242,7 +5209,6 @@ int mbr_em300raw_wr_height(int verbose, FILE *mbfp, int swap, struct mbsys_simra
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	struct mbsys_simrad2_heading_struct *heading;
 	char line[EM2_HEADING_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -5260,7 +5226,7 @@ int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	}
 
 	/* get storage structure */
-	heading = (struct mbsys_simrad2_heading_struct *)store->heading;
+	struct mbsys_simrad2_heading_struct *heading = (struct mbsys_simrad2_heading_struct *)store->heading;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -5414,7 +5380,6 @@ int mbr_em300raw_wr_heading(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	struct mbsys_simrad2_ssv_struct *ssv;
 	char line[EM2_SSV_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -5432,7 +5397,7 @@ int mbr_em300raw_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 	}
 
 	/* get storage structure */
-	ssv = (struct mbsys_simrad2_ssv_struct *)store->ssv;
+	struct mbsys_simrad2_ssv_struct *ssv = (struct mbsys_simrad2_ssv_struct *)store->ssv;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -5584,7 +5549,6 @@ int mbr_em300raw_wr_ssv(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	struct mbsys_simrad2_tilt_struct *tilt;
 	char line[EM2_TILT_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -5602,7 +5566,7 @@ int mbr_em300raw_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	/* get storage structure */
-	tilt = (struct mbsys_simrad2_tilt_struct *)store->tilt;
+	struct mbsys_simrad2_tilt_struct *tilt = (struct mbsys_simrad2_tilt_struct *)store->tilt;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -5754,7 +5718,6 @@ int mbr_em300raw_wr_tilt(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	struct mbsys_simrad2_extraparameters_struct *extraparameters;
 	char line[EM2_EXTRAPARAMETERS_HEADER_SIZE];
 	short label;
 	size_t write_len;
@@ -5772,7 +5735,7 @@ int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 	}
 
 	/* get storage structure */
-	extraparameters = (struct mbsys_simrad2_extraparameters_struct *)store->extraparameters;
+	struct mbsys_simrad2_extraparameters_struct *extraparameters = (struct mbsys_simrad2_extraparameters_struct *)store->extraparameters;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -5928,7 +5891,6 @@ int mbr_em300raw_wr_extraparameters(int verbose, FILE *mbfp, int swap, struct mb
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	struct mbsys_simrad2_attitude_struct *attitude;
 	char line[EM2_ATTITUDE_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -5946,7 +5908,7 @@ int mbr_em300raw_wr_attitude(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	/* get storage structure */
-	attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
+	struct mbsys_simrad2_attitude_struct *attitude = (struct mbsys_simrad2_attitude_struct *)store->attitude;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -6617,7 +6579,6 @@ int mbr_em300raw_wr_svp2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_BATH_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -6636,6 +6597,7 @@ int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	}
 
 	/* get storage structure */
+	struct mbsys_simrad2_ping_struct *ping;
 	if (store->sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
 	else
@@ -6820,7 +6782,6 @@ int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -6838,7 +6799,7 @@ int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 	}
 
 	/* get storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -6998,7 +6959,6 @@ int mbr_em300raw_wr_rawbeam(int verbose, FILE *mbfp, int swap, struct mbsys_simr
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM2_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -7016,7 +6976,7 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	/* get storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
+	struct mbsys_simrad2_ping_struct *ping = (struct mbsys_simrad2_ping_struct *)store->ping;
 
 	/* print debug statements */
 	if (verbose >= 5) {
@@ -7252,7 +7212,6 @@ int mbr_em300raw_wr_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_RAWBEAM3_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -7271,6 +7230,7 @@ int mbr_em300raw_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	}
 
 	/* get storage structure */
+	struct mbsys_simrad2_ping_struct *ping;
 	if (store->sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
 	else
@@ -7489,7 +7449,6 @@ int mbr_em300raw_wr_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int head, int *error) {
-	struct mbsys_simrad2_ping_struct *ping;
 	char line[EM2_SS_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -7508,6 +7467,7 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	}
 
 	/* get storage structure */
+	struct mbsys_simrad2_ping_struct *ping;
 	if (store->sonar == MBSYS_SIMRAD2_EM3002 && store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
 	else
@@ -7707,7 +7667,6 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_struct *store, int *error) {
-	struct mbsys_simrad2_watercolumn_struct *wc;
 	char line[EM2_WC_HEADER_SIZE];
 	short label;
 	int write_len;
@@ -7727,7 +7686,7 @@ int mbr_em300raw_wr_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	}
 
 	/* get storage structure */
-	wc = (struct mbsys_simrad2_watercolumn_struct *)store->wc;
+	struct mbsys_simrad2_watercolumn_struct *wc = (struct mbsys_simrad2_watercolumn_struct *)store->wc;
 
 	/* print debug statements */
 	if (verbose >= 5) {
