@@ -1,0 +1,87 @@
+{
+"file_info": {
+"swath_data_file": "tahoe_98_134.0.em1000.mb51",
+"mbio_data_format_id": "51",
+"format_name": "MBF_EMOLDRAW",
+"informal_description": "Old Simrad vendor multibeam format",
+"attributes": "Simrad EM1000, EM12S, EM12D, ;                      and EM121 multibeam sonars,;                      bathymetry, amplitude, and sidescan,;                      60 beams for EM1000, 81 beams for EM12S/D,;		      121 beams for EM121, variable pixels,;		      ascii + binary, Simrad."
+},
+"data_totals": {
+"number_of_records": "2"
+},
+"bathymetry_data": {
+"max_beams_per_ping": "121",
+"number_beams": "242",
+"number_good_beams": "120",
+"percent_good_beams": "49.59",
+"number_zero_beams": "122",
+"percent_zero_beams": "50.41",
+"number_flagged_beams": "0",
+"percent_flagged_beams": " 0.00"
+},
+"amplitude_data": {
+"max_beams_per_ping": "121",
+"number_beams": "242",
+"number_good_beams": "120",
+"percent_good_beams": " 49.59",
+"number_zero_beams": "122",
+"percent_zero_beams": "50.41",
+"number_flagged_beams": "0",
+"percent_flagged_beams": " 0.00"
+},
+"sidescan_data": {
+"max_pixels_per_ping": "1024",
+"number_of_pixels": "2048",
+"number_good_pixels": "1354",
+"percent_good_pixels": "66.11",
+"number_zero_pixels": "0",
+"percent_zero_pixels": " 0.00",
+"number_flagged_pixels": "694",
+"percent_flagged_pixels": "33.89"
+},
+"navigation_totals": {
+"total_time_hours": "0.0001",
+"total_track_length_km": "0.0000",
+"average_speed_km_per_hr": "0.0000",
+"average_speed_knots": "0.0000"
+},
+"start_of_data": {
+"time": "08 10 1998 22:24:29.250000  JD222",
+"time_iso": "1998-08-10T22:24:29.250000",
+"longitude": "-120.011418333",
+"latitude": "39.214781667",
+"depth_meters": "23.1800",
+"speed_km_per_hour": "0.0000",
+"speed_knots": "0.0000",
+"heading_degrees": "294.8000",
+"sonar_depth_meters": "0.0000",
+"sonar_altitude_meters": "23.1800"
+},
+"end_of_data": {
+"time": "08 10 1998 22:24:29.510000  JD222",
+"time_iso": "1998-08-10T22:24:29.510000",
+"longitude": "-120.011418333",
+"latitude": "39.214781667",
+"depth_meters": "23.1200",
+"speed_km_per_hour": "0.0000",
+"speed_knots": "0.0000",
+"heading_degrees": "294.6000",
+"sonar_depth_meters": "-0.0200",
+"sonar_altitude_meters": "23.1400"
+},
+"limits": {
+"minimum_longitude": "-120.011834641",
+"maximum_longitude": "-120.011084198",
+"minimum_latitude": "39.214082934",
+"maximum_latitude": "39.215351565",
+"minimum_sonar_depth": "0.0000",
+"maximum_sonar_depth": "0.0000",
+"minimum_altitude": "23.1400",
+"maximum_altitude": "23.1800",
+"minimum_depth": "19.7200",
+"maximum_depth": "24.5200",
+"minimum_amplitude": "-39.5000",
+"maximum_amplitude": "-16.5000",
+"minimum_sidescan": "-63.5000",
+"maximum_sidescan": "-8.5000"
+}}
