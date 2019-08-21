@@ -73,11 +73,30 @@
 #define bswap_16 __swap16
 #define bswap_32 __swap32
 #define bswap_64 __swap64
+#elif defined(__FreeBSD__)
+#include <sys/endian.h>
+#define bswap_32(x) bswap32(x)
+#define bswap_64(x) bswap64(x)
+#elif defined(__NetBSD__)
+#include <sys/types.h>
+#include <machine/bswap.h>
+#if defined(__BSWAP_RENAME) && !defined(__bswap_32)
+#define bswap_32(x) bswap32(x)
+#define bswap_64(x) bswap64(x)
+#endif
 #elif defined(__APPLE__)
 #include <libkern/OSByteOrder.h>
 #define bswap_16 OSSwapInt16
 #define bswap_32 OSSwapInt32
 #define bswap_64 OSSwapInt64
+#elif defined(_MSC_VER)
+#include <stdlib.h>
+#define bswap_32(x) _byteswap_ulong(x)
+#define bswap_64(x) _byteswap_uint64(x)
+#elif defined(__sun) || defined(sun)
+#include <sys/byteorder.h>
+#define bswap_32(x) BSWAP_32(x)
+#define bswap_64(x) BSWAP_64(x)
 #else
 #include <sys/endian.h>
 #define bswap_16 bswap16
@@ -96,7 +115,7 @@
 /////////////////////////
 // Macros
 /////////////////////////
-#define MB1CONV_NAME "mb1tof71"
+#define MB1CONV_NAME "mb1conv"
 #ifndef MB1CONV_BUILD
 /// @def MB1CONV_BUILD
 /// @brief module build date.
@@ -170,14 +189,14 @@ static bool g_signal=0;
 /// @return none
 static void s_show_help()
 {
-    char help_message[] = "\nMB1 to F71 converter\n";
-    char usage_message[] = "\nmb1tof71 [options]\n"
-    "--verbose=n : verbose output level\n"
-    "--help      : output help message\n"
-    "--version   : output version info\n"
-    "--no-swap   : don't byteswap\n"
-    "--ifile     : input file\n"
-    "--ofile     : output file (default is <ifile>.mb71)\n"
+    char help_message[] = "\n Convert MB1 (tbin) records to F71 (fbt)\n";
+    char usage_message[] = "\n mb1conv [options]\n"
+    "  --verbose=n : verbose output level\n"
+    "  --help      : output help message\n"
+    "  --version   : output version info\n"
+    "  --no-swap   : don't byteswap\n"
+    "  --ifile     : input file\n"
+    "  --ofile     : output file (default is <ifile>.mb71)\n"
     "\n";
     printf("%s",help_message);
     printf("%s",usage_message);
