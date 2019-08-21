@@ -96,10 +96,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <byteswap.h>
 #include <memory.h>
 
 #include "mb71_msg.h"
+#include "mswap.h"
 
 /////////////////////////
 // Declarations 
@@ -175,57 +175,29 @@ int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src)
         uint16_t u16[2];
         int64_t rbytes=0;
         
-        out->recordtype = bswap_16(src->recordtype);
+        out->recordtype = mswap_16(src->recordtype);
         
-        memcpy(&u64[0],&src->time_d,8);
-        u64[1]=bswap_64(u64[0]);
-        memcpy(&out->time_d,&u64[1],8);
-        memcpy(&u64[0],&src->longitude,8);
-        u64[1]=bswap_64(u64[0]);
-        memcpy(&out->longitude,&u64[1],8);
-        memcpy(&u64[0],&src->latitude,8);
-        u64[1]=bswap_64(u64[0]);
-        memcpy(&out->latitude,&u64[1],8);
-        memcpy(&u64[0],&src->sonardepth,8);
-        u64[1]=bswap_64(u64[0]);
-        memcpy(&out->sonardepth,&u64[1],8);
-        memcpy(&u64[0],&src->altitude,8);
-        u64[1]=bswap_64(u64[0]);
-        memcpy(&out->altitude,&u64[1],8);
-        
-        memcpy(&u32[0],&src->heading,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->heading,&u32[1],4);
-        memcpy(&u32[0],&src->speed,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->speed,&u32[1],4);
-        memcpy(&u32[0],&src->roll,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->roll,&u32[1],4);
-        memcpy(&u32[0],&src->pitch,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->pitch,&u32[1],4);
-        memcpy(&u32[0],&src->heave,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->heave,&u32[1],4);
-        memcpy(&u32[0],&src->beam_xwidth,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->beam_xwidth,&u32[1],4);
-        memcpy(&u32[0],&src->beam_lwidth,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->beam_lwidth,&u32[1],4);
+        mswap_bytes(&out->time_d,    &src->time_d,8);
+        mswap_bytes(&out->longitude, &src->longitude,8);
+        mswap_bytes(&out->latitude,  &src->latitude,8);
+        mswap_bytes(&out->sonardepth,&src->sonardepth,8);
+        mswap_bytes(&out->altitude,  &src->altitude,8);
 
-        out->beams_bath=bswap_32(src->beams_bath);
-        out->beams_amp=bswap_32(src->beams_amp);
-        out->pixels_ss=bswap_32(src->pixels_ss);
-        out->spare1=bswap_32(src->spare1);
-        
-        memcpy(&u32[0],&src->depth_scale,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->depth_scale,&u32[1],4);
-        memcpy(&u32[0],&src->distance_scale,4);
-        u32[1]=bswap_32(u32[0]);
-        memcpy(&out->distance_scale,&u32[1],4);
+        mswap_bytes(&out->heading,&src->heading,4);
+        mswap_bytes(&out->speed,  &src->speed,4);
+        mswap_bytes(&out->roll,   &src->roll,4);
+        mswap_bytes(&out->pitch,  &src->pitch,4);
+        mswap_bytes(&out->heave,  &src->heave,4);
+        mswap_bytes(&out->beam_xwidth,&src->beam_xwidth,4);
+        mswap_bytes(&out->beam_lwidth,&src->beam_lwidth,4);
+
+        out->beams_bath = mswap_32(src->beams_bath);
+        out->beams_amp  = mswap_32(src->beams_amp);
+        out->pixels_ss  = mswap_32(src->pixels_ss);
+        out->spare1     = mswap_32(src->spare1);
+
+        out->depth_scale = mswap_16(src->depth_scale);
+        out->distance_scale  = mswap_16(src->distance_scale);
         
         // no swap ss_scalepower (1 byte)
         // no swap ss_type (1 byte)
@@ -244,11 +216,10 @@ int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src)
         short *obx = MB71_PBX(out,nbeams);
 
         for(i=0;i<nbeams;i++){
-            obz[i] = bswap_16(bz[i]);
-            oby[i] = bswap_16(by[i]);
-            obx[i] = bswap_16(bx[i]);
+            obz[i] = mswap_16(bz[i]);
+            oby[i] = mswap_16(by[i]);
+            obx[i] = mswap_16(bx[i]);
         }
-        
     }
     return retval;
 }

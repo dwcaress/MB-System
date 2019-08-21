@@ -42,6 +42,7 @@ libmbtrn_la_SOURCES = \
                 mlog.c \
                 mlist.c \
                 mstats.c \
+				mswap.c \
 				mbtrn.c \
                 mbtrn-server.c \
 				r7kc.c
