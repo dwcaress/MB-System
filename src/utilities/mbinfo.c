@@ -23,8 +23,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 1, 1993
- *
- *
  */
 
 #include <math.h>
@@ -49,7 +47,6 @@ struct ping {
 	double *sslat;
 };
 
-/* output formats */
 enum OutputFormat {
   FREE_TEXT = 0,
   JSON = 1,
@@ -68,16 +65,12 @@ static const char usage_message[] =
 int main(int argc, char **argv) {
 	int errflg = 0;
 	int help = 0;
-	int flag = 0;
 
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 	char format_description[MB_DESCRIPTION_LENGTH];
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -107,9 +100,6 @@ int main(int argc, char **argv) {
 	int pixels_ss = 0;
 
 	/* MBIO read values */
-	void *mbio_ptr = NULL;
-	struct mb_io_struct *mb_io_ptr;
-	int kind;
 	struct ping data[MBINFO_MAXPINGS];
 	struct ping *datacur;
 	int time_i[7];
@@ -131,27 +121,6 @@ int main(int argc, char **argv) {
 	double *sslat = NULL;
 	char comment[MB_COMMENT_MAXLINE];
 	int icomment = 0;
-
-	/* metadata controls */
-	int imetadata = 0;
-	int meta_vessel = 0;
-	int meta_institution = 0;
-	int meta_platform = 0;
-	int meta_sonar = 0;
-	int meta_sonarversion = 0;
-	int meta_cruiseid = 0;
-	int meta_cruisename = 0;
-	int meta_pi = 0;
-	int meta_piinstitution = 0;
-	int meta_client = 0;
-	int meta_svcorrected = 0;
-	int meta_tidecorrected = 0;
-	int meta_batheditmanual = 0;
-	int meta_batheditauto = 0;
-	int meta_rollbias = 0;
-	int meta_pitchbias = 0;
-	int meta_headingbias = 0;
-	int meta_draft = 0;
 
 	/* mbinfo control parameters */
 	int comments = MB_NO;
@@ -268,7 +237,6 @@ int main(int argc, char **argv) {
 
 	/* coverage mask variables */
 	int coverage_mask = MB_NO;
-	int pass;
 	int mask_nx = 0;
 	int mask_ny = 0;
 	double mask_dx = 0.0;
@@ -283,7 +251,6 @@ int main(int argc, char **argv) {
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
 	    output if verbose > 1) */
-	FILE *stream = stdout;
 	FILE *output = NULL;
 	int output_usefile = MB_NO;
 	char *fileprint;
@@ -298,7 +265,6 @@ int main(int argc, char **argv) {
 	int val_int;
 	double val_double;
 
-	/* initialize some variables */
 	for (int i = 0; i < 7; i++) {
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
@@ -308,13 +274,14 @@ int main(int argc, char **argv) {
 		notice_list_tot[i] = 0;
 	}
 
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings_get, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to stdin */
 	strcpy(read_file, "stdin");
 
 	/* process argument list */
+        {
+	int flag = 0;
 	int c;
 	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
 		switch (c) {
@@ -414,19 +381,16 @@ int main(int argc, char **argv) {
 			sscanf(optarg, "%d", &output_format);
 			if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
 				errflg++;
-				fprintf(stream, "Invalid output format for inf file");
+				fprintf(stderr, "Invalid output format for inf file");
 			}
 			flag++;
 			break;
 		case '?':
 			errflg++;
 		}
+	}
 
-	/* set output stream */
-	if (verbose <= 1)
-		stream = stdout;
-	else
-		stream = stderr;
+	FILE * const stream = verbose <= 1 ? stdout : stderr;
 
 	/* if error flagged then print it and exit */
 	if (errflg) {
@@ -442,7 +406,6 @@ int main(int argc, char **argv) {
 		fprintf(stream, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stream, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stream, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -484,7 +447,6 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* if help desired then print it and exit */
 	if (help) {
 		static const char help_message[] =
 		    "MBINFO reads a swath sonar data file and outputs\n"
@@ -502,15 +464,14 @@ int main(int argc, char **argv) {
 	if (format == 0)
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
-	/* set bathymetry scaling */
 	if (bathy_in_feet == MB_YES)
 		bathy_scale = 1.0 / 0.3048;
 	else
 		bathy_scale = 1.0;
 
+
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const int read_datalist = format < 0 ? MB_YES : MB_NO;
 
 	/* if reading from datalist then variance calculations
 	    are disabled */
@@ -554,8 +515,29 @@ int main(int argc, char **argv) {
 		break;
 	}
 	/* read only once unless coverage mask requested */
-	pass = 0;
+	int pass = 0;
 	int done = MB_NO;
+
+	/* metadata controls */
+	int imetadata = 0;
+	int meta_vessel = 0;
+	int meta_institution = 0;
+	int meta_platform = 0;
+	int meta_sonar = 0;
+	int meta_sonarversion = 0;
+	int meta_cruiseid = 0;
+	int meta_cruisename = 0;
+	int meta_pi = 0;
+	int meta_piinstitution = 0;
+	int meta_client = 0;
+	int meta_svcorrected = 0;
+	int meta_tidecorrected = 0;
+	int meta_batheditmanual = 0;
+	int meta_batheditauto = 0;
+	int meta_rollbias = 0;
+	int meta_pitchbias = 0;
+	int meta_headingbias = 0;
+	int meta_draft = 0;
 	while (done == MB_NO) {
 
 		/* open file list */
@@ -580,10 +562,12 @@ int main(int argc, char **argv) {
 		/* loop over all files to be read */
 		while (read_data == MB_YES) {
 
+			void *mbio_ptr = NULL;
 			/* initialize reading the swath file */
 			if ((status = mb_read_init(verbose, file, format, pings_get, lonflip, bounds, btime_i, etime_i, speedmin, timegap,
 			                           &mbio_ptr, &btime_d, &etime_d, &beams_bath_alloc, &beams_amp_alloc, &pixels_ss_alloc,
 			                           &error)) != MB_SUCCESS) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stream, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 				fprintf(stream, "\nSwath File <%s> not initialized for reading\n", file);
@@ -672,6 +656,7 @@ int main(int argc, char **argv) {
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
+				char *message;
 				mb_error(verbose, error, &message);
 				fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
 				fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -799,6 +784,7 @@ int main(int argc, char **argv) {
 				error = MB_ERROR_NO_ERROR;
 				while (nread < pings_read && error == MB_ERROR_NO_ERROR) {
 
+					int kind;
 					/* read a ping of data */
 					datacur = &data[nread];
 					status = mb_read(verbose, mbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading,
@@ -1238,17 +1224,20 @@ int main(int argc, char **argv) {
 						/* do nothing */
 					}
 					else if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nNonfatal MBIO Error:\n%s\n", message);
 						fprintf(stream, "Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
 						        time_i[5], time_i[6]);
 					}
 					else if (verbose >= 1 && error < MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nNonfatal MBIO Error:\n%s\n", message);
 						fprintf(stream, "Number of good records so far: %d\n", irecfile);
 					}
 					else if (verbose >= 1 && error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nFatal MBIO Error:\n%s\n", message);
 						fprintf(stream, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3],
@@ -1282,7 +1271,7 @@ int main(int argc, char **argv) {
 							/* change and apply lonflip if needed */
 							if (lonflip_use != lonflip) {
 								/* change lonflip used in reading */
-								mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+								struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 								mb_io_ptr->lonflip = lonflip_use;
 								lonflip = lonflip_use;
 
@@ -1715,6 +1704,7 @@ int main(int argc, char **argv) {
 					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, beams_bath_max * sizeof(int), (void **)&nbathvartot, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -1736,6 +1726,7 @@ int main(int argc, char **argv) {
 					    mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(double), (void **)&ampvartot, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, beams_amp_max * sizeof(int), (void **)&nampvartot, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -1756,6 +1747,7 @@ int main(int argc, char **argv) {
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(double), (void **)&ssvartot, &error);
 					status &= mb_reallocd(verbose, __FILE__, __LINE__, pixels_ss_max * sizeof(int), (void **)&nssvartot, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stream, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
@@ -2447,7 +2439,6 @@ int main(int argc, char **argv) {
 		break;
 	}
 
-	/* close output file */
 	if (output_usefile == MB_YES && output != NULL) {
 		fclose(output);
 	}
@@ -2464,21 +2455,18 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&nssvartot, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&mask, &error);
 
-	/* set program status */
 	status = MB_SUCCESS;
 
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stream, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stream, "dbg2  Ending status:\n");
 		fprintf(stream, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
