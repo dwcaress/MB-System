@@ -328,7 +328,7 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
         mb1_frame_t *dest = *pdest;
         
         // sync to start of record
-        bp = (byte *)&dest->sounding;
+        bp = (byte *)dest->sounding;
         readlen = 1;
         while( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
             if(*bp=='M'){
@@ -342,7 +342,10 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
             }
         }
         
-//                fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
+//        fprintf(stderr,"%d: read sync err[%d/%s]\n",__LINE__,errno,strerror(errno));
+//        fprintf(stderr,"%d: frame[%p]\n",__LINE__,dest);
+//        fprintf(stderr,"%d: sounding[%p]\n",__LINE__,dest->sounding);
+//        fprintf(stderr,"%d: chksum[%p]\n",__LINE__,dest->checksum);
 
         // if start of sync found, read header (fixed-length sounding bytes)
         if(record_bytes>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
@@ -350,30 +353,33 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
             record_bytes+=readlen;
             bp=NULL;
             readlen=0;
-            if(dest->sounding.nbeams>0 && dest->sounding.nbeams<=MB1_MAX_BEAMS){
+            if(NULL!=dest && NULL!=dest->sounding && dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
       
-                if(mb1_frame_resize(&dest, dest->sounding.nbeams, MB1_RS_BEAMS)!=NULL){
-                    bp=(byte *)&dest->sounding.beams[0];
-                    readlen = dest->sounding.size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
+                if(mb1_frame_resize(&dest, dest->sounding->nbeams, MB1_RS_BEAMS)!=NULL){
+                    bp=(byte *)&dest->sounding->beams[0];
+                    readlen = dest->sounding->size-(MB1_HEADER_BYTES+MB1_CHECKSUM_BYTES);
                     *pdest=dest;
                 }
             }
 
             
-//                        fprintf(stderr,"%d: sounding.sz[%u] readlen[%u] err[%d/%s]\n",__LINE__,dest->sounding.size,readlen,errno,strerror(errno));
+//                        fprintf(stderr,"%d: sounding->sz[%u] readlen[%u] err[%d/%s]\n",__LINE__,dest->sounding->size,readlen,errno,strerror(errno));
 
              // if header OK, read sounding data (variable length)
             if(readlen>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                 record_bytes+=readlen;
-                byte chksum[MB1_CHECKSUM_BYTES]={0};
-                bp =(byte *)chksum;
+                bp=(byte *)dest->checksum;
                 readlen=MB1_CHECKSUM_BYTES;
-//                                fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
+//              fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
                 // read checksum
                 if( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
                     record_bytes+=readlen;
                     retval=record_bytes;
-//                                        fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
+
+                    unsigned int checksum = mb1_frame_calc_checksum(dest);
+                    
+//                    fprintf(stderr,"checksum (calc/read)[%08X/%08X] - %s\n",checksum,*(dest->checksum),(checksum== (*dest->checksum)?"VALID":"INVALID"));
+//                  fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
                 }else{
                     fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
                 }
@@ -394,7 +400,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
     
     if(NULL!=dest && NULL!=src){
         
-        int32_t mb71_size = (98+7*src->sounding.nbeams);
+        int32_t mb71_size = (98+7*src->sounding->nbeams);
         byte *bp = *dest;
         int32_t msize = size;
 
@@ -411,19 +417,19 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
 
             // 22069=0x5635:'V''5'
             pmb71->recordtype  = 0x5635;
-            pmb71->time_d      = src->sounding.ts;
-            pmb71->longitude   = src->sounding.lon;
-            pmb71->latitude    = src->sounding.lat;
-            pmb71->sonardepth  = src->sounding.depth;
+            pmb71->time_d      = src->sounding->ts;
+            pmb71->longitude   = src->sounding->lon;
+            pmb71->latitude    = src->sounding->lat;
+            pmb71->sonardepth  = src->sounding->depth;
             pmb71->altitude    = 0;
-            pmb71->heading     = src->sounding.hdg;
+            pmb71->heading     = src->sounding->hdg;
             pmb71->speed       = 0.0;
             pmb71->roll        = 0.0;
             pmb71->pitch       = 0.0;
             pmb71->heave       = 0.0;
             pmb71->beam_xwidth = 1.0;
             pmb71->beam_lwidth = 1.0;
-            pmb71->beams_bath  = src->sounding.nbeams;
+            pmb71->beams_bath  = src->sounding->nbeams;
             pmb71->beams_amp   = 0;
             pmb71->pixels_ss   = 0;
             pmb71->spare1      = 0;
@@ -435,15 +441,15 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             pmb71->topo_type     = 0x02;
             
             int i=0;
-            int nbeams = src->sounding.nbeams;
+            int nbeams = src->sounding->nbeams;
             // get scaling
             double depthmax = -1e6;
             double distmax = -1e6;
             double x=0;
             for ( i = 0; i < nbeams; i++) {
-                depthmax = MAX(depthmax, fabs(src->sounding.beams[i].rhoz));
-                distmax  = MAX(distmax, fabs(src->sounding.beams[i].rhoy));
-                distmax  = MAX(distmax, fabs(src->sounding.beams[i].rhox));
+                depthmax = MAX(depthmax, fabs(src->sounding->beams[i].rhoz));
+                distmax  = MAX(distmax, fabs(src->sounding->beams[i].rhoy));
+                distmax  = MAX(distmax, fabs(src->sounding->beams[i].rhox));
             }
             
             if (depthmax > 0.0)
@@ -454,7 +460,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             if(NULL!=cfg && cfg->verbose>0){
                 //            fprintf(stderr,"size double[%d] float[%d] int[%d] uchar[%d] ushort[%d] short[%d] mbf71v5_hdr_t[%d]\r\n",sizeof(double),sizeof(float),sizeof(int),sizeof(unsigned char),sizeof(unsigned short),sizeof(short),sizeof(mbf71v5_hdr_t));
                 fprintf(stderr,"nb[%2d] mb71_sz[%d] beams[%p/%ld]\r\n", nbeams,mb71_size,&pmb71->beam_bytes[0],((long)&pmb71->beam_bytes[0]-(long)pmb71));
-                fprintf(stderr,"ts[%.3lf] lat[%.3lf] lon[%.3lf] sonar_depth[%.3lf]\r\n",src->sounding.ts,src->sounding.lat,src->sounding.lon,src->sounding.depth);
+                fprintf(stderr,"ts[%.3lf] lat[%.3lf] lon[%.3lf] sonar_depth[%.3lf]\r\n",src->sounding->ts,src->sounding->lat,src->sounding->lon,src->sounding->depth);
                 fprintf(stderr,"max_depth[%.4lf] max_distance[%.4lf]\r\n",depthmax,distmax);
                 fprintf(stderr,"depth_scale[%.4lf] distance_scale[%.4lf]\r\n\r\n",pmb71->depth_scale,pmb71->distance_scale);
             }
@@ -469,11 +475,11 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
                 // beam flag
                 bf[i]= 0x00;
                 // depth (mb1 rohz = bath-sonardepth)
-                bz[i]= (src->sounding.beams[i].rhoz)/pmb71->depth_scale;
+                bz[i]= (src->sounding->beams[i].rhoz)/pmb71->depth_scale;
                 // across-track
-                by[i]= src->sounding.beams[i].rhoy/pmb71->distance_scale;
+                by[i]= src->sounding->beams[i].rhoy/pmb71->distance_scale;
                 // along-track
-                bx[i]=src->sounding.beams[i].rhox/pmb71->distance_scale;
+                bx[i]=src->sounding->beams[i].rhox/pmb71->distance_scale;
             }
             // no amp, sidescan
             //        pmb71->amp;

@@ -247,6 +247,7 @@ extern "C" {
     /// otherwise, stores result in dest (src does not change)
     /// @param[in] dest output to byte array
     /// @param[in] src mb71 frame data
+    /// @return 0 on success, -1 otherwise
     int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src);
      
     /// @fn mb71v5_show(mb71v5_t *self, bool verbose, uint16_t indent)
@@ -254,6 +255,7 @@ extern "C" {
     /// @param[in] self    frame reference
     /// @param[in] verbose indent extra output (if implemented)
     /// @param[in] indent  output indentation (spaces)
+    /// @return none
     void mb71v5_show(mb71v5_t *self, bool verbose, uint16_t indent);
 #ifdef __cplusplus
 }

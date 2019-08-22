@@ -123,7 +123,7 @@ void mb71v5_show(mb71v5_t *self, bool verbose, uint16_t indent)
     if (NULL != self) {
         fprintf(stderr,"%*s[self           %10p]\n",indent,(indent>0?" ":""), self);
         fprintf(stderr,"%*s[recordtype     %6s%04X]\n",indent,(indent>0?" ":"")," ", self->recordtype);
-        fprintf(stderr,"%*s[time_d         %10.3lf]\n",indent,(indent>0?" ":""), self->time_d);
+        fprintf(stderr,"%*s[time_d     %10.3lf]\n",indent,(indent>0?" ":""), self->time_d);
         fprintf(stderr,"%*s[longitude      %10.3lf]\n",indent,(indent>0?" ":""), self->longitude);
         fprintf(stderr,"%*s[latitude       %10.3lf]\n",indent,(indent>0?" ":""), self->latitude);
         fprintf(stderr,"%*s[sonardepth     %10.3lf]\n",indent,(indent>0?" ":""), self->sonardepth);
@@ -144,7 +144,7 @@ void mb71v5_show(mb71v5_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[ss_scalepower  %8s%02X]\n",indent,(indent>0?" ":""), " ",self->ss_scalepower);
         fprintf(stderr,"%*s[ss_type        %8s%02X]\n",indent,(indent>0?" ":""), " ",self->ss_type);
         fprintf(stderr,"%*s[imagery_type   %8s%02X]\n",indent,(indent>0?" ":""), " ",self->imagery_type);
-        fprintf(stderr,"%*s[topo_type      %8s%02X\n",indent,(indent>0?" ":""), " ",self->topo_type);
+        fprintf(stderr,"%*s[topo_type      %8s%02X]\n",indent,(indent>0?" ":""), " ",self->topo_type);
         int nbeams =self->beams_bath;
         
         unsigned char *bf = MB71_PBF(self,nbeams);
@@ -152,10 +152,10 @@ void mb71v5_show(mb71v5_t *self, bool verbose, uint16_t indent)
         short *by = MB71_PBY(self,nbeams);
         short *bx = MB71_PBX(self,nbeams);
 
-        fprintf(stderr,"%*s[beam  flags vert    cross      along]\n",indent+3,(indent>0?" ":""));
+        fprintf(stderr,"%*s[ n   flags vert    cross      along]\n",indent+3,(indent>0?" ":""));
 
         for(int i=0;i<self->beams_bath;i++){
-            fprintf(stderr,"%*s[%3d]  %02X,%8hd,%8hd,%8hd\n",indent+3,(indent>0?" ":""), i, bf[i],bz[i],by[i],bx[i]);
+            fprintf(stderr,"%*s[%3d  %02X,%8hd,%8hd,%8hd ]\n",indent+3,(indent>0?" ":""), i, bf[i],bz[i],by[i],bx[i]);
         }
 
     }
@@ -170,9 +170,9 @@ int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src)
         // save nbeams before it's swapped
         int nbeams=src->beams_bath;
         mb71v5_t *out = (NULL==dest ? src : dest);
-        uint64_t u64[2];
-        uint32_t u32[2];
-        uint16_t u16[2];
+        uint64_t u64[2]={0};
+        uint32_t u32[2]={0};
+        uint16_t u16[2]={0};
         int64_t rbytes=0;
         
         out->recordtype = mswap_16(src->recordtype);
@@ -204,8 +204,6 @@ int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src)
         // no swap imagery_type (1 byte)
         // no swap topo_type (1 byte)
         
-        int i=0;
-
         // no swap flags (1 byte)
 
         short *bz = MB71_PBZ(src,nbeams);
@@ -215,11 +213,13 @@ int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src)
         short *oby = MB71_PBY(out,nbeams);
         short *obx = MB71_PBX(out,nbeams);
 
-        for(i=0;i<nbeams;i++){
+        int i=0;
+		for(i=0;i<nbeams;i++){
             obz[i] = mswap_16(bz[i]);
             oby[i] = mswap_16(by[i]);
             obx[i] = mswap_16(bx[i]);
         }
+        retval=0;
     }
     return retval;
 }

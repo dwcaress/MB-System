@@ -77,7 +77,7 @@
 #define MB1_MAX_BEAMS 512
 /// @def MB1_TYPE_ID
 /// @brief MB1 record type ID (0x53423100='M''B''1''\0')
-#define MB1_TYPE_ID 0x53423100
+#define MB1_TYPE_ID 0x4D423100
 /// @def MB1_HEADER_BYTES
 /// @brief MB1 header (static field) size (bytes)
 #define MB1_HEADER_BYTES   56
@@ -95,6 +95,12 @@
 /// @brief size of complete MB1 data frame
 /// @param[in] beams number of beams
 #define MB1_FRAME_BYTES(beams) (MB1_HEADER_BYTES+beams*MB1_BEAM_BYTES+MB1_CHECKSUM_BYTES)
+/// @def MB1_MAX_FRAME_BYTES
+/// @brief max size of MB1 data frame
+#define MB1_MAX_FRAME_BYTES MB1_FRAME_BYTES(MB1_MAX_BEAMS)
+/// @def MB1_PCHECKSUM_U32(pframe)
+/// @brief checksum pointer (unsigned int *)
+#define MB1_PCHECKSUM_U32(pframe) (NULL!=pframe ? (unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES) : NULL)
 
 /////////////////////////
 // Type Definitions
@@ -167,18 +173,26 @@ typedef struct mb1_sounding_s
     /// @var mb1_sounding_s::beams
     /// @brief beam data array
     mb1_beam_t beams[];
+    /// 32-bit checksum follows beam array
 }mb1_sounding_t;
 
 /// @typedef struct mb1_frame_s mb1_frame_t
-/// @brief MB1 data frame
+/// @brief MB1 data frame.
+/// Structure is variable length; sounding and checksum
+/// pointers are at the beginning, followed by sounding
+/// data (variable length) and checksum, which must be
+/// contiguous.
 typedef struct mb1_frame_s
 {
     /// @var mb1_frame_s::sounding
     /// @brief sounding data
-    mb1_sounding_t sounding;
+    mb1_sounding_t *sounding;
     /// @var mb1_frame_s::checksum
     /// @brief 32-bit checksum (byte sum over header and beam data)
-    uint32_t checksum;
+    uint32_t *checksum;
+    /// sounding data (variable length, contiguous) follows checksum pointer
+    /// sounding points to start of sounding header
+    /// checksum points to checksum (after variable length beam data array)
 }mb1_frame_t;
 
 #pragma pack(pop)
@@ -193,6 +207,7 @@ extern "C" {
     /// @fn mb1_frame_t *mb1_frame_new(int beams)
     /// @brief allocate new MB1 data frame. Caller must release using mb1_frame_destroy.
     /// @param[in] beams number of beams (>=0)
+    /// @return new mb1_frame_t pointer on success, NULL otherwise
     mb1_frame_t *mb1_frame_new(int beams);
     
     /// @fn mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags)
@@ -200,18 +215,34 @@ extern "C" {
     /// @param[in] pself pointer to mb1_frame_t ref.
     /// @param[in] beams number of beams (>=0)
     /// @param[in] flags indicate what fields to initialize to zero (checksum always cleared)
+    /// @return new mb1_frame_t pointer on success, NULL otherwise
     mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams,  int flags);
-    
+
+    /// @fn int mb1_frame_zero(mb1_frame_t **pself, int flags)
+    /// @brief zero MB1 data frame
+    /// @param[in] pself pointer to mb1_frame_t ref.
+    /// @param[in] flags indicate what fields to initialize to zero (checksum always cleared)
+    /// @return 0 on success, -1 otherwise
+    int mb1_frame_zero(mb1_frame_t *self, int flags);
+
     /// @fn void mb1_frame_destroy(mb1_frame_t **pself);
     /// @brief release resources for mb1_frame_t.
     /// @param[in] pself pointer to mb1_frame_t ref.
+    /// @return none
     void mb1_frame_destroy(mb1_frame_t **pself);
     
+    /// @fn unsigned int mb1_frame_calc_checksum(mb1_frame_t *self);
+    /// @brief calculate 32-bit checksum.
+    /// @param[in] self pointer to mb1_frame_t ref.
+    /// @return 32-bit (unsigned int) checksum) on success, 0xFFFF otherwise
+    unsigned int mb1_frame_calc_checksum(mb1_frame_t *self);
+
     /// @fn void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent)
     /// @brief write frame summary to console (stderr)
     /// @param[in] self    frame reference
     /// @param[in] verbose indent extra output (if implemented)
     /// @param[in] indent  output indentation (spaces)
+    /// @return none
     void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent);
 #ifdef __cplusplus
 }

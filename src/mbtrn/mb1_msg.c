@@ -111,45 +111,15 @@ mb1_frame_t *mb1_frame_new(int beams)
     mb1_frame_t *instance =NULL;
     if(beams>=0){
         uint32_t frame_size = MB1_FRAME_BYTES(beams);
-        instance = (mb1_frame_t *)malloc(frame_size);
+        uint32_t alloc_size = frame_size+sizeof(mb1_frame_t);
+        instance = (mb1_frame_t *)malloc(alloc_size);
         if(NULL!=instance){
-            memset(instance,0,frame_size);
-            instance->sounding.type = MB1_TYPE_ID;
-            instance->sounding.size=frame_size;
-            instance->sounding.nbeams=beams;
-        }
-    }
-    return instance;
-}
-
-mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams, int flags)
-{
-    mb1_frame_t *instance =NULL;
-
-    if(NULL!=pself && beams>=0){
-        uint32_t frame_size = MB1_FRAME_BYTES(beams);
-        if(NULL==*pself){
-            instance = mb1_frame_new(beams);
-        }else{
-	        instance = (mb1_frame_t *)realloc((*pself),frame_size);
-        }
-        if(NULL!=instance){
-            if(flags==MB1_RS_ALL){
-                memset(instance,0,frame_size);
-            }else{
-                if( (flags&MB1_RS_BEAMS)){
-                    memset(&instance->sounding.beams[0],0,MB1_BEAM_ARRAY_BYTES(beams));
-                }
-                if( (flags&MB1_RS_HEADER)){
-                    memset(&instance->sounding,0,MB1_HEADER_BYTES);
-                }
-                // always clear the checksum
-                memset(&instance->checksum,0,MB1_CHECKSUM_BYTES);
-            }
-            instance->sounding.type = MB1_TYPE_ID;
-            instance->sounding.size=frame_size;
-            instance->sounding.nbeams=beams;
-            *pself = instance;
+            memset(instance,0,alloc_size);
+            instance->sounding = (mb1_sounding_t *)((unsigned char *)instance+sizeof(mb1_frame_t));
+            instance->checksum = MB1_PCHECKSUM_U32(instance);
+            instance->sounding->type = MB1_TYPE_ID;
+            instance->sounding->size=frame_size;
+            instance->sounding->nbeams=beams;
         }
     }
     return instance;
@@ -164,27 +134,96 @@ void mb1_frame_destroy(mb1_frame_t **pself)
     }
 }
 
+mb1_frame_t *mb1_frame_resize(mb1_frame_t **pself, int beams, int flags)
+{
+    mb1_frame_t *instance =NULL;
+    
+    if(NULL!=pself && beams>=0){
+        uint32_t frame_size = MB1_FRAME_BYTES(beams);
+        uint32_t alloc_size = frame_size+sizeof(mb1_frame_t);
+        if(NULL==*pself){
+            instance = mb1_frame_new(beams);
+        }else{
+            instance = (mb1_frame_t *)realloc((*pself),alloc_size);
+        }
+        if(NULL!=instance){
+            instance->sounding = (mb1_sounding_t *)((unsigned char *)instance+sizeof(mb1_frame_t));
+            instance->checksum = MB1_PCHECKSUM_U32(instance);
+            instance->sounding->type = MB1_TYPE_ID;
+            instance->sounding->size=frame_size;
+            instance->sounding->nbeams=beams;
+            mb1_frame_zero(instance,flags);
+            *pself = instance;
+        }
+    }
+    return instance;
+}
+
+int mb1_frame_zero(mb1_frame_t *self, int flags)
+{
+    int retval=-1;
+    if(NULL!=self){
+        uint32_t beams=self->sounding->nbeams;
+        if(beams>0 && beams<=MB1_MAX_BEAMS){
+            uint32_t frame_size = MB1_FRAME_BYTES(beams);
+            if(flags==MB1_RS_ALL){
+                memset(self->sounding,0,frame_size);
+            }else{
+                if( (flags&MB1_RS_BEAMS)){
+                    memset(&self->sounding->beams[0],0,MB1_BEAM_ARRAY_BYTES(beams));
+                }
+                if( (flags&MB1_RS_HEADER)){
+                    memset(self->sounding,0,MB1_HEADER_BYTES);
+                }
+                // always clear the checksum
+                memset(self->checksum,0,MB1_CHECKSUM_BYTES);
+            }
+            retval=0;
+        }
+    }
+    return retval;
+}
+
+unsigned int mb1_frame_calc_checksum(mb1_frame_t *self)
+{
+    unsigned int retval = 0xFFFFFFFF;
+    if(NULL!=self){
+        unsigned int checksum=0x00000000;
+        unsigned char *cp = (unsigned char *)self->sounding;
+        int i=0;
+        int chk_len =self->sounding->size-MB1_CHECKSUM_BYTES;
+        if(chk_len>0 && chk_len<=MB1_MAX_FRAME_BYTES){
+            for (i = 0; i < chk_len; i++) {
+                checksum += (unsigned int) (*cp++);
+            }
+            retval=checksum;
+        }
+    }
+    return retval;
+}
+
 void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent)
 {
     if (NULL != self) {
         fprintf(stderr,"%*s[self           %10p]\n",indent,(indent>0?" ":""), self);
-        fprintf(stderr,"%*s[type           %6s%04X]\n",indent,(indent>0?" ":"")," ", self->sounding.type);
-        fprintf(stderr,"%*s[size           %10d]\n",indent,(indent>0?" ":""), self->sounding.size);
-        fprintf(stderr,"%*s[ts             %10.3lf]\n",indent,(indent>0?" ":""), self->sounding.ts);
-        fprintf(stderr,"%*s[lat            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding.lat);
-        fprintf(stderr,"%*s[lon            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding.lon);
-        fprintf(stderr,"%*s[depth          %10.3lf]\n",indent,(indent>0?" ":""), self->sounding.depth);
-        fprintf(stderr,"%*s[hdg            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding.hdg);
-        fprintf(stderr,"%*s[ping_number    %10u]\n",indent,(indent>0?" ":""), self->sounding.ping_number);
-        fprintf(stderr,"%*s[nbeams         %10u]\n",indent,(indent>0?" ":""), self->sounding.nbeams);
-        int nbeams = self->sounding.nbeams;
+        fprintf(stderr,"%*s[type           %2s%08X]\n",indent,(indent>0?" ":"")," ", self->sounding->type);
+        fprintf(stderr,"%*s[size           %10d]\n",indent,(indent>0?" ":""), self->sounding->size);
+        fprintf(stderr,"%*s[ts         %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->ts);
+        fprintf(stderr,"%*s[lat            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->lat);
+        fprintf(stderr,"%*s[lon            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->lon);
+        fprintf(stderr,"%*s[depth          %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->depth);
+        fprintf(stderr,"%*s[hdg            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->hdg);
+        fprintf(stderr,"%*s[ping_number    %10u]\n",indent,(indent>0?" ":""), self->sounding->ping_number);
+        fprintf(stderr,"%*s[nbeams         %10u]\n",indent,(indent>0?" ":""), self->sounding->nbeams);
+        fprintf(stderr,"%*s[checksum       %2s%08X]\n",indent,(indent>0?" ":""), " ",*self->checksum);
+        int nbeams = self->sounding->nbeams;
         fprintf(stderr,"%*s[[ n ] beam     rhox      rhoy       rhoz   ]\n",indent+3,(indent>0?" ":""));
         for(int i=0;i<nbeams;i++){
             fprintf(stderr,"%*s[[%3d] %03d  %+10.3lf %+10.3lf %+10.3lf]\n",indent+3,(indent>0?" ":""), i,
-                    self->sounding.beams[i].beam_num,
-                    self->sounding.beams[i].rhox,
-                    self->sounding.beams[i].rhoy,
-                    self->sounding.beams[i].rhoz);
+                    self->sounding->beams[i].beam_num,
+                    self->sounding->beams[i].rhox,
+                    self->sounding->beams[i].rhoy,
+                    self->sounding->beams[i].rhoz);
         }
     }
 }
