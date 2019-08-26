@@ -42,6 +42,7 @@ libmbtrn_la_SOURCES = \
                 mlog.c \
                 mlist.c \
                 mstats.c \
+				mswap.c \
 				mbtrn.c \
                 mbtrn-server.c \
 				r7kc.c
@@ -49,7 +50,7 @@ libmbtrn_la_SOURCES = \
 
 libmbtrn_la_LIBADD = -lpthread
 
-bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k tbinx udps udpc
+bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k tbinx udps udpc mb1conv
 
 tmbtrn_SOURCES = mbtrn-test.c 
 tmbtrn_LDADD = libmbtrn.la
@@ -74,6 +75,9 @@ udps_LDADD = libmbtrn.la
 
 udpc_SOURCES = udpc.c
 udpc_LDADD = libmbtrn.la
+
+mb1conv_SOURCES = mb1conv.c mb1_msg.c mb71_msg.c
+mb1conv_LDADD = libmbtrn.la
 
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
 
