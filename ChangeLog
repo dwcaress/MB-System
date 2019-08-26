@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+  Version 5.7.6beta6     August 26, 2019
   Version 5.7.6beta5     August 6, 2019
   Version 5.7.6beta4     August 2, 2019
   Version 5.7.6beta2     July 25, 2019
@@ -321,6 +322,21 @@ announced releases.
 -------------------------------------------------------------------------------
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
+
+-----> 5.7.6beta6 (August 26, 2019)
+
+Mbm_route2mission: AUV spiral descent option now includes a behavior to disable
+DVL aiding of the INS during the descent.
+
+Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): these i/o modules have been
+updated to handle both a new verion (1.3) of the 3D at Depth Wide
+Swath Lidar (WiSSL) *.raa format data.
+
+Mbtrn library: Updated to current code written by Kent Headley.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
 
 -----> 5.7.6beta5 (August 6, 2019)
 

@@ -93,7 +93,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = tmbtrn$(EXEEXT) stream7k$(EXEEXT) frames7k$(EXEEXT) \
 	trnc$(EXEEXT) emu7k$(EXEEXT) tbinx$(EXEEXT) udps$(EXEEXT) \
-	udpc$(EXEEXT)
+	udpc$(EXEEXT) mb1conv$(EXEEXT)
 subdir = src/mbtrn
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -143,7 +143,7 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libmbtrn_la_DEPENDENCIES =
 am_libmbtrn_la_OBJECTS = mframe.lo mcbuf.lo msocket.lo mthread.lo \
 	mfile.lo mtime.lo mmdebug.lo mconfig.lo merror.lo mlog.lo \
-	mlist.lo mstats.lo mbtrn.lo mbtrn-server.lo r7kc.lo
+	mlist.lo mstats.lo mswap.lo mbtrn.lo mbtrn-server.lo r7kc.lo
 libmbtrn_la_OBJECTS = $(am_libmbtrn_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -158,6 +158,10 @@ emu7k_DEPENDENCIES = libmbtrn.la
 am_frames7k_OBJECTS = frames7k.$(OBJEXT)
 frames7k_OBJECTS = $(am_frames7k_OBJECTS)
 frames7k_DEPENDENCIES = libmbtrn.la
+am_mb1conv_OBJECTS = mb1conv.$(OBJEXT) mb1_msg.$(OBJEXT) \
+	mb71_msg.$(OBJEXT)
+mb1conv_OBJECTS = $(am_mb1conv_OBJECTS)
+mb1conv_DEPENDENCIES = libmbtrn.la
 am_stream7k_OBJECTS = stream7k.$(OBJEXT)
 stream7k_OBJECTS = $(am_stream7k_OBJECTS)
 stream7k_DEPENDENCIES = libmbtrn.la
@@ -193,13 +197,15 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src/mbio
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/emu7k.Po ./$(DEPDIR)/frames7k.Po \
-	./$(DEPDIR)/mbtrn-server.Plo ./$(DEPDIR)/mbtrn-test.Po \
-	./$(DEPDIR)/mbtrn.Plo ./$(DEPDIR)/mcbuf.Plo \
-	./$(DEPDIR)/mconfig.Plo ./$(DEPDIR)/merror.Plo \
-	./$(DEPDIR)/mfile.Plo ./$(DEPDIR)/mframe.Plo \
-	./$(DEPDIR)/mlist.Plo ./$(DEPDIR)/mlog.Plo \
-	./$(DEPDIR)/mmdebug.Plo ./$(DEPDIR)/msocket.Plo \
-	./$(DEPDIR)/mstats.Plo ./$(DEPDIR)/mthread.Plo \
+	./$(DEPDIR)/mb1_msg.Po ./$(DEPDIR)/mb1conv.Po \
+	./$(DEPDIR)/mb71_msg.Po ./$(DEPDIR)/mbtrn-server.Plo \
+	./$(DEPDIR)/mbtrn-test.Po ./$(DEPDIR)/mbtrn.Plo \
+	./$(DEPDIR)/mcbuf.Plo ./$(DEPDIR)/mconfig.Plo \
+	./$(DEPDIR)/merror.Plo ./$(DEPDIR)/mfile.Plo \
+	./$(DEPDIR)/mframe.Plo ./$(DEPDIR)/mlist.Plo \
+	./$(DEPDIR)/mlog.Plo ./$(DEPDIR)/mmdebug.Plo \
+	./$(DEPDIR)/msocket.Plo ./$(DEPDIR)/mstats.Plo \
+	./$(DEPDIR)/mswap.Plo ./$(DEPDIR)/mthread.Plo \
 	./$(DEPDIR)/mtime.Plo ./$(DEPDIR)/r7kc.Plo \
 	./$(DEPDIR)/stream7k.Po ./$(DEPDIR)/tbinx.Po \
 	./$(DEPDIR)/trnc.Po ./$(DEPDIR)/udpc.Po ./$(DEPDIR)/udps.Po
@@ -223,8 +229,9 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libmbtrn_la_SOURCES) $(emu7k_SOURCES) $(frames7k_SOURCES) \
-	$(stream7k_SOURCES) $(tbinx_SOURCES) $(tmbtrn_SOURCES) \
-	$(trnc_SOURCES) $(udpc_SOURCES) $(udps_SOURCES)
+	$(mb1conv_SOURCES) $(stream7k_SOURCES) $(tbinx_SOURCES) \
+	$(tmbtrn_SOURCES) $(trnc_SOURCES) $(udpc_SOURCES) \
+	$(udps_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -463,6 +470,7 @@ libmbtrn_la_SOURCES = \
                 mlog.c \
                 mlist.c \
                 mstats.c \
+				mswap.c \
 				mbtrn.c \
                 mbtrn-server.c \
 				r7kc.c
@@ -484,6 +492,8 @@ udps_SOURCES = udps.c
 udps_LDADD = libmbtrn.la
 udpc_SOURCES = udpc.c
 udpc_LDADD = libmbtrn.la
+mb1conv_SOURCES = mb1conv.c mb1_msg.c mb71_msg.c
+mb1conv_LDADD = libmbtrn.la
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
 CLEANFILES = 
 DISTCLEANFILES = 
@@ -616,6 +626,10 @@ frames7k$(EXEEXT): $(frames7k_OBJECTS) $(frames7k_DEPENDENCIES) $(EXTRA_frames7k
 	@rm -f frames7k$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(frames7k_OBJECTS) $(frames7k_LDADD) $(LIBS)
 
+mb1conv$(EXEEXT): $(mb1conv_OBJECTS) $(mb1conv_DEPENDENCIES) $(EXTRA_mb1conv_DEPENDENCIES) 
+	@rm -f mb1conv$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(mb1conv_OBJECTS) $(mb1conv_LDADD) $(LIBS)
+
 stream7k$(EXEEXT): $(stream7k_OBJECTS) $(stream7k_DEPENDENCIES) $(EXTRA_stream7k_DEPENDENCIES) 
 	@rm -f stream7k$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(stream7k_OBJECTS) $(stream7k_LDADD) $(LIBS)
@@ -683,6 +697,9 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emu7k.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/frames7k.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb1_msg.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb1conv.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb71_msg.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn-server.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn-test.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbtrn.Plo@am__quote@ # am--include-marker
@@ -696,6 +713,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmdebug.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msocket.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mstats.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mswap.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mthread.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mtime.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/r7kc.Plo@am__quote@ # am--include-marker
@@ -862,6 +880,9 @@ clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/emu7k.Po
 	-rm -f ./$(DEPDIR)/frames7k.Po
+	-rm -f ./$(DEPDIR)/mb1_msg.Po
+	-rm -f ./$(DEPDIR)/mb1conv.Po
+	-rm -f ./$(DEPDIR)/mb71_msg.Po
 	-rm -f ./$(DEPDIR)/mbtrn-server.Plo
 	-rm -f ./$(DEPDIR)/mbtrn-test.Po
 	-rm -f ./$(DEPDIR)/mbtrn.Plo
@@ -875,6 +896,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mmdebug.Plo
 	-rm -f ./$(DEPDIR)/msocket.Plo
 	-rm -f ./$(DEPDIR)/mstats.Plo
+	-rm -f ./$(DEPDIR)/mswap.Plo
 	-rm -f ./$(DEPDIR)/mthread.Plo
 	-rm -f ./$(DEPDIR)/mtime.Plo
 	-rm -f ./$(DEPDIR)/r7kc.Plo
@@ -931,6 +953,9 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/emu7k.Po
 	-rm -f ./$(DEPDIR)/frames7k.Po
+	-rm -f ./$(DEPDIR)/mb1_msg.Po
+	-rm -f ./$(DEPDIR)/mb1conv.Po
+	-rm -f ./$(DEPDIR)/mb71_msg.Po
 	-rm -f ./$(DEPDIR)/mbtrn-server.Plo
 	-rm -f ./$(DEPDIR)/mbtrn-test.Po
 	-rm -f ./$(DEPDIR)/mbtrn.Plo
@@ -944,6 +969,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mmdebug.Plo
 	-rm -f ./$(DEPDIR)/msocket.Plo
 	-rm -f ./$(DEPDIR)/mstats.Plo
+	-rm -f ./$(DEPDIR)/mswap.Plo
 	-rm -f ./$(DEPDIR)/mthread.Plo
 	-rm -f ./$(DEPDIR)/mtime.Plo
 	-rm -f ./$(DEPDIR)/r7kc.Plo

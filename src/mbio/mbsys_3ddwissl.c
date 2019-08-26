@@ -402,13 +402,13 @@ int mbsys_3ddwissl_alloc
   /* head A calibration */
   memset((void *)&store->calibration_v1s1_a, 0,
     sizeof(struct mbsys_3ddwissl_calibration_v1s1_struct));
-  memset((void *)&store->calibration_v1s2_a, 0,
-    sizeof(struct mbsys_3ddwissl_calibration_v1s2_struct));
+  memset((void *)&store->calibration_v1s3_a, 0,
+    sizeof(struct mbsys_3ddwissl_calibration_v1s3_struct));
 
   memset((void *)&store->calibration_v1s1_b, 0,
     sizeof(struct mbsys_3ddwissl_calibration_v1s1_struct));
-  memset((void *)&store->calibration_v1s2_b, 0,
-    sizeof(struct mbsys_3ddwissl_calibration_v1s2_struct));
+  memset((void *)&store->calibration_v1s3_b, 0,
+    sizeof(struct mbsys_3ddwissl_calibration_v1s3_struct));
 
   /* Scan Information */
   store->record_id = MB_DATA_NONE;    /* head A (0x3D53 or 0x3D73) or head B (0x3D54 or
@@ -2921,508 +2921,508 @@ int mbsys_3ddwissl_print_store
     fprintf(stderr,
       "%s     calibration A: cfg_path:                      %s\n",
       first,
-      store->calibration_v1s2_a.cfg_path);
+      store->calibration_v1s3_a.cfg_path);
     fprintf(stderr,
       "%s     calibration A: laser_head_no:                 %d\n",
       first,
-      store->calibration_v1s2_a.laser_head_no);
+      store->calibration_v1s3_a.laser_head_no);
     fprintf(stderr,
       "%s     calibration A: process_for_air:               %d\n",
       first,
-      store->calibration_v1s2_a.process_for_air);
+      store->calibration_v1s3_a.process_for_air);
     fprintf(stderr,
       "%s     calibration A: temperature_compensation:      %d\n",
       first,
-      store->calibration_v1s2_a.temperature_compensation);
+      store->calibration_v1s3_a.temperature_compensation);
     fprintf(stderr,
       "%s     calibration A: emergency_shutdown:            %d\n",
       first,
-      store->calibration_v1s2_a.emergency_shutdown);
+      store->calibration_v1s3_a.emergency_shutdown);
     fprintf(stderr,
       "%s     calibration A: ocb_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_a.ocb_temperature_limit_c);
+      store->calibration_v1s3_a.ocb_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration A: ocb_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_a.ocb_temperature_limit_c);
+      store->calibration_v1s3_a.ocb_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration A: ocb_humidity_limit:            %f\n",
       first,
-      store->calibration_v1s2_a.ocb_humidity_limit);
+      store->calibration_v1s3_a.ocb_humidity_limit);
     fprintf(stderr,
       "%s     calibration A: pb_temperature_limit_1_c:      %f\n",
       first,
-      store->calibration_v1s2_a.pb_temperature_limit_1_c);
+      store->calibration_v1s3_a.pb_temperature_limit_1_c);
     fprintf(stderr,
       "%s     calibration A: pb_temperature_limit_2_c:      %f\n",
       first,
-      store->calibration_v1s2_a.pb_temperature_limit_2_c);
+      store->calibration_v1s3_a.pb_temperature_limit_2_c);
     fprintf(stderr,
       "%s     calibration A: pb_humidity_limit:             %f\n",
       first,
-      store->calibration_v1s2_a.pb_humidity_limit);
+      store->calibration_v1s3_a.pb_humidity_limit);
     fprintf(stderr,
       "%s     calibration A: dig_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_a.dig_temperature_limit_c);
+      store->calibration_v1s3_a.dig_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration A: ocb_comm_port:                 %s\n",
       first,
-      store->calibration_v1s2_a.ocb_comm_port);
+      store->calibration_v1s3_a.ocb_comm_port);
     fprintf(stderr,
       "%s     calibration A: ocb_comm_cfg:                  %s\n",
       first,
-      store->calibration_v1s2_a.ocb_comm_cfg);
+      store->calibration_v1s3_a.ocb_comm_cfg);
     fprintf(stderr,
       "%s     calibration A: az_ao_deg_to_volt:             %f\n",
       first,
-      store->calibration_v1s2_a.az_ao_deg_to_volt);
+      store->calibration_v1s3_a.az_ao_deg_to_volt);
     fprintf(stderr,
       "%s     calibration A: az_ai_neg_v_to_deg:            %f\n",
       first,
-      store->calibration_v1s2_a.az_ai_neg_v_to_deg);
+      store->calibration_v1s3_a.az_ai_neg_v_to_deg);
     fprintf(stderr,
       "%s     calibration A: az_ai_pos_v_to_deg:            %f\n",
       first,
-      store->calibration_v1s2_a.az_ai_pos_v_to_deg);
+      store->calibration_v1s3_a.az_ai_pos_v_to_deg);
     fprintf(stderr,
       "%s     calibration A: t1_air:                        %f\n",
       first,
-      store->calibration_v1s2_a.t1_air);
+      store->calibration_v1s3_a.t1_air);
     fprintf(stderr,
       "%s     calibration A: ff_air:                        %f\n",
       first,
-      store->calibration_v1s2_a.ff_air);
+      store->calibration_v1s3_a.ff_air);
     fprintf(stderr,
       "%s     calibration A: t1_water_g4000:                %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g4000);
+      store->calibration_v1s3_a.t1_water_g4000);
     fprintf(stderr,
       "%s     calibration A: ff_water_g4000:                %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g4000);
+      store->calibration_v1s3_a.ff_water_g4000);
     fprintf(stderr,
       "%s     calibration A: t1_water_g3000:                %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g3000);
+      store->calibration_v1s3_a.t1_water_g3000);
     fprintf(stderr,
       "%s     calibration A: ff_water_g3000:                %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g3000);
+      store->calibration_v1s3_a.ff_water_g3000);
     fprintf(stderr,
       "%s     calibration A: t1_water_g2000:                %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g2000);
+      store->calibration_v1s3_a.t1_water_g2000);
     fprintf(stderr,
       "%s     calibration A: ff_water_g2000:                %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g2000);
+      store->calibration_v1s3_a.ff_water_g2000);
     fprintf(stderr,
       "%s     calibration A: t1_water_g1000:                %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g1000);
+      store->calibration_v1s3_a.t1_water_g1000);
     fprintf(stderr,
       "%s     calibration A: ff_water_g1000:                %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g1000);
+      store->calibration_v1s3_a.ff_water_g1000);
     fprintf(stderr,
       "%s     calibration A: t1_water_g400:                 %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g400);
+      store->calibration_v1s3_a.t1_water_g400);
     fprintf(stderr,
       "%s     calibration A: ff_water_g400:                 %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g400);
+      store->calibration_v1s3_a.ff_water_g400);
     fprintf(stderr,
       "%s     calibration A: t1_water_g300:                 %f\n",
       first,
-      store->calibration_v1s2_a.t1_water_g300);
+      store->calibration_v1s3_a.t1_water_g300);
     fprintf(stderr,
       "%s     calibration A: ff_water_g300:                 %f\n",
       first,
-      store->calibration_v1s2_a.ff_water_g300);
+      store->calibration_v1s3_a.ff_water_g300);
     fprintf(stderr,
       "%s     calibration A: temp_comp_poly2:               %f\n",
       first,
-      store->calibration_v1s2_a.temp_comp_poly2);
+      store->calibration_v1s3_a.temp_comp_poly2);
     fprintf(stderr,
       "%s     calibration A: temp_comp_poly1:               %f\n",
       first,
-      store->calibration_v1s2_a.temp_comp_poly1);
+      store->calibration_v1s3_a.temp_comp_poly1);
     fprintf(stderr,
       "%s     calibration A: temp_comp_poly:                %f\n",
       first,
-      store->calibration_v1s2_a.temp_comp_poly);
+      store->calibration_v1s3_a.temp_comp_poly);
     fprintf(stderr,
       "%s     calibration A: laser_start_time_sec:          %f\n",
       first,
-      store->calibration_v1s2_a.laser_start_time_sec);
+      store->calibration_v1s3_a.laser_start_time_sec);
     fprintf(stderr,
       "%s     calibration A: scanner_shift_cts:             %f\n",
       first,
-      store->calibration_v1s2_a.scanner_shift_cts);
+      store->calibration_v1s3_a.scanner_shift_cts);
     fprintf(stderr,
       "%s     calibration A: factory_scanner_lrg_deg:       %f\n",
       first,
-      store->calibration_v1s2_a.factory_scanner_lrg_deg);
+      store->calibration_v1s3_a.factory_scanner_lrg_deg);
     fprintf(stderr,
       "%s     calibration A: factory_scanner_med_deg:       %f\n",
       first,
-      store->calibration_v1s2_a.factory_scanner_med_deg);
+      store->calibration_v1s3_a.factory_scanner_med_deg);
     fprintf(stderr,
       "%s     calibration A: factory_scanner_sml_deg:       %f\n",
       first,
-      store->calibration_v1s2_a.factory_scanner_sml_deg);
+      store->calibration_v1s3_a.factory_scanner_sml_deg);
     fprintf(stderr,
       "%s     calibration A: el_angle_fixed_deg:            %f\n",
       first,
-      store->calibration_v1s2_a.el_angle_fixed_deg);
+      store->calibration_v1s3_a.el_angle_fixed_deg);
     fprintf(stderr,
       "%s     calibration A: zda_to_pps_max_msec            %d\n",
       first,
-      store->calibration_v1s2_a.zda_to_pps_max_msec);
+      store->calibration_v1s3_a.zda_to_pps_max_msec);
     fprintf(stderr,
       "%s     calibration A: zda_udp_port                   %d\n",
       first,
-      store->calibration_v1s2_a.zda_udp_port);
+      store->calibration_v1s3_a.zda_udp_port);
     fprintf(stderr,
       "%s     calibration A: show_time_sync_errors          %d\n",
       first,
-      store->calibration_v1s2_a.show_time_sync_errors);
+      store->calibration_v1s3_a.show_time_sync_errors);
     fprintf(stderr,
       "%s     calibration A: min_time_diff_update_msec      %d\n",
       first,
-      store->calibration_v1s2_a.min_time_diff_update_msec);
+      store->calibration_v1s3_a.min_time_diff_update_msec);
     fprintf(stderr,
       "%s     calibration A:  ctd_tcp_port                  %d\n",
       first,
-      store->calibration_v1s2_a.ctd_tcp_port);
+      store->calibration_v1s3_a.ctd_tcp_port);
     fprintf(stderr,
       "%s     calibration A: trigger_level_volt             %f\n",
       first,
-      store->calibration_v1s2_a.trigger_level_volt);
+      store->calibration_v1s3_a.trigger_level_volt);
     fprintf(stderr,
       "%s     calibration A: mf_t0_position                 %d\n",
       first,
-      store->calibration_v1s2_a.mf_t0_position);
+      store->calibration_v1s3_a.mf_t0_position);
     fprintf(stderr,
       "%s     calibration A: mf_start_proc                  %d\n",
       first,
-      store->calibration_v1s2_a.mf_start_proc);
+      store->calibration_v1s3_a.mf_start_proc);
     fprintf(stderr,
       "%s     calibration A: dig_ref_pos_t0_cnts            %d\n",
       first,
-      store->calibration_v1s2_a.dig_ref_pos_t0_cnts);
+      store->calibration_v1s3_a.dig_ref_pos_t0_cnts);
     fprintf(stderr,
       "%s     calibration A: dummy                          %d\n",
       first,
-      store->calibration_v1s2_a.dummy);
+      store->calibration_v1s3_a.dummy);
     fprintf(stderr,
       "%s     calibration A:  t0_min_height_raw_cts         %d\n",
       first,
-      store->calibration_v1s2_a.t0_min_height_raw_cts);
+      store->calibration_v1s3_a.t0_min_height_raw_cts);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_0          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_0);
+      store->calibration_v1s3_a.scanner_neg_polynom_0);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_1          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_1);
+      store->calibration_v1s3_a.scanner_neg_polynom_1);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_2          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_2);
+      store->calibration_v1s3_a.scanner_neg_polynom_2);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_3          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_3);
+      store->calibration_v1s3_a.scanner_neg_polynom_3);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_4          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_4);
+      store->calibration_v1s3_a.scanner_neg_polynom_4);
     fprintf(stderr,
       "%s     calibration A: scanner_neg_polynom_5          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_neg_polynom_5);
+      store->calibration_v1s3_a.scanner_neg_polynom_5);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_0          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_0);
+      store->calibration_v1s3_a.scanner_pos_polynom_0);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_1          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_1);
+      store->calibration_v1s3_a.scanner_pos_polynom_1);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_2          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_2);
+      store->calibration_v1s3_a.scanner_pos_polynom_2);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_3          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_3);
+      store->calibration_v1s3_a.scanner_pos_polynom_3);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_4          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_4);
+      store->calibration_v1s3_a.scanner_pos_polynom_4);
     fprintf(stderr,
       "%s     calibration A: scanner_pos_polynom_5          %f\n",
       first,
-      store->calibration_v1s2_a.scanner_pos_polynom_5);
+      store->calibration_v1s3_a.scanner_pos_polynom_5);
 
     fprintf(stderr,
       "%s     calibration B: cfg_path:                      %s\n",
       first,
-      store->calibration_v1s2_b.cfg_path);
+      store->calibration_v1s3_b.cfg_path);
     fprintf(stderr,
       "%s     calibration B: laser_head_no:                 %d\n",
       first,
-      store->calibration_v1s2_b.laser_head_no);
+      store->calibration_v1s3_b.laser_head_no);
     fprintf(stderr,
       "%s     calibration B: process_for_air:               %d\n",
       first,
-      store->calibration_v1s2_b.process_for_air);
+      store->calibration_v1s3_b.process_for_air);
     fprintf(stderr,
       "%s     calibration B: temperature_compensation:      %d\n",
       first,
-      store->calibration_v1s2_b.temperature_compensation);
+      store->calibration_v1s3_b.temperature_compensation);
     fprintf(stderr,
       "%s     calibration B: emergency_shutdown:            %d\n",
       first,
-      store->calibration_v1s2_b.emergency_shutdown);
+      store->calibration_v1s3_b.emergency_shutdown);
     fprintf(stderr,
       "%s     calibration B: ocb_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_b.ocb_temperature_limit_c);
+      store->calibration_v1s3_b.ocb_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration B: ocb_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_b.ocb_temperature_limit_c);
+      store->calibration_v1s3_b.ocb_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration B: ocb_humidity_limit:            %f\n",
       first,
-      store->calibration_v1s2_b.ocb_humidity_limit);
+      store->calibration_v1s3_b.ocb_humidity_limit);
     fprintf(stderr,
       "%s     calibration B: pb_temperature_limit_1_c:      %f\n",
       first,
-      store->calibration_v1s2_b.pb_temperature_limit_1_c);
+      store->calibration_v1s3_b.pb_temperature_limit_1_c);
     fprintf(stderr,
       "%s     calibration B: pb_temperature_limit_2_c:      %f\n",
       first,
-      store->calibration_v1s2_b.pb_temperature_limit_2_c);
+      store->calibration_v1s3_b.pb_temperature_limit_2_c);
     fprintf(stderr,
       "%s     calibration B: pb_humidity_limit:             %f\n",
       first,
-      store->calibration_v1s2_b.pb_humidity_limit);
+      store->calibration_v1s3_b.pb_humidity_limit);
     fprintf(stderr,
       "%s     calibration B: dig_temperature_limit_c:       %f\n",
       first,
-      store->calibration_v1s2_b.dig_temperature_limit_c);
+      store->calibration_v1s3_b.dig_temperature_limit_c);
     fprintf(stderr,
       "%s     calibration B: ocb_comm_port:                 %s\n",
       first,
-      store->calibration_v1s2_b.ocb_comm_port);
+      store->calibration_v1s3_b.ocb_comm_port);
     fprintf(stderr,
       "%s     calibration B: ocb_comm_cfg:                  %s\n",
       first,
-      store->calibration_v1s2_b.ocb_comm_cfg);
+      store->calibration_v1s3_b.ocb_comm_cfg);
     fprintf(stderr,
       "%s     calibration B: az_ao_deg_to_volt:             %f\n",
       first,
-      store->calibration_v1s2_b.az_ao_deg_to_volt);
+      store->calibration_v1s3_b.az_ao_deg_to_volt);
     fprintf(stderr,
       "%s     calibration B: az_ai_neg_v_to_deg:            %f\n",
       first,
-      store->calibration_v1s2_b.az_ai_neg_v_to_deg);
+      store->calibration_v1s3_b.az_ai_neg_v_to_deg);
     fprintf(stderr,
       "%s     calibration B: az_ai_pos_v_to_deg:            %f\n",
       first,
-      store->calibration_v1s2_b.az_ai_pos_v_to_deg);
+      store->calibration_v1s3_b.az_ai_pos_v_to_deg);
     fprintf(stderr,
       "%s     calibration B: t1_air:                        %f\n",
       first,
-      store->calibration_v1s2_b.t1_air);
+      store->calibration_v1s3_b.t1_air);
     fprintf(stderr,
       "%s     calibration B: ff_air:                        %f\n",
       first,
-      store->calibration_v1s2_b.ff_air);
+      store->calibration_v1s3_b.ff_air);
     fprintf(stderr,
       "%s     calibration B: t1_water_g4000:                %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g4000);
+      store->calibration_v1s3_b.t1_water_g4000);
     fprintf(stderr,
       "%s     calibration B: ff_water_g4000:                %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g4000);
+      store->calibration_v1s3_b.ff_water_g4000);
     fprintf(stderr,
       "%s     calibration B: t1_water_g3000:                %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g3000);
+      store->calibration_v1s3_b.t1_water_g3000);
     fprintf(stderr,
       "%s     calibration B: ff_water_g3000:                %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g3000);
+      store->calibration_v1s3_b.ff_water_g3000);
     fprintf(stderr,
       "%s     calibration B: t1_water_g2000:                %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g2000);
+      store->calibration_v1s3_b.t1_water_g2000);
     fprintf(stderr,
       "%s     calibration B: ff_water_g2000:                %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g2000);
+      store->calibration_v1s3_b.ff_water_g2000);
     fprintf(stderr,
       "%s     calibration B: t1_water_g1000:                %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g1000);
+      store->calibration_v1s3_b.t1_water_g1000);
     fprintf(stderr,
       "%s     calibration B: ff_water_g1000:                %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g1000);
+      store->calibration_v1s3_b.ff_water_g1000);
     fprintf(stderr,
       "%s     calibration B: t1_water_g400:                 %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g400);
+      store->calibration_v1s3_b.t1_water_g400);
     fprintf(stderr,
       "%s     calibration B: ff_water_g400:                 %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g400);
+      store->calibration_v1s3_b.ff_water_g400);
     fprintf(stderr,
       "%s     calibration B: t1_water_g300:                 %f\n",
       first,
-      store->calibration_v1s2_b.t1_water_g300);
+      store->calibration_v1s3_b.t1_water_g300);
     fprintf(stderr,
       "%s     calibration B: ff_water_g300:                 %f\n",
       first,
-      store->calibration_v1s2_b.ff_water_g300);
+      store->calibration_v1s3_b.ff_water_g300);
     fprintf(stderr,
       "%s     calibration B: temp_comp_poly2:               %f\n",
       first,
-      store->calibration_v1s2_b.temp_comp_poly2);
+      store->calibration_v1s3_b.temp_comp_poly2);
     fprintf(stderr,
       "%s     calibration B: temp_comp_poly1:               %f\n",
       first,
-      store->calibration_v1s2_b.temp_comp_poly1);
+      store->calibration_v1s3_b.temp_comp_poly1);
     fprintf(stderr,
       "%s     calibration B: temp_comp_poly:                %f\n",
       first,
-      store->calibration_v1s2_b.temp_comp_poly);
+      store->calibration_v1s3_b.temp_comp_poly);
     fprintf(stderr,
       "%s     calibration B: laser_start_time_sec:          %f\n",
       first,
-      store->calibration_v1s2_b.laser_start_time_sec);
+      store->calibration_v1s3_b.laser_start_time_sec);
     fprintf(stderr,
       "%s     calibration B: scanner_shift_cts:             %f\n",
       first,
-      store->calibration_v1s2_b.scanner_shift_cts);
+      store->calibration_v1s3_b.scanner_shift_cts);
     fprintf(stderr,
       "%s     calibration B: factory_scanner_lrg_deg:       %f\n",
       first,
-      store->calibration_v1s2_b.factory_scanner_lrg_deg);
+      store->calibration_v1s3_b.factory_scanner_lrg_deg);
     fprintf(stderr,
       "%s     calibration B: factory_scanner_med_deg:       %f\n",
       first,
-      store->calibration_v1s2_b.factory_scanner_med_deg);
+      store->calibration_v1s3_b.factory_scanner_med_deg);
     fprintf(stderr,
       "%s     calibration B: factory_scanner_sml_deg:       %f\n",
       first,
-      store->calibration_v1s2_b.factory_scanner_sml_deg);
+      store->calibration_v1s3_b.factory_scanner_sml_deg);
     fprintf(stderr,
       "%s     calibration B: el_angle_fixed_deg:            %f\n",
       first,
-      store->calibration_v1s2_b.el_angle_fixed_deg);
+      store->calibration_v1s3_b.el_angle_fixed_deg);
     fprintf(stderr,
       "%s     calibration B: zda_to_pps_max_msec            %d\n",
       first,
-      store->calibration_v1s2_b.zda_to_pps_max_msec);
+      store->calibration_v1s3_b.zda_to_pps_max_msec);
     fprintf(stderr,
       "%s     calibration B: zda_udp_port                   %d\n",
       first,
-      store->calibration_v1s2_b.zda_udp_port);
+      store->calibration_v1s3_b.zda_udp_port);
     fprintf(stderr,
       "%s     calibration B: show_time_sync_errors          %d\n",
       first,
-      store->calibration_v1s2_b.show_time_sync_errors);
+      store->calibration_v1s3_b.show_time_sync_errors);
     fprintf(stderr,
       "%s     calibration B: min_time_diff_update_msec      %d\n",
       first,
-      store->calibration_v1s2_b.min_time_diff_update_msec);
+      store->calibration_v1s3_b.min_time_diff_update_msec);
     fprintf(stderr,
       "%s     calibration B:  ctd_tcp_port                  %d\n",
       first,
-      store->calibration_v1s2_b.ctd_tcp_port);
+      store->calibration_v1s3_b.ctd_tcp_port);
     fprintf(stderr,
       "%s     calibration B: trigger_level_volt             %f\n",
       first,
-      store->calibration_v1s2_b.trigger_level_volt);
+      store->calibration_v1s3_b.trigger_level_volt);
     fprintf(stderr,
       "%s     calibration B: mf_t0_position                 %d\n",
       first,
-      store->calibration_v1s2_b.mf_t0_position);
+      store->calibration_v1s3_b.mf_t0_position);
     fprintf(stderr,
       "%s     calibration B: mf_start_proc                  %d\n",
       first,
-      store->calibration_v1s2_b.mf_start_proc);
+      store->calibration_v1s3_b.mf_start_proc);
     fprintf(stderr,
       "%s     calibration B: dig_ref_pos_t0_cnts            %d\n",
       first,
-      store->calibration_v1s2_b.dig_ref_pos_t0_cnts);
+      store->calibration_v1s3_b.dig_ref_pos_t0_cnts);
     fprintf(stderr,
       "%s     calibration B: dummy                          %d\n",
       first,
-      store->calibration_v1s2_b.dummy);
+      store->calibration_v1s3_b.dummy);
     fprintf(stderr,
       "%s     calibration B:  t0_min_height_raw_cts         %d\n",
       first,
-      store->calibration_v1s2_b.t0_min_height_raw_cts);
+      store->calibration_v1s3_b.t0_min_height_raw_cts);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_0          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_0);
+      store->calibration_v1s3_b.scanner_neg_polynom_0);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_1          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_1);
+      store->calibration_v1s3_b.scanner_neg_polynom_1);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_2          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_2);
+      store->calibration_v1s3_b.scanner_neg_polynom_2);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_3          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_3);
+      store->calibration_v1s3_b.scanner_neg_polynom_3);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_4          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_4);
+      store->calibration_v1s3_b.scanner_neg_polynom_4);
     fprintf(stderr,
       "%s     calibration B: scanner_neg_polynom_5          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_neg_polynom_5);
+      store->calibration_v1s3_b.scanner_neg_polynom_5);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_0          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_0);
+      store->calibration_v1s3_b.scanner_pos_polynom_0);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_1          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_1);
+      store->calibration_v1s3_b.scanner_pos_polynom_1);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_2          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_2);
+      store->calibration_v1s3_b.scanner_pos_polynom_2);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_3          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_3);
+      store->calibration_v1s3_b.scanner_pos_polynom_3);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_4          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_4);
+      store->calibration_v1s3_b.scanner_pos_polynom_4);
     fprintf(stderr,
       "%s     calibration B: scanner_pos_polynom_5          %f\n",
       first,
-      store->calibration_v1s2_b.scanner_pos_polynom_5);
+      store->calibration_v1s3_b.scanner_pos_polynom_5);
     }
   if (store->kind == MB_DATA_DATA)
     {

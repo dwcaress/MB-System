@@ -385,7 +385,7 @@ int main(int argc, char **argv) {
 			}
 			flag++;
 			break;
-		case '?':
+		default:
 			errflg++;
 		}
 	}
@@ -492,7 +492,7 @@ int main(int argc, char **argv) {
 		case XML:
 			strcat(output_file, "_inf.xml");
 			break;
-		case '?':
+		default:
 			break;
 		}
 		if ((output = fopen(output_file, "w")) == NULL)
@@ -511,7 +511,7 @@ int main(int argc, char **argv) {
 		fprintf(output, "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 		fprintf(output, "<mbinfo>\n");
 		break;
-	case '?':
+	default:
 		break;
 	}
 	/* read only once unless coverage mask requested */
@@ -773,7 +773,7 @@ int main(int argc, char **argv) {
 					fprintf(output, "\t\t<attributes>%s</attributes>\n", &format_description[len1]);
 					fprintf(output, "\t</file_info>\n");
 					break;
-				case '?':
+				default:
 					errflg++;
 				}
 			}
@@ -820,7 +820,9 @@ int main(int argc, char **argv) {
 									fprintf(output, "\nComments in file %s:\n", file);
 									icomment++;
 									break;
-								case '?':
+								case JSON:
+								case XML:
+								default:
 									break;
 								}
 							}
@@ -834,7 +836,7 @@ int main(int argc, char **argv) {
 							case XML:
 								fprintf(output, "\t<comment>%s</comment>\n", comment);
 								break;
-							case '?':
+							default:
 								break;
 							}
 						}
@@ -1211,7 +1213,7 @@ int main(int argc, char **argv) {
 								meta_draft++;
 							}
 							break;
-						case '?':
+						default:
 							break;
 						}
 					}
@@ -1383,7 +1385,7 @@ int main(int argc, char **argv) {
 						speed_apparent = 3600.0 * distance / (time_d - time_d_last);
 						if (good_nav_only == MB_YES) {
 							//if (navlon == 0.0 || navlat == 0.0) {		// This still misses lots of trash JL
-							if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) { 
+							if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) {
 								good_nav = MB_NO;
 							}
 							else if (beginnav == MB_YES && speed_apparent >= speed_threshold) {
@@ -2144,7 +2146,7 @@ int main(int argc, char **argv) {
 		}
 		fprintf(output, "\t</limits>\n");
 		break;
-	case '?':
+	default:
 		break;
 	}
 	if (pings_read > 2 && beams_bath_max > 0 && (ngdbeams > 0 || verbose >= 1)) {
@@ -2190,7 +2192,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t</values>\n");
 			fprintf(output, "\t</beam_bathymetry_variances>\n");
 			break;
-		case '?':
+		default:
 			break;
 		}
 	}
@@ -2235,7 +2237,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t</values>\n");
 			fprintf(output, "\t</beam_amplitude_variances>\n");
 			break;
-		case '?':
+		default:
 			break;
 		}
 	}
@@ -2280,7 +2282,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "\t\t</values>\n");
 			fprintf(output, "\t</pixel_sidescan_variances>\n");
 			break;
-		case '?':
+		default:
 			break;
 		}
 	}
@@ -2388,7 +2390,7 @@ int main(int argc, char **argv) {
 			}
 			fprintf(output, "\t</problem_notices>\n");
 			break;
-		case '?':
+		default:
 			break;
 		}
 	}
@@ -2420,7 +2422,8 @@ int main(int argc, char **argv) {
 			}
 			fprintf(output, "\"}");
 			break;
-		case '?':
+		case XML:
+		default:
 			break;
 		}
 	}
@@ -2435,7 +2438,7 @@ int main(int argc, char **argv) {
 	case XML:
 		fprintf(output, "</mbinfo>\n");
 		break;
-	case '?':
+	default:
 		break;
 	}
 
