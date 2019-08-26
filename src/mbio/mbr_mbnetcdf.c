@@ -272,9 +272,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	size_t count[3];
 	int nc_status;
 #ifdef MBNETCDF_DEBUG
-	int nc_verbose = 1;
-#else
-	int nc_verbose = 0;
+	verbose = MAX(2, verbose);
 #endif
 
 	/* if first read then set everything up */
@@ -285,89 +283,89 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		int dim_id;
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "CIB_BLOCK_DIM", &dim_id);
 		if (nc_status != NC_NOERR) {
-			if (verbose >= 2 || nc_verbose >= 1)
+			if (verbose >= 2)
 				fprintf(stderr, "nc_inq_dimid CIB_BLOCK_DIM not found: %s\n", nc_strerror(nc_status));
 		}
 		else {
 			nc_status = nc_inq_dimlen(mb_io_ptr->ncid, dim_id, &store->CIB_BLOCK_DIM);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
 		}
 
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "mbHistoryRecNbr", &dim_id);
 		if (nc_status != NC_NOERR) {
-			if (verbose >= 2 || nc_verbose >= 1)
+			if (verbose >= 2)
 				fprintf(stderr, "nc_inq_dimid mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
 		}
 		else {
 			nc_status = nc_inq_dimlen(mb_io_ptr->ncid, dim_id, &store->mbHistoryRecNbr);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
 		}
 
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "mbNameLength", &dim_id);
 		if (nc_status != NC_NOERR) {
-			if (verbose >= 2 || nc_verbose >= 1)
+			if (verbose >= 2)
 				fprintf(stderr, "nc_inq_dimid mbNameLength error: %s\n", nc_strerror(nc_status));
 		}
 		else {
 			nc_status = nc_inq_dimlen(mb_io_ptr->ncid, dim_id, &store->mbNameLength);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen mbNameLength error: %s\n", nc_strerror(nc_status));
 		}
 
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "mbCommentLength", &dim_id);
 		if (nc_status != NC_NOERR) {
-			if (verbose >= 2 || nc_verbose >= 1)
+			if (verbose >= 2)
 				fprintf(stderr, "nc_inq_dimid mbCommentLength error: %s\n", nc_strerror(nc_status));
 		}
 		else {
 			nc_status = nc_inq_dimlen(mb_io_ptr->ncid, dim_id, &store->mbCommentLength);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen mbCommentLength error: %s\n", nc_strerror(nc_status));
 		}
 
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "mbAntennaNbr", &dim_id);
 		if (nc_status != NC_NOERR) {
-			if (verbose >= 2 || nc_verbose >= 1)
+			if (verbose >= 2)
 				fprintf(stderr, "nc_inq_dimid mbAntennaNbr error: %s\n", nc_strerror(nc_status));
 		}
 		else {
 			nc_status = nc_inq_dimlen(mb_io_ptr->ncid, dim_id, &store->mbAntennaNbr);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen mbAntennaNbr error: %s\n", nc_strerror(nc_status));
 		}
 
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "mbBeamNbr", &dim_id);
 		if (nc_status != NC_NOERR) {
-			if (verbose >= 2 || nc_verbose >= 1)
+			if (verbose >= 2)
 				fprintf(stderr, "nc_inq_dimid mbBeamNbr error: %s\n", nc_strerror(nc_status));
 		}
 		else {
 			nc_status = nc_inq_dimlen(mb_io_ptr->ncid, dim_id, &store->mbBeamNbr);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen mbBeamNbr error: %s\n", nc_strerror(nc_status));
 		}
 
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "mbCycleNbr", &dim_id);
 		if (nc_status != NC_NOERR) {
-			if (verbose >= 2 || nc_verbose >= 1)
+			if (verbose >= 2)
 				fprintf(stderr, "nc_inq_dimid mbCycleNbr error: %s\n", nc_strerror(nc_status));
 		}
 		else {
 			nc_status = nc_inq_dimlen(mb_io_ptr->ncid, dim_id, &store->mbCycleNbr);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen mbCycleNbr error: %s\n", nc_strerror(nc_status));
 		}
 
 		nc_status = nc_inq_dimid(mb_io_ptr->ncid, "mbVelocityProfilNbr", &dim_id);
 		if (nc_status != NC_NOERR) {
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimid mbVelocityProfilNbr error: %s\n", nc_strerror(nc_status));
 		}
 		else {
 			nc_status = nc_inq_dimlen(mb_io_ptr->ncid, dim_id, &store->mbVelocityProfilNbr);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_dimlen mbVelocityProfilNbr error: %s\n", nc_strerror(nc_status));
 		}
 
@@ -395,145 +393,145 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* get global attributes */
 		if (status == MB_SUCCESS) {
 			nc_status = nc_get_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbVersion", &store->mbVersion);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbVersion error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbName", store->mbName);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbName error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbClasse", store->mbClasse);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbClasse error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbLevel", &store->mbLevel);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbLevel error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbNbrHistoryRec", &store->mbNbrHistoryRec);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbNbrHistoryRec error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbTimeReference", store->mbTimeReference);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbTimeReference error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbStartDate", &store->mbStartDate);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbStartDate error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbStartTime", &store->mbStartTime);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbStartTime error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbEndDate", &store->mbEndDate);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbEndDate error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbEndTime", &store->mbEndTime);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbEndTime error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbNorthLatitude", &store->mbNorthLatitude);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbNorthLatitude error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbSouthLatitude", &store->mbSouthLatitude);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbSouthLatitude error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbEastLongitude", &store->mbEastLongitude);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbEastLongitude error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbWestLongitude", &store->mbWestLongitude);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbWestLongitude error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbMeridian180", store->mbMeridian180);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbMeridian180 error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbGeoDictionnary", store->mbGeoDictionnary);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbGeoDictionnary error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbGeoRepresentation", store->mbGeoRepresentation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbGeoRepresentation error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbGeodesicSystem", store->mbGeodesicSystem);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbGeodesicSystem error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbEllipsoidName", store->mbEllipsoidName);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbEllipsoidName error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbEllipsoidA", &store->mbEllipsoidA);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbEllipsoidA error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbEllipsoidInvF", &store->mbEllipsoidInvF);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbEllipsoidInvF error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbEllipsoidE2", &store->mbEllipsoidE2);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbEllipsoidE2 error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbProjType", &store->mbProjType);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbProjType error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbProjParameterValue", &store->mbProjParameterValue[0]);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbProjParameterValue error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbProjParameterCode", store->mbProjParameterCode);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbProjParameterCode error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbSounder", &store->mbSounder);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbSounder error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbShip", store->mbShip);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbShip error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbSurvey", store->mbSurvey);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbSurvey error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbReference", store->mbReference);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbReference error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbAntennaOffset", &store->mbAntennaOffset[0]);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbAntennaOffset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbAntennaDelay", &store->mbAntennaDelay);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbAntennaDelay error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbSounderOffset", &store->mbSounderOffset[0]);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbSounderOffset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbSounderDelay", &store->mbSounderDelay);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbSounderDelay error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbVRUOffset", &store->mbVRUOffset[0]);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbVRUOffset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbVRUDelay", &store->mbVRUDelay);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbVRUDelay error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbHeadingBias", &store->mbHeadingBias);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbHeadingBias error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbRollBias", &store->mbRollBias);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbRollBias error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbPitchBias", &store->mbPitchBias);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbPitchBias error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbHeaveBias", &store->mbHeaveBias);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbHeaveBias error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbDraught", &store->mbDraught);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbDraught error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbNavType", &store->mbNavType);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbNavType error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbNavRef", store->mbNavRef);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbNavRef error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbTideType", &store->mbTideType);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbTideType error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbTideRef", store->mbTideRef);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbTideRef error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbMinDepth", &store->mbMinDepth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbMinDepth error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbMaxDepth", &store->mbMaxDepth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbMaxDepth error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_get_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbCycleCounter", &store->mbCycleCounter);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_att mbCycleCounter error: %s\n", nc_strerror(nc_status));
 			if (nc_status != NC_NOERR) {
 				status = MB_FAILURE;
@@ -603,175 +601,175 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* get variable IDs */
 		if (status == MB_SUCCESS) {
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbHistDate", &store->mbHistDate_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbHistDate_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbHistTime", &store->mbHistTime_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbHistTime_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbHistCode", &store->mbHistCode_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbHistCode_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbHistAutor", &store->mbHistAutor_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbHistAutor_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbHistModule", &store->mbHistModule_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbHistModule_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbHistComment", &store->mbHistComment_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbHistComment_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbCycle", &store->mbCycle_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbCycle_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbDate", &store->mbDate_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbDate_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbTime", &store->mbTime_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if ((verbose >= 2) && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbTime_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbOrdinate", &store->mbOrdinate_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbOrdinate_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAbscissa", &store->mbAbscissa_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAbscissa_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbFrequency", &store->mbFrequency_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbFrequency_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSonarFrequency", &store->mbSonarFrequency_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbSonarFrequency_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSounderMode", &store->mbSounderMode_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbSounderMode_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbReferenceDepth", &store->mbReferenceDepth_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbReferenceDepth_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbDynamicDraught", &store->mbDynamicDraught_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbDynamicDraught_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbTide", &store->mbTide_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbTide_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSoundVelocity", &store->mbSoundVelocity_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbSoundVelocity_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbHeading", &store->mbHeading_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbHeading_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbRoll", &store->mbRoll_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbRoll_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbPitch", &store->mbPitch_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbPitch_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbTransmissionHeave", &store->mbTransmissionHeave_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbTransmissionHeave_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbDistanceScale", &store->mbDistanceScale_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbDistanceScale_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbRangeScale", &store->mbRangeScale_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbRangeScale_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbDepthScale", &store->mbDepthScale_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbDepthScale_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVerticalDepth", &store->mbVerticalDepth_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbVerticalDepth_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbCQuality", &store->mbCQuality_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbCQuality_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbCFlag", &store->mbCFlag_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbCQuality_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbInterlacing", &store->mbInterlacing_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbInterlacing_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSamplingRate", &store->mbSamplingRate_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbSamplingRate_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbCompensationLayerMode", &store->mbCompensationLayerMode_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbCompensationLayerMode_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbTransmitBeamwidth", &store->mbTransmitBeamwidth_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbTransmitBeamwidth_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbReceiveBeamwidth", &store->mbReceiveBeamwidth_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbReceiveBeamwidth_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbTransmitPulseLength", &store->mbTransmitPulseLength_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbTransmitPulseLength_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAlongDistance", &store->mbAlongDistance_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAlongDistance_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAcrossDistance", &store->mbAcrossDistance_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAcrossDistance_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbDepth", &store->mbDepth_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbDepth_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAcrossBeamAngle", &store->mbAcrossBeamAngle_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAcrossBeamAngle_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAzimutBeamAngle", &store->mbAzimutBeamAngle_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAzimutBeamAngle not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbRange", &store->mbRange_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbRange_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSoundingBias", &store->mbSoundingBias_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbSoundingBias_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSQuality", &store->mbSQuality_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbSQuality_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbReflectivity", &store->mbReflectivity_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbReflectivity_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbReceptionHeave", &store->mbReceptionHeave_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbReceptionHeave_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAlongSlope", &store->mbAlongSlope_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAlongSlope_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAcrossSlope", &store->mbAcrossSlope_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAcrossSlope_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSFlag", &store->mbSFlag_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbSFlag_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbSLengthOfDetection", &store->mbSLengthOfDetection_id);
-			if ((verbose >= 2 || nc_verbose >= 2) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbSLengthOfDetection_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAntenna", &store->mbAntenna_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAntenna_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBeamBias", &store->mbBeamBias_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbBeamBias_id not found: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBFlag", &store->mbBFlag_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbBFlag_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbBeam", &store->mbBeam_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbBeam_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbAFlag", &store->mbAFlag_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbAFlag_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilRef", &store->mbVelProfilRef_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbVelProfilRef_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilIdx", &store->mbVelProfilIdx_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbVelProfilIdx_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilDate", &store->mbVelProfilDate_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbVelProfilDate_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_inq_varid(mb_io_ptr->ncid, "mbVelProfilTime", &store->mbVelProfilTime_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_inq_varid mbVelProfilTime_id error: %s\n", nc_strerror(nc_status));
 			if (nc_status != NC_NOERR) {
 				status = MB_FAILURE;
@@ -1008,2731 +1006,2731 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		if (status == MB_SUCCESS) {
 			if (store->mbHistDate_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistDate_id, "type", store->mbHistDate_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistDate_id, "long_name", store->mbHistDate_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistDate_id, "name_code", store->mbHistDate_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistDate_id, "units", store->mbHistDate_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistDate_id, "unit_code", store->mbHistDate_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistDate_id, "add_offset", &store->mbHistDate_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistDate_id, "scale_factor", &store->mbHistDate_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistDate_id, "minimum", &store->mbHistDate_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistDate_id, "maximum", &store->mbHistDate_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistDate_id, "valid_minimum", &store->mbHistDate_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistDate_id, "valid_maximum", &store->mbHistDate_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistDate_id, "missing_value", &store->mbHistDate_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistDate_id, "format_C", store->mbHistDate_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistDate_id, "orientation", store->mbHistDate_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistDate_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistTime_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistTime_id, "type", store->mbHistTime_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistTime_id, "long_name", store->mbHistTime_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistTime_id, "name_code", store->mbHistTime_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistTime_id, "units", store->mbHistTime_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistTime_id, "unit_code", store->mbHistTime_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistTime_id, "add_offset", &store->mbHistTime_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistTime_id, "scale_factor", &store->mbHistTime_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistTime_id, "minimum", &store->mbHistTime_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistTime_id, "maximum", &store->mbHistTime_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistTime_id, "valid_minimum", &store->mbHistTime_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistTime_id, "valid_maximum", &store->mbHistTime_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistTime_id, "missing_value", &store->mbHistTime_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistTime_id, "format_C", store->mbHistTime_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistTime_id, "orientation", store->mbHistTime_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistTime_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistCode_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "type", store->mbHistCode_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "long_name", store->mbHistCode_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "name_code", store->mbHistCode_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "units", store->mbHistCode_units);
 				/*fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);*/
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "unit_code", store->mbHistCode_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistCode_id, "add_offset", &store->mbHistCode_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistCode_id, "scale_factor", &store->mbHistCode_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistCode_id, "minimum", &store->mbHistCode_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbHistCode_id, "maximum", &store->mbHistCode_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistCode_id, "valid_minimum", &store->mbHistCode_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistCode_id, "valid_maximum", &store->mbHistCode_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHistCode_id, "missing_value", &store->mbHistCode_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "format_C", store->mbHistCode_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "orientation", store->mbHistCode_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistAutor_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistAutor_id, "type", store->mbHistAutor_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistAutor_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistAutor_id, "long_name", store->mbHistAutor_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistAutor_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistAutor_id, "name_code", store->mbHistAutor_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistAutor_name_code error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistModule_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistModule_id, "type", store->mbHistModule_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistModule_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistModule_id, "long_name", store->mbHistModule_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistModule_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistModule_id, "name_code", store->mbHistModule_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistModule_name_code error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistComment_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistComment_id, "type", store->mbHistComment_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistComment_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbHistComment_id, "long_name", store->mbHistComment_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistComment_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbHistComment_id, "name_code", store->mbHistComment_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistComment_name_code error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbCycle_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCycle_id, "type", store->mbCycle_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCycle_id, "long_name", store->mbCycle_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCycle_id, "name_code", store->mbCycle_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCycle_id, "units", store->mbCycle_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCycle_id, "unit_code", store->mbCycle_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCycle_id, "add_offset", &store->mbCycle_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCycle_id, "scale_factor", &store->mbCycle_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCycle_id, "minimum", &store->mbCycle_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCycle_id, "maximum", &store->mbCycle_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCycle_id, "valid_minimum", &store->mbCycle_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCycle_id, "valid_maximum", &store->mbCycle_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCycle_id, "missing_value", &store->mbCycle_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCycle_id, "format_C", store->mbCycle_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCycle_id, "orientation", store->mbCycle_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCycle_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbDate_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDate_id, "type", store->mbDate_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDate_id, "long_name", store->mbDate_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDate_id, "name_code", store->mbDate_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDate_id, "units", store->mbDate_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDate_id, "unit_code", store->mbDate_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDate_id, "add_offset", &store->mbDate_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDate_id, "scale_factor", &store->mbDate_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDate_id, "minimum", &store->mbDate_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDate_id, "maximum", &store->mbDate_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDate_id, "valid_minimum", &store->mbDate_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDate_id, "valid_maximum", &store->mbDate_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDate_id, "missing_value", &store->mbDate_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDate_id, "format_C", store->mbDate_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDate_id, "orientation", store->mbDate_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDate_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbTime_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTime_id, "type", store->mbTime_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTime_id, "long_name", store->mbTime_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTime_id, "name_code", store->mbTime_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTime_id, "units", store->mbTime_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTime_id, "unit_code", store->mbTime_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTime_id, "add_offset", &store->mbTime_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTime_id, "scale_factor", &store->mbTime_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTime_id, "minimum", &store->mbTime_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTime_id, "maximum", &store->mbTime_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTime_id, "valid_minimum", &store->mbTime_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTime_id, "valid_maximum", &store->mbTime_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTime_id, "missing_value", &store->mbTime_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTime_id, "format_C", store->mbTime_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTime_id, "orientation", store->mbTime_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTime_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbOrdinate_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbOrdinate_id, "type", store->mbOrdinate_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbOrdinate_id, "long_name", store->mbOrdinate_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbOrdinate_id, "name_code", store->mbOrdinate_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbOrdinate_id, "units", store->mbOrdinate_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbOrdinate_id, "unit_code", store->mbOrdinate_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbOrdinate_id, "add_offset", &store->mbOrdinate_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbOrdinate_id, "scale_factor", &store->mbOrdinate_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbOrdinate_id, "minimum", &store->mbOrdinate_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbOrdinate_id, "maximum", &store->mbOrdinate_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbOrdinate_id, "valid_minimum", &store->mbOrdinate_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbOrdinate_id, "valid_maximum", &store->mbOrdinate_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbOrdinate_id, "missing_value", &store->mbOrdinate_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbOrdinate_id, "format_C", store->mbOrdinate_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbOrdinate_id, "orientation", store->mbOrdinate_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbOrdinate_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAbscissa_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAbscissa_id, "type", store->mbAbscissa_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAbscissa_id, "long_name", store->mbAbscissa_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAbscissa_id, "name_code", store->mbAbscissa_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAbscissa_id, "units", store->mbAbscissa_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAbscissa_id, "unit_code", store->mbAbscissa_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbAbscissa_id, "add_offset", &store->mbAbscissa_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbAbscissa_id, "scale_factor", &store->mbAbscissa_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbAbscissa_id, "minimum", &store->mbAbscissa_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbAbscissa_id, "maximum", &store->mbAbscissa_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAbscissa_id, "valid_minimum", &store->mbAbscissa_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAbscissa_id, "valid_maximum", &store->mbAbscissa_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAbscissa_id, "missing_value", &store->mbAbscissa_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAbscissa_id, "format_C", store->mbAbscissa_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAbscissa_id, "orientation", store->mbAbscissa_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAbscissa_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbFrequency_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbFrequency_id, "type", store->mbFrequency_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbFrequency_id, "long_name", store->mbFrequency_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbFrequency_id, "name_code", store->mbFrequency_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbFrequency_id, "units", store->mbFrequency_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbFrequency_id, "unit_code", store->mbFrequency_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbFrequency_id, "add_offset", &store->mbFrequency_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbFrequency_id, "scale_factor", &store->mbFrequency_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbFrequency_id, "minimum", &store->mbFrequency_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbFrequency_id, "maximum", &store->mbFrequency_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbFrequency_id, "valid_minimum", &store->mbFrequency_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbFrequency_id, "valid_maximum", &store->mbFrequency_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbFrequency_id, "missing_value", &store->mbFrequency_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbFrequency_id, "format_C", store->mbFrequency_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbFrequency_id, "orientation", store->mbFrequency_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbFrequency_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbSonarFrequency_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSonarFrequency_id, "type", store->mbSonarFrequency_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSonarFrequency_id, "long_name", store->mbSonarFrequency_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSonarFrequency_id, "name_code", store->mbSonarFrequency_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSonarFrequency_id, "units", store->mbSonarFrequency_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSonarFrequency_id, "unit_code", store->mbSonarFrequency_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbSonarFrequency_id, "add_offset",
 				                              &store->mbSonarFrequency_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbSonarFrequency_id, "scale_factor",
 				                              &store->mbSonarFrequency_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbSonarFrequency_id, "minimum", &store->mbSonarFrequency_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbSonarFrequency_id, "maximum", &store->mbSonarFrequency_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSonarFrequency_id, "valid_minimum",
 				                           &store->mbSonarFrequency_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSonarFrequency_id, "valid_maximum",
 				                           &store->mbSonarFrequency_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSonarFrequency_id, "missing_value",
 				                           &store->mbSonarFrequency_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSonarFrequency_id, "format_C", store->mbSonarFrequency_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSonarFrequency_id, "orientation",
 				                            store->mbSonarFrequency_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSonarFrequency_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbSounderMode_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSounderMode_id, "type", store->mbSounderMode_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSounderMode_id, "long_name", store->mbSounderMode_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSounderMode_id, "name_code", store->mbSounderMode_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSounderMode_id, "units", store->mbSounderMode_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSounderMode_id, "unit_code", store->mbSounderMode_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSounderMode_id, "add_offset", &store->mbSounderMode_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSounderMode_id, "scale_factor", &store->mbSounderMode_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSounderMode_id, "minimum", &store->mbSounderMode_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSounderMode_id, "maximum", &store->mbSounderMode_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSounderMode_id, "valid_minimum",
 				                           &store->mbSounderMode_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSounderMode_id, "valid_maximum",
 				                           &store->mbSounderMode_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSounderMode_id, "missing_value",
 				                           &store->mbSounderMode_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSounderMode_id, "format_C", store->mbSounderMode_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSounderMode_id, "orientation", store->mbSounderMode_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSounderMode_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbReferenceDepth_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReferenceDepth_id, "type", store->mbReferenceDepth_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReferenceDepth_id, "long_name", store->mbReferenceDepth_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReferenceDepth_id, "name_code", store->mbReferenceDepth_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReferenceDepth_id, "units", store->mbReferenceDepth_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReferenceDepth_id, "unit_code", store->mbReferenceDepth_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbReferenceDepth_id, "add_offset",
 				                              &store->mbReferenceDepth_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbReferenceDepth_id, "scale_factor",
 				                              &store->mbReferenceDepth_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbReferenceDepth_id, "minimum", &store->mbReferenceDepth_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbReferenceDepth_id, "maximum", &store->mbReferenceDepth_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReferenceDepth_id, "valid_minimum",
 				                           &store->mbReferenceDepth_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReferenceDepth_id, "valid_maximum",
 				                           &store->mbReferenceDepth_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReferenceDepth_id, "missing_value",
 				                           &store->mbReferenceDepth_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReferenceDepth_id, "format_C", store->mbReferenceDepth_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReferenceDepth_id, "orientation",
 				                            store->mbReferenceDepth_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReferenceDepth_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbDynamicDraught_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDynamicDraught_id, "type", store->mbDynamicDraught_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDynamicDraught_id, "long_name", store->mbDynamicDraught_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDynamicDraught_id, "name_code", store->mbDynamicDraught_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDynamicDraught_id, "units", store->mbDynamicDraught_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDynamicDraught_id, "unit_code", store->mbDynamicDraught_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbDynamicDraught_id, "add_offset",
 				                              &store->mbDynamicDraught_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbDynamicDraught_id, "scale_factor",
 				                              &store->mbDynamicDraught_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbDynamicDraught_id, "minimum", &store->mbDynamicDraught_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbDynamicDraught_id, "maximum", &store->mbDynamicDraught_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDynamicDraught_id, "valid_minimum",
 				                           &store->mbDynamicDraught_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDynamicDraught_id, "valid_maximum",
 				                           &store->mbDynamicDraught_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDynamicDraught_id, "missing_value",
 				                           &store->mbDynamicDraught_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDynamicDraught_id, "format_C", store->mbDynamicDraught_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDynamicDraught_id, "orientation",
 				                            store->mbDynamicDraught_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDynamicDraught_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbTide_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTide_id, "type", store->mbTide_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTide_id, "long_name", store->mbTide_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTide_id, "name_code", store->mbTide_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTide_id, "units", store->mbTide_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTide_id, "unit_code", store->mbTide_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbTide_id, "add_offset", &store->mbTide_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbTide_id, "scale_factor", &store->mbTide_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbTide_id, "minimum", &store->mbTide_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbTide_id, "maximum", &store->mbTide_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTide_id, "valid_minimum", &store->mbTide_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTide_id, "valid_maximum", &store->mbTide_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTide_id, "missing_value", &store->mbTide_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTide_id, "format_C", store->mbTide_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTide_id, "orientation", store->mbTide_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTide_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbSoundVelocity_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSoundVelocity_id, "type", store->mbSoundVelocity_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundVelocity_id, "long_name", store->mbSoundVelocity_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundVelocity_id, "name_code", store->mbSoundVelocity_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSoundVelocity_id, "units", store->mbSoundVelocity_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundVelocity_id, "unit_code", store->mbSoundVelocity_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbSoundVelocity_id, "add_offset",
 				                              &store->mbSoundVelocity_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbSoundVelocity_id, "scale_factor",
 				                              &store->mbSoundVelocity_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbSoundVelocity_id, "minimum", &store->mbSoundVelocity_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbSoundVelocity_id, "maximum", &store->mbSoundVelocity_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSoundVelocity_id, "valid_minimum",
 				                           &store->mbSoundVelocity_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSoundVelocity_id, "valid_maximum",
 				                           &store->mbSoundVelocity_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSoundVelocity_id, "missing_value",
 				                           &store->mbSoundVelocity_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundVelocity_id, "format_C", store->mbSoundVelocity_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSoundVelocity_id, "orientation",
 				                            store->mbSoundVelocity_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundVelocity_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHeading_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHeading_id, "type", store->mbHeading_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHeading_id, "long_name", store->mbHeading_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHeading_id, "name_code", store->mbHeading_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHeading_id, "units", store->mbHeading_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHeading_id, "unit_code", store->mbHeading_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbHeading_id, "add_offset", &store->mbHeading_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbHeading_id, "scale_factor", &store->mbHeading_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbHeading_id, "minimum", &store->mbHeading_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbHeading_id, "maximum", &store->mbHeading_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHeading_id, "valid_minimum", &store->mbHeading_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHeading_id, "valid_maximum", &store->mbHeading_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbHeading_id, "missing_value", &store->mbHeading_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHeading_id, "format_C", store->mbHeading_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHeading_id, "orientation", store->mbHeading_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHeading_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbRoll_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRoll_id, "type", store->mbRoll_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRoll_id, "long_name", store->mbRoll_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRoll_id, "name_code", store->mbRoll_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRoll_id, "units", store->mbRoll_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRoll_id, "unit_code", store->mbRoll_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbRoll_id, "add_offset", &store->mbRoll_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbRoll_id, "scale_factor", &store->mbRoll_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbRoll_id, "minimum", &store->mbRoll_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbRoll_id, "maximum", &store->mbRoll_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRoll_id, "valid_minimum", &store->mbRoll_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRoll_id, "valid_maximum", &store->mbRoll_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRoll_id, "missing_value", &store->mbRoll_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRoll_id, "format_C", store->mbRoll_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRoll_id, "orientation", store->mbRoll_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRoll_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbPitch_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbPitch_id, "type", store->mbPitch_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbPitch_id, "long_name", store->mbPitch_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbPitch_id, "name_code", store->mbPitch_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbPitch_id, "units", store->mbPitch_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbPitch_id, "unit_code", store->mbPitch_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbPitch_id, "add_offset", &store->mbPitch_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbPitch_id, "scale_factor", &store->mbPitch_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbPitch_id, "minimum", &store->mbPitch_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbPitch_id, "maximum", &store->mbPitch_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbPitch_id, "valid_minimum", &store->mbPitch_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbPitch_id, "valid_maximum", &store->mbPitch_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbPitch_id, "missing_value", &store->mbPitch_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbPitch_id, "format_C", store->mbPitch_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbPitch_id, "orientation", store->mbPitch_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbPitch_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbTransmissionHeave_id >= 0) {
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "type", store->mbTransmissionHeave_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "long_name",
 				                            store->mbTransmissionHeave_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "name_code",
 				                            store->mbTransmissionHeave_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "units", store->mbTransmissionHeave_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "unit_code",
 				                            store->mbTransmissionHeave_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "add_offset",
 				                              &store->mbTransmissionHeave_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "scale_factor",
 				                              &store->mbTransmissionHeave_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "minimum",
 				                              &store->mbTransmissionHeave_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "maximum",
 				                              &store->mbTransmissionHeave_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "valid_minimum",
 				                           &store->mbTransmissionHeave_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "valid_maximum",
 				                           &store->mbTransmissionHeave_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "missing_value",
 				                           &store->mbTransmissionHeave_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "format_C",
 				                            store->mbTransmissionHeave_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmissionHeave_id, "orientation",
 				                            store->mbTransmissionHeave_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmissionHeave_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbDistanceScale_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDistanceScale_id, "type", store->mbDistanceScale_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDistanceScale_id, "long_name", store->mbDistanceScale_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDistanceScale_id, "name_code", store->mbDistanceScale_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDistanceScale_id, "units", store->mbDistanceScale_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDistanceScale_id, "unit_code", store->mbDistanceScale_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbDistanceScale_id, "add_offset",
 				                              &store->mbDistanceScale_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbDistanceScale_id, "scale_factor",
 				                              &store->mbDistanceScale_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbDistanceScale_id, "minimum", &store->mbDistanceScale_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbDistanceScale_id, "maximum", &store->mbDistanceScale_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDistanceScale_id, "valid_minimum",
 				                           &store->mbDistanceScale_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDistanceScale_id, "valid_maximum",
 				                           &store->mbDistanceScale_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDistanceScale_id, "missing_value",
 				                           &store->mbDistanceScale_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDistanceScale_id, "format_C", store->mbDistanceScale_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDistanceScale_id, "orientation",
 				                            store->mbDistanceScale_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDistanceScale_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbRangeScale_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRangeScale_id, "type", store->mbRangeScale_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRangeScale_id, "long_name", store->mbRangeScale_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRangeScale_id, "name_code", store->mbRangeScale_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRangeScale_id, "units", store->mbRangeScale_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRangeScale_id, "unit_code", store->mbRangeScale_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbRangeScale_id, "add_offset", &store->mbRangeScale_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbRangeScale_id, "scale_factor", &store->mbRangeScale_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbRangeScale_id, "minimum", &store->mbRangeScale_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbRangeScale_id, "maximum", &store->mbRangeScale_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbRangeScale_id, "valid_minimum", &store->mbRangeScale_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbRangeScale_id, "valid_maximum", &store->mbRangeScale_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbRangeScale_id, "missing_value", &store->mbRangeScale_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRangeScale_id, "format_C", store->mbRangeScale_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbRangeScale_id, "orientation", store->mbRangeScale_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRangeScale_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbDepthScale_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepthScale_id, "type", store->mbDepthScale_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepthScale_id, "long_name", store->mbDepthScale_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepthScale_id, "name_code", store->mbDepthScale_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepthScale_id, "units", store->mbDepthScale_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepthScale_id, "unit_code", store->mbDepthScale_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbDepthScale_id, "add_offset", &store->mbDepthScale_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbDepthScale_id, "scale_factor", &store->mbDepthScale_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbDepthScale_id, "minimum", &store->mbDepthScale_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbDepthScale_id, "maximum", &store->mbDepthScale_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbDepthScale_id, "valid_minimum", &store->mbDepthScale_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbDepthScale_id, "valid_maximum", &store->mbDepthScale_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbDepthScale_id, "missing_value", &store->mbDepthScale_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepthScale_id, "format_C", store->mbDepthScale_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbDepthScale_id, "orientation", store->mbDepthScale_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepthScale_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVerticalDepth_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVerticalDepth_id, "type", store->mbVerticalDepth_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVerticalDepth_id, "long_name", store->mbVerticalDepth_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVerticalDepth_id, "name_code", store->mbVerticalDepth_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVerticalDepth_id, "units", store->mbVerticalDepth_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVerticalDepth_id, "unit_code", store->mbVerticalDepth_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVerticalDepth_id, "add_offset", &store->mbVerticalDepth_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVerticalDepth_id, "scale_factor",
 				                           &store->mbVerticalDepth_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVerticalDepth_id, "minimum", &store->mbVerticalDepth_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVerticalDepth_id, "maximum", &store->mbVerticalDepth_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVerticalDepth_id, "valid_minimum",
 				                           &store->mbVerticalDepth_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVerticalDepth_id, "valid_maximum",
 				                           &store->mbVerticalDepth_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVerticalDepth_id, "missing_value",
 				                           &store->mbVerticalDepth_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVerticalDepth_id, "format_C", store->mbVerticalDepth_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVerticalDepth_id, "orientation",
 				                            store->mbVerticalDepth_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVerticalDepth_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbCQuality_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCQuality_id, "type", store->mbCQuality_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCQuality_id, "long_name", store->mbCQuality_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCQuality_id, "name_code", store->mbCQuality_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCQuality_id, "units", store->mbCQuality_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCQuality_id, "unit_code", store->mbCQuality_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCQuality_id, "add_offset", &store->mbCQuality_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbCQuality_id, "scale_factor", &store->mbCQuality_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCQuality_id, "minimum", &store->mbCQuality_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCQuality_id, "maximum", &store->mbCQuality_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbCQuality_id, "valid_minimum", &store->mbCQuality_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbCQuality_id, "valid_maximum", &store->mbCQuality_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbCQuality_id, "missing_value", &store->mbCQuality_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCQuality_id, "format_C", store->mbCQuality_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCQuality_id, "orientation", store->mbCQuality_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCQuality_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbCFlag_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCFlag_id, "type", store->mbCFlag_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCFlag_id, "long_name", store->mbCFlag_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCFlag_id, "name_code", store->mbCFlag_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCFlag_id, "units", store->mbCFlag_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCFlag_id, "unit_code", store->mbCFlag_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCFlag_id, "add_offset", &store->mbCFlag_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCFlag_id, "scale_factor", &store->mbCFlag_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCFlag_id, "minimum", &store->mbCFlag_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCFlag_id, "maximum", &store->mbCFlag_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCFlag_id, "valid_minimum", &store->mbCFlag_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCFlag_id, "valid_maximum", &store->mbCFlag_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCFlag_id, "missing_value", &store->mbCFlag_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCFlag_id, "format_C", store->mbCFlag_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCFlag_id, "orientation", store->mbCFlag_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCFlag_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbInterlacing_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbInterlacing_id, "type", store->mbInterlacing_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbInterlacing_id, "long_name", store->mbInterlacing_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbInterlacing_id, "name_code", store->mbInterlacing_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbInterlacing_id, "units", store->mbInterlacing_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbInterlacing_id, "unit_code", store->mbInterlacing_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbInterlacing_id, "add_offset", &store->mbInterlacing_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbInterlacing_id, "scale_factor", &store->mbInterlacing_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbInterlacing_id, "minimum", &store->mbInterlacing_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbInterlacing_id, "maximum", &store->mbInterlacing_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbInterlacing_id, "valid_minimum",
 				                           &store->mbInterlacing_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbInterlacing_id, "valid_maximum",
 				                           &store->mbInterlacing_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbInterlacing_id, "missing_value",
 				                           &store->mbInterlacing_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbInterlacing_id, "format_C", store->mbInterlacing_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbInterlacing_id, "orientation", store->mbInterlacing_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbInterlacing_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbSamplingRate_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSamplingRate_id, "type", store->mbSamplingRate_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSamplingRate_id, "long_name", store->mbSamplingRate_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSamplingRate_id, "name_code", store->mbSamplingRate_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSamplingRate_id, "units", store->mbSamplingRate_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSamplingRate_id, "unit_code", store->mbSamplingRate_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSamplingRate_id, "add_offset", &store->mbSamplingRate_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSamplingRate_id, "scale_factor",
 				                           &store->mbSamplingRate_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSamplingRate_id, "minimum", &store->mbSamplingRate_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSamplingRate_id, "maximum", &store->mbSamplingRate_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSamplingRate_id, "valid_minimum",
 				                           &store->mbSamplingRate_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSamplingRate_id, "valid_maximum",
 				                           &store->mbSamplingRate_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSamplingRate_id, "missing_value",
 				                           &store->mbSamplingRate_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSamplingRate_id, "format_C", store->mbSamplingRate_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSamplingRate_id, "orientation", store->mbSamplingRate_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSamplingRate_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbCompensationLayerMode_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "type",
 				                            store->mbCompensationLayerMode_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "long_name",
 				                            store->mbCompensationLayerMode_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "name_code",
 				                            store->mbCompensationLayerMode_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "units",
 				                            store->mbCompensationLayerMode_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "unit_code",
 				                            store->mbCompensationLayerMode_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "add_offset",
 				                           &store->mbCompensationLayerMode_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "scale_factor",
 				                           &store->mbCompensationLayerMode_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "minimum",
 				                           &store->mbCompensationLayerMode_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "maximum",
 				                           &store->mbCompensationLayerMode_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "valid_minimum",
 				                           &store->mbCompensationLayerMode_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "valid_maximum",
 				                           &store->mbCompensationLayerMode_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "missing_value",
 				                           &store->mbCompensationLayerMode_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "format_C",
 				                            store->mbCompensationLayerMode_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, "orientation",
 				                            store->mbCompensationLayerMode_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbCompensationLayerMode_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbTransmitBeamwidth_id >= 0) {
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "type", store->mbTransmitBeamwidth_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "long_name",
 				                            store->mbTransmitBeamwidth_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "name_code",
 				                            store->mbTransmitBeamwidth_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "units", store->mbTransmitBeamwidth_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "unit_code",
 				                            store->mbTransmitBeamwidth_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "add_offset",
 				                           &store->mbTransmitBeamwidth_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "scale_factor",
 				                           &store->mbTransmitBeamwidth_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "minimum",
 				                           &store->mbTransmitBeamwidth_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "maximum",
 				                           &store->mbTransmitBeamwidth_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "valid_minimum",
 				                           &store->mbTransmitBeamwidth_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "valid_maximum",
 				                           &store->mbTransmitBeamwidth_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "missing_value",
 				                           &store->mbTransmitBeamwidth_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "format_C",
 				                            store->mbTransmitBeamwidth_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, "orientation",
 				                            store->mbTransmitBeamwidth_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitBeamwidth_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbReceiveBeamwidth_id >= 0) {
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "type", store->mbReceiveBeamwidth_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "long_name",
 				                            store->mbReceiveBeamwidth_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "name_code",
 				                            store->mbReceiveBeamwidth_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "units", store->mbReceiveBeamwidth_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "unit_code",
 				                            store->mbReceiveBeamwidth_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "add_offset",
 				                           &store->mbReceiveBeamwidth_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "scale_factor",
 				                           &store->mbReceiveBeamwidth_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "minimum", &store->mbReceiveBeamwidth_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "maximum", &store->mbReceiveBeamwidth_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "valid_minimum",
 				                           &store->mbReceiveBeamwidth_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "valid_maximum",
 				                           &store->mbReceiveBeamwidth_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "missing_value",
 				                           &store->mbReceiveBeamwidth_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "format_C",
 				                            store->mbReceiveBeamwidth_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, "orientation",
 				                            store->mbReceiveBeamwidth_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReceiveBeamwidth_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbTransmitPulseLength_id >= 0) {
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "type", store->mbTransmitPulseLength_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "long_name",
 				                            store->mbTransmitPulseLength_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "name_code",
 				                            store->mbTransmitPulseLength_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "units",
 				                            store->mbTransmitPulseLength_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "unit_code",
 				                            store->mbTransmitPulseLength_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "add_offset",
 				                           &store->mbTransmitPulseLength_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "scale_factor",
 				                           &store->mbTransmitPulseLength_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "minimum",
 				                           &store->mbTransmitPulseLength_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "maximum",
 				                           &store->mbTransmitPulseLength_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "valid_minimum",
 				                           &store->mbTransmitPulseLength_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "valid_maximum",
 				                           &store->mbTransmitPulseLength_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "missing_value",
 				                           &store->mbTransmitPulseLength_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "format_C",
 				                            store->mbTransmitPulseLength_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, "orientation",
 				                            store->mbTransmitPulseLength_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbTransmitPulseLength_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAlongDistance_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongDistance_id, "type", store->mbAlongDistance_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAlongDistance_id, "long_name", store->mbAlongDistance_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAlongDistance_id, "name_code", store->mbAlongDistance_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongDistance_id, "units", store->mbAlongDistance_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAlongDistance_id, "unit_code", store->mbAlongDistance_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAlongDistance_id, "add_offset", &store->mbAlongDistance_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAlongDistance_id, "scale_factor",
 				                           &store->mbAlongDistance_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAlongDistance_id, "minimum", &store->mbAlongDistance_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAlongDistance_id, "maximum", &store->mbAlongDistance_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAlongDistance_id, "valid_minimum",
 				                           &store->mbAlongDistance_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAlongDistance_id, "valid_maximum",
 				                           &store->mbAlongDistance_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAlongDistance_id, "missing_value",
 				                           &store->mbAlongDistance_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAlongDistance_id, "format_C", store->mbAlongDistance_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongDistance_id, "orientation",
 				                            store->mbAlongDistance_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAlongDistance_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAcrossDistance_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossDistance_id, "type", store->mbAcrossDistance_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossDistance_id, "long_name", store->mbAcrossDistance_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossDistance_id, "name_code", store->mbAcrossDistance_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossDistance_id, "units", store->mbAcrossDistance_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossDistance_id, "unit_code", store->mbAcrossDistance_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossDistance_id, "add_offset",
 				                           &store->mbAcrossDistance_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossDistance_id, "scale_factor",
 				                           &store->mbAcrossDistance_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossDistance_id, "minimum", &store->mbAcrossDistance_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossDistance_id, "maximum", &store->mbAcrossDistance_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossDistance_id, "valid_minimum",
 				                           &store->mbAcrossDistance_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossDistance_id, "valid_maximum",
 				                           &store->mbAcrossDistance_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossDistance_id, "missing_value",
 				                           &store->mbAcrossDistance_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossDistance_id, "format_C", store->mbAcrossDistance_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossDistance_id, "orientation",
 				                            store->mbAcrossDistance_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossDistance_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbDepth_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepth_id, "type", store->mbDepth_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepth_id, "long_name", store->mbDepth_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepth_id, "name_code", store->mbDepth_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepth_id, "units", store->mbDepth_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepth_id, "unit_code", store->mbDepth_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDepth_id, "add_offset", &store->mbDepth_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDepth_id, "scale_factor", &store->mbDepth_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDepth_id, "minimum", &store->mbDepth_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDepth_id, "maximum", &store->mbDepth_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDepth_id, "valid_minimum", &store->mbDepth_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDepth_id, "valid_maximum", &store->mbDepth_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbDepth_id, "missing_value", &store->mbDepth_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepth_id, "format_C", store->mbDepth_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbDepth_id, "orientation", store->mbDepth_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbDepth_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAcrossBeamAngle_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "type", store->mbAcrossBeamAngle_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "long_name",
 				                            store->mbAcrossBeamAngle_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "name_code",
 				                            store->mbAcrossBeamAngle_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "units", store->mbAcrossBeamAngle_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "unit_code",
 				                            store->mbAcrossBeamAngle_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "add_offset",
 				                              &store->mbAcrossBeamAngle_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "scale_factor",
 				                              &store->mbAcrossBeamAngle_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "minimum", &store->mbAcrossBeamAngle_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "maximum", &store->mbAcrossBeamAngle_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "valid_minimum",
 				                           &store->mbAcrossBeamAngle_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "valid_maximum",
 				                           &store->mbAcrossBeamAngle_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "missing_value",
 				                           &store->mbAcrossBeamAngle_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "format_C", store->mbAcrossBeamAngle_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, "orientation",
 				                            store->mbAcrossBeamAngle_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAcrossBeamAngle_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAzimutBeamAngle_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "type", store->mbAzimutBeamAngle_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "long_name",
 				                            store->mbAzimutBeamAngle_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "name_code",
 				                            store->mbAzimutBeamAngle_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "units", store->mbAzimutBeamAngle_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "unit_code",
 				                            store->mbAzimutBeamAngle_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "add_offset",
 				                              &store->mbAzimutBeamAngle_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "scale_factor",
 				                              &store->mbAzimutBeamAngle_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "minimum", &store->mbAzimutBeamAngle_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "maximum", &store->mbAzimutBeamAngle_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "valid_minimum",
 				                           &store->mbAzimutBeamAngle_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "valid_maximum",
 				                           &store->mbAzimutBeamAngle_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "missing_value",
 				                           &store->mbAzimutBeamAngle_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "format_C", store->mbAzimutBeamAngle_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, "orientation",
 				                            store->mbAzimutBeamAngle_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAzimutBeamAngle_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbRange_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRange_id, "type", store->mbRange_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRange_id, "long_name", store->mbRange_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRange_id, "name_code", store->mbRange_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRange_id, "units", store->mbRange_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRange_id, "unit_code", store->mbRange_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRange_id, "add_offset", &store->mbRange_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRange_id, "scale_factor", &store->mbRange_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRange_id, "minimum", &store->mbRange_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRange_id, "maximum", &store->mbRange_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRange_id, "valid_minimum", &store->mbRange_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRange_id, "valid_maximum", &store->mbRange_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbRange_id, "missing_value", &store->mbRange_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRange_id, "format_C", store->mbRange_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbRange_id, "orientation", store->mbRange_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbRange_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbSoundingBias_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSoundingBias_id, "type", store->mbSoundingBias_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundingBias_id, "long_name", store->mbSoundingBias_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundingBias_id, "name_code", store->mbSoundingBias_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSoundingBias_id, "units", store->mbSoundingBias_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundingBias_id, "unit_code", store->mbSoundingBias_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbSoundingBias_id, "add_offset", &store->mbSoundingBias_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbSoundingBias_id, "scale_factor",
 				                              &store->mbSoundingBias_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbSoundingBias_id, "minimum", &store->mbSoundingBias_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbSoundingBias_id, "maximum", &store->mbSoundingBias_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSoundingBias_id, "valid_minimum",
 				                           &store->mbSoundingBias_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSoundingBias_id, "valid_maximum",
 				                           &store->mbSoundingBias_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSoundingBias_id, "missing_value",
 				                           &store->mbSoundingBias_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundingBias_id, "format_C", store->mbSoundingBias_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSoundingBias_id, "orientation", store->mbSoundingBias_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSoundingBias_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbSQuality_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSQuality_id, "type", store->mbSQuality_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSQuality_id, "long_name", store->mbSQuality_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSQuality_id, "name_code", store->mbSQuality_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSQuality_id, "units", store->mbSQuality_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSQuality_id, "unit_code", store->mbSQuality_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSQuality_id, "add_offset", &store->mbSQuality_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSQuality_id, "scale_factor", &store->mbSQuality_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSQuality_id, "minimum", &store->mbSQuality_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSQuality_id, "maximum", &store->mbSQuality_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSQuality_id, "valid_minimum", &store->mbSQuality_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSQuality_id, "valid_maximum", &store->mbSQuality_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSQuality_id, "missing_value", &store->mbSQuality_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSQuality_id, "format_C", store->mbSQuality_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSQuality_id, "orientation", store->mbSQuality_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSQuality_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbReflectivity_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReflectivity_id, "type", store->mbReflectivity_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReflectivity_id, "long_name", store->mbReflectivity_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReflectivity_id, "name_code", store->mbReflectivity_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReflectivity_id, "units", store->mbReflectivity_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReflectivity_id, "unit_code", store->mbReflectivity_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbReflectivity_id, "add_offset", &store->mbReflectivity_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbReflectivity_id, "scale_factor",
 				                              &store->mbReflectivity_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbReflectivity_id, "minimum", &store->mbReflectivity_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbReflectivity_id, "maximum", &store->mbReflectivity_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReflectivity_id, "valid_minimum",
 				                           &store->mbReflectivity_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReflectivity_id, "valid_maximum",
 				                           &store->mbReflectivity_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReflectivity_id, "missing_value",
 				                           &store->mbReflectivity_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReflectivity_id, "format_C", store->mbReflectivity_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReflectivity_id, "orientation", store->mbReflectivity_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbReflectivity_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbReceptionHeave_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceptionHeave_id, "type", store->mbSFlag_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceptionHeave_id, "long_name", store->mbSFlag_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceptionHeave_id, "name_code", store->mbSFlag_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceptionHeave_id, "units", store->mbSFlag_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceptionHeave_id, "unit_code", store->mbSFlag_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReceptionHeave_id, "add_offset", &store->mbSFlag_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbReceptionHeave_id, "scale_factor", &store->mbSFlag_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReceptionHeave_id, "minimum", &store->mbSFlag_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbReceptionHeave_id, "maximum", &store->mbSFlag_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbReceptionHeave_id, "valid_minimum", &store->mbSFlag_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbReceptionHeave_id, "valid_maximum", &store->mbSFlag_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbReceptionHeave_id, "missing_value", &store->mbSFlag_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbReceptionHeave_id, "format_C", store->mbSFlag_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbReceptionHeave_id, "orientation", store->mbSFlag_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAlongSlope_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongSlope_id, "type", store->mbSFlag_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongSlope_id, "long_name", store->mbSFlag_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongSlope_id, "name_code", store->mbSFlag_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongSlope_id, "units", store->mbSFlag_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongSlope_id, "unit_code", store->mbSFlag_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAlongSlope_id, "add_offset", &store->mbSFlag_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAlongSlope_id, "scale_factor", &store->mbSFlag_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAlongSlope_id, "minimum", &store->mbSFlag_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAlongSlope_id, "maximum", &store->mbSFlag_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAlongSlope_id, "valid_minimum", &store->mbSFlag_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAlongSlope_id, "valid_maximum", &store->mbSFlag_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAlongSlope_id, "missing_value", &store->mbSFlag_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongSlope_id, "format_C", store->mbSFlag_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAlongSlope_id, "orientation", store->mbSFlag_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAcrossSlope_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossSlope_id, "type", store->mbSFlag_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossSlope_id, "long_name", store->mbSFlag_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossSlope_id, "name_code", store->mbSFlag_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossSlope_id, "units", store->mbSFlag_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossSlope_id, "unit_code", store->mbSFlag_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossSlope_id, "add_offset", &store->mbSFlag_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossSlope_id, "scale_factor", &store->mbSFlag_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossSlope_id, "minimum", &store->mbSFlag_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossSlope_id, "maximum", &store->mbSFlag_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossSlope_id, "valid_minimum", &store->mbSFlag_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossSlope_id, "valid_maximum", &store->mbSFlag_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAcrossSlope_id, "missing_value", &store->mbSFlag_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossSlope_id, "format_C", store->mbSFlag_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAcrossSlope_id, "orientation", store->mbSFlag_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbSFlag_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSFlag_id, "type", store->mbSFlag_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSFlag_id, "long_name", store->mbSFlag_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSFlag_id, "name_code", store->mbSFlag_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSFlag_id, "units", store->mbSFlag_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSFlag_id, "unit_code", store->mbSFlag_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSFlag_id, "add_offset", &store->mbSFlag_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSFlag_id, "scale_factor", &store->mbSFlag_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSFlag_id, "minimum", &store->mbSFlag_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSFlag_id, "maximum", &store->mbSFlag_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSFlag_id, "valid_minimum", &store->mbSFlag_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSFlag_id, "valid_maximum", &store->mbSFlag_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSFlag_id, "missing_value", &store->mbSFlag_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSFlag_id, "format_C", store->mbSFlag_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSFlag_id, "orientation", store->mbSFlag_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbSLengthOfDetection_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "type", store->mbSFlag_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "long_name", store->mbSFlag_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "name_code", store->mbSFlag_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "units", store->mbSFlag_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "unit_code", store->mbSFlag_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "add_offset", &store->mbSFlag_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "scale_factor", &store->mbSFlag_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "minimum", &store->mbSFlag_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "maximum", &store->mbSFlag_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "valid_minimum",
 				                           &store->mbSFlag_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "valid_maximum",
 				                           &store->mbSFlag_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "missing_value",
 				                           &store->mbSFlag_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "format_C", store->mbSFlag_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, "orientation", store->mbSFlag_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbSFlag_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAntenna_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAntenna_id, "type", store->mbAntenna_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAntenna_id, "long_name", store->mbAntenna_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAntenna_id, "name_code", store->mbAntenna_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAntenna_id, "units", store->mbAntenna_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAntenna_id, "unit_code", store->mbAntenna_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAntenna_id, "add_offset", &store->mbAntenna_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAntenna_id, "scale_factor", &store->mbAntenna_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAntenna_id, "minimum", &store->mbAntenna_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAntenna_id, "maximum", &store->mbAntenna_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAntenna_id, "valid_minimum", &store->mbAntenna_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAntenna_id, "valid_maximum", &store->mbAntenna_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbAntenna_id, "missing_value", &store->mbAntenna_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAntenna_id, "format_C", store->mbAntenna_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAntenna_id, "orientation", store->mbAntenna_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAntenna_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbBeamBias_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeamBias_id, "type", store->mbBeamBias_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeamBias_id, "long_name", store->mbBeamBias_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeamBias_id, "name_code", store->mbBeamBias_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeamBias_id, "units", store->mbBeamBias_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeamBias_id, "unit_code", store->mbBeamBias_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_double(mb_io_ptr->ncid, store->mbBeamBias_id, "add_offset", &store->mbBeamBias_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_double(mb_io_ptr->ncid, store->mbBeamBias_id, "scale_factor", &store->mbBeamBias_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeamBias_id, "minimum", &store->mbBeamBias_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeamBias_id, "maximum", &store->mbBeamBias_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbBeamBias_id, "valid_minimum", &store->mbBeamBias_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbBeamBias_id, "valid_maximum", &store->mbBeamBias_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbBeamBias_id, "missing_value", &store->mbBeamBias_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeamBias_id, "format_C", store->mbBeamBias_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeamBias_id, "orientation", store->mbBeamBias_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeamBias_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbBFlag_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBFlag_id, "type", store->mbBFlag_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBFlag_id, "long_name", store->mbBFlag_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBFlag_id, "name_code", store->mbBFlag_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBFlag_id, "units", store->mbBFlag_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBFlag_id, "unit_code", store->mbBFlag_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBFlag_id, "add_offset", &store->mbBFlag_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBFlag_id, "scale_factor", &store->mbBFlag_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBFlag_id, "minimum", &store->mbBFlag_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBFlag_id, "maximum", &store->mbBFlag_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBFlag_id, "valid_minimum", &store->mbBFlag_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBFlag_id, "valid_maximum", &store->mbBFlag_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBFlag_id, "missing_value", &store->mbBFlag_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBFlag_id, "format_C", store->mbBFlag_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBFlag_id, "orientation", store->mbBFlag_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBFlag_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbBeam_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeam_id, "type", store->mbBeam_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeam_id, "long_name", store->mbBeam_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeam_id, "name_code", store->mbBeam_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeam_id, "units", store->mbBeam_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeam_id, "unit_code", store->mbBeam_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeam_id, "add_offset", &store->mbBeam_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeam_id, "scale_factor", &store->mbBeam_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeam_id, "minimum", &store->mbBeam_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeam_id, "maximum", &store->mbBeam_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeam_id, "valid_minimum", &store->mbBeam_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeam_id, "valid_maximum", &store->mbBeam_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbBeam_id, "missing_value", &store->mbBeam_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeam_id, "format_C", store->mbBeam_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbBeam_id, "orientation", store->mbBeam_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbBeam_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAFlag_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAFlag_id, "type", store->mbAFlag_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_type error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAFlag_id, "long_name", store->mbAFlag_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAFlag_id, "name_code", store->mbAFlag_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAFlag_id, "units", store->mbAFlag_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAFlag_id, "unit_code", store->mbAFlag_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAFlag_id, "add_offset", &store->mbAFlag_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAFlag_id, "scale_factor", &store->mbAFlag_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAFlag_id, "minimum", &store->mbAFlag_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAFlag_id, "maximum", &store->mbAFlag_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAFlag_id, "valid_minimum", &store->mbAFlag_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAFlag_id, "valid_maximum", &store->mbAFlag_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbAFlag_id, "missing_value", &store->mbAFlag_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAFlag_id, "format_C", store->mbAFlag_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbAFlag_id, "orientation", store->mbAFlag_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbAFlag_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVelProfilRef_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilRef_id, "type", store->mbVelProfilRef_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilRef_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilRef_id, "long_name", store->mbVelProfilRef_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilRef_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilRef_id, "name_code", store->mbVelProfilRef_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilRef_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilRef_id, "type", store->mbVelProfilRef_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilRef_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilRef_id, "long_name", store->mbVelProfilRef_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilRef_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilRef_id, "name_code", store->mbVelProfilRef_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilRef_name_code error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVelProfilIdx_id >= 0) {
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "add_offset", &store->mbVelProfilIdx_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "scale_factor",
 				                           &store->mbVelProfilIdx_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "minimum", &store->mbVelProfilIdx_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "maximum", &store->mbVelProfilIdx_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "valid_minimum",
 				                           &store->mbVelProfilIdx_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "valid_maximum",
 				                           &store->mbVelProfilIdx_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "missing_value",
 				                           &store->mbVelProfilIdx_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "format_C", store->mbVelProfilIdx_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilIdx_id, "orientation", store->mbVelProfilIdx_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilIdx_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVelProfilDate_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilDate_id, "type", store->mbVelProfilDate_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilDate_id, "long_name", store->mbVelProfilDate_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilDate_id, "name_code", store->mbVelProfilDate_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilDate_id, "units", store->mbVelProfilDate_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilDate_id, "unit_code", store->mbVelProfilDate_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilDate_id, "add_offset", &store->mbVelProfilDate_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilDate_id, "scale_factor",
 				                           &store->mbVelProfilDate_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilDate_id, "minimum", &store->mbVelProfilDate_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilDate_id, "maximum", &store->mbVelProfilDate_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilDate_id, "valid_minimum",
 				                           &store->mbVelProfilDate_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilDate_id, "valid_maximum",
 				                           &store->mbVelProfilDate_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilDate_id, "missing_value",
 				                           &store->mbVelProfilDate_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilDate_id, "format_C", store->mbVelProfilDate_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilDate_id, "orientation",
 				                            store->mbVelProfilDate_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilDate_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVelProfilTime_id >= 0) {
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilTime_id, "type", store->mbVelProfilTime_type);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_type error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilTime_id, "long_name", store->mbVelProfilTime_long_name);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_long_name error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilTime_id, "name_code", store->mbVelProfilTime_name_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilTime_id, "units", store->mbVelProfilTime_units);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_units error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilTime_id, "unit_code", store->mbVelProfilTime_unit_code);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_unit_code error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilTime_id, "add_offset", &store->mbVelProfilTime_add_offset);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_add_offset error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilTime_id, "scale_factor",
 				                           &store->mbVelProfilTime_scale_factor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_scale_factor error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilTime_id, "minimum", &store->mbVelProfilTime_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilTime_id, "maximum", &store->mbVelProfilTime_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilTime_id, "valid_minimum",
 				                           &store->mbVelProfilTime_valid_minimum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_valid_minimum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilTime_id, "valid_maximum",
 				                           &store->mbVelProfilTime_valid_maximum);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_valid_maximum error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_int(mb_io_ptr->ncid, store->mbVelProfilTime_id, "missing_value",
 				                           &store->mbVelProfilTime_missing_value);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_missing_value error: %s\n", nc_strerror(nc_status));
 				nc_status =
 				    nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilTime_id, "format_C", store->mbVelProfilTime_format_C);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_format_C error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbVelProfilTime_id, "orientation",
 				                            store->mbVelProfilTime_orientation);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbVelProfilTime_orientation error: %s\n", nc_strerror(nc_status));
 			}
 			if (nc_status != NC_NOERR) {
@@ -4275,21 +4273,21 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				index[0] = 0;
 				count[0] = store->mbNbrHistoryRec;
 				nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbHistDate_id, index, count, store->mbHistDate);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbHistDate error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistTime_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbNbrHistoryRec;
 				nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbHistTime_id, index, count, store->mbHistTime);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbHistTime error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistCode_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbNbrHistoryRec;
 				nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbHistCode_id, index, count, store->mbHistCode);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbHistCode error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistAutor_id >= 0) {
@@ -4298,7 +4296,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				count[0] = store->mbNbrHistoryRec;
 				count[1] = store->mbNameLength;
 				nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbHistAutor_id, index, count, store->mbHistAutor);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbHistAutor error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistModule_id >= 0) {
@@ -4307,7 +4305,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				count[0] = store->mbNbrHistoryRec;
 				count[1] = store->mbNameLength;
 				nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbHistModule_id, index, count, store->mbHistModule);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbHistModule error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbHistComment_id >= 0) {
@@ -4316,42 +4314,42 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				count[0] = store->mbNbrHistoryRec;
 				count[1] = store->mbCommentLength;
 				nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbHistComment_id, index, count, store->mbHistComment);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbHistComment error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAntenna_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbBeamNbr;
 				nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbAntenna_id, index, count, store->mbAntenna);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbAntenna error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbBeamBias_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbBeamNbr;
 				nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbBeamBias_id, index, count, store->mbBeamBias);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbBeamBias error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbBFlag_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbBeamNbr;
 				nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbBFlag_id, index, count, store->mbBFlag);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbBFlag error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbBeam_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbAntennaNbr;
 				nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbBeam_id, index, count, store->mbBeam);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbBeam error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbAFlag_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbAntennaNbr;
 				nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbAFlag_id, index, count, store->mbAFlag);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbAFlag error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVelProfilRef_id >= 0) {
@@ -4360,28 +4358,28 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				count[0] = store->mbVelocityProfilNbr;
 				count[1] = store->mbCommentLength;
 				nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbVelProfilRef_id, index, count, store->mbVelProfilRef);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbVelProfilRef error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVelProfilIdx_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbVelocityProfilNbr;
 				nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbVelProfilIdx_id, index, count, store->mbVelProfilIdx);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbVelProfilIdx error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVelProfilDate_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbVelocityProfilNbr;
 				nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbVelProfilDate_id, index, count, store->mbVelProfilDate);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbVelProfilDate error: %s\n", nc_strerror(nc_status));
 			}
 			if (store->mbVelProfilTime_id >= 0) {
 				index[0] = 0;
 				count[0] = store->mbVelocityProfilNbr;
 				nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbVelProfilTime_id, index, count, store->mbVelProfilTime);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_vara mbVelProfilTime error: %s\n", nc_strerror(nc_status));
 			}
 			if (nc_status != NC_NOERR) {
@@ -4489,146 +4487,146 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			/* fprintf(stderr,"index: %d %d count:%d %d mbCycleNbr:%d
 			 * mbCycle_id:%d\n",index[0],index[1],count[0],count[1],store->mbCycleNbr,store->mbCycle_id);*/
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbCycle_id, index, count, store->mbCycle);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbCycle error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbDate_id >= 0) {
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbDate_id, index, count, store->mbDate);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbDate error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbTime_id >= 0) {
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbTime_id, index, count, store->mbTime);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbTime error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbOrdinate_id >= 0) {
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbOrdinate_id, index, count, store->mbOrdinate);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbOrdinate error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbAbscissa_id >= 0) {
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbAbscissa_id, index, count, store->mbAbscissa);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbAbscissa error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbFrequency_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbFrequency_id, index, count, store->mbFrequency);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbFrequency error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbSonarFrequency_id >= 0) {
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbSonarFrequency_id, index, count, store->mbSonarFrequency);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbSonarFrequency error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbSounderMode_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbSounderMode_id, index, count, store->mbSounderMode);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbSounderMode error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbReferenceDepth_id >= 0) {
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbReferenceDepth_id, index, count, store->mbReferenceDepth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbReferenceDepth error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbDynamicDraught_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbDynamicDraught_id, index, count, store->mbDynamicDraught);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbDynamicDraught error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbTide_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbTide_id, index, count, store->mbTide);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbTide error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbSoundVelocity_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbSoundVelocity_id, index, count, store->mbSoundVelocity);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbSoundVelocity error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbHeading_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbHeading_id, index, count, (short *)store->mbHeading);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbHeading error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbRoll_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbRoll_id, index, count, store->mbRoll);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbRoll error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbPitch_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbPitch_id, index, count, store->mbPitch);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbPitch error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbTransmissionHeave_id >= 0) {
 			nc_status =
 			    nc_get_vara_short(mb_io_ptr->ncid, store->mbTransmissionHeave_id, index, count, store->mbTransmissionHeave);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbTransmissionHeave error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbDistanceScale_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbDistanceScale_id, index, count, store->mbDistanceScale);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbDistanceScale error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbRangeScale_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbRangeScale_id, index, count, store->mbRangeScale);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbRangeScale error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbDepthScale_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbDepthScale_id, index, count, store->mbDepthScale);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbDepthScale error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbVerticalDepth_id >= 0) {
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbVerticalDepth_id, index, count, store->mbVerticalDepth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbVerticalDepth error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbCQuality_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbCQuality_id, index, count, store->mbCQuality);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbCQuality error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbCFlag_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbCFlag_id, index, count, store->mbCFlag);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbCFlag error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbInterlacing_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbInterlacing_id, index, count, store->mbInterlacing);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbInterlacing error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbSamplingRate_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbSamplingRate_id, index, count, store->mbSamplingRate);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbSamplingRate error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbCompensationLayerMode_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbCompensationLayerMode_id, index, count,
 			                             store->mbCompensationLayerMode);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbCompensationLayerMode error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbTransmitBeamwidth_id >= 0) {
 			nc_status =
 			    nc_get_vara_short(mb_io_ptr->ncid, store->mbTransmitBeamwidth_id, index, count, store->mbTransmitBeamwidth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbTransmitBeamwidth error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbReceiveBeamwidth_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbReceiveBeamwidth_id, index, count, store->mbReceiveBeamwidth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbReceiveBeamwidth error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbTransmitPulseLength_id >= 0) {
 			nc_status =
 			    nc_get_vara_short(mb_io_ptr->ncid, store->mbTransmitPulseLength_id, index, count, store->mbTransmitPulseLength);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbTransmitPulseLength error: %s\n", nc_strerror(nc_status));
 		}
 
@@ -4653,73 +4651,73 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* read the per-beam variables from next record */
 		if (store->mbAlongDistance_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbAlongDistance_id, index, count, store->mbAlongDistance);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbAlongDistance error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbAcrossDistance_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbAcrossDistance_id, index, count, store->mbAcrossDistance);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbAcrossDistance error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbDepth_id >= 0) {
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbDepth_id, index, count, store->mbDepth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbDepth error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbAcrossBeamAngle_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbAcrossBeamAngle_id, index, count, store->mbAcrossBeamAngle);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbAcrossBeamAngle error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbAzimutBeamAngle_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbAzimutBeamAngle_id, index, count, store->mbAzimutBeamAngle);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbAzimutBeamAngle error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbRange_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbRange_id, index, count, store->mbRange);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbRange error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbSoundingBias_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbSoundingBias_id, index, count, store->mbSoundingBias);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbSoundingBias error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbSQuality_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbSQuality_id, index, count, store->mbSQuality);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbSQuality error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbReflectivity_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbReflectivity_id, index, count, store->mbReflectivity);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbReflectivity error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbReceptionHeave_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbReceptionHeave_id, index, count, store->mbReceptionHeave);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbReceptionHeave error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbAlongSlope_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbAlongSlope_id, index, count, store->mbAlongSlope);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbAlongSlope error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbAcrossSlope_id >= 0) {
 			nc_status = nc_get_vara_short(mb_io_ptr->ncid, store->mbAcrossSlope_id, index, count, store->mbAcrossSlope);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbAcrossSlope error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbSFlag_id >= 0) {
 			nc_status = nc_get_vara_text(mb_io_ptr->ncid, store->mbSFlag_id, index, count, store->mbSFlag);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbSFlag error: %s\n", nc_strerror(nc_status));
 		}
 		if (store->mbSLengthOfDetection_id >= 0) {
 			nc_status =
 			    nc_get_vara_text(mb_io_ptr->ncid, store->mbSLengthOfDetection_id, index, count, store->mbSLengthOfDetection);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbSLengthOfDetection error: %s\n", nc_strerror(nc_status));
 		}
 		/* check status */
@@ -4910,24 +4908,15 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	int status = MB_SUCCESS;
 
 	int nc_status;
-	int CIB_BLOCK_DIM_id;
-	int mbHistoryRecNbr_id;
 	int mbNameLength_id;
 	int mbCommentLength_id;
 	int mbAntennaNbr_id;
 	int mbBeamNbr_id;
 	int mbCycleNbr_id;
-	int mbVelocityProfilNbr_id;
-	int dimsNbr;
-	int dims[3];
-	size_t index[3], count[3];
-	char *user_ptr;
-	double time_d;
-	int icomment;
+	size_t index[3];
+	size_t count[3];
 #ifdef MBNETCDF_DEBUG
-	int nc_verbose = 1;
-#else
-	int nc_verbose = 0;
+	verbose = MAX(2, verbose);
 #endif
 
 	/* if comment and nothing written yet save it */
@@ -4961,7 +4950,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* save old comment (from pre-existing netcdf file) */
 		if (store != storelocal) {
 			/* figure out which comment is being passed */
-			icomment = -1;
+			int icomment = -1;
 			for (int i = 0; i < store->mbNbrHistoryRec; i++) {
 				if (strncmp(store->comment, &store->mbHistComment[i * store->mbCommentLength], MBSYS_NETCDF_COMMENTLEN) == 0) {
 					icomment = i;
@@ -4983,7 +4972,8 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* save new comment */
 		else {
-			if ((user_ptr = getenv("USER")) == NULL)
+			char *user_ptr = getenv("USER");
+			if (user_ptr == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)
 				strncpy(&(storelocal->mbHistAutor[(*commentwrite) * storelocal->mbNameLength]), user_ptr, MBSYS_NETCDF_NAMELEN);
@@ -4992,7 +4982,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			strncpy(&(storelocal->mbHistModule[(*commentwrite) * storelocal->mbNameLength]), "MB-System", MBSYS_NETCDF_NAMELEN);
 			strncpy(&(storelocal->mbHistComment[(*commentwrite) * storelocal->mbCommentLength]), store->comment,
 			        MBSYS_NETCDF_COMMENTLEN);
-			time_d = (double)time((time_t *)0);
+			const double time_d = (double)time((time_t *)0);
 			storelocal->mbHistDate[*commentwrite] = (int)(time_d / SECINDAY);
 			storelocal->mbHistTime[*commentwrite] = (int)(1000 * (time_d - storelocal->mbHistDate[*commentwrite] * SECINDAY));
 			storelocal->mbHistCode[*commentwrite] = 1;
@@ -5022,32 +5012,36 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		storelocal->mbVelocityProfilNbr = store->mbVelocityProfilNbr;
 
 		/* define the dimensions */
+		int CIB_BLOCK_DIM_id = 0;
 		if (storelocal->CIB_BLOCK_DIM > 0) {
 			nc_status = nc_def_dim(mb_io_ptr->ncid, "CIB_BLOCK_DIM", storelocal->CIB_BLOCK_DIM, &CIB_BLOCK_DIM_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_dim CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
 			/*fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%lu\n",storelocal->CIB_BLOCK_DIM);*/
 		}
+		int mbHistoryRecNbr_id;
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbHistoryRecNbr", storelocal->mbHistoryRecNbr, &mbHistoryRecNbr_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbNameLength", storelocal->mbNameLength, &mbNameLength_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbNameLength error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbCommentLength", storelocal->mbCommentLength, &mbCommentLength_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbCommentLength error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbAntennaNbr", storelocal->mbAntennaNbr, &mbAntennaNbr_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbAntennaNbr error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbBeamNbr", storelocal->mbBeamNbr, &mbBeamNbr_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbBeamNbr error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbCycleNbr", NC_UNLIMITED, &mbCycleNbr_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+
+		int mbVelocityProfilNbr_id;
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbCycleNbr error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbVelocityProfilNbr", storelocal->mbVelocityProfilNbr, &mbVelocityProfilNbr_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_dim mbVelocityProfilNbr error: %s\n", nc_strerror(nc_status));
 
 		if (verbose >= 2) {
@@ -5067,34 +5061,36 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 
 		/* define global variables */
+		int dims[3];
 		dims[0] = mbHistoryRecNbr_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbHistDate", NC_INT, 1, dims, &storelocal->mbHistDate_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbHistDate_id error: %s\n", nc_strerror(nc_status));
 		dims[0] = mbHistoryRecNbr_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbHistTime", NC_INT, 1, dims, &storelocal->mbHistTime_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbHistTime_id error: %s\n", nc_strerror(nc_status));
 		dims[0] = mbHistoryRecNbr_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbHistCode", NC_CHAR, 1, dims, &storelocal->mbHistCode_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbHistCode_id error: %s\n", nc_strerror(nc_status));
 		dims[0] = mbHistoryRecNbr_id;
 		dims[1] = mbNameLength_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbHistAutor", NC_CHAR, 2, dims, &storelocal->mbHistAutor_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbHistAutor_id error: %s\n", nc_strerror(nc_status));
 		dims[0] = mbHistoryRecNbr_id;
 		dims[1] = mbNameLength_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbHistModule", NC_CHAR, 2, dims, &storelocal->mbHistModule_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbHistModule_id error: %s\n", nc_strerror(nc_status));
 		dims[0] = mbHistoryRecNbr_id;
 		dims[1] = mbCommentLength_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbHistComment", NC_CHAR, 2, dims, &storelocal->mbHistComment_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbHistComment_id error: %s\n", nc_strerror(nc_status));
 
+		int dimsNbr;
 		/* define per ping variables */
 		if (storelocal->CIB_BLOCK_DIM > 0) {
 			dimsNbr = 3;
@@ -5109,98 +5105,98 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			dims[2] = 0;
 		}
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbCycle", NC_INT, dimsNbr, dims, &storelocal->mbCycle_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbCycle_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbDate", NC_INT, dimsNbr, dims, &storelocal->mbDate_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbDate_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbTime", NC_INT, dimsNbr, dims, &storelocal->mbTime_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbTime_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbOrdinate", NC_INT, dimsNbr, dims, &storelocal->mbOrdinate_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbOrdinate_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbAbscissa", NC_INT, dimsNbr, dims, &storelocal->mbAbscissa_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbAbscissa_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbFrequency", NC_CHAR, dimsNbr, dims, &storelocal->mbFrequency_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbFrequency_id error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbSonarFrequency", NC_INT, dimsNbr, dims, &storelocal->mbSonarFrequency_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbSonarFrequency_id error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbSounderMode", NC_CHAR, dimsNbr, dims, &storelocal->mbSounderMode_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbSounderMode_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbReferenceDepth", NC_INT, dimsNbr, dims, &storelocal->mbReferenceDepth_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbReferenceDepth_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbDynamicDraught", NC_SHORT, dimsNbr, dims, &storelocal->mbDynamicDraught_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbDynamicDraught_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbTide", NC_SHORT, dimsNbr, dims, &storelocal->mbTide_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbTide_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbSoundVelocity", NC_SHORT, dimsNbr, dims, &storelocal->mbSoundVelocity_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbSoundVelocity_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbHeading", NC_SHORT, dimsNbr, dims, &storelocal->mbHeading_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbHeading_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbRoll", NC_SHORT, dimsNbr, dims, &storelocal->mbRoll_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbRoll_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbPitch", NC_SHORT, dimsNbr, dims, &storelocal->mbPitch_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbPitch_id error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_def_var(mb_io_ptr->ncid, "mbTransmissionHeave", NC_SHORT, dimsNbr, dims, &storelocal->mbTransmissionHeave_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbTransmissionHeave_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbDistanceScale", NC_CHAR, dimsNbr, dims, &storelocal->mbDistanceScale_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbDistanceScale_id error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbRangeScale", NC_SHORT, dimsNbr, dims, &storelocal->mbRangeScale_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbRangeScale_id error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbDepthScale", NC_CHAR, dimsNbr, dims, &storelocal->mbDepthScale_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbDepthScale_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbVerticalDepth", NC_INT, dimsNbr, dims, &storelocal->mbVerticalDepth_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbVerticalDepth_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbCQuality", NC_CHAR, dimsNbr, dims, &storelocal->mbCQuality_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbCQuality_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbCFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbCFlag_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbCFlag_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbInterlacing", NC_CHAR, dimsNbr, dims, &storelocal->mbInterlacing_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbInterlacing_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbSamplingRate", NC_SHORT, dimsNbr, dims, &storelocal->mbSamplingRate_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbSamplingRate_id error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbCompensationLayerMode", NC_CHAR, dimsNbr, dims,
 			                       &storelocal->mbCompensationLayerMode_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbCompensationLayerMode_id error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_def_var(mb_io_ptr->ncid, "mbTransmitBeamwidth", NC_SHORT, dimsNbr, dims, &storelocal->mbTransmitBeamwidth_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbTransmitBeamwidth_id error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_def_var(mb_io_ptr->ncid, "mbReceiveBeamwidth", NC_CHAR, dimsNbr, dims, &storelocal->mbReceiveBeamwidth_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbReceiveBeamwidth_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbTransmitPulseLength", NC_SHORT, dimsNbr, dims,
 			                       &storelocal->mbTransmitPulseLength_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbTransmitPulseLength_id error: %s\n", nc_strerror(nc_status));
 		}
 
@@ -5218,96 +5214,96 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			dims[2] = 0;
 		}
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbAlongDistance", NC_SHORT, dimsNbr, dims, &storelocal->mbAlongDistance_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbAlongDistance_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbAcrossDistance", NC_SHORT, dimsNbr, dims, &storelocal->mbAcrossDistance_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbAcrossDistance_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbDepth", NC_INT, dimsNbr, dims, &storelocal->mbDepth_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbDepth_id error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status =
 			    nc_def_var(mb_io_ptr->ncid, "mbAcrossBeamAngle", NC_SHORT, dimsNbr, dims, &storelocal->mbAcrossBeamAngle_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbAcrossBeamAngle_id error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_def_var(mb_io_ptr->ncid, "mbAzimutBeamAngle", NC_SHORT, dimsNbr, dims, &storelocal->mbAzimutBeamAngle_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbAzimutBeamAngle_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbRange", NC_SHORT, dimsNbr, dims, &storelocal->mbRange_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbRange_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbSoundingBias", NC_SHORT, dimsNbr, dims, &storelocal->mbSoundingBias_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbSoundingBias_id error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbSQuality", NC_CHAR, dimsNbr, dims, &storelocal->mbSQuality_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbSQuality_id error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbReflectivity", NC_CHAR, dimsNbr, dims, &storelocal->mbReflectivity_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbReflectivity_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbReceptionHeave", NC_CHAR, dimsNbr, dims, &storelocal->mbReceptionHeave_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbReceptionHeave_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbAlongSlope", NC_SHORT, dimsNbr, dims, &storelocal->mbAlongSlope_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbAlongSlope_id error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbAcrossSlope", NC_SHORT, dimsNbr, dims, &storelocal->mbAcrossSlope_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbAcrossSlope_id error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbSFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbSFlag_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbSFlag_id error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status =
 			    nc_def_var(mb_io_ptr->ncid, "mbSLengthOfDetection", NC_CHAR, dimsNbr, dims, &storelocal->mbSLengthOfDetection_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbSLengthOfDetection_id error: %s\n", nc_strerror(nc_status));
 		}
 
 		dimsNbr = 1;
 		dims[0] = mbBeamNbr_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbAntenna", NC_CHAR, dimsNbr, dims, &storelocal->mbAntenna_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbAntenna_id error: %s\n", nc_strerror(nc_status));
 		if (extended != MB_YES) {
 			nc_status = nc_def_var(mb_io_ptr->ncid, "mbBeamBias", NC_SHORT, dimsNbr, dims, &storelocal->mbBeamBias_id);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_var mbBeamBias_id error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbBFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbBFlag_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbBFlag_id error: %s\n", nc_strerror(nc_status));
 
 		/* define global variables */
 		dimsNbr = 1;
 		dims[0] = mbAntennaNbr_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbBeam", NC_SHORT, dimsNbr, dims, &storelocal->mbBeam_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbBeam_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbAFlag", NC_CHAR, dimsNbr, dims, &storelocal->mbAFlag_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbAFlag_id error: %s\n", nc_strerror(nc_status));
 		dimsNbr = 2;
 		dims[0] = mbVelocityProfilNbr_id;
 		dims[1] = mbCommentLength_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbVelProfilRef", NC_CHAR, dimsNbr, dims, &storelocal->mbVelProfilRef_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbVelProfilRef_id error: %s\n", nc_strerror(nc_status));
 		dimsNbr = 1;
 		dims[0] = mbVelocityProfilNbr_id;
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbVelProfilIdx", NC_SHORT, dimsNbr, dims, &storelocal->mbVelProfilIdx_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbVelProfilIdx_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbVelProfilDate", NC_INT, dimsNbr, dims, &storelocal->mbVelProfilDate_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbVelProfilDate_id error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_def_var(mb_io_ptr->ncid, "mbVelProfilTime", NC_INT, dimsNbr, dims, &storelocal->mbVelProfilTime_id);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_def_var mbVelProfilTime_id error: %s\n", nc_strerror(nc_status));
 
 		if (verbose >= 2) {
@@ -5362,152 +5358,152 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* save the global attributes */
 		nc_status = nc_put_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbVersion", NC_SHORT, 1, &store->mbVersion);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVersion error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbName", MBSYS_NETCDF_ATTRIBUTELEN, store->mbName);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbName error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbClasse", MBSYS_NETCDF_ATTRIBUTELEN, store->mbClasse);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbClasse error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbLevel", NC_SHORT, 1, &store->mbLevel);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbLevel error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbNbrHistoryRec", NC_SHORT, 1, &storelocal->mbNbrHistoryRec);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbNbrHistoryRec error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbTimeReference", MBSYS_NETCDF_ATTRIBUTELEN, store->mbTimeReference);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTimeReference error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbStartDate", NC_INT, 1, &store->mbStartDate);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbStartDate error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbStartTime", NC_INT, 1, &store->mbStartTime);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbStartTime error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbEndDate", NC_INT, 1, &store->mbEndDate);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbEndDate error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbEndTime", NC_INT, 1, &store->mbEndTime);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbEndTime error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbNorthLatitude", NC_DOUBLE, 1, &store->mbNorthLatitude);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbNorthLatitude error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbSouthLatitude", NC_DOUBLE, 1, &store->mbSouthLatitude);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSouthLatitude error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbEastLongitude", NC_DOUBLE, 1, &store->mbEastLongitude);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbEastLongitude error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbWestLongitude", NC_DOUBLE, 1, &store->mbWestLongitude);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbWestLongitude error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbMeridian180", MBSYS_NETCDF_ATTRIBUTELEN, store->mbMeridian180);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbMeridian180 error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbGeoDictionnary", MBSYS_NETCDF_ATTRIBUTELEN, store->mbGeoDictionnary);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbGeoDictionnary error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbGeoRepresentation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            store->mbGeoRepresentation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbGeoRepresentation error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbGeodesicSystem", MBSYS_NETCDF_ATTRIBUTELEN, store->mbGeodesicSystem);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbGeodesicSystem error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbEllipsoidName", MBSYS_NETCDF_COMMENTLEN, store->mbEllipsoidName);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbEllipsoidName error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbEllipsoidA", NC_DOUBLE, 1, &store->mbEllipsoidA);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbEllipsoidA error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbEllipsoidInvF", NC_DOUBLE, 1, &store->mbEllipsoidInvF);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbEllipsoidInvF error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbEllipsoidE2", NC_DOUBLE, 1, &store->mbEllipsoidE2);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbEllipsoidE2 error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbProjType", NC_SHORT, 1, &store->mbProjType);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbProjType error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbProjParameterValue", NC_DOUBLE, 10, store->mbProjParameterValue);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbProjParameterValue error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbProjParameterCode", MBSYS_NETCDF_COMMENTLEN,
 		                            store->mbProjParameterCode);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbProjParameterCode error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbSounder", NC_SHORT, 1, &store->mbSounder);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounder error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbShip", MBSYS_NETCDF_COMMENTLEN, store->mbShip);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbShip error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbSurvey", MBSYS_NETCDF_COMMENTLEN, store->mbSurvey);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSurvey error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbReference", MBSYS_NETCDF_COMMENTLEN, store->mbReference);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbReference error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbAntennaOffset", NC_DOUBLE, 3, store->mbAntennaOffset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntennaOffset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbAntennaDelay", NC_DOUBLE, 1, &store->mbAntennaDelay);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntennaDelay error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbSounderOffset", NC_DOUBLE, 3, store->mbSounderOffset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderOffset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbSounderDelay", NC_DOUBLE, 1, &store->mbSounderDelay);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderDelay error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbVRUOffset", NC_DOUBLE, 3, store->mbVRUOffset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVRUOffset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbVRUDelay", NC_DOUBLE, 1, &store->mbVRUDelay);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVRUDelay error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbHeadingBias", NC_DOUBLE, 1, &store->mbHeadingBias);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeadingBias error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbRollBias", NC_DOUBLE, 1, &store->mbRollBias);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbRollBias error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbPitchBias", NC_DOUBLE, 1, &store->mbPitchBias);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbPitchBias error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbHeaveBias", NC_DOUBLE, 1, &store->mbHeaveBias);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeaveBias error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbDraught", NC_DOUBLE, 1, &store->mbDraught);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDraught error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbNavType", NC_SHORT, 1, &store->mbNavType);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbNavType error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbNavRef", MBSYS_NETCDF_COMMENTLEN, store->mbNavRef);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbNavRef error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_short(mb_io_ptr->ncid, NC_GLOBAL, "mbTideType", NC_SHORT, 1, &store->mbTideType);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTideType error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, NC_GLOBAL, "mbTideRef", MBSYS_NETCDF_COMMENTLEN, store->mbTideRef);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTideRef error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbMinDepth", NC_DOUBLE, 1, &store->mbMinDepth);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbMinDepth error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, NC_GLOBAL, "mbMaxDepth", NC_DOUBLE, 1, &store->mbMaxDepth);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbMaxDepth error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, NC_GLOBAL, "mbCycleCounter", NC_INT, 1, &store->mbCycleCounter);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVersion error: %s\n", nc_strerror(nc_status));
 
 		if (verbose >= 2) {
@@ -5572,3015 +5568,3015 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* save the variable attributes */
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistDate_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistDate_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistDate_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistDate_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistDate_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbHistDate_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistDate_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbHistDate_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistDate_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "minimum", NC_INT, 1, &storelocal->mbHistDate_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistDate_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "maximum", NC_INT, 1, &storelocal->mbHistDate_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistDate_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbHistDate_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistDate_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbHistDate_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistDate_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbHistDate_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistDate_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistDate_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistDate_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistDate_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistTime_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistTime_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistTime_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistTime_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistTime_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbHistTime_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistTime_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbHistTime_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistTime_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "minimum", NC_INT, 1, &storelocal->mbHistTime_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistTime_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "maximum", NC_INT, 1, &storelocal->mbHistTime_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistTime_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbHistTime_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistTime_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbHistTime_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistTime_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbHistTime_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistTime_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistTime_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistTime_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistTime_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistCode_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistCode_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistCode_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistCode_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistCode_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbHistCode_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistCode_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbHistCode_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistCode_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "minimum", NC_INT, 1, &storelocal->mbHistCode_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistCode_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "maximum", NC_INT, 1, &storelocal->mbHistCode_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistCode_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbHistCode_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistCode_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbHistCode_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistCode_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHistCode_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbHistCode_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHistCode_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistCode_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistCode_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistAutor_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistAutor_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistAutor_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistModule_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistModule_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistModule_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistComment_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistComment_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHistComment_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCycle_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCycle_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCycle_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCycle_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCycle_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCycle_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCycle_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCycle_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCycle_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCycle_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCycle_id, "add_offset", NC_INT, 1, &storelocal->mbCycle_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCycle_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCycle_id, "scale_factor", NC_INT, 1, &storelocal->mbCycle_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCycle_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCycle_id, "minimum", NC_INT, 1, &storelocal->mbCycle_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCycle_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCycle_id, "maximum", NC_INT, 1, &storelocal->mbCycle_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCycle_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCycle_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbCycle_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCycle_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCycle_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbCycle_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCycle_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCycle_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbCycle_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCycle_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCycle_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCycle_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCycle_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCycle_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbDate_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDate_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDate_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "units", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbDate_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDate_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "add_offset", NC_INT, 1, &storelocal->mbDate_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDate_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "scale_factor", NC_INT, 1, &storelocal->mbDate_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDate_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "minimum", NC_INT, 1, &storelocal->mbDate_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDate_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "maximum", NC_INT, 1, &storelocal->mbDate_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDate_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "valid_minimum", NC_INT, 1, &storelocal->mbDate_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDate_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "valid_maximum", NC_INT, 1, &storelocal->mbDate_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDate_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDate_id, "missing_value", NC_INT, 1, &storelocal->mbDate_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDate_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDate_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDate_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDate_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTime_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTime_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTime_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "units", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTime_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTime_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "add_offset", NC_INT, 1, &storelocal->mbTime_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTime_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "scale_factor", NC_INT, 1, &storelocal->mbTime_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTime_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "minimum", NC_INT, 1, &storelocal->mbTime_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTime_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "maximum", NC_INT, 1, &storelocal->mbTime_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTime_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "valid_minimum", NC_INT, 1, &storelocal->mbTime_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTime_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "valid_maximum", NC_INT, 1, &storelocal->mbTime_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTime_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTime_id, "missing_value", NC_INT, 1, &storelocal->mbTime_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTime_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTime_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTime_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTime_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbOrdinate_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbOrdinate_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbOrdinate_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbOrdinate_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbOrdinate_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbOrdinate_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbOrdinate_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbOrdinate_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbOrdinate_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "minimum", NC_DOUBLE, 1,
 		                              &storelocal->mbOrdinate_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbOrdinate_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "maximum", NC_DOUBLE, 1,
 		                              &storelocal->mbOrdinate_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbOrdinate_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbOrdinate_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbOrdinate_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbOrdinate_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbOrdinate_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbOrdinate_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbOrdinate_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbOrdinate_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbOrdinate_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbOrdinate_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAbscissa_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAbscissa_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAbscissa_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAbscissa_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAbscissa_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbAbscissa_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAbscissa_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbAbscissa_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAbscissa_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "minimum", NC_DOUBLE, 1,
 		                              &storelocal->mbAbscissa_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAbscissa_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "maximum", NC_DOUBLE, 1,
 		                              &storelocal->mbAbscissa_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAbscissa_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbAbscissa_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAbscissa_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbAbscissa_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAbscissa_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbAbscissa_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAbscissa_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAbscissa_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAbscissa_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAbscissa_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbFrequency_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbFrequency_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbFrequency_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbFrequency_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbFrequency_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbFrequency_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbFrequency_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbFrequency_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbFrequency_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbFrequency_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbFrequency_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbFrequency_id, "minimum", NC_INT, 1, &storelocal->mbFrequency_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbFrequency_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbFrequency_id, "maximum", NC_INT, 1, &storelocal->mbFrequency_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbFrequency_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbFrequency_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbFrequency_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbFrequency_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbFrequency_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbFrequency_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbFrequency_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbFrequency_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbFrequency_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbFrequency_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbFrequency_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbFrequency_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSonarFrequency_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSonarFrequency_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSonarFrequency_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSonarFrequency_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSonarFrequency_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbSonarFrequency_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSonarFrequency_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbSonarFrequency_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSonarFrequency_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbSonarFrequency_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSonarFrequency_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbSonarFrequency_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSonarFrequency_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbSonarFrequency_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSonarFrequency_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbSonarFrequency_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSonarFrequency_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbSonarFrequency_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSonarFrequency_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSonarFrequency_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbSonarFrequency_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSounderMode_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSounderMode_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSounderMode_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSounderMode_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSounderMode_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbSounderMode_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderMode_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbSounderMode_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderMode_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbSounderMode_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderMode_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbSounderMode_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderMode_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbSounderMode_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderMode_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbSounderMode_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderMode_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbSounderMode_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSounderMode_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSounderMode_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSounderMode_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSounderMode_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbReferenceDepth_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbReferenceDepth_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbReferenceDepth_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbReferenceDepth_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbReferenceDepth_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbReferenceDepth_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbReferenceDepth_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbReferenceDepth_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbReferenceDepth_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "minimum", NC_DOUBLE, 1,
 		                              &storelocal->mbReferenceDepth_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbReferenceDepth_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "maximum", NC_DOUBLE, 1,
 		                              &storelocal->mbReferenceDepth_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbReferenceDepth_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbReferenceDepth_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbReferenceDepth_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbReferenceDepth_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbReferenceDepth_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbReferenceDepth_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbReferenceDepth_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbReferenceDepth_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbReferenceDepth_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDynamicDraught_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDynamicDraught_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDynamicDraught_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDynamicDraught_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDynamicDraught_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbDynamicDraught_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDynamicDraught_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbDynamicDraught_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDynamicDraught_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "minimum", NC_DOUBLE, 1,
 		                              &storelocal->mbDynamicDraught_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDynamicDraught_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "maximum", NC_DOUBLE, 1,
 		                              &storelocal->mbDynamicDraught_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDynamicDraught_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbDynamicDraught_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDynamicDraught_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbDynamicDraught_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDynamicDraught_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbDynamicDraught_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDynamicDraught_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDynamicDraught_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDynamicDraught_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTide_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTide_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTide_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTide_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTide_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTide_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTide_id, "units", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTide_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTide_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTide_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbTide_id, "add_offset", NC_DOUBLE, 1, &storelocal->mbTide_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTide_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbTide_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbTide_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTide_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbTide_id, "minimum", NC_DOUBLE, 1, &storelocal->mbTide_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTide_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbTide_id, "maximum", NC_DOUBLE, 1, &storelocal->mbTide_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTide_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTide_id, "valid_minimum", NC_INT, 1, &storelocal->mbTide_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTide_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTide_id, "valid_maximum", NC_INT, 1, &storelocal->mbTide_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTide_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTide_id, "missing_value", NC_INT, 1, &storelocal->mbTide_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTide_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTide_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTide_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTide_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTide_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSoundVelocity_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSoundVelocity_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSoundVelocity_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSoundVelocity_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSoundVelocity_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbSoundVelocity_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSoundVelocity_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbSoundVelocity_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSoundVelocity_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "minimum", NC_DOUBLE, 1,
 		                              &storelocal->mbSoundVelocity_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSoundVelocity_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "maximum", NC_DOUBLE, 1,
 		                              &storelocal->mbSoundVelocity_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSoundVelocity_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbSoundVelocity_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSoundVelocity_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbSoundVelocity_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSoundVelocity_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbSoundVelocity_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSoundVelocity_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSoundVelocity_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSoundVelocity_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHeading_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHeading_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHeading_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHeading_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHeading_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbHeading_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbHeading_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeading_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbHeading_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbHeading_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeading_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbHeading_id, "minimum", NC_DOUBLE, 1, &storelocal->mbHeading_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeading_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbHeading_id, "maximum", NC_DOUBLE, 1, &storelocal->mbHeading_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeading_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHeading_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbHeading_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeading_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHeading_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbHeading_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeading_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbHeading_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbHeading_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbHeading_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHeading_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbHeading_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbHeading_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRoll_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbRoll_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRoll_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbRoll_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRoll_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbRoll_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRoll_id, "units", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbRoll_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRoll_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbRoll_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbRoll_id, "add_offset", NC_DOUBLE, 1, &storelocal->mbRoll_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbRoll_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbRoll_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbRoll_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbRoll_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbRoll_id, "minimum", NC_DOUBLE, 1, &storelocal->mbRoll_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbRoll_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbRoll_id, "maximum", NC_DOUBLE, 1, &storelocal->mbRoll_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbRoll_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRoll_id, "valid_minimum", NC_INT, 1, &storelocal->mbRoll_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbRoll_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRoll_id, "valid_maximum", NC_INT, 1, &storelocal->mbRoll_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbRoll_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRoll_id, "missing_value", NC_INT, 1, &storelocal->mbRoll_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbRoll_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRoll_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbRoll_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRoll_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbRoll_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPitch_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbPitch_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPitch_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbPitch_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPitch_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbPitch_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPitch_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbPitch_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPitch_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbPitch_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbPitch_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbPitch_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbPitch_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbPitch_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbPitch_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbPitch_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbPitch_id, "minimum", NC_DOUBLE, 1, &storelocal->mbPitch_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbPitch_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_double(mb_io_ptr->ncid, storelocal->mbPitch_id, "maximum", NC_DOUBLE, 1, &storelocal->mbPitch_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbPitch_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPitch_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbPitch_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbPitch_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPitch_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbPitch_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbPitch_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbPitch_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbPitch_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbPitch_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPitch_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbPitch_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbPitch_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbPitch_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTransmissionHeave_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTransmissionHeave_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTransmissionHeave_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTransmissionHeave_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTransmissionHeave_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbTransmissionHeave_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTransmissionHeave_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbTransmissionHeave_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTransmissionHeave_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "minimum", NC_DOUBLE, 1,
 		                              &storelocal->mbTransmissionHeave_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTransmissionHeave_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "maximum", NC_DOUBLE, 1,
 		                              &storelocal->mbTransmissionHeave_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTransmissionHeave_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbTransmissionHeave_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTransmissionHeave_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbTransmissionHeave_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTransmissionHeave_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbTransmissionHeave_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbTransmissionHeave_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTransmissionHeave_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbTransmissionHeave_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDistanceScale_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDistanceScale_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDistanceScale_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDistanceScale_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDistanceScale_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbDistanceScale_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDistanceScale_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbDistanceScale_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDistanceScale_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "minimum", NC_DOUBLE, 1,
 		                              &storelocal->mbDistanceScale_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDistanceScale_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "maximum", NC_DOUBLE, 1,
 		                              &storelocal->mbDistanceScale_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDistanceScale_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbDistanceScale_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDistanceScale_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbDistanceScale_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDistanceScale_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbDistanceScale_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDistanceScale_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDistanceScale_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDistanceScale_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRangeScale_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRangeScale_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRangeScale_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRangeScale_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRangeScale_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbRangeScale_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRangeScale_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbRangeScale_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRangeScale_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbRangeScale_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRangeScale_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbRangeScale_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRangeScale_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbRangeScale_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRangeScale_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbRangeScale_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRangeScale_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbRangeScale_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRangeScale_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRangeScale_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRangeScale_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRangeScale_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepthScale_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepthScale_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepthScale_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepthScale_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepthScale_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "add_offset", NC_DOUBLE, 1,
 		                              &storelocal->mbDepthScale_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepthScale_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "scale_factor", NC_DOUBLE, 1,
 		                              &storelocal->mbDepthScale_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepthScale_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "minimum", NC_DOUBLE, 1,
 		                              &storelocal->mbDepthScale_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepthScale_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "maximum", NC_DOUBLE, 1,
 		                              &storelocal->mbDepthScale_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepthScale_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbDepthScale_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepthScale_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbDepthScale_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepthScale_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbDepthScale_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepthScale_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepthScale_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepthScale_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepthScale_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVerticalDepth_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVerticalDepth_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVerticalDepth_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVerticalDepth_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVerticalDepth_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbVerticalDepth_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVerticalDepth_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbVerticalDepth_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVerticalDepth_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbVerticalDepth_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVerticalDepth_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbVerticalDepth_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVerticalDepth_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbVerticalDepth_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVerticalDepth_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbVerticalDepth_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVerticalDepth_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbVerticalDepth_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVerticalDepth_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVerticalDepth_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVerticalDepth_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCQuality_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCQuality_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCQuality_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCQuality_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCQuality_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCQuality_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCQuality_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCQuality_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCQuality_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCQuality_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCQuality_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbCQuality_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCQuality_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCQuality_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbCQuality_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCQuality_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCQuality_id, "minimum", NC_INT, 1, &storelocal->mbCQuality_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCQuality_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCQuality_id, "maximum", NC_INT, 1, &storelocal->mbCQuality_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCQuality_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCQuality_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbCQuality_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCQuality_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCQuality_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbCQuality_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCQuality_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCQuality_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbCQuality_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCQuality_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCQuality_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCQuality_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCQuality_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCQuality_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCFlag_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCFlag_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCFlag_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCFlag_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCFlag_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCFlag_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCFlag_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCFlag_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCFlag_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCFlag_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCFlag_id, "add_offset", NC_INT, 1, &storelocal->mbCFlag_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCFlag_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCFlag_id, "scale_factor", NC_INT, 1, &storelocal->mbCFlag_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCFlag_id, "minimum", NC_INT, 1, &storelocal->mbCFlag_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCFlag_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCFlag_id, "maximum", NC_INT, 1, &storelocal->mbCFlag_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCFlag_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCFlag_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbCFlag_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCFlag_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbCFlag_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCFlag_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbCFlag_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbCFlag_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCFlag_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCFlag_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCFlag_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbCFlag_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbInterlacing_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbInterlacing_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbInterlacing_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbInterlacing_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbInterlacing_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbInterlacing_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbInterlacing_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbInterlacing_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbInterlacing_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbInterlacing_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbInterlacing_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbInterlacing_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbInterlacing_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbInterlacing_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbInterlacing_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbInterlacing_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbInterlacing_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbInterlacing_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbInterlacing_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbInterlacing_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbInterlacing_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbInterlacing_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSamplingRate_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSamplingRate_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSamplingRate_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSamplingRate_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSamplingRate_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbSamplingRate_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSamplingRate_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbSamplingRate_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSamplingRate_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbSamplingRate_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSamplingRate_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbSamplingRate_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSamplingRate_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbSamplingRate_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSamplingRate_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbSamplingRate_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSamplingRate_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbSamplingRate_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSamplingRate_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSamplingRate_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSamplingRate_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "type",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCompensationLayerMode_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "long_name",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCompensationLayerMode_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "name_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCompensationLayerMode_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "units",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCompensationLayerMode_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "unit_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCompensationLayerMode_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "add_offset", NC_INT, 1,
 			                           &storelocal->mbCompensationLayerMode_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbCompensationLayerMode_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "scale_factor", NC_INT, 1,
 			                           &storelocal->mbCompensationLayerMode_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbCompensationLayerMode_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "minimum", NC_INT, 1,
 			                           &storelocal->mbCompensationLayerMode_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbCompensationLayerMode_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "maximum", NC_INT, 1,
 			                           &storelocal->mbCompensationLayerMode_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbCompensationLayerMode_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbCompensationLayerMode_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbCompensationLayerMode_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbCompensationLayerMode_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbCompensationLayerMode_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbCompensationLayerMode_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbCompensationLayerMode_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "format_C",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCompensationLayerMode_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbCompensationLayerMode_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbTransmitBeamwidth_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "long_name",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitBeamwidth_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "name_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitBeamwidth_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbTransmitBeamwidth_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "unit_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitBeamwidth_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "add_offset", NC_INT, 1,
 			                           &storelocal->mbTransmitBeamwidth_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitBeamwidth_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "scale_factor", NC_INT, 1,
 			                           &storelocal->mbTransmitBeamwidth_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitBeamwidth_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "minimum", NC_INT, 1,
 			                           &storelocal->mbTransmitBeamwidth_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitBeamwidth_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "maximum", NC_INT, 1,
 			                           &storelocal->mbTransmitBeamwidth_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitBeamwidth_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbTransmitBeamwidth_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitBeamwidth_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbTransmitBeamwidth_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitBeamwidth_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbTransmitBeamwidth_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitBeamwidth_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "format_C",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitBeamwidth_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitBeamwidth_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceiveBeamwidth_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "long_name",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbReceiveBeamwidth_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "name_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbReceiveBeamwidth_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceiveBeamwidth_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "unit_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbReceiveBeamwidth_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "add_offset", NC_INT, 1,
 			                           &storelocal->mbReceiveBeamwidth_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceiveBeamwidth_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "scale_factor", NC_INT, 1,
 			                           &storelocal->mbReceiveBeamwidth_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceiveBeamwidth_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "minimum", NC_INT, 1,
 			                           &storelocal->mbReceiveBeamwidth_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceiveBeamwidth_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "maximum", NC_INT, 1,
 			                           &storelocal->mbReceiveBeamwidth_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceiveBeamwidth_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbReceiveBeamwidth_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceiveBeamwidth_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbReceiveBeamwidth_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceiveBeamwidth_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbReceiveBeamwidth_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceiveBeamwidth_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceiveBeamwidth_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbReceiveBeamwidth_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbTransmitPulseLength_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "long_name",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitPulseLength_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "name_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitPulseLength_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbTransmitPulseLength_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "unit_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitPulseLength_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "add_offset", NC_INT, 1,
 			                           &storelocal->mbTransmitPulseLength_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitPulseLength_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "scale_factor", NC_INT, 1,
 			                           &storelocal->mbTransmitPulseLength_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitPulseLength_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "minimum", NC_INT, 1,
 			                           &storelocal->mbTransmitPulseLength_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitPulseLength_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "maximum", NC_INT, 1,
 			                           &storelocal->mbTransmitPulseLength_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitPulseLength_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbTransmitPulseLength_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitPulseLength_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbTransmitPulseLength_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitPulseLength_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbTransmitPulseLength_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbTransmitPulseLength_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "format_C",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitPulseLength_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbTransmitPulseLength_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAlongDistance_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAlongDistance_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAlongDistance_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAlongDistance_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAlongDistance_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbAlongDistance_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAlongDistance_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbAlongDistance_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAlongDistance_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbAlongDistance_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAlongDistance_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbAlongDistance_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAlongDistance_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbAlongDistance_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAlongDistance_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbAlongDistance_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAlongDistance_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbAlongDistance_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAlongDistance_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAlongDistance_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAlongDistance_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAcrossDistance_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAcrossDistance_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAcrossDistance_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAcrossDistance_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAcrossDistance_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbAcrossDistance_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAcrossDistance_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbAcrossDistance_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAcrossDistance_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbAcrossDistance_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAcrossDistance_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbAcrossDistance_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAcrossDistance_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbAcrossDistance_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAcrossDistance_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbAcrossDistance_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAcrossDistance_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbAcrossDistance_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAcrossDistance_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAcrossDistance_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAcrossDistance_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepth_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbDepth_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepth_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepth_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepth_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepth_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepth_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepth_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepth_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepth_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepth_id, "add_offset", NC_INT, 1, &storelocal->mbDepth_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepth_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepth_id, "scale_factor", NC_INT, 1, &storelocal->mbDepth_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepth_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepth_id, "minimum", NC_INT, 1, &storelocal->mbDepth_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepth_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepth_id, "maximum", NC_INT, 1, &storelocal->mbDepth_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepth_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepth_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbDepth_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepth_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepth_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbDepth_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepth_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbDepth_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbDepth_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbDepth_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepth_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepth_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbDepth_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbDepth_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossBeamAngle_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossBeamAngle_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossBeamAngle_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossBeamAngle_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossBeamAngle_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbAcrossBeamAngle_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossBeamAngle_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbAcrossBeamAngle_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossBeamAngle_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbAcrossBeamAngle_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossBeamAngle_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbAcrossBeamAngle_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossBeamAngle_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbAcrossBeamAngle_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossBeamAngle_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbAcrossBeamAngle_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossBeamAngle_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbAcrossBeamAngle_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossBeamAngle_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossBeamAngle_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbAcrossBeamAngle_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAzimutBeamAngle_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAzimutBeamAngle_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAzimutBeamAngle_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAzimutBeamAngle_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAzimutBeamAngle_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbAzimutBeamAngle_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAzimutBeamAngle_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbAzimutBeamAngle_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAzimutBeamAngle_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbAzimutBeamAngle_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAzimutBeamAngle_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbAzimutBeamAngle_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAzimutBeamAngle_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbAzimutBeamAngle_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAzimutBeamAngle_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbAzimutBeamAngle_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAzimutBeamAngle_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbAzimutBeamAngle_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAzimutBeamAngle_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAzimutBeamAngle_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbAzimutBeamAngle_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRange_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRange_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRange_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRange_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRange_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRange_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRange_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRange_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRange_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRange_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRange_id, "add_offset", NC_INT, 1, &storelocal->mbRange_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRange_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRange_id, "scale_factor", NC_INT, 1,
 			                           &storelocal->mbRange_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRange_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRange_id, "minimum", NC_INT, 1, &storelocal->mbRange_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRange_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRange_id, "maximum", NC_INT, 1, &storelocal->mbRange_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRange_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRange_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbRange_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRange_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRange_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbRange_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRange_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbRange_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbRange_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbRange_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRange_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRange_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbRange_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbRange_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSoundingBias_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSoundingBias_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSoundingBias_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSoundingBias_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSoundingBias_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbSoundingBias_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSoundingBias_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbSoundingBias_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSoundingBias_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbSoundingBias_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSoundingBias_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbSoundingBias_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSoundingBias_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbSoundingBias_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSoundingBias_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbSoundingBias_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSoundingBias_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbSoundingBias_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSoundingBias_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSoundingBias_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSoundingBias_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSQuality_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSQuality_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSQuality_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSQuality_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSQuality_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSQuality_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbSQuality_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSQuality_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSQuality_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbSQuality_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSQuality_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSQuality_id, "minimum", NC_INT, 1, &storelocal->mbSQuality_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSQuality_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSQuality_id, "maximum", NC_INT, 1, &storelocal->mbSQuality_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSQuality_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSQuality_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbSQuality_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSQuality_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSQuality_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbSQuality_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSQuality_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSQuality_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbSQuality_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSQuality_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSQuality_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSQuality_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReflectivity_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReflectivity_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReflectivity_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReflectivity_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReflectivity_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbReflectivity_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReflectivity_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbReflectivity_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReflectivity_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbReflectivity_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReflectivity_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbReflectivity_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReflectivity_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbReflectivity_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReflectivity_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbReflectivity_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReflectivity_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbReflectivity_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReflectivity_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReflectivity_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReflectivity_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceptionHeave_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceptionHeave_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceptionHeave_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceptionHeave_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceptionHeave_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbReceptionHeave_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceptionHeave_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbReceptionHeave_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceptionHeave_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbReceptionHeave_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceptionHeave_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbReceptionHeave_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceptionHeave_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbReceptionHeave_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceptionHeave_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbReceptionHeave_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceptionHeave_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbReceptionHeave_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbReceptionHeave_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbReceptionHeave_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbReceptionHeave_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAlongSlope_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAlongSlope_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAlongSlope_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAlongSlope_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAlongSlope_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbAlongSlope_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAlongSlope_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbAlongSlope_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAlongSlope_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbAlongSlope_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAlongSlope_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbAlongSlope_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAlongSlope_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbAlongSlope_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAlongSlope_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbAlongSlope_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAlongSlope_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbAlongSlope_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAlongSlope_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAlongSlope_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAlongSlope_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossSlope_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossSlope_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossSlope_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossSlope_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossSlope_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbAcrossSlope_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossSlope_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbAcrossSlope_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossSlope_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "minimum", NC_DOUBLE, 1,
 			                              &storelocal->mbAcrossSlope_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossSlope_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "maximum", NC_DOUBLE, 1,
 			                              &storelocal->mbAcrossSlope_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossSlope_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbAcrossSlope_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossSlope_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbAcrossSlope_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossSlope_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbAcrossSlope_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbAcrossSlope_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossSlope_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbAcrossSlope_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbSFlag_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSFlag_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSFlag_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSFlag_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSFlag_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSFlag_id, "add_offset", NC_INT, 1, &storelocal->mbSFlag_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSFlag_id, "scale_factor", NC_INT, 1, &storelocal->mbSFlag_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSFlag_id, "minimum", NC_INT, 1, &storelocal->mbSFlag_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSFlag_id, "maximum", NC_INT, 1, &storelocal->mbSFlag_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSFlag_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbSFlag_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSFlag_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbSFlag_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSFlag_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbSFlag_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbSFlag_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSFlag_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbSFlag_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSLengthOfDetection_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "long_name",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbSLengthOfDetection_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "name_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbSLengthOfDetection_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbSLengthOfDetection_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "unit_code",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbSLengthOfDetection_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "add_offset", NC_INT, 1,
 			                           &storelocal->mbSLengthOfDetection_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSLengthOfDetection_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "scale_factor", NC_INT, 1,
 			                           &storelocal->mbSLengthOfDetection_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSLengthOfDetection_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "minimum", NC_INT, 1,
 			                           &storelocal->mbSLengthOfDetection_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSLengthOfDetection_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "maximum", NC_INT, 1,
 			                           &storelocal->mbSLengthOfDetection_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSLengthOfDetection_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbSLengthOfDetection_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSLengthOfDetection_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbSLengthOfDetection_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSLengthOfDetection_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbSLengthOfDetection_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbSLengthOfDetection_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "format_C",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbSLengthOfDetection_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, "orientation",
 			                            MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbSLengthOfDetection_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAntenna_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAntenna_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAntenna_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAntenna_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAntenna_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAntenna_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAntenna_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAntenna_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAntenna_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAntenna_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAntenna_id, "add_offset", NC_INT, 1, &storelocal->mbAntenna_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntenna_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAntenna_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbAntenna_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntenna_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAntenna_id, "minimum", NC_INT, 1, &storelocal->mbAntenna_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntenna_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAntenna_id, "maximum", NC_INT, 1, &storelocal->mbAntenna_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntenna_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAntenna_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbAntenna_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntenna_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAntenna_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbAntenna_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntenna_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAntenna_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbAntenna_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAntenna_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAntenna_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAntenna_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAntenna_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAntenna_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		if (extended != MB_YES) {
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbBeamBias_type);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbBeamBias_long_name);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbBeamBias_name_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbBeamBias_units);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbBeamBias_unit_code);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "add_offset", NC_DOUBLE, 1,
 			                              &storelocal->mbBeamBias_add_offset);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbBeamBias_add_offset error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_double(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "scale_factor", NC_DOUBLE, 1,
 			                              &storelocal->mbBeamBias_scale_factor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbBeamBias_scale_factor error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "minimum", NC_INT, 1, &storelocal->mbBeamBias_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbBeamBias_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "maximum", NC_INT, 1, &storelocal->mbBeamBias_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbBeamBias_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "valid_minimum", NC_INT, 1,
 			                           &storelocal->mbBeamBias_valid_minimum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbBeamBias_valid_minimum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "valid_maximum", NC_INT, 1,
 			                           &storelocal->mbBeamBias_valid_maximum);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbBeamBias_valid_maximum error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "missing_value", NC_INT, 1,
 			                           &storelocal->mbBeamBias_missing_value);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att mbBeamBias_missing_value error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbBeamBias_format_C);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeamBias_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 			                            storelocal->mbBeamBias_orientation);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBFlag_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbBFlag_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBFlag_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBFlag_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBFlag_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBFlag_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBFlag_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBFlag_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBFlag_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBFlag_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBFlag_id, "add_offset", NC_INT, 1, &storelocal->mbBFlag_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBFlag_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBFlag_id, "scale_factor", NC_INT, 1, &storelocal->mbBFlag_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBFlag_id, "minimum", NC_INT, 1, &storelocal->mbBFlag_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBFlag_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBFlag_id, "maximum", NC_INT, 1, &storelocal->mbBFlag_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBFlag_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBFlag_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbBFlag_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBFlag_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbBFlag_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBFlag_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbBFlag_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBFlag_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBFlag_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBFlag_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBFlag_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBFlag_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeam_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbBeam_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeam_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBeam_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeam_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBeam_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeam_id, "units", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbBeam_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeam_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBeam_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeam_id, "add_offset", NC_INT, 1, &storelocal->mbBeam_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBeam_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeam_id, "scale_factor", NC_INT, 1, &storelocal->mbBeam_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBeam_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeam_id, "minimum", NC_INT, 1, &storelocal->mbBeam_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBeam_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeam_id, "maximum", NC_INT, 1, &storelocal->mbBeam_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBeam_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeam_id, "valid_minimum", NC_INT, 1, &storelocal->mbBeam_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBeam_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeam_id, "valid_maximum", NC_INT, 1, &storelocal->mbBeam_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBeam_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbBeam_id, "missing_value", NC_INT, 1, &storelocal->mbBeam_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbBeam_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeam_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBeam_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbBeam_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbBeam_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAFlag_id, "type", MBSYS_NETCDF_ATTRIBUTELEN, storelocal->mbAFlag_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAFlag_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAFlag_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAFlag_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAFlag_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAFlag_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAFlag_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAFlag_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAFlag_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAFlag_id, "add_offset", NC_INT, 1, &storelocal->mbAFlag_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAFlag_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAFlag_id, "scale_factor", NC_INT, 1, &storelocal->mbAFlag_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAFlag_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAFlag_id, "minimum", NC_INT, 1, &storelocal->mbAFlag_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAFlag_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAFlag_id, "maximum", NC_INT, 1, &storelocal->mbAFlag_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAFlag_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAFlag_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbAFlag_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAFlag_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbAFlag_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAFlag_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbAFlag_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbAFlag_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbAFlag_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAFlag_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAFlag_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbAFlag_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbAFlag_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilRef_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilRef_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilRef_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilRef_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilRef_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilRef_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilIdx_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilIdx_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilIdx_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilIdx_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilIdx_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbVelProfilIdx_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilIdx_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbVelProfilIdx_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilIdx_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbVelProfilIdx_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilIdx_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbVelProfilIdx_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilIdx_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbVelProfilIdx_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilIdx_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbVelProfilIdx_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilIdx_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbVelProfilIdx_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilIdx_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilIdx_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilIdx_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilDate_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilDate_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilDate_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilDate_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilDate_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbVelProfilDate_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilDate_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbVelProfilDate_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilDate_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbVelProfilDate_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilDate_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbVelProfilDate_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilDate_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbVelProfilDate_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilDate_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbVelProfilDate_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilDate_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbVelProfilDate_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilDate_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilDate_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilDate_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "type", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilTime_type);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "long_name", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilTime_long_name);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "name_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilTime_name_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "units", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilTime_units);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "unit_code", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilTime_unit_code);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "add_offset", NC_INT, 1,
 		                           &storelocal->mbVelProfilTime_add_offset);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilTime_add_offset error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "scale_factor", NC_INT, 1,
 		                           &storelocal->mbVelProfilTime_scale_factor);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilTime_scale_factor error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "minimum", NC_INT, 1,
 		                           &storelocal->mbVelProfilTime_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilTime_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "maximum", NC_INT, 1,
 		                           &storelocal->mbVelProfilTime_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilTime_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "valid_minimum", NC_INT, 1,
 		                           &storelocal->mbVelProfilTime_valid_minimum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilTime_valid_minimum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "valid_maximum", NC_INT, 1,
 		                           &storelocal->mbVelProfilTime_valid_maximum);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilTime_valid_maximum error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_int(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "missing_value", NC_INT, 1,
 		                           &storelocal->mbVelProfilTime_missing_value);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att mbVelProfilTime_missing_value error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "format_C", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilTime_format_C);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_att_text(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, "orientation", MBSYS_NETCDF_ATTRIBUTELEN,
 		                            storelocal->mbVelProfilTime_orientation);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_att JJJJ error: %s\n", nc_strerror(nc_status));
 
 		if (verbose >= 2) {
@@ -9125,19 +9121,19 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index[0] = 0;
 			count[0] = storelocal->mbHistoryRecNbr;
 			nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbHistDate_id, index, count, store->mbHistDate);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbHistDate error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
 			count[0] = storelocal->mbHistoryRecNbr;
 			nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbHistTime_id, index, count, store->mbHistTime);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbHistTime error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
 			count[0] = storelocal->mbHistoryRecNbr;
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbHistCode_id, index, count, store->mbHistCode);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbHistCode error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
@@ -9145,7 +9141,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			count[0] = storelocal->mbHistoryRecNbr;
 			count[1] = storelocal->mbNameLength;
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbHistAutor_id, index, count, store->mbHistAutor);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbHistAutor error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
@@ -9153,7 +9149,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			count[0] = storelocal->mbHistoryRecNbr;
 			count[1] = storelocal->mbNameLength;
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbHistModule_id, index, count, store->mbHistModule);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbHistModule error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
@@ -9161,39 +9157,39 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			count[0] = storelocal->mbHistoryRecNbr;
 			count[1] = storelocal->mbCommentLength;
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbHistComment_id, index, count, store->mbHistComment);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbHistComment error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
 			count[0] = storelocal->mbBeamNbr;
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbAntenna_id, index, count, store->mbAntenna);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbAntenna error: %s\n", nc_strerror(nc_status));
 
 			if (extended != MB_YES) {
 				index[0] = 0;
 				count[0] = storelocal->mbBeamNbr;
 				nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbBeamBias_id, index, count, store->mbBeamBias);
-				if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_put_vara mbBeamBias error: %s\n", nc_strerror(nc_status));
 			}
 
 			index[0] = 0;
 			count[0] = storelocal->mbBeamNbr;
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbBFlag_id, index, count, store->mbBFlag);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbBFlag error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
 			count[0] = storelocal->mbAntennaNbr;
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbBeam_id, index, count, store->mbBeam);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbBeam error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
 			count[0] = storelocal->mbAntennaNbr;
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbAFlag_id, index, count, store->mbAFlag);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbAFlag error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
@@ -9201,25 +9197,25 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			count[0] = storelocal->mbVelocityProfilNbr;
 			count[1] = storelocal->mbCommentLength;
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbVelProfilRef_id, index, count, store->mbVelProfilRef);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbVelProfilRef error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
 			count[0] = storelocal->mbVelocityProfilNbr;
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbVelProfilIdx_id, index, count, store->mbVelProfilIdx);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbVelProfilIdx error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
 			count[0] = storelocal->mbVelocityProfilNbr;
 			nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbVelProfilDate_id, index, count, store->mbVelProfilDate);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbVelProfilDate error: %s\n", nc_strerror(nc_status));
 
 			index[0] = 0;
 			count[0] = storelocal->mbVelocityProfilNbr;
 			nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbVelProfilTime_id, index, count, store->mbVelProfilTime);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbVelProfilTime error: %s\n", nc_strerror(nc_status));
 			if (nc_status != NC_NOERR) {
 				status = MB_FAILURE;
@@ -9250,98 +9246,98 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		/* fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d index: %d %d %d count: %d %d %d\n",
 		storelocal->CIB_BLOCK_DIM,index[0],index[1],index[2],count[0],count[1],count[2]); */
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbCycle_id, index, count, store->mbCycle);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbCycle error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbDate_id, index, count, store->mbDate);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbDate error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbTime_id, index, count, store->mbTime);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbTime error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbOrdinate_id, index, count, store->mbOrdinate);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbOrdinate error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbAbscissa_id, index, count, store->mbAbscissa);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbAbscissa error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbFrequency_id, index, count, store->mbFrequency);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbFrequency error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbSonarFrequency_id, index, count, store->mbSonarFrequency);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbSonarFrequency error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbSounderMode_id, index, count, store->mbSounderMode);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbSounderMode error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbReferenceDepth_id, index, count, store->mbReferenceDepth);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbReferenceDepth error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbDynamicDraught_id, index, count, store->mbDynamicDraught);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbDynamicDraught error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbTide_id, index, count, store->mbTide);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbTide error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbSoundVelocity_id, index, count, store->mbSoundVelocity);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbSoundVelocity error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbHeading_id, index, count, (short *)store->mbHeading);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbHeading error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbRoll_id, index, count, store->mbRoll);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbRoll error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbPitch_id, index, count, store->mbPitch);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbPitch error: %s\n", nc_strerror(nc_status));
 		nc_status =
 		    nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbTransmissionHeave_id, index, count, store->mbTransmissionHeave);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbTransmissionHeave error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbDistanceScale_id, index, count, store->mbDistanceScale);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbDistanceScale error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbRangeScale_id, index, count, store->mbRangeScale);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbRangeScale error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbDepthScale_id, index, count, store->mbDepthScale);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbDepthScale error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbVerticalDepth_id, index, count, store->mbVerticalDepth);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbVerticalDepth error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbCQuality_id, index, count, store->mbCQuality);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbCQuality error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbCFlag_id, index, count, store->mbCFlag);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbCFlag error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbInterlacing_id, index, count, store->mbInterlacing);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbInterlacing error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbSamplingRate_id, index, count, store->mbSamplingRate);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbSamplingRate error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbCompensationLayerMode_id, index, count,
 			                             store->mbCompensationLayerMode);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbCompensationLayerMode error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbTransmitBeamwidth_id, index, count, store->mbTransmitBeamwidth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbTransmitBeamwidth error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbReceiveBeamwidth_id, index, count, store->mbReceiveBeamwidth);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbReceiveBeamwidth error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbTransmitPulseLength_id, index, count,
 			                              store->mbTransmitPulseLength);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbTransmitPulseLength error: %s\n", nc_strerror(nc_status));
 		}
 		if (storelocal->CIB_BLOCK_DIM > 0) {
@@ -9361,54 +9357,54 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			count[2] = 0;
 		}
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbAlongDistance_id, index, count, store->mbAlongDistance);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbAlongDistance error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbAcrossDistance_id, index, count, store->mbAcrossDistance);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbAcrossDistance error: %s\n", nc_strerror(nc_status));
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbDepth_id, index, count, store->mbDepth);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbDepth error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status =
 			    nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbAcrossBeamAngle_id, index, count, store->mbAcrossBeamAngle);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbAcrossBeamAngle error: %s\n", nc_strerror(nc_status));
 			nc_status =
 			    nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbAzimutBeamAngle_id, index, count, store->mbAzimutBeamAngle);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbAzimutBeamAngle error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbRange_id, index, count, store->mbRange);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbRange error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbSoundingBias_id, index, count, store->mbSoundingBias);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbSoundingBias error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbSQuality_id, index, count, store->mbSQuality);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbSQuality error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbReflectivity_id, index, count, store->mbReflectivity);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbReflectivity error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbReceptionHeave_id, index, count, store->mbReceptionHeave);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbReceptionHeave error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbAlongSlope_id, index, count, store->mbAlongSlope);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbAlongSlope error: %s\n", nc_strerror(nc_status));
 			nc_status = nc_put_vara_short(mb_io_ptr->ncid, storelocal->mbAcrossSlope_id, index, count, store->mbAcrossSlope);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbAcrossSlope error: %s\n", nc_strerror(nc_status));
 		}
 		nc_status = nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbSFlag_id, index, count, store->mbSFlag);
-		if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbSQuality error: %s\n", nc_strerror(nc_status));
 		if (extended == MB_YES) {
 			nc_status =
 			    nc_put_vara_text(mb_io_ptr->ncid, storelocal->mbSLengthOfDetection_id, index, count, store->mbSLengthOfDetection);
-			if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR)
+			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_put_vara mbSLengthOfDetection error: %s\n", nc_strerror(nc_status));
 		}
 
