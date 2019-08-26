@@ -260,7 +260,7 @@ int mb_segy_write_init(int verbose, char *segyfile, struct mb_segyasciiheader_st
 		if (asciiheader != NULL)
 			for (int j = 0; j < 40; j++) {
 				fprintf(stderr, "dbg2       asciiheader[%d]:", j);
-				for (int i = 0; i < 80; j++)
+				for (int i = 0; i < 80; i++)
 					fprintf(stderr, "%c", asciiheader->line[j][i]);
 				fprintf(stderr, "\n");
 			}
