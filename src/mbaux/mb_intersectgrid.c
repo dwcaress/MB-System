@@ -32,13 +32,8 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
-
 /*--------------------------------------------------------------------*/
 int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **topogrid_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_topogrid_struct *topogrid;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -49,10 +44,10 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 	}
 
 	/* allocate memory for topogrid structure */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_topogrid_struct), (void **)topogrid_ptr, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mb_topogrid_struct), (void **)topogrid_ptr, error);
 
 	/* get pointer to topogrid structure */
-	topogrid = (struct mb_topogrid_struct *)*topogrid_ptr;
+	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)*topogrid_ptr;
 
 	/* read in the data */
 	strcpy(topogrid->file, topogridfile);
@@ -103,7 +98,6 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -130,15 +124,10 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip, void **top
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
 int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_topogrid_struct *topogrid;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -148,12 +137,12 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error) {
 	}
 
 	/* deallocate the topogrid structure */
-	topogrid = (struct mb_topogrid_struct *)*topogrid_ptr;
+	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)*topogrid_ptr;
+	int status = MB_SUCCESS;
 	if (topogrid->data != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(topogrid->data), error);
 	status = mb_freed(verbose, __FILE__, __LINE__, (void **)topogrid_ptr, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -162,20 +151,12 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error) {
 		fprintf(stderr, "dbg2       status:                    %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
 int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navlat, double *topo, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_topogrid_struct *topogrid;
-	int nfound;
-	int i, j, ii, jj, k;
+	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
 
-	/* get pointer to topogrid structure */
-	topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -201,20 +182,22 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 	}
 
 	/* get topography at specified location */
-	nfound = 0;
+	int nfound = 0;
 	*topo = 0.0;
-	i = (int)((navlon - topogrid->xmin) / topogrid->dx);
-	j = (int)((navlat - topogrid->ymin) / topogrid->dy);
+	const int i = (int)((navlon - topogrid->xmin) / topogrid->dx);
+	const int j = (int)((navlat - topogrid->ymin) / topogrid->dy);
 	if (i >= 0 && i < topogrid->n_columns - 1 && j >= 0 && j < topogrid->n_rows - 1) {
-		for (ii = i; ii <= i + 1; ii++)
-			for (jj = j; jj <= j + 1; jj++) {
-				k = ii * topogrid->n_rows + jj;
+		for (int ii = i; ii <= i + 1; ii++)
+			for (int jj = j; jj <= j + 1; jj++) {
+				const int k = ii * topogrid->n_rows + jj;
 				if (topogrid->data[k] != topogrid->nodatavalue) {
 					nfound++;
 					*topo += topogrid->data[k];
 				}
 			}
 	}
+
+	int status = MB_SUCCESS;
 	if (nfound > 0) {
 		*topo /= (double)nfound;
 	}
@@ -223,7 +206,6 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 		*error = MB_ERROR_NOT_ENOUGH_DATA;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -233,20 +215,12 @@ int mb_topogrid_topo(int verbose, void *topogrid_ptr, double navlon, double navl
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
 int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *error) {
-	int status = MB_SUCCESS;
-	struct mb_topogrid_struct *topogrid;
-	int nfound;
-	int i, j, ii, jj, k;
+	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
 
-	/* get pointer to topogrid structure */
-	topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -277,7 +251,8 @@ int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *e
         bounds[3] = topogrid->ymax;
     }
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -290,29 +265,14 @@ int mb_topogrid_bounds(int verbose, void *topogrid_ptr, double bounds[4], int *e
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
 int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double navlat, double altitude, double sonardepth,
                           double mtodeglon, double mtodeglat, double vx, double vy, double vz, double *lon, double *lat,
                           double *topo, double *range, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_topogrid_struct *topogrid;
-	int done;
-	int iteration;
-	int iteration_max = 25;
-	double topotolerance = 0.1;
-	double dr, r, lontest, lattest;
-	double rmin, rmax;
-	double topotest, topog, dtopo;
-	int nfound;
-	int i, j, ii, jj, k;
+	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
 
-	/* get pointer to topogrid structure */
-	topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -344,14 +304,16 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		fprintf(stderr, "dbg2       topogrid->data:            %p\n", topogrid->data);
 	}
 
-	/* initialize search for intersection */
-	done = MB_NO;
-	iteration = 0;
-	topotest = 0.0;
-	dtopo = 0.0;
-	rmin = 0.0;
+	int status = MB_SUCCESS;
+
+	double rmax;
+	int done = MB_NO;
+	double dtopo = 0.0;
+	double rmin = 0.0;
 
 	/* if altitude specified use it for initial guess */
+	double dr;
+	double r;
 	if (altitude > 0.0) {
 		dr = altitude / 20;
 		r = altitude / vz - dr;
@@ -360,14 +322,14 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 
 	/* if altitude not specified use altitude at location */
 	else {
-		nfound = 0;
-		topog = 0.0;
-		i = (int)((navlon - topogrid->xmin) / topogrid->dx);
-		j = (int)((navlat - topogrid->ymin) / topogrid->dy);
+		int nfound = 0;
+		double topog = 0.0;
+		const int i = (int)((navlon - topogrid->xmin) / topogrid->dx);
+		const int j = (int)((navlat - topogrid->ymin) / topogrid->dy);
 		if (i >= 0 && i < topogrid->n_columns - 1 && j >= 0 && j < topogrid->n_rows - 1) {
-			for (ii = i; ii <= i + 1; ii++)
-				for (jj = j; jj <= j + 1; jj++) {
-					k = ii * topogrid->n_rows + jj;
+			for (int ii = i; ii <= i + 1; ii++)
+				for (int jj = j; jj <= j + 1; jj++) {
+					const int k = ii * topogrid->n_rows + jj;
 					if (topogrid->data[k] != topogrid->nodatavalue) {
 						nfound++;
 						topog += topogrid->data[k];
@@ -388,25 +350,29 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		}
 	}
 
+	int iteration = 0;
+	const int iteration_max = 25;
+	double topotolerance = 0.1;
+
 	/* test different ranges along the vector until the grid is intersected */
 	while (done == MB_NO && iteration < iteration_max) {
 		/* update the range to be tested */
 		r += dr;
 
 		/* get position of range estimate projected along the vector */
-		lontest = navlon + mtodeglon * vx * r;
-		lattest = navlat + mtodeglat * vy * r;
-		topotest = -sonardepth - vz * r;
+		const double lontest = navlon + mtodeglon * vx * r;
+		const double lattest = navlat + mtodeglat * vy * r;
+		const double topotest = -sonardepth - vz * r;
 
 		/* get topography value at that point */
-		nfound = 0;
-		topog = 0.0;
-		i = (int)((lontest - topogrid->xmin) / topogrid->dx);
-		j = (int)((lattest - topogrid->ymin) / topogrid->dy);
+		int nfound = 0;
+		double topog = 0.0;
+		const int i = (int)((lontest - topogrid->xmin) / topogrid->dx);
+		const int j = (int)((lattest - topogrid->ymin) / topogrid->dy);
 		if (i >= 0 && i < topogrid->n_columns - 1 && j >= 0 && j < topogrid->n_rows - 1) {
-			for (ii = i; ii <= i + 1; ii++)
-				for (jj = j; jj <= j + 1; jj++) {
-					k = ii * topogrid->n_rows + jj;
+			for (int ii = i; ii <= i + 1; ii++)
+				for (int jj = j; jj <= j + 1; jj++) {
+					const int k = ii * topogrid->n_rows + jj;
 					if (topogrid->data[k] != topogrid->nodatavalue) {
 						nfound++;
 						topog += topogrid->data[k];
@@ -459,7 +425,6 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 	*topo = -sonardepth - vz * r;
 	*range = r;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -472,7 +437,6 @@ int mb_topogrid_intersect(int verbose, void *topogrid_ptr, double navlon, double
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -480,20 +444,8 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
                               double navlat, double heading, double altitude, double sonardepth, double pitch,
                               double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                               double *table_range, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_topogrid_struct *topogrid;
-	double mtodeglon, mtodeglat;
-	double dangle;
-	double rr, xx, zz;
-	double alpha, beta, theta, phi;
-	double vx, vy, vz;
-	double lon, lat, topo;
-	int nset, first, last;
+	struct mb_topogrid_struct *topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
 
-	/* get pointer to topogrid structure */
-	topogrid = (struct mb_topogrid_struct *)topogrid_ptr;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -525,34 +477,44 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		fprintf(stderr, "dbg2       topogrid->data:            %p\n", topogrid->data);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* loop over all of the angles */
+	double mtodeglon;
+	double mtodeglat;
 	mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-	dangle = (angle_max - angle_min) / (nangle - 1);
-	alpha = pitch;
-	nset = 0;
+	double dangle = (angle_max - angle_min) / (nangle - 1);
+	double alpha = pitch;
+	int nset = 0;
 	for (int i = 0; i < nangle; i++) {
 		/* get angles in takeoff coordinates */
 		table_angle[i] = angle_min + dangle * i;
-		beta = 90.0 - table_angle[i];
+		const double beta = 90.0 - table_angle[i];
+		double theta;
+		double phi;
 		mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
 
 		/* calculate unit vector relative to the vehicle */
-		vz = cos(DTR * theta);
-		vx = sin(DTR * theta) * cos(DTR * phi);
-		vy = sin(DTR * theta) * sin(DTR * phi);
+		const double vz = cos(DTR * theta);
+		double vx = sin(DTR * theta) * cos(DTR * phi);
+		double vy = sin(DTR * theta) * sin(DTR * phi);
 
 		/* rotate unit vector by vehicle heading */
 		vx = vx * cos(DTR * heading) + vy * sin(DTR * heading);
 		vy = -vx * sin(DTR * heading) + vy * cos(DTR * heading);
 
+		double lon;
+		double lat;
+		double topo;
+		double rr;
 		/* find the range where this vector intersects the grid */
 		status = mb_topogrid_intersect(verbose, topogrid_ptr, navlon, navlat, altitude, sonardepth, mtodeglon, mtodeglat, vx, vy,
 		                               vz, &lon, &lat, &topo, &rr, error);
 
 		/* get the position from successful intersection with the grid */
 		if (status == MB_SUCCESS) {
-			zz = rr * cos(DTR * theta);
-			xx = rr * sin(DTR * theta);
+			const double zz = rr * cos(DTR * theta);
+			const double xx = rr * sin(DTR * theta);
 			table_xtrack[i] = xx * cos(DTR * phi);
 			table_ltrack[i] = xx * sin(DTR * phi);
 			table_altitude[i] = zz;
@@ -570,8 +532,8 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 	if (nset < nangle) {
 		/* find first and last table entries set if possible */
 		if (nset > 0) {
-			first = nangle;
-			last = -1;
+			int first = nangle;
+			int last = -1;
 			for (int i = 0; i < nangle; i++) {
 				if (table_range[i] > 0.0) {
 					first = MIN(i, first);
@@ -584,7 +546,9 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 				if (table_range[i] <= 0.0) {
 					/* get angles in takeoff coordinates */
 					table_angle[i] = angle_min + dangle * i;
-					beta = 90.0 - table_angle[i];
+					const double beta = 90.0 - table_angle[i];
+					double theta;
+					double phi;
 					mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
 
 					if (nset == 0) {
@@ -601,7 +565,7 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 					}
 
 					table_range[i] = table_altitude[first] / cos(DTR * theta);
-					xx = table_range[i] * sin(DTR * theta);
+					const double xx = table_range[i] * sin(DTR * theta);
 					table_xtrack[i] = xx * cos(DTR * phi);
 					table_ltrack[i] = xx * sin(DTR * phi);
 					nset++;
@@ -616,7 +580,6 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		status = MB_SUCCESS;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -629,7 +592,6 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr, int nangle, doubl
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
