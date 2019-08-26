@@ -2,19 +2,19 @@
 /// @file msocket.c
 /// @authors k. Headley
 /// @date 01 jan 2018
- 
+
 /// mframe cross-platform socket wrappers implementation
 /// for *nix/Cygwin
 
 /////////////////////////
-// Terms of use 
+// Terms of use
 /////////////////////////
 /*
 Copyright Information
 
 Copyright 2000-2018 MBARI
 Monterey Bay Aquarium Research Institute, all rights reserved.
- 
+
 Terms of Use
 
 This program is free software; you can redistribute it and/or modify
@@ -26,38 +26,38 @@ http://www.gnu.org/licenses/gpl-3.0.html
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details 
+GNU General Public License for more details
 (http://www.gnu.org/licenses/gpl-3.0.html)
- 
+
  MBARI provides the documentation and software code "as is", with no warranty,
- express or implied, as to the software, title, non-infringement of third party 
+ express or implied, as to the software, title, non-infringement of third party
  rights, merchantability, or fitness for any particular purpose, the accuracy of
- the code, or the performance or results which you may obtain from its use. You 
- assume the entire risk associated with use of the code, and you agree to be 
- responsible for the entire cost of repair or servicing of the program with 
+ the code, or the performance or results which you may obtain from its use. You
+ assume the entire risk associated with use of the code, and you agree to be
+ responsible for the entire cost of repair or servicing of the program with
  which you are using the code.
- 
+
  In no event shall MBARI be liable for any damages, whether general, special,
- incidental or consequential damages, arising out of your use of the software, 
- including, but not limited to, the loss or corruption of your data or damages 
- of any kind resulting from use of the software, any prohibited use, or your 
+ incidental or consequential damages, arising out of your use of the software,
+ including, but not limited to, the loss or corruption of your data or damages
+ of any kind resulting from use of the software, any prohibited use, or your
  inability to use the software. You agree to defend, indemnify and hold harmless
- MBARI and its officers, directors, and employees against any claim, loss, 
- liability or expense, including attorneys' fees, resulting from loss of or 
- damage to property or the injury to or death of any person arising out of the 
+ MBARI and its officers, directors, and employees against any claim, loss,
+ liability or expense, including attorneys' fees, resulting from loss of or
+ damage to property or the injury to or death of any person arising out of the
  use of the software.
- 
- The MBARI software is provided without obligation on the part of the 
- Monterey Bay Aquarium Research Institute to assist in its use, correction, 
+
+ The MBARI software is provided without obligation on the part of the
+ Monterey Bay Aquarium Research Institute to assist in its use, correction,
  modification, or enhancement.
- 
- MBARI assumes no responsibility or liability for any third party and/or 
- commercial software required for the database or applications. Licensee agrees 
- to obtain and maintain valid licenses for any additional third party software 
+
+ MBARI assumes no responsibility or liability for any third party and/or
+ commercial software required for the database or applications. Licensee agrees
+ to obtain and maintain valid licenses for any additional third party software
  required.
 */
 /////////////////////////
-// Headers 
+// Headers
 /////////////////////////
 
 #include "mframe.h"
@@ -70,7 +70,7 @@ GNU General Public License for more details
 // Macros
 /////////////////////////
 
-// These macros should only be defined for 
+// These macros should only be defined for
 // application main files rather than general C files
 /*
 /// @def PRODUCT
@@ -125,7 +125,7 @@ int msock_set_blocking(msock_socket_t *s, bool enabled)
             retval = fcntl(s->fd, F_SETFL, flags);
         }// else error
     }// else invalid arg
-    
+
     return retval;
 }
 // End function msock_set_blocking
@@ -156,7 +156,7 @@ void msock_addr_destroy(msock_addr_t **pself)
     if (NULL!=pself) {
         msock_addr_t *self = *pself;
         if (NULL!=self) {
-            
+
             if (NULL!=self->alist) {
                 // alist used to hold UDP reslist
                 // [i.e. getaddrinfo],
@@ -225,18 +225,18 @@ int msock_connection_addr2str(msock_connection_t *self)
     struct sockaddr_in *psin = NULL;
     uint16_t port=0xFFFF;
     int svc=0;
-    
+
     if (NULL!=self && NULL != self->addr &&
         NULL != self->addr->ainfo &&
         NULL != self->addr->ainfo->ai_addr) {
-        
+
         psin = (struct sockaddr_in *)self->addr->ainfo->ai_addr;
         ctest = inet_ntop(AF_INET, &psin->sin_addr, self->chost, MSOCK_ADDR_LEN);
-        
+
         if (NULL!=ctest) {
-            
+
             port = ntohs(psin->sin_port);
-            
+
             svc = port;
             snprintf(self->service,NI_MAXSERV,"%d",svc);
             retval=0;
@@ -398,12 +398,12 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
         }
         s->addr->host=strdup(host);
     }
-    
+
     s->addr->port=port;
 
     memset(s->addr->portstr,0,PORTSTR_BYTES*sizeof(char));
     sprintf(s->addr->portstr,"%d",port);
-    
+
     memset(&s->addr->hints,0,sizeof(struct addrinfo));
     PDPRINT((stderr,"configuring type [%s]\n",(type==ST_TCP ? "SOCK_STREAM" : "SOCK_DGRAM")));
     s->addr->hints.ai_family=PF_INET;
@@ -413,7 +413,7 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
     s->addr->hints.ai_canonname=NULL;
     s->addr->hints.ai_addr=NULL;
     s->addr->hints.ai_next=NULL;
-    
+
     int status=0;
 
     if (NULL != s->addr->alist) {
@@ -422,19 +422,19 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
         s->addr->alist=NULL;
     }
     struct addrinfo *rp=NULL;
-    
+
     if ((status = getaddrinfo(s->addr->host, s->addr->portstr, &s->addr->hints, &rp)) == 0){
-        
+
 		// walk the linked list of addrinfo returned by getaddrinfo
         // until we find a socket that succeeds
         s->addr->alist = rp;
-        
+
         for (; rp!=NULL; rp = rp->ai_next) {
 ////            PDPRINT((stderr,"rp[%p]\n",rp));
 //            fprintf(stderr,"msock_configure - rp family[%s] type[%s]\n",
 //                    (rp->ai_family==AF_INET?"IPv4":"IPv6"),
 //                    (rp->ai_socktype==SOCK_STREAM?"TCP":"UDP"));
-            
+
             s->fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
             if (s->fd>0){
                 s->addr->ainfo = rp;
@@ -460,7 +460,7 @@ int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_
     }else{
         fprintf(stderr, "getaddrinfo error: %d/%s\n",status, gai_strerror(status));
     }
-    
+
     return retval;
 }
 // End function msock_configure
@@ -549,12 +549,12 @@ int msock_listen(msock_socket_t *s, int queue)
 int msock_accept(msock_socket_t *s,msock_addr_t *addr)
 {
     int retval=-1;
-    
+
     if (NULL != s && NULL != s->addr->ainfo){
-        
+
         struct sockaddr *dest_addr=(addr==NULL?NULL:addr->ainfo->ai_addr);
         socklen_t addrlen = (addr==NULL?0:MSOCK_ADDR_LEN);
- 
+
         int new_fd = accept(s->fd, (struct sockaddr *)dest_addr, &addrlen);
         if (new_fd != -1) {
             PDPRINT((stderr,"accept received connection from client on socket new_fd[%d]\n",new_fd));
@@ -583,7 +583,7 @@ int64_t msock_send(msock_socket_t *s,byte *buf, uint32_t len)
         if (s->type==ST_TCP) {
             //                fprintf(stderr,">>>>>>>>>>>>>>>>> MSOCK_SEND : buf[%p] len[%"PRIu32"]\n",buf,len);
             //                r7k_hex_show(buf,len,16,true,5);
-            
+
 #if defined(__APPLE__)
             // must also set socket option SO_NOSIGPIPE
             if( (retval = send(s->fd,buf,len,0))<=0){
@@ -620,7 +620,7 @@ if (NULL != s && NULL != buf && len>0) {
     if (NULL!=addr && NULL!=addr->ainfo) {
         dest_addr = addr->ainfo->ai_addr;
     }
-    
+
     if( (retval = sendto(s->fd,buf,len,flags,dest_addr,MSOCK_ADDR_LEN)) > 0){
         //                    PDPRINT((stderr,"sendto OK [%lld]\n",retval));
     }else{
@@ -662,18 +662,18 @@ int64_t msock_recv(msock_socket_t *s, byte *buf, uint32_t len, int flags)
 int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_t len, int flags)
 {
     int64_t retval= 0;
-    
+
     if (NULL != s && NULL!=buf && len>0) {
-        
+
         struct sockaddr *dest_addr=(addr==NULL?NULL:addr->ainfo->ai_addr);
         socklen_t addrlen = (addr==NULL?0:MSOCK_ADDR_LEN);
-        
+
 //        fprintf(stderr,"recvfrom connection[%p] dest_addr[%p] ai_family[%d] addrlen[%d]\n",addr,(addr?addr->ainfo->ai_addr:NULL),(int)(addr?addr->ainfo->ai_family:-1),(int)(addr?addr->ainfo->ai_addrlen:-1));
-        
+
         if( (retval = recvfrom(s->fd,buf,len,flags,dest_addr,&addrlen))>0){
             // PDPRINT((stderr,"received data connection[%p] dest[%p] ainfo[%p] [%lld]\n",addr,dest_addr,addr->ainfo,retval));
         }else{
-            PDPRINT((stderr,"recvfrom failed [%d %s]\n",errno,strerror(errno)));
+            // PDPRINT((stderr,"recvfrom failed [%d %s]\n",errno,strerror(errno)));
         }
     }else{
         fprintf(stderr,"invalid arguments\n");
@@ -696,33 +696,33 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
     double t_rem=(double)timeout_msec;
     int64_t nbytes=0;
     int64_t read_total=0;
-    
+
     double start_sec   = mtime_dtime();
     double now_sec     = 0.0;
     double to_sec      = (double)timeout_msec/1000.0;
     double elapsed_sec = 0.0;
     bool err_quit=false;
 #if defined(__CYGWIN__)
-    
+
     static LARGE_INTEGER pfreq={0};
     if (pfreq.QuadPart==0) {
         QueryPerformanceCounter(&pfreq);
     }
-    
+
 #endif
 
      if ( (NULL!=s) && s->fd>0 && (NULL!=buf) && len>0) {
-         
+
         byte *pbuf=buf;
         memset(buf,0,len);
-         
-      
+
+
 //         fprintf(stderr,"#### read_tmout - fd[%d] buf[%p] len[%"PRIu32"] to[%"PRIu32"]\n",s->fd,buf,len, timeout_msec);
 
 //         fprintf(stderr,"#### read_tmout - buf[%p] len[%"PRIu32"] to[%"PRIu32"]\n",buf,len, timeout_msec);
         while (err_quit==false && read_total<len && elapsed_sec<to_sec && pbuf<(buf+len) ) {
 
-            
+
             // read from the file/socket
            nbytes = read(s->fd, pbuf, (len-read_total));
 
@@ -735,7 +735,7 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
 //                fprintf(stderr,"read_total %"PRId64"\n",read_total);
             }else{
                 // got error or connection closed by server
-                
+
                 // when server side disconnects
                 // read and recv both return 0 or -1 and set one
                 // of several error conditions. This ambiguity (that it
@@ -760,9 +760,9 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
                 // [errno 104/Connection reset by peer]
                 // ENOENT
                 // [errno 2/No such file or directory]
-                
+
                 fprintf(stderr,"ERR - read[%"PRId64"] sock[%d] [%d/%s]\n", nbytes, s->fd,errno,strerror(errno));
-                
+
                 switch (errno) {
                     case 0:
                         fprintf(stderr,"read 0 (EOF) setting EOF %d\n", s->fd);
@@ -774,7 +774,7 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
                         me_errno=ME_ESOCK;
                         retval=-1;
                        break;
-                        
+
                     case ENOTCONN:
                         fprintf(stderr,"ENOTCONN socket %d setting socket error\n", s->fd);
                         me_errno=ME_ESOCK;
@@ -825,24 +825,24 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
                     break;
                 }
             }
-            
+
             if (timeout_msec>0) {
                 // select/read may be interrupted before its timeout
                 // Update timeout value and retry for remaining time
                 now_sec = mtime_dtime();
                 elapsed_sec   = now_sec-start_sec;
             }
-            
+
         }// while
 
     }// ERR - invalid arg
-    
+
     if (read_total==len) {
         // read complete - OK
         me_errno=ME_OK;
 //        fprintf(stderr,"read filled request - buf:\n");
     }else{
-        
+
         switch (me_errno) {
             case ME_EREAD:
             case ME_ESOCK:
@@ -850,7 +850,7 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
             case ME_ETMOUT:
                 // use me_errno
                 break;
-                
+
             default:
                 if (t_rem<0) {
                     // timed out
@@ -901,14 +901,14 @@ msock_socket_t *msock_wrap_fd(int fd)
 int msock_test()
 {
     int retval=-1;
-    
+
     msock_socket_t *svr = msock_socket_new("localhost",9999,ST_TCP);
     msock_socket_t *cli = msock_socket_new("localhost",9999,ST_TCP);
-    
+
     if (NULL!=svr && NULL!=cli) {
         msock_set_blocking(svr,true);
         msock_set_blocking(cli,true);
-        
+
         if( (msock_bind(svr)==0)){
             if( (msock_listen(svr,1)==0) ){
                 if(msock_connect(cli)==0){

@@ -108,3 +108,4 @@ lib
 *.log
 *.trs
 *~
+src/mbtrn/mb1conv

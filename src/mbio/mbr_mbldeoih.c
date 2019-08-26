@@ -312,6 +312,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->kind = MB_DATA_NONE;
 		}
 	}
+
 	if (status == MB_SUCCESS && header_length == 2) {
 		/* only 2 byte header for new style comment */
 		status = MB_SUCCESS;
@@ -595,7 +596,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       status:           %d\n", status);
 		fprintf(stderr, "dbg5       error:            %d\n", *error);
 	}
-	if (verbose >= 5 && store->kind == MB_DATA_DATA) {
+	else if (verbose >= 5 && store->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  Current version header values in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       time_d:           %f\n", store->time_d);
 		fprintf(stderr, "dbg5       longitude:        %f\n", store->longitude);

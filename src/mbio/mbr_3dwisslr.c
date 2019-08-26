@@ -892,7 +892,7 @@ int mbr_3dwisslr_rd_data
 )
 {
   struct mbsys_3ddwissl_calibration_v1s1_struct *calibration_v1s1;
-  struct mbsys_3ddwissl_calibration_v1s2_struct *calibration_v1s2;
+  struct mbsys_3ddwissl_calibration_v1s3_struct *calibration_v1s3;
   struct mbsys_3ddwissl_pulse_struct *pulse;
   int *file_header_readwritten;
   char *buffer = NULL;
@@ -1244,267 +1244,278 @@ int mbr_3dwisslr_rd_data
         }
 
       /* format V1S2 has 407-byte calibration structures */
-      /* format V1S3 has 450-byte calibration structures (same as V1S2 with added 43 unused
-         bytes) */
+      /* format V1S3 has 450-byte calibration structures */
       else if (( store->file_version == 1) &&
         (( store->sub_version == 2) || ( store->sub_version == 3) ))
         {
         /* get calibration information for head a */
-        calibration_v1s2= &store->calibration_v1s2_a;
-        memcpy(calibration_v1s2->cfg_path, &buffer[index], 64); index +=64;
+        calibration_v1s3= &store->calibration_v1s3_a;
+        memcpy(calibration_v1s3->cfg_path, &buffer[index], 64); index +=64;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->laser_head_no)); index += 4;
+          &(calibration_v1s3->laser_head_no)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->process_for_air)); index += 4;
-        calibration_v1s2->temperature_compensation = buffer[index]; index += 1;
-        calibration_v1s2->emergency_shutdown = buffer[index]; index += 1;
+          &(calibration_v1s3->process_for_air)); index += 4;
+        calibration_v1s3->temperature_compensation = buffer[index]; index += 1;
+        calibration_v1s3->emergency_shutdown = buffer[index]; index += 1;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ocb_temperature_limit_c)); index += 4;
+          &(calibration_v1s3->ocb_temperature_limit_c)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ocb_humidity_limit)); index += 4;
+          &(calibration_v1s3->ocb_humidity_limit)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->pb_temperature_limit_1_c)); index += 4;
+          &(calibration_v1s3->pb_temperature_limit_1_c)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->pb_temperature_limit_2_c)); index += 4;
+          &(calibration_v1s3->pb_temperature_limit_2_c)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->pb_humidity_limit)); index += 4;
+          &(calibration_v1s3->pb_humidity_limit)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->dig_temperature_limit_c)); index += 4;
-        memcpy(calibration_v1s2->ocb_comm_port, &buffer[index], 24); index += 24;
-        memcpy(calibration_v1s2->ocb_comm_cfg, &buffer[index], 24); index += 24;
+          &(calibration_v1s3->dig_temperature_limit_c)); index += 4;
+        memcpy(calibration_v1s3->ocb_comm_port, &buffer[index], 24); index += 24;
+        memcpy(calibration_v1s3->ocb_comm_cfg, &buffer[index], 24); index += 24;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->az_ao_deg_to_volt)); index += 4;
+          &(calibration_v1s3->az_ao_deg_to_volt)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->az_ai_neg_v_to_deg)); index += 4;
+          &(calibration_v1s3->az_ai_neg_v_to_deg)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->az_ai_pos_v_to_deg)); index += 4;
-        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(calibration_v1s2->t1_air));
+          &(calibration_v1s3->az_ai_pos_v_to_deg)); index += 4;
+        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(calibration_v1s3->t1_air));
         index += 4;
-        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(calibration_v1s2->ff_air));
+        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(calibration_v1s3->ff_air));
         index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g4000)); index += 4;
+          &(calibration_v1s3->t1_water_g4000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g4000)); index += 4;
+          &(calibration_v1s3->ff_water_g4000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g3000)); index += 4;
+          &(calibration_v1s3->t1_water_g3000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g3000)); index += 4;
+          &(calibration_v1s3->ff_water_g3000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g2000)); index += 4;
+          &(calibration_v1s3->t1_water_g2000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g2000)); index += 4;
+          &(calibration_v1s3->ff_water_g2000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g1000)); index += 4;
+          &(calibration_v1s3->t1_water_g1000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g1000)); index += 4;
+          &(calibration_v1s3->ff_water_g1000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g400)); index += 4;
+          &(calibration_v1s3->t1_water_g400)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g400)); index += 4;
+          &(calibration_v1s3->ff_water_g400)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g300)); index += 4;
+          &(calibration_v1s3->t1_water_g300)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g300)); index += 4;
+          &(calibration_v1s3->ff_water_g300)); index += 4;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->temp_comp_poly2)); index += 8;
+          &(calibration_v1s3->temp_comp_poly2)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->temp_comp_poly1)); index += 8;
+          &(calibration_v1s3->temp_comp_poly1)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->temp_comp_poly)); index += 8;
+          &(calibration_v1s3->temp_comp_poly)); index += 8;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->laser_start_time_sec)); index += 4;
+          &(calibration_v1s3->laser_start_time_sec)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_shift_cts)); index += 4;
+          &(calibration_v1s3->scanner_shift_cts)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->factory_scanner_lrg_deg)); index += 4;
+          &(calibration_v1s3->factory_scanner_lrg_deg)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->factory_scanner_med_deg)); index += 4;
+          &(calibration_v1s3->factory_scanner_med_deg)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->factory_scanner_sml_deg)); index += 4;
+          &(calibration_v1s3->factory_scanner_sml_deg)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->factory_dig_cnt_to_volts)); index += 4;
+          &(calibration_v1s3->factory_dig_cnt_to_volts)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->el_angle_fixed_deg)); index += 4;
+          &(calibration_v1s3->el_angle_fixed_deg)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->zda_to_pps_max_msec)); index += 4;
+          &(calibration_v1s3->zda_to_pps_max_msec)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->zda_udp_port)); index += 4;
-        calibration_v1s2->show_time_sync_errors = buffer[index]; index += 1;
+          &(calibration_v1s3->zda_udp_port)); index += 4;
+        calibration_v1s3->show_time_sync_errors = buffer[index]; index += 1;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->min_time_diff_update_msec)); index += 4;
+          &(calibration_v1s3->min_time_diff_update_msec)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ctd_tcp_port)); index += 4;
+          &(calibration_v1s3->ctd_tcp_port)); index += 4;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->trigger_level_volt)); index += 8;
+          &(calibration_v1s3->trigger_level_volt)); index += 8;
         mb_get_binary_int(MB_YES,
           (void *)&buffer[index],
-          &(calibration_v1s2->mf_t0_position)); index += 4;
+          &(calibration_v1s3->mf_t0_position)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->mf_start_proc)); index += 4;
+          &(calibration_v1s3->mf_start_proc)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->dig_ref_pos_t0_cnts)); index += 4;
-        mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration_v1s2->dummy));
+          &(calibration_v1s3->dig_ref_pos_t0_cnts)); index += 4;
+        mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration_v1s3->dummy));
         index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t0_min_height_raw_cts)); index += 4;
+          &(calibration_v1s3->t0_min_height_raw_cts)); index += 4;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_0)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_0)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_1)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_1)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_2)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_2)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_3)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_3)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_4)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_4)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_5)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_5)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_0)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_0)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_1)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_1)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_2)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_2)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_3)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_3)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_4)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_4)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_5)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_5)); index += 8;
         if (( store->file_version == 1) && ( store->sub_version == 3) )
           {
-          memcpy(calibration_v1s2->unused, &buffer[index], 43); index += 43;
+          mb_get_binary_short(MB_YES, (void *)&buffer[index],
+            &(calibration_v1s3->trigger_coupling_type)); index += 2;
+          mb_get_binary_float(MB_YES, (void *)&buffer[index],
+            &(calibration_v1s3->digitizer_voltage_range_v)); index += 4;
+          mb_get_binary_int(MB_YES, (void *)&buffer[index],
+            &(calibration_v1s3->prf_tune_wait_ms)); index += 4;
+          memcpy(calibration_v1s3->unused, &buffer[index], 33); index += 33;
           }
         /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration a: %zu\n", */
         /*__FILE__, __FUNCTION__, __LINE__, index); */
 
         /* get calibration information for head b */
-        calibration_v1s2 = &store->calibration_v1s2_b;
-        memcpy(calibration_v1s2->cfg_path, &buffer[index], 64); index +=64;
+        calibration_v1s3 = &store->calibration_v1s3_b;
+        memcpy(calibration_v1s3->cfg_path, &buffer[index], 64); index +=64;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->laser_head_no)); index += 4;
+          &(calibration_v1s3->laser_head_no)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->process_for_air)); index += 4;
-        calibration_v1s2->temperature_compensation = buffer[index]; index += 1;
-        calibration_v1s2->emergency_shutdown = buffer[index]; index += 1;
+          &(calibration_v1s3->process_for_air)); index += 4;
+        calibration_v1s3->temperature_compensation = buffer[index]; index += 1;
+        calibration_v1s3->emergency_shutdown = buffer[index]; index += 1;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ocb_temperature_limit_c)); index += 4;
+          &(calibration_v1s3->ocb_temperature_limit_c)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ocb_humidity_limit)); index += 4;
+          &(calibration_v1s3->ocb_humidity_limit)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->pb_temperature_limit_1_c)); index += 4;
+          &(calibration_v1s3->pb_temperature_limit_1_c)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->pb_temperature_limit_2_c)); index += 4;
+          &(calibration_v1s3->pb_temperature_limit_2_c)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->pb_humidity_limit)); index += 4;
+          &(calibration_v1s3->pb_humidity_limit)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->dig_temperature_limit_c)); index += 4;
-        memcpy(calibration_v1s2->ocb_comm_port, &buffer[index], 24); index += 24;
-        memcpy(calibration_v1s2->ocb_comm_cfg, &buffer[index], 24); index += 24;
+          &(calibration_v1s3->dig_temperature_limit_c)); index += 4;
+        memcpy(calibration_v1s3->ocb_comm_port, &buffer[index], 24); index += 24;
+        memcpy(calibration_v1s3->ocb_comm_cfg, &buffer[index], 24); index += 24;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->az_ao_deg_to_volt)); index += 4;
+          &(calibration_v1s3->az_ao_deg_to_volt)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->az_ai_neg_v_to_deg)); index += 4;
+          &(calibration_v1s3->az_ai_neg_v_to_deg)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->az_ai_pos_v_to_deg)); index += 4;
-        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(calibration_v1s2->t1_air));
+          &(calibration_v1s3->az_ai_pos_v_to_deg)); index += 4;
+        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(calibration_v1s3->t1_air));
         index += 4;
-        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(calibration_v1s2->ff_air));
+        mb_get_binary_float(MB_YES, (void *)&buffer[index], &(calibration_v1s3->ff_air));
         index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g4000)); index += 4;
+          &(calibration_v1s3->t1_water_g4000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g4000)); index += 4;
+          &(calibration_v1s3->ff_water_g4000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g3000)); index += 4;
+          &(calibration_v1s3->t1_water_g3000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g3000)); index += 4;
+          &(calibration_v1s3->ff_water_g3000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g2000)); index += 4;
+          &(calibration_v1s3->t1_water_g2000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g2000)); index += 4;
+          &(calibration_v1s3->ff_water_g2000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g1000)); index += 4;
+          &(calibration_v1s3->t1_water_g1000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g1000)); index += 4;
+          &(calibration_v1s3->ff_water_g1000)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g400)); index += 4;
+          &(calibration_v1s3->t1_water_g400)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g400)); index += 4;
+          &(calibration_v1s3->ff_water_g400)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t1_water_g300)); index += 4;
+          &(calibration_v1s3->t1_water_g300)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ff_water_g300)); index += 4;
+          &(calibration_v1s3->ff_water_g300)); index += 4;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->temp_comp_poly2)); index += 8;
+          &(calibration_v1s3->temp_comp_poly2)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->temp_comp_poly1)); index += 8;
+          &(calibration_v1s3->temp_comp_poly1)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->temp_comp_poly)); index += 8;
+          &(calibration_v1s3->temp_comp_poly)); index += 8;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->laser_start_time_sec)); index += 4;
+          &(calibration_v1s3->laser_start_time_sec)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_shift_cts)); index += 4;
+          &(calibration_v1s3->scanner_shift_cts)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->factory_scanner_lrg_deg)); index += 4;
+          &(calibration_v1s3->factory_scanner_lrg_deg)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->factory_scanner_med_deg)); index += 4;
+          &(calibration_v1s3->factory_scanner_med_deg)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->factory_scanner_sml_deg)); index += 4;
+          &(calibration_v1s3->factory_scanner_sml_deg)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->factory_dig_cnt_to_volts)); index += 4;
+          &(calibration_v1s3->factory_dig_cnt_to_volts)); index += 4;
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->el_angle_fixed_deg)); index += 4;
+          &(calibration_v1s3->el_angle_fixed_deg)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->zda_to_pps_max_msec)); index += 4;
+          &(calibration_v1s3->zda_to_pps_max_msec)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->zda_udp_port)); index += 4;
-        calibration_v1s2->show_time_sync_errors = buffer[index]; index += 1;
+          &(calibration_v1s3->zda_udp_port)); index += 4;
+        calibration_v1s3->show_time_sync_errors = buffer[index]; index += 1;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->min_time_diff_update_msec)); index += 4;
+          &(calibration_v1s3->min_time_diff_update_msec)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->ctd_tcp_port)); index += 4;
+          &(calibration_v1s3->ctd_tcp_port)); index += 4;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->trigger_level_volt)); index += 8;
+          &(calibration_v1s3->trigger_level_volt)); index += 8;
         mb_get_binary_int(MB_YES,
           (void *)&buffer[index],
-          &(calibration_v1s2->mf_t0_position)); index += 4;
+          &(calibration_v1s3->mf_t0_position)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->mf_start_proc)); index += 4;
+          &(calibration_v1s3->mf_start_proc)); index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->dig_ref_pos_t0_cnts)); index += 4;
-        mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration_v1s2->dummy));
+          &(calibration_v1s3->dig_ref_pos_t0_cnts)); index += 4;
+        mb_get_binary_int(MB_YES, (void *)&buffer[index], &(calibration_v1s3->dummy));
         index += 4;
         mb_get_binary_int(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->t0_min_height_raw_cts)); index += 4;
+          &(calibration_v1s3->t0_min_height_raw_cts)); index += 4;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_0)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_0)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_1)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_1)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_2)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_2)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_3)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_3)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_4)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_4)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_neg_polynom_5)); index += 8;
+          &(calibration_v1s3->scanner_neg_polynom_5)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_0)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_0)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_1)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_1)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_2)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_2)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_3)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_3)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_4)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_4)); index += 8;
         mb_get_binary_double(MB_YES, (void *)&buffer[index],
-          &(calibration_v1s2->scanner_pos_polynom_5)); index += 8;
+          &(calibration_v1s3->scanner_pos_polynom_5)); index += 8;
         if (( store->file_version == 1) && ( store->sub_version == 3) )
           {
-          memcpy(calibration_v1s2->unused, &buffer[index], 43); index += 43;
+          mb_get_binary_short(MB_YES, (void *)&buffer[index],
+            &(calibration_v1s3->trigger_coupling_type)); index += 2;
+          mb_get_binary_float(MB_YES, (void *)&buffer[index],
+            &(calibration_v1s3->digitizer_voltage_range_v)); index += 4;
+          mb_get_binary_int(MB_YES, (void *)&buffer[index],
+            &(calibration_v1s3->prf_tune_wait_ms)); index += 4;
+          memcpy(calibration_v1s3->unused, &buffer[index], 33); index += 33;
           }
         /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration b: %zu\n", */
         /*__FILE__, __FUNCTION__, __LINE__, index); */
@@ -1752,7 +1763,7 @@ int mbr_3dwisslr_wr_data
 {
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_calibration_v1s1_struct *calibration_v1s1;
-  struct mbsys_3ddwissl_calibration_v1s2_struct *calibration_v1s2;
+  struct mbsys_3ddwissl_calibration_v1s3_struct *calibration_v1s3;
   int *file_header_readwritten;
   char *buffer = NULL;
   size_t write_len;
@@ -2134,311 +2145,323 @@ int mbr_3dwisslr_wr_data
       else/* if (store->file_version == 1 && store->sub_version >= 2) */
 
         {/* put calibration information for head a */
-        calibration_v1s2 = &store->calibration_v1s2_a;
-        memcpy((void **)&buffer[index], calibration_v1s2->cfg_path, 64); index +=64;
-        mb_put_binary_int(MB_YES, calibration_v1s2->laser_head_no, (void **)&buffer[index]);
+        calibration_v1s3 = &store->calibration_v1s3_a;
+        memcpy((void **)&buffer[index], calibration_v1s3->cfg_path, 64); index +=64;
+        mb_put_binary_int(MB_YES, calibration_v1s3->laser_head_no, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->process_for_air,
+        mb_put_binary_int(MB_YES, calibration_v1s3->process_for_air,
           (void **)&buffer[index]); index += 4;
-        buffer[index] = calibration_v1s2->temperature_compensation; index += 1;
-        buffer[index] = calibration_v1s2->emergency_shutdown; index += 1;
+        buffer[index] = calibration_v1s3->temperature_compensation; index += 1;
+        buffer[index] = calibration_v1s3->emergency_shutdown; index += 1;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ocb_temperature_limit_c,
+          calibration_v1s3->ocb_temperature_limit_c,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->ocb_humidity_limit,
-          (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES,
-          calibration_v1s2->pb_temperature_limit_1_c,
+        mb_put_binary_float(MB_YES, calibration_v1s3->ocb_humidity_limit,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->pb_temperature_limit_2_c,
-          (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->pb_humidity_limit,
+          calibration_v1s3->pb_temperature_limit_1_c,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->dig_temperature_limit_c,
+          calibration_v1s3->pb_temperature_limit_2_c,
           (void **)&buffer[index]); index += 4;
-        /*memcpy((void **)&buffer[index], calibration_v1s2->l_d_cable_set, 24); index +=24; */
-        memcpy((void **)&buffer[index], calibration_v1s2->ocb_comm_port, 24); index += 24;
-        memcpy((void **)&buffer[index], calibration_v1s2->ocb_comm_cfg, 24); index += 24;
-        mb_put_binary_float(MB_YES, calibration_v1s2->az_ao_deg_to_volt,
+        mb_put_binary_float(MB_YES, calibration_v1s3->pb_humidity_limit,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->az_ai_neg_v_to_deg,
+        mb_put_binary_float(MB_YES,
+          calibration_v1s3->dig_temperature_limit_c,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->az_ai_pos_v_to_deg,
+        /*memcpy((void **)&buffer[index], calibration_v1s3->l_d_cable_set, 24); index +=24; */
+        memcpy((void **)&buffer[index], calibration_v1s3->ocb_comm_port, 24); index += 24;
+        memcpy((void **)&buffer[index], calibration_v1s3->ocb_comm_cfg, 24); index += 24;
+        mb_put_binary_float(MB_YES, calibration_v1s3->az_ao_deg_to_volt,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->t1_air, (void **)&buffer[index]);
+        mb_put_binary_float(MB_YES, calibration_v1s3->az_ai_neg_v_to_deg,
+          (void **)&buffer[index]); index += 4;
+        mb_put_binary_float(MB_YES, calibration_v1s3->az_ai_pos_v_to_deg,
+          (void **)&buffer[index]); index += 4;
+        mb_put_binary_float(MB_YES, calibration_v1s3->t1_air, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->ff_air, (void **)&buffer[index]);
+        mb_put_binary_float(MB_YES, calibration_v1s3->ff_air, (void **)&buffer[index]);
         index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->t1_water_g4000,
+          calibration_v1s3->t1_water_g4000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ff_water_g4000,
+          calibration_v1s3->ff_water_g4000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->t1_water_g3000,
+          calibration_v1s3->t1_water_g3000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ff_water_g3000,
+          calibration_v1s3->ff_water_g3000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->t1_water_g2000,
+          calibration_v1s3->t1_water_g2000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ff_water_g2000,
+          calibration_v1s3->ff_water_g2000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->t1_water_g1000,
+          calibration_v1s3->t1_water_g1000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ff_water_g1000,
+          calibration_v1s3->ff_water_g1000,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->t1_water_g400,
+        mb_put_binary_float(MB_YES, calibration_v1s3->t1_water_g400,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->ff_water_g400,
+        mb_put_binary_float(MB_YES, calibration_v1s3->ff_water_g400,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->t1_water_g300,
+        mb_put_binary_float(MB_YES, calibration_v1s3->t1_water_g300,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->ff_water_g300,
+        mb_put_binary_float(MB_YES, calibration_v1s3->ff_water_g300,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_double(MB_YES, calibration_v1s2->temp_comp_poly2,
+        mb_put_binary_double(MB_YES, calibration_v1s3->temp_comp_poly2,
           (void **)&buffer[index]); index += 8;
-        mb_put_binary_double(MB_YES, calibration_v1s2->temp_comp_poly1,
+        mb_put_binary_double(MB_YES, calibration_v1s3->temp_comp_poly1,
           (void **)&buffer[index]); index += 8;
-        mb_put_binary_double(MB_YES, calibration_v1s2->temp_comp_poly,
+        mb_put_binary_double(MB_YES, calibration_v1s3->temp_comp_poly,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->laser_start_time_sec,
+          calibration_v1s3->laser_start_time_sec,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->scanner_shift_cts,
-          (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES,
-          calibration_v1s2->factory_scanner_lrg_deg,
+        mb_put_binary_float(MB_YES, calibration_v1s3->scanner_shift_cts,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->factory_scanner_med_deg,
+          calibration_v1s3->factory_scanner_lrg_deg,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->factory_scanner_sml_deg,
+          calibration_v1s3->factory_scanner_med_deg,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->el_angle_fixed_deg,
+        mb_put_binary_float(MB_YES,
+          calibration_v1s3->factory_scanner_sml_deg,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->zda_to_pps_max_msec,
+        mb_put_binary_float(MB_YES, calibration_v1s3->el_angle_fixed_deg,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->zda_udp_port, (void **)&buffer[index]);
+        mb_put_binary_int(MB_YES, calibration_v1s3->zda_to_pps_max_msec,
+          (void **)&buffer[index]); index += 4;
+        mb_put_binary_int(MB_YES, calibration_v1s3->zda_udp_port, (void **)&buffer[index]);
         index += 4;
-        buffer[index] = calibration_v1s2->show_time_sync_errors; index += 1;
+        buffer[index] = calibration_v1s3->show_time_sync_errors; index += 1;
         mb_put_binary_int(MB_YES,
-          calibration_v1s2->min_time_diff_update_msec,
+          calibration_v1s3->min_time_diff_update_msec,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->ctd_tcp_port, (void **)&buffer[index]);
+        mb_put_binary_int(MB_YES, calibration_v1s3->ctd_tcp_port, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_double(MB_YES, calibration_v1s2->trigger_level_volt,
+        mb_put_binary_double(MB_YES, calibration_v1s3->trigger_level_volt,
           (void **)&buffer[index]); index += 8;
-        mb_put_binary_int(MB_YES, calibration_v1s2->mf_t0_position,
+        mb_put_binary_int(MB_YES, calibration_v1s3->mf_t0_position,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->mf_start_proc, (void **)&buffer[index]);
+        mb_put_binary_int(MB_YES, calibration_v1s3->mf_start_proc, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->dig_ref_pos_t0_cnts,
+        mb_put_binary_int(MB_YES, calibration_v1s3->dig_ref_pos_t0_cnts,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->dummy, (void **)&buffer[index]);
+        mb_put_binary_int(MB_YES, calibration_v1s3->dummy, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->t0_min_height_raw_cts,
+        mb_put_binary_int(MB_YES, calibration_v1s3->t0_min_height_raw_cts,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_0,
+          calibration_v1s3->scanner_neg_polynom_0,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_1,
+          calibration_v1s3->scanner_neg_polynom_1,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_2,
+          calibration_v1s3->scanner_neg_polynom_2,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_3,
+          calibration_v1s3->scanner_neg_polynom_3,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_4,
+          calibration_v1s3->scanner_neg_polynom_4,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_5,
+          calibration_v1s3->scanner_neg_polynom_5,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_0,
+          calibration_v1s3->scanner_pos_polynom_0,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_1,
+          calibration_v1s3->scanner_pos_polynom_1,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_2,
+          calibration_v1s3->scanner_pos_polynom_2,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_3,
+          calibration_v1s3->scanner_pos_polynom_3,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_4,
+          calibration_v1s3->scanner_pos_polynom_4,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_5,
+          calibration_v1s3->scanner_pos_polynom_5,
           (void **)&buffer[index]); index += 8;
-        memcpy((void **)&buffer[index], calibration_v1s2->unused, 43); index +=43;
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration_v1s2 a: %zu\n", */
+        mb_put_binary_short(MB_YES, calibration_v1s3->trigger_coupling_type,
+        (void **)&buffer[index]); index += 2;
+        mb_put_binary_float(MB_YES, calibration_v1s3->digitizer_voltage_range_v,
+        (void **)&buffer[index]); index += 4;
+        mb_put_binary_int(MB_YES, calibration_v1s3->prf_tune_wait_ms,
+        (void **)&buffer[index]); index += 4;
+        memcpy((void **)&buffer[index], calibration_v1s3->unused, 33); index +=33;
+        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration_v1s3 a: %zu\n", */
         /*__FILE__, __FUNCTION__, __LINE__, index); */
 
         /* put calibration information for head b */
-        calibration_v1s2 = &store->calibration_v1s2_b;
-        memcpy((void **)&buffer[index], calibration_v1s2->cfg_path, 64); index +=64;
-        mb_put_binary_int(MB_YES, calibration_v1s2->laser_head_no, (void **)&buffer[index]);
+        calibration_v1s3 = &store->calibration_v1s3_b;
+        memcpy((void **)&buffer[index], calibration_v1s3->cfg_path, 64); index +=64;
+        mb_put_binary_int(MB_YES, calibration_v1s3->laser_head_no, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->process_for_air,
+        mb_put_binary_int(MB_YES, calibration_v1s3->process_for_air,
           (void **)&buffer[index]); index += 4;
-        buffer[index] = calibration_v1s2->temperature_compensation; index += 1;
-        buffer[index] = calibration_v1s2->emergency_shutdown; index += 1;
+        buffer[index] = calibration_v1s3->temperature_compensation; index += 1;
+        buffer[index] = calibration_v1s3->emergency_shutdown; index += 1;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ocb_temperature_limit_c,
+          calibration_v1s3->ocb_temperature_limit_c,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->ocb_humidity_limit,
-          (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES,
-          calibration_v1s2->pb_temperature_limit_1_c,
+        mb_put_binary_float(MB_YES, calibration_v1s3->ocb_humidity_limit,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->pb_temperature_limit_2_c,
-          (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->pb_humidity_limit,
+          calibration_v1s3->pb_temperature_limit_1_c,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->dig_temperature_limit_c,
+          calibration_v1s3->pb_temperature_limit_2_c,
           (void **)&buffer[index]); index += 4;
-        /*memcpy((void **)&buffer[index], calibration_v1s2->l_d_cable_set, 24); index +=24; */
-        memcpy((void **)&buffer[index], calibration_v1s2->ocb_comm_port, 24); index += 24;
-        memcpy((void **)&buffer[index], calibration_v1s2->ocb_comm_cfg, 24); index += 24;
-        mb_put_binary_float(MB_YES, calibration_v1s2->az_ao_deg_to_volt,
+        mb_put_binary_float(MB_YES, calibration_v1s3->pb_humidity_limit,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->az_ai_neg_v_to_deg,
+        mb_put_binary_float(MB_YES,
+          calibration_v1s3->dig_temperature_limit_c,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->az_ai_pos_v_to_deg,
+        /*memcpy((void **)&buffer[index], calibration_v1s3->l_d_cable_set, 24); index +=24; */
+        memcpy((void **)&buffer[index], calibration_v1s3->ocb_comm_port, 24); index += 24;
+        memcpy((void **)&buffer[index], calibration_v1s3->ocb_comm_cfg, 24); index += 24;
+        mb_put_binary_float(MB_YES, calibration_v1s3->az_ao_deg_to_volt,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->t1_air, (void **)&buffer[index]);
+        mb_put_binary_float(MB_YES, calibration_v1s3->az_ai_neg_v_to_deg,
+          (void **)&buffer[index]); index += 4;
+        mb_put_binary_float(MB_YES, calibration_v1s3->az_ai_pos_v_to_deg,
+          (void **)&buffer[index]); index += 4;
+        mb_put_binary_float(MB_YES, calibration_v1s3->t1_air, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->ff_air, (void **)&buffer[index]);
+        mb_put_binary_float(MB_YES, calibration_v1s3->ff_air, (void **)&buffer[index]);
         index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->t1_water_g4000,
+          calibration_v1s3->t1_water_g4000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ff_water_g4000,
+          calibration_v1s3->ff_water_g4000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->t1_water_g3000,
+          calibration_v1s3->t1_water_g3000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ff_water_g3000,
+          calibration_v1s3->ff_water_g3000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->t1_water_g2000,
+          calibration_v1s3->t1_water_g2000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ff_water_g2000,
+          calibration_v1s3->ff_water_g2000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->t1_water_g1000,
+          calibration_v1s3->t1_water_g1000,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->ff_water_g1000,
+          calibration_v1s3->ff_water_g1000,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->t1_water_g400,
+        mb_put_binary_float(MB_YES, calibration_v1s3->t1_water_g400,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->ff_water_g400,
+        mb_put_binary_float(MB_YES, calibration_v1s3->ff_water_g400,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->t1_water_g300,
+        mb_put_binary_float(MB_YES, calibration_v1s3->t1_water_g300,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->ff_water_g300,
+        mb_put_binary_float(MB_YES, calibration_v1s3->ff_water_g300,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_double(MB_YES, calibration_v1s2->temp_comp_poly2,
+        mb_put_binary_double(MB_YES, calibration_v1s3->temp_comp_poly2,
           (void **)&buffer[index]); index += 8;
-        mb_put_binary_double(MB_YES, calibration_v1s2->temp_comp_poly1,
+        mb_put_binary_double(MB_YES, calibration_v1s3->temp_comp_poly1,
           (void **)&buffer[index]); index += 8;
-        mb_put_binary_double(MB_YES, calibration_v1s2->temp_comp_poly,
+        mb_put_binary_double(MB_YES, calibration_v1s3->temp_comp_poly,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->laser_start_time_sec,
+          calibration_v1s3->laser_start_time_sec,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->scanner_shift_cts,
-          (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES,
-          calibration_v1s2->factory_scanner_lrg_deg,
+        mb_put_binary_float(MB_YES, calibration_v1s3->scanner_shift_cts,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->factory_scanner_med_deg,
+          calibration_v1s3->factory_scanner_lrg_deg,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_float(MB_YES,
-          calibration_v1s2->factory_scanner_sml_deg,
+          calibration_v1s3->factory_scanner_med_deg,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_float(MB_YES, calibration_v1s2->el_angle_fixed_deg,
+        mb_put_binary_float(MB_YES,
+          calibration_v1s3->factory_scanner_sml_deg,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->zda_to_pps_max_msec,
+        mb_put_binary_float(MB_YES, calibration_v1s3->el_angle_fixed_deg,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->zda_udp_port, (void **)&buffer[index]);
+        mb_put_binary_int(MB_YES, calibration_v1s3->zda_to_pps_max_msec,
+          (void **)&buffer[index]); index += 4;
+        mb_put_binary_int(MB_YES, calibration_v1s3->zda_udp_port, (void **)&buffer[index]);
         index += 4;
-        buffer[index] = calibration_v1s2->show_time_sync_errors; index += 1;
+        buffer[index] = calibration_v1s3->show_time_sync_errors; index += 1;
         mb_put_binary_int(MB_YES,
-          calibration_v1s2->min_time_diff_update_msec,
+          calibration_v1s3->min_time_diff_update_msec,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->ctd_tcp_port, (void **)&buffer[index]);
+        mb_put_binary_int(MB_YES, calibration_v1s3->ctd_tcp_port, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_double(MB_YES, calibration_v1s2->trigger_level_volt,
+        mb_put_binary_double(MB_YES, calibration_v1s3->trigger_level_volt,
           (void **)&buffer[index]); index += 8;
-        mb_put_binary_int(MB_YES, calibration_v1s2->mf_t0_position,
+        mb_put_binary_int(MB_YES, calibration_v1s3->mf_t0_position,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->mf_start_proc, (void **)&buffer[index]);
+        mb_put_binary_int(MB_YES, calibration_v1s3->mf_start_proc, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->dig_ref_pos_t0_cnts,
+        mb_put_binary_int(MB_YES, calibration_v1s3->dig_ref_pos_t0_cnts,
           (void **)&buffer[index]); index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->dummy, (void **)&buffer[index]);
+        mb_put_binary_int(MB_YES, calibration_v1s3->dummy, (void **)&buffer[index]);
         index += 4;
-        mb_put_binary_int(MB_YES, calibration_v1s2->t0_min_height_raw_cts,
+        mb_put_binary_int(MB_YES, calibration_v1s3->t0_min_height_raw_cts,
           (void **)&buffer[index]); index += 4;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_0,
+          calibration_v1s3->scanner_neg_polynom_0,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_1,
+          calibration_v1s3->scanner_neg_polynom_1,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_2,
+          calibration_v1s3->scanner_neg_polynom_2,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_3,
+          calibration_v1s3->scanner_neg_polynom_3,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_4,
+          calibration_v1s3->scanner_neg_polynom_4,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_neg_polynom_5,
+          calibration_v1s3->scanner_neg_polynom_5,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_0,
+          calibration_v1s3->scanner_pos_polynom_0,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_1,
+          calibration_v1s3->scanner_pos_polynom_1,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_2,
+          calibration_v1s3->scanner_pos_polynom_2,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_3,
+          calibration_v1s3->scanner_pos_polynom_3,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_4,
+          calibration_v1s3->scanner_pos_polynom_4,
           (void **)&buffer[index]); index += 8;
         mb_put_binary_double(MB_YES,
-          calibration_v1s2->scanner_pos_polynom_5,
+          calibration_v1s3->scanner_pos_polynom_5,
           (void **)&buffer[index]); index += 8;
-        memcpy((void **)&buffer[index], calibration_v1s2->unused, 43); index +=43;
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration_v1s2 b: %zu\n", */
+        mb_put_binary_short(MB_YES, calibration_v1s3->trigger_coupling_type,
+        (void **)&buffer[index]); index += 2;
+        mb_put_binary_float(MB_YES, calibration_v1s3->digitizer_voltage_range_v,
+        (void **)&buffer[index]); index += 4;
+        mb_put_binary_int(MB_YES, calibration_v1s3->prf_tune_wait_ms,
+        (void **)&buffer[index]); index += 4;
+        memcpy((void **)&buffer[index], calibration_v1s3->unused, 33); index +=33;
+        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration_v1s3 b: %zu\n", */
         /*__FILE__, __FUNCTION__, __LINE__, index); */
         }
 
