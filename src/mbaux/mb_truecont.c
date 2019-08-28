@@ -36,7 +36,6 @@
 const double EPS = 0.0001;
 #define NUM_BEAMS_ALLOC_MIN 16
 
-/* local function prototypes */
 int mb_tcontour(int verbose, struct swath *data, int *error);
 int mb_ocontour(int verbose, struct swath *data, int *error);
 int get_start_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *closed);
@@ -994,7 +993,6 @@ int dump_contour(struct swath *data, double value) {
 	/* plot the labels */
 	char label[25];
 	sprintf(label, "  %d", (int)value);
-	const int len = strlen(label);
 	for (int i = 0; i < data->nlabel; i++) {
 		if (data->justify[i] == 1) {
 			double mtodeglon;
