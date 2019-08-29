@@ -112,23 +112,6 @@
 int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri, int *iv1, int *iv2, int *iv3, int *ct1, int *ct2,
               int *ct3, int *cs1, int *cs2, int *cs3, double *v1, double *v2, double *v3, int *istack, int *kv1, int *kv2,
               int *error) {
-	int status = MB_SUCCESS;
-	int itemp[2][3];
-	int addside;
-	int n1;
-	double xmin, xmax, ymin, ymax;
-	double cx, cy, crsq, rad, rsq;
-	int maxn;
-	int isp, id;
-	int nuc, km, jt, kt, i1, i2;
-	int l1, l2;
-	int *ivs1, *ivs2;
-	double denom, s;
-	double xproduct;
-	int notfound;
-	int k;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -160,6 +143,8 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		}
 	}
 
+	int itemp[2][3];
+
 	/* define itemp */
 	itemp[0][0] = 1;
 	itemp[1][0] = 2;
@@ -169,15 +154,15 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	itemp[1][2] = 3;
 
 	/* initialize the triangle stack */
-	n1 = 2 * npts + 3;
+	int n1 = 2 * npts + 3;
 	for (int i = 0; i < n1; i++)
 		istack[i] = i;
 
 	/* determine the extremes of the data */
-	xmin = p1[0];
-	xmax = p1[0];
-	ymin = p2[0];
-	ymax = p2[0];
+	double xmin = p1[0];
+	double xmax = p1[0];
+	double ymin = p2[0];
+	double ymax = p2[0];
 	for (int i = 0; i < npts; i++) {
 		xmin = MIN(xmin, p1[i]);
 		xmax = MAX(xmax, p1[i]);
@@ -187,9 +172,9 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 
 	/* enclose the data region in an equilateral triangle
 	    - put circumcenter and radius-squared into the list */
-	cx = xmax - xmin;
-	cy = ymax - ymin;
-	crsq = 1.2 * (cx * cx + cy * cy);
+	double cx = xmax - xmin;
+	double cy = ymax - ymin;
+	const double crsq = 1.2 * (cx * cx + cy * cy);
 	cx = 0.5 * (xmin + xmax);
 	cy = 0.5 * (ymin + ymax);
 	v1[0] = cx;
@@ -197,8 +182,8 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	v3[0] = crsq;
 
 	/* put vertex coordinates in the end of the p array */
-	rad = sqrt(v3[0]);
-	maxn = npts + 3;
+	const double rad = sqrt(v3[0]);
+	/* const int maxn = npts + 3; */
 	for (int i = 0; i < 3; i++) {
 		p1[npts + 2 - i] = v1[0] + rad * cos(2.0944 * (i + 1));
 		p2[npts + 2 - i] = v2[0] + rad * sin(2.0944 * (i + 1));
@@ -208,20 +193,23 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	iv3[0] = npts;
 
 	/* scan through the data backwards */
-	isp = 1;
-	id = 1;
-	for (nuc = npts - 1; nuc > -1; nuc--) {
-		km = 0;
+	int isp = 1;
+	int id = 1;
+
+	int status = MB_SUCCESS;
+
+	for (int nuc = npts - 1; nuc > -1; nuc--) {
+		int km = 0;
 		/*fprintf(stderr,"\nnuc:%d\n",nuc);
 		for (jt=0;jt<isp;jt++)
 		fprintf(stderr,"jt:%d  %d %d %d\n",jt,iv1[jt],iv2[jt],iv3[jt]);*/
 
 		/* loop through the established 3-tuples */
-		for (jt = 0; jt < isp; jt++) {
-			i1 = iv3[jt];
+		for (int jt = 0; jt < isp; jt++) {
+			const int i1 = iv3[jt];
 			/* calculate the distance of the
 			point from the jt circumcenter */
-			rsq = (p1[nuc] - p1[i1]) * (p1[nuc] + p1[i1] - 2 * v1[jt]) + (p2[nuc] - p2[i1]) * (p2[nuc] + p2[i1] - 2 * v2[jt]);
+			const double rsq = (p1[nuc] - p1[i1]) * (p1[nuc] + p1[i1] - 2 * v1[jt]) + (p2[nuc] - p2[i1]) * (p2[nuc] + p2[i1] - 2 * v2[jt]);
 
 			/* If the point lies within circumcircle of triangle
 			(3-tuple) jt then delete this triangle. Save the
@@ -247,8 +235,10 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 				/* add edges to kv but delete if already present */
 				for (int i = 0; i < 3; i++) {
 					/* cycle through the edges of the triangle */
-					l1 = itemp[0][i];
-					l2 = itemp[1][i];
+					const int l1 = itemp[0][i];
+					const int l2 = itemp[1][i];
+					int *ivs1 = NULL;
+					int *ivs2 = NULL;
 					if (l1 == 1)
 						ivs1 = iv1;
 					if (l1 == 2)
@@ -261,7 +251,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 						ivs2 = iv2;
 					if (l2 == 3)
 						ivs2 = iv3;
-					addside = MB_YES;
+					int addside = MB_YES;
 
 					/* Check if the side is already stored in kv. If it
 					    is then Side common to more than one of the
@@ -271,7 +261,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 						if (ivs1[jt] == kv1[j] && ivs2[jt] == kv2[j]) {
 							addside = MB_NO;
 							km--;
-							for (k = j; k < km; k++) {
+							for (int k = j; k < km; k++) {
 								kv1[k] = kv1[k + 1];
 								kv2[k] = kv2[k + 1];
 							}
@@ -299,17 +289,18 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		/* form new 3-tuples */
 		for (int i = 0; i < km; i++) {
 			/* pop the triangle index from the stack */
-			kt = istack[id];
+			int kt = istack[id];
 			id++;
 
 			/* calculate the circumcircle and radius squared */
-			i1 = kv1[i];
-			i2 = kv2[i];
-			denom = ((p1[i1] - p1[nuc]) * (p2[i2] - p2[nuc]) - (p2[i1] - p2[nuc]) * (p1[i2] - p1[nuc]));
+			const int i1 = kv1[i];
+			const int i2 = kv2[i];
+			const double denom = ((p1[i1] - p1[nuc]) * (p2[i2] - p2[nuc]) - (p2[i1] - p2[nuc]) * (p1[i2] - p1[nuc]));
 
 			/* check if the three points form a true triangle */
 			if (denom != 0.0) {
-				s = ((p1[i1] - p1[nuc]) * (p1[i1] - p1[i2]) + (p2[i1] - p2[nuc]) * (p2[i1] - p2[i2])) / denom;
+				const double s =
+				    ((p1[i1] - p1[nuc]) * (p1[i1] - p1[i2]) + (p2[i1] - p2[nuc]) * (p2[i1] - p2[i2])) / denom;
 				v1[kt] = 0.5 * (p1[i2] + p1[nuc] + s * (p2[i2] - p2[nuc]));
 				v2[kt] = 0.5 * (p2[i2] + p2[nuc] - s * (p1[i2] - p1[nuc]));
 			}
@@ -367,7 +358,8 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 
 	/* make sure all triangles are defined clockwise */
 	for (int i = 0; i < *ntri; i++) {
-		xproduct = -(p1[iv2[i]] - p1[iv1[i]]) * (p2[iv3[i]] - p2[iv2[i]]) + (p1[iv3[i]] - p1[iv2[i]]) * (p2[iv2[i]] - p2[iv1[i]]);
+		const double xproduct =
+		    -(p1[iv2[i]] - p1[iv1[i]]) * (p2[iv3[i]] - p2[iv2[i]]) + (p1[iv3[i]] - p1[iv2[i]]) * (p2[iv2[i]] - p2[iv1[i]]);
 		if (xproduct < 0.0) {
 			int j = iv2[i];
 			iv2[i] = iv3[i];
@@ -387,7 +379,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	for (int i = 0; i < *ntri; i++) {
 		/* check side 1 of triangle i */
 		if (ct1[i] == -1) {
-			notfound = MB_YES;
+			int notfound = MB_YES;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv1[i] == iv2[j] && iv2[i] == iv1[j]) {
 					ct1[i] = j;
@@ -414,7 +406,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		}
 		/* check side 2 of triangle i */
 		if (ct2[i] == -1) {
-			notfound = MB_YES;
+			int notfound = MB_YES;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv2[i] == iv2[j] && iv3[i] == iv1[j]) {
 					ct2[i] = j;
@@ -441,7 +433,7 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		}
 		/* check side 3 of triangle i */
 		if (ct3[i] == -1) {
-			notfound = MB_YES;
+			int notfound = MB_YES;
 			for (int j = 0; notfound && j < *ntri; j++) {
 				if (notfound && iv3[i] == iv2[j] && iv1[i] == iv1[j]) {
 					ct3[i] = j;
@@ -468,7 +460,6 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
