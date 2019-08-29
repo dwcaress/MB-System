@@ -18,7 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April, 1994
- *
  */
 
 #include <math.h>
@@ -275,14 +274,14 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 /* 	function mb_contour_deall deallocates the memory required to
     contour multibeam bathymetry data. */
 int mb_contour_deall(int verbose, struct swath *data, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* deallocate memory for bathymetry data */
 	for (int i = 0; i < data->npings_max; i++) {
@@ -339,7 +338,6 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
 	/* deallocate memory for swath structure */
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -394,7 +392,6 @@ int get_start_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *
 /*--------------------------------------------------------------------------*/
 /* 	function get_next_tri finds next contour component if it exists */
 int get_next_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *closed, int *itristart, int *isidestart) {
-
 	/* check if contour ends where it began */
 	if (*closed && data->ct[*iside2][*itri] == *itristart && data->cs[*iside2][*itri] == *isidestart)
 		return (MB_NO);
@@ -454,13 +451,13 @@ int get_next_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *c
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_pos_tri finds position of contour crossing point */
-int get_pos_tri(struct swath *data, double eps, int itri, int iside, double value, double *x, double *y) {
-	int v1 = iside;
+int get_pos_tri(const struct swath *data, double eps, int itri, int iside, double value, double *x, double *y) {
+	const int v1 = iside;
 	int v2 = iside + 1;
 	if (v2 == 3)
 		v2 = 0;
-	int pt1 = data->iv[v1][itri];
-	int pt2 = data->iv[v2][itri];
+	const int pt1 = data->iv[v1][itri];
+	const int pt2 = data->iv[v2][itri];
 
         double factor;
 	if (fabs(data->z[pt2] - data->z[pt1]) > eps)
@@ -474,7 +471,7 @@ int get_pos_tri(struct swath *data, double eps, int itri, int iside, double valu
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_azimuth_tri gets azimuth across track for a label */
-int get_azimuth_tri(struct swath *data, int itri, int iside, double *angle) {
+int get_azimuth_tri(const struct swath *data, int itri, int iside, double *angle) {
 	*angle = -data->pings[data->pingid[data->iv[iside][itri]]].heading;
 	if (*angle > 180.0)
 		*angle = *angle - 360.0;
@@ -488,17 +485,17 @@ int get_azimuth_tri(struct swath *data, int itri, int iside, double *angle) {
  *	labels. */
 int check_label(struct swath *data, int nlab) {
 #define MAXHIS 30
-	static double xlabel_his[MAXHIS], ylabel_his[MAXHIS];
+	static double xlabel_his[MAXHIS];
+	static double ylabel_his[MAXHIS];
 	static int nlabel_his = 0;
-	double dx, dy, rr;
 
 	int good = 1;
 	int ilab = 0;
 	double rad_label_his = data->label_spacing;
 	while (good && ilab < nlabel_his) {
-		dx = xlabel_his[ilab] - data->xlabel[nlab];
-		dy = ylabel_his[ilab] - data->ylabel[nlab];
-		rr = sqrt(dx * dx + dy * dy);
+		const double dx = xlabel_his[ilab] - data->xlabel[nlab];
+		const double dy = ylabel_his[ilab] - data->ylabel[nlab];
+		const double rr = sqrt(dx * dx + dy * dy);
 		if (rr < rad_label_his)
 			good = 0;
 		ilab++;
@@ -598,8 +595,6 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 		}
 	}
 
-	int status = MB_SUCCESS;
-
 	/* count number of points and verify that enough memory is allocated */
 	int npt_cnt = 0;
 	for (int i = 0; i < data->npings; i++) {
@@ -609,6 +604,8 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 				npt_cnt++;
 		}
 	}
+
+	int status = MB_SUCCESS;
 	const int ntri_cnt = 3 * npt_cnt + 1;
 	if (npt_cnt > data->npts_alloc) {
 		data->npts_alloc = npt_cnt;
@@ -961,7 +958,7 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 /*--------------------------------------------------------------------------*/
 /* 	function get_start_old finds next contour starting point.
  *	the borders are searched first and then the interior */
-int get_start_old(struct swath *data, int *k, int *i, int *j, int *d, int *closed) {
+int get_start_old(const struct swath *data, int *k, int *i, int *j, int *d, int *closed) {
 	/* search edges */
 	*closed = 0;
 
@@ -1032,10 +1029,10 @@ int get_start_old(struct swath *data, int *k, int *i, int *j, int *d, int *close
 /* 	function get_next_old finds next contour component if it exists */
 int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd, int k, int i, int j, int d, int kbeg, int ibeg, int jbeg,
                  int dbeg, int *closed) {
-	static int ioff[3][2][2] = {{{0, -1}, {1, 0}}, {{1, -1}, {0, 0}}, {{0, -1}, {0, 1}}};
-	static int joff[3][2][2] = {{{0, 1}, {0, -1}}, {{0, 0}, {1, -1}}, {{1, 0}, {0, -1}}};
-	static int koff[3][2][2] = {{{1, 1}, {0, 0}}, {{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}};
-	static int doff[3][2][2] = {{{1, 0}, {0, 1}}, {{0, 1}, {0, 1}}, {{0, 1}, {1, 0}}};
+	static const int ioff[3][2][2] = {{{0, -1}, {1, 0}}, {{1, -1}, {0, 0}}, {{0, -1}, {0, 1}}};
+	static const int joff[3][2][2] = {{{0, 1}, {0, -1}}, {{0, 0}, {1, -1}}, {{1, 0}, {0, -1}}};
+	static const int koff[3][2][2] = {{{1, 1}, {0, 0}}, {{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}};
+	static const int doff[3][2][2] = {{{1, 0}, {0, 1}}, {{0, 1}, {0, 1}}, {{0, 1}, {1, 0}}};
 	int kt[3];
 	int it[3];
 	int jt[3];
@@ -1119,7 +1116,7 @@ int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd, int k, 
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_pos_old finds position of contour crossing point */
-int get_pos_old(struct swath *data, double eps, double *x, double *y, int k, int i, int j, double value) {
+int get_pos_old(const struct swath *data, double eps, double *x, double *y, int k, int i, int j, double value) {
 
 	/* get grid positions and values */
 	const double x1 = data->pings[i].bathlon[j];
@@ -1156,7 +1153,7 @@ int get_pos_old(struct swath *data, double eps, double *x, double *y, int k, int
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_hand_old finds handedness of contour */
-int get_hand_old(struct swath *data, int *hand, int k, int i, int j, int d) {
+int get_hand_old(const struct swath *data, int *hand, int k, int i, int j, int d) {
 	if (k == 0 && d == 0) {
 		if (data->pings[i].bath[j] > data->pings[i].bath[j + 1])
 			*hand = 1;
@@ -1185,7 +1182,7 @@ int get_hand_old(struct swath *data, int *hand, int k, int i, int j, int d) {
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_azimuth_old gets azimuth across shiptrack at ping iping */
-int get_azimuth_old(struct swath *data, int iping, double *angle) {
+int get_azimuth_old(const struct swath *data, int iping, double *angle) {
 
 	*angle = -data->pings[iping].heading;
 	if (*angle > 180.0)
