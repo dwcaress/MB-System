@@ -28,6 +28,13 @@
 #ifndef MB_AUX_H_
 #define MB_AUX_H_
 
+/* Avoid conflict with GDAL */
+#undef PACKAGE_BUGREPORT
+#undef PACKAGE_NAME
+#undef PACKAGE_STRING
+#undef PACKAGE_TARNAME
+#undef PACKAGE_URL
+#undef PACKAGE_VERSION
 #include "mb_io.h"
 
 /* contour algorithm defines */
@@ -214,13 +221,13 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
                      char *titl, char *projection, int argc, char **argv, int *error);
 
 /* mb_cheb function prototypes */
-void lsqup(double *a, int *ia, int *nia, int nnz, int nc, int nr, double *x, double *dx, double *d, int nfix, int *ifix,
-           double *fix, int ncycle, double *sigma);
+void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, double *x, double *dx, const double *d, int nfix, const int *ifix,
+           const double *fix, int ncycle, const double *sigma);
 void chebyu(double *sigma, int ncycle, double shi, double slo, double *work);
 void splits(double *x, double *t, int n);
 double errlim(double *sigma, int ncycle, double shi, double slo);
 double errrat(double x1, double x2, double *sigma, int ncycle);
-void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
+void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
             double *w, double *smax, double *err, double *sup);
 
 /* mb_topogrid function prototypes */

@@ -62,15 +62,6 @@
 #include "mb_aux.h"
 #include "mb_define.h"
 
-void lsqup(double *a, int *ia, int *nia, int nnz, int nc, int nr, double *x, double *dx, double *d, int nfix, int *ifix,
-           double *fix, int ncycle, double *sigma);
-void chebyu(double *sigma, int ncycle, double shi, double slo, double *work);
-void splits(double *x, double *t, int n);
-double errlim(double *sigma, int ncycle, double shi, double slo);
-double errrat(double x1, double x2, double *sigma, int ncycle);
-void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
-            double *w, double *smax, double *err, double *sup);
-
 /*----------------------------------------------------------------------
  *
  *     least squares solution using richardson's algorithm
@@ -91,8 +82,8 @@ void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int
  *          minimize :  || a*x - d || = (a*x - d) * (a*x -d)
  *
  *----------------------------------------------------------------------*/
-void lsqup(double *a, int *ia, int *nia, int nnz, int nc, int nr, double *x, double *dx, double *d, int nfix, int *ifix,
-           double *fix, int ncycle, double *sigma)
+void lsqup(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, double *x, double *dx, const double *d, int nfix, const int *ifix,
+           const double *fix, int ncycle, const double *sigma)
 /*----------------------------------------------------------------------
  * -------
  *  input
@@ -301,7 +292,7 @@ double errrat(double x1, double x2, double *sigma, int ncycle)
  *                            ..... allen h. olson 10-4-85.
  *                                  university of california, san diego
  *----------------------------------------------------------------------*/
-void lspeig(double *a, int *ia, int *nia, int nnz, int nc, int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
+void lspeig(const double *a, const int *ia, const int *nia, int nnz, int nc, int nr, int ncyc, int *nsig, double *x, double *dx, double *sigma,
             double *w, double *smax, double *err, double *sup)
 /*-------
  * input
