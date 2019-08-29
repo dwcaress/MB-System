@@ -115,7 +115,7 @@
 
 /// @def TRNC_VERBOSE_DFL
 /// @brief default debug level
-#define TRNC_VERBOSE_DFL 0
+#define TRNC_VERBOSE_DFL 1
 /// @def TRNC_HOST_DFL
 /// @brief default server host
 #define TRNC_HOST_DFL "localhost"
@@ -124,7 +124,7 @@
 #define TRNC_PORT_DFL 27000
 /// @def TRNC_BLOCK_DFL
 /// @brief default socket blocking
-#define TRNC_BLOCK_DFL 0
+#define TRNC_BLOCK_DFL 1
 /// @def TRNC_CYCLES_DFL
 /// @brief default cycles
 #define TRNC_CYCLES_DFL (-1)
@@ -372,6 +372,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             mmd_channel_en(MOD_MBTRN,MM_DEBUG);
             break;
         default:
+            mmd_channel_en(MOD_TRNC,MM_DEBUG);
             break;
     }
     
@@ -555,7 +556,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             
             // action: show message
             if (action == AT_SHOW_MSG) {
-                PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
+                PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V1|TRNC_V2,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
                         psounding->ts,
                         psounding->ping_number,
                         psounding->lat,
@@ -566,7 +567,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                 uint32_t j=0;
                 struct mbtrn_beam_data *bd=psounding->beams;
                 for (j=0; j<psounding->nbeams; j++,bd++){
-                    PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
+                    PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V2,(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
                             (uint32_t)bd->beam_num,
                             bd->rhox,
                             bd->rhoy,
