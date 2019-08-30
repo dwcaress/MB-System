@@ -93,8 +93,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April, 1994
- *
- *
  */
 
 #include <math.h>
@@ -144,8 +142,6 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 	}
 
 	int itemp[2][3];
-
-	/* define itemp */
 	itemp[0][0] = 1;
 	itemp[1][0] = 2;
 	itemp[0][1] = 1;
@@ -200,9 +196,6 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 
 	for (int nuc = npts - 1; nuc > -1; nuc--) {
 		int km = 0;
-		/*fprintf(stderr,"\nnuc:%d\n",nuc);
-		for (jt=0;jt<isp;jt++)
-		fprintf(stderr,"jt:%d  %d %d %d\n",jt,iv1[jt],iv2[jt],iv3[jt]);*/
 
 		/* loop through the established 3-tuples */
 		for (int jt = 0; jt < isp; jt++) {
@@ -217,20 +210,10 @@ int mb_delaun(int verbose, int npts, double *p1, double *p2, int *ed, int *ntri,
 			triangle for which the point lies within the circumcircle
 			Thus "interior" edges are eliminated prior to
 			construction of the new triangles (3 tuples). */
-			/*if (rsq <= 0.0 && !(rsq < 0.0))
-			{
-			fprintf(stderr,"NOTICE: rsq:%g\n",rsq);
-			fprintf(stderr,"nuc:%d p1:%f p2:%f  i1:%d p1:%f p2:%f  jt:%d v1:%f v2:%f\n",
-			nuc,p1[nuc],p2[nuc],i1,p1[i1],p2[i1],jt,v1[jt],v2[jt]);
-			fprintf(stderr,"jt:%d iv1:%d %f %f\n",jt,iv1[jt],p1[iv1[jt]],p2[iv1[jt]]);
-			fprintf(stderr,"jt:%d iv2:%d %f %f\n",jt,iv2[jt],p1[iv2[jt]],p2[iv2[jt]]);
-			fprintf(stderr,"jt:%d iv3:%d %f %f\n",jt,iv3[jt],p1[iv3[jt]],p2[iv3[jt]]);
-			}*/
 			if (rsq <= 0.0) {
 				/* triangle needs replacing => push the index on the stack */
 				id = id - 1;
 				istack[id] = jt;
-				/*fprintf(stderr,"delete triangle jt:%d\n",jt);*/
 
 				/* add edges to kv but delete if already present */
 				for (int i = 0; i < 3; i++) {
