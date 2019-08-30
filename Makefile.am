@@ -7,7 +7,7 @@ endif
 SUBDIRS = src $(XBUILD_SUB_TEST)
 
 distcleancheck:
-        @:
+	@:
 
 distclean-local:
-        @:
+	@:

@@ -4,36 +4,48 @@ endif
 
 bin_PROGRAMS = mbnavadjust mbnavadjustmerge $(MBNAVADJUSTFINE)
 
-if BUILD_MBTRN
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
-  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
-endif
-
 AM_CFLAGS =  ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	    -I${top_srcdir}/src/mbaux \
-		-I${top_srcdir}/src/mbview \
-	    -I${top_srcdir}/src/gsf \
-        $(MBTRNINCDIR) \
-		${libnetcdf_CPPFLAGS} \
-		${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
+AM_CPPFLAGS =
+AM_CPPFLAGS += -I${top_srcdir}/src/mbio
+AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+AM_CPPFLAGS += -I${top_srcdir}/src/mbview
+AM_CPPFLAGS += -I${top_srcdir}/src/gsf
+AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
+AM_CPPFLAGS += ${libmotif_CPPFLAGS}
+AM_CPPFLAGS += ${libopengl_CPPFLAGS}
 
 AM_LDFLAGS =
 
-LIBS = ${top_builddir}/src/mbio/libmbio.la \
-        ${top_builddir}/src/mbaux/libmbaux.la \
-        ${top_builddir}/src/mbaux/libmbxgr.la \
-        ${top_builddir}/src/mbview/libmbview.la \
-        ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        $(MBTRNLIB) ${libmotif_LIBS} ${libopengl_LIBS} \
-        $(LIBM)
+LIBS =
+LIBS += ${top_builddir}/src/mbio/libmbio.la
+LIBS += ${top_builddir}/src/mbaux/libmbaux.la
+LIBS += ${top_builddir}/src/mbaux/libmbxgr.la
+LIBS += ${top_builddir}/src/mbview/libmbview.la
+LIBS += ${libgmt_LIBS}
+LIBS += ${libnetcdf_LIBS}
+LIBS += ${libproj_LIBS}
+LIBS += ${libmotif_LIBS}
+LIBS += ${libopengl_LIBS}
+LIBS += $(LIBM)
 
-mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation.c \
-	mbnavadjust_prog.c mbnavadjust_io.c mbnavadjust_util.c mbnavadjust_creation.h \
-	mbnavadjust_extrawidgets.h mbnavadjust_io.h mbnavadjust.h
+mbnavadjust_SOURCES =
+mbnavadjust_SOURCES += mbnavadjust.c
+mbnavadjust_SOURCES += mbnavadjust.h
+mbnavadjust_SOURCES += mbnavadjust_callbacks.c
+mbnavadjust_SOURCES += mbnavadjust_creation.c
+mbnavadjust_SOURCES += mbnavadjust_creation.h
+mbnavadjust_SOURCES += mbnavadjust_extrawidgets.h
+mbnavadjust_SOURCES += mbnavadjust_io.c
+mbnavadjust_SOURCES += mbnavadjust_io.h
+mbnavadjust_SOURCES += mbnavadjust_prog.c
+mbnavadjust_SOURCES += mbnavadjust_util.c
 
 mbnavadjustmerge_SOURCES = mbnavadjustmerge.c mbnavadjust_io.c mbnavadjust_io.h
 
-mbnavadjustfine_SOURCES = mbnavadjust_fine.cpp mbnavadjust_icp.cpp \
-	mbnavadjust_icp.hpp mbnavadjust_io.c mbnavadjust_io.h
+mbnavadjustfine_SOURCES =
+mbnavadjustfine_SOURCES += mbnavadjust_fine.cpp
+mbnavadjustfine_SOURCES += mbnavadjust_icp.cpp
+mbnavadjustfine_SOURCES += mbnavadjust_icp.hpp
+mbnavadjustfine_SOURCES += mbnavadjust_io.c
+mbnavadjustfine_SOURCES += mbnavadjust_io.h
