@@ -176,20 +176,37 @@ int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src)
         int64_t rbytes=0;
         
         out->recordtype = mswap_16(src->recordtype);
-        
-        mswap_bytes(&out->time_d,    &src->time_d,8);
-        mswap_bytes(&out->longitude, &src->longitude,8);
-        mswap_bytes(&out->latitude,  &src->latitude,8);
-        mswap_bytes(&out->sonardepth,&src->sonardepth,8);
-        mswap_bytes(&out->altitude,  &src->altitude,8);
-
-        mswap_bytes(&out->heading,&src->heading,4);
-        mswap_bytes(&out->speed,  &src->speed,4);
-        mswap_bytes(&out->roll,   &src->roll,4);
-        mswap_bytes(&out->pitch,  &src->pitch,4);
-        mswap_bytes(&out->heave,  &src->heave,4);
-        mswap_bytes(&out->beam_xwidth,&src->beam_xwidth,4);
-        mswap_bytes(&out->beam_lwidth,&src->beam_lwidth,4);
+        if(out==src){
+            // swap in place
+            mswap_bytes(&out->time_d,8);
+            mswap_bytes(&out->longitude,8);
+            mswap_bytes(&out->latitude,8);
+            mswap_bytes(&out->sonardepth,8);
+            mswap_bytes(&out->altitude,8);
+            
+            mswap_bytes(&out->heading,4);
+            mswap_bytes(&out->speed,4);
+            mswap_bytes(&out->roll,4);
+            mswap_bytes(&out->pitch,4);
+            mswap_bytes(&out->heave,4);
+            mswap_bytes(&out->beam_xwidth,4);
+            mswap_bytes(&out->beam_lwidth,4);
+       }else{
+           // swap into memory (don't change source)
+            mswap_bytes_mem(&out->time_d,    &src->time_d,8);
+            mswap_bytes_mem(&out->longitude, &src->longitude,8);
+            mswap_bytes_mem(&out->latitude,  &src->latitude,8);
+            mswap_bytes_mem(&out->sonardepth,&src->sonardepth,8);
+            mswap_bytes_mem(&out->altitude,  &src->altitude,8);
+            
+            mswap_bytes_mem(&out->heading,&src->heading,4);
+            mswap_bytes_mem(&out->speed,  &src->speed,4);
+            mswap_bytes_mem(&out->roll,   &src->roll,4);
+            mswap_bytes_mem(&out->pitch,  &src->pitch,4);
+            mswap_bytes_mem(&out->heave,  &src->heave,4);
+            mswap_bytes_mem(&out->beam_xwidth,&src->beam_xwidth,4);
+            mswap_bytes_mem(&out->beam_lwidth,&src->beam_lwidth,4);
+        }
 
         out->beams_bath = mswap_32(src->beams_bath);
         out->beams_amp  = mswap_32(src->beams_amp);
