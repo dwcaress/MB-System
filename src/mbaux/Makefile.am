@@ -16,14 +16,14 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES =
-libmbaux_la_SOURCES += mb_zgrid.c
-libmbaux_la_SOURCES += mb_surface.c
 libmbaux_la_SOURCES += mb_cheb.c
 libmbaux_la_SOURCES += mb_delaun.c
+libmbaux_la_SOURCES += mb_intersectgrid.c
+libmbaux_la_SOURCES += mb_readwritegrd.c
+libmbaux_la_SOURCES += mb_surface.c
 libmbaux_la_SOURCES += mb_track.c
 libmbaux_la_SOURCES += mb_truecont.c
-libmbaux_la_SOURCES += mb_readwritegrd.c
-libmbaux_la_SOURCES += mb_intersectgrid.c
+libmbaux_la_SOURCES += mb_zgrid.c
 
 libmbaux_la_LIBADD =
 libmbaux_la_LIBADD += ${top_builddir}/src/mbio/libmbio.la
