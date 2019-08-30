@@ -33,9 +33,11 @@
 #include "mb_status.h"
 
 /* Projection defines */
-#define ModelTypeProjected 1
-#define ModelTypeGeographic 2
-#define GCS_WGS_84 4326
+enum ModelType {
+  ModelTypeProjected = 1,
+  ModelTypeGeographic = 2
+};
+static const int GCS_WGS_84 = 4326;
 
 /*--------------------------------------------------------------------------*/
 int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char *grid_projection_id, float *nodatavalue, int *nxy,
@@ -66,7 +68,7 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	struct GMT_GRID_HEADER *header; /* GMT grid header structure pointer */
 	mb_path projectionname = "";
 	int epsgid;
-	int modeltype;
+	enum ModelType modeltype;
 
 	/* if file exists proceed */
 	if (status == MB_SUCCESS) {
@@ -329,7 +331,8 @@ int mb_read_gmt_grd(int verbose, char *grdfile, int *grid_projection_mode, char 
 	}
 
 	return (status);
-} /*--------------------------------------------------------------------*/
+}
+/*--------------------------------------------------------------------*/
 /*
  * function write_cdfgrd writes output grid to a
  * GMT version 2 netCDF grd file
@@ -386,14 +389,9 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 		registration = GMT_GRID_DEFAULT_REG;
 	}
 
-	double wesn[4];
-	wesn[0] = xmin; /* Min/max x and y coordinates */
-	wesn[1] = xmax; /* Min/max x and y coordinates */
-	wesn[2] = ymin; /* Min/max x and y coordinates */
-	wesn[3] = ymax; /* Min/max x and y coordinates */
-	double inc[2];
-	inc[0] = dx;    /* x and y increment */
-	inc[1] = dy;    /* x and y increment */
+	/* Min/max x and y coordinates */
+	double wesn[4] = {xmin, xmax, ymin, ymax};
+	double inc[2] = {dx, dy};  /* x and y increment */
 	int pad = 0;
 
 	int status = MB_SUCCESS;
@@ -407,7 +405,7 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	}
 
 	/* Get some projection and user info needed for the grid remark field */
-	int modeltype;
+	enum ModelType modeltype;
 	int epsgid;
 	int grid_projection_mode;
 	mb_path projectionname = "";
@@ -469,8 +467,8 @@ int mb_write_gmt_grd(int verbose, char *grdfile, float *grid, float nodatavalue,
 	strcpy(date, ctime(&right_now));
 	date[strlen(date) - 1] = '\0';
 	char user[MB_PATH_MAXLINE];
-	char *user_ptr;
-	if ((user_ptr = getenv("USER")) == NULL)
+	char *user_ptr = getenv("USER");
+	if (user_ptr == NULL)
 		if ((user_ptr = getenv("LOGNAME")) == NULL)
 			user_ptr = getenv("USERNAME");
 	if (user_ptr != NULL)
