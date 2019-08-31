@@ -127,16 +127,7 @@ const int ZGRID_DIMENSION_MAX = 500;
 /*----------------------------------------------------------------------- */
 int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float *dy, float *xyz, int *n, float *zpij, int *knxt,
               int *imnew, float *cay, int *nrng) {
-	int error = MB_ERROR_NO_ERROR;
 	int status = MB_SUCCESS;
-	int verbose = 0;
-	float *sz = NULL;
-	float sdx, sdy;
-	double xi, yj;
-	double dx_d, dy_d, sfactor, sdx_d, sdy_d;
-	double sx0, sx1, sy0, sy1;
-	int snx, sny, snrng;
-	int j, k, si, sj, sk00, sk01, sk10, sk11;
 
 	/* if nx and ny < ZGRID_DIMENSION_MAX just call zgrid() */
 	if (*nx < ZGRID_DIMENSION_MAX && *ny < ZGRID_DIMENSION_MAX) {
@@ -148,18 +139,21 @@ int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float
 	   use bilinear interpolation to map that onto the desired grid */
 	else {
 		/* get scale reduction factor and new dimensions and cell sizes */
-		dx_d = (double)*dx;
-		dy_d = (double)*dy;
-		sfactor = ((double)(ZGRID_DIMENSION_MAX)) / MAX(*nx, *ny);
-		snx = (int)(sfactor * (*nx)) + 1;
-		sny = (int)(sfactor * (*ny)) + 1;
-		sdx_d = (dx_d * (*nx - 1)) / snx;
-		sdy_d = (dy_d * (*ny - 1)) / sny;
-		snrng = (int)(sfactor * (*nrng)) + 1;
-		sdx = (float)sdx_d;
-		sdy = (float)sdy_d;
+		const double dx_d = (double)*dx;
+		const double dy_d = (double)*dy;
+		const double sfactor = ((double)(ZGRID_DIMENSION_MAX)) / MAX(*nx, *ny);
+		int snx = (int)(sfactor * (*nx)) + 1;
+		int sny = (int)(sfactor * (*ny)) + 1;
+		const double sdx_d = (dx_d * (*nx - 1)) / snx;
+		const double sdy_d = (dy_d * (*ny - 1)) / sny;
+		int snrng = (int)(sfactor * (*nrng)) + 1;
+		float sdx = (float)sdx_d;
+		float sdy = (float)sdy_d;
 
 		/* allocate array for intermediate grid */
+		const int verbose = 0;
+		float *sz = NULL;
+		int error = MB_ERROR_NO_ERROR;
 		status = mb_mallocd(verbose, __FILE__, __LINE__, snx * sny * sizeof(float), (void **)&sz, &error);
 		memset((void *)sz, (int)0, (size_t)(snx * sny * sizeof(float)));
 
@@ -171,13 +165,13 @@ int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float
 		/* now fill in the full resolution grid by bilinear interpolation */
 		fprintf(stderr, "Smooth surface mapped onto full resolution grid using bilinear interpolation\n");
 		for (int i = 0; i < *nx; i++)
-			for (j = 0; j < *ny; j++) {
-				k = i + j * (*nx);
+			for (int j = 0; j < *ny; j++) {
+				const int k = i + j * (*nx);
 
-				xi = i * dx_d;
-				yj = j * dy_d;
-				si = xi / sdx_d;
-				sj = yj / sdy_d;
+				const double xi = i * dx_d;
+				const double yj = j * dy_d;
+				int si = xi / sdx_d;
+				int sj = yj / sdy_d;
 				if (si >= snx - 1)
 					si = snx - 2;
 				if (si < 0)
@@ -187,16 +181,16 @@ int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float
 				if (sj < 0)
 					sj = 0;
 
-				sk00 = si + sj * snx;
-				sk10 = (si + 1) + sj * snx;
-				sk01 = si + (sj + 1) * snx;
-				sk11 = (si + 1) + (sj + 1) * snx;
+				const int sk00 = si + sj * snx;
+				const int sk10 = (si + 1) + sj * snx;
+				const int sk01 = si + (sj + 1) * snx;
+				const int sk11 = (si + 1) + (sj + 1) * snx;
 
 				if (sz[sk00] < 5.0e34f && sz[sk10] < 5.0e34f && sz[sk01] < 5.0e34f && sz[sk11] < 5.0e34f) {
-					sx0 = si * sdx_d;
-					sx1 = (si + 1) * sdx_d;
-					sy0 = sj * sdy_d;
-					sy1 = (sj + 1) * sdy_d;
+					const double sx0 = si * sdx_d;
+					const double sx1 = (si + 1) * sdx_d;
+					const double sy0 = sj * sdy_d;
+					const double sy1 = (sj + 1) * sdy_d;
 
 					z[k] = (float)((((double)sz[sk00]) * (sx1 - xi) * (sy1 - yj) + ((double)sz[sk10]) * (xi - sx0) * (sy1 - yj) +
 					                ((double)sz[sk01]) * (sx1 - xi) * (yj - sy0) + ((double)sz[sk11]) * (xi - sx0) * (yj - sy0)) /
@@ -217,65 +211,59 @@ int mb_zgrid2(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float
 /*----------------------------------------------------------------------- */
 int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float *dy, float *xyz, int *n, float *zpij, int *knxt,
              int *imnew, float *cay, int *nrng) {
-	/* System generated locals */
-	int z_dim1, z_offset, i__1, i__2, i__3;
-	float r__1;
-
-	/* Local variables */
-	float delz;
-	int iter, nnew;
-	float zijn, zmin, zimm, zmax, zjmm, zipp, zjpp;
-	float root, zsum, zpxy, a, b, c, d;
-	int i, j, k;
-	float x, y, zbase, relax, delzm;
-	float derzm;
-	int jmnew;
-	float dzmax, dzrms;
-	int kk, im, jm;
-	float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, dzmaxf, convtest, convtestlast, relaxn, rootgs, dzrmsp, big, abz;
-	int npg;
-	int nmax;
-	int nconvtestincrease;
-	float eps, zim, zjm;
-	float dzcriteria;
-	int npt;
-	float wgt, zip, zjp, tpy, zxy;
-	int ii, jj, kkk;
-
 	/* Parameter adjustments */
-	z_dim1 = *nx;
-	z_offset = z_dim1 + 1;
+	int z_dim1 = *nx;
+	int z_offset = z_dim1 + 1;
 	z -= z_offset;
 	xyz -= 4;
 
 	/* Function Body */
-	eps = 0.002f;
+	int nmax;
 	if (*nx > *ny)
 		nmax = *nx;
 	else
 		nmax = *ny;
 	/* if (*nrng < nmax)
 	    nmax = *nrng; */
-	eps = ((float)nmax) * 0.000016;
+	float eps = ((float)nmax) * 0.000016;
 	if (eps < 0.02)
 		eps = 0.02;
 
 	/* trying dzmax > eps as a simple convergence criterea */
-	dzcriteria = 0.001;
-	convtestlast = 0.0;
+	float dzcriteria = 0.001;
+	float convtestlast = 0.0;
 
-	big = 9.0e29f;
-	nconvtestincrease = 0;
+	float big = 9.0e29f;
+	int nconvtestincrease = 0;
 
 	/*     get zbase which will make all zp values positive by 20*(zmax-zmin)
 	 */
 	/* **********************************************************************
 	 */
 
-	zmin = xyz[6];
-	zmax = xyz[6];
-	i__1 = *n;
-	for (k = 2; k <= i__1; ++k) {
+	int i__2, i__3;
+	float r__1;
+	float delz;
+	int iter, nnew;
+	float zijn, zimm, zjmm, zipp, zjpp;
+	float root, zsum, zpxy, a, b, c, d;
+	int j;
+	float x, y, zbase, relax, delzm;
+	float derzm;
+	int jmnew;
+	float dzmax, dzrms;
+	int kk, im, jm;
+	float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, dzmaxf, convtest, relaxn, rootgs, dzrmsp, abz;
+	int npg;
+	float zim, zjm;
+	int npt;
+	float wgt, zip, zjp, tpy, zxy;
+	int ii, jj, kkk;
+
+	float zmin = xyz[6];
+	float zmax = xyz[6];
+	int i__1 = *n;
+	for (int k = 2; k <= i__1; ++k) {
 		if (xyz[k * 3 + 3] - zmax <= 0.0f) {
 			goto L14;
 		}
@@ -306,9 +294,9 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 
 	i__1 = *n;
 	for (kk = 1; kk <= i__1; ++kk) {
-		k = *n + 1 - kk;
+		const int k = *n + 1 - kk;
 		knxt[k - 1] = 0;
-		i = (xyz[k * 3 + 1] - *x1) / *dx + 1.5f;
+		const int i = (xyz[k * 3 + 1] - *x1) / *dx + 1.5f;
 		if (i * (*nx + 1 - i) <= 0) {
 			goto L60;
 		}
@@ -353,7 +341,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 	 */
 
 	i__1 = *n;
-	for (k = 1; k <= i__1; ++k) {
+	for (int k = 1; k <= i__1; ++k) {
 		if (knxt[k - 1] <= 0) {
 			goto L80;
 		}
@@ -363,7 +351,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 	L65:
 		npt = 0;
 		zsum = 0.0f;
-		i = (xyz[k * 3 + 1] - *x1) / *dx + 1.5f;
+		const int i = (xyz[k * 3 + 1] - *x1) / *dx + 1.5f;
 		j = (xyz[k * 3 + 2] - *y1) / *dy + 1.5f;
 		kk = k;
 	L70:
@@ -402,7 +390,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 	 */
 
 	i__1 = *nx;
-	for (i = 1; i <= i__1; ++i) {
+	for (int i = 1; i <= i__1; ++i) {
 		i__2 = *ny;
 		for (j = 1; j <= i__2; ++j) {
 			if (z[i + j * z_dim1] != 0.0f) {
@@ -420,7 +408,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 	for (iter = 1; iter <= i__2; ++iter) {
 		nnew = 0;
 		i__1 = *nx;
-		for (i = 1; i <= i__1; ++i) {
+		for (int i = 1; i <= i__1; ++i) {
 			i__3 = *ny;
 			for (j = 1; j <= i__3; ++j) {
 				if (z[i + j * z_dim1] + big >= 0.0f) {
@@ -525,7 +513,7 @@ int mb_zgrid(float *z, int *nx, int *ny, float *x1, float *y1, float *dx, float 
 	}
 L200:
 	i__2 = *nx;
-	for (i = 1; i <= i__2; ++i) {
+	for (int i = 1; i <= i__2; ++i) {
 		i__3 = *ny;
 		for (j = 1; j <= i__3; ++j) {
 			abz = (r__1 = z[i + j * z_dim1], (float)fabs((double)r__1));
@@ -553,7 +541,7 @@ L200:
 		dzmax = 0.0f;
 		npg = 0;
 		i__2 = *nx;
-		for (i = 1; i <= i__2; ++i) {
+		for (int i = 1; i <= i__2; ++i) {
 			i__1 = *ny;
 			for (j = 1; j <= i__1; ++j) {
 				z00 = z[i + j * z_dim1];
@@ -763,7 +751,7 @@ L200:
 		}
 	L3020:
 		i__1 = *n;
-		for (k = 1; k <= i__1; ++k) {
+		for (int k = 1; k <= i__1; ++k) {
 			knxt[k - 1] = (i__2 = knxt[k - 1], abs(i__2));
 			if (knxt[k - 1] <= 0) {
 				goto L3400;
@@ -773,7 +761,7 @@ L200:
 			}
 		L3030:
 			x = (xyz[k * 3 + 1] - *x1) / *dx;
-			i = x + 1.5f;
+			const int i = x + 1.5f;
 			x = x + 1.0f - i;
 			y = (xyz[k * 3 + 2] - *y1) / *dy;
 			j = y + 1.5f;
@@ -913,7 +901,7 @@ L200:
 		}
 
 		i__1 = *n;
-		for (k = 1; k <= i__1; ++k) {
+		for (int k = 1; k <= i__1; ++k) {
 			if (knxt[k - 1] <= 0) {
 				goto L3500;
 			}
@@ -923,7 +911,7 @@ L200:
 		L3410:
 			npt = 0;
 			zsum = 0.0f;
-			i = (xyz[k * 3 + 1] - *x1) / *dx + 1.5f;
+			const int i = (xyz[k * 3 + 1] - *x1) / *dx + 1.5f;
 			j = (xyz[k * 3 + 2] - *y1) / *dy + 1.5f;
 			kk = k;
 		L3420:
@@ -947,8 +935,7 @@ L200:
 	L3600:
 
 		/*     test for convergence */
-		/* ******************************************************************
-		**** */
+		/* ********************************************************************** */
 		/* all grid points assigned */
 		if (npg <= 1) {
 			goto L4010;
@@ -1009,8 +996,7 @@ L200:
 		}
 
 	/*     improve the relaxation factor. */
-	/* ******************************************************************
-	**** */
+	/* ********************************************************************** */
 
 	L3740:
 		if ((iter - 20) * (iter - 40) * (iter - 60) != 0) {
@@ -1045,11 +1031,10 @@ L200:
 L4010:
 
 	/*     remove zbase from array z and return. */
-	/* **********************************************************************
-	 */
+	/* ***********************************************************************/
 
 	i__3 = *nx;
-	for (i = 1; i <= i__3; ++i) {
+	for (int i = 1; i <= i__3; ++i) {
 		i__1 = *ny;
 		for (j = 1; j <= i__1; ++j) {
 			if (z[i + j * z_dim1] - big >= 0.0f) {
