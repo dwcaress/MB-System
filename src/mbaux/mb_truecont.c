@@ -18,7 +18,6 @@
  *
  * Author:	D. W. Caress
  * Date:	April, 1994
- *
  */
 
 #include <math.h>
@@ -36,23 +35,6 @@
 const double EPS = 0.0001;
 #define NUM_BEAMS_ALLOC_MIN 16
 
-/* local function prototypes */
-int mb_tcontour(int verbose, struct swath *data, int *error);
-int mb_ocontour(int verbose, struct swath *data, int *error);
-int get_start_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *closed);
-int get_next_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *closed, int *itristart, int *isidestart);
-int get_pos_tri(struct swath *data, double eps, int itri, int iside, double value, double *x, double *y);
-int get_azimuth_tri(struct swath *data, int itri, int iside, double *angle);
-int check_label(struct swath *data, int nlab);
-int dump_contour(struct swath *data, double value);
-int get_start_old(struct swath *data, int *k, int *i, int *j, int *d, int *closed);
-int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd, int k, int i, int j, int d, int kbeg, int ibeg, int jbeg,
-                 int dbeg, int *closed);
-int get_pos_old(struct swath *data, double eps, double *x, double *y, int k, int i, int j, double value);
-int get_hand_old(struct swath *data, int *hand, int k, int i, int j, int d);
-int get_azimuth_old(struct swath *data, int iping, double *angle);
-
-
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to
     contour multibeam bathymetry data.
@@ -68,7 +50,6 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
                     void (*contour_newpen)(int), void (*contour_setline)(int),
                     void (*contour_justify_string)(double, char *, double *),
                     void (*contour_plot_string)(double, double, double, double, char *), int *error) {
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -278,7 +259,6 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 	dataptr->contour_justify_string = contour_justify_string;
 	dataptr->contour_plot_string = contour_plot_string;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -294,15 +274,14 @@ int mb_contour_init(int verbose, struct swath **data, int npings_max, int beams_
 /* 	function mb_contour_deall deallocates the memory required to
     contour multibeam bathymetry data. */
 int mb_contour_deall(int verbose, struct swath *data, int *error) {
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
 		fprintf(stderr, "dbg2       data:                    %p\n", data);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* deallocate memory for bathymetry data */
 	for (int i = 0; i < data->npings_max; i++) {
@@ -359,7 +338,6 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
 	/* deallocate memory for swath structure */
 	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&data, error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -371,40 +349,211 @@ int mb_contour_deall(int verbose, struct swath *data, int *error) {
 	return (MB_SUCCESS);
 }
 /*--------------------------------------------------------------------------*/
-/* 	function mb_contour calls the appropriate contouring routine. */
-int mb_contour(int verbose, struct swath *data, int *error) {
-	/* print input debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
-		fprintf(stderr, "dbg2       data:                    %p\n", data);
-		fprintf(stderr, "dbg2       data->contour_alg:       %d\n", data->contour_algorithm);
-	}
+/* 	function get_start_tri finds next contour starting point. */
+int get_start_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *closed) {
+	/* search triangles */
+	*closed = MB_NO;
+	for (int i = 0; i < data->ntri; i++)
+		for (int j = 0; j < 3; j++) {
+			if (data->flag[j][i] > 0) {
+				/* find two flagged sides */
+				*itri = i;
+				*iside1 = j;
+				*iside2 = -1;
+				for (int jj = 0; jj < 3; jj++)
+					if (jj != j && data->flag[jj][i] > 0)
+						*iside2 = jj;
+				if (*iside2 == -1) {
+					fprintf(stderr, "no flagged side in get_start_tri???\n");
+					fprintf(stderr, "noflag: itri:%d flags: %d %d %d\n", *itri, data->flag[0][*itri], data->flag[1][*itri],
+					        data->flag[2][*itri]);
+				}
 
-	/* call the appropriate contouring routine */
-	int status = MB_SUCCESS;
-	if (data->contour_algorithm == MB_CONTOUR_TRIANGLES)
-		status &= mb_tcontour(verbose, data, error);
-	else
-		status &= mb_ocontour(verbose, data, error);
+				/* check if contour continues on both sides */
+				if (data->ct[*iside1][i] > -1 && data->ct[*iside2][i] > -1)
+					*closed = MB_YES;
 
-	/* print output debug statements */
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
+				/* else make sure contour starts at dead end */
+				else if (data->ct[*iside1][i] > -1) {
+					const int isave = *iside1;
+					*iside1 = *iside2;
+					*iside2 = isave;
+					*closed = MB_NO;
+				}
+				else
+					*closed = MB_NO;
+				return (MB_YES);
+			}
+		}
 
-	return (status);
+	/* nothing found */
+	return (MB_NO);
 }
+/*--------------------------------------------------------------------------*/
+/* 	function get_next_tri finds next contour component if it exists */
+int get_next_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *closed, int *itristart, int *isidestart) {
+	/* check if contour ends where it began */
+	if (*closed && data->ct[*iside2][*itri] == *itristart && data->cs[*iside2][*itri] == *isidestart)
+		return (MB_NO);
 
+	/* check if current triangle side connects to another */
+	else if (data->ct[*iside2][*itri] > -1) {
+		*iside1 = data->cs[*iside2][*itri];
+		*itri = data->ct[*iside2][*itri];
+		*iside2 = -1;
+		for (int j = 0; j < 3; j++)
+			if (j != *iside1 && data->flag[j][*itri] != 0)
+				*iside2 = j;
+		if (*iside2 == -1) {
+			fprintf(stderr, "no flagged side in get_next_tri???\n");
+			fprintf(stderr, "noflag: itri:%d flags: %d %d %d\n", *itri, data->flag[0][*itri], data->flag[1][*itri],
+			        data->flag[2][*itri]);
+			return (MB_NO);
+		}
+		return (MB_YES);
+	}
+
+	/* else if contour ends but closed set true then
+	    turn contour around and continue in other direction */
+	else if (*closed) {
+		for (int i = 0; i < data->nsave / 2; i++) {
+			const double xs = data->xsave[i];
+			const double ys = data->ysave[i];
+			data->xsave[i] = data->xsave[data->nsave - i - 1];
+			data->ysave[i] = data->ysave[data->nsave - i - 1];
+			data->xsave[data->nsave - i - 1] = xs;
+			data->ysave[data->nsave - i - 1] = ys;
+		}
+		*closed = MB_NO;
+		data->nsave--;
+		const int itrisave = *itristart;
+		const int isidesave = *isidestart;
+		*itristart = *itri;
+		*isidestart = *iside2;
+		*itri = itrisave;
+		*iside2 = isidesave;
+		*iside1 = -1;
+		for (int j = 0; j < 3; j++)
+			if (j != *iside2 && data->flag[j][*itri] != 0)
+				*iside1 = j;
+
+		/* if next side not found end contour */
+		if (*iside1 == -1)
+			return (MB_NO);
+
+		/* else keep going */
+		return (MB_YES);
+	}
+
+	/* else contour ends and is not closed */
+	else
+		return (MB_NO);
+}
+/*--------------------------------------------------------------------------*/
+/* 	function get_pos_tri finds position of contour crossing point */
+int get_pos_tri(const struct swath *data, double eps, int itri, int iside, double value, double *x, double *y) {
+	const int v1 = iside;
+	int v2 = iside + 1;
+	if (v2 == 3)
+		v2 = 0;
+	const int pt1 = data->iv[v1][itri];
+	const int pt2 = data->iv[v2][itri];
+
+        double factor;
+	if (fabs(data->z[pt2] - data->z[pt1]) > eps)
+		factor = (value - data->z[pt1]) / (data->z[pt2] - data->z[pt1]);
+	else
+		factor = 0.5;
+	*x = data->x[pt1] + factor * (data->x[pt2] - data->x[pt1]);
+	*y = data->y[pt1] + factor * (data->y[pt2] - data->y[pt1]);
+
+	return (MB_YES);
+}
+/*--------------------------------------------------------------------------*/
+/* 	function get_azimuth_tri gets azimuth across track for a label */
+int get_azimuth_tri(const struct swath *data, int itri, int iside, double *angle) {
+	*angle = -data->pings[data->pingid[data->iv[iside][itri]]].heading;
+	if (*angle > 180.0)
+		*angle = *angle - 360.0;
+	if (*angle < -180.0)
+		*angle = *angle + 360.0;
+
+	return (MB_YES);
+}
+/*--------------------------------------------------------------------------*/
+/* 	function check_label checks if new label will overwrite any recent
+ *	labels. */
+int check_label(struct swath *data, int nlab) {
+#define MAXHIS 30
+	static double xlabel_his[MAXHIS];
+	static double ylabel_his[MAXHIS];
+	static int nlabel_his = 0;
+
+	int good = 1;
+	int ilab = 0;
+	double rad_label_his = data->label_spacing;
+	while (good && ilab < nlabel_his) {
+		const double dx = xlabel_his[ilab] - data->xlabel[nlab];
+		const double dy = ylabel_his[ilab] - data->ylabel[nlab];
+		const double rr = sqrt(dx * dx + dy * dy);
+		if (rr < rad_label_his)
+			good = 0;
+		ilab++;
+	}
+	ilab--;
+	if (good) {
+		nlabel_his++;
+		if (nlabel_his >= MAXHIS)
+			nlabel_his = MAXHIS - 1;
+		for (int i = nlabel_his; i > 0; i--) {
+			xlabel_his[i] = xlabel_his[i - 1];
+			ylabel_his[i] = ylabel_his[i - 1];
+		}
+		xlabel_his[0] = data->xlabel[nlab];
+		ylabel_his[0] = data->ylabel[nlab];
+	}
+	return (good);
+}
+/*--------------------------------------------------------------------------*/
+/* 	function dump_contour dumps the contour stored in xsave and ysave
+ *	to the plotting routines */
+int dump_contour(struct swath *data, double value) {
+	/* plot the contours */
+	if (data->nsave < 2)
+		return (MB_NO);
+	data->contour_plot(data->xsave[0], data->ysave[0], IMOVE);
+	for (int i = 1; i < data->nsave - 1; i++)
+		data->contour_plot(data->xsave[i], data->ysave[i], IDRAW);
+	data->contour_plot(data->xsave[data->nsave - 1], data->ysave[data->nsave - 1], ISTROKE);
+	data->nsave = 0;
+
+	/* plot the labels */
+	char label[25];
+	sprintf(label, "  %d", (int)value);
+	for (int i = 0; i < data->nlabel; i++) {
+		if (data->justify[i] == 1) {
+			double mtodeglon;
+			double mtodeglat;
+			mb_coor_scale(0, data->ylabel[i], &mtodeglon, &mtodeglat);
+			double s[4];
+			data->contour_justify_string(data->label_hgt, label, s);
+			const double dx = 1.5 * s[2] * cos(DTR * data->angle[i]);
+			const double dy = 1.5 * mtodeglat / mtodeglon * s[2] * sin(DTR * data->angle[i]);
+			const double x = data->xlabel[i] - dx;
+			const double y = data->ylabel[i] - dy;
+			data->contour_plot_string(x, y, data->label_hgt, data->angle[i], label);
+		}
+		else {
+			data->contour_plot_string(data->xlabel[i], data->ylabel[i], data->label_hgt, data->angle[i], label);
+		}
+	}
+	data->nlabel = 0;
+
+	return (MB_YES);
+}
 /*--------------------------------------------------------------------------*/
 /* 	function mb_tcontour contours multibeam data. */
 int mb_tcontour(int verbose, struct swath *data, int *error) {
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -446,8 +595,6 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 		}
 	}
 
-	int status = MB_SUCCESS;
-
 	/* count number of points and verify that enough memory is allocated */
 	int npt_cnt = 0;
 	for (int i = 0; i < data->npings; i++) {
@@ -457,6 +604,8 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 				npt_cnt++;
 		}
 	}
+
+	int status = MB_SUCCESS;
 	const int ntri_cnt = 3 * npt_cnt + 1;
 	if (npt_cnt > data->npts_alloc) {
 		data->npts_alloc = npt_cnt;
@@ -556,7 +705,6 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 			}
 		}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Data points:\n");
 		fprintf(stderr, "dbg4       npts:             %d\n", data->npts);
@@ -613,7 +761,6 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Data points:\n");
 		fprintf(stderr, "dbg4       nlevel:           %d\n", data->nlevel);
@@ -677,7 +824,6 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 			const int tick = data->tick_list[ival];
 			const int label = data->label_list[ival];
 
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  About to contour level in function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       value:         %f\n", value);
@@ -799,7 +945,6 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 			/* done with contouring this level */
 		}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -810,133 +955,236 @@ int mb_tcontour(int verbose, struct swath *data, int *error) {
 
 	return (status);
 }
-
 /*--------------------------------------------------------------------------*/
-/* 	function get_start_tri finds next contour starting point. */
-int get_start_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *closed) {
-	/* search triangles */
-	*closed = MB_NO;
-	for (int i = 0; i < data->ntri; i++)
-		for (int j = 0; j < 3; j++) {
-			if (data->flag[j][i] > 0) {
-				/* find two flagged sides */
-				*itri = i;
-				*iside1 = j;
-				*iside2 = -1;
-				for (int jj = 0; jj < 3; jj++)
-					if (jj != j && data->flag[jj][i] > 0)
-						*iside2 = jj;
-				if (*iside2 == -1) {
-					fprintf(stderr, "no flagged side in get_start_tri???\n");
-					fprintf(stderr, "noflag: itri:%d flags: %d %d %d\n", *itri, data->flag[0][*itri], data->flag[1][*itri],
-					        data->flag[2][*itri]);
-				}
+/* 	function get_start_old finds next contour starting point.
+ *	the borders are searched first and then the interior */
+int get_start_old(const struct swath *data, int *k, int *i, int *j, int *d, int *closed) {
+	/* search edges */
+	*closed = 0;
 
-				/* check if contour continues on both sides */
-				if (data->ct[*iside1][i] > -1 && data->ct[*iside2][i] > -1)
-					*closed = MB_YES;
+	/* search bottom (i = 0) */
+	for (int jj = 0; jj < data->pings[0].beams_bath - 1; jj++)
+		if (data->pings[0].bflag[0][jj]) {
+			*k = 0;
+			*i = 0;
+			*j = jj;
+			*d = 0;
+			return (1);
+		}
 
-				/* else make sure contour starts at dead end */
-				else if (data->ct[*iside1][i] > -1) {
-					const int isave = *iside1;
-					*iside1 = *iside2;
-					*iside2 = isave;
-					*closed = MB_NO;
-				}
-				else
-					*closed = MB_NO;
-				return (MB_YES);
+	/* search top (i = npings-1) */
+	for (int jj = 0; jj < data->pings[data->npings - 1].beams_bath - 1; jj++)
+		if (data->pings[data->npings - 1].bflag[0][jj]) {
+			*k = 0;
+			*i = data->npings - 1;
+			*j = jj;
+			*d = 1;
+			return (1);
+		}
+
+	/* search left (j = 0) */
+	for (int ii = 0; ii < data->npings - 1; ii++)
+		if (data->pings[ii].beams_bath > 0 && data->pings[ii].bflag[1][0]) {
+			*k = 1;
+			*i = ii;
+			*j = 0;
+			*d = 0;
+			return (1);
+		}
+
+	/* search right (j = beams_bath-1) */
+	for (int ii = 0; ii < data->npings - 1; ii++)
+		if (data->pings[ii].beams_bath > 0 && data->pings[ii].bflag[1][data->pings[ii].beams_bath - 1]) {
+			*k = 1;
+			*i = ii;
+			*j = data->pings[ii].beams_bath - 1;
+			*d = 1;
+			return (1);
+		}
+
+	/* search interior */
+	*closed = 1;
+	for (int ii = 0; ii < data->npings - 1; ii++)
+		for (int jj = 0; jj < data->pings[ii].beams_bath - 1; jj++) {
+			if (data->pings[ii].bflag[0][jj]) {
+				*k = 0;
+				*i = ii;
+				*j = jj;
+				*d = 0;
+				return (1);
+			}
+			if (data->pings[ii].bflag[1][jj]) {
+				*k = 1;
+				*i = ii;
+				*j = jj;
+				*d = 0;
+				return (1);
 			}
 		}
 
 	/* nothing found */
-	return (MB_NO);
+	return (0);
 }
 /*--------------------------------------------------------------------------*/
-/* 	function get_next_tri finds next contour component if it exists */
-int get_next_tri(struct swath *data, int *itri, int *iside1, int *iside2, int *closed, int *itristart, int *isidestart) {
+/* 	function get_next_old finds next contour component if it exists */
+int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd, int k, int i, int j, int d, int kbeg, int ibeg, int jbeg,
+                 int dbeg, int *closed) {
+	static const int ioff[3][2][2] = {{{0, -1}, {1, 0}}, {{1, -1}, {0, 0}}, {{0, -1}, {0, 1}}};
+	static const int joff[3][2][2] = {{{0, 1}, {0, -1}}, {{0, 0}, {1, -1}}, {{1, 0}, {0, -1}}};
+	static const int koff[3][2][2] = {{{1, 1}, {0, 0}}, {{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}};
+	static const int doff[3][2][2] = {{{1, 0}, {0, 1}}, {{0, 1}, {0, 1}}, {{0, 1}, {1, 0}}};
+	int kt[3];
+	int it[3];
+	int jt[3];
+	int dt[3];
+	int ifedge[3];
 
-	/* check if contour ends where it began */
-	if (*closed && data->ct[*iside2][*itri] == *itristart && data->cs[*iside2][*itri] == *isidestart)
-		return (MB_NO);
-
-	/* check if current triangle side connects to another */
-	else if (data->ct[*iside2][*itri] > -1) {
-		*iside1 = data->cs[*iside2][*itri];
-		*itri = data->ct[*iside2][*itri];
-		*iside2 = -1;
-		for (int j = 0; j < 3; j++)
-			if (j != *iside1 && data->flag[j][*itri] != 0)
-				*iside2 = j;
-		if (*iside2 == -1) {
-			fprintf(stderr, "no flagged side in get_next_tri???\n");
-			fprintf(stderr, "noflag: itri:%d flags: %d %d %d\n", *itri, data->flag[0][*itri], data->flag[1][*itri],
-			        data->flag[2][*itri]);
-			return (MB_NO);
-		}
-		return (MB_YES);
+	/* there are three possible edges for the contour to go to */
+	/* (left = 0, across = 1, right = 2) */
+	/* find out which edges have unflagged crossing points */
+	for (int edge = 0; edge < 3; edge++) {
+		kt[edge] = koff[edge][k][d];
+		it[edge] = i + ioff[edge][k][d];
+		jt[edge] = j + joff[edge][k][d];
+		dt[edge] = doff[edge][k][d];
+		if (it[edge] < 0 || it[edge] >= data->npings || jt[edge] < 0
+            || jt[edge] >= data->pings[i].beams_bath || data->pings[it[edge]].beams_bath <= 0)
+			ifedge[edge] = 0;
+		else
+			ifedge[edge] = data->pings[it[edge]].bflag[kt[edge]][jt[edge]];
 	}
 
-	/* else if contour ends but closed set true then
-	    turn contour around and continue in other direction */
+	/* if the across edge exists, use it */
+	if (ifedge[1]) {
+		*nk = kt[1];
+		*ni = it[1];
+		*nj = jt[1];
+		*nd = dt[1];
+		return (1);
+	}
+
+	/* else if edge 0 exists, use it */
+	else if (ifedge[0]) {
+		*nk = kt[0];
+		*ni = it[0];
+		*nj = jt[0];
+		*nd = dt[0];
+		return (1);
+	}
+
+	/* else if edge 2 exists, use it */
+	else if (ifedge[2]) {
+		*nk = kt[2];
+		*ni = it[2];
+		*nj = jt[2];
+		*nd = dt[2];
+		return (1);
+	}
+
+	/* if no edge is found and contour is closed and closes then */
+	/* contour ends */
+	else if (*closed && kbeg == k && ibeg == i && jbeg == j)
+		return (0);
+
+	/* if no edge is found and contour is closed but doesn't close then */
+	/* reverse order of points and start over */
 	else if (*closed) {
-		for (int i = 0; i < data->nsave / 2; i++) {
-			const double xs = data->xsave[i];
-			const double ys = data->ysave[i];
-			data->xsave[i] = data->xsave[data->nsave - i - 1];
-			data->ysave[i] = data->ysave[data->nsave - i - 1];
-			data->xsave[data->nsave - i - 1] = xs;
-			data->ysave[data->nsave - i - 1] = ys;
+		for (int ii = 0; ii < data->nsave / 2; ii++) {
+			const double xs = data->xsave[ii];
+			const double ys = data->ysave[ii];
+			data->xsave[ii] = data->xsave[data->nsave - ii - 1];
+			data->ysave[ii] = data->ysave[data->nsave - ii - 1];
+			data->xsave[data->nsave - ii - 1] = xs;
+			data->ysave[data->nsave - ii - 1] = ys;
 		}
-		*closed = MB_NO;
+		*closed = 0;
+		*nk = kbeg;
+		*ni = ibeg;
+		*nj = jbeg;
+		if (dbeg)
+			*nd = 0;
+		else
+			*nd = 1;
 		data->nsave--;
-		const int itrisave = *itristart;
-		const int isidesave = *isidestart;
-		*itristart = *itri;
-		*isidestart = *iside2;
-		*itri = itrisave;
-		*iside2 = isidesave;
-		*iside1 = -1;
-		for (int j = 0; j < 3; j++)
-			if (j != *iside2 && data->flag[j][*itri] != 0)
-				*iside1 = j;
-
-		/* if next side not found end contour */
-		if (*iside1 == -1)
-			return (MB_NO);
-
-		/* else keep going */
-		return (MB_YES);
+		return (1);
 	}
 
-	/* else contour ends and is not closed */
+	/* else if no edge is found and contour is not closed */
+	/* then contour ends */
 	else
-		return (MB_NO);
+		return (0);
 }
 /*--------------------------------------------------------------------------*/
-/* 	function get_pos_tri finds position of contour crossing point */
-int get_pos_tri(struct swath *data, double eps, int itri, int iside, double value, double *x, double *y) {
-	int v1 = iside;
-	int v2 = iside + 1;
-	if (v2 == 3)
-		v2 = 0;
-	int pt1 = data->iv[v1][itri];
-	int pt2 = data->iv[v2][itri];
+/* 	function get_pos_old finds position of contour crossing point */
+int get_pos_old(const struct swath *data, double eps, double *x, double *y, int k, int i, int j, double value) {
 
-        double factor;
-	if (fabs(data->z[pt2] - data->z[pt1]) > eps)
-		factor = (value - data->z[pt1]) / (data->z[pt2] - data->z[pt1]);
+	/* get grid positions and values */
+	const double x1 = data->pings[i].bathlon[j];
+	const double y1 = data->pings[i].bathlat[j];
+	const double v1 = data->pings[i].bath[j];
+	double x2;
+	double y2;
+	double v2;
+	if (k == 0) {
+		x2 = data->pings[i].bathlon[j + 1];
+		y2 = data->pings[i].bathlat[j + 1];
+		v2 = data->pings[i].bath[j + 1];
+	}
+	else {
+		x2 = data->pings[i + 1].bathlon[j];
+		y2 = data->pings[i + 1].bathlat[j];
+		v2 = data->pings[i + 1].bath[j];
+	}
+
+	/* interpolate the position */
+	double factor;
+	if (fabs(v2 - v1) > eps)
+		factor = (value - v1) / (v2 - v1);
 	else
 		factor = 0.5;
-	*x = data->x[pt1] + factor * (data->x[pt2] - data->x[pt1]);
-	*y = data->y[pt1] + factor * (data->y[pt2] - data->y[pt1]);
+	if (factor < 0.0)
+		factor = 0.0;
+	if (factor > 1.0)
+		factor = 1.0;
+	*x = factor * (x2 - x1) + x1;
+	*y = factor * (y2 - y1) + y1;
 
 	return (MB_YES);
 }
 /*--------------------------------------------------------------------------*/
-/* 	function get_azimuth_tri gets azimuth across track for a label */
-int get_azimuth_tri(struct swath *data, int itri, int iside, double *angle) {
-	*angle = -data->pings[data->pingid[data->iv[iside][itri]]].heading;
+/* 	function get_hand_old finds handedness of contour */
+int get_hand_old(const struct swath *data, int *hand, int k, int i, int j, int d) {
+	if (k == 0 && d == 0) {
+		if (data->pings[i].bath[j] > data->pings[i].bath[j + 1])
+			*hand = 1;
+		else
+			*hand = -1;
+	}
+	else if (k == 0 && d == 1) {
+		if (data->pings[i].bath[j] > data->pings[i].bath[j + 1])
+			*hand = -1;
+		else
+			*hand = 1;
+	}
+	else if (k == 1 && d == 0) {
+		if (data->pings[i].bath[j] > data->pings[i + 1].bath[j])
+			*hand = -1;
+		else
+			*hand = 1;
+	}
+	else if (k == 1 && d == 1) {
+		if (data->pings[i].bath[j] > data->pings[i + 1].bath[j])
+			*hand = 1;
+		else
+			*hand = -1;
+	}
+	return (MB_YES);
+}
+/*--------------------------------------------------------------------------*/
+/* 	function get_azimuth_old gets azimuth across shiptrack at ping iping */
+int get_azimuth_old(const struct swath *data, int iping, double *angle) {
+
+	*angle = -data->pings[iping].heading;
 	if (*angle > 180.0)
 		*angle = *angle - 360.0;
 	if (*angle < -180.0)
@@ -945,81 +1193,8 @@ int get_azimuth_tri(struct swath *data, int itri, int iside, double *angle) {
 	return (MB_YES);
 }
 /*--------------------------------------------------------------------------*/
-/* 	function check_label checks if new label will overwrite any recent
- *	labels. */
-int check_label(struct swath *data, int nlab) {
-#define MAXHIS 30
-	static double xlabel_his[MAXHIS], ylabel_his[MAXHIS];
-	static int nlabel_his = 0;
-	double dx, dy, rr;
-
-	int good = 1;
-	int ilab = 0;
-	double rad_label_his = data->label_spacing;
-	while (good && ilab < nlabel_his) {
-		dx = xlabel_his[ilab] - data->xlabel[nlab];
-		dy = ylabel_his[ilab] - data->ylabel[nlab];
-		rr = sqrt(dx * dx + dy * dy);
-		if (rr < rad_label_his)
-			good = 0;
-		ilab++;
-	}
-	ilab--;
-	if (good) {
-		nlabel_his++;
-		if (nlabel_his >= MAXHIS)
-			nlabel_his = MAXHIS - 1;
-		for (int i = nlabel_his; i > 0; i--) {
-			xlabel_his[i] = xlabel_his[i - 1];
-			ylabel_his[i] = ylabel_his[i - 1];
-		}
-		xlabel_his[0] = data->xlabel[nlab];
-		ylabel_his[0] = data->ylabel[nlab];
-	}
-	return (good);
-}
-/*--------------------------------------------------------------------------*/
-/* 	function dump_contour dumps the contour stored in xsave and ysave
- *	to the plotting routines */
-int dump_contour(struct swath *data, double value) {
-	/* plot the contours */
-	if (data->nsave < 2)
-		return (MB_NO);
-	data->contour_plot(data->xsave[0], data->ysave[0], IMOVE);
-	for (int i = 1; i < data->nsave - 1; i++)
-		data->contour_plot(data->xsave[i], data->ysave[i], IDRAW);
-	data->contour_plot(data->xsave[data->nsave - 1], data->ysave[data->nsave - 1], ISTROKE);
-	data->nsave = 0;
-
-	/* plot the labels */
-	char label[25];
-	sprintf(label, "  %d", (int)value);
-	const int len = strlen(label);
-	for (int i = 0; i < data->nlabel; i++) {
-		if (data->justify[i] == 1) {
-			double mtodeglon;
-			double mtodeglat;
-			mb_coor_scale(0, data->ylabel[i], &mtodeglon, &mtodeglat);
-			double s[4];
-			data->contour_justify_string(data->label_hgt, label, s);
-			const double dx = 1.5 * s[2] * cos(DTR * data->angle[i]);
-			const double dy = 1.5 * mtodeglat / mtodeglon * s[2] * sin(DTR * data->angle[i]);
-			const double x = data->xlabel[i] - dx;
-			const double y = data->ylabel[i] - dy;
-			data->contour_plot_string(x, y, data->label_hgt, data->angle[i], label);
-		}
-		else {
-			data->contour_plot_string(data->xlabel[i], data->ylabel[i], data->label_hgt, data->angle[i], label);
-		}
-	}
-	data->nlabel = 0;
-
-	return (MB_YES);
-}
-/*--------------------------------------------------------------------------*/
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error) {
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1155,7 +1330,6 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Data points:\n");
 		fprintf(stderr, "dbg4       nlevel:           %d\n", data->nlevel);
@@ -1184,7 +1358,6 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 			const int tick = data->tick_list[ival];
 			const int label = data->label_list[ival];
 
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  About to contour level in function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       value:         %f\n", value);
@@ -1379,7 +1552,6 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 			/* done with contouring this level */
 		}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1391,241 +1563,32 @@ int mb_ocontour(int verbose, struct swath *data, int *error) {
 	return (MB_SUCCESS);
 }
 /*--------------------------------------------------------------------------*/
-/* 	function get_start_old finds next contour starting point.
- *	the borders are searched first and then the interior */
-int get_start_old(struct swath *data, int *k, int *i, int *j, int *d, int *closed) {
-	/* search edges */
-	*closed = 0;
-
-	/* search bottom (i = 0) */
-	for (int jj = 0; jj < data->pings[0].beams_bath - 1; jj++)
-		if (data->pings[0].bflag[0][jj]) {
-			*k = 0;
-			*i = 0;
-			*j = jj;
-			*d = 0;
-			return (1);
-		}
-
-	/* search top (i = npings-1) */
-	for (int jj = 0; jj < data->pings[data->npings - 1].beams_bath - 1; jj++)
-		if (data->pings[data->npings - 1].bflag[0][jj]) {
-			*k = 0;
-			*i = data->npings - 1;
-			*j = jj;
-			*d = 1;
-			return (1);
-		}
-
-	/* search left (j = 0) */
-	for (int ii = 0; ii < data->npings - 1; ii++)
-		if (data->pings[ii].beams_bath > 0 && data->pings[ii].bflag[1][0]) {
-			*k = 1;
-			*i = ii;
-			*j = 0;
-			*d = 0;
-			return (1);
-		}
-
-	/* search right (j = beams_bath-1) */
-	for (int ii = 0; ii < data->npings - 1; ii++)
-		if (data->pings[ii].beams_bath > 0 && data->pings[ii].bflag[1][data->pings[ii].beams_bath - 1]) {
-			*k = 1;
-			*i = ii;
-			*j = data->pings[ii].beams_bath - 1;
-			*d = 1;
-			return (1);
-		}
-
-	/* search interior */
-	*closed = 1;
-	for (int ii = 0; ii < data->npings - 1; ii++)
-		for (int jj = 0; jj < data->pings[ii].beams_bath - 1; jj++) {
-			if (data->pings[ii].bflag[0][jj]) {
-				*k = 0;
-				*i = ii;
-				*j = jj;
-				*d = 0;
-				return (1);
-			}
-			if (data->pings[ii].bflag[1][jj]) {
-				*k = 1;
-				*i = ii;
-				*j = jj;
-				*d = 0;
-				return (1);
-			}
-		}
-
-	/* nothing found */
-	return (0);
-}
-/*--------------------------------------------------------------------------*/
-/* 	function get_next_old finds next contour component if it exists */
-int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd, int k, int i, int j, int d, int kbeg, int ibeg, int jbeg,
-                 int dbeg, int *closed) {
-	static int ioff[3][2][2] = {{{0, -1}, {1, 0}}, {{1, -1}, {0, 0}}, {{0, -1}, {0, 1}}};
-	static int joff[3][2][2] = {{{0, 1}, {0, -1}}, {{0, 0}, {1, -1}}, {{1, 0}, {0, -1}}};
-	static int koff[3][2][2] = {{{1, 1}, {0, 0}}, {{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}};
-	static int doff[3][2][2] = {{{1, 0}, {0, 1}}, {{0, 1}, {0, 1}}, {{0, 1}, {1, 0}}};
-	int kt[3];
-	int it[3];
-	int jt[3];
-	int dt[3];
-	int ifedge[3];
-
-	/* there are three possible edges for the contour to go to */
-	/* (left = 0, across = 1, right = 2) */
-	/* find out which edges have unflagged crossing points */
-	for (int edge = 0; edge < 3; edge++) {
-		kt[edge] = koff[edge][k][d];
-		it[edge] = i + ioff[edge][k][d];
-		jt[edge] = j + joff[edge][k][d];
-		dt[edge] = doff[edge][k][d];
-		if (it[edge] < 0 || it[edge] >= data->npings || jt[edge] < 0
-            || jt[edge] >= data->pings[i].beams_bath || data->pings[it[edge]].beams_bath <= 0)
-			ifedge[edge] = 0;
-		else
-			ifedge[edge] = data->pings[it[edge]].bflag[kt[edge]][jt[edge]];
+/* 	function mb_contour calls the appropriate contouring routine. */
+int mb_contour(int verbose, struct swath *data, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:                 %d\n", verbose);
+		fprintf(stderr, "dbg2       data:                    %p\n", data);
+		fprintf(stderr, "dbg2       data->contour_alg:       %d\n", data->contour_algorithm);
 	}
 
-	/* if the across edge exists, use it */
-	if (ifedge[1]) {
-		*nk = kt[1];
-		*ni = it[1];
-		*nj = jt[1];
-		*nd = dt[1];
-		return (1);
-	}
-
-	/* else if edge 0 exists, use it */
-	else if (ifedge[0]) {
-		*nk = kt[0];
-		*ni = it[0];
-		*nj = jt[0];
-		*nd = dt[0];
-		return (1);
-	}
-
-	/* else if edge 2 exists, use it */
-	else if (ifedge[2]) {
-		*nk = kt[2];
-		*ni = it[2];
-		*nj = jt[2];
-		*nd = dt[2];
-		return (1);
-	}
-
-	/* if no edge is found and contour is closed and closes then */
-	/* contour ends */
-	else if (*closed && kbeg == k && ibeg == i && jbeg == j)
-		return (0);
-
-	/* if no edge is found and contour is closed but doesn't close then */
-	/* reverse order of points and start over */
-	else if (*closed) {
-		for (int ii = 0; ii < data->nsave / 2; ii++) {
-			const double xs = data->xsave[ii];
-			const double ys = data->ysave[ii];
-			data->xsave[ii] = data->xsave[data->nsave - ii - 1];
-			data->ysave[ii] = data->ysave[data->nsave - ii - 1];
-			data->xsave[data->nsave - ii - 1] = xs;
-			data->ysave[data->nsave - ii - 1] = ys;
-		}
-		*closed = 0;
-		*nk = kbeg;
-		*ni = ibeg;
-		*nj = jbeg;
-		if (dbeg)
-			*nd = 0;
-		else
-			*nd = 1;
-		data->nsave--;
-		return (1);
-	}
-
-	/* else if no edge is found and contour is not closed */
-	/* then contour ends */
+	/* call the appropriate contouring routine */
+	int status = MB_SUCCESS;
+	if (data->contour_algorithm == MB_CONTOUR_TRIANGLES)
+		status &= mb_tcontour(verbose, data, error);
 	else
-		return (0);
-}
-/*--------------------------------------------------------------------------*/
-/* 	function get_pos_old finds position of contour crossing point */
-int get_pos_old(struct swath *data, double eps, double *x, double *y, int k, int i, int j, double value) {
+		status &= mb_ocontour(verbose, data, error);
 
-	/* get grid positions and values */
-	const double x1 = data->pings[i].bathlon[j];
-	const double y1 = data->pings[i].bathlat[j];
-	const double v1 = data->pings[i].bath[j];
-	double x2;
-	double y2;
-	double v2;
-	if (k == 0) {
-		x2 = data->pings[i].bathlon[j + 1];
-		y2 = data->pings[i].bathlat[j + 1];
-		v2 = data->pings[i].bath[j + 1];
-	}
-	else {
-		x2 = data->pings[i + 1].bathlon[j];
-		y2 = data->pings[i + 1].bathlat[j];
-		v2 = data->pings[i + 1].bath[j];
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* interpolate the position */
-	double factor;
-	if (fabs(v2 - v1) > eps)
-		factor = (value - v1) / (v2 - v1);
-	else
-		factor = 0.5;
-	if (factor < 0.0)
-		factor = 0.0;
-	if (factor > 1.0)
-		factor = 1.0;
-	*x = factor * (x2 - x1) + x1;
-	*y = factor * (y2 - y1) + y1;
-
-	return (MB_YES);
-}
-/*--------------------------------------------------------------------------*/
-/* 	function get_hand_old finds handedness of contour */
-int get_hand_old(struct swath *data, int *hand, int k, int i, int j, int d) {
-	if (k == 0 && d == 0) {
-		if (data->pings[i].bath[j] > data->pings[i].bath[j + 1])
-			*hand = 1;
-		else
-			*hand = -1;
-	}
-	else if (k == 0 && d == 1) {
-		if (data->pings[i].bath[j] > data->pings[i].bath[j + 1])
-			*hand = -1;
-		else
-			*hand = 1;
-	}
-	else if (k == 1 && d == 0) {
-		if (data->pings[i].bath[j] > data->pings[i + 1].bath[j])
-			*hand = -1;
-		else
-			*hand = 1;
-	}
-	else if (k == 1 && d == 1) {
-		if (data->pings[i].bath[j] > data->pings[i + 1].bath[j])
-			*hand = 1;
-		else
-			*hand = -1;
-	}
-	return (MB_YES);
+	return (status);
 }
 
-/*--------------------------------------------------------------------------*/
-/* 	function get_azimuth_old gets azimuth across shiptrack at ping iping */
-int get_azimuth_old(struct swath *data, int iping, double *angle) {
-
-	*angle = -data->pings[iping].heading;
-	if (*angle > 180.0)
-		*angle = *angle - 360.0;
-	if (*angle < -180.0)
-		*angle = *angle + 360.0;
-
-	return (MB_YES);
-}
 /*--------------------------------------------------------------------------*/
