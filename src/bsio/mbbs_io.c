@@ -50,12 +50,19 @@
 #include "mbbs_defines.h"
 #include "mbbs_mem.h"
 
-extern int mbbs_getpngdataptrs(Ping *, MemType *, PingData *);
-extern double mbbs_nand();
-extern float mbbs_nanf();
-extern MemType *mbbs_pngmemalloc(Ping *);
-extern int mbbs_mr1_xdrpnghdrv1(Ping *, XDR *);
-extern int mbbs_mr1_xdrpnghdrv2(Ping *, XDR *);
+int mbbs_getpngdataptrs(Ping *, MemType *, PingData *);
+double mbbs_nand();
+float mbbs_nanf();
+MemType *mbbs_pngmemalloc(Ping *);
+int mbbs_mr1_xdrpnghdrv1(Ping *, XDR *);
+int mbbs_mr1_xdrpnghdrv2(Ping *, XDR *);
+
+int mbbs_xdrbsfhdr(BSFile *, XDR *);
+int mbbs_xdrpnghdr(Ping *, XDR *, int);
+int mbbs_xdrpngdata(Ping *, MemType *, XDR *);
+int mbbs_xdrpngpddata(Ping *, PingData *, XDR *);
+int mbbs_xdrstring(XDR *, char **, unsigned long *);
+int mbbs_xdrside(PingSide *, XDR *, int, unsigned long *);
 
 unsigned long bs_iobytecnt;
 int bs_ionaninit = 0;
@@ -75,8 +82,6 @@ int mbbs_rdbsfhdr(BSFile *bsf, XDR *xdrs)
    Returns BS_SUCCESS, BS_BADARCH or BS_READ.
 */
 {
-	int mbbs_xdrbsfhdr(BSFile *, XDR *);
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -93,8 +98,6 @@ int mbbs_wrbsfhdr(BSFile *bsf, XDR *xdrs)
    Returns BS_SUCCESS, BS_BADARCH or BS_READ.
 */
 {
-	int mbbs_xdrbsfhdr(BSFile *, XDR *);
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -131,8 +134,6 @@ int mbbs_rdpnghdr(Ping *png, XDR *xdrs, int version)
    Returns BS_SUCCESS, BS_BADARCH, BS_BADARG or BS_READ.
 */
 {
-	int mbbs_xdrpnghdr(Ping *, XDR *, int);
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -168,8 +169,6 @@ int mbbs_wrpnghdr(Ping *png, XDR *xdrs)
    Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
 */
 {
-	int mbbs_xdrpnghdr(Ping *, XDR *, int);
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -189,8 +188,6 @@ int mbbs_rdpngdata(Ping *png, MemType *data, XDR *xdrs)
    Returns BS_SUCCESS, BS_BADARCH or BS_READ.
 */
 {
-	int mbbs_xdrpngdata(Ping *, MemType *, XDR *);
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -207,8 +204,6 @@ int mbbs_wrpngdata(Ping *png, MemType *data, XDR *xdrs)
    Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
 */
 {
-	int mbbs_xdrpngdata(Ping *, MemType *, XDR *);
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -225,8 +220,6 @@ int mbbs_rdpngpddata(Ping *png, PingData *pddata, XDR *xdrs)
    Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
 */
 {
-	int mbbs_xdrpngpddata(Ping *, PingData *, XDR *);
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -243,8 +236,6 @@ int mbbs_wrpngpddata(Ping *png, PingData *pddata, XDR *xdrs)
    Returns BS_SUCCESS, BS_BADARCH or BS_WRITE.
 */
 {
-	int mbbs_xdrpngpddata(Ping *, PingData *, XDR *);
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
@@ -737,7 +728,6 @@ int mbbs_xdrbsfhdr(BSFile *bsf, XDR *xdrs)
 	char **cpp;
 	int version;
 	unsigned long strbc;
-	int mbbs_xdrstring(XDR *, char **, unsigned long *);
 
 	bs_iobytecnt = 0;
 
@@ -855,7 +845,6 @@ int mbbs_xdrpnghdr(Ping *png, XDR *xdrs, int version)
 	unsigned int flags;
 	int tvsec, tvusec;
 	unsigned long sidebc;
-	int mbbs_xdrside(PingSide *, XDR *, int, unsigned long *);
 
 	switch (version) {
 	case BS_VERSION_1_0:
@@ -1128,7 +1117,6 @@ int mbbs_xdrpngdata(Ping *png, MemType *data, XDR *xdrs)
 */
 {
 	PingData pd;
-	int mbbs_xdrpngpddata(Ping *, PingData *, XDR *);
 
 	if (mbbs_getpngdataptrs(png, data, &pd) != BS_SUCCESS)
 		return 0;
