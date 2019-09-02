@@ -130,7 +130,7 @@ pointer may be a null pointer if the function fails for any reason.)
 The quantity of memory allocated is dependent upon the number of data
 samples and padding samples indicated by \fIpng\fR. Padding samples,
 i.e., meaningless placeholder samples that are immediately contiguous and
-subsequent to valid data samples, are never stored to files, but it is 
+subsequent to valid data samples, are never stored to files, but it is
 sometimes convenient to allocate this additional sample memory at the
 time a ping is read in order to perform an operation that may result
 in an increase in the number of meaningful samples associated with that
@@ -473,7 +473,7 @@ named BS header, inserting a blank space between each of the character
 strings pointed to by \fIargv\fR and appending a trailing semicolon to the
 final string. The routine will also append a newline to the pre-existing
 log field before appending \fIargv\fR if that pre-existing log field is
-non-empty. The last element of the \fIargv\fR array of character pointers 
+non-empty. The last element of the \fIargv\fR array of character pointers
 must be a null pointer. This routine will allocate new memory for the
 modified log field and deallocate the memory consumed by the previous log
 field.

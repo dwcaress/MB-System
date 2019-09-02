@@ -37,11 +37,11 @@
 
 #include "mbbs_defines.h"
 
-extern int mbbs_getpngdataptrs(Ping *, MemType *, PingData *);
-extern int mbbs_pngrealloc(Ping *, MemType **, unsigned int *);
-extern int mbbs_rdpngdata(Ping *, MemType *, XDR *);
-extern int mbbs_wrpngdata(Ping *, MemType *, XDR *);
-extern int mbbs_xdrpnghdr(Ping *, XDR *, int);
+int mbbs_getpngdataptrs(Ping *, MemType *, PingData *);
+int mbbs_pngrealloc(Ping *, MemType **, unsigned int *);
+int mbbs_rdpngdata(Ping *, MemType *, XDR *);
+int mbbs_wrpngdata(Ping *, MemType *, XDR *);
+int mbbs_xdrpnghdr(Ping *, XDR *, int);
 
 extern unsigned long bs_iobytecnt;
 
