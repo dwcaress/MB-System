@@ -36,8 +36,7 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/mbtrn/mframe/
 
 libmbtrn_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
-libmbtrn_la_SOURCES = \
-				mframe/src/mframe.c \
+libmbtrn_la_SOURCES =  mframe/src/mframe.c \
                 mframe/src/mcbuf.c \
                 mframe/src/msocket.c \
                 mframe/src/mthread.c \

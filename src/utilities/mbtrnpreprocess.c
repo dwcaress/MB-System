@@ -44,16 +44,17 @@
 #include <string.h>
 #include <poll.h>
 #include "mconfig.h"
-//#include "mbtrn.h"
 #include "r7kc.h"
 #include "msocket.h"
 #include "mtime.h"
 #include "mlist.h"
 #include "mlog.h"
 #include "medebug.h"
-#include "trnw.h"
 #include "r7k-reader.h"
 #include "mstats.h"
+#ifdef WITH_MBTNAV
+#include "trnw.h"
+#endif //WITH_MBTNAV
 
 /* ping structure definition */
 struct mbtrnpreprocess_ping_struct {
@@ -318,8 +319,8 @@ static double stats_prev_end=0.0;
 static double stats_prev_start=0.0;
 static bool log_clock_res=true;
 
+#ifdef WITH_MBTNAV
 trn_config_t *trn_cfg = NULL;
-
 #define UTM_MONTEREY_BAY 10L
 #define UTM_AXIAL        12L
 #define TRN_UTM_DFL   UTM_MONTEREY_BAY
@@ -335,6 +336,7 @@ char *trn_cfg_file=NULL;
 char *trn_particles_file=NULL;
 char *trn_log_dir=NULL;
 wtnav_t *tnav = NULL;
+#endif //WITH_MBTNAV
 
 #define MBTRNPP_MEAS_MOD ((double)0.0) //3600.0
 
@@ -356,11 +358,13 @@ wtnav_t *tnav = NULL;
 int mbtrnpreprocess_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags);
 int mbtrnpreprocess_log_min(mstats_metstats_t *stats);
 
+#ifdef WITH_MBTNAV
 
 int mbtrnpreprocess_init_trn(int verbose,trn_config_t *cfg);
 int mbtrnpreprocess_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1,trn_config_t *cfg);
 int mbtrnpreprocess_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, pt_cdata_t **pt_out, pt_cdata_t **mle_out, pt_cdata_t **mse_out);
 int mbtrnpreprocess_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out,trn_config_t *cfg);
+#endif //WITH_MBTNAV
 
 /*--------------------------------------------------------------------*/
 
@@ -719,7 +723,7 @@ int main(int argc, char **argv) {
             else if (strcmp("stats", options[option_index].name) == 0) {
                 sscanf(optarg,"%lf",&trn_status_interval_sec);
             }
-
+#ifdef WITH_MBTNAV
                 /* TRN enable */
             else if (strcmp("trn-en", options[option_index].name) == 0) {
                 trn_enable=true;
@@ -757,6 +761,7 @@ int main(int argc, char **argv) {
                 trn_log_dir=strdup(optarg);
                 sscanf(optarg,"%d",&trn_log_dir);
             }
+#endif // WITH_MBTNAV
 
 			/* format */
 			else if (strcmp("format", options[option_index].name) == 0) {
@@ -916,7 +921,7 @@ int main(int argc, char **argv) {
 #endif
 
     mbtrnpreprocess_init_debug(verbose);
-
+#ifdef WITH_MBTNAV
     if( trn_enable && NULL!=(trn_cfg = trncfg_new(NULL,-1,
                                     trn_utm_zone,trn_mtype,trn_ftype,
                                     trn_map_file,
@@ -929,6 +934,7 @@ int main(int argc, char **argv) {
             fprintf(stderr, "TRN init failed\n");
         }
     }
+
     // release the config strings
     if(NULL!=trn_map_file)free(trn_map_file);
     if(NULL!=trn_cfg_file)free(trn_cfg_file);
@@ -936,6 +942,7 @@ int main(int argc, char **argv) {
     if(NULL!=trn_log_dir)free(trn_log_dir);
 
     trncfg_show(trn_cfg,true,5);
+#endif //WITH_MBTNAV
 
 	/* load platform definition if specified */
 	if (use_platform_file == MB_YES) {
@@ -1537,11 +1544,14 @@ int main(int argc, char **argv) {
 
                         mb_put_binary_int(MB_YES, checksum, &output_buffer[index]); index += 4;
                         PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"chk[%08X] idx[%zu] mb1sz[%zu]\n",checksum,index,mb1_size));
+#ifdef WITH_MBTNAV
 
                         if(trn_enable){
 	                        mb1_t *mb1 = (mb1_t *)output_buffer;
     	                    mbtrnpreprocess_trn_process_mb1(tnav,mb1,trn_cfg);
                         }
+#endif// WITH_MBTNAV
+
                         MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_MBPING_XT], mtime_dtime());
 
                         /* send the packet to TRN */
@@ -2682,6 +2692,7 @@ int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 
+#ifdef WITH_MBTNAV
 
 int mbtrnpreprocess_init_trn(int verbose,trn_config_t *cfg)
 {
@@ -2832,5 +2843,6 @@ int mbtrnpreprocess_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1,trn_config_t *cfg)
     
     return retval;
 }
+#endif //WITH_MBTNAV
 
 /*--------------------------------------------------------------------*/
