@@ -92,6 +92,7 @@ typedef enum{
     MOD_EMU7K,
     MOD_TBINX,
     MOD_MBTRNPP,
+    MOD_R7KR,
     APP_MODULE_COUNT
 }app_module_ids;
 
@@ -110,6 +111,22 @@ typedef enum{
     MBTRN_V1= (1<<ID_MBTRN_V1),
     MBTRN_V2= (1<<ID_MBTRN_V2)
 }mbtrn_channel_mask;
+
+/// @enum r7kr_channel_id
+/// @brief test module channel IDs
+/// [note : starting above reserved mframe channel IDs]
+typedef enum{
+    ID_R7KR_V1=MM_CHANNEL_COUNT,
+    ID_R7KR_V2,
+    R7KR_CH_COUNT
+}r7kr_channel_id;
+
+/// @enum r7kr_channel_mask
+/// @brief test module channel masks
+typedef enum{
+    R7KR_V1= (1<<ID_R7KR_V1),
+    R7KR_V2= (1<<ID_R7KR_V2)
+}r7kr_channel_mask;
 
 /// @enum r7k_channel_id
 /// @brief test module channel IDs
@@ -257,9 +274,9 @@ typedef enum{
 
 /// @def MST_STATS_EN
 /// @brief enable stats macros
-//#ifndef MST_STATS_EN
-//#define MST_STATS_EN
-//#endif
+#ifndef MST_STATS_EN
+#define MST_STATS_EN
+#endif
 
 /// @def MBTRNPP_STAT_PERIOD_SEC
 #define MBTRNPP_STAT_PERIOD_SEC ((double)20.0)

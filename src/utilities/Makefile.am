@@ -3,8 +3,9 @@ if BUILD_FFTW
 endif
 if BUILD_MBTRN
   MBTRN_PROG = mbtrnpreprocess
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtnav/trnw
   MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
+  TRNWLIB = ${top_builddir}/src/mbtnav/libtrnw.la ${top_builddir}/src/mbtnav/libqnx.la ${top_builddir}/src/mbtnav/libnewmat.la  ${top_builddir}/src/mbtnav/libtnav.la  ${top_builddir}/src/mbtnav/libgeolib.la
 endif
 
 # TODO(schwehr): What happened to mbps?
@@ -61,7 +62,7 @@ bin_PROGRAMS = mbconfig \
         mbtime \
         mbvoxelclean \
         $(FFTW_PROG) \
-        $(MBTRN_PROG)
+		$(MBTRN_PROG)
 
 
 include_HEADERS = levitus.h
@@ -161,7 +162,7 @@ mbtrnpreprocess_LDADD = $(top_builddir)/src/mbtrn/libmbtrn.la \
        $(top_builddir)/src/mbaux/libmbaux.la \
        $(top_builddir)/src/mbaux/libmbxgr.la \
        ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-       $(MBTRNLIB) $(LIBM)
+       $(MBTRNLIB) $(TRNWLIB) $(LIBM)
 endif
 
 BUILT_SOURCES = levitus.h

@@ -59,36 +59,28 @@
 // Headers
 /////////////////////////
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <getopt.h>
-//#include <stdarg.h>
-//#include <string.h>
-//#include <errno.h>
-//#include <inttypes.h>
-//#include <arpa/inet.h>
-//#include <signal.h>
-//
-//#include "iowrap.h"
-//#include "mbtrn.h"
-//#include "mdebug.h"
-
 #include <getopt.h>
 #include "msocket.h"
 #include "mtime.h"
-#include "mbtrn.h"
 #include "medebug.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
 #define UDPS_NAME "udps"
+#ifndef UDPS_VER
+/// @def UDPS_VER
+/// @brief module build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DUDPS_VER=<version>
+#define UDPS_VER (dev)
+#endif
 #ifndef UDPS_BUILD
 /// @def UDPS_BUILD
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
-/// w/ -DMBTRN_BUILD=`date`
-#define UDPS_BUILD ""VERSION_STRING(MBTRN_BUILD)
+/// w/ -DMFRAME_BUILD=`date`
+#define UDPS_BUILD VERSION_STRING(UDPS_VER)" "LIBMFRAME_BUILD
 #endif
 
 // These macros should only be defined for
@@ -294,11 +286,11 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 break;
         }
         if (version) {
-            mbtrn_show_app_version(UDPS_NAME,UDPS_BUILD);
+            MFRAME_SHOW_VERSION(UDPS_NAME, UDPS_BUILD);
             exit(0);
         }
         if (help) {
-            mbtrn_show_app_version(UDPS_NAME,UDPS_BUILD);
+            MFRAME_SHOW_VERSION(UDPS_NAME, UDPS_BUILD);
             s_show_help();
             exit(0);
         }

@@ -165,17 +165,17 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
             uint32_t sync_bytes=0;
             int64_t rbytes=-1;
 
-            if( (rbytes = mbtrn_read_stripped_frame(mb_io_ptr->mbsp, (byte *) buffer, R7K_MAX_FRAME_BYTES, MBR_NET_STREAM, 0.0, MBTRN_READ_TMOUT_MSEC,  &sync_bytes)) < 0){
+            if( (rbytes = r7kr_read_stripped_frame(mb_io_ptr->mbsp, (byte *) buffer, R7K_MAX_FRAME_BYTES, R7KR_NET_STREAM, 0.0, R7KR_READ_TMOUT_MSEC,  &sync_bytes)) < 0){
 
                 status   = MB_FAILURE;
                 *error   = MB_ERROR_EOF;
                 *size    = (size_t)rbytes;
                 if (me_errno==ME_ESOCK) {
-                    fprintf(stderr,"mbtrn_reader server connection closed.\n");
+                    fprintf(stderr,"r7kr_reader server connection closed.\n");
                 }else if (me_errno==ME_EOF) {
-                    fprintf(stderr,"mbtrn_reader end of file (server connection closed).\n");
+                    fprintf(stderr,"r7kr_reader end of file (server connection closed).\n");
                 }else{
-                    fprintf(stderr,"mbtrn_read_stripped_frame me_errno %d/%s\n",me_errno,me_strerror(me_errno));
+                    fprintf(stderr,"r7kr_read_stripped_frame me_errno %d/%s\n",me_errno,me_strerror(me_errno));
                 }
             }else {
                 *error = MB_ERROR_NO_ERROR;

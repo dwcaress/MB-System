@@ -71,18 +71,11 @@
 // Includes 
 /////////////////////////
 
-//#include <pthread.h>
-//#include "iowrap.h"
-//#include "r7kc.h"
-//#include "mbtrn.h"
-//#include "mlist.h"
-//#include "mconfig.h"
-
 #include "mthread.h"
 #include "msocket.h"
 #include "mfile.h"
 #include "r7kc.h"
-#include "mbtrn.h"
+#include "r7k-reader.h"
 #include "mlist.h"
 
 /////////////////////////
@@ -208,7 +201,7 @@ typedef struct emu7k_s
     mthread_thread_t *w;
     /// @var emu7k_s::reader
     /// @brief s7k stream reader
-    mbtrn_reader_t *reader;
+    r7kr_reader_t *reader;
     /// @var emu7k_s::max_clients
     /// @brief max allowed client connections
     uint32_t max_clients;

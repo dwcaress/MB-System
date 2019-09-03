@@ -1,7 +1,7 @@
 lib_LTLIBRARIES = mbsystem.la
 
 if BUILD_MBTRN
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/mbtrn/mframe/src
   MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 endif
 

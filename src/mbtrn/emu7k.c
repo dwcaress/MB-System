@@ -112,12 +112,19 @@
 
 
 #define EMU7K_NAME "emu7k"
+#ifndef EMU7K_VER
+/// @def EMU7K_VER
+/// @brief module build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DEMU7K_VER=<version>
+#define EMU7K_VER (dev)
+#endif
 #ifndef EMU7K_BUILD
 /// @def EMU7K_BUILD
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
 /// w/ -DMBTRN_BUILD=`date`
-#define EMU7K_BUILD ""VERSION_STRING(MBTRN_BUILD)
+#define EMU7K_BUILD VERSION_STRING(EMU7K_VER)" "LIBMFRAME_BUILD
 #endif
 
 /// @def CUR_FRAME
@@ -255,7 +262,7 @@ emu7k_t *emu7k_new(msock_socket_t *s, mfile_file_t *mb_data, app_cfg_t *cfg)
         self->client_count=0;
         self->client_list = mlist_new();
         self->cfg = cfg;
-        self->reader=mbtrn_freader_new(mb_data, 2*MAX_FRAME_BYTES_7K, NULL, 0);
+        self->reader=r7kr_freader_new(mb_data, 2*MAX_FRAME_BYTES_7K, NULL, 0);
     }
     return self;
 }
@@ -280,7 +287,7 @@ emu7k_t *emu7k_lnew(msock_socket_t *s, mlist_t *path_list, app_cfg_t *cfg)
         self->client_count = 0;
         self->client_list  = mlist_new();
         self->cfg       = cfg;
-        self->reader    = mbtrn_freader_new(NULL, 2*MAX_FRAME_BYTES_7K, NULL, 0);
+        self->reader    = r7kr_freader_new(NULL, 2*MAX_FRAME_BYTES_7K, NULL, 0);
         self->file_list = NULL;
         
         if (mlist_size(path_list)>0) {
@@ -425,11 +432,11 @@ static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t 
     if (NULL!=self && NULL!=self->reader && NULL!=self->cfg &&
         NULL!=dest) {
 
-        mbtrn_flags_t rflags = ( (self->cfg->netframe_input) ? MBR_NET_STREAM : MBR_DRF_STREAM );
+        r7kr_flags_t rflags = ( (self->cfg->netframe_input) ? R7KR_NET_STREAM : R7KR_DRF_STREAM );
       
-        if( (rbytes = mbtrn_read_frame(self->reader, dest, len, rflags , 0.0, 20, sync_bytes )) >0 ){
+        if( (rbytes = r7kr_read_frame(self->reader, dest, len, rflags , 0.0, 20, sync_bytes )) >0 ){
             retval=rbytes;
-            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"mbtrn_read_frame_new returned %s sz[%"PRId64"] sync[%"PRIu32"/x%X]\n",( (self->cfg->netframe_input) ? "NF" : "DRF" ), rbytes, *sync_bytes,*sync_bytes));
+            PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"r7kr_read_frame_new returned %s sz[%"PRId64"] sync[%"PRIu32"/x%X]\n",( (self->cfg->netframe_input) ? "NF" : "DRF" ), rbytes, *sync_bytes,*sync_bytes));
 //            if (self->cfg->netframe_input) {
 //                r7k_nf_show((r7k_nf_t *)dest,false,5);
 //                r7k_drf_show((r7k_drf_t *)(dest+R7K_NF_BYTES),false,5);
@@ -483,8 +490,8 @@ static void *s_server_publish(void *arg)
 
             PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"running file[%s]\n",source_file->path));
             PMPRINT(MOD_EMU7K,EMU7K_V1,(stderr,"min_delay[%.3lf] max_delay[%.3lf]\n",min_delay,max_delay));
-            if (mbtrn_reader_set_file(svr->reader,source_file)!=0) {
-                PEPRINT((stderr,"mbtrn_reader_set_file failed\n"));
+            if (r7kr_reader_set_file(svr->reader,source_file)!=0) {
+                PEPRINT((stderr,"r7kr_reader_set_file failed\n"));
                 source_file=NULL;
             }
             
@@ -1173,11 +1180,13 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
                 break;
         }
         if (version) {
-            mbtrn_show_app_version(EMU7K_NAME, EMU7K_BUILD);
+            MFRAME_SHOW_VERSION(EMU7K_NAME, EMU7K_BUILD);
+            //            r7kr_show_app_version(EMU7K_NAME, EMU7K_BUILD);
             exit(0);
         }
         if (help) {
-            mbtrn_show_app_version(EMU7K_NAME, EMU7K_BUILD);
+            MFRAME_SHOW_VERSION(EMU7K_NAME, EMU7K_BUILD);
+            //            r7kr_show_app_version(EMU7K_NAME, EMU7K_BUILD);
             s_show_help();
             exit(0);
         }
@@ -1212,7 +1221,7 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
     mconf_init(NULL,NULL);
     mmd_channel_dis(MOD_EMU7K,MM_ALL);
     mmd_channel_set(MOD_R7K,MM_ERR);
-    mmd_channel_set(MOD_MBTRN,MM_DEBUG);
+    mmd_channel_set(MOD_R7KR,MM_DEBUG);
     mmd_channel_set(MOD_MSOCK,MM_ERR);
 
     switch (cfg->verbose) {
@@ -1249,59 +1258,6 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
            break;
     }
 
-    // use MDI_ALL to globally set module debug output
-    // may also set per module basis using module IDs
-    // defined in mconfig.h:
-    // APP1, APP2...APP5
-    // valid level values are
-    // MDL_UNSET,MDL_NONE
-    // MDL_FATAL, MDL_ERROR, MDL_WARN
-    // MDL_INFO, MDL_DEBUG
-//    mcfg_configure(NULL,0);
-//    mdb_set(MDI_ALL,MDL_UNSET);
-//    mdb_set(IOW,MDL_ERROR);
-//    mdb_set(MBTRN,MDL_DEBUG);
-//    switch (cfg->verbose) {
-//        case 0:
-//            mdb_set(APP1,MDL_NONE);
-//            mdb_set(APP2,MDL_NONE);
-//            mdb_set(APP3,MDL_NONE);
-//            mdb_set(APP4,MDL_NONE);
-//            mdb_set(APP5,MDL_NONE);
-//            break;
-//        case 1:
-//            mdb_set(APP1,MDL_DEBUG);
-//            break;
-//        case 2:
-//            mdb_set(APP1,MDL_DEBUG);
-//            mdb_set(APP2,MDL_DEBUG);
-//            break;
-//        case 3:
-//            mdb_set(APP1,MDL_DEBUG);
-//            mdb_set(APP2,MDL_DEBUG);
-//            mdb_set(APP3,MDL_DEBUG);
-//            break;
-//        case 4:
-//            mdb_set(APP1,MDL_DEBUG);
-//            mdb_set(APP2,MDL_DEBUG);
-//            mdb_set(APP3,MDL_DEBUG);
-//            mdb_set(APP4,MDL_DEBUG);
-//            break;
-//        case 5:
-//            mdb_set(APP1,MDL_DEBUG);
-//            mdb_set(APP2,MDL_DEBUG);
-//            mdb_set(APP3,MDL_DEBUG);
-//            mdb_set(APP4,MDL_DEBUG);
-//            mdb_set(APP5,MDL_DEBUG);
-//            break;
-//        default:
-//            mdb_set(APP1,MDL_ERROR);
-//            mdb_set(APP2,MDL_ERROR);
-//            mdb_set(APP3,MDL_ERROR);
-//            mdb_set(APP4,MDL_ERROR);
-//            mdb_set(APP5,MDL_ERROR);
-//            break;
-//    }
 }
 // End function parse_args
 

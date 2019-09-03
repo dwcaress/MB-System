@@ -60,38 +60,32 @@
 // Headers
 /////////////////////////
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <getopt.h>
-//#include <stdarg.h>
-//#include <string.h>
-//#include <errno.h>
-//#include <inttypes.h>
-//#include <signal.h>
-//#include "iowrap.h"
-//#include "r7kc.h"
-//#include "mbtrn.h"
-//#include "mdebug.h"
-//#include "mbtrn-utils.h"
-
 #include <getopt.h>
 #include "msocket.h"
 #include "r7kc.h"
-#include "mbtrn.h"
+#include "r7k-reader.h"
 #include "mmdebug.h"
 #include "medebug.h"
-#include "mbtrn-utils.h"
+#include "mutils.h"
+#include "mb1_msg.h"
 
 /////////////////////////
 // Macros
 /////////////////////////
 #define TRNC_NAME "trnc"
-#ifndef TRNC_BUILD
-/// @def TRNC_BUILD
+#ifndef TRNC_VER
+/// @def TRNC_VER
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
-/// w/ -DMBTRN_BUILD=`date`
-#define TRNC_BUILD ""VERSION_STRING(MBTRN_BUILD)
+/// w/ -DTRNC_VER=<version>
+#define TRNC_VER (dev)
+#endif
+#ifndef TRNC_BUILD
+/// @def LIBTRNC_BUILD
+/// @brief module build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DMFRAME_BUILD=`date`
+#define TRNC_BUILD VERSION_STRING(TRNC_VER)" "LIBMFRAME_BUILD
 #endif
 
 // These macros should only be defined for
@@ -144,6 +138,13 @@
 /// @def ID_APP3
 /// @brief debug module ID
 #define ID_APP3 3
+
+/// @def MBTRN_MSGTYPE_ACK
+/// @brief TRN message type ACK
+#define MBTRN_MSGTYPE_ACK (0x004B4341)
+/// @def MBTRN_MSGTYPE_MB1
+/// @brief TRN message type MB1 record
+#define MBTRN_MSGTYPE_MB1 (0x0031424D)
 
 /////////////////////////
 // Declarations
@@ -336,11 +337,13 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 break;
         }
         if (version) {
-            mbtrn_show_app_version(TRNC_NAME,TRNC_BUILD);
+            MFRAME_SHOW_VERSION(TRNC_NAME, TRNC_BUILD);
+            //             r7kr_show_app_version(TRNC_NAME,TRNC_BUILD);
             exit(0);
         }
         if (help) {
-            mbtrn_show_app_version(TRNC_NAME,TRNC_BUILD);
+            MFRAME_SHOW_VERSION(TRNC_NAME, TRNC_BUILD);
+            //             r7kr_show_app_version(TRNC_NAME,TRNC_BUILD);
             s_show_help();
             exit(0);
         }
@@ -349,14 +352,14 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
     mconf_init(NULL,NULL);
     mmd_channel_set(MOD_TRNC,MM_ERR);
     mmd_channel_set(MOD_R7K,MM_ERR);
-    mmd_channel_set(MOD_MBTRN,MM_ERR);
+    mmd_channel_set(MOD_R7KR,MM_ERR);
     mmd_channel_set(MOD_MSOCK,MM_ERR);
 
     switch (cfg->verbose) {
         case 0:
             mmd_channel_set(MOD_TRNC,0);
             mmd_channel_set(MOD_R7K,0);
-            mmd_channel_set(MOD_MBTRN,0);
+            mmd_channel_set(MOD_R7KR,0);
             mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
@@ -369,7 +372,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             mmd_channel_en(MOD_TRNC,MM_DEBUG);
             mmd_channel_en(MOD_MSOCK,MM_DEBUG);
             mmd_channel_en(MOD_R7K,MM_DEBUG);
-            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7KR,MM_DEBUG);
             break;
         default:
             mmd_channel_en(MOD_TRNC,MM_DEBUG);
@@ -426,12 +429,13 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
     if (NULL!=s) {
         
         // initialize variables
-        trn_message_t message;
-        trn_message_t *pmessage = &message;
-        mbtrn_header_t *pheader = &pmessage->data.header;
-        mbtrn_sounding_t *psounding = &pmessage->data.sounding;
-        
-        memset(pmessage,0,sizeof(message));
+//        TODO replace
+//        trn_message_t message;
+//        trn_message_t *pmessage = &message;
+//        mbtrn_header_t *pheader = &pmessage->data.header;
+//        mbtrn_sounding_t *psounding = &pmessage->data.sounding;
+//        memset(pmessage,0,sizeof(message));
+        byte msg_buf[MB1_MAX_FRAME_BYTES]={0};
         int hbeat_counter=0;
         int64_t test=0;
         byte *pread=NULL;
@@ -446,7 +450,8 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             // check states, assign actions
             switch (state) {
                 case ST_INIT:
-                    memset(&message,0,MBTRN_MAX_MSG_BYTES);
+//                    memset(&message,0,MBTRN_MAX_MSG_BYTES);
+                    memset(&msg_buf,0,MB1_MAX_FRAME_BYTES);
                     action = AT_CONNECT;
                     break;
                 case ST_CONNECTED:
@@ -454,7 +459,8 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     break;
                 case ST_REQ_PENDING:
                 case ST_SUBSCRIBED:
-                    memset(&message,0,MBTRN_MAX_MSG_BYTES);
+//                    memset(&message,0,MBTRN_MAX_MSG_BYTES);
+                    memset(&msg_buf,0,MB1_MAX_FRAME_BYTES);
                     action=AT_RD_MSG;
                     break;
                 case ST_HBEAT_EXPIRED:
@@ -494,21 +500,33 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             
             // action: read response
             if (action == AT_RD_MSG) {
-                pread = (byte *)&message;
-                readlen = MBTRN_MAX_MSG_BYTES;
+//                pread = (byte *)&message;
+//                readlen = MBTRN_MAX_MSG_BYTES;
+                pread = msg_buf;
+                readlen = MB1_MAX_FRAME_BYTES;
+                
                 // request message
                 if ((test = msock_recvfrom(s, NULL, pread, readlen,0))>0) {
                     
                     trn_rx_bytes+=test;
                     trn_rx_count++;
                     
+                    mfu_hex_show(msg_buf, test, 16, true, 5);
+                    
                     // check message type
-                    if (pheader->type==MBTRN_MSGTYPE_ACK) {
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received ACK ret[%"PRId64"] [%08X]\n",test,pheader->type));
+                    mb1_frame_t frame = {0},*mb1=&frame;
+                    
+                    mb1->sounding=(mb1_sounding_t *)(msg_buf);
+                    mb1->checksum=MB1_PCHECKSUM_U32(mb1);
+                    
+//                    mb1->sounding = (mb1_sounding_t *)(msg_buf+sizeof(mb1_frame_t));
+//                    mb1->checksum = MB1_PCHECKSUM_U32(mb1);
+                    if (mb1->sounding->type==MBTRN_MSGTYPE_ACK) {
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received ACK ret[%"PRId64"] [%08X]\n",test,mb1->sounding->type));
                         hbeat_counter=0;
                         state=ST_SUBSCRIBED;
-                    }else if (pheader->type==MBTRN_MSGTYPE_MB1) {
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",test,pheader->type,pheader->size,psounding->ping_number));
+                    }else if (mb1->sounding->type==MBTRN_MSGTYPE_MB1) {
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",test,mb1->sounding->type,mb1->sounding->size,mb1->sounding->ping_number));
                         trn_msg_count++;
                         trn_msg_bytes+=test;
                         
@@ -526,7 +544,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                         }
                     }else{
                         // response not recognized
-                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"invalid message [%08X]\n",pheader->type));
+                        PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"invalid message [%08X]\n",mb1->sounding->type));
                     }
                 }else{
                     // read returned error
@@ -556,23 +574,47 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             
             // action: show message
             if (action == AT_SHOW_MSG) {
+//                PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V1|TRNC_V2,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
+//                        psounding->ts,
+//                        psounding->ping_number,
+//                        psounding->lat,
+//                        psounding->lon,
+//                        psounding->depth,
+//                        psounding->hdg,
+//                        (uint32_t)psounding->nbeams));
+//                uint32_t j=0;
+//                struct mbtrn_beam_data *bd=psounding->beams;
+//                for (j=0; j<psounding->nbeams; j++,bd++){
+//                    PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V2,(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
+//                            (uint32_t)bd->beam_num,
+//                            bd->rhox,
+//                            bd->rhoy,
+//                            bd->rhoz));
+//                }
+                
+                mb1_frame_t frame = {0},*mb1=&frame;
+                
+                mb1->sounding=(mb1_sounding_t *)(msg_buf);
+                mb1->checksum=MB1_PCHECKSUM_U32(mb1);
                 PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V1|TRNC_V2,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
-                        psounding->ts,
-                        psounding->ping_number,
-                        psounding->lat,
-                        psounding->lon,
-                        psounding->depth,
-                        psounding->hdg,
-                        (uint32_t)psounding->nbeams));
+                                                           mb1->sounding->ts,
+                                                           mb1->sounding->ping_number,
+                                                           mb1->sounding->lat,
+                                                           mb1->sounding->lon,
+                                                           mb1->sounding->depth,
+                                                           mb1->sounding->hdg,
+                                                           (uint32_t)mb1->sounding->nbeams));
                 uint32_t j=0;
-                struct mbtrn_beam_data *bd=psounding->beams;
-                for (j=0; j<psounding->nbeams; j++,bd++){
+                mb1_beam_t *bd=mb1->sounding->beams;
+                for (j=0; j<mb1->sounding->nbeams; j++,bd++){
                     PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V2,(stderr,"n[%03"PRIu32"] atrk/X[% 10.3lf] ctrk/Y[% 10.3lf] dpth/Z[% 10.3lf]\n",
-                            (uint32_t)bd->beam_num,
-                            bd->rhox,
-                            bd->rhoy,
-                            bd->rhoz));
+                                                       (uint32_t)bd->beam_num,
+                                                       bd->rhox,
+                                                       bd->rhoy,
+                                                       bd->rhoz));
                 }
+
+
             }
             
             // action: quit state machine

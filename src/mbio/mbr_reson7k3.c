@@ -9091,9 +9091,9 @@ Have a nice day...:                              %4.4X | %d\n", store->type, sto
 #ifdef MBTRN_ENABLED
   else if (mb_io_ptr->mbsp != NULL) {
       if (*save_flag == MB_YES)
-          mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp) - *size;
+          mb_io_ptr->file_bytes = r7kr_reader_tell(mb_io_ptr->mbsp) - *size;
       else
-          mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp);
+          mb_io_ptr->file_bytes = r7kr_reader_tell(mb_io_ptr->mbsp);
   } else {
       fprintf(stderr,"ERROR - both file and socket input pointers are NULL:                              %4.4X | %d\n", store->type, store->type);
   }

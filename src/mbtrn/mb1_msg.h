@@ -81,6 +81,12 @@
 /// @def MB1_HEADER_BYTES
 /// @brief MB1 header (static field) size (bytes)
 #define MB1_HEADER_BYTES   56
+/// @def MB1_TYPE_BYTES
+/// @brief MB1 type size (bytes)
+#define MB1_TYPE_BYTES   4
+/// @def MB1_SIZE_BYTES
+/// @brief MB1 size size (bytes)
+#define MB1_SIZE_BYTES   4
 /// @def MB1_BEAM_BYTES
 /// @brief MB1 beam data size
 #define MB1_BEAM_BYTES     28

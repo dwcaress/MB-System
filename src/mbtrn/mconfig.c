@@ -153,9 +153,9 @@ char *emu7k_ch_names[EMU7K_CH_COUNT]={
     "warn.emu7k",
     "err.emu7k",
     "emu7k.v1",
-    "emu7k.v2"
-    "emu7k.v3"
-    "emu7k.v4"
+    "emu7k.v2",
+    "emu7k.v3",
+    "emu7k.v4",
     "emu7k.v5"
 };
 
@@ -167,8 +167,8 @@ char *tbinx_ch_names[TBINX_CH_COUNT]={
     "warn.tbinx",
     "err.tbinx",
     "tbinx.v1",
-    "tbinx.v2"
-    "tbinx.v3"
+    "tbinx.v2",
+    "tbinx.v3",
     "tbinx.v4"
 };
 
@@ -180,9 +180,19 @@ char *mbtrnpp_ch_names[MBTRNPP_CH_COUNT]={
     "warn.mbtrnpp",
     "err.mbtrnpp",
     "mbtrnpp.v1",
-    "mbtrnpp.v2"
-    "mbtrnpp.v3"
+    "mbtrnpp.v2",
+    "mbtrnpp.v3",
     "mbtrnpp.v4"
+};
+/// @var char *r7kr_ch_names[R7KR_CH_COUNT]
+/// @brief module channel names
+char *r7kr_ch_names[R7KR_CH_COUNT]={
+    "trace.mbtrnpp",
+    "debug.mbtrnpp",
+    "warn.mbtrnpp",
+    "err.mbtrnpp",
+    "r7kr.v1",
+    "r7kr.v2"
 };
 
 static mmd_module_config_t mmd_config_defaults[]={
@@ -193,7 +203,8 @@ static mmd_module_config_t mmd_config_defaults[]={
     {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)),trnc_ch_names},
     {MOD_EMU7K,"MOD_EMU7K",EMU7K_CH_COUNT,((MM_ERR|MM_WARN)),emu7k_ch_names},
     {MOD_TBINX,"MOD_TBINX",TBINX_CH_COUNT,((MM_ERR|MM_WARN)|TBINX_V1),tbinx_ch_names},
-    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names}
+    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names},
+    {MOD_R7KR,"MOD_R7KR",R7KR_CH_COUNT,((MM_ERR|MM_WARN)|R7KR_V1),r7kr_ch_names}
 };
 
 /////////////////////////

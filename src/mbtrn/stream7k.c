@@ -59,24 +59,12 @@
 // Headers
 /////////////////////////
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <getopt.h>
-//#include <stdarg.h>
-//#include <signal.h>
-//#include "r7kc.h"
-//#include "iowrap.h"
-//#include "merror.h"
-//#include "mbtrn.h"
-//#include "mdebug.h"
-//#include "mconfig.h"
-
 #include <getopt.h>
 #include "r7kc.h"
 #include "mframe.h"
 #include "msocket.h"
 #include "merror.h"
-#include "mbtrn.h"
+#include "r7k-reader.h"
 #include "mmdebug.h"
 #include "medebug.h"
 #include "mconfig.h"
@@ -105,12 +93,19 @@
  */
 
 #define STREAM7K_NAME "stream7k"
+#ifndef STREAM7K_VER
+/// @def STREAM7K_VER
+/// @brief module build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DSTREAM7K_VER=<version>
+#define STREAM7K_VER (dev)
+#endif
 #ifndef STREAM7K_BUILD
 /// @def STREAM7K_BUILD
 /// @brief module build date.
 /// Sourced from CFLAGS in Makefile
-/// w/ -DMBTRN_BUILD=`date`
-#define STREAM7K_BUILD ""VERSION_STRING(MBTRN_BUILD)
+/// w/ -DMFRAME_BUILD=`date`
+#define STREAM7K_BUILD VERSION_STRING(STREAM7K_VER)" "LIBMFRAME_BUILD
 #endif
 
 /// @def RESON_HOST_DFL
@@ -260,11 +255,13 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 break;
         }
         if (version) {
-            mbtrn_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
+            MFRAME_SHOW_VERSION(STREAM7K_NAME, STREAM7K_BUILD);
+//            r7kr_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
             exit(0);
         }
         if (help) {
-            mbtrn_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
+            MFRAME_SHOW_VERSION(STREAM7K_NAME, STREAM7K_BUILD);
+//            r7kr_show_app_version(STREAM7K_NAME, STREAM7K_BUILD);
             s_show_help();
             exit(0);
         }
@@ -274,14 +271,14 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
 	mconf_init(NULL,NULL);
     mmd_channel_set(MOD_S7K,MM_ERR);
     mmd_channel_set(MOD_R7K,MM_ERR);
-    mmd_channel_set(MOD_MBTRN,MM_ERR);
+    mmd_channel_set(MOD_R7KR,MM_ERR);
     mmd_channel_set(MOD_MSOCK,MM_ERR);
 
     switch (cfg->verbose) {
         case 0:
             mmd_channel_set(MOD_S7K,0);
             mmd_channel_set(MOD_R7K,0);
-            mmd_channel_set(MOD_MBTRN,0);
+            mmd_channel_set(MOD_R7KR,0);
             mmd_channel_set(MOD_MSOCK,0);
             break;
         case 1:
@@ -294,34 +291,11 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
             mmd_channel_en(MOD_S7K,MM_DEBUG);
             mmd_channel_en(MOD_MSOCK,MM_DEBUG);
             mmd_channel_en(MOD_R7K,MM_DEBUG);
-            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7KR,MM_DEBUG);
             break;
         default:
             break;
 	}
-
-//    mcfg_configure(NULL,0);
-//
-//    mdb_set(MDI_ALL,MDL_UNSET);
-//    mdb_set(IOW,MDL_ERROR);
-//    mdb_set(R7K,MDL_ERROR);
-//    mdb_set(MBTRN,MDL_ERROR);
-//    switch (cfg->verbose) {
-//        case 0:
-//            mdb_set(MDI_ALL,MDL_UNSET);
-//            break;
-//        case 1:
-//            mdb_set(APP1,MDL_DEBUG);
-//            break;
-//        case 2:
-//            mdb_set(APP1,MDL_DEBUG);
-//            mdb_set(IOW,MDL_DEBUG);
-//            mdb_set(R7K,MDL_DEBUG);
-//            mdb_set(MBTRN,MDL_DEBUG);
-//            break;
-//        default:
-//            break;
-//    }
 }
 // End function parse_args
 
