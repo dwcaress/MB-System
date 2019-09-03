@@ -196,7 +196,9 @@ static mlist_item_t *s_mlist_rsort(mlist_item_t *head, mlist_item_t *tail, mlist
                 cur = cur->next;
             }
             tmp = cur;
-            tmp->next =  pivot;
+            if(NULL!=tmp){
+            	tmp->next =  pivot;
+            }
         }
         
         // Recur for the list after the pivot element
@@ -351,7 +353,6 @@ void mlist_free(void *pself)
         }
         // free list resources
         free(self);
-        pself=NULL;
     }
 }
 // End function mlist_free

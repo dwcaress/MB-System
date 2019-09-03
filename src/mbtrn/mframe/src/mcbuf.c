@@ -448,8 +448,8 @@ int mcbuf_test()
     assert(MCBUF_IS_EMPTY(b));
 
     // cause pointer wrap
-    ret = mcbuf_write(b,wdata,cap,MCB_ALLOW_PARTIAL,&status);
-    ret = mcbuf_read(b,rdata,10,MCB_NONE,&status);
+    mcbuf_write(b,wdata,cap,MCB_ALLOW_PARTIAL,&status);
+    mcbuf_read(b,rdata,10,MCB_NONE,&status);
     ret = mcbuf_write(b,wdata,cap,MCB_ALLOW_PARTIAL,&status);
     assert(ret==10);
     assert(status==MCB_OK);

@@ -289,6 +289,11 @@ int mmd_test();
 /// @return none
 void mmd_initialize();
 
+/// @fn void mmd_release()
+/// @brief release resources
+/// @return none
+void mmd_release();
+
 /// @fn int mmd_module_configure(mmd_module_config_t *config)
 /// @brief configure module
 /// @param[in] config module configuration

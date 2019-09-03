@@ -123,13 +123,15 @@ static int s_iow2posix_flags(int iflags)
 #if defined(__APPLE__)
     pflags |= ( (iflags&MFILE_RSYNC   )!=0 ? O_SYNC    : 0 );
 #else
-    pflags |= ( (iflags&MFILE_RSYNC   )!=0 ? O_RSYNC    : 0 );
+    // O_RSYNC=0
+    pflags |=  0;
 #endif
     pflags |= ( (iflags&MFILE_SYNC    )!=0 ? O_SYNC     : 0 );
 #if defined(__CYGWIN__)
     pflags |= ( (iflags&MFILE_ASYNC   )!=0 ? O_SYNC    : 0 );
 #else
-    pflags |= ( (iflags&MFILE_ASYNC   )!=0 ? O_ASYNC    : 0 );
+    // O_ASYNC=0
+    pflags |= 0;
 #endif
     pflags |= ( (iflags&MFILE_EXCL    )!=0 ? O_EXCL     : 0 );
 //    pflags |= ( (iflags&MFILE_DIRECT  )!=0 ? O_DIRECT   : 0 );
@@ -305,7 +307,6 @@ int mfile_rename(mfile_file_t *self,const char *path)
         
         if (self->fd>0) {
             mfile_close(self);
-            self->fd=-1;
         }
 
         if (NULL!=self->path) {
@@ -486,6 +487,10 @@ int mfile_vfprintf(mfile_file_t *self, char *fmt, va_list args)
         va_list cargs;
         va_copy(cargs,args);
         retval=vdprintf(self->fd,fmt,cargs);
+        // comment out this va_end if it causes an issue
+        // (added per cppcheck)
+        va_end(cargs);
+
     }else{
         fprintf(stderr,"invalid argument\n");
     }

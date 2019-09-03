@@ -110,13 +110,18 @@ char *mmd_ch_names[MM_CHANNEL_COUNT]={
 };
 
 mmd_module_config_t module_config_table[MM_MODULE_COUNT]={
-    {MOD_MFRAME,"mframe",  MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
-    {MOD_MFILE,"mfile",    MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
-    {MOD_MLIST,"mlist",    MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
-    {MOD_MERR,"merr",      MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
-    {MOD_MCBUF,"mcbuf",    MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
-    {MOD_MSOCK,"msock",    MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
-    {MOD_MTIME,"mtime",    MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MFRAME,"mframe",MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MERR,"merr",    MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MBBUF,"mbbuf",  MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MCBUF,"mcbuf",  MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MFILE,"mfile",  MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MLIST,"mlist",  MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MLOG,"mlog",    MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MMEM,"mmem",    MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MQUEUE,"mqueue",MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MSOCK,"msock",  MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MSTATS,"mstats",MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
+    {MOD_MTIME,"mtime",  MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
     {MOD_MTHREAD,"mthread",MM_CHANNEL_COUNT,(MM_WARN|MM_ERR),mmd_ch_names},
 };
 
@@ -129,7 +134,7 @@ mmd_module_config_t *mmd_module_config_copy(mmd_module_config_t *module)
 {
     mmd_module_config_t *instance=NULL;
     if(NULL!=module){
-     instance= (mmd_module_config_t *)malloc(sizeof(mmd_module_config_t));
+     	instance= (mmd_module_config_t *)malloc(sizeof(mmd_module_config_t));
         if(NULL!=instance){
             memset(instance,0,sizeof(mmd_module_config_t));
             instance->id=module->id;
@@ -144,8 +149,11 @@ mmd_module_config_t *mmd_module_config_copy(mmd_module_config_t *module)
             
             if(NULL!=module->channel_names){
                 uint32_t i=0;
+                uint32_t cn_size=module->channel_count*sizeof(char *);
+                
                 instance->channel_names=(char **)malloc(module->channel_count*sizeof(char *));
-               
+                memset(instance->channel_names,0,cn_size);
+                
                 for(i=0;i<module->channel_count;i++){
                     if(NULL!=module->channel_names[i]){
                         instance->channel_names[i]=strdup(module->channel_names[i]);
@@ -163,16 +171,22 @@ void mmd_module_config_destroy(mmd_module_config_t **pself)
 {
     if(NULL!=pself){
         mmd_module_config_t *self = (mmd_module_config_t *)(*pself);
+
         if(NULL!=self){
             if(NULL!=self->name){
                 free(self->name);
             }
             if(NULL!=self->channel_names){
                 uint32_t i=0;
-                for(i=0;i<self->channel_count;i++)
-                    if(NULL!=self->channel_names[i])
+                for(i=0;i<self->channel_count;i++){
+                    if(NULL!=self->channel_names[i]){
                         free(self->channel_names[i]);
+                    }
+                }
+                free(self->channel_names);
             }
+            free(self);
+            *pself=NULL;
         }
     }
 }
@@ -188,7 +202,7 @@ void mmd_config_show(mmd_module_config_t *self, bool verbose, uint16_t indent)
         if(verbose){
             uint32_t i=0;
             for(i=0;i<self->channel_count;i++){
-                fprintf(stderr,"%*s[ ch[%d]     %10s]\n",indent+1,(indent>0?" ":""), i,self->channel_names[i]);
+                fprintf(stderr,"%*s[ ch[%u]     %10s]\n",indent+1,(indent>0?" ":""), i,self->channel_names[i]);
             }
         }
     }
@@ -212,14 +226,19 @@ void mmd_initialize()
     }
 
     for(i=0;i<MM_MODULE_COUNT;i++){
-        mmd_module_config_t *mod = mmd_module_config_copy(&module_config_table[i]);
-        if(NULL!=mod){
-            mmd_module_configure(mod);
-        }
+        mmd_module_configure(&module_config_table[i]);
     }
     mlist_autofree(mmd_module_list,mmd_module_config_free);
 }
 // End function mmd_initialize
+
+void mmd_release()
+{
+	if(NULL!=mmd_module_list){
+		mlist_destroy(&mmd_module_list);
+    }
+}
+// End function mmd_release
 
 
 mmd_module_config_t *s_lookup_module(mmd_module_id_t id)
@@ -572,6 +591,10 @@ int mmd_test()
     MT_WARN(M2C2,"m2c2 warn (req)");
     MT_ERR(M2C2,"m2c2 err (req)");
     
+    fprintf(stderr,"PMPRINT...\r\n");
+    PMPRINT(MOD1,MM_ALL,(stderr,"MOD1,MM_ALL %08X\r\n",mmd_get_enmask(MOD1,NULL)));
+    PMPRINT(MOD2,MM_ALL,(stderr,"MOD1,MM_ALL %08X\r\n",mmd_get_enmask(MOD1,NULL)));
+
     retval = 0;
     
     return retval;

@@ -284,8 +284,9 @@ extern "C" {
     int mlog_tprintf(mlog_id_t log, char *fmt, ...);
     int mlog_puts(mlog_id_t log, char *data);
     int mlog_putc(mlog_id_t log, char data);
-    int mlog_test();
-    
+#ifdef WITH_MLOG_TEST
+   int mlog_test(int verbose);
+#endif
 #ifdef __cplusplus
 }
 #endif

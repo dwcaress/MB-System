@@ -223,8 +223,6 @@ int msock_connection_addr2str(msock_connection_t *self)
     int retval=-1;
     const char *ctest=NULL;
     struct sockaddr_in *psin = NULL;
-    uint16_t port=0xFFFF;
-    int svc=0;
     
     if (NULL!=self && NULL != self->addr &&
         NULL != self->addr->ainfo &&
@@ -234,10 +232,10 @@ int msock_connection_addr2str(msock_connection_t *self)
         ctest = inet_ntop(AF_INET, &psin->sin_addr, self->chost, MSOCK_ADDR_LEN);
         
         if (NULL!=ctest) {
+
+            uint16_t port = ntohs(psin->sin_port);
+            int svc = port;
             
-            port = ntohs(psin->sin_port);
-            
-            svc = port;
             snprintf(self->service,NI_MAXSERV,"%d",svc);
             retval=0;
         }else{
@@ -328,7 +326,7 @@ void msock_pstats_show(msock_pstats_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[err_count    %10u]\n",indent,(indent>0?" ":""), self->err_count);
     }
 }
-// End function mbtrn_reader_show
+// End function msock_pstats_show
 
 /// @fn msock_socket_t * msock_socket_new(const char * host, int port, msock_socket_ctype type)
 /// @brief create new socket instance.
@@ -694,14 +692,10 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
     me_errno=ME_OK;
     int64_t retval=0;
     double t_rem=(double)timeout_msec;
-    int64_t nbytes=0;
     int64_t read_total=0;
     
     double start_sec   = mtime_dtime();
-    double now_sec     = 0.0;
     double to_sec      = (double)timeout_msec/1000.0;
-    double elapsed_sec = 0.0;
-    bool err_quit=false;
 #if defined(__CYGWIN__)
     
     static LARGE_INTEGER pfreq={0};
@@ -713,6 +707,8 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
 
      if ( (NULL!=s) && s->fd>0 && (NULL!=buf) && len>0) {
          
+         bool err_quit=false;
+        double elapsed_sec = 0.0;
         byte *pbuf=buf;
         memset(buf,0,len);
          
@@ -724,7 +720,7 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
 
             
             // read from the file/socket
-           nbytes = read(s->fd, pbuf, (len-read_total));
+           int64_t nbytes = read(s->fd, pbuf, (len-read_total));
 
 //            fprintf(stderr,"read returned [%"PRId64"/%"PRId64"] [%d/%s]\n",nbytes,(len-read_total),errno,strerror(errno));
 
@@ -829,7 +825,7 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
             if (timeout_msec>0) {
                 // select/read may be interrupted before its timeout
                 // Update timeout value and retry for remaining time
-                now_sec = mtime_dtime();
+                double now_sec = mtime_dtime();
                 elapsed_sec   = now_sec-start_sec;
             }
             
@@ -910,15 +906,24 @@ int msock_test()
         msock_set_blocking(cli,true);
         
         if( (msock_bind(svr)==0)){
+            fprintf(stderr,"svr bound\n");
             if( (msock_listen(svr,1)==0) ){
+                fprintf(stderr,"svr listening\n");
                 if(msock_connect(cli)==0){
-                    if (msock_accept(svr,NULL)>0) {
-                        byte cmsg[16]={0};
-                        byte smsg[16]={0};
+                    fprintf(stderr,"cli connected\n");
+                     if ( (svr->fd = msock_accept(svr,NULL))>0) {
+                        fprintf(stderr,"svr accepted\n");
                         if(msock_send(cli,(byte *)"REQ",4)==4){
-                            if(msock_recv(svr,smsg,4)==4 && strcmp((const char *)smsg,"REQ")==0){
+                            fprintf(stderr,"cli REQ sent\n");
+                            byte smsg[16]={0};
+                            int32_t brx=0;
+                           if( (brx=msock_recv(svr,smsg,4,0))==4 && strcmp((const char *)smsg,"REQ")==0){
+                                fprintf(stderr,"svr REQ received\n");
                                 if(msock_send(svr,(byte *)"ACK",4)==4){
-                                    if(msock_recv(cli,cmsg,4)==4 && strcmp((const char *)cmsg,"ACK")==0){
+                                    fprintf(stderr,"svr ACK sent\n");
+                                    byte cmsg[16]={0};
+                                    if(msock_recv(cli,cmsg,4,0)==4 && strcmp((const char *)cmsg,"ACK")==0){
+                                        fprintf(stderr,"cli ACK received\n");
                                             fprintf(stderr,"OK\n");
                                             retval=0;
                                     }else{
@@ -928,7 +933,7 @@ int msock_test()
                                     fprintf(stderr,"svr send failed [%d/%s]\n",errno,strerror(errno));
                                 }
                             }else{
-                                fprintf(stderr,"svr rcv failed [%d/%s]\n",errno,strerror(errno));
+                                fprintf(stderr,"svr rcv failed smsg[%s] brx[%d] [%d/%s]\n",smsg,brx,errno,strerror(errno));
                             }
                         }else{
                             fprintf(stderr,"cli send failed [%d/%s]\n",errno,strerror(errno));

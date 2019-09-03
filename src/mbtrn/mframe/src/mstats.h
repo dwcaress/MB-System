@@ -282,6 +282,14 @@ typedef struct mstats_s{
     const char ***labels;
 }mstats_t;
 
+/// @typedef struct mstats_profile_s mstats_profile_t
+/// @brief structure for (application) stats
+typedef struct mstats_profile_s{
+    double session_start;
+    double uptime;
+    mstats_t *stats;
+}mstats_profile_t;
+
 /////////////////////////
 // Exports
 /////////////////////////
@@ -301,7 +309,9 @@ extern "C" {
     int mstats_log_timing(mlog_id_t log_id, mstats_metstats_t *stats,  double timestamp, char *type_str, const char **labels, int channels);
     int mstats_log_counts(mlog_id_t log_id, uint32_t *counts, double timestamp, char *type_str, const char **labels, int channels);
     double mstats_dtime();
-    
+    mstats_profile_t *mstats_profile_new(uint32_t ev_counters, uint32_t status_counters, uint32_t tm_channels, const char ***channel_labels, double pstart, double psec);
+void mstats_profile_destroy(mstats_profile_t **pself);
+
 #if defined(WITH_MSTATS_TEST)
     int mstats_test();
 #endif

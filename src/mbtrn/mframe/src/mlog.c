@@ -180,7 +180,7 @@ static void s_mlog_list_destroy(bool incl_logs)
 {
     if (NULL != s_log_list) {
         mlog_list_entry_t *plist = s_log_list;
-        mlog_list_entry_t *pafter = plist->next;
+        mlog_list_entry_t *pafter = NULL;
         do{
             if (incl_logs && NULL!=plist->log) {
                 s_mlog_destroy(&plist->log);
@@ -369,9 +369,6 @@ static int s_get_log_info(mlog_info_t *dest, char *path, char *name, char *fmt, 
     int retval=-1;
     if (NULL!=dest && NULL!=name && NULL!=file) {
         DIR *dp;
-        struct dirent *ep;
-        time_t tseg=0;
-        int16_t nseg=-1;
         
         memset(dest,0,sizeof(mlog_info_t));
         dest->seg_min=0xFFFF;
@@ -381,8 +378,9 @@ static int s_get_log_info(mlog_info_t *dest, char *path, char *name, char *fmt, 
         
         dp = opendir ((path==NULL?".":path));
         if (dp != NULL){
+            struct dirent *ep;
             while ( (ep = readdir(dp))!=NULL ){
-                nseg=s_path_segno(ep->d_name,name,(fmt!=NULL?fmt:ML_SEG_FMT));
+                int16_t nseg=s_path_segno(ep->d_name,name,(fmt!=NULL?fmt:ML_SEG_FMT));
                 // if it's a segment
                 if ( nseg >= 0) {
                     retval=0;
@@ -395,7 +393,7 @@ static int s_get_log_info(mlog_info_t *dest, char *path, char *name, char *fmt, 
                         dest->seg_min = nseg;
                     }
                     
-                    tseg=mfile_mtime(ep->d_name);
+                    time_t tseg=mfile_mtime(ep->d_name);
 //                    fprintf(stderr,"tseg[%ld] nseg[%hu] tb[%ld] te[%ld]\n",tseg,nseg,dest->tb,dest->te);
                     if( tseg>0){
                         if (tseg > dest->te) {
@@ -628,30 +626,50 @@ static void s_init_log(mlog_t *self)
                 self->stime = time(NULL);
                 // segments are zero indexed, so count is +1
                 self->seg_count=linfo.seg_count;
-            }else if (linfo.seg_b >= 0) {
+            }else  {
 //                fprintf(stderr,"init to latest written [%d/%ld]\n",linfo.seg_b,linfo.tb);
                 // use most recently written segment
                 
                 // set latest segment [rename, close/reopen if open]
                 s_log_set_seg(self,linfo.seg_b);
                 self->cur_seg = linfo.seg_b;
-                self->seg_len = mfile_fsize(self->file);
-                self->stime = time(NULL);
-                // segments are zero indexed, so count is +1
-                self->seg_count=linfo.seg_count;
-                
-            }else{
-//                fprintf(stderr,"init to first\n");
-                // set current segment [rename, close/reopen if open]
-                s_log_set_seg(self,0);
-                mfile_ftruncate(self->file,0);
-                // if no log exists, init first segment
-                self->cur_seg = 0;
-                self->seg_len = 0;
+                if(linfo.seg_b==0){
+                    self->seg_len = 0;
+                    mfile_ftruncate(self->file,0);
+                }else{
+                	self->seg_len = mfile_fsize(self->file);
+                }
                 // segments are zero indexed, so count is +1
                 self->seg_count=linfo.seg_count;
                 self->stime = time(NULL);
+
             }
+//            else if (linfo.seg_b >= 0) {
+//                //                fprintf(stderr,"init to latest written [%d/%ld]\n",linfo.seg_b,linfo.tb);
+//                // use most recently written segment
+//
+//                // set latest segment [rename, close/reopen if open]
+//                s_log_set_seg(self,linfo.seg_b);
+//                self->cur_seg = linfo.seg_b;
+//                self->seg_len = mfile_fsize(self->file);
+//                // segments are zero indexed, so count is +1
+//                self->seg_count=linfo.seg_count;
+//                self->stime = time(NULL);
+//
+//            } else{
+            // would never  reach this if testing for (linfo.seg)
+//////                fprintf(stderr,"init to first\n");
+//                // set current segment [rename, close/reopen if open]
+//                s_log_set_seg(self,0);
+//                mfile_ftruncate(self->file,0);
+//                // if no log exists, init first segment
+//                self->cur_seg = 0;
+//                self->seg_len = 0;
+//                // segments are zero indexed, so count is +1
+//                self->seg_count=linfo.seg_count;
+//                self->stime = time(NULL);
+//            }
+            
 //            fprintf(stderr,"check limits...\n");
             // if it's already full, rotate
             if (s_log_chklimits(self)==0) {
@@ -692,7 +710,7 @@ size_t len =0;
             op = retval;
             sprintf(op,"%s%s",(self->path==NULL?"":self->path),self->name);
             op=retval+strlen(retval);
-            sprintf(op,ML_SEG_FMT,segno);
+            sprintf(op,ML_SEG_FMT,(short int)segno);
             op=retval+strlen(retval);
             sprintf(op,"%s%s",(self->ext==NULL?"":"."),(self->ext==NULL?"":self->ext));
         }
@@ -818,7 +836,7 @@ static mlog_t *s_mlog_new(const char *file_path, mlog_config_t *config)
 
             self->stime = 0;
             
-            self->file  = mfile_file_new(NULL);
+//            self->file  = mfile_file_new(NULL);
             tpath = s_seg_path(file_path,self,0);
             self->file  = mfile_file_new(tpath);
             free(tpath);
@@ -863,7 +881,7 @@ mlog_id_t mlog_get_instance(const char *file_path, mlog_config_t *config, char *
             fprintf(stderr,"ERR - i[%p] a[%d]\n",instance,test);
         }
     }else{
-        fprintf(stderr,"ERR - fp[%p] c[%p] n[%s]\n",file_path,config,name);
+        fprintf(stderr,"ERR - fp[%p] c[%p] n[%s]\n",file_path,config,(NULL!=name?name:"NULL"));
     }
     return retval;
 }
@@ -1189,10 +1207,10 @@ int mlog_flush(mlog_id_t id)
 #if defined(__QNX__)
 int mlog_printf(mlog_id_t id, char *fmt, ...)
 {
-    va_list va1;
-    va_list va2;
-    va_list va3;
-    va_list va4;
+//    va_list va1;
+//    va_list va2;
+//    va_list va3;
+//    va_list va4;
 
     int retval = -1;
     mlog_t *log = NULL;
@@ -1212,10 +1230,11 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
 //        fprintf(stderr,"dest[%x]&ML_SOUT[%x]\n",dest,(dest&ML_SOUT));
         
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
+                va_list va1;
+                va_list va2;
             int wbytes=0;
             // print message to buffer
             va_start(va1,fmt);
-//            va_copy(cargs,args);
             wbytes=vsnprintf(NULL,0,fmt,va1);
             va_end(va1);
             
@@ -1236,7 +1255,8 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
         }
                     // send to stderr, stdout
         if( (dest&ML_SERR) !=0 ){
-            va_start(va3,fmt);
+            va_list va3;
+           va_start(va3,fmt);
             vfprintf(stderr,fmt, va3);
             va_end(va3);
             if (term!=0x00) {
@@ -1244,6 +1264,7 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
             }
         }
         if( (dest&ML_SOUT) !=0 ){
+            va_list va4;
            va_start(va4,fmt);
             vprintf(fmt, va4);
             va_end(va4);
@@ -1259,10 +1280,10 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
 
 int mlog_tprintf(mlog_id_t id, char *fmt, ...)
 {
-    va_list va1;
-    va_list va2;
-    va_list va3;
-    va_list va4;
+//    va_list va1;
+//    va_list va2;
+//    va_list va3;
+//    va_list va4;
     
     int retval = -1;
     mlog_t *log = s_lookup_log(id);
@@ -1297,7 +1318,9 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
 //        fprintf(stderr,"mask[%x]&TL_SOUT[%x]\n",strmask,(strmask&TL_SOUT));
         
         if (dest&ML_FILE  && (flags&ML_DIS)==0 ) {
-            int wbytes=0;
+            va_list va1;
+            va_list va2;
+           int wbytes=0;
             // print message to buffer
             wbytes=snprintf(NULL,0,"%s%s",timestamp,del);
             va_start(va1,fmt);
@@ -1326,7 +1349,8 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
         // send to stderr, stdout
         if( (dest&ML_SERR) !=0 ){
             fprintf(stderr,"%s%s",timestamp,del);
-            va_start(va3,fmt);
+            va_list va3;
+           va_start(va3,fmt);
             vfprintf(stderr,fmt, va3);
             va_end(va3);
            if (term!=0x00) {
@@ -1334,6 +1358,7 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
             }
         }
         if( (dest&ML_SOUT) !=0 ){
+            va_list va4;
             va_start(va4,fmt);
             fprintf(stdout,"%s%s",timestamp,del);
             vprintf(fmt, va4);
@@ -1383,12 +1408,16 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
             if ( (log->cfg->lim_b > 0) && ((log->seg_len+wbytes) > log->cfg->lim_b) ) {
                 s_log_rotate(log);
             }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
             va_copy(cargs,args);
             if( (wbytes=mfile_vfprintf(log->file,fmt,cargs))>0){
                 // add one for the null char
                 log->seg_len+=wbytes+1;
             }
-        }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
+     }
 //        else{
 //            fprintf(stderr,"file output disabled d[%0X] f[%0X]\n",dest,flags);
 //        }
@@ -1400,6 +1429,8 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
             if (term!=0x00) {
                 fprintf(stderr,"\n");
             }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
         }
         if( (dest&ML_SOUT) !=0 ){
             va_copy(cargs,args);
@@ -1407,6 +1438,8 @@ int mlog_printf(mlog_id_t id, char *fmt, ...)
             if (term!=0x00) {
                 fprintf(stdout,"\n");
             }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
         }
         
         va_end(args);
@@ -1473,6 +1506,8 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
             if ( (log->cfg->lim_b > 0) && ((log->seg_len+wbytes) > log->cfg->lim_b) ) {
                 s_log_rotate(log);
             }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
 
             va_copy(cargs,args);
             if((wbytes=mfile_fprintf(log->file,"%s%s",timestamp,del))>0){
@@ -1481,6 +1516,8 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
             if( (wbytes=mfile_vfprintf(log->file,fmt,cargs))>0){
                 log->seg_len+=wbytes;
             }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
         }
 //        else{
 //            fprintf(stderr,"file output disabled d[%0X] f[%0X]\n",dest,flags);
@@ -1494,6 +1531,8 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
             if (term!=0x00) {
                 fprintf(stderr,"\n");
             }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
         }
         if( (dest&ML_SOUT) !=0 ){
             va_copy(cargs,args);
@@ -1502,6 +1541,8 @@ int mlog_tprintf(mlog_id_t id, char *fmt, ...)
             if (term!=0x00) {
                 fprintf(stdout,"\n");
             }
+            // va_end added per cppcheck - delete if issues
+            va_end(cargs);
         }
         
         va_end(args);
@@ -1538,13 +1579,17 @@ int mlog_write(mlog_id_t id, byte *data, uint32_t len)
                 while (drem>0) {
                     uint32_t srem = (log->cfg->lim_b - log->seg_len);
                      uint32_t wlen =0;
-                    if (srem <= 0 ) {
+                    if (log->seg_len >=  log->cfg->lim_b) {
                         s_log_rotate(log);
                         srem = log->cfg->lim_b;
                     }
-                    if( (drem = (data+len-wp))<=0){
+//                    if( (drem = (data+len-wp))<=0){
+//                        break;
+//                    }
+                    if( wp>=(data+len)){
                         break;
                     }
+                    drem = (data+len-wp);
                     wlen = ( drem > srem ? srem : drem);
 //                    fprintf(stderr,"wlen[%u] drem[%u] srem[%u]\n",wlen,drem,srem);
                     if( (retval = mfile_write(log->file,wp,wlen)) > 0 ){
@@ -1622,11 +1667,12 @@ int mlog_putc(mlog_id_t id, char data)
 }
 // End function mlog_putc
 
-
-/// @fn int mlog_test()
+#ifdef WITH_MLOG_TEST
+/// @fn int mlog_test(int verbose)
 /// @brief mlog unit test(s). may throw assertions.
+/// @param[in] verbose enable verbose output >=0
 /// @return 0 on success, -1 otherwise
-int mlog_test()
+int mlog_test(int verbose)
 {
     int retval = -1;
 	
@@ -1747,7 +1793,7 @@ int mlog_test()
     
     fprintf(stderr,"looking for max seg in dir [%s] using name[%s]\n", syslog_orig->path, syslog_orig->name);
     s_get_log_info(&linfo,syslog_orig->path,syslog_orig->name, ML_SEG_FMT,syslog_orig->file);
-    fprintf(stderr,"max_seg [%04hd]\n",linfo.seg_max);
+    fprintf(stderr,"max_seg [%04hu]\n",linfo.seg_max);
     
     fprintf(stderr,"before write (should rotate)...\n\n");
     mlog_info_show(&linfo,true,5);
@@ -1779,5 +1825,6 @@ int mlog_test()
     return retval;
 }
 // End function mlog_test
+#endif // WITH_MLOG_TEST
 
 

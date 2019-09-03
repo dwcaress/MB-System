@@ -68,6 +68,37 @@
 /////////////////////////
 // Includes 
 /////////////////////////
+#ifndef MFRAME_VER
+/// @def MFRAME_VER
+/// @brief MFRAME library build version.
+#define MFRAME_VER 1.1.15
+#endif
+#ifndef MFRAME_BUILD
+/// @def MFRAME_BUILD
+/// @brief MFRAME library build date.
+/// Sourced from CFLAGS in Makefile
+/// w/ -DMFRAME_BUILD=`date`
+#define MFRAME_BUILD "0000/00/00T00:00:00-0000"
+#endif
+
+/// @def VERSION_HELPER
+/// @brief version string helper.
+#define VERSION_HELPER(s) #s
+/// @def VERSION_STRING
+/// @brief version string macro.
+#define VERSION_STRING(s) VERSION_HELPER(s)
+/// @def LIBMFRAME_VERSION
+/// @brief library version string macro.
+#define LIBMFRAME_VERSION ""VERSION_STRING(MFRAME_VER)
+/// @def LIBMFRAME_BUILD
+/// @brief library version build date string macro.
+#define LIBMFRAME_BUILD ""VERSION_STRING(MFRAME_BUILD)
+
+/// @def MFRAME_SHOW_VERSION(app_name,app_version)
+/// @param[in] app_name application name
+/// @param[in] app_version application version
+/// @brief print version info
+#define MFRAME_SHOW_VERSION(app_name,app_version) printf("\n %s build[%s] mframe[v%s] \n\n",app_name, app_version, LIBMFRAME_VERSION)
 
 #if defined(__CYGWIN__)
 #include <Windows.h>
@@ -271,8 +302,11 @@ typedef int pthread_mutex_t;
 #define vdprintf
 #else //!__QNX__
 
-
+#if defined(__APPLE__)
 #define OFFT_CAST(x) ((long long) x)
+#elif defined(__unix__) || defined(__CYGWIN__)
+#define OFFT_CAST(x) ((long) x)
+#endif
 
 #endif
 

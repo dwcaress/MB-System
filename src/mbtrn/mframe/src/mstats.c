@@ -327,6 +327,34 @@ int mstats_update_stats(mstats_t *stats, uint32_t channels, mstats_flags flags)
 }
 // End function mstats_update_stats
 
+mstats_profile_t *mstats_profile_new(uint32_t ev_counters, uint32_t status_counters, uint32_t tm_channels, const char ***channel_labels, double pstart, double psec)
+{
+    mstats_profile_t *self =(mstats_profile_t *)malloc(sizeof(mstats_profile_t));
+    if (self) {
+        self->session_start = mtime_dtime();
+        self->uptime = 0.0;
+        self->stats = mstats_new(ev_counters, status_counters, tm_channels, channel_labels);
+        
+        mstats_set_period(self->stats,pstart,psec);
+    }
+    return self;
+}
+// End function mstats_profile_new
+
+void mstats_profile_destroy(mstats_profile_t **pself)
+{
+    if(NULL!=pself){
+        mstats_profile_t *self = (mstats_profile_t *)*pself;
+        if(NULL!=self){
+            if(NULL!=self->stats){
+                mstats_destroy(&self->stats);
+            }
+            free(self);
+            *pself=NULL;
+        }
+    }
+}
+// End function mstats_profile_destroy
 
 #if defined(WITH_MSTATS_TEST)
 /// @typedef enum mstats_event_id mstats_event_id
@@ -531,9 +559,9 @@ int mstats_test()
             // inner loop timer start
             MST_METRIC_START(stats->metrics[MSAPP_INNER_LOOP_XT], mtime_dtime());
             for(n=0;n<2;n++){
-                double j=0.0,k=0.0;
+                double k=0.0;
                 for(k=0.0;k<2.0*PI;k+=PI/100.0){
-                    j=sin(k);
+                    double j=sin(k);
 #ifdef MST_STATS_EN
                     // some "status" counters: number of times sin()
                     // is gt, lt, or eq zero
@@ -581,5 +609,6 @@ int mstats_test()
     
     return retval;
 }
+
 
 #endif //MSTATS_WITH_TEST

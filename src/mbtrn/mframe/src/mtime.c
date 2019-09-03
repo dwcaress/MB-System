@@ -101,22 +101,19 @@ GNU General Public License for more details
 // Function Definitions
 /////////////////////////
 
-/// @fn double mtime_dtime()
-/// @brief get system time as a double
-/// @return system time as double, with usec precision
-///  if supported by platform
 double mtime_dtime()
 {
     double retval=0.0;
-    struct timespec now={0};
 
-#if defined(__linux__) || defined(__CYGWIN__)
-    clock_gettime(CLOCK_MONOTONIC, &now); //CLOCK_REALTIME, CLOCK_MONOTONIC_RAW, CLOCK_PROCESS_CPUTIME_ID
+#if defined(__linux__) || defined(__CYGWIN__) || defined(__QNX__)
+    struct timespec now={0};
+    clock_gettime(MTIME_DTIME_CLOCK, &now);
     retval=((double)now.tv_sec+((double)now.tv_nsec/(double)1.0e9));
-#elif defined(__MACH__)
+#elif defined(__MACH__) || defined(__APPLE__)
+    struct timespec now={0};
     clock_serv_t cclock;
     mach_timespec_t mts;
-    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
+    host_get_clock_service(mach_host_self(), MTIME_DTIME_CLOCK, &cclock);
     clock_get_time(cclock, &mts);
     mach_port_deallocate(mach_task_self(), cclock);
     now.tv_sec = mts.tv_sec;
@@ -131,10 +128,6 @@ double mtime_dtime()
 }
 // End function mtime_dtime
 
-/// @fn double mtime_mdtime(double mod)
-/// @brief get system time as a double
-/// @return system time as double, with usec precision
-///  if supported by platform
 double mtime_mdtime(double mod)
 {
     double retval = 0.0;
@@ -150,10 +143,6 @@ double mtime_mdtime(double mod)
 }
 // End function mtime_mdtime
 
-/// @fn void mtime_delay_ns(uint32_t nsec)
-/// @brief delay for specied period
-/// @param[in] nsec delay period (nsec)
-/// @return none
 void mtime_delay_ns(uint32_t nsec)
 {
 
@@ -170,12 +159,8 @@ void mtime_delay_ns(uint32_t nsec)
         memset(&rem,0,sizeof(struct timespec));
     }
 }
-
 // End function mtime_delay_nsec
-/// @fn void mtime_delay_ms(uint32_t msec)
-/// @brief delay for specied period
-/// @param[in] msec delay period (msec)
-/// @return none
+
 void mtime_delay_ms(uint32_t msec)
 {
 
@@ -189,3 +174,249 @@ void mtime_delay_ms(uint32_t msec)
     mtime_delay_ns(nsec);
 }
 // End function mtime_delay_ms
+
+void mtime_alloc_splits(mtime_stopwatch_t *self, unsigned int n)
+{
+
+    if(NULL!=self ){
+        if(n==0){
+            if(NULL!=self->split){
+                free(self->split);
+            }
+            self->split=NULL;
+            self->nsplits=0;
+                
+        }else{
+            self->split=(double *)realloc(self->split,n*sizeof(double));
+            if(NULL!=self->split){
+                self->nsplits=n;
+                mtime_clr_splits(self);
+            }else{
+                self->nsplits=0;
+            }
+
+        }
+    }
+}
+// End function mtime_alloc_splits
+
+void mtime_clr_splits(mtime_stopwatch_t *self)
+{
+    if(NULL!=self && NULL!=self->split && self->nsplits>0)
+        memset(self->split,0,self->nsplits*sizeof(double));
+}
+// End function mtime_clr_splits
+
+void mtime_sw_new(mtime_stopwatch_t **pself, unsigned int nsplits)
+{
+    if(NULL!=pself){
+        uint32_t alloc_size=sizeof(mtime_stopwatch_t);
+        
+        mtime_stopwatch_t *instance = (mtime_stopwatch_t *)malloc(alloc_size);
+        
+        if(NULL!=instance){
+            memset(instance,0,alloc_size);
+            instance->split=NULL;
+            instance->nsplits=0;
+            if(nsplits>0){
+                instance->split = (double *)malloc(nsplits*sizeof(double));
+                instance->nsplits=nsplits;
+            }
+        }
+        mtime_stopwatch_t *self = *pself;
+        if(NULL!=self){
+            mtime_sw_destroy(pself);
+        }
+        *pself = instance;
+    }
+}
+// End function mtime_sw_new
+
+void mtime_sw_destroy(mtime_stopwatch_t **pself)
+{
+    if(NULL!=pself){
+        mtime_stopwatch_t *self = *pself;
+        if(NULL!=self){
+            if(NULL!=self->split)
+                free(self->split);
+            free(self);
+            *pself=NULL;
+        }
+    }
+}
+// End function mtime_sw_destroy
+
+int mtime_clock_getres(int clock_id, struct timespec *res)
+{
+    unsigned long retval = -1;
+    
+#if defined(__MACH__)
+    //kern_return_t          kr;
+    mach_msg_type_number_t count;
+    clock_serv_t           cclock;
+    natural_t              attribute[4];
+    
+    // could use kr to get, check return value
+    host_get_clock_service(mach_host_self(), MTIME_DTIME_CLOCK,(clock_serv_t *)&cclock);
+    
+    count = sizeof(attribute)/sizeof(natural_t);
+    // could use kr to get, check return value
+    clock_get_attributes(cclock, CLOCK_GET_TIME_RES,(clock_attr_t)attribute, &count);
+    res->tv_nsec=attribute[0];
+    mach_port_deallocate(mach_task_self(), cclock);
+    retval=0;
+    
+    // this is how to get time of day (not relevant here)
+    //    mach_timespec_t        timespec;
+    //    struct timeval         t;
+    //    kr = clock_get_time(cclock, &timespec);
+    //    gettimeofday(&t, NULL);
+    
+    
+#else
+    if(clock_getres(clock_id,res)==0){
+        retval = 0;
+    }
+#endif
+    return retval;
+}
+// End function mtime_clock_getres
+
+int mtime_clock_setres(int clock_id, struct timespec *res)
+{
+    unsigned long retval = -1;
+    
+#if defined(__MACH__) || defined(__linux__)
+// not supported on OS X
+#else
+    if(clock_setres(clock_id,res)==0){
+        // maybe supported on linux
+        // is supported on QNX4
+        retval = 0;
+    }
+#endif
+    return retval;
+}
+// End function mtime_clock_setres
+
+#ifdef WITH_MTIME_TEST
+/// @fn int32_t mtime_test()
+/// @brief test mtime API
+/// @return 0 on success, -1 otherwise
+int mtime_test(int argc, char **argv)
+{
+    int retval=-1;
+    
+    mtime_stopwatch_t *swatch=NULL;
+    int loop_count=20;
+    int lc=0,oc=0,sc=0;
+    int test=0;
+    int op_count=10000;
+    unsigned int clk_res=500000;
+    
+    // parse command line
+    for(lc=0;lc<argc;lc++){
+        if(strcmp(argv[lc],"-h")==0){
+            fprintf(stderr," use: %s [options] \n",argv[0]);
+            fprintf(stderr,"   -l n : number of loops\n");
+            fprintf(stderr,"   -o n : number of times to do operation\n");
+            fprintf(stderr,"   -r n : clock resolution (nsec, QNX only)\n");
+            fprintf(stderr," \n");
+            exit(0);
+        }
+        if(strcmp(argv[lc],"-l")==0 && (lc+1)<argc){
+            sscanf(argv[lc+1],"%d",&loop_count);
+            lc++;
+            continue;
+        }
+        if(strcmp(argv[lc],"-o")==0 && (lc+1)<argc){
+            if(sscanf(argv[lc+1],"%d",&op_count)==1){
+                lc++;
+                continue;
+            }
+        }
+        if(strcmp(argv[lc],"-r")==0 && (lc+1)<argc){
+            if(sscanf(argv[lc+1],"%u",&clk_res)==1){
+                lc++;
+                continue;
+            }
+        }
+    }
+
+    // allocate a stopwatch, with <loop_count> split times to make loop measurements
+    // release when done using MTIME_SW_DESTROY to prevent memory leaks
+    MTIME_SW_NEW(&swatch,loop_count);
+    
+    fprintf(stderr,"loop_count[%d]\n",loop_count);
+    fprintf(stderr,"op_count[%d]\n",op_count);
+    fprintf(stderr,"clk_res    [%u]\n",clk_res);
+    
+    // get clock resolution
+    test = MTIME_SW_GETRES(swatch);
+    fprintf(stderr,"clock getres[%ld] [%d, %d/%s]\n",MTIME_SW_RES(swatch),test,errno,strerror(errno));
+#if defined(__QNX__)
+    if(MTIME_DTIME_CLOCK==CLOCK_REALTIME)fprintf(stderr,"clock is CLOCK_REALTIME\n");
+    // set clock resolution (not supported on all platforms)
+    swatch->res.tv_nsec=clk_res;
+    MTIME_SW_SETRES(swatch,clk_res);
+    fprintf(stderr,"clock setres[%ld] [%d, %d/%s]\n",MTIME_SW_RES(swatch),test,errno,strerror(errno));
+#endif
+
+    sc=0;
+    
+    // get start time
+    MTIME_SW_START(swatch,mtime_dtime());
+
+    // do stuff...e.g. measure how long it takes to
+    // run mtime_dtime <op_count> times
+    for(lc=0;lc<loop_count;lc++){
+        // time how long it takes to call a function a number of times
+        for(oc=0;oc<op_count;oc++){
+            mtime_dtime();
+        }
+        // mark split time for each loop
+        MTIME_SW_SET_SPLIT(swatch,sc,mtime_dtime());
+        sc++;
+    }
+    
+    // get stop time
+    MTIME_SW_STOP(swatch,mtime_dtime());
+    // save elapsed time (stop-start)
+    MTIME_SW_EL_SAVE(swatch);
+    
+    // Note the macros outside this block compile out if MTIME_STOPWATCH_EN
+    // is not defined; this block has logic, IO, etc.
+    // could wrap using #ifdef MTIME_STOPWATCH_EN
+    // or use the stopwatch reference for minor impact and less clutter
+    if(NULL!=swatch){
+        
+        // process split times, get avg, etc.
+        fprintf(stderr," lap      split         tlap     tmin     tmax    sum\n");
+        fprintf(stderr,"         [n/n+1]\n");
+        double tsum=0.0, tmin=100.0, tmax=-100.0;
+        for(lc=0;lc<loop_count-1;lc++){
+            double tlap=MTIME_SW_GET_SPLIT(swatch,lc,lc+1);
+            tsum+=tlap;
+            if(tlap>tmax)tmax=tlap;
+            if(tlap<tmin)tmin=tlap;
+            if(NULL!=swatch->split){
+                fprintf(stderr,"%02d-%02d  %.4lf/%.4lf  %+.4lf  %+.4lf  %+.4lf %+.4lf\n",lc,lc+1,swatch->split[lc]-swatch->start, swatch->split[lc+1]-swatch->start,tlap,tmin,tmax,tsum);
+                
+            }else{
+                fprintf(stderr,"%02d-%02d  %.4lf/%.4lf  %+.4lf  %+.4lf  %+.4lf  %+.4lf\n",lc,lc+1,0., 0.,tlap,tmin,tmax,tsum);
+            }
+        }
+
+        fprintf(stderr,"start[%.4lf] stop[%.4lf] start-stop[%.4lf]\n",swatch->start,swatch->stop,(swatch->stop-swatch->start));
+        fprintf(stderr,"SW elapsed[%.4lf]\n",MTIME_SW_ELAPSED(swatch));
+        fprintf(stderr,"lc[%d] oc[%d] tmin[%e] tmax[%e] sum[%e] avg[%.4e/%.4e]\n",loop_count,op_count,tmin,tmax,tsum,(tsum/loop_count),((tsum/loop_count)/op_count));
+        
+        retval=0;
+    }
+    
+    // release stopwatch resources
+    MTIME_SW_DESTROY(&swatch);
+
+    return retval;
+}
+#endif // WITH_MTIME_TEST
