@@ -5,7 +5,11 @@ if BUILD_MBTRN
   MBTRN_PROG = mbtrnpreprocess
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtnav/trnw
   MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
-  TRNWLIB = ${top_builddir}/src/mbtnav/libtrnw.la ${top_builddir}/src/mbtnav/libqnx.la ${top_builddir}/src/mbtnav/libnewmat.la  ${top_builddir}/src/mbtnav/libtnav.la  ${top_builddir}/src/mbtnav/libgeolib.la
+if BUILD_MBTNAV
+  TRNWLIB = ${top_builddir}/src/mbtnav/libtrnw.la ${top_builddir}/src/mbtnav/libqnx.la \
+ ${top_builddir}/src/mbtnav/libnewmat.la  ${top_builddir}/src/mbtnav/libtnav.la  \
+ ${top_builddir}/src/mbtnav/libgeolib.la
+endif
 endif
 
 # TODO(schwehr): What happened to mbps?
