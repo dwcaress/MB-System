@@ -1,9 +1,10 @@
 ///
-/// @file mfile.h
+/// @file mconfig.h
 /// @authors k. headley
 /// @date 06 nov 2012
  
-/// mframe cross-platform file IO wrappers
+/// Library configuration
+/// set debug parameters for modules in this project
  
 /// @sa doxygen-examples.c for more examples of Doxygen markup
  
@@ -60,113 +61,58 @@
  */
 
 // include guard
-#ifndef MFLAG_H
-/// @def MFLAG_H
+#ifndef MCONFIG_H
+/// @def MCONFIG_H
 /// @brief include guard
-#define MFLAG_H
+#define MCONFIG_H
 
 /////////////////////////
 // Includes 
 /////////////////////////
 
-/////////////////////////
-// Macros
-/////////////////////////
+#include "mframe.h"
+
+// User Includes...
 
 /////////////////////////
 // Type Definitions
 /////////////////////////
 
-/// @struct mfile_file_s
-/// @brief wrapped file representation (posix implementation)
-struct mfile_file_s;
 
-/// @typedef struct mfile_file_s mfile_file_t
-/// @brief wrapped file typedef
-typedef struct mfile_file_s mfile_file_t;
 
-/// @struct mfile_file_s
-/// @brief wrapped file representation (posix implementation)
-struct mfile_file_s
-{
-    /// @var mfile_file_s::path
-    /// @brief file path
-    char *path;
-    /// @var mfile_file_s::fd
-    /// @brief file descriptor
-    int fd;
-    /// @var mfile_file_s::flags
-    /// @brief file attribute flags
-    int flags;
-    /// @var mfile_file_s::mode
-    /// @brief file permissions flags
-    mode_t mode;
-};
+/////////////////////////
+// Macros
+/////////////////////////
 
-/// @typedef enum mfile_flags_t mfile_flags_t
-/// @brief file attribute flags
-typedef enum {
-    MFILE_RONLY=0x1,
-    MFILE_WONLY=0x2,
-    MFILE_RDWR=0x4,
-    MFILE_APPEND=0x8,
-    MFILE_CREATE=0x10,
-    MFILE_TRUNC=0x20,
-    MFILE_NONBLOCK=0x40,
-    MFILE_SYNC=0x80,
-    MFILE_RSYNC=0x100,
-    MFILE_DSYNC=0x200,
-    MFILE_ASYNC=0x400,
-    MFILE_EXCL=0x400
-//    MFILE_DIRECT=0x800
-} mfile_flags_t;
+/// @def MTIME_STOPWATCH_EN
+/// @brief enable stopwatch macros
+//#ifndef MTIME_STOPWATCH_EN
+//#define MTIME_STOPWATCH_EN
+//#endif
 
-/// @typedef enum mfile_mode_t mfile_mode_t
-/// @brief file permission flags
-typedef enum{
-    MFILE_RWXU=0x800,
-    MFILE_RU=0x400,
-    MFILE_WU=0x200,
-    MFILE_XU=0x100,
-    MFILE_RWXG=0x80,
-    MFILE_RG=0x40,
-    MFILE_WG=0x20,
-    MFILE_XG=0x10,
-    MFILE_RWXO=0x8,
-    MFILE_RO=0x4,
-    MFILE_WO=0x2,
-    MFILE_XO=0x1
-} mfile_mode_t;
-
-/// @typedef enum mfile_mode_t mfile_whence_t
-/// @brief file seek flags
-typedef enum{MFILE_SET=0, MFILE_CUR, MFILE_END} mfile_whence_t;
+/// @def MST_STATS_EN
+/// @brief enable stats macros
+//#ifndef MST_STATS_EN
+//#define MST_STATS_EN
+//#endif
 
 /////////////////////////
 // Exports
 /////////////////////////
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-mfile_file_t *mfile_file_new(const char *path);
-void mfile_file_destroy(mfile_file_t **pself);
-void mfile_file_show(mfile_file_t *self, bool verbose, uint16_t indent);
+// exported config functions here
 
-int mfile_open(mfile_file_t *self,mfile_flags_t flags);
-int mfile_close(mfile_file_t *self);
-int mfile_mopen(mfile_file_t *self,mfile_flags_t flags,mfile_mode_t mode );
-int64_t mfile_seek(mfile_file_t *self, uint32_t ofs, mfile_whence_t whence);
-int64_t mfile_read(mfile_file_t *self, byte *dest, uint32_t len);
-int64_t mfile_write(mfile_file_t *self, byte *src, uint32_t len);
-int mfile_ftruncate(mfile_file_t *self, uint32_t len);
-int mfile_fprintf(mfile_file_t *self, const char *fmt, ...);
-int mfile_vfprintf(mfile_file_t *self, const char *fmt, va_list args);
-int mfile_flush(mfile_file_t *self);
-int64_t mfile_fsize(mfile_file_t *self);
-time_t mfile_mtime(const char *path);
-int mfile_rename(mfile_file_t *self,const char *path);
-    
+/// @fn int mconf_init(void *pargs, void *prtn)
+/// @brief app-specific init (user defined in mconfig.c)
+/// @param[in]  pargs arguments
+/// @param[out] prtn  return value
+/// @return 0 on success, -1 otherwise
+int mconf_init(void *pargs, void *prtn);
+
 #ifdef __cplusplus
 }
 #endif

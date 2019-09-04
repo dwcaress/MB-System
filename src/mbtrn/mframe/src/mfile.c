@@ -433,20 +433,20 @@ int mfile_ftruncate(mfile_file_t *self, uint32_t len)
 }
 // End function mfile_ftruncate
 
-/// @fn int mfile_fprintf(mfile_file_t * self, char * fmt, ...)
+/// @fn int mfile_fprintf(mfile_file_t * self, const char * fmt, ...)
 /// @brief formatted print to file.
 /// @param[in] self file instance
 /// @param[in] fmt print format (e.g. stdio printf)
 /// @param[in] ... print arguments
 /// @return number of bytes output on success, -1 otherwise.
-int mfile_fprintf(mfile_file_t *self, char *fmt, ...)
+int mfile_fprintf(mfile_file_t *self, const char *fmt, ...)
 {
     int retval=-1;
     
     if(NULL != self){
         //get the arguments
         va_list args;
-        va_start(args, fmt);
+        va_start(args,fmt);
         
         retval=vdprintf(self->fd,fmt,args);
 
@@ -457,12 +457,12 @@ int mfile_fprintf(mfile_file_t *self, char *fmt, ...)
 // End function mfile_fprintf
 
 #if defined(__QNX__)
-/// @fn int mfile_vfprintf(mfile_file_t * self, char * fmt, va_list args)
+/// @fn int mfile_vfprintf(mfile_file_t * self, const char * fmt, va_list args)
 /// @param[in] self file instance
 /// @param[in] fmt print format (e.g. stdio printf)
 /// @param[in] args print arguments (as va_list - posix, supported on many platforms)
 /// @return number of bytes output on success, -1 otherwise.
-int mfile_vfprintf(mfile_file_t *self, char *fmt, va_list args)
+int mfile_vfprintf(mfile_file_t *self, const char *fmt, va_list args)
 {
     int retval=-1;
 //    if(NULL != self && self->fd>0){
@@ -474,12 +474,12 @@ int mfile_vfprintf(mfile_file_t *self, char *fmt, va_list args)
 }
 // End function mfile_vfprintf
 #else
-/// @fn int mfile_vfprintf(mfile_file_t * self, char * fmt, va_list args)
+/// @fn int mfile_vfprintf(mfile_file_t * self, const char * fmt, va_list args)
 /// @param[in] self file instance
 /// @param[in] fmt print format (e.g. stdio printf)
 /// @param[in] args print arguments (as va_list - posix, supported on many platforms)
 /// @return number of bytes output on success, -1 otherwise.
-int mfile_vfprintf(mfile_file_t *self, char *fmt, va_list args)
+int mfile_vfprintf(mfile_file_t *self, const char *fmt, va_list args)
 {
     int retval=-1;
     
