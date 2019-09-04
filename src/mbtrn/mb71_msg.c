@@ -146,7 +146,7 @@ void mb71v5_show(mb71v5_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[imagery_type   %8s%02X]\n",indent,(indent>0?" ":""), " ",self->imagery_type);
         fprintf(stderr,"%*s[topo_type      %8s%02X]\n",indent,(indent>0?" ":""), " ",self->topo_type);
         int nbeams =self->beams_bath;
-        
+        if(nbeams>0){
         unsigned char *bf = MB71_PBF(self,nbeams);
         short *bz = MB71_PBZ(self,nbeams);
         short *by = MB71_PBY(self,nbeams);
@@ -157,6 +157,7 @@ void mb71v5_show(mb71v5_t *self, bool verbose, uint16_t indent)
         for(int i=0;i<self->beams_bath;i++){
             fprintf(stderr,"%*s[%3d  %02X,%8hd,%8hd,%8hd ]\n",indent+3,(indent>0?" ":""), i, bf[i],bz[i],by[i],bx[i]);
         }
+        }
 
     }
 }
@@ -166,14 +167,13 @@ int mb71v5_bswap(mb71v5_t *dest, mb71v5_t *src)
 {
     int retval=-1;
     
-    if(NULL!=src){
+    if(NULL!=src  && src->beams_bath>0){
         // save nbeams before it's swapped
         int nbeams=src->beams_bath;
         mb71v5_t *out = (NULL==dest ? src : dest);
-        uint64_t u64[2]={0};
-        uint32_t u32[2]={0};
-        uint16_t u16[2]={0};
-        int64_t rbytes=0;
+//        uint64_t u64[2]={0};
+//        uint32_t u32[2]={0};
+//        uint16_t u16[2]={0};
         
         out->recordtype = mswap_16(src->recordtype);
         if(out==src){

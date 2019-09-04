@@ -355,7 +355,6 @@ void r7kr_reader_set_log(r7kr_reader_t *self, mlog_id_t id)
     if (NULL!=self) {
         if (self->log_id!=MLOG_ID_INVALID) {
             mlog_delete_instance(self->log_id);
-            self->log_id=MLOG_ID_INVALID;
         }
         self->log_id=id;
      }
@@ -472,8 +471,8 @@ void r7kr_reader_show(r7kr_reader_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[sub_count %10u]\n",indent,(indent>0?" ":""), self->sub_count);
         fprintf(stderr,"%*s[sub_list  %10p]\n",indent,(indent>0?" ":""), self->sub_list);
         if (verbose) {
-            for (uint32_t i=0; i<self->sub_count; i++) {
-                fprintf(stderr,"%*s[sub[%02d]  %10u]\n",indent+3,(indent+3>0?" ":""),i, self->sub_list[i]);
+            for (unsigned int i=0; i<self->sub_count; i++) {
+                fprintf(stderr,"%*s[sub[%02u]  %10u]\n",indent+3,(indent+3>0?" ":""),i, self->sub_list[i]);
             }
         }
     }
@@ -1181,7 +1180,6 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                     if (pframe->protocol_version == R7K_DRF_PROTO_VER ) {
                         
                         uint32_t pending_bytes = (pbuf-psync);
-                        uint32_t completion_bytes = 0;
                         
                         // have read more bytes than a DRF header...
                         if (pending_bytes>R7K_DRF_BYTES) {
@@ -1189,7 +1187,7 @@ int64_t r7kr_read_drf(r7kr_reader_t *self, byte *dest, uint32_t len,
                             // the header should be valid...
                             if (pframe->size<=R7K_MAX_FRAME_BYTES &&
                                 pframe->sync_pattern == R7K_DRF_SYNC_PATTERN) {
-                                
+                                uint32_t completion_bytes =0;
                                 if(pending_bytes <= pframe->size){
 
                                     completion_bytes = (pframe->size - pending_bytes);
@@ -1460,15 +1458,11 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
 {
     
     int64_t retval=-1;
+    
     me_errno = ME_OK;
-    uint32_t frame_bytes=0;
-    uint32_t nf_bytes=0;
-    uint32_t drf_bytes=0;
     r7kr_flags_t rflags=0;
     
     byte *pbuf=dest;
-    int64_t read_bytes=0;
-    uint32_t read_len=0;
 
     r7kr_parse_state_t state = R7KR_STATE_START;
     r7kr_parse_action_t action = R7KR_ACTION_QUIT;
@@ -1477,6 +1471,12 @@ int64_t r7kr_read_frame(r7kr_reader_t *self, byte *dest,
         ( (flags&R7KR_NF_STREAM) || (flags&R7KR_DRF_STREAM) || (flags&R7KR_NET_STREAM) ) &&
         NULL!=sockif && sockif->fd>0
         ) {
+
+        uint32_t frame_bytes=0;
+        uint32_t nf_bytes=0;
+        uint32_t drf_bytes=0;
+        int64_t read_bytes=0;
+        uint32_t read_len=0;
 
         while (state != R7KR_STATE_FRAME_VALID ) {
             
@@ -1873,7 +1873,6 @@ int r7kr_test(int argc, char **argv)
     r7kr_reader_show(reader,true, 5);
     
     uint32_t lost_bytes=0;
-    int istat=0;
     // test r7kr_read_frame
     byte frame_buf[MAX_FRAME_BYTES_7K]={0};
     int frames_read=0;
@@ -1885,6 +1884,7 @@ int r7kr_test(int argc, char **argv)
          // clear frame buffer
         memset(frame_buf,0,MAX_FRAME_BYTES_7K);
         // read frame
+        int istat=0;
         if( (istat = r7kr_read_frame(reader, frame_buf, MAX_FRAME_BYTES_7K, R7KR_NET_STREAM, 0.0, R7KR_READ_TMOUT_MSEC,&lost_bytes )) > 0){
             
             frames_read++;

@@ -319,22 +319,22 @@ static void app_cfg_destroy(app_cfg_t **pself)
 static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
 {
     int32_t retval=-1;
-    byte *bp = NULL;
-    uint32_t readlen = 0;
-    uint32_t record_bytes=0;
-    int64_t read_bytes=0;
     
     if(NULL!=src && NULL!=pdest){
+        byte *bp = NULL;
+        uint32_t readlen = 1;
+        uint32_t record_bytes=0;
+        int64_t read_bytes=0;
         mb1_frame_t *dest = *pdest;
         
         // sync to start of record
         bp = (byte *)dest->sounding;
-        readlen = 1;
+
         while( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
             if(*bp=='M'){
                 // found sync start
                 //                fprintf(stderr,"%s:%d\n",__FUNCTION__,__LINE__);
-                record_bytes+=readlen;
+                record_bytes+=read_bytes;
                 bp++;
                 readlen=MB1_HEADER_BYTES-1;
                 //                fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
@@ -350,7 +350,7 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
         // if start of sync found, read header (fixed-length sounding bytes)
         if(record_bytes>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
             
-            record_bytes+=readlen;
+            record_bytes+=read_bytes;
             bp=NULL;
             readlen=0;
             if(NULL!=dest && NULL!=dest->sounding && dest->sounding->nbeams>0 && dest->sounding->nbeams<=MB1_MAX_BEAMS){
@@ -367,18 +367,19 @@ static int32_t s_read_mb1_rec( mb1_frame_t **pdest, mfile_file_t *src)
 
              // if header OK, read sounding data (variable length)
             if(readlen>0 && (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
-                record_bytes+=readlen;
+                record_bytes+=read_bytes;
                 bp=(byte *)dest->checksum;
                 readlen=MB1_CHECKSUM_BYTES;
 //              fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
                 // read checksum
                 if( (read_bytes=mfile_read(src,(byte *)bp,readlen))==readlen){
-                    record_bytes+=readlen;
+                    record_bytes+=read_bytes;
                     retval=record_bytes;
 
                     unsigned int checksum = mb1_frame_calc_checksum(dest);
-                    
-//                    fprintf(stderr,"checksum (calc/read)[%08X/%08X] - %s\n",checksum,*(dest->checksum),(checksum== (*dest->checksum)?"VALID":"INVALID"));
+                    if(checksum!=*(dest->checksum)){
+                    fprintf(stderr,"checksum err (calc/read)[%08X/%08X]\n",checksum,*(dest->checksum));
+                    }
 //                  fprintf(stderr,"%d: read_bytes[%lld] bp[%p] err[%d/%s]\n",__LINE__,read_bytes,bp,errno,strerror(errno));
                 }else{
                     fprintf(stderr,"%d: read failed err[%d/%s]\n",__LINE__,errno,strerror(errno));
@@ -445,7 +446,7 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
             // get scaling
             double depthmax = -1e6;
             double distmax = -1e6;
-            double x=0;
+
             for ( i = 0; i < nbeams; i++) {
                 depthmax = MAX(depthmax, fabs(src->sounding->beams[i].rhoz));
                 distmax  = MAX(distmax, fabs(src->sounding->beams[i].rhoy));
@@ -496,88 +497,86 @@ static int32_t s_mb1_to_mb71v5(byte **dest, int32_t size, mb1_frame_t *src, app_
 static int s_app_main(app_cfg_t *cfg)
 {
     int retval=-1;
-    int32_t test[2]={0};
-    int itest=0;
-    int record_size=0;
-    int64_t input_bytes=0;
-    int64_t file_size=0;
     
-    int32_t mb71_size=0;
-    uint32_t output_bytes=0;
-    uint32_t err_count=0;
-    uint32_t rec_count=0;
-    bool quit=false;
-    mfile_file_t *ifile = mfile_file_new(cfg->ifile);
-    mfile_file_t *ofile = mfile_file_new(cfg->ofile);
-    byte *mb71_bytes=NULL;
-    mb1_frame_t *mb1=NULL;
-    mb71v5_t *pmb71 = NULL;
-    
-    if( (itest=mfile_open(ifile, MFILE_RONLY))>0 &&
-       (itest=mfile_mopen(ofile, MFILE_RDWR|MFILE_CREATE,MFILE_RU|MFILE_WU|MFILE_RG|MFILE_WG))>0){
+    if(NULL!=cfg){
+        int32_t test[2]={0};
+        int64_t input_bytes=0;
+        uint32_t output_bytes=0;
+        uint32_t err_count=0;
+        uint32_t rec_count=0;
+        mfile_file_t *ifile = mfile_file_new(cfg->ifile);
+        mfile_file_t *ofile = mfile_file_new(cfg->ofile);
+        byte *mb71_bytes=NULL;
+        mb1_frame_t *mb1=NULL;
+        mb71v5_t *pmb71 = NULL;
         
-        file_size=mfile_fsize(ifile);
-        
-        while( !g_interrupt && !quit && input_bytes<file_size){
+        if( (test[0]=mfile_open(ifile, MFILE_RONLY))>0 &&
+           (test[1]=mfile_mopen(ofile, MFILE_RDWR|MFILE_CREATE,MFILE_RU|MFILE_WU|MFILE_RG|MFILE_WG))>0){
             
-            // reset frame (or create if NULL)
-            mb1_frame_resize(&mb1,0,MB1_RS_ALL);
+            int record_size=0;
+            int64_t file_size=mfile_fsize(ifile);;
+            int32_t mb71_size=0;
+            bool quit=false;
             
-            if((test[0]=s_read_mb1_rec(&mb1, ifile))>0){
-                rec_count++;
-                input_bytes+=test[0];
+            while( !g_interrupt && !quit && input_bytes<file_size){
                 
-                if((mb71_size=s_mb1_to_mb71v5(&mb71_bytes,mb71_size,mb1, cfg))>0){
-                    // cast bytes to mb71 record frame
-                    pmb71 = (mb71v5_t *)mb71_bytes;
-                    output_bytes+=mb71_size;
-                    if(NULL!=cfg){
+                // reset frame (or create if NULL)
+                mb1_frame_resize(&mb1,0,MB1_RS_ALL);
+                
+                if((test[0]=s_read_mb1_rec(&mb1, ifile))>0){
+                    rec_count++;
+                    input_bytes+=test[0];
+                    
+                    if((mb71_size=s_mb1_to_mb71v5(&mb71_bytes,mb71_size,mb1, cfg))>0){
+                        // cast bytes to mb71 record frame
+                        pmb71 = (mb71v5_t *)mb71_bytes;
+                        output_bytes+=mb71_size;
                         if( cfg->verbose>2){
                             mb1_frame_show(mb1,5,true);
-                       }
+                        }
                         if( cfg->verbose>1){
                             mb71v5_show(pmb71,5,true);
                         }
+                        
+                        // byte swap mb71 frame, per config
+                        // (once swapped, don't use data members)
+                        if(cfg->bswap){
+                            mb71v5_bswap(NULL, pmb71);
+                        }
+                        
+                        // write the bytes
+                        mfile_write(ofile,(byte *)pmb71,mb71_size);
+                    }else{
+                        err_count++;
+                        if(cfg->verbose>0){
+                            fprintf(stderr,"s_mb1_to_mb71v5 failed [%d] ecount[%u]\n",record_size,err_count);
+                        }
                     }
-                    
-                    // byte swap mb71 frame, per config
-                    // (once swapped, don't use data members)
-                    if(cfg->bswap){
-                        mb71v5_bswap(NULL, pmb71);
-                    }
-                    
-                    // write the bytes
-                    mfile_write(ofile,(byte *)pmb71,mb71_size);
                 }else{
-                     err_count++;
-                    if(NULL!=cfg && cfg->verbose>0){
-                        fprintf(stderr,"s_mb1_to_mb71v5 failed [%d] ecount[%d]\n",record_size,err_count);
-                    }
+                    err_count++;
+                    fprintf(stderr,"s_read_mb1_rec failed [%d] ecount[%u]\n",test[0],err_count);
+                    quit=true;
                 }
-            }else{
-                err_count++;
-                fprintf(stderr,"s_read_mb1_rec failed [%d] ecount[%d]\n",test[0],err_count);
-                quit=true;
-            }
-
-        }// while
-
-    }else{
-        fprintf(stderr,"mfile_open failed i/o[%d/%d]\n",test[0],test[1]);
-        err_count++;
-    }
-    
-    mfile_file_destroy(&ifile);
-    mfile_file_destroy(&ofile);
-    if(NULL!=mb71_bytes){
-        free(mb71_bytes);
-    }
-    mb1_frame_destroy(&mb1);
-    retval=0;
-    
-    if(NULL!=cfg && cfg->verbose>0){
-        fprintf(stderr,"%s:%d rec/in/out/err[%d/%d/%d/%d]\n",__FUNCTION__,__LINE__,rec_count,input_bytes,output_bytes,err_count);
-    }
+                
+            }// while
+            
+        }else{
+            fprintf(stderr,"mfile_open failed i/o[%d/%d]\n",test[0],test[1]);
+            err_count++;
+        }
+        
+        mfile_file_destroy(&ifile);
+        mfile_file_destroy(&ofile);
+        if(NULL!=mb71_bytes){
+            free(mb71_bytes);
+        }
+        mb1_frame_destroy(&mb1);
+        retval=0;
+        
+        if(cfg->verbose>0){
+            fprintf(stderr,"%s:%d rec/in/out/err[%u/%ld/%u/%u]\n",__FUNCTION__,__LINE__,rec_count,input_bytes,output_bytes,err_count);
+        }
+    }// else NULL cfg
     return retval;
 }
 

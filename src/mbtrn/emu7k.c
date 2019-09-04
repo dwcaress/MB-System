@@ -427,12 +427,12 @@ void emu7k_show(emu7k_t *self, bool verbose, uint16_t indent)
 static int64_t read_s7k_frame(emu7k_t *self, byte *dest, uint32_t len, uint32_t *sync_bytes)
 {
     int64_t retval=-1;
-    int64_t rbytes=0;
-
+ 
     if (NULL!=self && NULL!=self->reader && NULL!=self->cfg &&
         NULL!=dest) {
 
-        r7kr_flags_t rflags = ( (self->cfg->netframe_input) ? R7KR_NET_STREAM : R7KR_DRF_STREAM );
+        int64_t rbytes=0;
+       r7kr_flags_t rflags = ( (self->cfg->netframe_input) ? R7KR_NET_STREAM : R7KR_DRF_STREAM );
       
         if( (rbytes = r7kr_read_frame(self->reader, dest, len, rflags , 0.0, 20, sync_bytes )) >0 ){
             retval=rbytes;
@@ -481,10 +481,6 @@ static void *s_server_publish(void *arg)
         uint32_t start_offset = svr->cfg->start_offset;
         
         while (NULL!=source_file && !svr->stop) {
-            double sys_start = 0.0;
-            double str_start = 0.0;
-            double pkt_time  = 0.0;
-            double sys_now   = 0.0;
             double min_delay = ((double)svr->cfg->min_delay)/1000.0;
             double max_delay = MAX_DELAY_DFL_SEC;
 
@@ -496,6 +492,11 @@ static void *s_server_publish(void *arg)
             }
             
             if (NULL != source_file) {
+                double sys_start = 0.0;
+                double str_start = 0.0;
+                double pkt_time  = 0.0;
+                double sys_now   = 0.0;
+
                 r7k_drf_t *pdrf[2] = {0};
                 r7k_nf_t *pnf[2] = {0};
                 int64_t rbytes=0;
@@ -891,31 +892,30 @@ void *s_server_main(void *arg)
 {
     emu7k_t *svr = (emu7k_t *)arg;
    
-    char buf[ADDRSTR_BYTES]={0};
-    struct timeval tv;
-    fd_set master;
-    fd_set read_fds;
-    int fdmax;
-    int stat=0;
-    byte iobuf[256]; // buffer for client data
-    int nbytes;
-    struct sockaddr_storage client_addr={0};
-    socklen_t addr_size=0;
-    bool stop_req=false;
-    emu7k_stat_t *stats = &svr->stats;
     int *retval=NULL;
 
-    stats->start_time=time(NULL);
-    
-    msock_socket_t  *s = svr->sock_if;
-    msock_set_blocking(s,true);
-    
-    if ( (NULL!=svr) && (NULL!=s)) {
+    if ( (NULL!=svr) ) {
+        struct timeval tv;
+        fd_set master;
+        fd_set read_fds;
+        byte iobuf[256]; // buffer for client data
+        struct sockaddr_storage client_addr={0};
+        socklen_t addr_size=0;
+        bool stop_req=false;
+        emu7k_stat_t *stats = &svr->stats;
+
+        stats->start_time=time(NULL);
+
+        msock_socket_t  *s = svr->sock_if;
+        msock_set_blocking(s,true);
        	PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"starting worker thread\n"));
         if(mthread_thread_start(svr->w, s_server_publish, (void *)svr)!=0){
             PEPRINT((stderr,"worker thread start failed\n"));
             stop_req=true;
         }else{
+
+            char buf[ADDRSTR_BYTES]={0};
+            int fdmax;
 
             msock_bind(s);
             PMPRINT(MOD_EMU7K,EMU7K_V2,(stderr,"server [%s] - starting\n",msock_addr2str(s,buf,ADDRSTR_BYTES)));
@@ -929,17 +929,17 @@ void *s_server_main(void *arg)
             FD_SET(s->fd,&master);
             fdmax = s->fd;
             
-            bool do_close=true;
             while (!svr->stop && !stop_req) {
                read_fds = master;
+                int stat=0;
                 // MMINFO(APP1,"pending on select\n");
                 if( (stat=select(fdmax+1, &read_fds, NULL, NULL, &tv)) != -1){
                     int newfd=-1;
                     for (int i=s->fd; i<=fdmax; i++) {
-                        
+
                         if (FD_ISSET(i, &read_fds)){
+                            bool do_close=true;
                             // MMINFO(APP1,"readfs [%d/%d] selected\n",i,fdmax);
-                            do_close=true;
                             if (i==s->fd) {
                                 PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server main listener [%d] got request\n",i));
 
@@ -957,6 +957,8 @@ void *s_server_main(void *arg)
                                     // MMINFO(APP1,"accept failed [%d/%s]\n",errno,strerror(errno));
                                 }
                             }else{
+                                int nbytes=0;
+
                                 do_close=false;
                                 PMPRINT(MOD_EMU7K,EMU7K_V4,(stderr,"server waiting for client data fd[%d]\n",i));
                                 if (( nbytes = recv(i, iobuf, sizeof iobuf, 0)) <= 0) {
@@ -976,7 +978,7 @@ void *s_server_main(void *arg)
                                     close(i); // bye!
                                 }
                                 FD_CLR(i, &master); // remove from master set
-                            }
+                           }
                         }else{
                             //                       MMINFO(APP1,"readfs fd[%d/%d] ISSET:%s\n",i,fdmax,(FD_ISSET(i,&read_fds)?"TRUE":"FALSE"));
                         }
@@ -994,21 +996,21 @@ void *s_server_main(void *arg)
                 emu7k_stat_show(stats,false,7);
             }
         }
+        if (stop_req) {
+            PMPRINT(MOD_EMU7K,EMU7K_V3,(stderr,"Test server - interrupted - stop flag set\n"));
+            if (NULL!=s) {
+                s->status=1;
+            }
+        }else{
+            PMPRINT(MOD_EMU7K,EMU7K_V3,(stderr,"Test server - normal exit\n"));
+            if (NULL!=s) {
+                s->status=0;
+            }
+        }
+        
+        retval=(NULL!=s?&s->status:NULL);
     }
     
-    if (stop_req) {
-        PMPRINT(MOD_EMU7K,EMU7K_V3,(stderr,"Test server - interrupted - stop flag set\n"));
-        if (NULL!=s) {
-            s->status=1;
-        }
-    }else{
-        PMPRINT(MOD_EMU7K,EMU7K_V3,(stderr,"Test server - normal exit\n"));
-        if (NULL!=s) {
-        	s->status=0;
-        }
-    }
-    
-    retval=(NULL!=s?&s->status:NULL);
     
     pthread_exit((void *)retval);
 
@@ -1202,8 +1204,8 @@ static void s_parse_args(int argc, char **argv, app_cfg_t *cfg)
         fprintf(stderr,"port      [%d]\n",cfg->port);
         fprintf(stderr,"file      [%s]\n",cfg->file_path);
         fprintf(stderr,"restart   [%c]\n",(cfg->restart?'Y':'N'));
-        fprintf(stderr,"statn     [%d]\n",cfg->statn);
-        fprintf(stderr,"min-delay [%u]\n",cfg->min_delay);
+        fprintf(stderr,"statn     [%u]\n",cfg->statn);
+        fprintf(stderr,"min-delay [%d]\n",cfg->min_delay);
         fprintf(stderr,"nf        [%c]\n",(cfg->netframe_input?'Y':'N'));
         fprintf(stderr,"offset    [%"PRIu32"]\n",cfg->start_offset);
         fprintf(stderr,"xds       [%d]\n",cfg->xds);

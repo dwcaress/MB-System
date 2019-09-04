@@ -58,14 +58,6 @@ GNU General Public License for more details
 /////////////////////////
 // Headers 
 /////////////////////////
-//#include <inttypes.h>
-//#include <errno.h>
-//#include <time.h>
-//#include <sys/time.h>
-//#include <math.h>
-//#include "r7kc.h"
-//#include "mconfig.h"
-//#include "mdebug.h"
 
 #include "r7kc.h"
 #include "merror.h"
@@ -94,6 +86,9 @@ GNU General Public License for more details
 "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"\
 "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
 */
+
+// string buffer expansion increment
+#define R7K_STR_INC 256
 
 /////////////////////////
 // Declarations 
@@ -312,15 +307,15 @@ void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
     if (NULL!=data && len>0 && cols>0) {
         int rows = len/cols;
         int rem = len%cols;
-        int i=0,j=0;
+
         byte *p=data;
-        for (i=0; i<rows; i++) {
+        for (int i=0; i<rows; i++) {
             if (show_offsets) {
-                fprintf(stderr,"%*s%04zd [",indent,(indent>0?" ":""),(p-data));
+                fprintf(stderr,"%*s%04ld [",indent,(indent>0?" ":""),(long int)(p-data));
             }else{
                 fprintf(stderr,"%*s[",indent,(indent>0?" ":""));
             }
-            for (j=0; j<cols; j++) {
+            for (int j=0; j<cols; j++) {
                 if (p>=data && p<(data+len)) {
                     byte b = (*p);
                     fprintf(stderr," %02x",b);
@@ -333,11 +328,11 @@ void r7k_hex_show(byte *data, uint32_t len, uint16_t cols, bool show_offsets, ui
         }
         if (rem>0) {
             if (show_offsets) {
-                fprintf(stderr,"%*s%04zd [",indent,(indent>0?" ":""),(p-data));
+                fprintf(stderr,"%*s%04ld [",indent,(indent>0?" ":""),(long int)(p-data));
             }else{
                 fprintf(stderr,"%*s[",indent,(indent>0?" ":""));
             }
-            for (j=0; j<rem; j++) {
+            for (int j=0; j<rem; j++) {
                 fprintf(stderr," %02x",*p++);
             }
             fprintf(stderr,"%*s ]\n",3*(cols-rem)," ");
@@ -363,7 +358,7 @@ void r7k_parser_show(r7k_parse_stat_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[parsed_records %10u]\n",indent,(indent>0?" ":""), self->parsed_records);
         fprintf(stderr,"%*s[parsed_bytes   %10u]\n",indent,(indent>0?" ":""), self->parsed_bytes);
         fprintf(stderr,"%*s[resync_count   %10u]\n",indent,(indent>0?" ":""), self->resync_count);
-        fprintf(stderr,"%*s[status         %10u]\n",indent,(indent>0?" ":""), self->status);
+        fprintf(stderr,"%*s[status         %10d]\n",indent,(indent>0?" ":""), self->status);
     }
 }
 // End function r7k_parser_show
@@ -383,24 +378,24 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
     char *wbuf=NULL;
     char *fmt=NULL;
     uint32_t wlen=len;
-    uint32_t wb=0;
-    uint32_t inc=256;
-    uint32_t n=1;
+//    uint32_t inc=256;
     
     if (NULL!=self) {
         
-        wbuf=(char *)malloc(inc*sizeof(char));
+        wbuf=(char *)malloc(R7K_STR_INC*sizeof(char));
         memset(wbuf,0,len);
     	dp=wbuf;
 
         // TODO: check length/realloc
         if (dp!=NULL) {
+
+            uint32_t n=1;
             fmt="%*s[self           %10p]\n";
-            wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self);
+            uint32_t wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self);
             wlen+=wb;
-            if (wlen>inc) {
+            if (wlen>R7K_STR_INC) {
                 n++;
-                wbuf=(char *)realloc(wbuf,n*inc*sizeof(char));
+                wbuf=(char *)realloc(wbuf,n*R7K_STR_INC*sizeof(char));
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self);
@@ -409,9 +404,9 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             fmt="%*s[src_bytes      %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->src_bytes);
             wlen+=wb;
-            if (wlen>inc) {
+            if (wlen>R7K_STR_INC) {
                 n++;
-                wbuf=(char *)realloc(wbuf,n*inc*sizeof(char));
+                wbuf=(char *)realloc(wbuf,n*R7K_STR_INC*sizeof(char));
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->src_bytes);
@@ -420,9 +415,9 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             fmt="%*s[sync_bytes     %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->sync_bytes);
             wlen+=wb;
-            if (wlen>inc) {
+            if (wlen>R7K_STR_INC) {
                 n++;
-                wbuf=(char *)realloc(wbuf,n*inc*sizeof(char));
+                wbuf=(char *)realloc(wbuf,n*R7K_STR_INC*sizeof(char));
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->sync_bytes);
@@ -431,9 +426,9 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             fmt="%*s[unread_bytes   %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->unread_bytes);
             wlen+=wb;
-            if (wlen>inc) {
+            if (wlen>R7K_STR_INC) {
                 n++;
-                wbuf=(char *)realloc(wbuf,n*inc*sizeof(char));
+                wbuf=(char *)realloc(wbuf,n*R7K_STR_INC*sizeof(char));
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->unread_bytes);
@@ -443,9 +438,9 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             fmt="%*s[parsed_records %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->parsed_records);
             wlen+=wb;
-            if (wlen>inc) {
+            if (wlen>R7K_STR_INC) {
                 n++;
-                wbuf=(char *)realloc(wbuf,n*inc*sizeof(char));
+                wbuf=(char *)realloc(wbuf,n*R7K_STR_INC*sizeof(char));
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->parsed_records);
@@ -454,9 +449,9 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             fmt="%*s[parsed_bytes   %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->parsed_bytes);
             wlen+=wb;
-            if (wlen>inc) {
+            if (wlen>R7K_STR_INC) {
                 n++;
-                wbuf=(char *)realloc(wbuf,n*inc*sizeof(char));
+                wbuf=(char *)realloc(wbuf,n*R7K_STR_INC*sizeof(char));
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->parsed_bytes);
@@ -465,20 +460,20 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
             fmt="%*s[resync_count   %10u]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->resync_count);
             wlen+=wb;
-            if (wlen>inc) {
+            if (wlen>R7K_STR_INC) {
                 n++;
-                wbuf=(char *)realloc(wbuf,n*inc*sizeof(char));
+                wbuf=(char *)realloc(wbuf,n*R7K_STR_INC*sizeof(char));
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->resync_count);
             dp = wbuf+strlen(wbuf);
             
-            fmt="%*s[status         %10u]\n";
+            fmt="%*s[status         %10d]\n";
             wb = snprintf(NULL,0,fmt,indent,(indent>0?" ":""), self->status);
             wlen+=wb;
-            if (wlen>inc) {
+            if (wlen>R7K_STR_INC) {
                 n++;
-                wbuf=(char *)realloc(wbuf,n*inc*sizeof(char));
+                wbuf=(char *)realloc(wbuf,n*R7K_STR_INC*sizeof(char));
                 dp = wbuf+strlen(wbuf);
             }
             sprintf(dp,fmt,indent,(indent>0?" ":""), self->status);
@@ -509,16 +504,15 @@ char *r7k_parser_str(r7k_parse_stat_t *self, char *dest, uint32_t len, bool verb
 uint32_t r7k_parse(byte *src, uint32_t len, r7k_drf_container_t *dest, r7k_parse_stat_t *status)
 {
     int retval=-1;
-    me_errno=ME_OK;
-    
-    uint32_t record_count = 0;
-    uint32_t sync_bytes = 0;
-    r7k_nf_t *pnf=NULL;
-    r7k_drf_t *pdrf=NULL;
-    r7k_checksum_t *pchk=NULL;
-    byte *psrc = NULL;
     
     if (NULL != src && NULL!=dest) {
+        me_errno=ME_OK;
+        r7k_nf_t *pnf=NULL;
+        r7k_drf_t *pdrf=NULL;
+        r7k_checksum_t *pchk=NULL;
+        byte *psrc = NULL;
+        uint32_t record_count = 0;
+        uint32_t sync_bytes = 0;
         psrc=src;
         memset(status,0,sizeof(r7k_parse_stat_t));
         status->src_bytes = len;
@@ -701,49 +695,46 @@ int r7k_stream_show(msock_socket_t *s, int sz, uint32_t tmout_ms, int cycles, bo
 {
     int retval=-1;
     int x=(sz<=0?16:sz);
-    //byte buf[x];			// Invalid C.	JL
-    byte *buf;
-    int64_t test=0;
-    int good=0,err=0,zero=0,tmout=0;
-    int status = 0;
-    bool forever=true;
-    int count=0;
-    if (sz < 0)
-    	buf = (byte *)malloc(16);
-    else
-    	buf = (byte *)malloc(sz);
+    byte *buf=(byte *)malloc(x);
 
-    if (cycles>0) {
-        forever=false;
-    }
-    //    PEPRINT((stderr,"cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N")));
+    if(NULL!=buf){
+        int good=0,err=0,zero=0,tmout=0;
+        int status = 0;
+        bool forever=true;
+        int count=0;
 
-    // read cycles or forever (cycles<=0)
-    while ( (forever || (count++ < cycles)) &&
-           (NULL!=interrupt && !(*interrupt)) ) {
-        memset(buf,0,x);
-        test = msock_read_tmout(s, buf, x, tmout_ms);
-        if(test>0){
-            good++;
-            r7k_hex_show(buf, test, 16, true, 3);
-            fprintf(stderr,"c[%d/%d] ret[%"PRId64"/%u] stat[%d] good/zero/tmout/err [%d/%d/%d/%d]\n",count,cycles,test,sz,status,good,zero,tmout,err);
-            retval=0;
-        }else if(test<0){
-           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"ERR [%d/%s]\n",me_errno,me_strerror(me_errno)));
-            err++;
-            tmout = (me_errno==ME_ETMOUT ? tmout+1 : tmout );
-            if (me_errno==ME_ETMOUT || me_errno==ME_EOF || me_errno==ME_ESOCK) {
-                break;
-            }
-        }else{
-           PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read returned 0\n"));
-            zero++;
-            if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
-                break;
+        if (cycles>0) {
+            forever=false;
+        }
+        //    PEPRINT((stderr,"cycles[%d] forever[%s] c||f[%s]\n",cycles,(forever?"Y":"N"),(forever || (cycles>0) ? "Y" :"N")));
+        
+        // read cycles or forever (cycles<=0)
+        while ( (forever || (count++ < cycles)) &&
+               (NULL!=interrupt && !(*interrupt)) ) {
+            memset(buf,0,x);
+            int64_t test = msock_read_tmout(s, buf, x, tmout_ms);
+            if(test>0){
+                good++;
+                r7k_hex_show(buf, test, 16, true, 3);
+                fprintf(stderr,"c[%d/%d] ret[%"PRId64"/%u] stat[%d] good/zero/tmout/err [%d/%d/%d/%d]\n",count,cycles,test,sz,status,good,zero,tmout,err);
+                retval=0;
+            }else if(test<0){
+                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"ERR [%d/%s]\n",me_errno,me_strerror(me_errno)));
+                err++;
+                tmout = (me_errno==ME_ETMOUT ? tmout+1 : tmout );
+                if (me_errno==ME_ETMOUT || me_errno==ME_EOF || me_errno==ME_ESOCK) {
+                    break;
+                }
+            }else{
+                PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read returned 0\n"));
+                zero++;
+                if (me_errno==ME_ESOCK || me_errno==ME_EOF) {
+                    break;
+                }
             }
         }
+        free(buf);
     }
-    free(buf);
     return retval;
 }
 // End function r7k_stream_show
@@ -814,38 +805,40 @@ void r7k_nf_destroy(r7k_nf_t **pself)
 r7k_nf_t * r7k_nf_init(r7k_nf_t **pnf,bool erase)
 {
     r7k_nf_t *nf=NULL;
-    
-    if (NULL == pnf) {
-        nf = (r7k_nf_t *)malloc(sizeof(r7k_nf_t));
-        memset(nf,0,sizeof(r7k_nf_t));
-        *pnf = nf;
-    }else{
-        nf = *pnf;
-    }
-    if (NULL!=nf) {
-        if (erase) {
+    if(NULL!=pnf){
+        if (NULL == *pnf) {
+            nf = (r7k_nf_t *)malloc(sizeof(r7k_nf_t));
             memset(nf,0,sizeof(r7k_nf_t));
+            *pnf = nf;
+        }else{
+            nf = *pnf;
         }
-        // caller must set:
-        // total_size
-        // packet_size
-        
-        // caller may optionally set
-        // total packets
-        // trans_id
-        // seq_number
-        
-        nf->protocol_version = R7K_NF_PROTO_VER;
-        nf->offset           = R7K_NF_BYTES;
-        nf->total_packets    = 1;
-        nf->total_records    = 1;
-        nf->tx_id            = 0;
-        
-        nf->seq_number       = 0;
-        nf->dest_dev_id      = R7K_DEVID_7KCENTER;
-        nf->dest_enumerator  = 0;
-        nf->src_enumerator   = 0;
-        nf->src_dev_id       = R7K_NF_DEVID_UNUSED;
+        if (NULL!=nf) {
+            if (erase) {
+                memset(nf,0,sizeof(r7k_nf_t));
+            }
+            // caller must set:
+            // total_size
+            // packet_size
+            
+            // caller may optionally set
+            // total packets
+            // trans_id
+            // seq_number
+            
+            nf->protocol_version = R7K_NF_PROTO_VER;
+            nf->offset           = R7K_NF_BYTES;
+            nf->total_packets    = 1;
+            nf->total_records    = 1;
+            nf->tx_id            = 0;
+            
+            nf->seq_number       = 0;
+            nf->dest_dev_id      = R7K_DEVID_7KCENTER;
+            nf->dest_enumerator  = 0;
+            nf->src_enumerator   = 0;
+            nf->src_dev_id       = R7K_NF_DEVID_UNUSED;
+        }
+
     }
     
     
@@ -1095,8 +1088,8 @@ void r7k_drfcon_show(r7k_drf_container_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[ofs_count    %10u]\n",indent,(indent>0?" ":""), self->ofs_count);
         fprintf(stderr,"%*s[drf_enum     %10u]\n",indent,(indent>0?" ":""), self->drf_enum);
         if (verbose) {
-            for (uint32_t i=0; i<self->ofs_count; i++) {
-                fprintf(stderr,"%*s[ofs[%02d]  %10u]\n",indent+3,(indent+3>0?" ":""),i, self->ofs_list[i]);
+            for (unsigned int i=0; i<self->ofs_count; i++) {
+                fprintf(stderr,"%*s[ofs[%02u]  %10u]\n",indent+3,(indent+3>0?" ":""),i, self->ofs_list[i]);
             }
         }
     }
@@ -1594,19 +1587,19 @@ byte *r7k_msg_serialize(r7k_msg_t *self)
 int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
 {
     int retval=-1;
-    int64_t nbytes=0;
     if (NULL != s && s->status==SS_CONNECTED) {
         
+        int64_t nbytes=0;
         // read nf, drf headers
         int64_t header_len = sizeof(r7k_nf_headers_t);
-        int64_t total_len=0;
+
         //byte headers[header_len];	// Invalid C.	JL
         byte *headers;
         headers = (byte *)malloc(header_len+1);
         
         memset(headers,0,header_len);
         if ( (nbytes=msock_read_tmout(s,headers,header_len,timeout_msec)) == header_len) {
-            total_len+=nbytes;
+            int64_t total_len=nbytes;
            PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"read headers [%"PRId64"/%"PRId64"]\n",nbytes,header_len));
             // get frame content
             r7k_nf_t *nf = (r7k_nf_t *)(headers);
@@ -1639,6 +1632,7 @@ int r7k_msg_receive(msock_socket_t *s, r7k_msg_t **dest, uint32_t timeout_msec)
 //                       PMPRINT(MOD_R7K,MM_DEBUG,(stderr,"dest msg:\n"));
 //                        r7k_msg_show(m,true,6);
                         *dest=m;
+                        retval=total_len;
                     }else{
                         PEPRINT((stderr,"msg_new failed\n"));
                     }

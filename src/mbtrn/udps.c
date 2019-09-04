@@ -276,7 +276,7 @@ void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 // connections
                 else if (strcmp("connections", options[option_index].name) == 0) {
                     sscanf(optarg,"%"PRIu32"",&cfg->connections);
-                    if (cfg->connections<=0||cfg->connections>UDPS_MAX_CONN_LIM) {
+                    if (cfg->connections==0||cfg->connections>UDPS_MAX_CONN_LIM) {
                         cfg->connections=UDPS_CONNECTIONS_DFL;
                     }
                 }
@@ -335,11 +335,8 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
     
     if (NULL!=cfg && NULL!=s) {
         msock_connection_t **connections=(msock_connection_t **)malloc(cfg->connections*sizeof(msock_connection_t));
-        uint32_t con_idx=0;
         byte buf[UDPS_BUF_LEN]={0};
         
-        int test=0;
-        int iobytes=0;
         int i=0;
         static struct timespec delay={0};
         static struct timespec rem={0};
@@ -351,7 +348,9 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
         
         // bind to port
         PDPRINT((stderr,"binding [%s] fd[%d]\n",cfg->host,s->fd));
-        if ( (iobytes=msock_bind(s))==0) {
+        int test=0;
+        if ( (test=msock_bind(s))==0) {
+            uint32_t con_idx=0;
             retval=0;
             do{
                 // clear buffers
@@ -361,15 +360,13 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                 memset(buf,0,UDPS_BUF_LEN);
                 
                 // read client socket
-                iobytes = msock_recvfrom(s, connections[con_idx]->addr, buf, UDPS_BUF_LEN,0);
+                int iobytes = msock_recvfrom(s, connections[con_idx]->addr, buf, UDPS_BUF_LEN,0);
                 // record arrival time
                 double tarrival = mtime_dtime();
                 
                 const char *ctest=NULL;
                 struct sockaddr_in *psin = NULL;
                 msock_connection_t *trn_peer=connections[con_idx];
-                uint16_t port=0xFFFF;
-                int svc=0;
                 
                 switch (iobytes) {
                     case 0:
@@ -385,7 +382,6 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                         
                     default:
                         // get host name info from connection
-                        
                         if (NULL != trn_peer->addr &&
                             NULL != trn_peer->addr->ainfo &&
                             NULL != trn_peer->addr->ainfo->ai_addr) {
@@ -394,9 +390,9 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
                             ctest = inet_ntop(AF_INET, &psin->sin_addr, trn_peer->chost, MSOCK_ADDR_LEN);
                             if (NULL!=ctest) {
                                 
-                                port = ntohs(psin->sin_port);
+                                uint16_t port = ntohs(psin->sin_port);
                                 
-                                svc = port;
+                                int svc = port;
                                 snprintf(trn_peer->service,NI_MAXSERV,"%d",svc);
                                 
                                 PDPRINT((stderr,"%11.3f Received %d bytes from peer[%d] %s:%s\n",

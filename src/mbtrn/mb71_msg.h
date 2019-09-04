@@ -106,22 +106,29 @@
 /// @brief get pointer to beam flags array
 /// @param[in] pmb71  mb71_frame_t pointer
 /// @param[in] nbeams number of bathymetry beams
-#define MB71_PBF(pmb71,nbeams) (NULL!=pmb71 && nbeams>0 ? (unsigned char *)&pmb71->beam_bytes[0*nbeams] : (unsigned char *)NULL)
+//#define MB71_PBF(pmb71,nbeams) (NULL!=pmb71 && nbeams>0 ? (unsigned char *)&pmb71->beam_bytes[0*nbeams] : (unsigned char *)NULL)
+#define MB71_PBF(pmb71,nbeams) ( (unsigned char *)&pmb71->beam_bytes[0*nbeams])
+
 /// @def MB71_PBZ(pmb71,nbeams)
 /// @brief get pointer to beam vertical component array
 /// @param[in] pmb71  mb71_frame_t pointer
 /// @param[in] nbeams number of bathymetry beams
-#define MB71_PBZ(pmb71,nbeams) (NULL!=pmb71 && nbeams>0 ? (short *)&pmb71->beam_bytes[1*nbeams] : (short *)NULL)
+//#define MB71_PBZ(pmb71,nbeams) (NULL!=pmb71 && nbeams>0 ? (short *)&pmb71->beam_bytes[1*nbeams] : (short *)NULL)
+#define MB71_PBZ(pmb71,nbeams) ((short *)&pmb71->beam_bytes[1*nbeams])
+
 /// @def MB71_PBY(pmb71,nbeams)
 /// @brief get pointer to beam across-track component array
 /// @param[in] pmb71  mb71_frame_t pointer
 /// @param[in] nbeams number of bathymetry beams
-#define MB71_PBY(pmb71,nbeams) (NULL!=pmb71 && nbeams>0 ? (short *)&pmb71->beam_bytes[3*nbeams] : (short *)NULL)
+//#define MB71_PBY(pmb71,nbeams) (NULL!=pmb71 && nbeams>0 ? (short *)&pmb71->beam_bytes[3*nbeams] : (short *)NULL)
+#define MB71_PBY(pmb71,nbeams) ((short *)&pmb71->beam_bytes[3*nbeams])
+
 /// @def MB71_PBX(pmb71,nbeams)
 /// @brief get pointer to beam along-track component array
 /// @param[in] pmb71  mb71_frame_t pointer
 /// @param[in] nbeams number of bathymetry beams
-#define MB71_PBX(pmb71,nbeams) (NULL!=pmb71 && nbeams>0 ? (short *)&pmb71->beam_bytes[5*nbeams] : (short *)NULL)
+//#define MB71_PBX(pmb71,nbeams) (NULL!=pmb71 && nbeams>0 ? (short *)&pmb71->beam_bytes[5*nbeams] : (short *)NULL)
+#define MB71_PBX(pmb71,nbeams) ((short *)&pmb71->beam_bytes[5*nbeams])
 
 #ifndef MAX
 /// @def MAX

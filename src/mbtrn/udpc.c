@@ -308,10 +308,10 @@ static int s_app_main(msock_socket_t *s, app_cfg_t *cfg)
         int test=0;
         byte buf[UDPC_BUF_LEN]={0};
         int cycles=cfg->cycles;
-        bool done=false;
         
         PDPRINT((stderr,"connect [%s:%d]\n",cfg->host,cfg->port));
         if ( (test=msock_connect(s))==0) {
+            bool done=false;
             do{
                 if( (test=msock_sendto(s,NULL,(byte *)"REQ",4,0))>0){
                     PDPRINT((stderr,"sendto OK [%d]\n",test));

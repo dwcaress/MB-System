@@ -425,9 +425,9 @@ static void parse_args(int argc, char **argv, app_cfg_t *cfg)
                 fprintf(stderr,"files[%2d] [%s]\n",i,cfg->files[i]);
             }
         }
-        fprintf(stderr,"sout      [%c]\n",(cfg->oflags&OF_SOUT?'Y':'N'));
-        fprintf(stderr,"csv       [%c]\n",(cfg->oflags&OF_CSV?'Y':'N'));
-        fprintf(stderr,"socket    [%c]\n",(cfg->oflags&OF_SOCKET?'Y':'N'));
+        fprintf(stderr,"sout      [%c]\n",( ((cfg->oflags&OF_SOUT)   !=0 )?'Y':'N'));
+        fprintf(stderr,"csv       [%c]\n",( ((cfg->oflags&OF_CSV)    !=0 )?'Y':'N'));
+        fprintf(stderr,"socket    [%c]\n",( ((cfg->oflags&OF_SOCKET) !=0 )?'Y':'N'));
         if (cfg->oflags&OF_SOCKET) {
         fprintf(stderr,"host:port [%s:%d]\n",cfg->host,cfg->port);
         }
@@ -449,14 +449,13 @@ static int s_delay_message(mb1_sounding_t *sounding, double prev_time, app_cfg_t
     
     if (NULL!=sounding && NULL!=cfg) {
         
-        double tsdiff = 0.0;
         struct timespec delay={0};
         struct timespec rem={0};
-        
+
         if (cfg->delay_msec==0) {
             // use timestamps
-            tsdiff = (sounding->ts-prev_time);
-            
+           double tsdiff = (sounding->ts-prev_time);
+
             PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"prev_time[%.3lf] ts[%.3lf] tsdiff[%.3lf]\n",prev_time,sounding->ts,tsdiff));
             if (tsdiff>TBX_MAX_DELAY_SEC) {
                 // if delay too large, use min delay
@@ -467,7 +466,8 @@ static int s_delay_message(mb1_sounding_t *sounding, double prev_time, app_cfg_t
                 if (  prev_time>0 && tsdiff > 0) {
                     time_t lsec = (time_t)tsdiff;
                     long lnsec = (10000000L*(tsdiff-lsec));
-                    struct timespec rem={0};
+                    rem.tv_sec=0;
+                    rem.tv_nsec=0;
                     delay.tv_sec=lsec;
                     delay.tv_nsec=lnsec;
                     PMPRINT(MOD_TBINX,TBINX_V4,(stderr,"case ts - using delay[%"PRIu32":%"PRIu32"]\n",(uint32_t)delay.tv_sec,(uint32_t)delay.tv_nsec));
@@ -715,7 +715,7 @@ static int s_out_socket(msock_socket_t *s, mb1_sounding_t *sounding)
                     data_available=true;
                     
                     const char *ctest=NULL;
-                    uint16_t port=0xFFFF;
+
                     struct sockaddr_in *psin = NULL;
                     
                     if (NULL != trn_peer->addr &&
@@ -726,7 +726,7 @@ static int s_out_socket(msock_socket_t *s, mb1_sounding_t *sounding)
                         ctest = inet_ntop(AF_INET, &psin->sin_addr, trn_peer->chost, MSOCK_ADDR_LEN);
                         if (NULL!=ctest) {
                             
-                            port = ntohs(psin->sin_port);
+                            uint16_t port = ntohs(psin->sin_port);
                             
                             svc = port;
                             snprintf(trn_peer->service,NI_MAXSERV,"%d",svc);
@@ -759,9 +759,10 @@ static int s_out_socket(msock_socket_t *s, mb1_sounding_t *sounding)
                             
                             PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"rx [%d]b cli[%d/%s:%s]\n", iobytes, svc, trn_peer->chost, trn_peer->service));
 
-                            // send ACK
-                            iobytes = msock_sendto(s, pclient->addr, (byte *)"ACK", 4, 0 );
                             if ( (NULL!=pclient) &&  (iobytes> 0) ) {
+                                // send ACK
+                                iobytes = msock_sendto(s, pclient->addr, (byte *)"ACK", 4, 0 );
+
                                 PMPRINT(MOD_TBINX,TBINX_V1,(stderr,"tx ACK [%d]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service));
                                 trn_tx_count++;
                                 trn_tx_bytes+=iobytes;
@@ -855,7 +856,7 @@ int s_process_file(app_cfg_t *cfg)
 
                 trn_osocket = msock_socket_new(cfg->host, cfg->port, ST_UDP);
                 msock_set_blocking(trn_osocket,false);
-                int test=-1;
+           
                 if ( (test=msock_bind(trn_osocket))==0) {
                     fprintf(stderr,"TRN host socket bind OK [%s:%d]\n",cfg->host, cfg->port);
                 }else{
@@ -866,35 +867,22 @@ int s_process_file(app_cfg_t *cfg)
             if ( (test=mfile_open(ifile,MFILE_RONLY)) > 0) {
                 PMPRINT(MOD_TBINX,TBINX_V2,(stderr,"open OK [%s]\n",cfg->files[i]));
                 
-                byte msg_buf[MB1_MAX_FRAME_BYTES]={0};
-                mb1_frame_t frame = {0},*mb1=&frame;
-                mb1->sounding=(mb1_sounding_t *)(msg_buf);
-                mb1->checksum=MB1_PCHECKSUM_U32(mb1);
-                byte *ptype = (byte *)&mb1->sounding->type;
-                byte *psize = (byte *)&mb1->sounding->size;
-
-//                trn_message_t message;
-//                memset(&message,0,sizeof(trn_message_t));
-
-//                trn_message_t *pmessage  = &message;
-//                mbtrn_header_t *phdr     = &pmessage->data.header;
-//                mbtrn_sounding_t *psounding     = &pmessage->data.sounding;
-//                byte *ptype = (byte *)&phdr->type;
-//                byte *psize = (byte *)&phdr->size;
+                byte msg_buf[MB1_MAX_FRAME_BYTES+sizeof(mb1_frame_t)]={0};
+                mb1_frame_t *mb1= (mb1_frame_t *) &msg_buf[0]; //&frame;
+                mb1->sounding = (mb1_sounding_t *)((byte *)msg_buf+sizeof(mb1_frame_t));
+                byte *ptype = (byte *)(&(mb1->sounding->type));
+                byte *psize = (byte *)(&(mb1->sounding->size));
                 
                 double prev_time =0.0;
                 
                 bool ferror=false;
                 int64_t rbytes=0;
                 bool sync_valid=false;
-                bool header_valid=false;
-                bool sounding_valid=false;
-                bool rec_valid=false;
                 while (!ferror) {
                     byte *sp = (byte *)mb1->sounding;
-                    header_valid=false;
-                    sounding_valid=false;
-                    rec_valid=false;
+                    bool header_valid=false;
+                    bool sounding_valid=false;
+                    bool rec_valid=false;
                     while (!sync_valid) {
                         if( ((rbytes=mfile_read(ifile,(byte *)sp,1))==1) && *sp=='M'){
                             sp++;
@@ -1015,14 +1003,14 @@ int s_process_file(app_cfg_t *cfg)
                             s_out_csv(csv_file,mb1->sounding);
                         }
                         if ( (cfg->oflags&OF_SOCKET) && (NULL!=trn_osocket) ) {
-                            int test=0;
+                            int test_con=0;
                             do{
                                 // send message to socket
                                 // or wait until clients connected
-                                if( (test=s_out_socket(trn_osocket,mb1->sounding)) != 0 ){
+                                if( (test_con=s_out_socket(trn_osocket,mb1->sounding)) != 0 ){
                                     sleep(TBX_SOCKET_DELAY_SEC);
                                 }
-                            }while (test!=0);
+                            }while (test_con!=0);
                         }
                     }
                 }

@@ -106,7 +106,8 @@
 #define MB1_MAX_FRAME_BYTES MB1_FRAME_BYTES(MB1_MAX_BEAMS)
 /// @def MB1_PCHECKSUM_U32(pframe)
 /// @brief checksum pointer (unsigned int *)
-#define MB1_PCHECKSUM_U32(pframe) (NULL!=pframe ? (unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES) : NULL)
+//#define MB1_PCHECKSUM_U32(pframe) (NULL!=pframe ? (unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES) : NULL)
+#define MB1_PCHECKSUM_U32(pframe) ((unsigned int *) (((unsigned char *)pframe)+sizeof(mb1_frame_t)+pframe->sounding->size-MB1_CHECKSUM_BYTES))
 
 /////////////////////////
 // Type Definitions

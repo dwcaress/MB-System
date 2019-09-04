@@ -88,15 +88,15 @@ GNU General Public License for more details
 // Declarations 
 /////////////////////////
 
-/// @var char *mbtrn_ch_names[MBTRN_CH_COUNT]
+/// @var char *r7kr_ch_names[R7KR_CH_COUNT]
 /// @brief module channel names
-char *mbtrn_ch_names[MBTRN_CH_COUNT]={
-    "trace.mbtrn",
-    "debug.mbtrn",
-    "warn.mbtrn",
-    "err.mbtrn",
-    "mbtrn.v1",
-    "mbtrn.v2"
+char *r7kr_ch_names[R7KR_CH_COUNT]={
+    "trace.mbtrnpp",
+    "debug.mbtrnpp",
+    "warn.mbtrnpp",
+    "err.mbtrnpp",
+    "r7kr.v1",
+    "r7kr.v2"
 };
 
 /// @var char *r7k_ch_names[R7K_CH_COUNT]
@@ -184,27 +184,16 @@ char *mbtrnpp_ch_names[MBTRNPP_CH_COUNT]={
     "mbtrnpp.v3",
     "mbtrnpp.v4"
 };
-/// @var char *r7kr_ch_names[R7KR_CH_COUNT]
-/// @brief module channel names
-char *r7kr_ch_names[R7KR_CH_COUNT]={
-    "trace.mbtrnpp",
-    "debug.mbtrnpp",
-    "warn.mbtrnpp",
-    "err.mbtrnpp",
-    "r7kr.v1",
-    "r7kr.v2"
-};
 
 static mmd_module_config_t mmd_config_defaults[]={
-    {MOD_MBTRN,"MOD_MBTRN",MBTRN_CH_COUNT,((MM_ERR|MM_WARN)|MBTRN_V1),mbtrn_ch_names},
+    {MOD_R7KR,"MOD_R7KR",R7KR_CH_COUNT,((MM_ERR|MM_WARN)|R7KR_V1),r7kr_ch_names},
     {MOD_R7K,"MOD_R7K",R7K_CH_COUNT,((MM_ERR|MM_WARN)|R7K_V1),r7k_ch_names},
     {MOD_S7K,"MOD_S7K",S7K_CH_COUNT,((MM_ERR|MM_WARN)),s7k_ch_names},
     {MOD_F7K,"MOD_F7K",F7K_CH_COUNT,((MM_ERR|MM_WARN)),f7k_ch_names},
     {MOD_TRNC,"MOD_TRNC",TRNC_CH_COUNT,((MM_ERR|MM_WARN)),trnc_ch_names},
     {MOD_EMU7K,"MOD_EMU7K",EMU7K_CH_COUNT,((MM_ERR|MM_WARN)),emu7k_ch_names},
     {MOD_TBINX,"MOD_TBINX",TBINX_CH_COUNT,((MM_ERR|MM_WARN)|TBINX_V1),tbinx_ch_names},
-    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names},
-    {MOD_R7KR,"MOD_R7KR",R7KR_CH_COUNT,((MM_ERR|MM_WARN)|R7KR_V1),r7kr_ch_names}
+    {MOD_MBTRNPP,"MOD_MBTRNPP",MBTRNPP_CH_COUNT,((MM_ERR|MM_WARN)|MBTRNPP_V1),mbtrnpp_ch_names}
 };
 
 /////////////////////////
@@ -227,13 +216,12 @@ int mconf_init(void *pargs, void *prtn)
 	int retval=-1;
 	// User code....
 	int i=0;
-	int test=0;
 	int app_modules =(APP_MODULE_COUNT-MM_MODULE_COUNT);
 	// call mmdebug init (optional)
 	mmd_initialize();
 	// then configure additional modules
 	for(i=0;i<app_modules;i++){
-	    test=mmd_module_configure(&mmd_config_defaults[i]);
+	    int test=mmd_module_configure(&mmd_config_defaults[i]);
         fprintf(stderr,"%s:%d >>> initializing module[id=%02d] - %10s/%08X [%d]\n",__FUNCTION__,__LINE__,mmd_config_defaults[i].id,mmd_config_defaults[i].name,mmd_get_enmask(mmd_config_defaults[i].id,NULL),test);
     }
     fprintf(stderr,"%s:%d >>> MM_WARN  %08X\n",__FUNCTION__,__LINE__,MM_WARN);

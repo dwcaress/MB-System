@@ -424,7 +424,6 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
     int trn_rx_bytes=0;
     int trn_msg_count=0;
     int trn_msg_bytes=0;
-    const char *reqstr="REQ\0";
     
     if (NULL!=s) {
         
@@ -484,7 +483,8 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             
             // action: write request
             if (action == AT_WR_REQ) {
-                
+                const char *reqstr="REQ\0";
+
                 test=msock_sendto(s,NULL,(byte *)reqstr,4,0);
                 
                 PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"sendto REQ ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
@@ -532,9 +532,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                         
                         action=AT_SHOW_MSG;
                         
-                        if (state==ST_REQ_PENDING) {
-                            state=ST_REQ_PENDING;
-                        }else{
+                        if (state!=ST_REQ_PENDING){
                             state=ST_SUBSCRIBED;
                         }
                         hbeat_counter++;

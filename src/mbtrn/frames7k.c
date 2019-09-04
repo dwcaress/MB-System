@@ -355,7 +355,6 @@ static int s_app_main (app_cfg_t *cfg)
         }
         
         uint32_t lost_bytes=0;
-        int istat=0;
         // test r7kr_read_frame
         byte frame_buf[MAX_FRAME_BYTES_7K]={0};
         
@@ -363,6 +362,7 @@ static int s_app_main (app_cfg_t *cfg)
         
         retval=0;
         while ( (forever || (count<cfg->cycles)) && !g_stop_flag) {
+            int istat=0;
             count++;
             // clear frame buffer
             memset(frame_buf,0,MAX_FRAME_BYTES_7K);

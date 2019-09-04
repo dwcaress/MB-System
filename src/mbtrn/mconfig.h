@@ -84,7 +84,7 @@
 /////////////////////////
 
 typedef enum{
-    MOD_MBTRN=MM_MODULE_COUNT,
+    MOD_R7KR=MM_MODULE_COUNT,
     MOD_R7K,
     MOD_S7K,
     MOD_F7K,
@@ -92,25 +92,8 @@ typedef enum{
     MOD_EMU7K,
     MOD_TBINX,
     MOD_MBTRNPP,
-    MOD_R7KR,
     APP_MODULE_COUNT
 }app_module_ids;
-
-/// @enum mbtrn_channel_id
-/// @brief test module channel IDs
-/// [note : starting above reserved mframe channel IDs]
-typedef enum{
-    ID_MBTRN_V1=MM_CHANNEL_COUNT,
-    ID_MBTRN_V2,
-    MBTRN_CH_COUNT
-}mbtrn_channel_id;
-
-/// @enum mbtrn_channel_mask
-/// @brief test module channel masks
-typedef enum{
-    MBTRN_V1= (1<<ID_MBTRN_V1),
-    MBTRN_V2= (1<<ID_MBTRN_V2)
-}mbtrn_channel_mask;
 
 /// @enum r7kr_channel_id
 /// @brief test module channel IDs

@@ -188,11 +188,11 @@ unsigned int mb1_frame_calc_checksum(mb1_frame_t *self)
 {
     unsigned int retval = 0xFFFFFFFF;
     if(NULL!=self){
-        unsigned int checksum=0x00000000;
         unsigned char *cp = (unsigned char *)self->sounding;
-        int i=0;
         int chk_len =self->sounding->size-MB1_CHECKSUM_BYTES;
         if(chk_len>0 && chk_len<=MB1_MAX_FRAME_BYTES){
+            unsigned int checksum=0x00000000;
+            int i=0;
             for (i = 0; i < chk_len; i++) {
                 checksum += (unsigned int) (*cp++);
             }
@@ -207,19 +207,19 @@ void mb1_frame_show(mb1_frame_t *self, bool verbose, uint16_t indent)
     if (NULL != self) {
         fprintf(stderr,"%*s[self           %10p]\n",indent,(indent>0?" ":""), self);
         fprintf(stderr,"%*s[type           %2s%08X]\n",indent,(indent>0?" ":"")," ", self->sounding->type);
-        fprintf(stderr,"%*s[size           %10d]\n",indent,(indent>0?" ":""), self->sounding->size);
+        fprintf(stderr,"%*s[size           %10u]\n",indent,(indent>0?" ":""), self->sounding->size);
         fprintf(stderr,"%*s[ts         %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->ts);
         fprintf(stderr,"%*s[lat            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->lat);
         fprintf(stderr,"%*s[lon            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->lon);
         fprintf(stderr,"%*s[depth          %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->depth);
         fprintf(stderr,"%*s[hdg            %10.3lf]\n",indent,(indent>0?" ":""), self->sounding->hdg);
-        fprintf(stderr,"%*s[ping_number    %10u]\n",indent,(indent>0?" ":""), self->sounding->ping_number);
+        fprintf(stderr,"%*s[ping_number    %10d]\n",indent,(indent>0?" ":""), self->sounding->ping_number);
         fprintf(stderr,"%*s[nbeams         %10u]\n",indent,(indent>0?" ":""), self->sounding->nbeams);
         fprintf(stderr,"%*s[checksum       %2s%08X]\n",indent,(indent>0?" ":""), " ",*self->checksum);
         int nbeams = self->sounding->nbeams;
         fprintf(stderr,"%*s[[ n ] beam     rhox      rhoy       rhoz   ]\n",indent+3,(indent>0?" ":""));
         for(int i=0;i<nbeams;i++){
-            fprintf(stderr,"%*s[[%3d] %03d  %+10.3lf %+10.3lf %+10.3lf]\n",indent+3,(indent>0?" ":""), i,
+            fprintf(stderr,"%*s[[%3d] %03u  %+10.3lf %+10.3lf %+10.3lf]\n",indent+3,(indent>0?" ":""), i,
                     self->sounding->beams[i].beam_num,
                     self->sounding->beams[i].rhox,
                     self->sounding->beams[i].rhoy,
