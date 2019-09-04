@@ -93,6 +93,7 @@ int mbbs_wrpnghdr(Ping *, XDR *);
 int mbbs_wrsllc(int, FILE *, long, double, double, float);
 int mbbs_wrtll(int, FILE *, long, double, double);
 int mbbs_wrtllc(int, FILE *, long, double, double, float);
+int mbbs_xdrpnghdr(Ping *png, XDR *xdrs, int version);
 int mbbs_xdrstring(XDR *, char **, unsigned long *);
 #ifdef __cplusplus
 }
