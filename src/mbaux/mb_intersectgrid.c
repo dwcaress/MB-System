@@ -141,7 +141,7 @@ int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error) {
 	int status = MB_SUCCESS;
 	if (topogrid->data != NULL)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&(topogrid->data), error);
-	status = mb_freed(verbose, __FILE__, __LINE__, (void **)topogrid_ptr, error);
+	status &= mb_freed(verbose, __FILE__, __LINE__, (void **)topogrid_ptr, error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
