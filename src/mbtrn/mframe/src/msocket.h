@@ -267,41 +267,38 @@ struct msock_connection_s
 extern "C" {
 #endif
     
-    // socket API
-    
-    msock_socket_t *msock_socket_new(const char *host, int port, msock_socket_ctype type);
-    void msock_socket_destroy(msock_socket_t **pself);
-    // pass in NULL socket to create dynamically
-    int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_ctype type);
-    int msock_set_blocking(msock_socket_t *s, bool enabled);
-    int msock_bind(msock_socket_t *s);
-    int msock_connect(msock_socket_t *s);
-    int msock_listen(msock_socket_t *s, int queue);
+// iow socket API
+
+msock_socket_t *msock_socket_new(const char *host, int port, msock_socket_ctype type);
+void msock_socket_destroy(msock_socket_t **pself);
+// pass in NULL socket to create dynamically
+int msock_configure(msock_socket_t *s, const char *host, int port, msock_socket_ctype type);
+int msock_set_blocking(msock_socket_t *s, bool enabled);
+int msock_bind(msock_socket_t *s);
+int msock_connect(msock_socket_t *s);
+int msock_listen(msock_socket_t *s, int queue);
     int msock_accept(msock_socket_t *s, msock_addr_t *addr);
-    
-    int64_t msock_send(msock_socket_t *s,byte *buf, uint32_t len);
-    int64_t msock_recv(msock_socket_t *s, byte *buf, uint32_t len,int flags);
-    int64_t msock_sendto(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_t len, int32_t flags);
-    int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_t len,int flags);
-    int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t timeout_msec);
-    char *msock_addr2str(msock_socket_t *s, char *dest, size_t len);
+
+int64_t msock_send(msock_socket_t *s,byte *buf, uint32_t len);
+int64_t msock_recv(msock_socket_t *s, byte *buf, uint32_t len,int flags);
+int64_t msock_sendto(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_t len, int32_t flags);
+int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_t len,int flags);
+int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t timeout_msec);
+char *msock_addr2str(msock_socket_t *s, char *dest, size_t len);
     int msock_close(msock_socket_t *self);
-    msock_socket_t *msock_wrap_fd(int fd);
-    
-    msock_addr_t *msock_addr_new();
-    void msock_addr_destroy(msock_addr_t **pself);
-    void msock_addr_init(msock_addr_t *self);
-    msock_connection_t *msock_connection_new();
-    void msock_connection_destroy(msock_connection_t **pself);
-    void msock_connection_free(void *pself);
-    
+msock_socket_t *msock_wrap_fd(int fd);
+
+msock_addr_t *msock_addr_new();
+void msock_addr_destroy(msock_addr_t **pself);
+void msock_addr_init(msock_addr_t *self);
+msock_connection_t *msock_connection_new();
+void msock_connection_destroy(msock_connection_t **pself);
+void msock_connection_free(void *pself);
+
     int msock_connection_addr2str(msock_connection_t *self);
-    
-    void msock_pstats_show(msock_pstats_t *self, bool verbose, uint16_t indent);
-    
-    void msock_set_debug(int level);
-    
-    int msock_test();
+
+void msock_pstats_show(msock_pstats_t *self, bool verbose, uint16_t indent);
+int msock_test();
     
 #ifdef __cplusplus
 }

@@ -105,21 +105,10 @@ GNU General Public License for more details
 /////////////////////////
 // Module Global Variables
 /////////////////////////
-int g_msocket_debug_level=0;
 
 /////////////////////////
 // Function Definitions
 /////////////////////////
-
-/// @fn void msock_set_debug(msock_socket_t *s, int level)
-/// @brief set module debug level (enable extra module debug output)
-/// @param[in] s socket instance
-/// @param[in] level debug output level >=0
-/// @return none
-void msock_set_debug(int level)
-{
-    g_msocket_debug_level=level;
-}
 
 /// @fn int msock_set_blocking(msock_socket_t * s, _Bool enabled)
 /// @brief configure socket to block or not block.
@@ -681,9 +670,7 @@ int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_
         
         if( (retval = recvfrom(s->fd,buf,len,flags,dest_addr,&addrlen))>0){
             // PDPRINT((stderr,"received data connection[%p] dest[%p] ainfo[%p] [%lld]\n",addr,dest_addr,addr->ainfo,retval));
-        }
-        else{
-            if(g_msocket_debug_level>0)
+        }else{
             PDPRINT((stderr,"recvfrom failed [%d %s]\n",errno,strerror(errno)));
         }
     }else{
