@@ -180,26 +180,33 @@ void set_coefficients() {
 }
 
 void set_offset() {
-	int add_w[5], add_e[5], add_s[5], add_n[5], add_w2[5], add_e2[5], add_s2[5], add_n2[5];
-
+	/* Make these const. */
+	int add_w[5];
 	add_w[0] = -m_rows;
 	add_w[1] = add_w[2] = add_w[3] = add_w[4] = -grid_east;
+	int add_w2[5];
 	add_w2[0] = -2 * m_rows;
 	add_w2[1] = -m_rows - grid_east;
 	add_w2[2] = add_w2[3] = add_w2[4] = -2 * grid_east;
+	int add_e[5];
 	add_e[4] = m_rows;
 	add_e[0] = add_e[1] = add_e[2] = add_e[3] = grid_east;
+	int add_e2[5];
 	add_e2[4] = 2 * m_rows;
 	add_e2[3] = m_rows + grid_east;
 	add_e2[2] = add_e2[1] = add_e2[0] = 2 * grid_east;
 
+	int add_n[5];
 	add_n[4] = 1;
 	add_n[3] = add_n[2] = add_n[1] = add_n[0] = grid;
+	int add_n2[5];
 	add_n2[4] = 2;
 	add_n2[3] = grid + 1;
 	add_n2[2] = add_n2[1] = add_n2[0] = 2 * grid;
+	int add_s[5];
 	add_s[0] = -1;
 	add_s[1] = add_s[2] = add_s[3] = add_s[4] = -grid;
+	int add_s2[5];
 	add_s2[0] = -2;
 	add_s2[1] = -grid - 1;
 	add_s2[2] = add_s2[3] = add_s2[4] = -2 * grid;
@@ -1444,4 +1451,3 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat, dou
 
 	return (status);
 }
-
