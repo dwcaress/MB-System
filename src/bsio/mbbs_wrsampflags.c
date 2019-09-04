@@ -35,38 +35,21 @@
 
 #include <stdio.h>
 
+#include "mbbs.h"
 #include "mbbs_defines.h"
-
-int mbbs_getpngdataptrs(Ping *, MemType *, PingData *);
-int mbbs_pngrealloc(Ping *, MemType **, unsigned int *);
-int mbbs_rdpngdata(Ping *, MemType *, XDR *);
-int mbbs_wrpngdata(Ping *, MemType *, XDR *);
-int mbbs_xdrpnghdr(Ping *, XDR *, int);
 
 extern unsigned long bs_iobytecnt;
 
 static MemType *bswsf_databuf = (MemType *)0;
 static unsigned int bswsf_databufsz = 0;
 
-int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned int dtmask, float swradius)
 /*
    Flags all samples of the specified datatype on the named side at
    across-track distances greater than swradius with {BTYD,SSD}_SWEDGE for
    the ping whose header is located at an arbitrary file byte offset.
 */
+int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned int dtmask, float swradius)
 {
-	Ping png;
-	PingData pngdata;
-	XDR xdr;
-	int err, i, trimbty, trimss;
-	int bsi, nbtyvals, nssvals, ssstart;
-	long pdoffset;
-	float *bty;
-	float sscutoff;
-	unsigned int *btyflags;
-	unsigned char *ssflags;
-	unsigned long datasz;
-
 	switch (version) {
 	case MR1_VERSION_1_0:
 	case MR1_VERSION_2_0:
@@ -100,18 +83,27 @@ int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned in
 
 	if (fseek(fp, phoffset, SEEK_SET) != 0)
 		return BS_FSEEK;
+	XDR xdr;
 	xdrstdio_create(&xdr, fp, XDR_DECODE);
+
+	Ping png;
 
 	if (!mbbs_xdrpnghdr(&png, &xdr, version)) {
 		xdr_destroy(&xdr);
 		return BS_READ;
 	}
-	trimbty = trimss = 0;
+
+	int trimbty = 0;
+	int trimss = 0;
+	int nbtyvals;
 	if (dtmask & BS_DTM_BATHYMETRY) {
 		if ((nbtyvals = png.png_sides[side].ps_btycount) > 0)
 			trimbty = 1;
 	}
+	int ssstart;
+	int nssvals;
 	if (dtmask & BS_DTM_SIDESCAN) {
+		float sscutoff;
 		if ((sscutoff = swradius - png.png_sides[side].ps_ssxoffset) < 0.)
 			sscutoff = 0.;
 		ssstart = sscutoff / png.png_ssincr;
@@ -124,8 +116,9 @@ int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned in
 	}
 
 	/* remember current file offset at end of ping header */
-	pdoffset = phoffset + bs_iobytecnt;
+	const long pdoffset = phoffset + bs_iobytecnt;
 
+	int err;
 	if ((err = mbbs_pngrealloc(&png, &bswsf_databuf, &bswsf_databufsz)) != BS_SUCCESS) {
 		xdr_destroy(&xdr);
 		return err;
@@ -134,31 +127,36 @@ int mbbs_setswradius(int version, FILE *fp, long phoffset, int side, unsigned in
 		xdr_destroy(&xdr);
 		return err;
 	}
-	datasz = bs_iobytecnt;
+	const unsigned long datasz = bs_iobytecnt;
 	xdr_destroy(&xdr);
 
+	PingData pngdata;
 	if ((err = mbbs_getpngdataptrs(&png, bswsf_databuf, &pngdata)) != BS_SUCCESS)
 		return err;
 
 	/* set {BTYD,SSD}_SWEDGE on all desired samples */
 	if (dtmask & BS_DTM_BATHYMETRY) {
+		int bsi;
 		if (png.png_flags & PNG_XYZ)
 			bsi = 3;
 		else
 			bsi = 2;
+		float *bty;
 		if ((bty = pngdata.pd_bty[side]) == (float *)0)
 			return BS_BADDATA;
+		unsigned int *btyflags;
 		if ((btyflags = pngdata.pd_btyflags[side]) == (unsigned int *)0)
 			return BS_BADDATA;
-		for (i = 0; i < nbtyvals; i++) {
+		for (int i = 0; i < nbtyvals; i++) {
 			if (bty[bsi * i] > swradius)
 				btyflags[i] |= BTYD_SWEDGE;
 		}
 	}
 	if (dtmask & BS_DTM_SIDESCAN) {
+		unsigned char *ssflags;
 		if ((ssflags = pngdata.pd_ssflags[side]) == (unsigned char *)0)
 			return BS_BADDATA;
-		for (i = ssstart; i < nssvals; i++)
+		for (int i = ssstart; i < nssvals; i++)
 			ssflags[i] |= SSD_SWEDGE;
 	}
 
