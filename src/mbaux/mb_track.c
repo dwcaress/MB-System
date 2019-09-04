@@ -16,8 +16,6 @@
  *
  * Author:	D. W. Caress
  * Date:	August, 1993
- *
- *
  */
 
 #include <math.h>
@@ -28,7 +26,6 @@
 #include "mb_define.h"
 #include "mb_status.h"
 
-/* global defines */
 #define IMOVE 3
 #define IDRAW 2
 #define ISTROKE -2
@@ -36,7 +33,6 @@
 /*--------------------------------------------------------------------------*/
 /* 	function mb_track plots the shiptrack of multibeam data. */
 void mb_track(int verbose, struct swath *data, int *error) {
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -169,9 +165,8 @@ void mb_track(int verbose, struct swath *data, int *error) {
 	/* reset line width */
 	data->contour_setline(0);
 
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -179,14 +174,11 @@ void mb_track(int verbose, struct swath *data, int *error) {
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
-
-	return;
 }
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_trackpingnumber annotates pingnumbers */
 void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -262,9 +254,8 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 	/* reset line width */
 	data->contour_setline(0);
 
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -272,15 +263,12 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error) {
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
-
-	return;
 }
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_trackname plots the filename on the shiptrack.
      - contributed by Gordon Keith, CSIRO, December 2004 */
 void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error) {
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBA function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -305,9 +293,8 @@ void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file
 		angle -= 360.0;
 	data->contour_plot_string(data->pings[0].navlon, data->pings[0].navlat, data->name_hgt, angle, label);
 
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -315,8 +302,5 @@ void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
-
-	return;
 }
-
 /*--------------------------------------------------------------------------*/
