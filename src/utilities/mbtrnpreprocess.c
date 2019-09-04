@@ -139,7 +139,6 @@ uint32_t reson_nsubs=11;
 uint32_t reson_subs[]={1003, 1006, 1008, 1010, 1012, 1013, 1015,
     1016, 7000, 7004, 7027};
 
-r7kr_reader_t *reson_reader;
 char *reson_hostname=NULL;
 int reson_port=R7K_7KCENTER_PORT;
 uint32_t reader_capacity=RESON_READER_CAPACITY_DFL;
@@ -346,7 +345,7 @@ wtnav_t *tnav = NULL;
 #define MBTRNPP_UPDATE_STATS(p,l,f)
 #endif //MST_STATS_EN
 
-// MBTRN_STAT_FLAGS define stats processing options
+// MSF_STAT_FLAGS define stats processing options
 // may include
 // MSF_STATUS : status counters
 // MSF_EVENT  : event/error counters
@@ -356,7 +355,6 @@ wtnav_t *tnav = NULL;
 #define MBTRNPP_STAT_FLAGS (MSF_STATUS|MSF_EVENT|MSF_ASTAT)
 
 int mbtrnpreprocess_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags);
-int mbtrnpreprocess_log_min(mstats_metstats_t *stats);
 
 #ifdef WITH_MBTNAV
 
@@ -912,7 +910,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nusage: %s\n", usage_message);
 		exit(error);
 	}
-#ifdef MBTRN_TIMING
+#ifdef R7KR_TIMING
     // print time message
     struct timeval stv={0};
     gettimeofday(&stv,NULL);
@@ -1546,6 +1544,7 @@ int main(int argc, char **argv) {
                         PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"chk[%08X] idx[%zu] mb1sz[%zu]\n",checksum,index,mb1_size));
 #ifdef WITH_MBTNAV
 
+                        // update TRN [TODO: don't send every sounding]
                         if(trn_enable){
 	                        mb1_t *mb1 = (mb1_t *)output_buffer;
     	                    mbtrnpreprocess_trn_process_mb1(tnav,mb1,trn_cfg);
@@ -2299,26 +2298,6 @@ int mbtrnpreprocess_logstatistics(int verbose,
 
 /*--------------------------------------------------------------------*/
 
-
-
-int mbtrnpreprocess_log_min(mstats_metstats_t *stats)
-{
-    if (NULL!=stats) {
-        mlog_tprintf(trn_mlog_id,"ut[%lu] src[%d/%d] cli[%d/%d/%d] tx[%d/%d] rx[%d/%d]\n",
-                     app_stats->uptime,
-                     MST_COUNTER_GET(app_stats->stats->events[MBTPP_EV_SRC_CONN]),
-                     MST_COUNTER_GET(app_stats->stats->events[MBTPP_EV_SRC_DISN]),
-                     MST_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN]),
-                     MST_COUNTER_GET(app_stats->stats->events[MBTPP_EV_CLI_CONN]),
-                     MST_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN]),
-                     MST_COUNTER_GET(app_stats->stats->events[MBTPP_EV_TRN_PUBN]),
-                     MST_COUNTER_GET(app_stats->stats->status[MBTPP_STA_TRN_TX_BYTES]),
-                     MST_COUNTER_GET(app_stats->stats->events[MBTPP_EV_CLI_RXN]),
-                     MST_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES]));
-    }
-    return 0;
-}
-
 int mbtrnpreprocess_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags)
 {
 
@@ -2359,27 +2338,29 @@ int mbtrnpreprocess_update_stats(mstats_profile_t *stats, mlog_id_t log_id, msta
         // update throughput measurement
         stats->stats->metrics[MBTPP_CH_THRUPUT].value =( stats->uptime>0.0 ? (double)stats->stats->status[MBTPP_STA_TRN_TX_BYTES]/stats->uptime:0.0);
 
-        fprintf(stderr,"cycle_xt: stat_now[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n",
+
+        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"cycle_xt: stat_now[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n",
                 stats_now,
                 app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].start,
                 app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].stop,
-                app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].value);
+                app_stats->stats->metrics[MBTPP_CH_CYCLE_XT].value));
+        
         // update stats
         mstats_update_stats(stats->stats, MBTPP_CH_COUNT, flags);
 
-        fprintf(stderr,"cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
+        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
                 app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n,
                 app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].sum,
                 app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].min,
                 app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].max,
-                app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].avg);
+                app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].avg));
 
-        fprintf(stderr,"cycle_xt.a: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
+        PMPRINT(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V3,(stderr,"cycle_xt.a: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
                 app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].n,
                 app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].sum,
                 app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].min,
                 app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].max,
-                app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].avg);
+                app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].avg));
 
         if (flags&MSF_READER) {
             mstats_update_stats(reader_stats, R7KR_MET_COUNT,flags);
@@ -2440,51 +2421,52 @@ int mbtrnpreprocess_init_debug(int verbose)
 
 	mmd_initialize();
     mconf_init(NULL,NULL);
-//    mmd_channel_set(MOD_MBTRNPP,MM_ERR|MM_DEBUG);
-//    mmd_channel_set(MOD_R7K,MM_ERR);
-//    mmd_channel_set(MOD_MBTRN,MM_ERR);
-//    mmd_channel_set(MOD_MSOCK,MM_ERR);
+
     fprintf(stderr,"%s:%d >>> MOD_MBTRNPP[id=%d]  %08X\n",__FUNCTION__,__LINE__,MOD_MBTRNPP,mmd_get_enmask(MOD_MBTRNPP,NULL));
 
     switch (verbose) {
         case 0:
             mmd_channel_set(MOD_MBTRNPP,MM_NONE);
             mmd_channel_set(MOD_R7K,MM_NONE);
-            mmd_channel_set(MOD_MBTRN,MM_NONE);
+            mmd_channel_set(MOD_R7KR,MM_NONE);
             mmd_channel_set(MOD_MSOCK,MM_NONE);
             break;
         case 1:
             mmd_channel_en(MOD_MBTRNPP,MBTRNPP_V1);
-            mmd_channel_en(MOD_MBTRN,MBTRN_V1);
+            mmd_channel_en(MOD_R7KR,R7KR_V1);
             break;
         case 2:
             mmd_channel_en(MOD_MBTRNPP,MM_DEBUG);
-            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7KR,MM_DEBUG);
             mmd_channel_en(MOD_R7K,R7K_PARSER);
             break;
         case -1:
             mmd_channel_en(MOD_MBTRNPP,MBTRNPP_V1);
-            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7KR,MM_DEBUG);
         	break;
         case -2:
-            mmd_channel_en(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2);
+            mmd_channel_en(MOD_MBTRNPP,MBTRNPP_V1|MBTRNPP_V2);
             break;
         case -3:
             mmd_channel_en(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2|MBTRNPP_V3);
-            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7KR,MM_DEBUG);
             mmd_channel_en(MOD_R7K,MM_WARN|R7K_PARSER);
+            // this enables messages from msock_recv (e.g. resource temporarily unavailable)
+            msock_set_debug(1);
             break;
         case -4:
             mmd_channel_en(MOD_MBTRNPP,MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2|MBTRNPP_V3|MBTRNPP_V4);
-            mmd_channel_en(MOD_MBTRN,MM_DEBUG);
+            mmd_channel_en(MOD_R7KR,MM_DEBUG);
             mmd_channel_en(MOD_R7K,MM_WARN|R7K_PARSER|R7K_DRFCON);
             mmd_channel_en(MOD_MSOCK,MM_DEBUG);
+            msock_set_debug(1);
             break;
         case -5:
             mmd_channel_en(MOD_MBTRNPP,MM_ALL);
-            mmd_channel_en(MOD_MBTRN,MM_ALL);
+            mmd_channel_en(MOD_R7KR,MM_ALL);
             mmd_channel_en(MOD_R7K,MM_ALL);
             mmd_channel_en(MOD_MSOCK,MM_ALL);
+            msock_set_debug(1);
             break;
        default:
             break;
@@ -2562,38 +2544,43 @@ int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int
      * mb_io_struct structure *mb_io_ptr. */
 
     PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"configuring r7kr_reader using %s:%d\n",reson_hostname,reson_port));
-    mb_io_ptr->mbsp = r7kr_reader_new(reson_hostname,reson_port,reader_capacity, reson_subs, reson_nsubs);
+    r7kr_reader_t *reader = r7kr_reader_new(reson_hostname,reson_port,reader_capacity, reson_subs, reson_nsubs);
 
-    if (mb_io_ptr->mbsp->state==R7KR_CONNECTED || mb_io_ptr->mbsp->state==R7KR_SUBSCRIBED) {
-        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
-    }
+    if(NULL!=mb_io_ptr && NULL!=reader){
+        
+        // set r7k_reader
+        mb_io_ptr->mbsp=reader;
+        
+        if (reader->state==R7KR_CONNECTED || reader->state==R7KR_SUBSCRIBED) {
+            // update application performance profile
+            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
+        }
+        
+        // get global 7K reader performance profile
+        reader_stats=r7kr_reader_get_stats(reader);
+        mstats_set_period(reader_stats, app_stats->stats->stat_period_start, app_stats->stats->stat_period_sec);
+        
+        // configure reader data log
+        if (mbr_blog_en) {
+            // open mbr data log
+            mbr_blog_path = (char *)malloc(512);
+            sprintf(mbr_blog_path,"%s//%s-%s%s",g_log_dir,MBR_BLOG_NAME,session_date,TRN_LOG_EXT);
+            
+            mbr_blog_id = mlog_get_instance(mbr_blog_path,&mbrlog_conf, MBR_BLOG_NAME);
+            
+            mlog_show(mbr_blog_id,true,5);
+            mlog_open(mbr_blog_id, flags, mode);
 
-    // get global reader stats reference
-    reader_stats=r7kr_reader_get_stats(mb_io_ptr->mbsp);
-    mstats_set_period(reader_stats, app_stats->stats->stat_period_start, app_stats->stats->stat_period_sec);
-
-    // configure reader data log
-    if (mbr_blog_en && NULL!=mb_io_ptr->mbsp) {
-        // open mbr data log
-        mbr_blog_path = (char *)malloc(512);
-        sprintf(mbr_blog_path,"%s//%s-%s%s",g_log_dir,MBR_BLOG_NAME,session_date,TRN_LOG_EXT);
-
-//        mbr_blog = mlog_new(mbr_blog_path,&mbrlog_conf);
-        mbr_blog_id = mlog_get_instance(mbr_blog_path,&mbrlog_conf, MBR_BLOG_NAME);
-
-        mlog_show(mbr_blog_id,true,5);
-        mlog_open(mbr_blog_id, flags, mode);
-
-
-        r7kr_reader_set_log(mb_io_ptr->mbsp,mbr_blog_id);
-
-//        mbr_blogs = fopen(mbr_blog_path,"a+");
-//        r7kr_reader_set_logstream(mb_io_ptr->mbsp,mbr_blogs);
-
-    }
-
-    if (verbose>=1) {
-        r7kr_reader_show(mb_io_ptr->mbsp,true,5);
+            r7kr_reader_set_log(reader,mbr_blog_id);
+        }
+        
+        if (verbose>=1) {
+            r7kr_reader_show(reader,true,5);
+        }
+    }else{
+        fprintf(stderr, "ERR - r7kr_reader_new failed (NULL) [%d:%s]\n",errno, strerror(errno));
+        status = MB_FAILURE;
+        *error = MB_ERROR_INIT_FAIL;
     }
 
     /* print output debug statements */
