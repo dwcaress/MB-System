@@ -2,11 +2,15 @@ bin_PROGRAMS = mbvelocitytool
 
 AM_CFLAGS = ${libnetcdf_CFLAGS}
 
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-        -I${top_srcdir}/src/mbaux \
-        -I${top_srcdir}/src/gsf \
-        ${libnetcdf_CPPFLAGS} \
-        ${libmotif_CPPFLAGS}
+AM_CPPFLAGS =
+AM_CPPFLAGS += -I${top_srcdir}/src/mbio
+AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+AM_CPPFLAGS += -I${top_srcdir}/src/gsf
+AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
+AM_CPPFLAGS += ${libmotif_CPPFLAGS}
+if BUILD_MBTRN
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
+endif
 
 AM_LDFLAGS =
 
