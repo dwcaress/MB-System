@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libmbtrn.la
+lib_LTLIBRARIES = libr7kr.la
 
 include_HEADERS = \
 				mframe/src/mframe.h \
@@ -34,9 +34,9 @@ AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/mbtrn/mframe/
     WITH_MEDEBUG_DEBUG     : enable medebug debug macros
 
 
-libmbtrn_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
-libmbtrn_la_SOURCES =  mframe/src/mframe.c \
+libr7kr_la_SOURCES =  mframe/src/mframe.c \
                 mframe/src/mcbuf.c \
                 mframe/src/msocket.c \
                 mframe/src/mthread.c \
@@ -54,36 +54,36 @@ libmbtrn_la_SOURCES =  mframe/src/mframe.c \
                 r7kc.c
 
 
-libmbtrn_la_LIBADD = -lpthread
+libr7kr_la_LIBADD = -lpthread
 
 bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv r7kr_test
 
 stream7k_SOURCES = stream7k.c
-stream7k_LDADD = libmbtrn.la
+stream7k_LDADD = libr7kr.la
 
 frames7k_SOURCES = frames7k.c
-frames7k_LDADD = libmbtrn.la
+frames7k_LDADD = libr7kr.la
 
 trnc_SOURCES = trnc.c
-trnc_LDADD = libmbtrn.la
+trnc_LDADD = libr7kr.la
 
 emu7k_SOURCES = emu7k.c
-emu7k_LDADD = libmbtrn.la
+emu7k_LDADD = libr7kr.la
 
 tbinx_SOURCES = tbinx.c
-tbinx_LDADD = libmbtrn.la
+tbinx_LDADD = libr7kr.la
 
 udps_SOURCES = udps.c
-udps_LDADD = libmbtrn.la
+udps_LDADD = libr7kr.la
 
 udpc_SOURCES = udpc.c
-udpc_LDADD = libmbtrn.la
+udpc_LDADD = libr7kr.la
 
 mb1conv_SOURCES = mb1conv.c mb1_msg.c mb71_msg.c
-mb1conv_LDADD = libmbtrn.la
+mb1conv_LDADD = libr7kr.la
 
 r7kr_test_SOURCES = r7kr-test.c
-r7kr_test_LDADD = libmbtrn.la
+r7kr_test_LDADD = libr7kr.la
 
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
 

@@ -351,7 +351,7 @@ wtnav_t *tnav = NULL;
 // MSF_EVENT  : event/error counters
 // MSF_ASTAT  : aggregate stats
 // MSF_PSTAT  : periodic stats
-// MSF_READER : mbtrn reader stats
+// MSF_READER : r7kr reader stats
 #define MBTRNPP_STAT_FLAGS (MSF_STATUS|MSF_EVENT|MSF_ASTAT)
 
 int mbtrnpreprocess_update_stats(mstats_profile_t *stats, mlog_id_t log_id, mstats_flags flags);

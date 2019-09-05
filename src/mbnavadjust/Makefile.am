@@ -6,7 +6,7 @@ bin_PROGRAMS = mbnavadjust mbnavadjustmerge $(MBNAVADJUSTFINE)
 
 if BUILD_MBTRN
   MBTRNINCDIR = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/mbtrn/mframe/src
-  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
 endif
 
 AM_CFLAGS =  ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
