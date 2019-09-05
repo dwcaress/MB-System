@@ -95,6 +95,9 @@ AM_CPPFLAGS += -I@top_srcdir@/src/gsf
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libproj_CPPFLAGS}
+if BUILD_MBTRN
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
+endif
 
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
@@ -259,7 +262,9 @@ libmbio_la_LIBADD += ${libgmt_LIBS}
 libmbio_la_LIBADD += ${libnetcdf_LIBS}
 libmbio_la_LIBADD += ${libproj_LIBS}
 libmbio_la_LIBADD += ${XDR_LIB}
-
+if BUILD_MBTRN
+libmbio_la_LIBADD += $(top_builddir)/src/mbtrn/libmbtrn.la
+endif
 nodist_libmbio_la_SOURCES = projections.h
 
 BUILT_SOURCES = projections.h
