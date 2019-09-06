@@ -87,6 +87,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@BUILD_GSF_TRUE@am__append_1 = gsf
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -324,6 +325,7 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -335,10 +337,9 @@ top_srcdir = @top_srcdir@
 @BUILD_MOTIF_TRUE@XBUILD_SUB_MOTIF = mbedit mbnavedit mbvelocitytool
 @BUILD_GL_TRUE@XBUILD_SUB_GL = mbview mbgrdviz mbeditviz mbnavadjust
 @BUILD_MBTRN_TRUE@XBUILD_SUB_MBTRN = mbtrn
-SUBDIRS = gsf surf bsio $(XBUILD_SUB_MBTRN) mbio mbaux \
+SUBDIRS = $(am__append_1) surf bsio $(XBUILD_SUB_MBTRN) mbio mbaux \
 	utilities gmt otps macros share man html ps \
 	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
-
 CLEANFILES = 
 DISTCLEANFILES = 
 all: all-recursive

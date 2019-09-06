@@ -933,6 +933,18 @@ AM_CONDITIONAL([HAVE_PTHREADS],[test "xyes" = "xyes"])
 AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LIBS)
 
+
+AS_ECHO(["Check if the GSF driver should be built"])
+AC_ARG_ENABLE(gsf, [AS_HELP_STRING([--disable-gsf], [build without the GSF driver])],
+        [GOT_GSF=yes], [GOT_GSF=no])
+if test "$GOT_GSF" = "no" ; then
+  enable_gsf=yes
+fi
+AM_CONDITIONAL([BUILD_GSF], [test $enable_gsf = yes])
+if test "$enable_gsf" = "yes" ; then
+  AC_DEFINE([ENABLE_GSF], 1, [Build with GSF])
+fi
+
 dnl--------------------------------------------------------------------
 dnl Generate Makefiles
 dnl--------------------------------------------------------------------
@@ -1051,6 +1063,11 @@ if test "$build_test" = "yes" ; then
     AS_ECHO(["Build unit tests: Enabled"])
 else
     AS_ECHO(["Build unit tests: Disabled"])
+fi
+if test $enable_gsf = yes ; then
+    AS_ECHO(["Build driver gsf: Enabled"])
+else
+    AS_ECHO(["Build driver gsf: Disabled"])
 fi
 
 AS_ECHO(["------------------------------------------------------------------------------"])

@@ -9,7 +9,9 @@ if BUILD_MBTRN
 endif
 
 SUBDIRS =
+if BUILD_GSF
 SUBDIRS += gsf
+endif
 SUBDIRS += surf
 SUBDIRS += bsio
 SUBDIRS += $(XBUILD_SUB_MBTRN)

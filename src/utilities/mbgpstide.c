@@ -61,7 +61,9 @@
 #include "mb_format.h"
 #include "mb_process.h"
 
+#ifdef ENABLE_GSF
 #include "mbsys_gsf.h"
+#endif
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 
@@ -217,7 +219,9 @@ int main(int argc, char **argv) {
 	struct mb_io_struct *mb_io_ptr = NULL;
 	struct mbsys_simrad2_struct *simrad2_ptr;
 	struct mbsys_simrad3_struct *simrad3_ptr;
+#ifdef ENABLE_GSF
 	struct mbsys_gsf_struct *gsf_ptr;
+#endif
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -620,6 +624,7 @@ int main(int argc, char **argv) {
 
 				mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
+#ifdef ENABLE_GSF
 				if (mb_io_ptr->format == MBF_GSFGENMB) {
 					if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
 						ttime_d = time_d;
@@ -632,7 +637,7 @@ int main(int argc, char **argv) {
 						nread++;
 					}
 				}
-
+#endif
 				/* Read sounder height from height telegram */
 				if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_HEIGHT && gps_source == 0) {
 

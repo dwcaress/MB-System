@@ -124,3 +124,7 @@
 /* Define to the type of a signed integer type of width exactly 8 bits if such
    a type exists and the standard includes do not define it. */
 /* #undef int8_t */
+
+/* Skip GSF driver */
+#define ENABLE_GSF 1
+

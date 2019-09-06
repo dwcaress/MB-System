@@ -3,13 +3,6 @@ lib_LTLIBRARIES = libmbio.la
 include_HEADERS =
 include_HEADERS += mb_config.h
 include_HEADERS += mb_define.h
-include_HEADERS += mb_format.h
-include_HEADERS += mb_info.h
-include_HEADERS += mb_io.h
-include_HEADERS += mb_process.h
-include_HEADERS += mb_segy.h
-include_HEADERS += mb_status.h
-include_HEADERS += mb_swap.h
 include_HEADERS += mbf_bchrtunb.h
 include_HEADERS += mbf_bchrxunb.h
 include_HEADERS += mbf_cbat8101.h
@@ -19,6 +12,7 @@ include_HEADERS += mbf_dsl120sf.h
 include_HEADERS += mbf_elmk2unb.h
 include_HEADERS += mbf_em12darw.h
 include_HEADERS += mbf_em12ifrm.h
+include_HEADERS += mbf_gsfgenmb.h
 include_HEADERS += mbf_hsatlraw.h
 include_HEADERS += mbf_hsldedmb.h
 include_HEADERS += mbf_hsldeoih.h
@@ -37,6 +31,7 @@ include_HEADERS += mbf_mstiffss.h
 include_HEADERS += mbf_oicgeoda.h
 include_HEADERS += mbf_oicmbari.h
 include_HEADERS += mbf_omghdcsj.h
+include_HEADERS += mb_format.h
 include_HEADERS += mbf_sb2100rw.h
 include_HEADERS += mbf_sbifremr.h
 include_HEADERS += mbf_sbsiocen.h
@@ -45,11 +40,18 @@ include_HEADERS += mbf_sbsiomrg.h
 include_HEADERS += mbf_sbsioswb.h
 include_HEADERS += mbf_sburicen.h
 include_HEADERS += mbf_xtfr8101.h
+include_HEADERS += mb_info.h
+include_HEADERS += mb_io.h
+include_HEADERS += mb_process.h
+include_HEADERS += mb_segy.h
+include_HEADERS += mb_status.h
+include_HEADERS += mb_swap.h
 include_HEADERS += mbsys_3datdepthlidar.h
 include_HEADERS += mbsys_3ddwissl.h
 include_HEADERS += mbsys_atlas.h
 include_HEADERS += mbsys_benthos.h
 include_HEADERS += mbsys_dsl.h
+include_HEADERS += mbsys_gsf.h
 include_HEADERS += mbsys_hdcs.h
 include_HEADERS += mbsys_hs10.h
 include_HEADERS += mbsys_hsds.h
@@ -82,10 +84,6 @@ include_HEADERS += mbsys_surf.h
 include_HEADERS += mbsys_swathplus.h
 include_HEADERS += mbsys_wassp.h
 include_HEADERS += mbsys_xse.h
-if BUILD_GSF
-include_HEADERS += mbf_gsfgenmb.h
-include_HEADERS += mbsys_gsf.h
-endif
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
@@ -93,15 +91,10 @@ AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I@top_srcdir@/src/bsio
 AM_CPPFLAGS += -I@top_srcdir@/src/surf
-if BUILD_GSF
 AM_CPPFLAGS += -I@top_srcdir@/src/gsf
-endif
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libproj_CPPFLAGS}
-if BUILD_MBTRN
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-endif
 
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
@@ -130,16 +123,6 @@ libmbio_la_SOURCES += mb_process.c
 libmbio_la_SOURCES += mb_proj.c
 libmbio_la_SOURCES += mb_put_all.c
 libmbio_la_SOURCES += mb_put_comment.c
-libmbio_la_SOURCES += mb_read.c
-libmbio_la_SOURCES += mb_read_init.c
-libmbio_la_SOURCES += mb_read_ping.c
-libmbio_la_SOURCES += mb_rt.c
-libmbio_la_SOURCES += mb_segy.c
-libmbio_la_SOURCES += mb_spline.c
-libmbio_la_SOURCES += mb_swap.c
-libmbio_la_SOURCES += mb_time.c
-libmbio_la_SOURCES += mb_write_init.c
-libmbio_la_SOURCES += mb_write_ping.c
 libmbio_la_SOURCES += mbr_3ddepthp.c
 libmbio_la_SOURCES += mbr_3dwisslp.c
 libmbio_la_SOURCES += mbr_3dwisslr.c
@@ -150,6 +133,9 @@ libmbio_la_SOURCES += mbr_cbat8101.c
 libmbio_la_SOURCES += mbr_cbat9001.c
 libmbio_la_SOURCES += mbr_dsl120pf.c
 libmbio_la_SOURCES += mbr_dsl120sf.c
+libmbio_la_SOURCES += mb_read.c
+libmbio_la_SOURCES += mb_read_init.c
+libmbio_la_SOURCES += mb_read_ping.c
 libmbio_la_SOURCES += mbr_edgjstar.c
 libmbio_la_SOURCES += mbr_elmk2unb.c
 libmbio_la_SOURCES += mbr_em12darw.c
@@ -159,6 +145,7 @@ libmbio_la_SOURCES += mbr_em300raw.c
 libmbio_la_SOURCES += mbr_em710mba.c
 libmbio_la_SOURCES += mbr_em710raw.c
 libmbio_la_SOURCES += mbr_emoldraw.c
+libmbio_la_SOURCES += mbr_gsfgenmb.c
 libmbio_la_SOURCES += mbr_hir2rnav.c
 libmbio_la_SOURCES += mbr_hs10jams.c
 libmbio_la_SOURCES += mbr_hsatlraw.c
@@ -213,9 +200,13 @@ libmbio_la_SOURCES += mbr_sburivax.c
 libmbio_la_SOURCES += mbr_segysegy.c
 libmbio_la_SOURCES += mbr_swplssxi.c
 libmbio_la_SOURCES += mbr_swplssxp.c
+libmbio_la_SOURCES += mb_rt.c
 libmbio_la_SOURCES += mbr_wasspenl.c
 libmbio_la_SOURCES += mbr_xtfb1624.c
 libmbio_la_SOURCES += mbr_xtfr8101.c
+libmbio_la_SOURCES += mb_segy.c
+libmbio_la_SOURCES += mb_spline.c
+libmbio_la_SOURCES += mb_swap.c
 libmbio_la_SOURCES += mbsys_3datdepthlidar.c
 libmbio_la_SOURCES += mbsys_3ddwissl.c
 libmbio_la_SOURCES += mbsys_atlas.c
@@ -223,6 +214,7 @@ libmbio_la_SOURCES += mbsys_benthos.c
 libmbio_la_SOURCES += mbsys_dsl.c
 libmbio_la_SOURCES += mbsys_elac.c
 libmbio_la_SOURCES += mbsys_elacmk2.c
+libmbio_la_SOURCES += mbsys_gsf.c
 libmbio_la_SOURCES += mbsys_hdcs.c
 libmbio_la_SOURCES += mbsys_hs10.c
 libmbio_la_SOURCES += mbsys_hsds.c
@@ -255,24 +247,19 @@ libmbio_la_SOURCES += mbsys_surf.c
 libmbio_la_SOURCES += mbsys_swathplus.c
 libmbio_la_SOURCES += mbsys_wassp.c
 libmbio_la_SOURCES += mbsys_xse.c
-if BUILD_GSF
-libmbio_la_SOURCES += mbr_gsfgenmb.c
-libmbio_la_SOURCES += mbsys_gsf.c
-endif
+libmbio_la_SOURCES += mb_time.c
+libmbio_la_SOURCES += mb_write_init.c
+libmbio_la_SOURCES += mb_write_ping.c
 
 libmbio_la_LIBADD =
 libmbio_la_LIBADD += $(top_builddir)/src/bsio/libmbbsio.la
 libmbio_la_LIBADD += $(top_builddir)/src/surf/libmbsapi.la
-if BUILD_GSF
 libmbio_la_LIBADD += $(top_builddir)/src/gsf/libmbgsf.la
-endif
 libmbio_la_LIBADD += ${libgmt_LIBS}
 libmbio_la_LIBADD += ${libnetcdf_LIBS}
 libmbio_la_LIBADD += ${libproj_LIBS}
 libmbio_la_LIBADD += ${XDR_LIB}
-if BUILD_MBTRN
-libmbio_la_LIBADD += $(top_builddir)/src/mbtrn/libmbtrn.la
-endif
+
 nodist_libmbio_la_SOURCES = projections.h
 
 BUILT_SOURCES = projections.h
