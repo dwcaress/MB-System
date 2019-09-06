@@ -23,7 +23,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "mb_config.h"
+
+#ifdef ENABLE_GSF
 #include "gsf.h"
+#endif
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -77,10 +81,12 @@ int mb_close(int verbose, void **mbio_ptr, int *error) {
 		status &= mb_fileio_close(verbose, *mbio_ptr, error);
 	}
 
+#ifdef ENABLE_GSF
 	/* else if gsf then use gsfClose */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF) {
 		gsfClose((int)mb_io_ptr->gsfid);
 	}
+#endif
 
 	/* else if netcdf then use nc_close */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF) {

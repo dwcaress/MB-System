@@ -19,7 +19,6 @@ include_HEADERS += mbf_dsl120sf.h
 include_HEADERS += mbf_elmk2unb.h
 include_HEADERS += mbf_em12darw.h
 include_HEADERS += mbf_em12ifrm.h
-include_HEADERS += mbf_gsfgenmb.h
 include_HEADERS += mbf_hsatlraw.h
 include_HEADERS += mbf_hsldedmb.h
 include_HEADERS += mbf_hsldeoih.h
@@ -51,7 +50,6 @@ include_HEADERS += mbsys_3ddwissl.h
 include_HEADERS += mbsys_atlas.h
 include_HEADERS += mbsys_benthos.h
 include_HEADERS += mbsys_dsl.h
-include_HEADERS += mbsys_gsf.h
 include_HEADERS += mbsys_hdcs.h
 include_HEADERS += mbsys_hs10.h
 include_HEADERS += mbsys_hsds.h
@@ -84,6 +82,10 @@ include_HEADERS += mbsys_surf.h
 include_HEADERS += mbsys_swathplus.h
 include_HEADERS += mbsys_wassp.h
 include_HEADERS += mbsys_xse.h
+if BUILD_GSF
+include_HEADERS += mbf_gsfgenmb.h
+include_HEADERS += mbsys_gsf.h
+endif
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
@@ -91,7 +93,9 @@ AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I@top_srcdir@/src/bsio
 AM_CPPFLAGS += -I@top_srcdir@/src/surf
+if BUILD_GSF
 AM_CPPFLAGS += -I@top_srcdir@/src/gsf
+endif
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libproj_CPPFLAGS}
@@ -155,7 +159,6 @@ libmbio_la_SOURCES += mbr_em300raw.c
 libmbio_la_SOURCES += mbr_em710mba.c
 libmbio_la_SOURCES += mbr_em710raw.c
 libmbio_la_SOURCES += mbr_emoldraw.c
-libmbio_la_SOURCES += mbr_gsfgenmb.c
 libmbio_la_SOURCES += mbr_hir2rnav.c
 libmbio_la_SOURCES += mbr_hs10jams.c
 libmbio_la_SOURCES += mbr_hsatlraw.c
@@ -220,7 +223,6 @@ libmbio_la_SOURCES += mbsys_benthos.c
 libmbio_la_SOURCES += mbsys_dsl.c
 libmbio_la_SOURCES += mbsys_elac.c
 libmbio_la_SOURCES += mbsys_elacmk2.c
-libmbio_la_SOURCES += mbsys_gsf.c
 libmbio_la_SOURCES += mbsys_hdcs.c
 libmbio_la_SOURCES += mbsys_hs10.c
 libmbio_la_SOURCES += mbsys_hsds.c
@@ -253,11 +255,17 @@ libmbio_la_SOURCES += mbsys_surf.c
 libmbio_la_SOURCES += mbsys_swathplus.c
 libmbio_la_SOURCES += mbsys_wassp.c
 libmbio_la_SOURCES += mbsys_xse.c
+if BUILD_GSF
+libmbio_la_SOURCES += mbr_gsfgenmb.c
+libmbio_la_SOURCES += mbsys_gsf.c
+endif
 
 libmbio_la_LIBADD =
 libmbio_la_LIBADD += $(top_builddir)/src/bsio/libmbbsio.la
 libmbio_la_LIBADD += $(top_builddir)/src/surf/libmbsapi.la
+if BUILD_GSF
 libmbio_la_LIBADD += $(top_builddir)/src/gsf/libmbgsf.la
+endif
 libmbio_la_LIBADD += ${libgmt_LIBS}
 libmbio_la_LIBADD += ${libnetcdf_LIBS}
 libmbio_la_LIBADD += ${libproj_LIBS}

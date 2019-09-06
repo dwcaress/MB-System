@@ -72,7 +72,9 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+if BUILD_GSF
 AM_CPPFLAGS += -I${top_srcdir}/src/gsf
+endif
 AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
@@ -102,7 +104,9 @@ mbauvnavusbl_SOURCES = mbauvnavusbl.c
 mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbbackangle_SOURCES = mbbackangle.c
 mbclean_SOURCES = mbclean.c
+if BUILD_GSF
 mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
+endif
 mbcopy_SOURCES = mbcopy.c
 mbctdlist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbctdlist_SOURCES = mbctdlist.c

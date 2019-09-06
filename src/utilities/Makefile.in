@@ -109,6 +109,7 @@ bin_PROGRAMS = mbconfig$(EXEEXT) mb7k2jstar$(EXEEXT) mb7k2ss$(EXEEXT) \
 	mbsvpselect$(EXEEXT) mbswplspreprocess$(EXEEXT) \
 	mbtime$(EXEEXT) mbvoxelclean$(EXEEXT) $(am__EXEEXT_1) \
 	$(am__EXEEXT_2)
+@BUILD_GSF_TRUE@am__append_1 = -I${top_srcdir}/src/gsf
 subdir = src/utilities
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -163,7 +164,8 @@ mbconfig_OBJECTS = $(am_mbconfig_OBJECTS)
 mbconfig_LDADD = $(LDADD)
 am_mbcopy_OBJECTS = mbcopy.$(OBJEXT)
 mbcopy_OBJECTS = $(am_mbcopy_OBJECTS)
-mbcopy_DEPENDENCIES = ${top_builddir}/src/gsf/libmbgsf.la
+@BUILD_GSF_TRUE@mbcopy_DEPENDENCIES =  \
+@BUILD_GSF_TRUE@	${top_builddir}/src/gsf/libmbgsf.la
 am_mbctdlist_OBJECTS = mbctdlist.$(OBJEXT)
 mbctdlist_OBJECTS = $(am_mbctdlist_OBJECTS)
 mbctdlist_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
@@ -240,8 +242,7 @@ mbpreprocess_OBJECTS = $(am_mbpreprocess_OBJECTS)
 mbpreprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbprocess_OBJECTS = mbprocess.$(OBJEXT)
 mbprocess_OBJECTS = $(am_mbprocess_OBJECTS)
-mbprocess_DEPENDENCIES = ${top_builddir}/src/gsf/libmbgsf.la \
-	${top_builddir}/src/mbaux/libmbaux.la
+mbprocess_DEPENDENCIES = ${top_builddir}/src/mbaux/libmbaux.la
 am_mbrollbias_OBJECTS = mbrollbias.$(OBJEXT)
 mbrollbias_OBJECTS = $(am_mbrollbias_OBJECTS)
 mbrollbias_LDADD = $(LDADD)
@@ -496,10 +497,8 @@ LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
-LIBS = ${top_builddir}/src/mbio/libmbio.la \
-       	${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        $(LIBM)
-
+LIBS = ${top_builddir}/src/mbio/libmbio.la ${libgmt_LIBS} \
+	${libnetcdf_LIBS} ${libproj_LIBS} $(LIBM)
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -618,6 +617,7 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -632,14 +632,9 @@ top_srcdir = @top_srcdir@
 @BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 include_HEADERS = levitus.h
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	    -I${top_srcdir}/src/mbaux \
-	    -I${top_srcdir}/src/gsf \
-        $(MBTRNINCDIR) \
-	    ${libgmt_CPPFLAGS} \
-	    ${libnetcdf_CPPFLAGS} \
-	    ${libfftw_CPPFLAGS}
-
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
+	$(am__append_1) $(MBTRNINCDIR) ${libgmt_CPPFLAGS} \
+	${libnetcdf_CPPFLAGS} ${libfftw_CPPFLAGS}
 AM_LDFLAGS = 
 mbconfig_SOURCES = mbconfig.c
 mb7k2jstar_SOURCES = mb7k2jstar.c
@@ -656,7 +651,7 @@ mbauvnavusbl_SOURCES = mbauvnavusbl.c
 mbbackangle_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbbackangle_SOURCES = mbbackangle.c
 mbclean_SOURCES = mbclean.c
-mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
+@BUILD_GSF_TRUE@mbcopy_LDADD = ${top_builddir}/src/gsf/libmbgsf.la
 mbcopy_SOURCES = mbcopy.c
 mbctdlist_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbctdlist_SOURCES = mbctdlist.c
@@ -687,7 +682,7 @@ mbnavlist_SOURCES = mbnavlist.c
 mbneptune2esf_SOURCES = mbneptune2esf.c
 mbpreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbpreprocess_SOURCES = mbpreprocess.c
-mbprocess_LDADD = ${top_builddir}/src/gsf/libmbgsf.la ${top_builddir}/src/mbaux/libmbaux.la
+mbprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbprocess_SOURCES = mbprocess.c
 mbrollbias_SOURCES = mbrollbias.c
 mbrolltimelag_SOURCES = mbrolltimelag.c
@@ -707,19 +702,20 @@ mbswplspreprocess_LDADD = ${top_builddir}/src/mbaux/libmbaux.la
 mbswplspreprocess_SOURCES = mbswplspreprocess.c
 mbtime_SOURCES = mbtime.c
 mbvoxelclean_SOURCES = mbvoxelclean.c
-@BUILD_FFTW_TRUE@mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
-@BUILD_FFTW_TRUE@                  ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
-
+@BUILD_FFTW_TRUE@mbsegypsd_LDADD =  \
+@BUILD_FFTW_TRUE@	${top_builddir}/src/mbaux/libmbaux.la \
+@BUILD_FFTW_TRUE@	${libgmt_LIBS} ${libnetcdf_LIBS} \
+@BUILD_FFTW_TRUE@	${libproj_LIBS} ${libfftw_LIBS}
 @BUILD_FFTW_TRUE@mbsegypsd_SOURCES = mbsegypsd.c
 @BUILD_FFTW_TRUE@mbsegypsd_LDFLAGS = 
 @BUILD_MBTRN_TRUE@mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
-@BUILD_MBTRN_TRUE@mbtrnpreprocess_LDADD = $(top_builddir)/src/mbtrn/libmbtrn.la \
-@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbio/libmbio.la \
-@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbaux/libmbaux.la \
-@BUILD_MBTRN_TRUE@       $(top_builddir)/src/mbaux/libmbxgr.la \
-@BUILD_MBTRN_TRUE@       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-@BUILD_MBTRN_TRUE@       $(MBTRNLIB) $(LIBM)
-
+@BUILD_MBTRN_TRUE@mbtrnpreprocess_LDADD =  \
+@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbtrn/libmbtrn.la \
+@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbio/libmbio.la \
+@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbaux/libmbaux.la \
+@BUILD_MBTRN_TRUE@	$(top_builddir)/src/mbaux/libmbxgr.la \
+@BUILD_MBTRN_TRUE@	${libgmt_LIBS} ${libnetcdf_LIBS} \
+@BUILD_MBTRN_TRUE@	${libproj_LIBS} $(MBTRNLIB) $(LIBM)
 BUILT_SOURCES = levitus.h
 CLEANFILES = levitus.h
 DISTCLEANFILES = levitus.h

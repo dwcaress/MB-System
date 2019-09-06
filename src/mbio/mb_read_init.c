@@ -25,7 +25,11 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#include "mb_config.h"
+
+#ifdef ENABLE_GSF
 #include "gsf.h"
+#endif
 #include "mb_define.h"
 #include "mb_format.h"
 #include "mb_io.h"
@@ -395,6 +399,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 		status = mb_fileio_open(verbose, *mbio_ptr, error);
 	}
 
+#ifdef ENABLE_GSF
 	/* else handle gsf files to be opened with gsflib */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF) {
 		status = gsfOpen(mb_io_ptr->file, GSF_READONLY, (int *)&(mb_io_ptr->gsfid));
@@ -407,7 +412,7 @@ int mb_read_init(int verbose, char *file, int format, int pings, int lonflip, do
 			*error = MB_ERROR_OPEN_FAIL;
 		}
 	}
-
+#endif
 	/* else handle netcdf files to be opened with libnetcdf */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF) {
 		status = nc_open(mb_io_ptr->file, NC_NOWRITE, (int *)&(mb_io_ptr->ncid));
