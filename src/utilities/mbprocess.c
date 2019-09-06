@@ -44,7 +44,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "gsf.h"
 #include "mb_aux.h"
 #include "mb_define.h"
 #include "mb_format.h"
@@ -56,7 +55,6 @@
 #include "mbsys_reson7k.h"
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
-#include "mbsys_gsf.h"
 
 /* define sidescan correction table structure */
 struct mbprocess_sscorr_struct {
