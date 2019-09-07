@@ -90,6 +90,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = mbnavadjust$(EXEEXT) mbnavadjustmerge$(EXEEXT) \
 	$(am__EXEEXT_1)
+@BUILD_MBTRN_TRUE@am__append_1 = -I${top_srcdir}/src/mbtrn
 subdir = src/mbnavadjust
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -109,7 +110,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mbnavadjust_OBJECTS = mbnavadjust.$(OBJEXT) \
 	mbnavadjust_callbacks.$(OBJEXT) mbnavadjust_creation.$(OBJEXT) \
-	mbnavadjust_prog.$(OBJEXT) mbnavadjust_io.$(OBJEXT) \
+	mbnavadjust_io.$(OBJEXT) mbnavadjust_prog.$(OBJEXT) \
 	mbnavadjust_util.$(OBJEXT)
 mbnavadjust_OBJECTS = $(am_mbnavadjust_OBJECTS)
 mbnavadjust_LDADD = $(LDADD)
@@ -260,13 +261,11 @@ LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
-        ${top_builddir}/src/mbaux/libmbaux.la \
-        ${top_builddir}/src/mbaux/libmbxgr.la \
-        ${top_builddir}/src/mbview/libmbview.la \
-        ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        $(MBTRNLIB) ${libmotif_LIBS} ${libopengl_LIBS} \
-        $(LIBM)
-
+	${top_builddir}/src/mbaux/libmbaux.la \
+	${top_builddir}/src/mbaux/libmbxgr.la \
+	${top_builddir}/src/mbview/libmbview.la ${libgmt_LIBS} \
+	${libnetcdf_LIBS} ${libproj_LIBS} ${libmotif_LIBS} \
+	${libopengl_LIBS} $(LIBM)
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -385,6 +384,7 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -394,26 +394,20 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 @BUILD_PCLTOOLS_TRUE@MBNAVADJUSTFINE = mbnavadjustfine
-@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
-@BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
-AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
-	    -I${top_srcdir}/src/mbaux \
-		-I${top_srcdir}/src/mbview \
-	    -I${top_srcdir}/src/gsf \
-        $(MBTRNINCDIR) \
-		${libnetcdf_CPPFLAGS} \
-		${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
-
+AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
+	-I${top_srcdir}/src/mbview -I${top_srcdir}/src/gsf \
+	${libnetcdf_CPPFLAGS} ${libmotif_CPPFLAGS} \
+	${libopengl_CPPFLAGS} $(am__append_1)
 AM_LDFLAGS = 
-mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust_callbacks.c mbnavadjust_creation.c \
-	mbnavadjust_prog.c mbnavadjust_io.c mbnavadjust_util.c mbnavadjust_creation.h \
-	mbnavadjust_extrawidgets.h mbnavadjust_io.h mbnavadjust.h
-
+mbnavadjust_SOURCES = mbnavadjust.c mbnavadjust.h \
+	mbnavadjust_callbacks.c mbnavadjust_creation.c \
+	mbnavadjust_creation.h mbnavadjust_extrawidgets.h \
+	mbnavadjust_io.c mbnavadjust_io.h mbnavadjust_prog.c \
+	mbnavadjust_util.c
 mbnavadjustmerge_SOURCES = mbnavadjustmerge.c mbnavadjust_io.c mbnavadjust_io.h
 mbnavadjustfine_SOURCES = mbnavadjust_fine.cpp mbnavadjust_icp.cpp \
 	mbnavadjust_icp.hpp mbnavadjust_io.c mbnavadjust_io.h
-
 all: all-am
 
 .SUFFIXES:

@@ -613,18 +613,8 @@ int main(int argc, char **argv) {
 					heave = aheave[inav];
 					sonardepth = draft - heave;
 
-					/*
-					seconds = time_i[5] + 1e-6 * time_i[6];
-					fprintf(stdout, "kind:%d error:%d %d of %d: time:%4d/%2d/%2d %2.2d:%2.2d:%9.6f\n",
-					kind, error, i, n,
-					time_i[0],  time_i[1],  time_i[2],
-					time_i[3],  time_i[4],  seconds);
-					*/
-
 					/* calculate course made good and distance */
 					mb_coor_scale(verbose, navlat, &mtodeglon, &mtodeglat);
-					const double headingx = sin(DTR * heading);
-					const double headingy = cos(DTR * heading);
 					if (first == MB_YES) {
 						time_interval = 0.0;
 						course = heading;

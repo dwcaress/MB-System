@@ -35,7 +35,9 @@
 #include "mb_io.h"
 #include "mb_status.h"
 #include "mbsys_elacmk2.h"
+#ifdef ENABLE_GSF
 #include "mbsys_gsf.h"
+#endif
 #include "mbsys_hsds.h"
 #include "mbsys_ldeoih.h"
 #include "mbsys_reson8k.h"
@@ -50,7 +52,10 @@
 #define MBCOPY_XSE_TO_ELACMK2 3
 #define MBCOPY_SIMRAD_TO_SIMRAD2 4
 #define MBCOPY_ANY_TO_MBLDEOIH 5
+
+#ifdef ENABLE_GSF
 #define MBCOPY_RESON8K_TO_GSF 6
+#endif
 
 #define MBCOPY_STRIPMODE_NONE       0
 #define MBCOPY_STRIPMODE_COMMENTS   1
@@ -70,8 +75,9 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, void *ombio_ptr, void *ostore_ptr,
                            int *error);
+#ifdef ENABLE_GSF
 int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *error);
-
+#endif
 
 /*--------------------------------------------------------------------*/
 
@@ -513,11 +519,14 @@ int main(int argc, char **argv) {
     copymode = MBCOPY_SIMRAD_TO_SIMRAD2;
   else if (pings == 1 && omb_io_ptr->format == MBF_MBLDEOIH)
     copymode = MBCOPY_ANY_TO_MBLDEOIH;
+#ifdef ENABLE_GSF
   else if (pings == 1 && imb_io_ptr->format == MBF_XTFR8101 && omb_io_ptr->format == MBF_GSFGENMB)
     copymode = MBCOPY_RESON8K_TO_GSF;
+#endif
   else
     copymode = MBCOPY_PARTIAL;
 
+#ifdef ENABLE_GSF
   /* quit if an unsupported copy to GSF is requested */
   if (omb_io_ptr->format == MBF_GSFGENMB && copymode == MBCOPY_PARTIAL) {
     fprintf(stderr, "Requested copy from format %d to GSF format %d is unsupported\n", imb_io_ptr->format,
@@ -526,6 +535,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\tand contributing it to the MB-System community\n");
     exit(error);
   }
+#endif
 
   /* print debug statements */
   if (verbose >= 2) {
@@ -949,11 +959,13 @@ int main(int argc, char **argv) {
       ostore_ptr = omb_io_ptr->store_data;
       status = mbcopy_simrad_to_simrad2(verbose, istore_ptr, ostore_ptr, &error);
     }
+#ifdef ENABLE_GSF
     else if (copymode == MBCOPY_RESON8K_TO_GSF && error == MB_ERROR_NO_ERROR) {
 
       ostore_ptr = omb_io_ptr->store_data;
       status = mbcopy_reson8k_to_gsf(verbose, imbio_ptr, ombio_ptr, &error);
     }
+#endif
     else if (copymode == MBCOPY_ANY_TO_MBLDEOIH && error == MB_ERROR_NO_ERROR) {
       if (kind == MB_DATA_DATA) {
         mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &draft,
@@ -1018,7 +1030,9 @@ int main(int argc, char **argv) {
       case MBCOPY_SIMRAD_TO_SIMRAD2:
       case MBCOPY_ELACMK2_TO_XSE:
       case MBCOPY_XSE_TO_ELACMK2:
+#ifdef ENABLE_GSF
       case MBCOPY_RESON8K_TO_GSF:
+#endif
         status = mb_insert(verbose, ombio_ptr, ostore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
                            mbeams_bath, ibeams_amp, ipixels_ss, mbeamflag, mbath, iamp, mbathacrosstrack, mbathalongtrack,
                            iss, issacrosstrack, issalongtrack, comment, &error);
@@ -2459,6 +2473,7 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
   return (status);
 }
 /*--------------------------------------------------------------------*/
+#ifdef ENABLE_GSF
 int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *error) {
   int status = MB_SUCCESS;
   struct mb_io_struct *imb_io_ptr;
@@ -2747,7 +2762,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
     fprintf(stderr, "dbg2       status:  %d\n", status);
   }
 
-  /* return status */
   return (status);
 }
+#endif  // ENABLE_GSF
 /*--------------------------------------------------------------------*/

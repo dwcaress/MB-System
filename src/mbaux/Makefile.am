@@ -11,8 +11,14 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libgdal_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
+if BUILD_MBTRN
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
+endif
 
-AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
+AM_CFLAGS =
+AM_CFLAGS += ${libgmt_CFLAGS}
+AM_CFLAGS += ${libgdal_CFLAGS}
+AM_CFLAGS += ${libnetcdf_CFLAGS}
 
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES =

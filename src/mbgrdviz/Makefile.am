@@ -8,6 +8,9 @@ AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I${top_srcdir}/src/mbview
 AM_CPPFLAGS += ${libgmt_CPPFLAGS} ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libmotif_CPPFLAGS} ${libopengl_CPPFLAGS}
+if BUILD_MBTRN
+AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
+endif
 
 AM_LDFLAGS =
 

@@ -241,9 +241,11 @@ int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error) {
 	else if (*format == MBF_DSL120SF) {
 		status = mbr_register_dsl120sf(verbose, mbio_ptr, error);
 	}
+#ifdef ENABLE_GSF
 	else if (*format == MBF_GSFGENMB) {
 		status = mbr_register_gsfgenmb(verbose, mbio_ptr, error);
 	}
+#endif
 	else if (*format == MBF_MSTIFFSS) {
 		status = mbr_register_mstiffss(verbose, mbio_ptr, error);
 	}
@@ -727,12 +729,14 @@ int mb_format_info(int verbose, int *format, int *system, int *beams_bath_max, i
 		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
 		                           beamwidth_xtrack, beamwidth_ltrack, error);
 	}
+#ifdef ENABLE_GSF
 	else if (*format == MBF_GSFGENMB) {
 		status = mbr_info_gsfgenmb(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
 		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
 		                           platform_source, nav_source, sensordepth_source, heading_source, attitude_source, svp_source,
 		                           beamwidth_xtrack, beamwidth_ltrack, error);
 	}
+#endif
 	else if (*format == MBF_MSTIFFSS) {
 		status = mbr_info_mstiffss(verbose, system, beams_bath_max, beams_amp_max, pixels_ss_max, format_name, system_name,
 		                           format_description, numfile, filetype, variable_beams, traveltime, beam_flagging,
