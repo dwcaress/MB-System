@@ -16,6 +16,5 @@ libmbbsio_la_SOURCES += mbbs_memalloc.c
 libmbbsio_la_SOURCES += mbbs_misc.c
 libmbbsio_la_SOURCES += mbbs_swapbytes.c
 libmbbsio_la_SOURCES += mbbs_tm.c
-libmbbsio_la_SOURCES += mbbs_utils.c
 libmbbsio_la_SOURCES += mbbs_wrhdrfields.c
 libmbbsio_la_SOURCES += mbbs_wrsampflags.c
