@@ -32,13 +32,14 @@
    Higher-level utilities for Hawaii Mapping Research Group BS files.
 */
 
-#include <stdio.h>
-#include <string.h>
 #include <math.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
+#include "mbbs.h"
 #include "mbbs_defines.h"
 
 /* Ugly patch because Windows has no fchdir() function */
@@ -49,31 +50,21 @@
 #endif
 #endif
 
-extern int mbbs_appendstr(char **, char *);
-extern int mbbs_copypng(int, XDR *, XDR *, int);
-extern int mbbs_freebsfmem(BSFile *);
-extern int mbbs_rdbsfhdr(BSFile *, XDR *);
-extern int mbbs_wrbsfhdr(BSFile *, XDR *);
-
+/* TODO(schwehr): Remove this unused function. */
 int mbbs_splitfile(char *dirnm, char *bsfnm0, char *bsfnm1, int pngid, char *logprefix) {
-	int chngdir, origdirfd, err;
-	char tmpfilenm[80], prefix[80], newlogtail[120];
-	char *lp, *tailstr;
-	FILE *ifp, *ofp;
-	XDR xdri, xdro;
-	BSFile bsfi, bsfo;
-
 	if (sizeof(int) < 4)
 		return BS_BADARCH;
 
 	if ((bsfnm0 == (char *)0) || ((int)strlen(bsfnm0) == 0) || (bsfnm1 == (char *)0) || ((int)strlen(bsfnm1) == 0) || (pngid < 0))
 		return BS_BADARG;
 
+	int chngdir;
 	if ((dirnm == (char *)0) || ((int)strlen(dirnm) == 0))
 		chngdir = 0;
 	else
 		chngdir = 1;
 
+	int origdirfd;
 	if (chngdir) {
 		if ((origdirfd = open(".", O_RDONLY)) < 0)
 			return BS_OPEN;
@@ -84,6 +75,7 @@ int mbbs_splitfile(char *dirnm, char *bsfnm0, char *bsfnm1, int pngid, char *log
 	}
 
 	/* rename original file to temporary name */
+	char tmpfilenm[80];
 	(void)strcpy(tmpfilenm, "BSLIBsplittmp");
 	if (access(tmpfilenm, F_OK) == 0) {
 		if (chngdir) {
@@ -100,6 +92,7 @@ int mbbs_splitfile(char *dirnm, char *bsfnm0, char *bsfnm1, int pngid, char *log
 		return BS_RENAME;
 	}
 
+	FILE *ifp;
 	if ((ifp = fopen(tmpfilenm, "r")) == (FILE *)0) {
 		(void)rename(tmpfilenm, bsfnm0);
 		if (chngdir) {
@@ -108,7 +101,10 @@ int mbbs_splitfile(char *dirnm, char *bsfnm0, char *bsfnm1, int pngid, char *log
 		}
 		return BS_OPEN;
 	}
+	XDR xdri;
 	xdrstdio_create(&xdri, ifp, XDR_DECODE);
+	BSFile bsfi;
+	int err;
 	if ((err = mbbs_rdbsfhdr(&bsfi, &xdri)) != BS_SUCCESS) {
 		(void)fclose(ifp);
 		(void)rename(tmpfilenm, bsfnm0);
@@ -128,12 +124,15 @@ int mbbs_splitfile(char *dirnm, char *bsfnm0, char *bsfnm1, int pngid, char *log
 		}
 		return BS_BADARG;
 	}
+	BSFile bsfo;
 	MemCopy(&bsfi, &bsfo, sizeof(BSFile));
 
 	/* these strings now belong to the output header! */
 	bsfi.bsf_srcfilenm = (char *)0;
 	bsfi.bsf_log = (char *)0;
 
+	char prefix[80];
+	char *lp;
 	if ((logprefix == (char *)0) || ((int)strlen(logprefix) == 0)) {
 		(void)sprintf(prefix, "BSLIB::bs_split()");
 		lp = prefix;
@@ -144,8 +143,10 @@ int mbbs_splitfile(char *dirnm, char *bsfnm0, char *bsfnm1, int pngid, char *log
 		(void)strcat(prefix, "...");
 		lp = prefix;
 	}
-	else
+	else {
 		lp = logprefix;
+	}
+	char newlogtail[120];
 	if ((int)strlen(bsfo.bsf_log) > 0)
 		(void)sprintf(newlogtail, "\n%s [ BreakFile @ Ping%1d HEAD ] ;", lp, pngid);
 	else
@@ -163,12 +164,13 @@ int mbbs_splitfile(char *dirnm, char *bsfnm0, char *bsfnm1, int pngid, char *log
 
 	/* eventually we will replace the "HEAD ] ;" substring just
 	   appended to the log with "TAIL ] ;", so locate it now */
-	tailstr = bsfo.bsf_log;
+	char *tailstr = bsfo.bsf_log;
 	tailstr += (int)strlen(bsfo.bsf_log);
 	for (; *tailstr != 'H'; tailstr--)
 		;
 
 	/* copy first part of original file */
+	FILE *ofp;
 	if ((ofp = fopen(bsfnm0, "w")) == (FILE *)0) {
 		(void)mbbs_freebsfmem(&bsfo);
 		(void)fclose(ifp);
@@ -179,6 +181,7 @@ int mbbs_splitfile(char *dirnm, char *bsfnm0, char *bsfnm1, int pngid, char *log
 		}
 		return BS_OPEN;
 	}
+	XDR xdro;
 	xdrstdio_create(&xdro, ofp, XDR_ENCODE);
 	bsfo.bsf_count = pngid;
 	if ((err = mbbs_wrbsfhdr(&bsfo, &xdro)) != BS_SUCCESS) {
