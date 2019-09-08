@@ -76,7 +76,6 @@ int mbbs_seekpng(int, XDR *, int);
 int mbbs_seekpngdata(Ping *, XDR *);
 int mbbs_setgmttz();
 int mbbs_setswradius(int, FILE *, long, int, unsigned int, float);
-int mbbs_splitfile(char *, char *, char *, int, char *);
 int mbbs_striptail(char *, char);
 int mbbs_tmparse(char *, int, double *);
 int mbbs_tmparsegmttz(char *, int, double *);
