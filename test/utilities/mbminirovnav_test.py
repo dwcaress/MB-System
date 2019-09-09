@@ -18,9 +18,12 @@ class MbminirovnavTest(unittest.TestCase):
 
   def testNoArgs(self):
     cmd = [self.cmd]
-    output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Input data loaded:', output)
-    self.assertIn('DVL:', output)
+    try:
+      subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+      output = e.output.decode()
+      self.assertEqual(1, e.returncode)
+    # This might not throw an exception.
 
   def testHelp(self):
     cmd = [self.cmd, '--help']
