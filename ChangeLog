@@ -324,7 +324,7 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.7.6beta7 (September 8, 2019)
+-----> 5.7.6beta8 (September 9, 2019)
 
 MBIO library beam flagging and detect types: The handling of multi-pick
 soundings has been modified. This refers to sensors that can report more than
