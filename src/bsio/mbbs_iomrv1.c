@@ -38,10 +38,10 @@
 #include "mbbs.h"
 #include "mbbs_defines.h"
 
-unsigned long bs_iobytecnt;
-int bs_ionaninit;
-float bs_ionanf;
-double bs_ionand;
+extern unsigned long bs_iobytecnt;
+extern int bs_ionaninit;
+extern float bs_ionanf;
+extern double bs_ionand;
 
 /*
    Internal routine.
@@ -227,4 +227,3 @@ int mbbs_mr1_xdrpnghdrv1(Ping *png, XDR *xdrs)
 
 	return 1;
 }
-

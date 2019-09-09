@@ -1,4 +1,4 @@
-.TH mblist 1 "8 April 2017" "MB-System 5.0" "MB-System 5.0"
+.TH mblist 1 "1 September 2019" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP \- List data in swath data files.
 
@@ -320,7 +320,7 @@ hemisphere characters.
 special character: this causes the position
 indicated by the next 'X', 'x', 'Y', or 'y'
 character to be that of the sensor rather
-than the associated seafloor 
+than the associated seafloor
 depth or backscatter value. This applies only
 to position values.
 .IP
@@ -334,9 +334,9 @@ to position and depth values.
 .IP
 \fB^\fP
 special character: this causes the position
-value indicated by the next 'X', or 'Y' 
-character to be expressed as an easting or 
-northing in the projected coordinate system 
+value indicated by the next 'X', or 'Y'
+character to be expressed as an easting or
+northing in the projected coordinate system
 (PCS) specified using the \fB-J\fP option.
 If no PCS is specified, then a Universal
 Tranvserse Mercator (UTM) projection will
@@ -403,7 +403,7 @@ for sidescan alongtrack distance (m)
 for beamflag numeric value (1=null, 0=good, 5=manual, 9=filter, 129=sonar).
 .IP
 \fBf\fP
-for beamflag character value ('-'=null, 'G'=good, 'M'=manual, 'F'=filter, 'S'=sonar).
+for beamflag character value ('-'=null, 'G'=good, 'M'=manual, 'F'=filter, 'S'=sonar, 'N'=secondary (multi-pick), 'I'=interpolated).
 .IP
 \fBG\fP
 for flat bottom grazing angle (degrees)
