@@ -868,7 +868,7 @@ int mbsys_3ddwissl_preprocess
   headingy = cos(store->heading * DTR);
 
   /* loop over all pulses */
-  for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+  for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
     {
     /* get pulse */
     struct mbsys_3ddwissl_pulse_struct *pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
@@ -1272,9 +1272,6 @@ int mbsys_3ddwissl_insert
   int status = MB_SUCCESS;
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
-  double dlon, dlat, dheading;
-  int ipulse, isounding;
-  int ibath;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -1318,9 +1315,9 @@ int mbsys_3ddwissl_insert
     store->time_d = time_d;
 
     /* calculate change in navigation */
-    dlon = navlon - store->navlon;
-    dlat = navlat - store->navlat;
-    dheading = heading - store->heading;
+    double dlon = navlon - store->navlon;
+    double dlat = navlat - store->navlat;
+    double dheading = heading - store->heading;
 
     /* set the navigation */
     store->navlon = navlon;
@@ -1349,12 +1346,12 @@ int mbsys_3ddwissl_insert
       }
 
     /* set the bathymetry */
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = &store->pulses[ipulse];
-      for (isounding = 0; isounding < store->soundings_per_pulse; isounding++)
+      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
         {
-        ibath = store->soundings_per_pulse * ipulse + isounding;
+        int ibath = store->soundings_per_pulse * ipulse + isounding;
         sounding = &pulse->soundings[isounding];
         sounding->beamflag = beamflag[ibath];
         sounding->depth = bath[ibath] - store->sensordepth;
@@ -1522,6 +1519,8 @@ int mbsys_3ddwissl_detects
 {
   assert(mbio_ptr != NULL);
   assert(store_ptr != NULL);
+  struct mbsys_3ddwissl_pulse_struct *pulse;
+  struct mbsys_3ddwissl_sounding_struct *sounding;
 
   if (verbose >= 2)
     {
@@ -1551,8 +1550,22 @@ int mbsys_3ddwissl_detects
     *nbeams = store->pulses_per_scan * store->soundings_per_pulse;
 
     /* LIDAR detects */
-    for (int i = 0; i < *nbeams; i++)
-      detects[i] = MB_DETECT_LIDAR;
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+      {
+      pulse = &store->pulses[ipulse];
+      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
+        {
+        int ibath = store->soundings_per_pulse * ipulse + isounding;
+        sounding = &pulse->soundings[isounding];
+
+        // Bits 8-11 are used for multi-detect sounding priority, with highest == 0
+        // A sounding flagged as secondary has a priority of 1, else the priority is 0
+        if (mb_beam_check_flag_secondary(sounding->beamflag))
+          detects[ibath] = MB_DETECT_LIDAR | 0x100;
+        else
+          detects[ibath] = MB_DETECT_LIDAR;
+        }
+      }
 
     /* always successful */
     *error = MB_ERROR_NO_ERROR;
@@ -1789,8 +1802,6 @@ int mbsys_3ddwissl_extract_altitude
 {
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
-  int ipulse, isounding;
-  double rmin, r;
 
   /* check for non-null data */
   assert(mbio_ptr != NULL);
@@ -1823,16 +1834,16 @@ int mbsys_3ddwissl_extract_altitude
     *transducer_depth = store->sensordepth;
 
     /* loop over all soundings looking for most nadir */
-    rmin = 9999999.9;
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    double rmin = 9999999.9;
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = &store->pulses[ipulse];
-      for (isounding=0; isounding < store->soundings_per_pulse; isounding++)
+      for (int isounding=0; isounding < store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
         if (mb_beam_ok(sounding->beamflag))
           {
-          r = sqrt(
+          double r = sqrt(
             sounding->acrosstrack * sounding->acrosstrack + sounding->alongtrack *
             sounding->alongtrack);
           if (r < rmin)
@@ -2425,16 +2436,13 @@ int mbsys_3ddwissl_copy
 /*----------------------------------------------------------------------*/
 int mbsys_3ddwissl_print_store
 (
-  int verbose,                /* in: verbosity level set on command line 0..N */
-  void *store_ptr,                  /* in: see
-                               mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
-  int *error                  /* out: see mb_status.h:MB_ERROR */
+  int verbose,              /* in: verbosity level set on command line 0..N */
+  void *store_ptr,          /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
+  int *error                /* out: see mb_status.h:MB_ERROR */
 )
 {
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
-  int status;
-  int ipulse, isounding;
 
   if (verbose >= 2)
     {
@@ -2448,7 +2456,7 @@ int mbsys_3ddwissl_print_store
   assert(store_ptr != NULL);
 
   /* always successful */
-  status = MB_SUCCESS;
+  int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
 
   /* get data structure pointers */
@@ -3479,7 +3487,7 @@ int mbsys_3ddwissl_print_store
 
     fprintf(stderr, "%s     num_pulses_alloc:              %d\n", first,
       store->num_pulses_alloc);
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = &(store->pulses[ipulse]);
       fprintf(stderr, "%s------------------------------------------\n", first);
@@ -3511,7 +3519,7 @@ int mbsys_3ddwissl_print_store
         pulse->roll_offset);
       fprintf(stderr, "%s     pitch_offset:                  %f\n", first,
         pulse->pitch_offset);
-      for (isounding = 0; isounding < store->soundings_per_pulse; isounding++)
+      for (int isounding = 0; isounding < store->soundings_per_pulse; isounding++)
         {
         sounding = &(pulse->soundings[isounding]);
         fprintf(stderr, "%s     --------\n", first);
@@ -3562,28 +3570,20 @@ int mbsys_3ddwissl_print_store
 /*--------------------------------------------------------------------*/
 int mbsys_3ddwissl_calculatebathymetry
 (
-  int verbose,                    /* in: verbosity level set on command line
-                               0..N */
-  void *mbio_ptr,                        /* in: see mb_io.h:mb_io_struct */
-  void *store_ptr,                      /* in: see
-                                   mbsys_3ddwissl.h:mbsys_3ddwissl_struct
-                                   */
-  double amplitude_threshold,            /* used to determine valid soundings */
-  double target_altitude,            /* used to prioritize picks close to a desired
-                           standoff */
-  int *error                      /* out: see mb_status.h:MB_ERROR */
+  int verbose,        /* in: verbosity level set on command line 0..N */
+  void *mbio_ptr,     /* in: see mb_io.h:mb_io_struct */
+  void *store_ptr,    /* in: see mbsys_3ddwissl.h:mbsys_3ddwissl_struct */
+  double amplitude_threshold,   /* used to determine valid soundings */
+  double target_altitude, /* used to prioritize picks close to a desired standoff */
+  int *error              /* out: see mb_status.h:MB_ERROR */
 )
 {
   struct mbsys_3ddwissl_pulse_struct *pulse;
   struct mbsys_3ddwissl_sounding_struct *sounding;
-  int status;
-  int time_i[7];
   double alpha, beta, theta, phi;
   double angle_az_sign, angle_el_sign;
   double mtodeglon, mtodeglat;
   double xx;
-  int ipulse, isounding, isounding_largest;
-  short amplitude_largest, amplitude_max;
   double head_offset_x_m;
   double head_offset_y_m;
   double head_offset_z_m;
@@ -3607,7 +3607,7 @@ int mbsys_3ddwissl_calculatebathymetry
   assert(store_ptr != NULL);
 
   /* always successful */
-  status = MB_SUCCESS;
+  int status = MB_SUCCESS;
   *error = MB_ERROR_NO_ERROR;
 
   /* get data structure pointers */
@@ -3617,6 +3617,7 @@ int mbsys_3ddwissl_calculatebathymetry
   if (store->kind == MB_DATA_DATA)
     {
     /* get time_d timestamp */
+    int time_i[7];
     time_i[0] = store->year;
     time_i[1] = store->month;
     time_i[2] = store->day;
@@ -3657,11 +3658,11 @@ int mbsys_3ddwissl_calculatebathymetry
       }
 
     /* figure out valid amplitude threshold */
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
-      amplitude_max = 0;
-      for (isounding=0; isounding<store->soundings_per_pulse; isounding++)
+      short amplitude_max = 0;
+      for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
         /* valid pulses have nonzero ranges */
@@ -3672,12 +3673,12 @@ int mbsys_3ddwissl_calculatebathymetry
 /*fprintf(stderr,"\namplitude_max:%d amplitude_threshold:%f\n", amplitude_max, amplitude_threshold); */
 
     /* loop over all pulses and soundings */
-    for (ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
+    for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
       {
       pulse = (struct mbsys_3ddwissl_pulse_struct *)&store->pulses[ipulse];
-      isounding_largest = -1;
-      amplitude_largest = 0;
-      for (isounding=0; isounding<store->soundings_per_pulse; isounding++)
+      int isounding_largest = -1;
+      short amplitude_largest = 0;
+      for (int isounding=0; isounding<store->soundings_per_pulse; isounding++)
         {
         sounding = &pulse->soundings[isounding];
 
@@ -3709,7 +3710,7 @@ int mbsys_3ddwissl_calculatebathymetry
 
           /* set beamflag */
           if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
-            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
+            sounding->beamflag = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
           else
             sounding->beamflag = MB_FLAG_NULL;
 

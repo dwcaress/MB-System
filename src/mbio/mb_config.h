@@ -4,6 +4,9 @@
 /* Machine is littleendian, (Byteswapping on) */
 #define BYTESWAPPED 1
 
+/* Build with GSF */
+#define ENABLE_GSF 1
+
 /* Machine is bigendian, (Byteswapping off) */
 /* #undef ENDIAN_BIG */
 
@@ -83,7 +86,7 @@
 #define PACKAGE_NAME "mbsystem"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "mbsystem 5.7.6beta6"
+#define PACKAGE_STRING "mbsystem 5.7.6beta7"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "mbsystem"
@@ -92,7 +95,7 @@
 #define PACKAGE_URL "http://www.mbari.org/data/mbsystem/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "5.7.6beta6"
+#define PACKAGE_VERSION "5.7.6beta7"
 
 /* Build tools using PCL */
 /* #undef PCLTOOLS_ENABLED */
@@ -104,10 +107,10 @@
 /* #undef TEST_ENABLED */
 
 /* Version number of package */
-#define VERSION "5.7.6beta6"
+#define VERSION "5.7.6beta7"
 
 /* Set VERSION_DATE define in mb_config.h */
-#define VERSION_DATE "26 August 2019"
+#define VERSION_DATE "8 September 2019"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -124,7 +127,3 @@
 /* Define to the type of a signed integer type of width exactly 8 bits if such
    a type exists and the standard includes do not define it. */
 /* #undef int8_t */
-
-/* Skip GSF driver */
-#define ENABLE_GSF 1
-

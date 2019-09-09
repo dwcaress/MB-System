@@ -2632,10 +2632,10 @@ int main(int argc, char **argv) {
 												fprintf(output[i], "F");
 											else if (mb_beam_check_flag_filter2(beamflag[k]))
 												fprintf(output[i], "F");
-											else if (mb_beam_check_flag_gt_1x_iho(beamflag[k]))
-												fprintf(output[i], "F");
-											else if (mb_beam_check_flag_gt_2x_iho(beamflag[k]))
-												fprintf(output[i], "F");
+											else if (mb_beam_check_flag_secondary(beamflag[k]))
+												fprintf(output[i], "N");
+											else if (mb_beam_check_flag_interpolate(beamflag[k]))
+												fprintf(output[i], "I");
 											else if (mb_beam_check_flag_sonar(beamflag[k]))
 												fprintf(output[i], "S");
 										}

@@ -131,6 +131,7 @@ struct mbedit_ping_struct {
 	double *bathacrosstrack;
 	double *bathalongtrack;
 	int *detect;
+  int *priority;
 	int *pulses;
 	int *bath_x;
 	int *bath_y;
@@ -192,6 +193,7 @@ static double *ss = NULL;
 static double *ssacrosstrack = NULL;
 static double *ssalongtrack = NULL;
 static int *detect = NULL;
+static int *priority = NULL;
 static int *pulses = NULL;
 static int *editcount = NULL;
 static char comment[MB_COMMENT_MAXLINE];
@@ -229,6 +231,7 @@ static double info_bath;
 static double info_bathacrosstrack;
 static double info_bathalongtrack;
 static int info_detect;
+static int info_priority;
 static int info_pulse;
 
 /* grab parameters */
@@ -2349,6 +2352,7 @@ int mbedit_action_mouse_info(int x_loc, int y_loc, int plwd, int exgr, int xntrv
 			info_bathacrosstrack = ping[iping].bathacrosstrack[jbeam];
 			info_bathalongtrack = ping[iping].bathalongtrack[jbeam];
 			info_detect = ping[iping].detect[jbeam];
+			info_priority = ping[iping].priority[jbeam];
 			info_pulse = ping[iping].pulses[jbeam];
 			/*			fprintf(stderr,"\nping: %d beam:%d depth:%10.3f \n",
 			                iping,jbeam,ping[iping].bath[jbeam]);*/
@@ -3866,6 +3870,8 @@ int mbedit_open_file(char *file, int form, int savemode) {
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&detect, &error);
 		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&priority, &error);
+		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&pulses, &error);
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), (void **)&editcount, &error);
@@ -3879,6 +3885,7 @@ int mbedit_open_file(char *file, int form, int savemode) {
 			ping[i].bathacrosstrack = NULL;
 			ping[i].bathalongtrack = NULL;
 			ping[i].detect = NULL;
+			ping[i].priority = NULL;
 			ping[i].pulses = NULL;
 			ping[i].bath_x = NULL;
 			ping[i].bath_y = NULL;
@@ -3983,6 +3990,7 @@ int mbedit_close_file() {
 			free(ping[i].bathacrosstrack);
 			free(ping[i].bathalongtrack);
 			free(ping[i].detect);
+			free(ping[i].priority);
 			free(ping[i].pulses);
 			free(ping[i].bath_x);
 			free(ping[i].bath_y);
@@ -4105,6 +4113,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer) {
 				free(ping[iping].bathacrosstrack);
 				free(ping[iping].bathalongtrack);
 				free(ping[iping].detect);
+				free(ping[iping].priority);
 				free(ping[iping].pulses);
 				free(ping[iping].bath_x);
 				free(ping[iping].bath_y);
@@ -4211,6 +4220,13 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 				status = MB_SUCCESS;
 				for (i = 0; i < ping[nbuff].beams_bath; i++) {
 					detect[i] = MB_DETECT_UNKNOWN;
+					priority[i] = 0;
+				}
+			}
+			else {
+				for (i = 0; i < ping[nbuff].beams_bath; i++) {
+          priority[i] = (detect[i] & 0x0000FF00) << 8;
+					detect[i] = detect[i] & 0x000000FF;
 				}
 			}
 			detect_status = mb_pulses(verbose, imbio_ptr, store_ptr, &kind, &nbeams, pulses, &detect_error);
@@ -4240,6 +4256,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			free(ping[nbuff].bathacrosstrack);
 			free(ping[nbuff].bathalongtrack);
 			free(ping[nbuff].detect);
+			free(ping[nbuff].priority);
 			free(ping[nbuff].pulses);
 			free(ping[nbuff].bath_x);
 			free(ping[nbuff].bath_y);
@@ -4258,6 +4275,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 			ping[nbuff].bathacrosstrack = (double *)malloc(ping[nbuff].beams_bath * sizeof(double));
 			ping[nbuff].bathalongtrack = (double *)malloc(ping[nbuff].beams_bath * sizeof(double));
 			ping[nbuff].detect = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
+			ping[nbuff].priority = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
 			ping[nbuff].pulses = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
 			ping[nbuff].bath_x = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
 			ping[nbuff].bath_y = (int *)malloc(ping[nbuff].beams_bath * sizeof(int));
@@ -4271,6 +4289,7 @@ int mbedit_load_data(int buffer_size, int *nloaded, int *nbuffer, int *ngood, in
 				ping[nbuff].bathacrosstrack[i] = bathacrosstrack[i];
 				ping[nbuff].bathalongtrack[i] = bathalongtrack[i];
 				ping[nbuff].detect[i] = detect[i];
+				ping[nbuff].priority[i] = priority[i];
 				ping[nbuff].pulses[i] = pulses[i];
 				ping[nbuff].bath_x[i] = 0;
 				ping[nbuff].bath_y[i] = 0;
@@ -4900,10 +4919,11 @@ int mbedit_plot_beam(int iping, int jbeam) {
 				beam_color = BLUE;
 			else if (mb_beam_check_flag_sonar(ping[iping].beamflag[jbeam]))
 				beam_color = GREEN;
-			else if (!mb_beam_check_flag_unusable(ping[iping].beamflag[jbeam]))
+			else {
 				beam_color = RED;
-			else
-				beam_color = GREEN;
+fprintf(stderr, "Beam:%d flag:%u priority:%d detect:%d\n",
+jbeam,ping[iping].beamflag[jbeam],ping[iping].priority[jbeam],ping[iping].detect[jbeam]);
+      }
 		}
 		else if (show_mode == MBEDIT_SHOW_DETECT) {
 			if (ping[iping].detect[jbeam] == MB_DETECT_AMPLITUDE)

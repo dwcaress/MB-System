@@ -19,12 +19,12 @@ define([AC_CACHE_LOAD], )
 define([AC_CACHE_SAVE], )
 
 dnl Initialize and set version and version date
-AC_INIT([mbsystem],[5.7.6beta6],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
+AC_INIT([mbsystem],[5.7.6beta7],[http://listserver.mbari.org/sympa/arc/mbsystem],[mbsystem],[http://www.mbari.org/data/mbsystem/])
 
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "26 August 2019", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "8 September 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -933,6 +933,10 @@ AM_CONDITIONAL([HAVE_PTHREADS],[test "xyes" = "xyes"])
 AC_SUBST(PTHREAD_CFLAGS)
 AC_SUBST(PTHREAD_LIBS)
 
+
+dnl--------------------------------------------------------------------
+dnl GSF Section - optionally disable inclusion of GSF format i/o module
+dnl--------------------------------------------------------------------
 
 AS_ECHO(["Check if the GSF driver should be built"])
 AC_ARG_ENABLE(gsf, [AS_HELP_STRING([--disable-gsf], [build without the GSF driver])],

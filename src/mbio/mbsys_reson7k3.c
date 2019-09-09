@@ -4796,9 +4796,19 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
 
           /* set initial beamflag based on beam quality values */
           qualitycharptr = (mb_u_char *)&(rawdetectiondata->quality);
+
+          // passed both quality metrics 0x01 and 0x02
           if ((qualitycharptr[0] & 0x03) == 0x03) {
             beamflag = MB_FLAG_NONE;
-          } else {
+          }
+
+          // multi-detect enabled, not primary pick, usually ignored
+          else if ((RawDetection->flags & 0x10) && (rawdetectiondata->flags & 0x1E00)) {
+            beamflag = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+          }
+
+          // else primary pick but failed quality so treated as flagged by sonar
+          else {
             beamflag = MB_FLAG_FLAG + MB_FLAG_SONAR;
           }
           qualitycharptr[3] = beamflag;
@@ -5340,6 +5350,18 @@ if (store->kind == MB_DATA_DATA) {
 //quality, quality, beamflag[i], beamflag[i]);
         amp[i] = rawdetectiondata->signal_strength;
       }
+
+      // if multi-pick enabled make sure flagged secondary soundings are flagged for being secondary
+      // do this check on insertion too
+      if (RawDetection->flags & 0x10) {
+        for (int i = 0; i < RawDetection->number_beams; i++) {
+          rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
+          if (mb_beam_check_flag_flagged(beamflag[i]) && rawdetectiondata->flags & 0x1E00) {
+            beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+          }
+        }
+      }
+
     } // end bathymetry in RawDetection 7027 records (e.g. Reson)
 
     // bathymetry in SegmentedRawDetection records (e.g. Hydrosweep)
@@ -5754,6 +5776,17 @@ int mbsys_reson7k3_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind
 
       /* get speed  */
 
+      // if multi-pick enabled make sure flagged secondary soundings are flagged for being secondary
+      // do this check on extraction too
+      if (RawDetection->flags & 0x10) {
+        for (int i = 0; i < RawDetection->number_beams; i++) {
+          rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
+          if (mb_beam_check_flag_flagged(beamflag[i]) && rawdetectiondata->flags & 0x1E00) {
+            beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SECONDARY;
+          }
+        }
+      }
+
       /* read distance and depth values into storage arrays */
       for (int i = 0; i < nbath; i++) {
         if (i < RawDetection->number_beams) {
@@ -6130,12 +6163,19 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
       *nbeams = BeamGeometry->number_beams;
       for (int i = 0; i < RawDetection->number_beams; i++) {
         rawdetectiondata = &(RawDetection->rawdetectiondata[i]);
-        if (rawdetectiondata->flags | 0x01)
+
+        // Detect types are in bits 0-1
+        if (rawdetectiondata->flags & 0x01)
           detects[i] = MB_DETECT_AMPLITUDE;
-        else if (rawdetectiondata->flags | 0x02)
+        else if (rawdetectiondata->flags & 0x02)
           detects[i] = MB_DETECT_PHASE;
         else
           detects[i] = MB_DETECT_UNKNOWN;
+
+        // multidetect priority (0=highest) is in flags bits 9-12, shift to 8-11 in detects value
+        if (RawDetection->flags & 0x10) {
+          detects[i] = detects[i] | (int)((rawdetectiondata->flags & 0x1E00) >> 1);
+        }
       }
 
       /* set status */
@@ -6151,12 +6191,19 @@ int mbsys_reson7k3_detects(int verbose, void *mbio_ptr, void *store_ptr, int *ki
         segmentedrawdetectionrxdata = &(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
         segmentedrawdetectiontxdata = &(SegmentedRawDetection->segmentedrawdetectiontxdata[segmentedrawdetectionrxdata->used_segment - 1]);
         bathydata = &(SegmentedRawDetection->bathydata[i]);
-        if (segmentedrawdetectionrxdata->flags2 | 0x01)
+
+        // Detect types are in bits 0-1
+        if (segmentedrawdetectionrxdata->flags2 & 0x01)
           detects[i] = MB_DETECT_AMPLITUDE;
-        else if (segmentedrawdetectionrxdata->flags2 | 0x02)
+        else if (segmentedrawdetectionrxdata->flags2 & 0x02)
           detects[i] = MB_DETECT_PHASE;
         else
           detects[i] = MB_DETECT_UNKNOWN;
+
+        // multidetect priority (0=highest) is in flags bits 9-12, shift to 8-11 in detects value
+        if (RawDetection->flags & 0x10) {
+          detects[i] = detects[i] | (int)((rawdetectiondata->flags & 0x1E00) >> 1);
+        }
       }
 
       /* set status */
