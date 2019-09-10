@@ -385,7 +385,7 @@ Mbm_route2mission: AUV spiral descent option now includes a behavior to disable
 DVL aiding of the INS during the descent.
 
 Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): these i/o modules have been
-updated to handle both a new verion (1.3) of the 3D at Depth Wide
+updated to handle both a new version (1.3) of the 3D at Depth Wide
 Swath Lidar (WiSSL) *.raa format data.
 
 Mbtrn library: Updated to current code written by Kent Headley.
@@ -459,7 +459,7 @@ displayed when the diference between the minimum and maximum depth of a section
 is less than one meter.
 
 Formats MBF_3DWISSLR (232) and MBF_3DWISSLP (233): working towards the code
-successfuly reading and writing the 3D at Depth WiSSL *.raa format version 1.2.
+successfully reading and writing the 3D at Depth WiSSL *.raa format version 1.2.
 
 -----> 5.7.5 (June 26, 2019)
 
@@ -2273,7 +2273,7 @@ held by NIO.
 
 Mbm_grdplot: Added two "sealevel" color palletes that use Haxby colors for
 negative values (e.g. topography below sea level) and either greens or browns
-for positive values (e.g. topography above sea level). The Sealevel 2 pallette
+for positive values (e.g. topography above sea level). The Sealevel 2 palette
 was contributed by Jenny Paduan.
 
 Mbeditviz: Changed default illumination parameters to magnitude=1.0 and
@@ -2406,7 +2406,7 @@ GSF library: Updated to new release 03.05. This release is licensed using LGPL 2
 
 -----> 5.4.2185 (May 11, 2014)
 
-Several programs: Fixed formating error in printing system time_tm.tv_sec values.
+Several programs: Fixed formatting error in printing system time_tm.tv_sec values.
 
 MBsvpselect: Fixed sscanf format warning.
 
@@ -3809,7 +3809,7 @@ Fixed bug in parsing file start and end times in *.inf files.
 MBIO functions mb_defaults(), mb_env(), and mb_lonflip():
 Changed mb_defaults(), mb_env(), and mb_lonflip() functions to always return
 MB_SUCCESS status even when ~/.mbio_defaults file does not exist. Working with
-system defaults hould not be an error.
+system defaults should not be an error.
 
 Program mbeditviz:
 Changed mbeditviz_import_file() function in mbeditviz_prog.c to reset global
@@ -3898,7 +3898,7 @@ format 59)for later use by mbprocess. The default algorithm matches the original
 bathymetry to within about 0.1% altitude by calculating an effective heave for
 each ping and takeoff angles for each beam. A second algorithm (which can only
 be activated by uncommenting an #ifdef statement in mbr_em710raw.c) matches the
-orignal bathymetry by modifying both the takeoff angles and the travel time
+original bathymetry by modifying both the takeoff angles and the travel time
 measurement - this achieves matching of the original bathymetry to about 0.02%
 of altitude. Use of the second algorithm is not recommended because modifying
 the fundamental observations (travel times) to match the sonar's calculation
@@ -4599,7 +4599,7 @@ rotational bathymetry correction - previously did not initialize
 heave values for non-null but flagged beams.
 
 A minor change to mbbackangle to output the slope correction
-status (-Q) in the coments in the output file.
+status (-Q) in the comments in the output file.
 
 Altered mbbackangle so that it outputs at least one table,
 even if there are no survey pings in a file. This prevents
