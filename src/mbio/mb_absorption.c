@@ -26,12 +26,6 @@
  *
  * Author:	D. W. Caress
  * Date:	February 10, 2008
- *          R/V Zephyr
- *          Hanging out at the channel entrance to La Paz, BCS, MX
- *          helping out as MBARI tries to save the grounded
- *          R/V Western Flyer.
- *          Note: as I was writing this code the Flyer was refloated
- *          and successfully backed off the reef.
  *
  * SeaBird Functions:
  *    int mb_seabird_density(int verbose, double salinity, double temperature, double pressure, double *density, int *error);
@@ -41,11 +35,6 @@
  *
  * Author:	D. W. Caress
  * Date:	June 30, 2017
- *          R/V Adolf Jensen
- *          Mobilizing in the harbor of Tasiilaq, East Greenland
- *          for a cruise running an AUV with sidelook DVL and multibeam
- *          around icebergs.
- *
  *--------------------------------------------------------------------
  *
  */
@@ -229,7 +218,7 @@ int mb_potential_temperature(int verbose, double temperature, double salinity, d
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -344,7 +333,6 @@ int mb_seabird_density(int verbose, double salinity, double temperature, double 
  *   pressure: pressure in decibars
  *   latitude: latitude in degrees
  *   depth: depth in meters
- *
  */
 int mb_seabird_depth(int verbose, double pressure, double latitude, double *depth, int *error) {
 	if (verbose >= 2) {
@@ -391,7 +379,6 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 
 	double RT = 0.0;
 	double RP = 0.0;
-	double result;
 
 	/* constants for salinity calculation */
 	const double A1 = 2.070e-5, A2 = -6.370e-10, A3 = 3.989e-15;
@@ -400,9 +387,9 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 	const double a[6] = { 0.0080, -0.1692, 25.3851, 14.0941, -7.0261, 2.7081 };
 	const double b[6] = { 0.0005, -0.0056, -0.0066, -0.0375, 0.0636, -0.0144 };
 
-	if (conductivity <= 0.0)
-		result = 0.0;
-	else {
+	if (conductivity <= 0.0) {
+		/* result = 0.0; */
+	} else {
 		conductivity *= 10.0; /* convert Siemens/meter to mmhos/cm */
 		const double R = conductivity / 42.914;
 		double val = 1 + B1 * temperature + B2 * temperature * temperature + B3 * R + B4 * R * temperature;
@@ -429,7 +416,7 @@ int mb_seabird_salinity(int verbose, double conductivity, double temperature, do
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -532,6 +519,5 @@ int mb_seabird_soundspeed(int verbose, int algorithm, double salinity,
 	}
 
 	return (status);
-
 }
 /*--------------------------------------------------------------------*/
