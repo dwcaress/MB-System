@@ -38,179 +38,180 @@
 #define SENSOR_ADD 1
 #define SENSOR_MODIFY 2
 
+static const char program_name[] = "mbmakeplatform";
+static const char help_message[] =
+    "mbmakeplatform creates or modifies an MB-System platform file.\n";
+static const char usage_message[] =
+    "mbmakeplatform \n"
+    "\t[\n"
+    "\t--verbose\n"
+    "\t--help\n"
+    "\t--input=plffile\n"
+    "\t--swath=datalist\n"
+    "\t--swath=swathfile\n"
+    "\t--swath-format=value\n"
+    "\t]\n"
+    "\t--output=plffile\n"
+    "\t[\n"
+    "\t--platform-type-surface-vessel\n"
+    "\t--platform-type-tow-body\n"
+    "\t--platform-type-rov\n"
+    "\t--platform-type-auv\n"
+    "\t--platform-type-aircraft\n"
+    "\t--platform-type-satellite\n"
+    "\t--platform-name=string\n"
+    "\t--platform-organization=string\n"
+    "\t--platform-documentation-url\n"
+    "\t--platform-start-time\n"
+    "\t--platform-end-time\n"
+    "\t--add-sensor-sonar-echosounder\n"
+    "\t--add-sensor-sonar-multiechosounder\n"
+    "\t--add-sensor-sonar-sidescan\n"
+    "\t--add-sensor-sonar-interferometry\n"
+    "\t--add-sensor-sonar-multibeam\n"
+    "\t--add-sensor-sonar-multibeam-twohead\n"
+    "\t--add-sensor-sonar-subbottom\n"
+    "\t--add-sensor-camera-mono\n"
+    "\t--add-sensor-camera-stereo\n"
+    "\t--add-sensor-camera-video\n"
+    "\t--add-sensor-lidar-scan\n"
+    "\t--add-sensor-lidar-swath\n"
+    "\t--add-sensor-position\n"
+    "\t--add-sensor-compass\n"
+    "\t--add-sensor-vru\n"
+    "\t--add-sensor-imu\n"
+    "\t--add-sensor-ins\n"
+    "\t--add-sensor-ins-with-pressure\n"
+    "\t--add-sensor-ctd\n"
+    "\t--add-sensor-pressure\n"
+    "\t--add-sensor-soundspeed\n"
+    "\t--end-sensor\n"
+    "\t--sensor-model=string\n"
+    "\t--sensor-manufacturer=string\n"
+    "\t--sensor-serialnumber=string\n"
+    "\t--sensor-capability-position\n"
+    "\t--sensor-capability-depth\n"
+    "\t--sensor-capability-altitude\n"
+    "\t--sensor-capability-velocity\n"
+    "\t--sensor-capability-acceleration\n"
+    "\t--sensor-capability-pressure\n"
+    "\t--sensor-capability-rollpitch\n"
+    "\t--sensor-capability-heading\n"
+    "\t--sensor-capability-magneticfield\n"
+    "\t--sensor-capability-temperature\n"
+    "\t--sensor-capability-conductivity\n"
+    "\t--sensor-capability-salinity\n"
+    "\t--sensor-capability-soundspeed\n"
+    "\t--sensor-capability-gravity\n"
+    "\t--sensor-capability-topography-echosounder\n"
+    "\t--sensor-capability-topography-interferometry\n"
+    "\t--sensor-capability-topography-sass\n"
+    "\t--sensor-capability-topography-multibeam\n"
+    "\t--sensor-capability-topography-photogrammetry\n"
+    "\t--sensor-capability-topography-structurefrommotion\n"
+    "\t--sensor-capability-topography-lidar\n"
+    "\t--sensor-capability-topography-structuredlight\n"
+    "\t--sensor-capability-topography-laserscanner\n"
+    "\t--sensor-capability-backscatter-echosounder\n"
+    "\t--sensor-capability-backscatter-sidescan\n"
+    "\t--sensor-capability-backscatter-interferometry\n"
+    "\t--sensor-capability-backscatter-sass\n"
+    "\t--sensor-capability-backscatter-multibeam\n"
+    "\t--sensor-capability-backscatter-lidar\n"
+    "\t--sensor-capability-backscatter-structuredlight\n"
+    "\t--sensor-capability-backscatter-laserscanner\n"
+    "\t--sensor-capability-photography\n"
+    "\t--sensor-capability-stereophotography\n"
+    "\t--sensor-capability-video\n"
+    "\t--sensor-capability-stereovideo\n"
+    "\t--sensor-capability1=value\n"
+    "\t--sensor-capability2=value\n"
+    "\t--sensor-offsets=x/y/z/azimuth/roll/pitch\n"
+    "\t--sensor-offset-positions=x/y/z\n"
+    "\t--sensor-offset-angles=azimuth/roll/pitch\n"
+    "\t--sensor-time-latency=value\n"
+    "\t--sensor-time-latency-model=file\n"
+    "\t--sensor-source-bathymetry\n"
+    "\t--sensor-source-bathymetry1\n"
+    "\t--sensor-source-bathymetry2\n"
+    "\t--sensor-source-bathymetry3\n"
+    "\t--sensor-source-backscatter\n"
+    "\t--sensor-source-backscatter1\n"
+    "\t--sensor-source-backscatter2\n"
+    "\t--sensor-source-backscatter3\n"
+    "\t--sensor-source-subbottom\n"
+    "\t--sensor-source-subbottom1\n"
+    "\t--sensor-source-subbottom2\n"
+    "\t--sensor-source-subbottom3\n"
+    "\t--sensor-source-position\n"
+    "\t--sensor-source-position1\n"
+    "\t--sensor-source-position2\n"
+    "\t--sensor-source-position3\n"
+    "\t--sensor-source-depth\n"
+    "\t--sensor-source-depth1\n"
+    "\t--sensor-source-depth2\n"
+    "\t--sensor-source-depth3\n"
+    "\t--sensor-source-heading\n"
+    "\t--sensor-source-heading1\n"
+    "\t--sensor-source-heading2\n"
+    "\t--sensor-source-heading3\n"
+    "\t--sensor-source-rollpitch\n"
+    "\t--sensor-source-rollpitch1\n"
+    "\t--sensor-source-rollpitch2\n"
+    "\t--sensor-source-rollpitch3\n"
+    "\t--sensor-source-heave\n"
+    "\t--sensor-source-heave1\n"
+    "\t--sensor-source-heave2\n"
+    "\t--sensor-source-heave3\n"
+    "\t--modify-sensor=sensorid\n"
+    "\t--modify-sensor-bathymetry\n"
+    "\t--modify-sensor-bathymetry1\n"
+    "\t--modify-sensor-bathymetry2\n"
+    "\t--modify-sensor-bathymetry3\n"
+    "\t--modify-sensor-backscatter\n"
+    "\t--modify-sensor-backscatter1\n"
+    "\t--modify-sensor-backscatter2\n"
+    "\t--modify-sensor-backscatter3\n"
+    "\t--modify-sensor-subbottom\n"
+    "\t--modify-sensor-subbottom1\n"
+    "\t--modify-sensor-subbottom2\n"
+    "\t--modify-sensor-subbottom3\n"
+    "\t--modify-sensor-position\n"
+    "\t--modify-sensor-position1\n"
+    "\t--modify-sensor-position2\n"
+    "\t--modify-sensor-position3\n"
+    "\t--modify-sensor-depth\n"
+    "\t--modify-sensor-depth1\n"
+    "\t--modify-sensor-depth2\n"
+    "\t--modify-sensor-depth3\n"
+    "\t--modify-sensor-heading\n"
+    "\t--modify-sensor-heading1\n"
+    "\t--modify-sensor-heading2\n"
+    "\t--modify-sensor-heading3\n"
+    "\t--modify-sensor-rollpitch\n"
+    "\t--modify-sensor-rollpitch1\n"
+    "\t--modify-sensor-rollpitch2\n"
+    "\t--modify-sensor-rollpitch3\n"
+    "\t--modify-sensor-heave\n"
+    "\t--modify-sensor-heave1\n"
+    "\t--modify-sensor-heave2\n"
+    "\t--modify-sensor-heave3\n"
+    "\t--modify-offsets=ioff/x/y/z/azimuth/roll/pitch\n"
+    "\t--modify-offset-positions=ioff/x/y/z\n"
+    "\t--modify-offset-angles=ioff/azimuth/roll/pitch\n"
+    "\t--modify-time-latency=value\n"
+    "\t--modify-time-latency-model=file\n"
+    "\t]\n";
+
+extern char *optarg;
+
 /*--------------------------------------------------------------------*/
-
 int main(int argc, char **argv) {
-	char program_name[] = "mbmakeplatform";
-	char help_message[] = "mbmakeplatform creates or modifies an MB-System platform file.\n";
-	char usage_message[] = "mbmakeplatform \n"
-	                       "\t[\n"
-	                       "\t--verbose\n"
-	                       "\t--help\n"
-	                       "\t--input=plffile\n"
-	                       "\t--swath=datalist\n"
-	                       "\t--swath=swathfile\n"
-	                       "\t--swath-format=value\n"
-	                       "\t]\n"
-	                       "\t--output=plffile\n"
-	                       "\t[\n"
-	                       "\t--platform-type-surface-vessel\n"
-	                       "\t--platform-type-tow-body\n"
-	                       "\t--platform-type-rov\n"
-	                       "\t--platform-type-auv\n"
-	                       "\t--platform-type-aircraft\n"
-	                       "\t--platform-type-satellite\n"
-	                       "\t--platform-name=string\n"
-	                       "\t--platform-organization=string\n"
-	                       "\t--platform-documentation-url\n"
-	                       "\t--platform-start-time\n"
-	                       "\t--platform-end-time\n"
-	                       "\t--add-sensor-sonar-echosounder\n"
-	                       "\t--add-sensor-sonar-multiechosounder\n"
-	                       "\t--add-sensor-sonar-sidescan\n"
-	                       "\t--add-sensor-sonar-interferometry\n"
-	                       "\t--add-sensor-sonar-multibeam\n"
-	                       "\t--add-sensor-sonar-multibeam-twohead\n"
-	                       "\t--add-sensor-sonar-subbottom\n"
-	                       "\t--add-sensor-camera-mono\n"
-	                       "\t--add-sensor-camera-stereo\n"
-	                       "\t--add-sensor-camera-video\n"
-	                       "\t--add-sensor-lidar-scan\n"
-	                       "\t--add-sensor-lidar-swath\n"
-	                       "\t--add-sensor-position\n"
-	                       "\t--add-sensor-compass\n"
-	                       "\t--add-sensor-vru\n"
-	                       "\t--add-sensor-imu\n"
-	                       "\t--add-sensor-ins\n"
-	                       "\t--add-sensor-ins-with-pressure\n"
-	                       "\t--add-sensor-ctd\n"
-	                       "\t--add-sensor-pressure\n"
-	                       "\t--add-sensor-soundspeed\n"
-	                       "\t--end-sensor\n"
-	                       "\t--sensor-model=string\n"
-	                       "\t--sensor-manufacturer=string\n"
-	                       "\t--sensor-serialnumber=string\n"
-	                       "\t--sensor-capability-position\n"
-	                       "\t--sensor-capability-depth\n"
-	                       "\t--sensor-capability-altitude\n"
-	                       "\t--sensor-capability-velocity\n"
-	                       "\t--sensor-capability-acceleration\n"
-	                       "\t--sensor-capability-pressure\n"
-	                       "\t--sensor-capability-rollpitch\n"
-	                       "\t--sensor-capability-heading\n"
-	                       "\t--sensor-capability-magneticfield\n"
-	                       "\t--sensor-capability-temperature\n"
-	                       "\t--sensor-capability-conductivity\n"
-	                       "\t--sensor-capability-salinity\n"
-	                       "\t--sensor-capability-soundspeed\n"
-	                       "\t--sensor-capability-gravity\n"
-	                       "\t--sensor-capability-topography-echosounder\n"
-	                       "\t--sensor-capability-topography-interferometry\n"
-	                       "\t--sensor-capability-topography-sass\n"
-	                       "\t--sensor-capability-topography-multibeam\n"
-	                       "\t--sensor-capability-topography-photogrammetry\n"
-	                       "\t--sensor-capability-topography-structurefrommotion\n"
-	                       "\t--sensor-capability-topography-lidar\n"
-	                       "\t--sensor-capability-topography-structuredlight\n"
-	                       "\t--sensor-capability-topography-laserscanner\n"
-	                       "\t--sensor-capability-backscatter-echosounder\n"
-	                       "\t--sensor-capability-backscatter-sidescan\n"
-	                       "\t--sensor-capability-backscatter-interferometry\n"
-	                       "\t--sensor-capability-backscatter-sass\n"
-	                       "\t--sensor-capability-backscatter-multibeam\n"
-	                       "\t--sensor-capability-backscatter-lidar\n"
-	                       "\t--sensor-capability-backscatter-structuredlight\n"
-	                       "\t--sensor-capability-backscatter-laserscanner\n"
-	                       "\t--sensor-capability-photography\n"
-	                       "\t--sensor-capability-stereophotography\n"
-	                       "\t--sensor-capability-video\n"
-	                       "\t--sensor-capability-stereovideo\n"
-	                       "\t--sensor-capability1=value\n"
-	                       "\t--sensor-capability2=value\n"
-	                       "\t--sensor-offsets=x/y/z/azimuth/roll/pitch\n"
-	                       "\t--sensor-offset-positions=x/y/z\n"
-	                       "\t--sensor-offset-angles=azimuth/roll/pitch\n"
-	                       "\t--sensor-time-latency=value\n"
-	                       "\t--sensor-time-latency-model=file\n"
-	                       "\t--sensor-source-bathymetry\n"
-	                       "\t--sensor-source-bathymetry1\n"
-	                       "\t--sensor-source-bathymetry2\n"
-	                       "\t--sensor-source-bathymetry3\n"
-	                       "\t--sensor-source-backscatter\n"
-	                       "\t--sensor-source-backscatter1\n"
-	                       "\t--sensor-source-backscatter2\n"
-	                       "\t--sensor-source-backscatter3\n"
-	                       "\t--sensor-source-subbottom\n"
-	                       "\t--sensor-source-subbottom1\n"
-	                       "\t--sensor-source-subbottom2\n"
-	                       "\t--sensor-source-subbottom3\n"
-	                       "\t--sensor-source-position\n"
-	                       "\t--sensor-source-position1\n"
-	                       "\t--sensor-source-position2\n"
-	                       "\t--sensor-source-position3\n"
-	                       "\t--sensor-source-depth\n"
-	                       "\t--sensor-source-depth1\n"
-	                       "\t--sensor-source-depth2\n"
-	                       "\t--sensor-source-depth3\n"
-	                       "\t--sensor-source-heading\n"
-	                       "\t--sensor-source-heading1\n"
-	                       "\t--sensor-source-heading2\n"
-	                       "\t--sensor-source-heading3\n"
-	                       "\t--sensor-source-rollpitch\n"
-	                       "\t--sensor-source-rollpitch1\n"
-	                       "\t--sensor-source-rollpitch2\n"
-	                       "\t--sensor-source-rollpitch3\n"
-	                       "\t--sensor-source-heave\n"
-	                       "\t--sensor-source-heave1\n"
-	                       "\t--sensor-source-heave2\n"
-	                       "\t--sensor-source-heave3\n"
-	                       "\t--modify-sensor=sensorid\n"
-	                       "\t--modify-sensor-bathymetry\n"
-	                       "\t--modify-sensor-bathymetry1\n"
-	                       "\t--modify-sensor-bathymetry2\n"
-	                       "\t--modify-sensor-bathymetry3\n"
-	                       "\t--modify-sensor-backscatter\n"
-	                       "\t--modify-sensor-backscatter1\n"
-	                       "\t--modify-sensor-backscatter2\n"
-	                       "\t--modify-sensor-backscatter3\n"
-	                       "\t--modify-sensor-subbottom\n"
-	                       "\t--modify-sensor-subbottom1\n"
-	                       "\t--modify-sensor-subbottom2\n"
-	                       "\t--modify-sensor-subbottom3\n"
-	                       "\t--modify-sensor-position\n"
-	                       "\t--modify-sensor-position1\n"
-	                       "\t--modify-sensor-position2\n"
-	                       "\t--modify-sensor-position3\n"
-	                       "\t--modify-sensor-depth\n"
-	                       "\t--modify-sensor-depth1\n"
-	                       "\t--modify-sensor-depth2\n"
-	                       "\t--modify-sensor-depth3\n"
-	                       "\t--modify-sensor-heading\n"
-	                       "\t--modify-sensor-heading1\n"
-	                       "\t--modify-sensor-heading2\n"
-	                       "\t--modify-sensor-heading3\n"
-	                       "\t--modify-sensor-rollpitch\n"
-	                       "\t--modify-sensor-rollpitch1\n"
-	                       "\t--modify-sensor-rollpitch2\n"
-	                       "\t--modify-sensor-rollpitch3\n"
-	                       "\t--modify-sensor-heave\n"
-	                       "\t--modify-sensor-heave1\n"
-	                       "\t--modify-sensor-heave2\n"
-	                       "\t--modify-sensor-heave3\n"
-	                       "\t--modify-offsets=ioff/x/y/z/azimuth/roll/pitch\n"
-	                       "\t--modify-offset-positions=ioff/x/y/z\n"
-	                       "\t--modify-offset-angles=ioff/azimuth/roll/pitch\n"
-	                       "\t--modify-time-latency=value\n"
-	                       "\t--modify-time-latency-model=file\n"
-	                       "\t]\n";
-
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -257,7 +258,6 @@ int main(int argc, char **argv) {
 	struct mb_sensor_offset_struct tmp_offsets[4];
 	int platform_num_sensors = 0;
 	mb_path input_platform_file;
-	int input_platform_file_defined = MB_NO;
 	mb_path input_swath_file;
 	int input_swath_format = 0;
 	int input_swath_platform_defined = MB_NO;
@@ -277,179 +277,6 @@ int main(int argc, char **argv) {
 	int index;
 	int i, j;
 
-	/* command line option definitions */
-	/* mbmakeplatform
-	 *      --verbose
-	 * 		--help
-	 *
-	 * 		--input=plffile
-	 *
-	 * 		--swath=datalist
-	 * 		--swath=swathfile
-	 * 		--swath-format=value
-	 *
-	 * 		--output=plffile
-	 *
-	 * 		--platform-type-surface-vessel
-	 * 		--platform-type-tow-body
-	 * 		--platform-type-rov
-	 * 		--platform-type-auv
-	 * 		--platform-type-aircraft
-	 * 		--platform-type-satellite
-	 *
-	 * 		--platform-name=string
-	 * 		--platform-organization=string
-	 *		--platform-documentation-url=string
-	 *		--platform-start-time=yyyy/mm/dd/hh/mm/ss.ssssss
-	 *		--platform-end-time=yyyy/mm/dd/hh/mm/ss.ssssss
-	 *
-	 * 		--add-sensor-sonar-echosounder
-	 * 		--add-sensor-sonar-multiechosounder
-	 * 		--add-sensor-sonar-sidescan
-	 * 		--add-sensor-sonar-interferometry
-	 * 		--add-sensor-sonar-multibeam
-	 * 		--add-sensor-sonar-multibeam-twohead
-	 * 		--add-sensor-sonar-subbottom
-	 * 		--add-sensor-camera-mono
-	 * 		--add-sensor-camera-stereo
-	 * 		--add-sensor-camera-video
-	 * 		--add-sensor-lidar-scan
-	 * 		--add-sensor-lidar-swath
-	 * 		--add-sensor-position
-	 * 		--add-sensor-compass
-	 * 		--add-sensor-vru
-	 * 		--add-sensor-imu
-	 * 		--add-sensor-ins
-	 * 		--add-sensor-ins-with-pressure
-	 * 		--add-sensor-ctd
-	 * 		--add-sensor-pressure
-	 * 		--add-sensor-soundspeed
-	 *
-	 * 		--sensor-model=string
-	 * 		--sensor-manufacturer=string
-	 * 		--sensor-serialnumber=string
-	 *
-	 * 		--sensor-capability-position
-	 * 		--sensor-capability-depth
-	 * 		--sensor-capability-altitude
-	 * 		--sensor-capability-velocity
-	 * 		--sensor-capability-acceleration
-	 * 		--sensor-capability-pressure
-	 * 		--sensor-capability-rollpitch
-	 * 		--sensor-capability-heading
-	 * 		--sensor-capability-magneticfield
-	 * 		--sensor-capability-temperature
-	 * 		--sensor-capability-conductivity
-	 * 		--sensor-capability-salinity
-	 * 		--sensor-capability-soundspeed
-	 * 		--sensor-capability-gravity
-	 * 		--sensor-capability-topography-echosounder
-	 * 		--sensor-capability-topography-interferometry
-	 * 		--sensor-capability-topography-sass
-	 * 		--sensor-capability-topography-multibeam
-	 * 		--sensor-capability-topography-photogrammetry
-	 * 		--sensor-capability-topography-structurefrommotion
-	 * 		--sensor-capability-topography-lidar
-	 * 		--sensor-capability-topography-structuredlight
-	 * 		--sensor-capability-topography-laserscanner
-	 * 		--sensor-capability-backscatter-echosounder
-	 * 		--sensor-capability-backscatter-sidescan
-	 * 		--sensor-capability-backscatter-interferometry
-	 * 		--sensor-capability-backscatter-sass
-	 * 		--sensor-capability-backscatter-multibeam
-	 * 		--sensor-capability-backscatter-lidar
-	 * 		--sensor-capability-backscatter-structuredlight
-	 * 		--sensor-capability-backscatter-laserscanner
-	 * 		--sensor-capability-photography
-	 * 		--sensor-capability-stereophotography
-	 * 		--sensor-capability-video
-	 * 		--sensor-capability-stereovideo
-	 *
-	 * 		--sensor-capability1=value
-	 * 		--sensor-capability2=value
-	 *
-	 * 		--sensor-offsets=x/y/z/azimuth/roll/pitch
-	 * 		--sensor-offset-positions=x/y/z
-	 * 		--sensor-offset-angles=azimuth/roll/pitch
-	 * 		--sensor-time-latency=value
-	 * 		--sensor-time-latency-model=file
-	 *
-	 * 		--sensor-source-bathymetry
-	 * 		--sensor-source-bathymetry1
-	 * 		--sensor-source-bathymetry2
-	 * 		--sensor-source-bathymetry3
-	 * 		--sensor-source-backscatter
-	 * 		--sensor-source-backscatter1
-	 * 		--sensor-source-backscatter2
-	 * 		--sensor-source-backscatter3
-	 * 		--sensor-source-subbottom
-	 * 		--sensor-source-subbottom1
-	 * 		--sensor-source-subbottom2
-	 * 		--sensor-source-subbottom3
-	 * 		--sensor-source-position
-	 * 		--sensor-source-position1
-	 * 		--sensor-source-position2
-	 * 		--sensor-source-position3
-	 * 		--sensor-source-depth
-	 * 		--sensor-source-depth1
-	 * 		--sensor-source-depth2
-	 * 		--sensor-source-depth3
-	 * 		--sensor-source-heading
-	 * 		--sensor-source-heading1
-	 * 		--sensor-source-heading2
-	 * 		--sensor-source-heading3
-	 * 		--sensor-source-rollpitch
-	 * 		--sensor-source-rollpitch1
-	 * 		--sensor-source-rollpitch2
-	 * 		--sensor-source-rollpitch3
-	 * 		--sensor-source-heave
-	 * 		--sensor-source-heave1
-	 * 		--sensor-source-heave2
-	 * 		--sensor-source-heave3
-	 *
-	 * 		--modify-sensor=sensorid
-	 * 		--modify-sensor-bathymetry
-	 * 		--modify-sensor-bathymetry1
-	 * 		--modify-sensor-bathymetry2
-	 * 		--modify-sensor-bathymetry3
-	 * 		--modify-sensor-backscatter
-	 * 		--modify-sensor-backscatter1
-	 * 		--modify-sensor-backscatter2
-	 * 		--modify-sensor-backscatter3
-	 * 		--modify-sensor-subbottom
-	 * 		--modify-sensor-subbottom1
-	 * 		--modify-sensor-subbottom2
-	 * 		--modify-sensor-subbottom3
-	 * 		--modify-sensor-position
-	 * 		--modify-sensor-position1
-	 * 		--modify-sensor-position2
-	 * 		--modify-sensor-position3
-	 * 		--modify-sensor-depth
-	 * 		--modify-sensor-depth1
-	 * 		--modify-sensor-depth2
-	 * 		--modify-sensor-depth3
-	 * 		--modify-sensor-heading
-	 * 		--modify-sensor-heading1
-	 * 		--modify-sensor-heading2
-	 * 		--modify-sensor-heading3
-	 * 		--modify-sensor-rollpitch
-	 * 		--modify-sensor-rollpitch1
-	 * 		--modify-sensor-rollpitch2
-	 * 		--modify-sensor-rollpitch3
-	 * 		--modify-sensor-heave
-	 * 		--modify-sensor-heave1
-	 * 		--modify-sensor-heave2
-	 * 		--modify-sensor-heave3
-	 *
-	 * 		--modify-offsets=ioff/x/y/z/azimuth/roll/pitch
-	 * 		--modify-offset-positions=ioff/x/y/z
-	 * 		--modify-offset-angles=ioff/azimuth/roll/pitch
-	 * 		--modify-time-latency=value
-	 * 		--modify-time-latency-model=file
-	 *
-	 * 		--end-sensor
-	 *
-	 */
 	static struct option options[] = {{"verbose", no_argument, NULL, 0},
 	                                  {"help", no_argument, NULL, 0},
 	                                  {"input", required_argument, NULL, 0},
@@ -607,7 +434,7 @@ int main(int argc, char **argv) {
 	                                  {NULL, 0, NULL, 0}};
 
 	/* get current default values */
-	status = mb_defaults(verbose, &input_swath_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &input_swath_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 	input_swath_format = 0;
 	pings = 1;
 	bounds[0] = -360.0;
@@ -653,7 +480,6 @@ int main(int argc, char **argv) {
 			else if (strcmp("input", options[option_index].name) == 0) {
 				/* set the name of the input platform file */
 				strcpy(input_platform_file, optarg);
-				input_platform_file_defined = MB_YES;
 
 				/* read the pre-existing platform file */
 				status = mb_platform_read(verbose, input_platform_file, (void **)&platform, &error);
@@ -2295,18 +2121,15 @@ int main(int argc, char **argv) {
 		status = mb_platform_deall(verbose, (void **)&platform, &error);
 	}
 
-	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
