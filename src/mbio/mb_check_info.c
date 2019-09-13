@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
-  *
+ *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -21,9 +21,6 @@
  *
  * Author:	D. W. Caress
  * Date:	September 3, 1996
- *
- *
- *
  */
 
 #include <math.h>
@@ -422,26 +419,9 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 				sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
 				for (int j = 0; j < mask_ny; j++)
 					fgets(line, 128, fp);
-				// sscanf(line, "CM dimensions: %d %d", &mb_info->mask_nx, &mb_info->mask_ny);
-				// status = mb_mallocd(verbose,__FILE__, __LINE__,mb_info->mask_nx*mb_info->mask_ny*sizeof(int),
-				//			(void **)&mb_info->mask,error);
-				// for (j=mb_info->mask_ny-1;j>=0;j--)
-				//	{
-				//	if ((startptr = fgets(line, 128, fp)) != NULL)
-				//		{
-				//		startptr = &line[6];
-				//		for (i=0;i<mb_info->mask_nx;i++)
-				//			{
-				//			k = i + j * mb_info->mask_nx;
-				//			mb_info->mask[k] = strtol(startptr, &endptr, 0);
-				//			startptr = endptr;
-				//			}
-				//		}
-				//	}
 			}
 		}
 
-		/* close the file */
 		fclose(fp);
 
 		/* apply lonflip if needed */
@@ -538,22 +518,6 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr, "dbg2       problem_avgtoofast:       %d\n", mb_info->problem_avgtoofast);
 		fprintf(stderr, "dbg2       problem_toodeep:          %d\n", mb_info->problem_toodeep);
 		fprintf(stderr, "dbg2       problem_baddatagram:      %d\n", mb_info->problem_baddatagram);
-		// fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
-		// fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
-		// fprintf(stderr,"dbg2       mask_dx:                  %g\n",mb_info->mask_dx);
-		// fprintf(stderr,"dbg2       mask_dy:                  %g\n",mb_info->mask_dy);
-		// fprintf(stderr,"dbg2       mask:                     %p\n",mb_info->mask);
-		// fprintf(stderr,"dbg2       mask:\n");
-		// for (j=mb_info->mask_ny-1;j>=0;j--)
-		//	{
-		//	fprintf(stderr, "dbg2       ");
-		//	for (i=0;i<mb_info->mask_nx;i++)
-		//		{
-		//		k = i + j * mb_info->mask_nx;
-		//		fprintf(stderr, " %1d", mb_info->mask[k]);
-		//		}
-		//	fprintf(stderr, "\n");
-		//	}
 		fprintf(stderr, "dbg2       error:                    %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
@@ -640,7 +604,7 @@ int mb_make_info(int verbose, int force, char *file, int format, int *error) {
 		/* TODO(schwehr): Check the result of shellstatus */
 	}
 
-	int status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1248,7 +1212,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, error);
+		/* status = */ mb_memory_list(verbose, error);
 
 	/* set error and status (if you got here you succeeded */
 	*error = MB_ERROR_NO_ERROR;
@@ -1317,21 +1281,6 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format, struct mb_in
 		fprintf(stderr, "dbg2       problem_avgtoofast:       %d\n", mb_info->problem_avgtoofast);
 		fprintf(stderr, "dbg2       problem_toodeep:          %d\n", mb_info->problem_toodeep);
 		fprintf(stderr, "dbg2       problem_baddatagram:      %d\n", mb_info->problem_baddatagram);
-		// fprintf(stderr,"dbg2       mask_nx:                  %d\n",mb_info->mask_nx);
-		// fprintf(stderr,"dbg2       mask_ny:                  %d\n",mb_info->mask_ny);
-		// fprintf(stderr,"dbg2       mask_dx:                  %g\n",mb_info->mask_dx);
-		// fprintf(stderr,"dbg2       mask_dy:                  %g\n",mb_info->mask_dy);
-		// fprintf(stderr,"dbg2       mask:\n");
-		// for (j=mb_info->mask_ny-1;j>=0;j--)
-		//	{
-		//	fprintf(stderr, "dbg2       ");
-		//	for (int i=0;i<mb_info->mask_nx;i++)
-		//		{
-		//		k = i + j * mb_info->mask_nx;
-		//		fprintf(stderr, " %1d", mb_info->mask[k]);
-		//		}
-		//	fprintf(stderr, "\n");
-		//	}
 		fprintf(stderr, "dbg2       error:          %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
