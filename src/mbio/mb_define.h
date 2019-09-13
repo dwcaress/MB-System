@@ -539,8 +539,8 @@ int mb_put_binary_double(int, double, void *);
 int mb_put_binary_long(int, mb_s_long, void *);
 int mb_get_bounds(char *text, double *bounds);
 double mb_ddmmss_to_degree(char *text);
-int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *alpha, double *beta, int *error);
-int mb_rollpitch_to_takeoff(int verbose, double alpha, double beta, double *theta, double *phi, int *error);
+int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error);
+int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *theta, double *phi, int *error);
 int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, double *phi, int *error);
 int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double sonar_offset_z, double nav_offset_x,
              double nav_offset_y, double nav_offset_z, double vru_offset_x, double vru_offset_y, double vru_offset_z,
