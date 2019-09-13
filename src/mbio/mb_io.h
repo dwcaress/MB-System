@@ -44,17 +44,25 @@
  * mb_platform_*() functions */
 
 /* survey platform type defines */
-#define MB_PLATFORM_NONE 0
-#define MB_PLATFORM_SURFACE_VESSEL 1
-#define MB_PLATFORM_TOW_BODY 2
-#define MB_PLATFORM_ROV 3
-#define MB_PLATFORM_AUV 4
-#define MB_PLATFORM_AIRCRAFT 5
-#define MB_PLATFORM_SATELLITE 6
-#define MB_PLATFORM_MOORING 7
-#define MB_PLATFORM_FIXED 8
-static char *mb_platform_type_string[] = {
-    "Unknown platform type", "Surface vessel", "Tow body", "ROV", "AUV", "Aircraft", "Satellite", "Mooring", "Fixed"};
+typedef enum {
+    MB_PLATFORM_NONE,
+    MB_PLATFORM_SURFACE_VESSEL,
+    MB_PLATFORM_TOW_BODY,
+    MB_PLATFORM_ROV,
+    MB_PLATFORM_AUV,
+    MB_PLATFORM_AIRCRAFT,
+    MB_PLATFORM_SATELLITE,
+    MB_PLATFORM_MOORING,
+    MB_PLATFORM_FIXED,
+} mb_platform_enum;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+const char *mb_platform_type(mb_platform_enum platform);
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 /* survey platform data source sensor defines */
 #define MB_PLATFORM_SOURCE_NONE 0
