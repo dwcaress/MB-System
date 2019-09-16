@@ -52,9 +52,9 @@
 #include "mb_swap.h"
 
 /* allocation */
-#define FILEALLOCNUM 16
-#define PINGALLOCNUM 128
-#define SNDGALLOCNUM 128
+static const int FILEALLOCNUM = 16;
+static const int PINGALLOCNUM = 128;
+static const int SNDGALLOCNUM = 128;
 
 struct mbareaclean_file_struct {
 	char filelist[MB_PATH_MAXLINE];
@@ -107,11 +107,13 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct
 
 /*--------------------------------------------------------------------*/
 
+static const char program_name[] = "MBAREACLEAN";
+static const char help_message[] = "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
+static const char usage_message[] =
+    "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize\n"
+    "\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
+
 int main(int argc, char **argv) {
-	char program_name[] = "MBAREACLEAN";
-	char help_message[] = "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
-	char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize	\n\t -Mthreshold/nmin "
-	                       "-Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
 	extern char *optarg;
 	int errflg = 0;
 	int c;
@@ -119,7 +121,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message = NULL;
@@ -134,7 +135,6 @@ int main(int argc, char **argv) {
 	char swathfileread[MB_PATH_MAXLINE];
 	char dfile[MB_PATH_MAXLINE];
 	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_UNSET;
 	int read_data;
 	double file_weight;
 	int format;
@@ -207,8 +207,6 @@ int main(int argc, char **argv) {
 	int nx, ny;
 	double mtodeglon;
 	double mtodeglat;
-	double mean;
-	double std_dev;
 	int pingmultiplicity;
 	int detect_status;
 	int detect_error;
@@ -221,7 +219,6 @@ int main(int argc, char **argv) {
 	int binnummax;
 	double *bindepths;
 	double threshold;
-	double median_depth;
 
 	/* counting parameters */
 	int files_tot = 0;
@@ -230,11 +227,6 @@ int main(int argc, char **argv) {
 	int beams_good_org_tot = 0;
 	int beams_flag_org_tot = 0;
 	int beams_null_org_tot = 0;
-	int pings_file = 0;
-	int beams_file = 0;
-	int beams_good_org_file = 0;
-	int beams_flag_org_file = 0;
-	int beams_null_org_file = 0;
 
 	/* save file control variables */
 	int esffile_open = MB_NO;
@@ -243,17 +235,11 @@ int main(int argc, char **argv) {
 	int action;
 
 	double xx, yy;
-	int flagsounding;
-	double median_depth_low;
-	double median_depth_high;
-	int done;
 	int ix, iy, ib, kgrid;
 	double d1, d2;
 	int i1, i2, n;
-	int i, j;
 
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* reset all defaults but the format and lonflip */
 	strcpy(read_file, "datalist.mb-1");
@@ -395,13 +381,11 @@ int main(int argc, char **argv) {
 	if (output_bad == MB_NO && output_good == MB_NO)
 		output_bad = MB_YES;
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -513,7 +497,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if error initializing memory then quit */
-	for (i = 0; i < nx * ny; i++) {
+	for (int i = 0; i < nx * ny; i++) {
 		gsndg[i] = NULL;
 		gsndgnum[i] = 0;
 		gsndgnum_alloc[i] = 0;
@@ -597,6 +581,7 @@ int main(int argc, char **argv) {
 
 	/* open file list */
 	if (read_datalist == MB_YES) {
+		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
@@ -644,8 +629,8 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize and increment counting variables */
-		pings_file = 0;
-		beams_file = 0;
+		int pings_file = 0;
+		/* int beams_file = 0; */
 
 		/* give the statistics */
 		if (verbose >= 0) {
@@ -747,17 +732,17 @@ int main(int argc, char **argv) {
 		/* now deal with old edit save file */
 		if (status == MB_SUCCESS) {
 			/* handle esf edits */
-			status = mb_esf_load(verbose, program_name, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
+			status = mb_esf_load(verbose, (char *)program_name, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
 		}
 
 		/* read */
-		done = MB_NO;
+		int done = MB_NO;
 		files_tot++;
 		pings_file = 0;
-		beams_file = 0;
-		beams_good_org_file = 0;
-		beams_flag_org_file = 0;
-		beams_null_org_file = 0;
+		/* beams_file = 0; */
+		int beams_good_org_file = 0;
+		int beams_flag_org_file = 0;
+		int beams_null_org_file = 0;
 		while (done == MB_NO) {
 			if (verbose > 1)
 				fprintf(stderr, "\n");
@@ -774,7 +759,7 @@ int main(int argc, char **argv) {
 			}
 			if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
 				/* save the beamflags */
-				for (i = 0; i < beams_bath; i++)
+				for (int i = 0; i < beams_bath; i++)
 					beamflagorg[i] = beamflag[i];
 
 				/* get detections and ping multiplicity */
@@ -782,7 +767,7 @@ int main(int argc, char **argv) {
 				detect_status = mb_detects(verbose, mbio_ptr, store_ptr, &kind, &beams_bath, detect, &detect_error);
 				if (detect_status != MB_SUCCESS) {
 					status = MB_SUCCESS;
-					for (i = 0; i < beams_bath; i++) {
+					for (int i = 0; i < beams_bath; i++) {
 						detect[i] = MB_DETECT_UNKNOWN;
 					}
 				}
@@ -824,10 +809,10 @@ int main(int argc, char **argv) {
 				/* update counters */
 				pings_tot++;
 				pings_file++;
-				for (i = 0; i < beams_bath; i++) {
+				for (int i = 0; i < beams_bath; i++) {
 					if (mb_beam_ok(beamflagorg[i])) {
 						beams_tot++;
-						beams_file++;
+						/* beams_file++; */
 						beams_good_org_tot++;
 						beams_good_org_file++;
 						files[nfile - 1].ngood++;
@@ -839,7 +824,7 @@ int main(int argc, char **argv) {
 					}
 					else {
 						beams_tot++;
-						beams_file++;
+						/* beams_file++; */
 						beams_flag_org_tot++;
 						beams_flag_org_file++;
 						files[nfile - 1].nflag++;
@@ -996,7 +981,7 @@ int main(int argc, char **argv) {
 
 				/* load up array */
 				binnum = 0;
-				for (i = 0; i < gsndgnum[kgrid]; i++) {
+				for (int i = 0; i < gsndgnum[kgrid]; i++) {
 					getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 					if (mb_beam_ok(sndg->sndg_beamflag)) {
 						bindepths[binnum] = sndg->sndg_depth;
@@ -1009,8 +994,10 @@ int main(int argc, char **argv) {
 				/* apply median filter only if there are enough soundings */
 				if (binnum >= median_filter_nmin) {
 					/* run qsort */
-					qsort((char *)bindepths, binnum, sizeof(double), (void *)mb_double_compare);
-					median_depth = bindepths[binnum / 2];
+					qsort((void *)bindepths, binnum, sizeof(double), (void *)mb_double_compare);
+					const double median_depth = bindepths[binnum / 2];
+					double median_depth_low;
+					double median_depth_high;
 					if (mediandensity_filter == MB_YES && binnum / 2 - mediandensity_filter_nmax / 2 >= 0)
 						median_depth_low = bindepths[binnum / 2 + mediandensity_filter_nmax / 2];
 					else
@@ -1024,10 +1011,10 @@ int main(int argc, char **argv) {
 					ix,iy,kgrid,xx,yy,binnum,median_depth);*/
 
 					/* process the soundings */
-					for (i = 0; i < gsndgnum[kgrid]; i++) {
+					for (int i = 0; i < gsndgnum[kgrid]; i++) {
 						getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 						threshold = fabs(median_filter_threshold * files[sndg->sndg_file].ping_altitude[sndg->sndg_ping]);
-						flagsounding = MB_NO;
+						int flagsounding = MB_NO;
 						if (fabs(sndg->sndg_depth - median_depth) > threshold)
 							flagsounding = MB_YES;
 						if (mediandensity_filter == MB_YES &&
@@ -1055,9 +1042,9 @@ int main(int argc, char **argv) {
 				yy = areabounds[3] + 0.5 * dy + iy * dy;
 
 				/* get mean */
-				mean = 0.0;
+				double mean = 0.0;
 				binnum = 0;
-				for (i = 0; i < gsndgnum[kgrid]; i++) {
+				for (int i = 0; i < gsndgnum[kgrid]; i++) {
 					getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 					if (mb_beam_ok(sndg->sndg_beamflag)) {
 						mean += sndg->sndg_depth;
@@ -1067,8 +1054,8 @@ int main(int argc, char **argv) {
 				mean /= binnum;
 
 				/* get standard deviation */
-				std_dev = 0.0;
-				for (i = 0; i < gsndgnum[kgrid]; i++) {
+				double std_dev = 0.0;
+				for (int i = 0; i < gsndgnum[kgrid]; i++) {
 					getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 					if (mb_beam_ok(sndg->sndg_beamflag))
 						std_dev += (sndg->sndg_depth - mean) * (sndg->sndg_depth - mean);
@@ -1085,7 +1072,7 @@ int main(int argc, char **argv) {
 				if (binnum >= std_dev_nmin) {
 
 					/* process the soundings */
-					for (i = 0; i < gsndgnum[kgrid]; i++) {
+					for (int i = 0; i < gsndgnum[kgrid]; i++) {
 						getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 						flag_sounding(verbose, fabs(sndg->sndg_depth - mean) > threshold, output_bad, output_good, sndg, &error);
 					}
@@ -1094,9 +1081,9 @@ int main(int argc, char **argv) {
 	}
 
 	/* loop over files checking for changed soundings */
-	for (i = 0; i < nfile; i++) {
+	for (int i = 0; i < nfile; i++) {
 		/* open esf file */
-		status = mb_esf_load(verbose, program_name, files[i].filelist, MB_NO, MB_YES, esffile, &esf, &error);
+		status = mb_esf_load(verbose, (char *)program_name, files[i].filelist, MB_NO, MB_YES, esffile, &esf, &error);
 		if (status == MB_SUCCESS && esf.esffp != NULL)
 			esffile_open = MB_YES;
 		if (status == MB_FAILURE && error == MB_ERROR_OPEN_FAIL) {
@@ -1105,7 +1092,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* loop over all of the soundings */
-		for (j = 0; j < files[i].nsndg; j++) {
+		for (int j = 0; j < files[i].nsndg; j++) {
 			sndg = &(files[i].sndg[j]);
 			if (sndg->sndg_beamflag != sndg->sndg_beamflag_org) {
 				if (mb_beam_ok(sndg->sndg_beamflag)) {
@@ -1142,7 +1129,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%d total pings processed\n", pings_tot);
 		fprintf(stderr, "%d total soundings processed\n", beams_tot);
 		fprintf(stderr, "-------------------------\n");
-		for (i = 0; i < nfile; i++) {
+		for (int i = 0; i < nfile; i++) {
 			fprintf(stderr, "%3d soundings:%7d flagged:%7d unflagged:%7d  file:%s\n", i, files[i].ngood + files[i].nflag,
 			        files[i].nflagged, files[i].nunflagged, files[i].filelist);
 		}
@@ -1150,14 +1137,14 @@ int main(int argc, char **argv) {
 
 	/* free arrays */
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&bindepths, &error);
-	for (i = 0; i < nx * ny; i++)
+	for (int i = 0; i < nx * ny; i++)
 		if (gsndg[i] != NULL)
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndg[i], &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndg, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndgnum, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndgnum_alloc, &error);
 
-	for (i = 0; i < nfile; i++) {
+	for (int i = 0; i < nfile; i++) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[nfile - 1].ping_time_d), &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[nfile - 1].pingmultiplicity), &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(files[nfile - 1].ping_altitude), &error);
@@ -1172,7 +1159,6 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
@@ -1184,11 +1170,6 @@ int main(int argc, char **argv) {
 }
 /*--------------------------------------------------------------------*/
 int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct **sndgptr, int *error) {
-	/* local variables */
-	int status = MB_SUCCESS;
-	int i, j;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1199,14 +1180,15 @@ int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct *
 
 	/* loop over the files until the sounding is found */
 	*sndgptr = NULL;
-	for (i = 0; i < nfile && *sndgptr == NULL; i++) {
+	for (int i = 0; i < nfile && *sndgptr == NULL; i++) {
 		if (soundingid >= files[i].sndg_countstart && soundingid < files[i].sndg_countstart + files[i].nsndg) {
-			j = soundingid - files[i].sndg_countstart;
+			const int j = soundingid - files[i].sndg_countstart;
 			*sndgptr = &(files[i].sndg[j]);
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1216,16 +1198,11 @@ int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct *
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
 
 int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct mbareaclean_sndg_struct *sndg, int *error) {
-	/* local variables */
-	int status = MB_SUCCESS;
-
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1254,7 +1231,8 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct
 		}
 	}
 
-	/* print output debug statements */
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1265,7 +1243,6 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 
