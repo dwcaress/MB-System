@@ -56,7 +56,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 	if (strncmp(file, stdin_string, 5) == 0) {
 		*file_in_bounds = MB_YES;
 
-		/*print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "dbg4  Cannot check bounds if input is stdin...\n");
 		}
@@ -165,7 +164,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 						*file_in_bounds = MB_NO;
 				}
 
-				/*print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "dbg4  Bounds from inf file:\n");
 					fprintf(stderr, "dbg4      lon_min: %f\n", lon_min);
@@ -180,7 +178,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 			else if (nrecords == 0) {
 				*file_in_bounds = MB_NO;
 
-				/*print debug statements */
 				if (verbose >= 4)
 					fprintf(stderr, "dbg4  The inf file shows zero records so out of bounds...\n");
 			}
@@ -190,7 +187,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 			else {
 				*file_in_bounds = MB_YES;
 
-				/*print debug statements */
 				if (verbose >= 4)
 					fprintf(stderr, "dbg4  No data listed in inf file so cannot check bounds...\n");
 			}
@@ -203,7 +199,6 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 		else {
 			*file_in_bounds = MB_YES;
 
-			/*print debug statements */
 			if (verbose >= 4)
 				fprintf(stderr, "dbg4  Cannot open inf file so cannot check bounds...\n");
 		}
@@ -251,7 +246,6 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 
-		/*print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "dbg2  Cannot open requested inf file: %s\n", file_inf);
 		}

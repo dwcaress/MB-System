@@ -410,7 +410,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
       }
     }
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -467,7 +466,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -515,7 +513,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -560,7 +557,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -596,7 +592,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
     else
       comment[0] = '\0';
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  New ping values:\n");
@@ -621,7 +616,6 @@ int mbsys_kmbes_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
       time_i[i] = store->time_i[i];
     *time_d = store->time_d;
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");

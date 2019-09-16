@@ -82,7 +82,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 	int done = MB_NO;
 	while (done == MB_NO) {
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg2  About to read ping in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2       need_new_ping: %d\n", mb_io_ptr->need_new_ping);
@@ -182,7 +181,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 			mb_io_ptr->old_lat = mb_io_ptr->new_lat;
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg2  New ping read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg2       need_new_ping: %d\n", mb_io_ptr->need_new_ping);
@@ -230,7 +228,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 		if (*error < MB_ERROR_NO_ERROR)
 			mb_notice_log_error(verbose, mbio_ptr, *error);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping checked by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -347,7 +344,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 4 && mb_io_ptr->new_kind == MB_DATA_DATA &&
 		    (status == MB_SUCCESS || (*error<MB_ERROR_NO_ERROR && * error> MB_ERROR_COMMENT && mb_io_ptr->pings_read == 1))) {
 			fprintf(stderr, "\ndbg4  New ping binned by MBIO function <%s>\n", __func__);
@@ -445,7 +441,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 			mb_io_ptr->last_lat = mb_io_ptr->new_lat;
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  End of reading loop in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Current status values:\n");
@@ -543,7 +538,6 @@ int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, int time_i[7], do
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Distance and Speed Calculated in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Speed and Distance Related Values:\n");

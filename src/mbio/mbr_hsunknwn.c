@@ -357,7 +357,6 @@ int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_kind = store->kind;
 	mb_io_ptr->new_error = *error;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:             %d\n", store->kind);
@@ -409,7 +408,6 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Status at beginning of MBIO function <%s>\n", __func__);
 		if (store != NULL)
@@ -419,7 +417,6 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       error:          %d\n", *error);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:             %d\n", store->kind);

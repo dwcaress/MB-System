@@ -388,7 +388,6 @@ int mbr_dsl120pf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       rec_type:         %d\n", data->rec_type);
@@ -537,7 +536,6 @@ int mbr_dsl120pf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       bat_type:         %d\n", data->bat_type);
@@ -620,7 +618,6 @@ int mbr_dsl120pf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       amp_type:         %d\n", data->amp_type);
@@ -684,7 +681,6 @@ int mbr_dsl120pf_rd_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		data->comment[79] = '\0';
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -977,7 +973,6 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
 	char *data_ptr = (char *)data;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       rec_type:         %d\n", data->rec_type);
@@ -1154,7 +1149,6 @@ int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
 	char *data_ptr = (char *)data;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       rec_type:         %d\n", data->rec_type);
@@ -1334,7 +1328,6 @@ int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	struct mbf_dsl120pf_struct *data = (struct mbf_dsl120pf_struct *)mb_io_ptr->raw_data;
 	char *data_ptr = (char *)data;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);

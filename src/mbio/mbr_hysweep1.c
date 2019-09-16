@@ -715,7 +715,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
@@ -902,7 +901,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       RSS_device_number:                 %d\n", store->RSS_device_number);
@@ -1021,7 +1019,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  MSS data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       MSS_device_number:                 %d\n", store->MSS_device_number);
@@ -1055,7 +1052,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  SNR data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       SNR_device_number:                 %d\n", store->SNR_device_number);
@@ -1119,7 +1115,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  TID data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       TID_device_number:                 %d\n", store->TID_device_number);
@@ -1148,7 +1143,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  HCP data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       HCP_device_number:                 %d\n", store->HCP_device_number);
@@ -1178,7 +1172,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  EC1 data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       EC1_device_number:                 %d\n", store->EC1_device_number);
@@ -1207,7 +1200,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  GPS data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       GPS_device_number:                 %d\n", store->GPS_device_number);
@@ -1231,7 +1223,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  GYR data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       GYR_device_number:                 %d\n", store->GYR_device_number);
@@ -1260,7 +1251,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  POS data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       POS_device_number:                 %d\n", store->POS_device_number);
@@ -1310,7 +1300,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  DEV data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       DEV_device_number:                 %d\n", device->DEV_device_number);
@@ -1337,7 +1326,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  DV2 data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       DV2_device_number:                 %d\n", DV2_device_number);
@@ -1351,7 +1339,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(line, "EOH", 3) == 0) {
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_EOH;
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  EOH data record read by MBIO function <%s>\n", __func__);
 				}
@@ -1378,7 +1365,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					mb_io_ptr->projection_initialized = MB_YES;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  Hysweep file header read by MBIO function <%s>\n", __func__);
 				}
@@ -1394,7 +1380,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(line, "EOL", 3) == 0) {
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_EOL;
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  EOL data record read by MBIO function <%s>\n", __func__);
 				}
@@ -1418,7 +1403,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					}
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  FTP data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       FTP_record:                        %s\n", store->FTP_record);
@@ -1436,7 +1420,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  VER data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       VER_version:                       %s\n", store->VER_version);
@@ -1458,7 +1441,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  HSP data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       HSP_minimum_depth:                 %f\n", store->HSP_minimum_depth);
@@ -1487,7 +1469,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  HSX data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       HSX_record:                        %d\n", store->HSX_record);
@@ -1508,7 +1489,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  HVF data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       HVF_device_number:                 %d\n", HVF_device_number);
@@ -1593,7 +1573,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  INF data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       INF_surveyor:                      %s\n", store->INF_surveyor);
@@ -1610,7 +1589,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(line, "LBP", 3) == 0) {
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_LBP;
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  LBP data record read by MBIO function <%s>\n", __func__);
 				}
@@ -1620,7 +1598,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(line, "LIN", 3) == 0) {
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_LIN;
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  LIN data record read by MBIO function <%s>\n", __func__);
 				}
@@ -1630,7 +1607,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(line, "LNN", 3) == 0) {
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_LNN;
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  LNN data record read by MBIO function <%s>\n", __func__);
 				}
@@ -1659,7 +1635,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  MBI data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       MBI_device_number:                 %d\n", MBI_device_number);
@@ -1702,7 +1677,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  OF2 data record read by OF2O function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       OF2_device_number:                 %d\n", OF2_device_number);
@@ -1733,7 +1707,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  PRI data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       primary_nav_device:                %d\n", store->primary_nav_device);
@@ -1744,7 +1717,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(line, "PTS", 3) == 0) {
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_PTS;
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  PTS data record read by MBIO function <%s>\n", __func__);
 				}
@@ -1768,7 +1740,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  SSI data record read by SSIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       SSI_device_number:                 %d\n", SSI_device_number);
@@ -1782,7 +1753,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			else if (strncmp(line, "SVC", 3) == 0) {
 				store->type = MBSYS_HYSWEEP_RECORDTYPE_SVC;
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  SVC data record read by MBIO function <%s>\n", __func__);
 				}
@@ -1812,7 +1782,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  TND data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       TND_survey_time_i[0]:              %d\n", store->TND_survey_time_i[0]);
@@ -1837,7 +1806,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  DFT data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       DFT_device_number:                 %d\n", store->DFT_device_number);
@@ -1866,7 +1834,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  FIX data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       FIX_device_number:                 %d\n", store->FIX_device_number);
@@ -1887,7 +1854,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  PSA data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       PSA_device_number:                 %d\n", store->PSA_device_number);
@@ -1909,7 +1875,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					*error = MB_ERROR_UNINTELLIGIBLE;
 				}
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  COM data record read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4       COM_comment:                       %s\n", store->COM_comment);
@@ -1929,7 +1894,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						*error = MB_ERROR_UNINTELLIGIBLE;
 					}
 
-					/* print debug statements */
 					if (verbose >= 4) {
 						fprintf(stderr, "\ndbg4  PRJ data record read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4       PRJ_proj4_command:                 %s\n", store->PRJ_proj4_command);
@@ -1938,7 +1902,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 				/* do not overwrite previously set projection */
 				else {
-					/* print debug statements */
 					if (verbose >= 4) {
 						fprintf(stderr, "\ndbg4  PRJ data record ignored by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4       Previously set PRJ_proj4_command:  %s\n", store->PRJ_proj4_command);
@@ -2269,7 +2232,6 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = mbsys_hysweep_makess(verbose, mbio_ptr, store_ptr, MB_NO, pixel_size, MB_NO, swath_width, 5, error);
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Multibeam bathymetry calculated by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);
@@ -2535,7 +2497,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			hysweeptmp.num_devices++;
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  FTP data record to be written by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       FTP_record:                        %s\n", hysweeptmp.FTP_record);
@@ -2646,7 +2607,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* call appropriate writing routines for ping data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  RMB data record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       RMB_device_number:                 %d\n", store->RMB_device_number);

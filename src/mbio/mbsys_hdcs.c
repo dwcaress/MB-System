@@ -401,7 +401,6 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		/* get speed */
 		*speed = 3.6e-3 * store->vesselVelocity;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Extracting data by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Data type:\n");
@@ -570,7 +569,6 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 			ssalongtrack[i] = 0.001 * store->ssalongtrack[i];
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -610,7 +608,6 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		/* copy comment */
 		strncpy(comment, store->comment, MBSYS_HDCS_MAX_COMMENT);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -1121,7 +1118,6 @@ int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*pitch = RTD * 1E-7 * store->vesselPitch;
 		*heave = 0.001 * store->vesselHeave;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

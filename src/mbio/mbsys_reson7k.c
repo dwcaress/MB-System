@@ -5209,7 +5209,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       /*--------------------------------------------------------------*/
       if (status == MB_SUCCESS && (bathymetry->optionaldata == MB_NO || pars->recalculate_bathymetry == MB_YES)) {
 
-        /* print debug statements */
         if (verbose >= 2) {
           fprintf(stderr, "\ndbg2 Recalculating bathymetry in %s: 7k ping records read:\n", __func__);
           fprintf(stderr, "dbg2      current_ping_number:           %d\n", store->current_ping_number);
@@ -6212,7 +6211,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       }
     }
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -6272,7 +6270,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -6319,7 +6316,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -6374,7 +6370,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -6431,7 +6426,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -6467,7 +6461,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     else
       comment[0] = '\0';
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  New ping values:\n");
@@ -6492,7 +6485,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
       time_i[i] = store->time_i[i];
     *time_d = store->time_d;
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -7560,7 +7552,6 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int 
       *navlat = ((double)fsdwssheader->latitude) / 360000.0;
     }
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -9992,7 +9983,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
       processedsidescan->alongtrack[i] = ssalongtrack[i];
     }
 
-    /* print debug statements */
     if (verbose >= 2) {
       fprintf(stderr, "\ndbg2  Sidescan regenerated in <%s>\n", __func__);
       fprintf(stderr, "dbg2       pixels_ss:  %d\n", nss);

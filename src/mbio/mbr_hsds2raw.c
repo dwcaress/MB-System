@@ -358,7 +358,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (xdr_status == MB_YES)
 		xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs, &telegram_sensor_status);
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -490,7 +489,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (xdr_status != MB_YES || telegram_act_no == telegram_max_no)
 			done = MB_YES;
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 		if (verbose >= 5)
 #endif
@@ -512,7 +510,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	}
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -620,7 +617,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (xdr_status != MB_YES || telegram_act_no == telegram_max_no)
 			done = MB_YES;
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 		if (verbose >= 5)
 #endif
@@ -644,7 +640,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	}
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -728,7 +723,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			xdr_status = xdr_float((XDR *)mb_io_ptr->xdrs, &store->tr_stop[i]);
 	}
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -852,7 +846,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (xdr_status == MB_YES)
 		xdr_status = xdr_opaque((XDR *)mb_io_ptr->xdrs, (char *)store->bs_nis, MBSYS_ATLAS_HSDS2_PFB_NUM);
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 	if (verbose >= 5)
 #endif
@@ -1044,7 +1037,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &profile_version);
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 			if (verbose >= 5)
 #endif
@@ -1195,7 +1187,6 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			if (xdr_status == MB_YES)
 				xdr_status = xdr_int((XDR *)mb_io_ptr->xdrs2, &sys_wind_status);
 
-/* print debug statements */
 #ifndef MBR_HSDS2RAW_DEBUG
 			if (verbose >= 5)
 #endif

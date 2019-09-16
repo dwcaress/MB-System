@@ -335,7 +335,6 @@ int mbr_cbat9001_rd_comment(int verbose, FILE *mbfp, int swap, struct mbf_cbat90
 		strncpy(data->comment, line, MBF_CBAT9001_COMMENT_LENGTH - 1);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -464,7 +463,6 @@ int mbr_cbat9001_rd_parameter(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
@@ -583,7 +581,6 @@ int mbr_cbat9001_rd_nav(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
@@ -683,7 +680,6 @@ int mbr_cbat9001_rd_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_s
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -777,7 +773,6 @@ int mbr_cbat9001_rd_short_svp(int verbose, FILE *mbfp, int swap, struct mbf_cbat
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -924,7 +919,6 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap, struct mbf_cbat9001_
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -1315,7 +1309,6 @@ int mbr_cbat9001_wr_comment(int verbose, FILE *mbfp, int swap, void *data_ptr, i
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -1387,7 +1380,6 @@ int mbr_cbat9001_wr_parameter(int verbose, FILE *mbfp, int swap, void *data_ptr,
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
@@ -1562,7 +1554,6 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
@@ -1697,7 +1688,6 @@ int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -1827,7 +1817,6 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int 
 	/* get pointer to raw data structure */
 	struct mbf_cbat9001_struct *data = (struct mbf_cbat9001_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);

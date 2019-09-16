@@ -224,7 +224,6 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			mb_io_ptr->hdr_comment_loc = 0;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       mf_version:       %d\n", store->header.bsf_version);
@@ -311,7 +310,6 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error) {
 			store->ping.png_flags = store->ping.png_flags ^ PNG_BTYSSFLAGSABSENT;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       png_flags:        %u\n", store->ping.png_flags);
@@ -505,7 +503,6 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 	struct mbsys_mr1v2001_struct *store = (struct mbsys_mr1v2001_struct *)store_ptr;
 	char *xdrs = mb_io_ptr->xdrs;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       png_flags:        %u\n", store->ping.png_flags);

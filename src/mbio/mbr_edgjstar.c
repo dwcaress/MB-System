@@ -1783,7 +1783,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	fprintf(stderr, "kind:%d error:%d status:%d\n", store->kind, *error, status);
 #endif
 
-	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_COMMENT) {
 		fprintf(stderr, "\ndbg5  New comment read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");
@@ -2320,7 +2319,6 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbsys_jstar_struct *store = (struct mbsys_jstar_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5 && store->kind == MB_DATA_COMMENT) {
 		fprintf(stderr, "\ndbg5  New comment to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Subsystem ID:\n");

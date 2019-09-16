@@ -867,7 +867,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && data->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -918,7 +917,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && data->kind == MB_DATA_COMMENT) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -1006,7 +1004,6 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_navint_interp(verbose, mbio_ptr, ptime_d, (double)data->line_heading, 0.0, &plon, &plat, &pspeed, error);
 		data->speed = pspeed / 3.6;
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "dbg4     Interpolated Navigation:\n");
 			fprintf(stderr, "dbg4       longitude:  %f\n", plon);
@@ -1358,14 +1355,12 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	/* get pointer to raw data structure */
 	struct mbf_em12ifrm_struct *data = (struct mbf_em12ifrm_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", mb_io_ptr->new_kind);
 		fprintf(stderr, "dbg5       error:      %d\n", *error);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && data->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  Values to write in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);

@@ -958,7 +958,6 @@ int mbr_hsatlraw_read_line(int verbose, FILE *mbfp, int minimum_size, char *line
 			status = MB_FAILURE;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New line read in function <%s>\n", __func__);
 			fprintf(stderr, "dbg5       line:       %s\n", line);
@@ -1018,7 +1017,6 @@ int mbr_hsatlraw_rd_ergnhydi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		mb_get_double(&(data->tide), line + 63 + shift, 6);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1090,7 +1088,6 @@ int mbr_hsatlraw_rd_ergnpara(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		mb_get_double(&(data->depth_center), line + 77 + shift, 7);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1161,7 +1158,6 @@ int mbr_hsatlraw_rd_ergnposi(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		strncpy(data->sensors, line + 59 + shift, 8);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1290,7 +1286,6 @@ int mbr_hsatlraw_rd_ergneich(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1430,7 +1425,6 @@ int mbr_hsatlraw_rd_ergnmess(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1541,7 +1535,6 @@ int mbr_hsatlraw_rd_ergnslzt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 			mb_get_double(&(data->gyro[i]), line + i * 5 + shift, 5);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1639,7 +1632,6 @@ int mbr_hsatlraw_rd_ergnctds(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1779,7 +1771,6 @@ int mbr_hsatlraw_rd_ergnampl(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -1855,7 +1846,6 @@ int mbr_hsatlraw_rd_ldeocmnt(int verbose, FILE *mbfp, struct mbf_hsatlraw_struct
 			data->comment[0] = '\0';
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Value read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -2009,7 +1999,6 @@ int mbr_hsatlraw_wr_rawline(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	/* get pointer to raw data structure */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       raw line:         %s\n", data->comment);
@@ -2051,7 +2040,6 @@ int mbr_hsatlraw_wr_ergnhydi(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2125,7 +2113,6 @@ int mbr_hsatlraw_wr_ergnpara(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2205,7 +2192,6 @@ int mbr_hsatlraw_wr_ergnposi(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2277,7 +2263,6 @@ int mbr_hsatlraw_wr_ergneich(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2388,7 +2373,6 @@ int mbr_hsatlraw_wr_ergnmess(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2505,12 +2489,10 @@ int mbr_hsatlraw_wr_ergnslzt(int verbose, FILE *mbfp, void *data_ptr, int *error
 		if (data->time[i] > 0)
 			datacheck = MB_YES;
 
-	/* print debug statements */
 	if (verbose >= 5 && datacheck == MB_NO) {
 		fprintf(stderr, "\ndbg5  No values to be written in MBIO function <%s>\n", __func__);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && datacheck == MB_YES) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2616,7 +2598,6 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2709,12 +2690,10 @@ int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error
 		if (data->amplitude[i] > 0)
 			datacheck = MB_YES;
 
-	/* print debug statements */
 	if (verbose >= 5 && datacheck == MB_NO) {
 		fprintf(stderr, "\ndbg5  No values to be written in MBIO function <%s>\n", __func__);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && datacheck == MB_YES) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       longitude:        %f\n", data->lon);
@@ -2858,7 +2837,6 @@ int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error
 	/* get pointer to raw data structure */
 	struct mbf_hsatlraw_struct *data = (struct mbf_hsatlraw_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);

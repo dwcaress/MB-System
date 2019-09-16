@@ -183,7 +183,6 @@ int mbsys_mstiff_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind
 			ssalongtrack[i] = 0.0;
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -563,7 +562,6 @@ int mbsys_mstiff_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *
 		*pitch = 0.0;
 		*heave = 0.0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

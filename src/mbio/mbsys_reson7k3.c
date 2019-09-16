@@ -4570,7 +4570,6 @@ int mbsys_reson7k3_preprocess(int verbose,     /* in: verbosity level set on com
         || (store->read_SegmentedRawDetection == MB_YES && SegmentedRawDetection->optionaldata == MB_NO)
         || pars->recalculate_bathymetry == MB_YES) {
 
-      /* print debug statements */
       if (verbose >= 2) {
         fprintf(stderr, "\ndbg2 Recalculating Bathymetry in %s: 7k ping records read:\n", __func__);
         fprintf(stderr, "dbg2      read_ProcessedSideScan:              %d\n",
@@ -5455,7 +5454,6 @@ if (store->kind == MB_DATA_DATA) {
 			}
     } // end extract processed multibeam sidescan
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -5512,7 +5510,6 @@ if (store->kind == MB_DATA_DATA) {
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -5560,7 +5557,6 @@ if (store->kind == MB_DATA_DATA) {
     *namp = 0;
     *nss = 0;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -5596,7 +5592,6 @@ if (store->kind == MB_DATA_DATA) {
     else
       comment[0] = '\0';
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  New ping values:\n");
@@ -5621,7 +5616,6 @@ if (store->kind == MB_DATA_DATA) {
       time_i[i] = store->time_i[i];
     *time_d = store->time_d;
 
-    /* print debug statements */
     if (verbose >= 4) {
       fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg4  Extracted values:\n");
@@ -8798,7 +8792,6 @@ int mbsys_reson7k3_makess(int verbose, void *mbio_ptr, void *store_ptr, int sour
       ProcessedSideScan->alongtrack[i] = ssalongtrack[i];
     }
 
-    /* print debug statements */
     if (verbose >= 2) {
       fprintf(stderr, "\ndbg2  SideScan regenerated in <%s>\n", __func__);
       fprintf(stderr, "dbg2       pixels_ss:  %d\n", nss);

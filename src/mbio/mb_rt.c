@@ -897,7 +897,6 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		model->number_plot++;
 	}
 
-	/* print debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  About to trace ray in MB_RT function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2       xx:               %f\n", model->xx);
@@ -932,7 +931,6 @@ int mb_rt(int verbose, void *modelptr, double source_depth, double source_angle,
 		if (model->tt_left <= 0.0)
 			model->done = MB_YES;
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  model->done with ray iteration in MB_RT function <%s>\n", __func__);
 			fprintf(stderr, "dbg2       xx:               %f\n", model->xx);

@@ -311,7 +311,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 			ssalongtrack[i] = store->ssalongtrack[i];
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -368,7 +367,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 		*namp = 0;
 		*nss = 0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -404,7 +402,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 		else
 			comment[0] = '\0';
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -429,7 +426,6 @@ int mbsys_templatesystem_extract(int verbose, void *mbio_ptr, void *store_ptr, i
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
