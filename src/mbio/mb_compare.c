@@ -28,8 +28,8 @@
 /*--------------------------------------------------------------------*/
 /* 	function mb_int_compare compares int values. */
 int mb_int_compare(const void *a, const void *b) {
-	int *aa = (int *)a;
-	int *bb = (int *)b;
+	const int *aa = (int *)a;
+	const int *bb = (int *)b;
 
 	if (*aa > *bb)
 		return (1);
@@ -39,8 +39,8 @@ int mb_int_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 /* 	function mb_double_compare compares double values. */
 int mb_double_compare(const void *a, const void *b) {
-	double *aa = (double *)a;
-	double *bb = (double *)b;
+	const double *aa = (double *)a;
+	const double *bb = (double *)b;
 
 	if (*aa > *bb)
 		return (1);
@@ -50,8 +50,8 @@ int mb_double_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 /* 	function mb_edit_compare compares mb_edit_struct values. */
 int mb_edit_compare(const void *a, const void *b) {
-	struct mb_edit_struct *aa = (struct mb_edit_struct *)a;
-	struct mb_edit_struct *bb = (struct mb_edit_struct *)b;
+	const struct mb_edit_struct *aa = (struct mb_edit_struct *)a;
+	const struct mb_edit_struct *bb = (struct mb_edit_struct *)b;
 
 	/*if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF && aa->time_d != bb->time_d)
 	{
@@ -73,13 +73,9 @@ int mb_edit_compare(const void *a, const void *b) {
 /*--------------------------------------------------------------------*/
 /* 	function mb_edit_compare compares mb_edit_struct values. */
 int mb_edit_compare_coarse(const void *a, const void *b) {
-	struct mb_edit_struct *aa = (struct mb_edit_struct *)a;
-	struct mb_edit_struct *bb = (struct mb_edit_struct *)b;
+	const struct mb_edit_struct *aa = (struct mb_edit_struct *)a;
+	const struct mb_edit_struct *bb = (struct mb_edit_struct *)b;
 
-	/*if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF && aa->time_d != bb->time_d)
-	{
-	fprintf(stderr,"aa:%.7f bb:%.7f diff:%g\n",aa->time_d,bb->time_d,aa->time_d - bb->time_d);
-	}*/
 	if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF_X10) {
 		if (aa->beam > bb->beam)
 			return (1);
