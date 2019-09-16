@@ -240,7 +240,6 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
 			index += 4;
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
 				        __func__);
@@ -377,7 +376,6 @@ int mbr_l3xseraw_rd_svp(int verbose, int buffer_size, char *buffer, void *store_
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       svp_source:          %d\n", store->svp_source);
@@ -501,7 +499,6 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
 			index += 4;
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
 				        __func__);
@@ -698,7 +695,6 @@ int mbr_l3xseraw_rd_ship(int verbose, int buffer_size, char *buffer, void *store
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       par_source:          %d\n", store->par_source);
@@ -846,7 +842,6 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
 			index += 4;
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
 				        __func__);
@@ -1136,7 +1131,6 @@ int mbr_l3xseraw_rd_sidescan(int verbose, int buffer_size, char *buffer, void *s
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sid_frame:            %d\n", store->sid_frame);
@@ -1311,7 +1305,6 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
 			index += 4;
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
 				        __func__);
@@ -1888,7 +1881,6 @@ int mbr_l3xseraw_rd_multibeam(int verbose, int buffer_size, char *buffer, void *
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mul_group_beam:      %d\n", store->mul_group_beam);
@@ -2084,7 +2076,6 @@ int byte_count;
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
 			index += 4;
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
 				        __func__);
@@ -2226,7 +2217,6 @@ int byte_count;
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sbm_source:          %d\n", store->sbm_source);
@@ -2503,7 +2493,6 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
 			index += 4;
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
 				        __func__);
@@ -2524,7 +2513,6 @@ int mbr_l3xseraw_rd_comment(int verbose, int buffer_size, char *buffer, void *st
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:             %s\n", store->comment);
@@ -2624,7 +2612,6 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 			mb_get_binary_int(SWAPFLAG, &buffer[index], (int *)&group_id);
 			index += 4;
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Group %d of %d bytes to be parsed in MBIO function <%s>\n", group_id, byte_count,
 				        __func__);
@@ -2822,7 +2809,6 @@ int mbr_l3xseraw_rd_nav(int verbose, int buffer_size, char *buffer, void *store_
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       nav_source:          %d\n", store->nav_source);
@@ -3394,7 +3380,6 @@ int mbr_l3xseraw_wr_nav(int verbose, int *buffer_size, char *buffer, void *store
 	/* get pointer to store data structure */
 	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       nav_source:          %d\n", store->nav_source);
@@ -4069,7 +4054,6 @@ int mbr_l3xseraw_wr_svp(int verbose, int *buffer_size, char *buffer, void *store
 	/* get pointer to store data structure */
 	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       svp_source:          %d\n", store->svp_source);
@@ -4477,7 +4461,6 @@ int mbr_l3xseraw_wr_ship(int verbose, int *buffer_size, char *buffer, void *stor
 	/* get pointer to store data structure */
 	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       par_source:          %d\n", store->par_source);
@@ -4984,8 +4967,6 @@ int mbr_l3xseraw_wr_multibeam(int verbose, int *buffer_size, char *buffer, void 
 	/* get pointer to store data structure */
 	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
-	/* print debug statements */
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mul_group_beam:      %d\n", store->mul_group_beam);
@@ -6102,7 +6083,6 @@ int mbr_l3xseraw_wr_sidescan(int verbose, int *buffer_size, char *buffer, void *
 	/* get pointer to store data structure */
 	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sid_frame:            %d\n", store->sid_frame);
@@ -6705,7 +6685,6 @@ int mbr_l3xseraw_wr_seabeam(int verbose, int *buffer_size, char *buffer, void *s
 	/* get pointer to store data structure */
 	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sbm_source:          %d\n", store->sbm_source);
@@ -7136,7 +7115,6 @@ int mbr_l3xseraw_wr_comment(int verbose, int *buffer_size, char *buffer, void *s
 	/* get pointer to store data structure */
 	struct mbsys_xse_struct *store = (struct mbsys_xse_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:             %s\n", store->comment);

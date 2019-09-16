@@ -401,7 +401,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					done = MB_YES;
 					data->kind = MB_DATA_ATTITUDE;
 
-					/* print debug statements */
 					if (verbose >= 4) {
 						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New attitude values:\n");
@@ -451,7 +450,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					done = MB_YES;
 					data->kind = MB_DATA_HEADING;
 
-					/* print debug statements */
 					if (verbose >= 4) {
 						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New heading values:\n");
@@ -497,7 +495,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					done = MB_NO;
 					data->kind = MB_DATA_NAV;
 
-					/* print debug statements */
 					if (verbose >= 4) {
 						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New position values:\n");
@@ -561,7 +558,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					done = MB_YES;
 					data->kind = MB_DATA_NAV;
 
-					/* print debug statements */
 					if (verbose >= 4) {
 						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New navigation values:\n");
@@ -718,7 +714,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					done = MB_YES;
 					data->kind = MB_DATA_DATA;
 
-					/* print debug statements */
 					if (verbose >= 4) {
 						fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 						fprintf(stderr, "dbg4  New ping values:\n");
@@ -837,7 +832,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 				done = MB_YES;
 				data->kind = MB_DATA_PARAMETER;
 
-				/* print debug statements */
 				if (verbose >= 4) {
 					fprintf(stderr, "\ndbg4  New data read by MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg4  New parameter values:\n");

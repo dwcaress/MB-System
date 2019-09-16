@@ -238,7 +238,6 @@ int mbr_rt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_kind = dataplus->kind;
 	mb_io_ptr->new_error = *error;
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS && dataplus->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  New ping read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Raw ping values:\n");
@@ -469,7 +468,6 @@ int mbr_wt_sbsiomrg(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		strncat(datacomment, store->comment, mb_io_ptr->data_structure_size - 3);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", dataplus->kind);

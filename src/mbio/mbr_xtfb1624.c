@@ -701,7 +701,6 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				mb_io_ptr->projection_initialized = MB_YES;
 			}
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       FileFormat:                 %d\n", fileheader->FileFormat);
@@ -822,7 +821,6 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				packetheader.HeaderType = 99;
 			}
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       Bytes Skipped:              %d\n", skip);
@@ -885,7 +883,6 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				mb_attint_add(verbose, mbio_ptr, timetag, heave, roll, pitch, error);
 				mb_hedint_add(verbose, mbio_ptr, timetag, heading, error);
 
-				/* print debug statements */
 				if (verbose >= 5) {
 					fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 					fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n",
@@ -1280,7 +1277,6 @@ int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error) {
 				done = MB_YES;
 			}
 
-			/* print debug statements */
 			if (verbose >= 5) {
 				fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg5       MagicNumber:                %d %d %x%x\n", pingheader->packetheader.MagicNumber[0],

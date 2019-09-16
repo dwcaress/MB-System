@@ -434,7 +434,6 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		/* extract sidescan */
 		*nss = 0;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -487,7 +486,6 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 			comment[0] = '\0';
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Comment extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -512,7 +510,6 @@ int mbsys_swathplus_extract(int verbose, void *mbio_ptr, void *store_ptr, int *k
 		}
 		*time_d = store->time_d;
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -1907,7 +1904,6 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1977,7 +1973,6 @@ int swpls_rd_comment(int verbose, char *buffer, void *store_ptr, int *error) {
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2905,7 +2900,6 @@ int swpls_wr_sxpheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_header *header = &(store->sxp_header);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_sxpheader(verbose, stderr, header, error);
@@ -2971,7 +2965,6 @@ int swpls_wr_sxpping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_sxpping *ping = &(store->sxp_ping);
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_sxpping(verbose, stderr, ping, error);
@@ -3136,7 +3129,6 @@ int swpls_wr_projection(int verbose, int *bufferalloc, char **bufferptr, void *s
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_projection *projection = &(store->projection);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_projection(verbose, stderr, projection, error);
@@ -3210,7 +3202,6 @@ int swpls_wr_comment(int verbose, int *bufferalloc, char **bufferptr, void *stor
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_comment *comment = &(store->comment);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_comment(verbose, stderr, comment, error);
@@ -3284,7 +3275,6 @@ int swpls_wr_sxiheader(int verbose, int *bufferalloc, char **bufferptr, void *st
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_header *header = &(store->sxi_header);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_sxiheader(verbose, stderr, header, error);
@@ -3350,7 +3340,6 @@ int swpls_wr_sxiping(int verbose, int *bufferalloc, char **bufferptr, void *stor
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_sxiping *ping = &(store->sxi_ping);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_sxiping(verbose, stderr, ping, error);
@@ -3448,7 +3437,6 @@ int swpls_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *sto
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_attitude *attitude = &(store->attitude);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_attitude(verbose, stderr, attitude, error);
@@ -3524,7 +3512,6 @@ int swpls_wr_posll(int verbose, int *bufferalloc, char **bufferptr, void *store_
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_posll *posll = &(store->posll);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_posll(verbose, stderr, posll, error);
@@ -3596,7 +3583,6 @@ int swpls_wr_posen(int verbose, int *bufferalloc, char **bufferptr, void *store_
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_posen *posen = &(store->posen);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_posen(verbose, stderr, posen, error);
@@ -3668,7 +3654,6 @@ int swpls_wr_ssv(int verbose, int *bufferalloc, char **bufferptr, void *store_pt
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_ssv *ssv = &(store->ssv);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_ssv(verbose, stderr, ssv, error);
@@ -3738,7 +3723,6 @@ int swpls_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_tide *tide = &(store->tide);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_tide(verbose, stderr, tide, error);
@@ -3803,7 +3787,6 @@ int swpls_wr_echosounder(int verbose, int *bufferalloc, char **bufferptr, void *
 		swpls_pr_echosounder(verbose, stderr, echosounder, error);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5        echosounder->time_d:      %d\n", echosounder->time_d);
@@ -3876,7 +3859,6 @@ int swpls_wr_agds(int verbose, int *bufferalloc, char **bufferptr, void *store_p
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_agds *agds = &(store->agds);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_agds(verbose, stderr, agds, error);
@@ -3948,7 +3930,6 @@ int swpls_wr_pos_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_pos_offset *pos_offset = &(store->pos_offset);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_pos_offset(verbose, stderr, pos_offset, error);
@@ -4024,7 +4005,6 @@ int swpls_wr_imu_offset(int verbose, int *bufferalloc, char **bufferptr, void *s
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_imu_offset *imu_offset = &(store->imu_offset);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_imu_offset(verbose, stderr, imu_offset, error);
@@ -4100,7 +4080,6 @@ int swpls_wr_txer_offset(int verbose, int *bufferalloc, char **bufferptr, void *
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_txer_offset *txer_offset = &(store->txer_offset);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_txer_offset(verbose, stderr, txer_offset, error);
@@ -4184,7 +4163,6 @@ int swpls_wr_wl_offset(int verbose, int *bufferalloc, char **bufferptr, void *st
 	struct mbsys_swathplus_struct *store = (struct mbsys_swathplus_struct *)store_ptr;
 	swpls_wl_offset *wl_offset = &(store->wl_offset);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		swpls_pr_wl_offset(verbose, stderr, wl_offset, error);

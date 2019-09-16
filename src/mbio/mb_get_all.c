@@ -51,14 +51,12 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	/* reset status */
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg2  About to read ping in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2       ping_count:    %d\n", mb_io_ptr->ping_count);
 		fprintf(stderr, "dbg2       error:         %d\n", *error);
 	}
 
-	/* get next ping */
 	int status = mb_read_ping(verbose, mbio_ptr, *store_ptr, kind, error);
 
 	/* if io arrays have been reallocated, update the
@@ -137,7 +135,6 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg2  New ping read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg2       status:        %d\n", status);
@@ -200,7 +197,6 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		else if (*speed < 0.0)
 			*speed = 0.0;
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Distance and Speed Calculated in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Speed and Distance Related Values:\n");
@@ -251,7 +247,6 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 		else if (*speed < 0.0)
 			*speed = 0.0;
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Distance and Speed Calculated in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Speed and Distance Related Values:\n");
@@ -325,7 +320,6 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind, int tim
 	if (*error < MB_ERROR_NO_ERROR)
 		mb_notice_log_error(verbose, mbio_ptr, *error);
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  New ping checked by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4  New ping values:\n");

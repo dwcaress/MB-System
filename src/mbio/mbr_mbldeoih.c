@@ -564,7 +564,6 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	mb_io_ptr->new_kind = store->kind;
 	mb_io_ptr->new_error = *error;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New header read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       flag:       %d\n", *flag);
@@ -950,7 +949,6 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	*flag = mb_swap_short(*flag);
 #endif
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New header set in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       flag:       %d\n", *flag);
@@ -1190,7 +1188,6 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		*error = MB_ERROR_EOF;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Going to write data in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);

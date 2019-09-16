@@ -285,7 +285,6 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       genbathy->version:                    %u\n", genbathy->version);
@@ -405,7 +404,6 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       corbathy->version:                    %u\n", corbathy->version);
@@ -521,7 +519,6 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       rawsonar->version:                    %u\n", rawsonar->version);
@@ -598,7 +595,6 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       gen_sens->version:                    %u\n", gen_sens->version);
@@ -670,7 +666,6 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       nvupdate->version:                    %u\n", nvupdate->version);
@@ -762,7 +757,6 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       wcd_navi->version:                    %u\n", wcd_navi->version);
@@ -873,7 +867,6 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sensprop->version:                    %u\n", sensprop->version);
@@ -964,7 +957,6 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sys_prop->version:                    %u\n", sys_prop->version);
@@ -1033,7 +1025,6 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < sys_cfg1->sys_cfg1_len; i++) {
@@ -1083,7 +1074,6 @@ int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mcomment->comment_length:             %u\n", mcomment->comment_length);
@@ -1143,7 +1133,6 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 		store->kind = MB_DATA_NONE;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < unknown1->unknown1_len; i++) {
@@ -1448,7 +1437,6 @@ int mbr_wasspenl_wr_genbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	genbathy->version = 3;
 	genbathy->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       genbathy->version:                    %u\n", genbathy->version);
@@ -1586,7 +1574,6 @@ int mbr_wasspenl_wr_corbathy(int verbose, int *bufferalloc, char **bufferptr, vo
 	corbathy->version = 4;
 	corbathy->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       corbathy->version:                    %u\n", corbathy->version);
@@ -1732,7 +1719,6 @@ int mbr_wasspenl_wr_rawsonar(int verbose, int *bufferalloc, char **bufferptr, vo
 	rawsonar->version = 2;
 	rawsonar->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       rawsonar->version:                    %u\n", rawsonar->version);
@@ -1858,7 +1844,6 @@ int mbr_wasspenl_wr_gen_sens(int verbose, int *bufferalloc, char **bufferptr, vo
 	gen_sens->version = 2;
 	gen_sens->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       gen_sens->version:                    %u\n", gen_sens->version);
@@ -1942,7 +1927,6 @@ int mbr_wasspenl_wr_nvupdate(int verbose, int *bufferalloc, char **bufferptr, vo
 	nvupdate->version = 4;
 	nvupdate->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       nvupdate->version:                    %u\n", nvupdate->version);
@@ -2041,7 +2025,6 @@ int mbr_wasspenl_wr_wcd_navi(int verbose, int *bufferalloc, char **bufferptr, vo
 	wcd_navi->version = 4;
 	wcd_navi->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       wcd_navi->version:                    %u\n", wcd_navi->version);
@@ -2147,7 +2130,6 @@ int mbr_wasspenl_wr_sensprop(int verbose, int *bufferalloc, char **bufferptr, vo
 	sensprop->version = 1;
 	sensprop->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sensprop->version:                    %u\n", sensprop->version);
@@ -2280,7 +2262,6 @@ int mbr_wasspenl_wr_sys_prop(int verbose, int *bufferalloc, char **bufferptr, vo
 	sys_prop->version = 1;
 	sys_prop->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sys_prop->version:                    %u\n", sys_prop->version);
@@ -2379,7 +2360,6 @@ int mbr_wasspenl_wr_sys_cfg1(int verbose, int *bufferalloc, char **bufferptr, vo
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 	struct mbsys_wassp_sys_cfg1_struct *sys_cfg1 = &(store->sys_cfg1);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < sys_cfg1->sys_cfg1_len; i++) {
@@ -2439,7 +2419,6 @@ int mbr_wasspenl_wr_mcomment(int verbose, int *bufferalloc, char **bufferptr, vo
 	struct mbsys_wassp_mcomment_struct *mcomment = &(store->mcomment);
 	mcomment->checksum = 0x8806CBA5;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mcomment->comment_length:             %u\n", mcomment->comment_length);
@@ -2511,7 +2490,6 @@ int mbr_wasspenl_wr_unknown1(int verbose, int *bufferalloc, char **bufferptr, vo
 	struct mbsys_wassp_struct *store = (struct mbsys_wassp_struct *)store_ptr;
 	struct mbsys_wassp_unknown1_struct *unknown1 = &(store->unknown1);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < unknown1->unknown1_len; i++) {

@@ -541,7 +541,6 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbsys_image83p_struct *store = (struct mbsys_image83p_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Status at beginning of MBIO function <%s>\n", __func__);
 		if (store != NULL)

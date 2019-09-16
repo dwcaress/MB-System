@@ -306,7 +306,6 @@ int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data
 		*error = MB_ERROR_EOF;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mf_magic:         %d\n", data->mf_magic);
@@ -461,7 +460,6 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 	if (status == MB_FAILURE)
 		*error = MB_ERROR_EOF;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sec:              %d\n", data->sec);
@@ -494,7 +492,6 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 		fprintf(stderr, "\n");
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "dbg5       port_beam  depth   xtrack    tt   angle\n");
 		for (int i = 0; i < data->port_btycount; i++) {
@@ -721,7 +718,6 @@ int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *data
 		fprintf(stderr, "dbg2       hdr_comment:%p\n", (void *)*hdr_comment);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       mf_magic:         %d\n", data->mf_magic);
@@ -777,7 +773,6 @@ int mbr_mr1bldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 		fprintf(stderr, "dbg2       data:       %p\n", (void *)data);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       sec:              %d\n", data->sec);

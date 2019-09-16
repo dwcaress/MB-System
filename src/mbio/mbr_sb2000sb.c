@@ -326,7 +326,6 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New header record in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  New header values:\n");
@@ -388,7 +387,6 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->ssv_source[1] = buffer[23];
 		}
 
-		/* print debug statements */
 		if (status == MB_SUCCESS && verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New sensor record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5  New sensor values:\n");
@@ -438,7 +436,6 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			mb_get_binary_short(MB_NO, &buffer[6 + i * 4], &store->bath_acrosstrack[i]);
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New data record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5  New data values:\n");
@@ -469,7 +466,6 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		mb_get_binary_short(MB_NO, &buffer[140], &store->vru2_forward);
 		mb_get_binary_short(MB_NO, &buffer[142], &store->vru2_vert);
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New svp record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5  New svp values:\n");
@@ -498,7 +494,6 @@ int mbr_rt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		strncpy(store->comment, buffer, MIN(store->data_size, MBSYS_SB2000_COMMENT_LENGTH - 1));
 		store->comment[MIN(store->data_size, MBSYS_SB2000_COMMENT_LENGTH - 1)] = '\0';
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg5  New comment record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg5  New comment:\n");
@@ -538,14 +533,12 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbsys_sb2000_struct *store = (struct mbsys_sb2000_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:       %d\n", store->kind);
 		fprintf(stderr, "dbg5       error:      %d\n", *error);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Header record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Header values:\n");
@@ -567,7 +560,6 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       data_type:  %c%c\n", store->data_type[0], store->data_type[1]);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && store->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  Sensor record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Sensor values:\n");
@@ -585,7 +577,6 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		fprintf(stderr, "dbg5       ssv_source:      %c%c\n", store->ssv_source[0], store->ssv_source[1]);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && store->kind == MB_DATA_VELOCITY_PROFILE) {
 		fprintf(stderr, "\ndbg5  SVP record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  SVP values:\n");
@@ -608,7 +599,6 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		        store->vru[4], store->vru[5], store->vru[6], store->vru[7]);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && store->kind == MB_DATA_DATA) {
 		fprintf(stderr, "\ndbg5  Data record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Data values:\n");
@@ -618,7 +608,6 @@ int mbr_wt_sb2000sb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fprintf(stderr, "dbg5       beam: %d  bath: %d  across_track: %d\n", i, store->bath[i], store->bath_acrosstrack[i]);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && store->kind == MB_DATA_COMMENT) {
 		fprintf(stderr, "\ndbg5  Comment record to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Comment:\n");

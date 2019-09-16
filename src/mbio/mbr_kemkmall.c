@@ -529,7 +529,6 @@ int mbr_kemkmall_rd_hdr(int verbose, char *buffer, void *header_ptr, void *emdgm
     *emdgm_type = UNKNOWN;
   }
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
@@ -614,7 +613,6 @@ int mbr_kemkmall_rd_spo(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   memcpy(&(spo->sensorData.posDataFromSensor), &buffer[index], numBytesRawSensorData);
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spo->header.numBytesDgm);
@@ -782,7 +780,6 @@ int mbr_kemkmall_rd_skm(int verbose, char *buffer, void *store_ptr, void *header
     index += 4;
   }
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", skm->header.numBytesDgm);
@@ -924,7 +921,6 @@ int mbr_kemkmall_rd_svp(int verbose, char *buffer, void *store_ptr, void *header
     index += 4;
   }
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
@@ -1038,7 +1034,6 @@ int mbr_kemkmall_rd_svt(int verbose, char *buffer, void *store_ptr, void *header
     index += 4;
   }
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:             %u\n", svt->header.numBytesDgm);
@@ -1140,7 +1135,6 @@ int mbr_kemkmall_rd_scl(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   memcpy(&(scl->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:         %u\n", scl->header.numBytesDgm);
@@ -1237,7 +1231,6 @@ int mbr_kemkmall_rd_sde(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   memcpy(&(sde->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", sde->header.numBytesDgm);
@@ -1332,7 +1325,6 @@ int mbr_kemkmall_rd_shi(int verbose, char *buffer, void *store_ptr, void *header
   index += 4;
   memcpy(&(shi->sensorData.dataFromSensor), &buffer[index], numBytesRawSensorData);
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", shi->header.numBytesDgm);
@@ -1435,7 +1427,6 @@ int mbr_kemkmall_rd_sha(int verbose, char *buffer, void *store_ptr, void *header
     index += sha->dataInfo.numBytesRawSensorData;
   }
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:            %u\n", sha->header.numBytesDgm);
@@ -1521,7 +1512,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   mb_get_binary_short(MB_YES, &buffer[index], &(partition.dgmNum));
   index += 2;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr,"dbg5       numOfDgms = %d\n", partition.numOfDgms);
@@ -1688,7 +1678,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   mb_get_binary_float(MB_YES, &buffer[index], &(mrz->pingInfo.ellipsoidHeightReRefPoint_m));
   index += 4;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr,"dbg5       numBytesInfoData:             %d\n", mrz->pingInfo.numBytesInfoData);
@@ -1779,7 +1768,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     mb_get_binary_short(MB_YES, &buffer[index], &(mrz->sectorInfo[i].padding1));
     index += 2;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mrz->pingInfo.numTxSectors);
@@ -1833,7 +1821,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
   mb_get_binary_short(MB_YES, &buffer[index], &(mrz->rxInfo.numBytesPerClass));
   index += 2;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesInfoData:           %d\n", mrz->rxInfo.numBytesRxInfo);
@@ -1868,7 +1855,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     mrz->extraDetClassInfo[i].alarmFlag = buffer[index];
     index++;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
@@ -2009,7 +1995,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
       mrz->sounding[i].beamflag_enabled = 1;
     }
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       soundingIndex:                   %d\n", mrz->sounding[i].soundingIndex);
@@ -2057,7 +2042,6 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
     }
   }
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numSidescanSamples:  %d\n", numSidescanSamples);
@@ -2133,7 +2117,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   mb_get_binary_short(MB_YES, &buffer[index], &(partition.dgmNum));
   index += 2;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numOfDgms:  %d\n", partition.numOfDgms);
@@ -2162,7 +2145,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   cmnPart.algorithmType = buffer[index];
   index++;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", cmnPart.numBytesCmnPart);
@@ -2196,7 +2178,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   mb_get_binary_float(MB_YES, &buffer[index], &(mwc->txInfo.heave_m));
   index += 4;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesTxInfo:       %d\n", mwc->txInfo.numBytesTxInfo);
@@ -2219,7 +2200,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
     mb_get_binary_short(MB_YES, &buffer[index], &(mwc->sectorData[i].padding));
     index += 2;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mwc->txInfo.numTxSectors);
@@ -2249,7 +2229,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
   mb_get_binary_float(MB_YES, &buffer[index], &(mwc->rxInfo.soundVelocity_mPerSec));
   index += 4;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesRxInfo:         %d\n", mwc->rxInfo.numBytesRxInfo);
@@ -2354,7 +2333,6 @@ int mbr_kemkmall_rd_mwc(int verbose, char *buffer, void *store_ptr, void *header
             break;
         }
 
-        /* print debug statements */
         if (status == MB_SUCCESS && verbose >= 5) {
           fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
           fprintf(stderr, "dbg5       #MWC receiver beam data %d/%d:\n", i, mwc->rxInfo.numBeams);
@@ -2463,7 +2441,6 @@ int mbr_kemkmall_rd_cpo(int verbose, char *buffer, void *store_ptr, void *header
   memcpy(&cpo->sensorData.posDataFromSensor, &buffer[index], numBytesRawSensorData);
   index += numBytesRawSensorData;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                  %u\n", cpo->header.numBytesDgm);
@@ -2540,7 +2517,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   /* extract the data */
   int index = MBSYS_KMBES_HEADER_SIZE;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", che->header.numBytesDgm);
@@ -2574,7 +2550,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   che->cmnPart.algorithmType = buffer[index];
   index++;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesCmnPart:      %d\n", che->cmnPart.numBytesCmnPart);
@@ -2592,7 +2567,6 @@ int mbr_kemkmall_rd_che(int verbose, char *buffer, void *store_ptr, void *header
   mb_get_binary_float(MB_YES, &buffer[index], &che->data.heave_m);
   index += 4;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       heave_m                         = %f\n", che->data.heave_m);
@@ -2658,7 +2632,6 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   memcpy(&iip->install_txt, &buffer[index], numBytesRawSensorData);
 //fprintf(stderr, "\niip->install_txt:\n%s\n", iip->install_txt);
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
@@ -2735,7 +2708,6 @@ int mbr_kemkmall_rd_iop(int verbose, char *buffer, void *store_ptr, void *header
   index += 2;
   memcpy(&iop->runtime_txt, &buffer[index], numBytesRawSensorData);
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", iop->header.numBytesDgm);
@@ -2815,7 +2787,6 @@ int mbr_kemkmall_rd_xmb(int verbose, char *buffer, void *store_ptr, void *header
   index += numBytesVersion;
   memset(&xmb->version[numBytesVersion], 0, MB_COMMENT_MAXLINE - numBytesVersion);
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmb->header.numBytesDgm);
@@ -2891,7 +2862,6 @@ int mbr_kemkmall_rd_xmc(int verbose, char *buffer, void *store_ptr, void *header
   index += numBytesComment;
   memset(&xmc->comment[numBytesComment], 0, MB_COMMENT_MAXLINE - numBytesComment);
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmc->header.numBytesDgm);
@@ -2981,7 +2951,6 @@ int mbr_kemkmall_rd_xms(int verbose, char *buffer, void *store_ptr, void *header
     index += 4;
   }
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xms->header.numBytesDgm);
@@ -3809,7 +3778,6 @@ int mbr_kemkmall_wr_header(int verbose, char **bufferptr, void *header_ptr, int 
   /* get pointer to raw data structure */
   header = (struct mbsys_kmbes_header *)header_ptr;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", header->numBytesDgm);
@@ -3879,7 +3847,6 @@ int mbr_kemkmall_wr_spo(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_spo *spo = &(store->spo);
   struct mbsys_kmbes_header *header = &store->spo.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                 %u\n", spo->header.numBytesDgm);
@@ -4008,7 +3975,6 @@ int mbr_kemkmall_wr_skm(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_skm *skm = &(store->skm);
   struct mbsys_kmbes_header *header = &store->skm.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                %u\n", skm->header.numBytesDgm);
@@ -4226,7 +4192,6 @@ int mbr_kemkmall_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_svp *svp = &(store->svp);
   struct mbsys_kmbes_header *header = &store->svp.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, " dbg5       numBytesDgm:     %u\n", svp->header.numBytesDgm);
@@ -4348,7 +4313,6 @@ int mbr_kemkmall_wr_svt(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_svt *svt = &(store->svt);
   struct mbsys_kmbes_header *header = &store->svt.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:              %u\n", svt->header.numBytesDgm);
@@ -4478,7 +4442,6 @@ int mbr_kemkmall_wr_scl(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_scl *scl = &(store->scl);
   struct mbsys_kmbes_header *header = &store->scl.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:         %u\n", scl->header.numBytesDgm);
@@ -4587,7 +4550,6 @@ int mbr_kemkmall_wr_sde(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_sde *sde = &(store->sde);
   struct mbsys_kmbes_header *header = &store->sde.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", sde->header.numBytesDgm);
@@ -4705,7 +4667,6 @@ int mbr_kemkmall_wr_shi(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_shi *shi = &(store->shi);
   struct mbsys_kmbes_header *header = &store->shi.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", shi->header.numBytesDgm);
@@ -4814,7 +4775,6 @@ int mbr_kemkmall_wr_sha(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_sha *sha = &(store->sha);
   struct mbsys_kmbes_header *header = &store->sha.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:            %u\n", sha->header.numBytesDgm);
@@ -4999,7 +4959,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_short(MB_YES, mrz->partition.dgmNum, &buffer[index]);
     index += 2;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numOfDgms:  %d\n", mrz->partition.numOfDgms);
@@ -5152,7 +5111,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_float(MB_YES, mrz->pingInfo.ellipsoidHeightReRefPoint_m, &buffer[index]);
     index += 4;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesInfoData:            %d\n", mrz->pingInfo.numBytesInfoData);
@@ -5234,7 +5192,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
       mb_put_binary_short(MB_YES, mrz->sectorInfo[i].padding1, &buffer[index]);
       index += 2;
 
-      /* print debug statements */
       if (verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mrz->pingInfo.numTxSectors);
@@ -5283,7 +5240,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_short(MB_YES, mrz->rxInfo.numBytesPerClass, &buffer[index]);
     index += 2;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesInfoData:          %d\n", mrz->rxInfo.numBytesRxInfo);
@@ -5309,7 +5265,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
       buffer[index] = mrz->extraDetClassInfo[i].alarmFlag;
       index++;
 
-      /* print debug statements */
       if (verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       numExtraDetInClass:  %d\n", mrz->extraDetClassInfo[i].numExtraDetInClass);
@@ -5424,7 +5379,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
 
       //numSidescanSamples += mrz->sounding[i].SInumSamples;
 
-      /* print debug statements */
       if (verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       soundingIndex:                  %d\n", mrz->sounding[i].soundingIndex);
@@ -5552,7 +5506,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_short(MB_YES, mwc->partition.dgmNum, &buffer[index]);
     index += 2;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numOfDgms:  %d\n", mwc->partition.numOfDgms);
@@ -5581,7 +5534,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     buffer[index] = mwc->cmnPart.algorithmType;
     index++;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesCmnPart:     %d\n", mwc->cmnPart.numBytesCmnPart);
@@ -5608,7 +5560,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_float(MB_YES, mwc->txInfo.heave_m, &buffer[index]);
     index += 4;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesTxInfo:       %d\n", mwc->txInfo.numBytesTxInfo);
@@ -5631,7 +5582,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
       mb_put_binary_short(MB_YES, mwc->sectorData[i].padding, &buffer[index]);
       index += 2;
 
-      /* print debug statements */
       if (verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       #MWC transmit sector %d/%d:\n", i + 1, mwc->txInfo.numTxSectors);
@@ -5661,7 +5611,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
     mb_put_binary_float(MB_YES, mwc->rxInfo.soundVelocity_mPerSec, &buffer[index]);
     index += 4;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesRxInfo:         %d\n", mwc->rxInfo.numBytesRxInfo);
@@ -5711,7 +5660,6 @@ int mbr_kemkmall_wr_mwc(int verbose, int *bufferalloc, char **bufferptr, void *s
           }
       }
 
-      /* print debug statements */
       if (status == MB_SUCCESS && verbose >= 5) {
         fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
         fprintf(stderr, "dbg5       #MWC receiver beam data %d/%d:\n", i, mwc->rxInfo.numBeams);
@@ -5779,7 +5727,6 @@ int mbr_kemkmall_wr_cpo(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_cpo *cpo = &(store->cpo);
   struct mbsys_kmbes_header *header = &store->cpo.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:                  %u\n", cpo->header.numBytesDgm);
@@ -5933,7 +5880,6 @@ int mbr_kemkmall_wr_che(int verbose, int *bufferalloc, char **bufferptr, void *s
     /* insert the data */
     index = MBSYS_KMBES_HEADER_SIZE;
 
-    /* print debug statements */
     if (verbose >= 5) {
       fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
       fprintf(stderr, "dbg5       numBytesDgm:    %u\n", che->header.numBytesDgm);
@@ -6032,7 +5978,6 @@ int mbr_kemkmall_wr_iip(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_iip *iip = &(store->iip);
   struct mbsys_kmbes_header *header = &store->iip.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iip->header.numBytesDgm);
@@ -6129,7 +6074,6 @@ int mbr_kemkmall_wr_iop(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_iop *iop = &(store->iop);
   struct mbsys_kmbes_header *header = &store->iop.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:      %u\n", iop->header.numBytesDgm);
@@ -6238,7 +6182,6 @@ int mbr_kemkmall_wr_xmb(int verbose, int *bufferalloc, char **bufferptr, void *s
   xmb->header.time_sec = iip->header.time_sec;
   xmb->header.time_nanosec = iip->header.time_nanosec;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:             %u\n", xmb->header.numBytesDgm);
@@ -6339,7 +6282,6 @@ int mbr_kemkmall_wr_xmc(int verbose, int *bufferalloc, char **bufferptr, void *s
   store->xmc.header.numBytesDgm = MBSYS_KMBES_HEADER_SIZE + numBytesComment + 36;
   *size = (size_t) xmc->header.numBytesDgm;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xmc->header.numBytesDgm);
@@ -6429,7 +6371,6 @@ int mbr_kemkmall_wr_xms(int verbose, int *bufferalloc, char **bufferptr, void *s
   struct mbsys_kmbes_xms *xms = &(store->xms);
   struct mbsys_kmbes_header *header = &store->xms.header;
 
-  /* print debug statements */
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
     fprintf(stderr, "dbg5       numBytesDgm:    %u\n", xms->header.numBytesDgm);

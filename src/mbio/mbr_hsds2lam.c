@@ -414,7 +414,6 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	}
 
-/* print debug statements */
 #ifndef MBR_HSDS2LAM_DEBUG
 	if (verbose >= 5)
 #endif
@@ -561,7 +560,6 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	struct mbsys_atlas_struct *store = (struct mbsys_atlas_struct *)store_ptr;
 
-/* print debug statements */
 #ifndef MBR_HSDS2LAM_DEBUG
 	if (verbose >= 5)
 #endif
