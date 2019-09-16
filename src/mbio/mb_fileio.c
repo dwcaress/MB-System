@@ -77,12 +77,12 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error) {
 
 			/* allocate the buffer */
 			buffer_error = MB_ERROR_NO_ERROR;
-			int buffer_status =
+			const int buffer_status =
 			    mb_mallocd(verbose, __FILE__, __LINE__, fileiobufferbytes, (void **)&mb_io_ptr->file_iobuffer, &buffer_error);
 
 			/* apply the buffer */
 			if (buffer_status == MB_SUCCESS) {
-				buffer_status = setvbuf(mb_io_ptr->mbfp, mb_io_ptr->file_iobuffer, _IOFBF, fileiobufferbytes);
+				/* buffer_status = */ setvbuf(mb_io_ptr->mbfp, mb_io_ptr->file_iobuffer, _IOFBF, fileiobufferbytes);
 				/* printf(stderr,"Called setvbuf size:%d status:%d\n",fileiobufferbytes,buffer_status); */
 			}
 		}
@@ -107,10 +107,8 @@ int mb_fileio_close(int verbose, void *mbio_ptr, int *error) {
 		fprintf(stderr, "dbg2       mbio_ptr:   %p\n", (void *)mbio_ptr);
 	}
 
-	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-	/* open the file */
 	if (mb_io_ptr->mbfp != NULL) {
 		fclose(mb_io_ptr->mbfp);
 		mb_io_ptr->mbfp = NULL;
@@ -140,13 +138,12 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 		fprintf(stderr, "dbg2       *size:      %p\n", (void *)(*size));
 	}
 
-	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	int status = MB_SUCCESS;
 
 	size_t read_len;
-    if (mb_io_ptr->mbfp != NULL) {
+	if (mb_io_ptr->mbfp != NULL) {
         /* read expected number of bytes into buffer */
         if ((read_len = fread(buffer, 1, *size, mb_io_ptr->mbfp)) != *size) {
             status = MB_FAILURE;
@@ -162,8 +159,8 @@ int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
         if (NULL != mb_io_ptr->mbsp) {
             // use the socket reader
             // read and return single frame
-            uint32_t sync_bytes=0;
-            int64_t rbytes=-1;
+            uint32_t sync_bytes = 0;
+            int64_t rbytes = -1;
 
             if( (rbytes = mbtrn_read_stripped_frame(mb_io_ptr->mbsp, (byte *) buffer, R7K_MAX_FRAME_BYTES, MBR_NET_STREAM, 0.0, MBTRN_READ_TMOUT_MSEC,  &sync_bytes)) < 0){
 
@@ -221,13 +218,12 @@ int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *
 		fprintf(stderr, "dbg2       *size:      %p\n", (void *)(*size));
 	}
 
-	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	int status = MB_SUCCESS;
 
 	/* write expected number of bytes from buffer */
-	size_t write_len = fwrite(buffer, 1, *size, mb_io_ptr->mbfp);
+	const size_t write_len = fwrite(buffer, 1, *size, mb_io_ptr->mbfp);
 	if (write_len != *size) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
