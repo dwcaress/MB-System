@@ -202,13 +202,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -224,7 +222,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       useaverage:      %d\n", useaverage);
 	}
 
-	/* if help desired then print it and exit */
 	if (help) {
 		fprintf(stderr, "\n%s\n", help_message);
 		fprintf(stderr, "\nusage: %s\n", usage_message);
@@ -582,7 +579,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%d input usbl records\n", nusbl);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

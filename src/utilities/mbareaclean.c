@@ -798,7 +798,7 @@ int main(int argc, char **argv) {
 				}
 				else if (files[nfile - 1].nping > 0
 						 && fabs(time_d - files[nfile - 1].ping_time_d[files[nfile - 1].nping - 1]) < MB_ESF_MAXTIMEDIFF) {
-					pingmultiplicity 
+					pingmultiplicity
 					    = files[nfile - 1].pingmultiplicity[files[nfile - 1].nping - 1] + 1;
 				}
 				else {
@@ -830,12 +830,12 @@ int main(int argc, char **argv) {
 						files[nfile - 1].nflag++;
 					}
 				}
-				
+
 				files[nfile - 1].ping_time_d[files[nfile - 1].nping] = time_d;
 				files[nfile - 1].pingmultiplicity[files[nfile - 1].nping] = pingmultiplicity;
 				files[nfile - 1].ping_altitude[files[nfile - 1].nping] = altitude;
 				files[nfile - 1].nping++;
-				
+
 				/* check beam range */
 				if (limit_beams == MB_YES && max_beam_no == 0)
 					max_beam = beams_bath - min_beam;
@@ -1165,7 +1165,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

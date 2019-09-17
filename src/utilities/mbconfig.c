@@ -206,13 +206,11 @@ int main(int argc, char **argv) {
 	if (mode_set == MB_NO)
 		mode_version = MB_YES;
 
-	/* print starting message */
 	if (verbose == 1 || mode_help == MB_YES) {
 		fprintf(stderr, "\n# Program %s\n", program_name);
 		fprintf(stderr, "# MB-system Version %s\n", version_string);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", version_string);
@@ -318,14 +316,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

@@ -441,7 +441,7 @@ int main(int argc, char **argv) {
 	bounds[1] = 360.0;
 	bounds[2] = -90.0;
 	bounds[3] = 90.0;
-    
+
 	/* initialize platform structure */
 	status = mb_platform_init(verbose, (void **)&platform, &error);
 

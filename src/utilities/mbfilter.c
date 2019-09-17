@@ -449,7 +449,6 @@ The default input and output streams are stdin and stdout.\n";
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -459,7 +458,6 @@ The default input and output streams are stdin and stdout.\n";
 	if (datakind != MBFILTER_BATH && datakind != MBFILTER_AMP)
 		datakind = MBFILTER_SS;
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1225,7 +1223,6 @@ The default input and output streams are stdin and stdout.\n";
 		fprintf(stderr, "%d total data records written\n", nwritetot);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
@@ -1233,7 +1230,6 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 	int status = MB_SUCCESS;
 	int i, nn;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1255,7 +1251,6 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 	if (nn > 0)
 		*hipass = val[0] - *hipass / nn;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1264,7 +1259,6 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1273,7 +1267,6 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 	double wgtsum;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1303,7 +1296,6 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 		*hipass = val[0] - *hipass / wgtsum;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1312,7 +1304,6 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1320,7 +1311,6 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, 
 	int status = MB_SUCCESS;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1341,7 +1331,6 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, 
 		*hipass = val[0] - val[n / 2];
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1350,7 +1339,6 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, 
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1358,7 +1346,6 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 	int status = MB_SUCCESS;
 	int i, nn;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1380,7 +1367,6 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 	if (nn > 0)
 		*smooth = *smooth / nn;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1389,7 +1375,6 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1398,7 +1383,6 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 	double wgtsum;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1428,7 +1412,6 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 		*smooth = *smooth / wgtsum;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1437,7 +1420,6 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1447,7 +1429,6 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 	double ratio;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1483,7 +1464,6 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 		ratio, threshold_lo, threshold_hi, original, *smooth);*/
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1492,7 +1472,6 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1502,7 +1481,6 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 	double diff;
 	int i, nn;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1534,7 +1512,6 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1543,7 +1520,6 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1554,7 +1530,6 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 	double contrast;
 	int i, ii;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1588,7 +1563,6 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 	/*fprintf(stderr, "val: %f %f  edge:%f contrast:%f\n",
 	val[0], *result, edge, contrast);*/
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1597,7 +1571,6 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1606,7 +1579,6 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt, double *resu
 	double gradient;
 	int i, nn;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1629,7 +1601,6 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt, double *resu
 	gradient = sqrt(gradient);
 	*result = val[0] - 2 * gradient;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1638,7 +1609,6 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt, double *resu
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1655,7 +1625,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
 	/* get data structure pointer */
 	ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1729,7 +1698,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
 		              beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1738,7 +1706,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
 		fprintf(stderr, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

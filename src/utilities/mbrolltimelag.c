@@ -226,13 +226,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -273,7 +271,6 @@ int main(int argc, char **argv) {
 	status = mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(double), (void **)&rr, &error);
 	status = mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(int), (void **)&timelaghistogram, &error);
 
-	/* print out some helpful information */
 	if (verbose > 0) {
 		fprintf(stderr, "Program %s parameters:\n", program_name);
 		fprintf(stderr, "  Input:                           %s\n", swathdata);
@@ -665,7 +662,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%d input slope\n", nslopetot);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

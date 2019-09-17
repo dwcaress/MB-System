@@ -965,7 +965,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < 24; i++)
 						channel->annotation[i] = s7ksegyheader->annotation[i]; /* 90-113 : Annotation string */
 					channel->samples = s7ksegyheader->samples;
-								 /* 114-115 : Samples in this packet  
+								 /* 114-115 : Samples in this packet
 	                              *           Large sample sizes require multiple packets.
 	                              *           For protocol versions 0xA and above, the
 	                              *           MSB1 field should include the MSBs
@@ -2204,7 +2204,7 @@ int main(int argc, char **argv) {
 								value = (double)(channel->trace[i]);
 								channelmax = MAX(value, channelmax);
 							}
-							channelpick = 0; 
+							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
 							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = (double)(channel->trace[i]);
@@ -2262,7 +2262,6 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg2       status:         %d\n", status);
 			}
 
-			/* print comments */
 			if (print_comments == MB_YES && kind == MB_DATA_COMMENT) {
 				if (icomment == 0) {
 					fprintf(stderr, "\nComments:\n");
@@ -2272,7 +2271,6 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* close the swath file */
 		status = mb_close(verbose, &imbio_ptr, &error);
 
 		fprintf(stdout, "\nData records read from: %s\n", file);

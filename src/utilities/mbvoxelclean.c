@@ -17,7 +17,7 @@
  * (e.g. the seafloor) result in dense regions of soundings while sparse soundings
  * in the water column or the subsurface are erroneous and can be flagged as bad.
  * This technique is more appropriate for lidar data than multibeam sonar data.
- * The resulting sounding edit events are output to edit save files which can be 
+ * The resulting sounding edit events are output to edit save files which can be
  * applied to the data by the program mbprocess. These are the same edit save
  * files created and/or modified by mbvoxelclean and mbedit.
  * The input data are one swath file or a datalist referencing multiple
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 	double etime_d;
 	double speedmin;
 	double timegap;
-    
+
 	/* processing variables */
 	int sensorhead = 0;
 	int sensorhead_status = MB_SUCCESS;
@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
     double d1, d2;
 
 	/* command line option definitions */
-	/* mbvoxelclean 
+	/* mbvoxelclean
      *     [
      *     --verbose
      *     --help
@@ -208,12 +208,12 @@ int main(int argc, char **argv) {
     double range_minimum = 0.0;
     int apply_range_maximum = MB_NO;
     double range_maximum = 0.0;
-    
+
     /* swath data storage */
 	struct mb_info_struct mb_info;
     int npings_alloc = 0;
     struct mbvoxelclean_ping_struct *pings = NULL;
-    
+
     /* voxel storage */
     int n_voxel = 0;
     int n_voxel_alloc = 0;
@@ -240,7 +240,7 @@ int main(int argc, char **argv) {
     int n_density_unflag = 0;
     int n_minrange_flag = 0;
     int n_maxrange_flag = 0;
-    
+
     int n_files_tot = 0;
     int n_pings_tot = 0;
     int n_beams_tot = 0;
@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
     int first, done;
     int ix, iy, iz, kk;
     int i, j;
-    
+
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &defaultpings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 	status = mb_uselockfiles(verbose, &uselockfiles);
@@ -396,9 +396,9 @@ int main(int argc, char **argv) {
 				apply_range_maximum = MB_YES;
 				sscanf(optarg, "%lf", &range_maximum);
 			}
-            
+
             break;
-            
+
 		case '?':
 			errflg++;
 		}
@@ -418,13 +418,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -563,10 +561,10 @@ int main(int argc, char **argv) {
 		}
 
 		/* proceed if file locked and format ok */
-		if (oktoprocess == MB_YES) {            
+		if (oktoprocess == MB_YES) {
             /* check for *inf file, create if necessary, and load metadata */
             status = mb_get_info_datalist(verbose, swathfile, &formatread, &mb_info, lonflip, &error);
-            
+
             /* allocate space to store the bathymetry data */
             if (npings_alloc <= mb_info.nrecords) {
                 status = mb_reallocd(verbose, __FILE__, __LINE__, mb_info.nrecords * sizeof(struct mbvoxelclean_ping_struct),
@@ -611,7 +609,7 @@ int main(int argc, char **argv) {
                     pings[i].beams_bath_alloc = mb_info.nbeams_bath;
                 }
             }
-                
+
             /* define local cartesian coordinate system based on first ping navigation and heading */
 			mb_coor_scale(verbose, mb_info.lat_start, &mtodeglon, &mtodeglat);
             headingx = sin(mb_info.heading_start * DTR);
@@ -621,7 +619,7 @@ int main(int argc, char **argv) {
 			strcpy(swathfileread, swathfile);
 			formatread = format;
 			mb_get_fbt(verbose, swathfileread, &formatread, &error);
- 
+
 			/* if verbose output status */
 			if (verbose >= 0) {
                 fprintf(stderr, "---------------------------------\n");
@@ -761,7 +759,7 @@ int main(int argc, char **argv) {
                         }
                         pings[n_pings].beams_bath_alloc = beams_bath;
                     }
-                    
+
 					/* check for ping multiplicity */
 					status = mb_get_store(verbose, mbio_ptr, &store_ptr, &error);
 					sensorhead_status = mb_sensorhead(verbose, mbio_ptr, store_ptr, &sensorhead, &sensorhead_error);
@@ -866,7 +864,7 @@ int main(int argc, char **argv) {
 					}
                     n_beams += pings[n_pings].beams_bath;
                     n_pings++;
-                     
+
 				}
 				else if (error > MB_ERROR_NO_ERROR) {
 					done = MB_YES;
@@ -875,7 +873,7 @@ int main(int argc, char **argv) {
 
 			/* close the swath file */
 			status = mb_close(verbose, &mbio_ptr, &error);
-            
+
             /* check edits for problems */
 			/*for (i=0;i<esf.nedit;i++)
 			{
@@ -892,7 +890,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr,"BEAM FLAG NOT USED:  i:%d edit: %f %d %d   %d\n",
 			i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 			}*/
-            
+
             /* allocate arrays of voxel beam counts - use unsigned char so that beam
              * counts are capped at 255 - ergo the maximum occupied count threshold
              * is 254 */
@@ -932,7 +930,7 @@ int main(int argc, char **argv) {
                 memset((void *)voxel_count, 0, (size_t)n_voxel);
                 n_voxel_alloc = n_voxel;
             }
-            
+
             /* count the soundings in each voxel */
             for (i=0; i < n_pings; i++) {
                 for (j=0; j< pings[i].beams_bath; j++) {
@@ -959,7 +957,7 @@ int main(int argc, char **argv) {
                     voxel_count[kk] = MB_NO;
                 }
             }
-            
+
             /* apply density filter to the soundings  */
             if (occupied_mode == MBVC_OCCUPIED_UNFLAG || empty_mode == MBVC_EMPTY_FLAG) {
                 for (i=0; i < n_pings; i++) {
@@ -993,7 +991,7 @@ int main(int argc, char **argv) {
                     }
                 }
             }
-            
+
             /* apply range filter to the soundings */
             if (apply_range_minimum == MB_YES || apply_range_maximum == MB_YES) {
                 for (i=0; i < n_pings; i++) {
@@ -1018,7 +1016,7 @@ int main(int argc, char **argv) {
                                             action, &error);
                                 n_density_flag++;
                             }
-                        }                        
+                        }
                     }
                 }
             }
@@ -1101,7 +1099,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d total beams flagged by minimum range filter\n", n_minrange_flag_tot);
         fprintf(stderr, "%d total beams unflagged by maximum range filter\n", n_maxrange_flag_tot);
 	}
-    
+
     /* free memory */
     for (i=0; i<npings_alloc; i++) {
        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].beamflag, &error);
@@ -1124,22 +1122,18 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print outfp debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
 int mbvoxelclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	/* local variables */
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1170,7 +1164,6 @@ int mbvoxelclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int
 		}
 	}
 
-	/* print outfp debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1179,7 +1172,6 @@ int mbvoxelclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

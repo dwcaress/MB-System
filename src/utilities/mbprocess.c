@@ -582,7 +582,6 @@ and mbedit edit save files.\n";
 		read_data = MB_YES;
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -620,7 +619,6 @@ and mbedit edit save files.\n";
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 	}
 
-	/* print starting info statements */
 	else if (verbose > 0) {
 		fprintf(stderr, "\nProgram <%s>\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -958,7 +956,6 @@ and mbedit edit save files.\n";
 				process.mbp_ssrecalc_mode = MBP_SSRECALC_OFF;
 			}
 
-			/* print starting info statements */
 			if (verbose == 1) {
 				fprintf(stderr, "\nInput and Output Files:\n");
 				if (process.mbp_format_specified == MB_YES)
@@ -5851,7 +5848,6 @@ and mbedit edit save files.\n";
 	/* check memory */
 	status = mb_memory_list(verbose, &error);
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
@@ -5862,7 +5858,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 	int iss, ibath;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -5918,7 +5913,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -5927,7 +5921,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -5938,7 +5931,6 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 	int ifirst, ilast, irecent, inext;
 	int i, ii, itable;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6037,7 +6029,6 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -6050,7 +6041,6 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -6060,7 +6050,6 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 	int ifirst, ilast;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6119,7 +6108,6 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -6129,16 +6117,13 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
 int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	//	int time_i[7];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -6175,7 +6160,6 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -6184,7 +6168,6 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

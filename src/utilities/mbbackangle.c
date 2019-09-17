@@ -406,7 +406,6 @@ by MBprocess.";
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -434,7 +433,6 @@ by MBprocess.";
 		ss_corr_slope = MBP_SSCORR_USETOPOSLOPE;
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -1142,7 +1140,6 @@ by MBprocess.";
 								}
 							}
 
-							/* print debug statements */
 							if (verbose >= 5) {
 								fprintf(stderr, "dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n", nrec, i, slope,
 								        altitude_use, bathacrosstrack[i], angle, j);
@@ -1273,7 +1270,6 @@ by MBprocess.";
 								}
 							}
 
-							/* print debug statements */
 							if (verbose >= 5) {
 								fprintf(stderr, "dbg5kkk       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n", nrec, i,
 								        slope, altitude_use, ssacrosstrack[i], angle, j);
@@ -1552,16 +1548,15 @@ by MBprocess.";
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	if (verbose > 0)
 		fprintf(stderr, "\n");
+
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
@@ -1573,7 +1568,6 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 	int ii, jj, i0, i1;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1633,7 +1627,6 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 	fprintf(tfp, "#\n");
 	fprintf(tfp, "#\n");
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1642,7 +1635,6 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1656,7 +1648,6 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 	int ii, jj, i0, i1, iref;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1726,7 +1717,6 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 	fprintf(tfp, "#\n");
 	fprintf(tfp, "#\n");
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1735,7 +1725,6 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
