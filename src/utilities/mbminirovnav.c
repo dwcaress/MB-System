@@ -323,7 +323,6 @@ int main(int argc, char **argv) {
     exit(error);
   }
 
-  /* print starting debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
     fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -356,7 +355,6 @@ int main(int argc, char **argv) {
     fprintf(stderr, "dbg2       interpolate_position:         %d\n", interpolate_position);
   }
 
-  /* print starting message */
   else if (verbose == 1 || help) {
     fprintf(stderr, "\nProgram %s\n", program_name);
     fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -797,7 +795,7 @@ int main(int argc, char **argv) {
             onav_lon = nav_lon[jnav-1];
             onav_lat = nav_lat[jnav-1];
           }
-          
+
           if (onav_lon != 0.0 && onav_lat != 0.0) {
             onav_position_flag = MB_YES;
             mb_proj_forward(verbose, pjptr, onav_lon, onav_lat, &onav_easting, &onav_northing, &error);
@@ -828,7 +826,6 @@ int main(int argc, char **argv) {
           }
         }
 
-        /* print output debug statements */
         if (verbose >= 4) {
           fprintf(stderr, "\ndbg4  Data to be written in MBIO function <%s>\n", program_name);
           fprintf(stderr, "dbg4  Values,read:\n");

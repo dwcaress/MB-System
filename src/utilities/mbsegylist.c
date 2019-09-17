@@ -222,13 +222,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -682,14 +680,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
@@ -697,7 +693,6 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 	int status = MB_SUCCESS;
 	char format[24] = "";
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -738,7 +733,6 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 	else
 		fwrite(&value, sizeof(double), 1, stdout);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -748,14 +742,12 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/
 int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -779,7 +771,6 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 	else
 		fwrite(&NaN, sizeof(double), 1, stdout);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -789,7 +780,6 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

@@ -261,13 +261,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -723,14 +721,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(outfp, "dbg2  Ending status:\n");
 		fprintf(outfp, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
@@ -766,7 +762,6 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	int nscan;
 	int shellstatus;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -844,7 +839,6 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	}
 	*timedelay = delay0;
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
@@ -860,7 +854,6 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 		fprintf(outfp, "dbg2       status:     %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

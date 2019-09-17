@@ -400,7 +400,6 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stream, "\nProgram %s\n", program_name);
 		fprintf(stream, "MB-system Version %s\n", MB_VERSION);
@@ -1551,7 +1550,6 @@ int main(int argc, char **argv) {
 					}
 				}
 
-				/* print debug statements */
 				if (verbose >= 2) {
 					fprintf(stream, "\ndbg2  Reading loop finished in program <%s>\n", program_name);
 					fprintf(stream, "dbg2       status:     %d\n", status);
@@ -1669,7 +1667,6 @@ int main(int argc, char **argv) {
 					}
 				}
 
-				/* print debug statements */
 				if (verbose >= 2) {
 					fprintf(stream, "\ndbg2  Processing loop finished in program <%s>\n", program_name);
 					fprintf(stream, "dbg2       status:     %d\n", status);

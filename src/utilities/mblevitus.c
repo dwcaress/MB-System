@@ -170,13 +170,11 @@ int main(int argc, char **argv) {
 	strcat(levitusfile, "\\share\\mbsystem\\LevitusAnnual82.dat");
 #endif
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -319,7 +317,6 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* open the output file */
 	if ((ofp = fopen(ofile, "w")) == NULL) {
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open output file <%s> for writing\n", ofile);
@@ -327,7 +324,6 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print it out */
 	fprintf(ofp, "# Water velocity profile created by program %s\n", program_name);
 	fprintf(ofp, "# MB-system Version %s\n", MB_VERSION);
 	right_now = time((time_t *)0);
@@ -376,14 +372,12 @@ int main(int argc, char **argv) {
 	/* close the output file */
 	fclose(ofp);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(outfp, "dbg2  Ending status:\n");
 		fprintf(outfp, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 

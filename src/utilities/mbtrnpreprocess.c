@@ -771,14 +771,12 @@ int main
     exit(error);
     }
 
-  /* print starting message */
   if ((verbose == 1) || help)
     {
     fprintf(stderr, "\nProgram %s\n", program_name);
     fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
     }
 
-  /* print starting debug statements */
   if (verbose >= 0)
     {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
@@ -2169,7 +2167,6 @@ int main
 
   fprintf(stderr, "exit app [%d]\n", error);
 
-  /* end it all */
   exit(error);
 } /* main */
 /*--------------------------------------------------------------------*/
@@ -2182,7 +2179,6 @@ int mbtrnpreprocess_openlog
   int *error
 )
 {
-  /* local variables */
   int status = MB_SUCCESS;
 
   /* time, user, host variables */
@@ -2195,7 +2191,6 @@ int mbtrnpreprocess_openlog
   mb_path log_file;
   mb_path log_message;
 
-  /* print input debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2250,7 +2245,6 @@ int mbtrnpreprocess_openlog
     exit(*error);
     }
 
-  /* print output debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -2262,7 +2256,6 @@ int mbtrnpreprocess_openlog
     fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-  /* return */
   return status;
 } /* mbtrnpreprocess_openlog */
 /*--------------------------------------------------------------------*/
@@ -2274,11 +2267,9 @@ int mbtrnpreprocess_closelog
   int *error
 )
 {
-  /* local variables */
   int status = MB_SUCCESS;
   char *log_message = "Closing mbtrnpreprocess log file";
 
-  /* print input debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2296,7 +2287,6 @@ int mbtrnpreprocess_closelog
     *logfp = NULL;
     }
 
-  /* print output debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -2307,7 +2297,6 @@ int mbtrnpreprocess_closelog
     fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-  /* return */
   return status;
 } /* mbtrnpreprocess_closelog */
 /*--------------------------------------------------------------------*/
@@ -2320,7 +2309,6 @@ int mbtrnpreprocess_postlog
   int *error
 )
 {
-  /* local variables */
   int status = MB_SUCCESS;
 
   /* time, user, host variables */
@@ -2330,7 +2318,6 @@ int mbtrnpreprocess_postlog
   int time_i[7];
   char date[32];
 
-  /* print input debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2378,7 +2365,6 @@ int mbtrnpreprocess_postlog
       time_i[6],
       log_message);
 
-  /* print output debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -2388,7 +2374,6 @@ int mbtrnpreprocess_postlog
     fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-  /* return */
   return status;
 } /* mbtrnpreprocess_postlog */
 /*--------------------------------------------------------------------*/
@@ -2409,11 +2394,9 @@ int mbtrnpreprocess_logparameters
   int *error
 )
 {
-  /* local variables */
   int status = MB_SUCCESS;
   mb_path log_message;
 
-  /* print input debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2466,7 +2449,6 @@ int mbtrnpreprocess_logparameters
     mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
     }
 
-  /* print output debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -2476,7 +2458,6 @@ int mbtrnpreprocess_logparameters
     fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-  /* return */
   return status;
 } /* mbtrnpreprocess_logparameters */
 /*--------------------------------------------------------------------*/
@@ -2496,11 +2477,9 @@ int mbtrnpreprocess_logstatistics
   int *error
 )
 {
-  /* local variables */
   int status = MB_SUCCESS;
   mb_path log_message;
 
-  /* print input debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2552,7 +2531,6 @@ int mbtrnpreprocess_logstatistics
     mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
     }
 
-  /* print output debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -2562,7 +2540,6 @@ int mbtrnpreprocess_logstatistics
     fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-  /* return */
   return status;
 } /* mbtrnpreprocess_logstatistics */
 /*--------------------------------------------------------------------*/
@@ -2979,11 +2956,9 @@ int mbtrnpreprocess_input_open
   int *error
 )
 {
-  /* local variables */
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
 
-  /* print input debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3046,7 +3021,6 @@ int mbtrnpreprocess_input_open
   if (verbose>=1)
     mbtrn_reader_show(mb_io_ptr->mbsp, true, 5);
 
-  /* print output debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -3056,7 +3030,6 @@ int mbtrnpreprocess_input_open
     fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-  /* return */
   return status;
 } /* mbtrnpreprocess_input_open */
 /*--------------------------------------------------------------------*/
@@ -3070,11 +3043,9 @@ int mbtrnpreprocess_input_read
   int *error
 )
 {
-  /* local variables */
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
 
-  /* print input debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3098,7 +3069,6 @@ int mbtrnpreprocess_input_read
    * The internal buffer should be allocated in mbtrnpreprocess_input_init() and stored
    * in the mb_io_struct structure *mb_io_ptr. */
 
-  /* print output debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -3108,7 +3078,6 @@ int mbtrnpreprocess_input_read
     fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-  /* return */
   return status;
 } /* mbtrnpreprocess_input_read */
 /*--------------------------------------------------------------------*/
@@ -3120,11 +3089,9 @@ int mbtrnpreprocess_input_close
   int *error
 )
 {
-  /* local variables */
   int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
 
-  /* print input debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3143,7 +3110,6 @@ int mbtrnpreprocess_input_close
    * mbtrnpreprocess_input_read(). Deallocate the internal, hidden buffer and any
    * other resources that were allocated by mbtrnpreprocess_input_init(). */
 
-  /* print output debug statements */
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -3153,7 +3119,6 @@ int mbtrnpreprocess_input_close
     fprintf(stderr, "dbg2       status:             %d\n", status);
     }
 
-  /* return */
   return status;
 } /* mbtrnpreprocess_input_close */
 /*--------------------------------------------------------------------*/

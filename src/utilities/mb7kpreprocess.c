@@ -935,19 +935,16 @@ int main(int argc, char **argv) {
 		sonardepth_source = R7KRECID_Depth;
 	}
 
-	/* if error flagged then print it and exit */
 	if (errflg) {
 		fprintf(stderr, "usage: %s\n", usage_message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
 	}
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -3406,7 +3403,6 @@ int main(int argc, char **argv) {
 				 */
 			}
 
-			/* print debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 				fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -4012,7 +4008,6 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* print it all out */
 		for (i = 0; i < nbatht; i++) {
 			mb_get_date(verbose, batht_time_d[i], time_i);
 			fprintf(stderr, "Ping: %7d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %15.6f %10.6f %2d  %15.6f", batht_ping[i],
@@ -7255,7 +7250,6 @@ int main(int argc, char **argv) {
 					 */
 				}
 
-				/* print debug statements */
 				if (verbose >= 2) {
 					fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 					fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -7729,13 +7723,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
-	/* end it all */
+
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

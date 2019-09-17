@@ -211,13 +211,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(output, "\nProgram %s\n", program_name);
 		fprintf(output, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(output, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -566,7 +564,6 @@ int main(int argc, char **argv) {
 	if (mb_data_nav_source_list == MB_YES)
 		fprintf(output, "%d navigation source data records listed\n", mb_data_nav_source_count);
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

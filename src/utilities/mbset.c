@@ -173,7 +173,6 @@ the manual pages for mbprocess and mbset. \n\n";
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
@@ -916,7 +915,6 @@ the manual pages for mbprocess and mbset. \n\n";
 			write_parameter_file = MB_YES;
 		}
 
-		/* print starting debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -926,7 +924,6 @@ the manual pages for mbprocess and mbset. \n\n";
 			fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		}
 
-		/* print starting info statements */
 		if (verbose == 1) {
 			fprintf(stderr, "\nProgram <%s>\n", program_name);
 			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -1275,7 +1272,6 @@ the manual pages for mbprocess and mbset. \n\n";
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
