@@ -92,26 +92,24 @@ struct ctd_calibration_struct {
 void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr);
 double calcPressure(struct ctd_calibration_struct *calibration_ptr,
 				double presCounts, double temperature);
-double calcTemp(struct ctd_calibration_struct *calibration_ptr,
+double calcTemp(const struct ctd_calibration_struct *calibration_ptr,
 				double tempCounts);
-double calcCond(struct ctd_calibration_struct *calibration_ptr,
+double calcCond(const struct ctd_calibration_struct *calibration_ptr,
 				double cFreq, double temp, double pressure);
 
+static const char program_name[] = "MBauvloglist";
+static const char help_message[] = "MBauvloglist lists table data from an MBARI AUV mission log file.";
+static const char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -Rid -S -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBauvloglist";
-	char help_message[] = "MBauvloglist lists table data from an MBARI AUV mission log file.";
-	char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -Rid -S -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message = NULL;
@@ -220,14 +218,9 @@ int main(int argc, char **argv) {
 	int ivalue;
 	int index;
 	int jinterp = 0;
-	int nchar;
-	int nget;
-	int nav_ok;
-	int interp_status;
-	int i, j, ii;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set file to null */
 	file[0] = '\0';
@@ -322,13 +315,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -366,7 +357,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       ctd_calibration_id:   %d\n", ctd_calibration_id);
 		fprintf(stderr, "dbg2       calc_ktime:           %d\n", calc_ktime);
 		fprintf(stderr, "dbg2       nprintfields:         %d\n", nprintfields);
-		for (i = 0; i < nprintfields; i++)
+		for (int i = 0; i < nprintfields; i++)
 			fprintf(stderr, "dbg2         printfields[%d]:      %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
 			        printfields[i].format);
 	}
@@ -382,7 +373,7 @@ int main(int argc, char **argv) {
 	if (nav_merge == MB_YES && strlen(nav_file) > 0) {
 		/* count the data points in the nav file */
 		nav_num = 0;
-		nchar = MB_PATH_MAXLINE - 1;
+		const int nchar = MB_PATH_MAXLINE - 1;
 		if ((fp = fopen(nav_file, "r")) == NULL) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", nav_file);
@@ -424,10 +415,12 @@ int main(int argc, char **argv) {
 			exit(error);
 		}
 		while ((result = fgets(buffer, nchar, fp)) == buffer) {
-			nget = sscanf(buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
-			              &time_i[3], &time_i[4], &sec, &nav_time_d[nav_num], &nav_navlon[nav_num], &nav_navlat[nav_num],
-			              &nav_heading[nav_num], &nav_speed[nav_num], &nav_sensordepth[nav_num], &nav_roll[nav_num],
-			              &nav_pitch[nav_num], &nav_heave[nav_num]);
+			const int nget = sscanf(
+				buffer, "%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", &time_i[0], &time_i[1], &time_i[2],
+				&time_i[3], &time_i[4], &sec, &nav_time_d[nav_num], &nav_navlon[nav_num], &nav_navlat[nav_num],
+				&nav_heading[nav_num], &nav_speed[nav_num], &nav_sensordepth[nav_num], &nav_roll[nav_num],
+				&nav_pitch[nav_num], &nav_heave[nav_num]);
+			int nav_ok;
 			if (nget >= 9)
 				nav_ok = MB_YES;
 			else
@@ -475,8 +468,9 @@ int main(int argc, char **argv) {
 			if (strcmp(type, "double") == 0) {
 				fields[nfields].type = TYPE_DOUBLE;
 				fields[nfields].size = 8;
+				/* TODO(schwehr): Is something missing? */
 				if (angles_in_degrees == MB_YES &&
-				    (strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mLonK") == 0 ||
+				    (/* strcmp(fields[nfields].name, "mLatK") == 0 || */ strcmp(fields[nfields].name, "mLonK") == 0 ||
 				     strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mRollK") == 0 ||
 				     strcmp(fields[nfields].name, "mPitchK") == 0 || strcmp(fields[nfields].name, "mHeadK") == 0 ||
 				     strcmp(fields[nfields].name, "mYawK") == 0 || strcmp(fields[nfields].name, "mLonCB") == 0 ||
@@ -545,7 +539,7 @@ int main(int argc, char **argv) {
 	/* by default print everything */
 	if (nprintfields == 0) {
 		nprintfields = nfields;
-		for (i = 0; i < nfields; i++) {
+		for (int i = 0; i < nfields; i++) {
 			strcpy(printfields[i].name, fields[i].name);
 			printfields[i].index = i;
 			printfields[i].formatset = MB_NO;
@@ -585,7 +579,7 @@ int main(int argc, char **argv) {
     }
 
 	/* check the fields to be printed */
-	for (i = 0; i < nprintfields; i++) {
+	for (int i = 0; i < nprintfields; i++) {
 		if (strcmp(printfields[i].name, "zero") == 0) {
 			printfields[i].index = INDEX_ZERO;
 			if (printfields[i].formatset == MB_NO) {
@@ -701,7 +695,7 @@ int main(int argc, char **argv) {
 			}
 		}
 		else {
-			for (j = 0; j < nfields; j++) {
+			for (int j = 0; j < nfields; j++) {
 				if (strcmp(printfields[i].name, fields[j].name) == 0)
 					printfields[i].index = j;
 			}
@@ -713,7 +707,7 @@ int main(int argc, char **argv) {
 
 	/* if verbose print list of print field names */
 	if (verbose > 0) {
-		for (i = 0; i < nprintfields; i++) {
+		for (int i = 0; i < nprintfields; i++) {
 			if (i == 0)
 				fprintf(stdout, "# ");
 			fprintf(stdout, "%s", printfields[i].name);
@@ -724,12 +718,14 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	/* int interp_status;  TODO(schwehr): Remove or test. */
+
 	/* read the data records in the auv log file */
 	nrecord = 0;
 	while (fread(buffer, recordsize, 1, fp) == 1) {
         /* recalculate CTD data if requested */
         if (recalculate_ctd == MB_YES) {
-            for (ii = 0; ii < nfields; ii++) {
+            for (int ii = 0; ii < nfields; ii++) {
                 if (strcmp(fields[ii].name, "cond_frequency") == 0)
                     mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &cond_frequency);
                 else if (strcmp(fields[ii].name, "temp_counts") == 0)
@@ -744,17 +740,17 @@ int main(int argc, char **argv) {
                                 thermistor);
             conductivity_calc = calcCond(&ctd_calibration, cond_frequency,
                                 temperature_calc, pressure_calc);
-            interp_status = mb_seabird_salinity(verbose, conductivity_calc, temperature_calc,
+            /* interp_status = */ mb_seabird_salinity(verbose, conductivity_calc, temperature_calc,
                                 pressure_calc, &salinity_calc, &error);
-            interp_status = mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
+            /* interp_status = */ mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
                                         salinity_calc, temperature_calc, pressure_calc,
                                         &soundspeed_calc, &error);
-            interp_status = mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
+            /* interp_status = */ mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
                                         &potentialtemperature_calc, &error);
-            interp_status = mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+            /* interp_status = */ mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
         } else if (ctd_available == MB_YES) {
             /* else deal with existing values if available */
-            for (ii = 0; ii < nprintfields; ii++) {
+            for (int ii = 0; ii < nprintfields; ii++) {
 				if (strcmp(fields[ii].name, "temperature") == 0)
 						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &temperature_calc);
 				else if (strcmp(fields[ii].name, "calculated_salinity") == 0)
@@ -764,12 +760,12 @@ int main(int argc, char **argv) {
 				else if (strcmp(fields[ii].name, "pressure") == 0)
 						mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &pressure_calc);
 				}
-            interp_status = mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
+            /* interp_status = */ mb_seabird_soundspeed(verbose, MB_SOUNDSPEEDALGORITHM_DELGROSSO,
                                         salinity_calc, temperature_calc, pressure_calc,
                                         &soundspeed_calc, &error);
-            interp_status = mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
+            /* interp_status = */ mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
                                         &potentialtemperature_calc, &error);
-            interp_status = mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
+            /* interp_status = */ mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
         }
     
         /* calculate timestamp by adding Kearfott second-of-day value (utcTime) to seconds to the start of day
@@ -778,7 +774,7 @@ int main(int argc, char **argv) {
             /* else deal with existing values if available */
             startofday_time_d = 0.0;
             ktime_calc = 0.0;
-            for (ii = 0; ii < nfields; ii++) {
+            for (int ii = 0; ii < nfields; ii++) {
 				if (strcmp(fields[ii].name, "time") == 0) {
                         mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &time_d);
                         startofday_time_d = MB_SECINDAY * floor(time_d / MB_SECINDAY);
@@ -791,7 +787,7 @@ int main(int argc, char **argv) {
         }
 
         /* loop over the printfields */
-		for (i = 0; i < nprintfields; i++) {
+		for (int i = 0; i < nprintfields; i++) {
 			index = printfields[i].index;
 			if (index == INDEX_ZERO) {
 				dvalue = 0.0;
@@ -801,7 +797,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (index == INDEX_MERGE_LON) {
-				interp_status = mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, nav_num, time_d, &dvalue,
+				/* interp_status = */ mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, nav_num, time_d, &dvalue,
 				                                           &jinterp, &error);
 				if (jinterp < 2 || jinterp > nav_num - 2)
 					dvalue = 0.0;
@@ -811,7 +807,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (index == INDEX_MERGE_LAT) {
-				interp_status = mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, nav_num, time_d, &dvalue,
+				/* interp_status = */ mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, nav_num, time_d, &dvalue,
 				                                          &jinterp, &error);
 				if (jinterp < 2 || jinterp > nav_num - 2)
 					dvalue = 0.0;
@@ -821,7 +817,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (index == INDEX_MERGE_HEADING) {
-				interp_status = mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nav_num, time_d, &dvalue,
+				/* interp_status = */ mb_linear_interp_heading(verbose, nav_time_d - 1, nav_heading - 1, nav_num, time_d, &dvalue,
 				                                         &jinterp, &error);
 				if (jinterp < 2 || jinterp > nav_num - 2)
 					dvalue = 0.0;
@@ -831,7 +827,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (index == INDEX_MERGE_SPEED) {
-				interp_status =
+				/* interp_status = */
 				    mb_linear_interp(verbose, nav_time_d - 1, nav_speed - 1, nav_num, time_d, &dvalue, &jinterp, &error);
 				if (jinterp < 2 || jinterp > nav_num - 2)
 					dvalue = 0.0;
@@ -841,7 +837,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (index == INDEX_MERGE_SENSORDEPTH) {
-				interp_status =
+				/* interp_status = */
 				    mb_linear_interp(verbose, nav_time_d - 1, nav_sensordepth - 1, nav_num, time_d, &dvalue, &jinterp, &error);
 				if (jinterp < 2 || jinterp > nav_num - 2)
 					dvalue = 0.0;
@@ -851,7 +847,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (index == INDEX_MERGE_ROLL) {
-				interp_status =
+				/* interp_status = */
 				    mb_linear_interp(verbose, nav_time_d - 1, nav_roll - 1, nav_num, time_d, &dvalue, &jinterp, &error);
 				if (jinterp < 2 || jinterp > nav_num - 2)
 					dvalue = 0.0;
@@ -861,7 +857,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (index == INDEX_MERGE_PITCH) {
-				interp_status =
+				/* interp_status = */
 				    mb_linear_interp(verbose, nav_time_d - 1, nav_pitch - 1, nav_num, time_d, &dvalue, &jinterp, &error);
 				if (jinterp < 2 || jinterp > nav_num - 2)
 					dvalue = 0.0;
@@ -871,7 +867,7 @@ int main(int argc, char **argv) {
 					fprintf(stdout, printfields[i].format, dvalue);
 			}
 			else if (index == INDEX_MERGE_HEAVE) {
-				interp_status =
+				/* interp_status = */
 				    mb_linear_interp(verbose, nav_time_d - 1, nav_heave - 1, nav_num, time_d, &dvalue, &jinterp, &error);
 				if (jinterp < 2 || jinterp > nav_num - 2)
 					dvalue = 0.0;
@@ -1022,14 +1018,12 @@ int main(int argc, char **argv) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&nav_heave, &error);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
@@ -1060,8 +1054,6 @@ void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr)
 	calibration_ptr->j = 5.724026e-005;
 	calibration_ptr->cpcor = -9.5700e-008;
 	calibration_ptr->ctcor = 3.2500e-006;
-
-	return;
 }
 
 //returns pressure in dbar. Returned pressure is zero at surface, assuming
@@ -1087,22 +1079,22 @@ double calcPressure(struct ctd_calibration_struct *calibration_ptr,
 }
 
 //return ITS90 temperature
-double calcTemp(struct ctd_calibration_struct *calibration_ptr,
+double calcTemp(const struct ctd_calibration_struct *calibration_ptr,
 				double tempCounts)
 {
-  double mv = (double)((double)tempCounts - 524288.0) / (double)1.6e7;
-  double r  = (mv * (double)2.295e10 + (double)9.216e8)
+  const double mv = (double)((double)tempCounts - 524288.0) / (double)1.6e7;
+  const double r  = (mv * (double)2.295e10 + (double)9.216e8)
                       / ((double)6.144e4 - mv*(double)5.3e5);
-  double ln_r = log(r);
+  const double ln_r = log(r);
 
-  double temp = 1. / ( calibration_ptr->a0 + calibration_ptr->a1*ln_r
+  const double temp = 1. / ( calibration_ptr->a0 + calibration_ptr->a1*ln_r
 					  + calibration_ptr->a2*ln_r*ln_r
 					  + calibration_ptr->a3*ln_r*ln_r*ln_r)
                       - (double)273.15;
   return temp;
 }
 
-double calcCond(struct ctd_calibration_struct *calibration_ptr,
+double calcCond(const struct ctd_calibration_struct *calibration_ptr,
 				double cFreq, double temp, double pressure)
 {
 
