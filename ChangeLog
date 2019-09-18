@@ -20,7 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
-  Version 5.7.6beta9     September 18, 2019
+  Version 5.7.6beta10    September 18, 2019
   Version 5.7.6beta8     September 9, 2019
   Version 5.7.6beta6     August 26, 2019
   Version 5.7.6beta5     August 6, 2019
@@ -325,7 +325,7 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
------> 5.7.6beta9 (September 18, 2019)
+-----> 5.7.6beta10 (September 18, 2019)
 
 Mbnavadjust: Changed the contouring displayed during analysis of crossings to
 be based on a triangular mesh representation of the bathymetry data for each

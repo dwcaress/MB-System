@@ -2457,6 +2457,9 @@ int mbnavadjust_read_triangles(int verbose, struct mbna_project *project,
         != sizeof(tfile_version_minor))
       status = MB_FAILURE;
     if (status == MB_SUCCESS
+        && (read_size = fread(&(swath->triangle_scale), 1, sizeof(double), tfp)) != sizeof(double))
+      status = MB_FAILURE;
+    if (status == MB_SUCCESS
         && (read_size = fread(&(swath->npts), 1, sizeof(int), tfp)) != sizeof(int))
       status = MB_FAILURE;
     if (status == MB_SUCCESS
@@ -2627,6 +2630,8 @@ int mbnavadjust_write_triangles(int verbose, struct mbna_project *project,
       if ((write_size = fwrite(&tfile_version_major, 1, sizeof(unsigned short), tfp)) != sizeof(unsigned short))
         status &= MB_FAILURE;
       if ((write_size = fwrite(&tfile_version_minor, 1, sizeof(unsigned short), tfp)) != sizeof(unsigned short))
+        status &= MB_FAILURE;
+      if ((write_size = fwrite(&(swath->triangle_scale), 1, sizeof(double), tfp)) != sizeof(double))
         status &= MB_FAILURE;
       if ((write_size = fwrite(&(swath->npts), 1, sizeof(int), tfp)) != sizeof(int))
         status &= MB_FAILURE;
@@ -2994,7 +2999,7 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
         status = MB_SUCCESS;
         *error = MB_ERROR_NO_ERROR;
         status = mb_triangulate(verbose, swath, error);
-        if (status == MB_SUCCESS && swath->ntri > 0) {
+        if (status == MB_SUCCESS) {
           status = mbnavadjust_write_triangles(verbose, project, file_id, section_id, swath, error);
         }
       }
