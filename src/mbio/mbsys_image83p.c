@@ -192,7 +192,6 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 			bathalongtrack[i] = store->bathalongtrack[i];
 		}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -224,7 +223,6 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		/* copy comment */
 		strncpy(comment, store->comment, MBSYS_IMAGE83P_COMMENTLEN);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -658,7 +656,6 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int
 		*pitch = 0.1 * (store->pitch - 900.0) + ((double)store->profile_tilt_angle - 180.0);
 		*heave = store->heave;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

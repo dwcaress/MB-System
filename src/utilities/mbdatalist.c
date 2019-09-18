@@ -337,13 +337,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(output, "\nProgram %s\n", program_name);
 		fprintf(output, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(output, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -651,14 +649,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(output, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(output, "dbg2  Ending status:\n");
 		fprintf(output, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

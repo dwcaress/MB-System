@@ -68,21 +68,19 @@
 // Includes 
 /////////////////////////
 #include <inttypes.h>
-
+#include <stdbool.h>
 /////////////////////////
 // Macros
 /////////////////////////
 /// @def mswap_16(x)
 /// @brief swap 16-bit values
 /// @param[n] x value to swap
-/// @return byte-swapped value of x
 #define mswap_16(x) \
 (((((uint16_t)x) >> 8) & 0x00FF) | ((((uint16_t)x) << 8) & 0xFF00))
 
 /// @def mswap_32(x)
 /// @brief swap 32-bit values
 /// @param[n] x value to swap
-/// @return byte-swapped value of x
 #define mswap_32(x) \
 (((((uint32_t)x) >> 24) & 0x000000FF) | ((((uint32_t)x) >>  8) & 0x0000FF00) | \
 ((((uint32_t)x) <<  8) & 0x00FF0000) | ((((uint32_t)x) << 24) & 0xFF000000))
@@ -90,7 +88,6 @@
 /// @def mswap_64(x)
 /// @brief swap 64-bit values
 /// @param[n] x value to swap
-/// @return byte-swapped value of x
 #define mswap_64(x) \
 (((((uint64_t)x) >> 56) & 0x00000000000000ffULL)| ((((uint64_t)x) >> 40) & 0x000000000000ff00ULL) | \
 ((((uint64_t)x) >> 24) & 0x0000000000ff0000ULL) | ((((uint64_t)x) >>  8) & 0x00000000ff000000ULL) | \
@@ -108,14 +105,27 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    /// @fn int mswap_bytes(unsigned char *dest, unsigned char *src, size_t len)
-    /// @brief byte-swap arbitrary length byte arrays
-    /// @param[n] dest output array (may be NULL)
+    /// @fn int mswap_bytes(void *src, size_t len)
+    /// @brief byte-swap arbitrary length byte arrays (in place)
     /// @param[n] src values to swap
     /// @param[n] len number of bytes (>0, even)
-    /// @return 0 on success, -1 otherwise (invalid argument(s)).
-    /// swaps src in place if dest is NULL, otherwise, sets dest and src is unchanged
-    int  mswap_bytes(void *dest, void *src, size_t len);
+    int  mswap_bytes(void *src, size_t len);
+    
+    /// @fn int mswap_bytes_mem(void *dest, void *src, size_t len)
+    /// @brief byte-swap arbitrary length byte arrays
+    /// @param[n] dest output array
+    /// @param[n] src values to swap
+    /// @param[n] len number of bytes (>0, even)
+    int  mswap_bytes_mem(void *dest, void *src, size_t len);
+    
+#ifdef WITH_MSWAP_TEST
+    /// @fn int mswap_test(int verbose)
+    /// @brief byte-swap unit test
+    /// @param[in] verbose enable verbose output >=0
+    /// @return 0 in success, -1 otherwise
+    int mswap_test(int verbose);
+#endif
+    
 #ifdef __cplusplus
 }
 #endif

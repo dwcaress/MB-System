@@ -449,7 +449,6 @@ int mbr_em710raw_rd_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                %d\n", store->type);
@@ -947,7 +946,6 @@ file will return error */
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -1186,7 +1184,6 @@ int mbr_em710raw_rd_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -1280,7 +1277,6 @@ int mbr_em710raw_rd_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -1358,7 +1354,6 @@ int mbr_em710raw_rd_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -1434,7 +1429,6 @@ int mbr_em710raw_rd_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -1545,7 +1539,6 @@ int mbr_em710raw_rd_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -1657,7 +1650,6 @@ int mbr_em710raw_rd_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -1768,7 +1760,6 @@ int mbr_em710raw_rd_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -1913,7 +1904,6 @@ int mbr_em710raw_rd_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -2052,7 +2042,6 @@ int mbr_em710raw_rd_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 			store->kind = MB_DATA_ATTITUDE1;
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:            %d\n", store->kind);
@@ -2202,7 +2191,6 @@ int mbr_em710raw_rd_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       kind:                 %d\n", store->kind);
@@ -2367,7 +2355,6 @@ int mbr_em710raw_rd_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -2482,7 +2469,6 @@ int mbr_em710raw_rd_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -2594,7 +2580,6 @@ int mbr_em710raw_rd_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -2786,7 +2771,6 @@ int mbr_em710raw_rd_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                  %d\n", store->type);
@@ -3009,7 +2993,6 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -3182,7 +3165,6 @@ int mbr_em710raw_rd_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                  %d\n", store->type);
@@ -3419,7 +3401,6 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:               %d\n", store->type);
@@ -3623,7 +3604,6 @@ int mbr_em710raw_rd_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -4933,7 +4913,6 @@ int mbr_em710raw_wr_start(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -5515,7 +5494,6 @@ int mbr_em710raw_wr_status(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                %d\n", store->type);
@@ -5676,7 +5654,6 @@ int mbr_em710raw_wr_run_parameter(int verbose, void *mbio_ptr, int swap, struct 
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -5819,7 +5796,6 @@ int mbr_em710raw_wr_clock(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -5928,7 +5904,6 @@ int mbr_em710raw_wr_tide(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -6031,7 +6006,6 @@ int mbr_em710raw_wr_height(int verbose, void *mbio_ptr, int swap, struct mbsys_s
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -6142,7 +6116,6 @@ int mbr_em710raw_wr_heading(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	/* get storage structure */
 	heading = (struct mbsys_simrad3_heading_struct *)store->heading;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -6286,7 +6259,6 @@ int mbr_em710raw_wr_ssv(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	/* get storage structure */
 	ssv = (struct mbsys_simrad3_ssv_struct *)store->ssv;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -6428,7 +6400,6 @@ int mbr_em710raw_wr_tilt(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 	/* get storage structure */
 	tilt = (struct mbsys_simrad3_tilt_struct *)store->tilt;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -6570,7 +6541,6 @@ int mbr_em710raw_wr_extraparameters(int verbose, void *mbio_ptr, int swap, struc
 	/* get storage structure */
 	extraparameters = (struct mbsys_simrad3_extraparameters_struct *)store->extraparameters;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -6716,7 +6686,6 @@ int mbr_em710raw_wr_attitude(int verbose, void *mbio_ptr, int swap, struct mbsys
 	/* get storage structure */
 	attitude = (struct mbsys_simrad3_attitude_struct *)store->attitude;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -6866,7 +6835,6 @@ int mbr_em710raw_wr_netattitude(int verbose, void *mbio_ptr, int swap, struct mb
 	/* get storage structure */
 	netattitude = (struct mbsys_simrad3_netattitude_struct *)store->netattitude;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                 %d\n", store->type);
@@ -7024,7 +6992,6 @@ int mbr_em710raw_wr_pos(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -7167,7 +7134,6 @@ int mbr_em710raw_wr_svp(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -7311,7 +7277,6 @@ int mbr_em710raw_wr_svp2(int verbose, void *mbio_ptr, int swap, struct mbsys_sim
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -7459,7 +7424,6 @@ int mbr_em710raw_wr_bath2(int verbose, void *mbio_ptr, int swap, struct mbsys_si
 	/* set which storage structure to use */
 	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                  %d\n", store->type);
@@ -7622,7 +7586,6 @@ int mbr_em710raw_wr_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 	/* set which storage structure to use */
 	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);
@@ -7824,7 +7787,6 @@ int mbr_em710raw_wr_quality(int verbose, void *mbio_ptr, int swap, struct mbsys_
 	/* set which storage structure to use */
 	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:                  %d\n", store->type);
@@ -7966,7 +7928,6 @@ int mbr_em710raw_wr_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 	/* set which storage structure to use */
 	ping = (struct mbsys_simrad3_ping_struct *)&(store->pings[store->ping_index]);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:               %d\n", store->type);
@@ -8152,7 +8113,6 @@ int mbr_em710raw_wr_wc(int verbose, void *mbio_ptr, int swap, struct mbsys_simra
 	/* get storage structure */
 	wc = (struct mbsys_simrad3_watercolumn_struct *)store->wc;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:            %d\n", store->type);

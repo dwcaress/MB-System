@@ -326,7 +326,6 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 				amp[ibeam] = reflscale * store->profile[i].amp[j];
 			}
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");
@@ -362,7 +361,6 @@ int mbsys_elac_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind, 
 		/* copy comment */
 		strcpy(comment, store->comment);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New ping read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New ping values:\n");
@@ -864,7 +862,6 @@ int mbsys_elac_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *ki
 		*pitch = 0.005 * store->profile[0].pitch;
 		*heave = 0.001 * store->profile[0].heave;
 
-		/* print debug statements */
 		if (verbose >= 5) {
 			fprintf(stderr, "\ndbg4  Data extracted by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Extracted values:\n");

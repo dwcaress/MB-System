@@ -56,7 +56,6 @@ int mb_mem_debug_on(int verbose, int *error) {
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
-	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
@@ -89,7 +88,6 @@ int mb_mem_debug_off(int verbose, int *error) {
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
-	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
@@ -140,7 +138,6 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
 		status = MB_SUCCESS;
 	}
 
-	/* print debug statements */
 	if ((verbose >= 5 || mb_mem_debug) && size > 0) {
 		fprintf(stderr, "\ndbg5  Memory allocated in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       i:%d  ptr:%p  size:%zu\n", n_mb_alloc, (void *)*ptr, size);
@@ -161,7 +158,6 @@ int mb_malloc(int verbose, size_t size, void **ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
@@ -212,7 +208,6 @@ int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size,
 		status = MB_SUCCESS;
 	}
 
-	/* print debug statements */
 	if ((verbose >= 5 || mb_mem_debug) && size > 0) {
 		fprintf(stderr, "\ndbg5  Memory allocated in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       i:%d  ptr:%p  size:%zu\n", n_mb_alloc, (void *)*ptr, size);
@@ -235,7 +230,6 @@ int mb_mallocd(int verbose, const char *sourcefile, int sourceline, size_t size,
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
@@ -323,13 +317,11 @@ int mb_realloc(int verbose, size_t size, void **ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if ((verbose >= 5 || mb_mem_debug) && size > 0) {
 		fprintf(stderr, "\ndbg5  Memory reallocated in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       i:%d  ptr:%p  size:%zu\n", n_mb_alloc, (void *)*ptr, size);
 	}
 
-	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
@@ -429,14 +421,12 @@ int mb_reallocd(int verbose, const char *sourcefile, int sourceline, size_t size
 		}
 	}
 
-	/* print debug statements */
 	if ((verbose >= 5 || mb_mem_debug) && size > 0) {
 		fprintf(stderr, "\ndbg5  Memory reallocated in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       i:%d  ptr:%p  size:%zu source:%s line:%d\n", n_mb_alloc, (void *)*ptr, size, sourcefile,
 		        sourceline);
 	}
 
-	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
@@ -506,13 +496,11 @@ int mb_free(int verbose, void **ptr, int *error) {
 		*ptr = NULL;
 	}
 
-	/* print debug statements */
 	if ((verbose >= 5 || mb_mem_debug) && iptr > -1) {
 		fprintf(stderr, "\ndbg5  Allocated memory freed in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       i:%d  ptr:%p  size:%zu\n", iptr, ptrvalue, ptrsize);
 	}
 
-	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
@@ -583,13 +571,11 @@ int mb_freed(int verbose, const char *sourcefile, int sourceline, void **ptr, in
 		*ptr = NULL;
 	}
 
-	/* print debug statements */
 	if ((verbose >= 5 || mb_mem_debug) && iptr > -1) {
 		fprintf(stderr, "\ndbg5  Allocated memory freed in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       i:%d  ptr:%p  size:%zu\n", iptr, (void *)ptrvalue, ptrsize);
 	}
 
-	/* print debug statements */
 	if (verbose >= 6 || mb_mem_debug) {
 		fprintf(stderr, "\ndbg6  Allocated memory list in MBIO function <%s>\n", __func__);
 		for (int i = 0; i < n_mb_alloc; i++)
@@ -621,7 +607,6 @@ int mb_memory_clear(int verbose, int *error) {
 
 	/* loop over all allocated memory */
 	for (int i = 0; i < n_mb_alloc; i++) {
-		/* print debug statements */
 		if (verbose >= 5 || mb_mem_debug) {
 			fprintf(stderr, "\ndbg5  Allocated memory freed in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       i:%d  ptr:%12p  size:%zu\n", i, (void *)mb_alloc_ptr[i], mb_alloc_size[i]);
@@ -693,7 +678,6 @@ int mb_memory_list(int verbose, int *error) {
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 	}
 
-	/* print debug statements */
 	if (verbose >= 4 || mb_mem_debug) {
 		if (n_mb_alloc > 0) {
 			fprintf(stderr, "\ndbg4  Allocated memory list in MBIO function <%s>\n", __func__);

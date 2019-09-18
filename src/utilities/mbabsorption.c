@@ -195,13 +195,11 @@ int main(int argc, char **argv) {
 	else
 		outfp = stderr;
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -229,7 +227,6 @@ int main(int argc, char **argv) {
 	status = mb_seabird_density(verbose, salinity, temperature, pressure, &density, &error);
 
 
-	/* print it out */
 	if (verbose > 0) {
 		fprintf(outfp, "\nProgram <%s>\n", program_name);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
@@ -249,14 +246,12 @@ int main(int argc, char **argv) {
 		fprintf(outfp, "%f\n", absorption);
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(outfp, "dbg2  Ending status:\n");
 		fprintf(outfp, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

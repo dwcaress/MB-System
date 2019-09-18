@@ -257,13 +257,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(outfp, "\nProgram %s\n", program_name);
 		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -402,7 +400,6 @@ int main(int argc, char **argv) {
 			status = MB_SUCCESS;
 		}
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 			fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -484,7 +481,6 @@ int main(int argc, char **argv) {
 			status = MB_SUCCESS;
 		}
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 			fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -595,7 +591,6 @@ int main(int argc, char **argv) {
 			status = MB_SUCCESS;
 		}
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 			fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -682,7 +677,6 @@ int main(int argc, char **argv) {
 			status = MB_SUCCESS;
 		}
 
-		/* print debug statements */
 		if (verbose >= 2) {
 			fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 			fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -732,7 +726,6 @@ int main(int argc, char **argv) {
 			/* set index */
 			indx = i + j * xdim;
 
-			/* print out id info */
 			fprintf(outfp, "\nRegion %d (%d %d) bounds:\n", j + i * ydim, i, j);
 			fprintf(outfp, "    Longitude: %9.4f %9.4f\n", bounds[0] + dx * i, bounds[0] + dx * (i + 1));
 			fprintf(outfp, "    Latitude:  %9.4f %9.4f\n", bounds[2] + dy * j, bounds[2] + dy * (j + 1));
@@ -893,14 +886,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

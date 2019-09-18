@@ -95,6 +95,9 @@
  "GNU General Public License for more details (http://www.gnu.org/licenses/gpl-3.0.html)\n"
  */
 #include <stdlib.h>
+#ifdef WITH_MSWAP_TEST
+#include <stdio.h>
+#endif
 #include "mswap.h"
 
 /////////////////////////
@@ -114,31 +117,71 @@
 // Function Definitions
 /////////////////////////
 
-int  mswap_bytes(void *dest, void *src, size_t len)
+int  mswap_bytes(void *src, size_t len)
 {
     int retval=-1;
     if( NULL!=src && (len>0) && ((len%2)==0) ){
         unsigned char *start=NULL, *end=NULL;
-        unsigned char *dstart=NULL, *dend=NULL;
-        unsigned char swap=0x00;
-        if(NULL==dest || dest==src){
-            // no dest or src==dest, swap in place
-            for ( start = (unsigned char *)src, end = start + len - 1; start < end; ++start, --end )
-            {
-                swap = *start;
-                *start = *end;
-                *end = swap;
-            }
-        }else{
-            dstart=(unsigned char *)dest;
-            dend=dstart+len-1;
-            for ( start = (unsigned char *)src, end = start + len - 1; start < end; ++start, --end, ++dstart, --dend )
-            {
-                *dstart=*end;
-                *dend=*start;
-            }
+
+        // no dest or src==dest, swap in place
+        for ( start = (unsigned char *)src, end = start + len - 1; start < end; ++start, --end )
+        {
+            unsigned char swap = *start;
+            *start = *end;
+            *end = swap;
         }
         retval=0;
     }
     return retval;
 }
+
+int  mswap_bytes_mem(void *dest, void *src, size_t len)
+{
+    int retval=-1;
+    if( NULL!=src && NULL!=dest && (len>0) && ((len%2)==0) ){
+        unsigned char *start=NULL, *end=NULL;
+        unsigned char *dstart=NULL, *dend=NULL;
+        
+        dstart=(unsigned char *)dest;
+        dend=dstart+len-1;
+        for ( start = (unsigned char *)src, end = start + len - 1; start < end; ++start, --end, ++dstart, --dend )
+        {
+            *dstart=*end;
+            *dend=*start;
+        }
+        retval=0;
+    }
+    return retval;
+}
+
+#ifdef WITH_MSWAP_TEST
+int mswap_test(int verbose)
+{
+    int retval=-1;
+    uint16_t err_count=0;
+    
+    uint16_t u16=0xABCD;
+    uint32_t u32=0xABCD1234;
+    uint64_t u64=0xABCD1234CAFEDEAD,d64=0;
+    
+    if(verbose)fprintf(stderr,"u16[%04X/%04X]\n",u16,mswap_16(u16));
+    if(mswap_16(u16)!=0xCDAB)err_count|=(1<<0);
+    
+    if(verbose)fprintf(stderr,"u32[%04X/%08X]\n",u32,mswap_32(u32));
+    if(mswap_32(u32)!=0x3412CDAB)err_count|=(1<<1);
+    
+    if(verbose)fprintf(stderr,"u64[%016lX/%016lX]\n",(long unsigned)u64,(long unsigned)mswap_64(u64));
+    if(mswap_64(u64)!=0xADDEFECA3412CDAB)err_count|=(1<<2);
+
+    if(verbose)fprintf(stderr,"u64[%016lX] (inplace)\n",(long unsigned)u64);
+    if(!(mswap_bytes(&u64,8)==0 && u64==0xADDEFECA3412CDAB))err_count|=(1<<3);
+    if(verbose)fprintf(stderr,"u64*[%016lX] (inplace)\n",(long unsigned)u64);
+    
+    if(!(mswap_bytes_mem(&d64,&u64,8)==0 && d64==0xABCD1234CAFEDEAD))err_count|=(1<<4);
+    if(verbose)fprintf(stderr,"u64[%016lX/%016lX] (mem)\n",(long unsigned)u64,(long unsigned)d64);
+
+    retval=err_count;
+    
+    return retval;
+}
+#endif

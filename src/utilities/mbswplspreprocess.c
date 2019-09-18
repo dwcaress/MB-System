@@ -213,7 +213,6 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting debug statements */
 	if (opts.verbose >= 1) {
 		print_mbdefaults(opts.verbose, &opts, &mbdflts, &error);
 	}
@@ -519,7 +518,6 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 	mb_path ofile[SWPLS_MAX_TXERS];
 	struct mbsys_swathplus_struct *istore = NULL;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -913,7 +911,6 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 static int ping_mode(int verbose, struct mbsys_swathplus_struct *store, int *mode, int *error) {
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1008,7 +1005,6 @@ static int zero_counts(int verbose, counts *recs, int *error) {
 static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct *store, int *error) {
 	int status = MB_SUCCESS;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");

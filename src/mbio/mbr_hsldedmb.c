@@ -376,7 +376,6 @@ int mbr_wt_hsldedmb(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *datacomment = (char *)data;
 	struct mbsys_hsds_struct *store = (struct mbsys_hsds_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Status at beginning of MBIO function <%s>\n", __func__);
 		if (store != NULL)

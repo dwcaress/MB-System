@@ -140,7 +140,6 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 	*nload = 0;
 	*error = MB_ERROR_NO_ERROR;
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Getting ready to read records in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nwant:         %d\n", nwant);
@@ -152,15 +151,12 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 	/* read records into the buffer until its full or eof */
 	int status = MB_SUCCESS;
 	while (*error <= MB_ERROR_NO_ERROR && *nload < nget) {
-		/* read the next data record */
 		int kind;
 		status &= mb_read_ping(verbose, mbio_ptr, store_ptr, &kind, error);
 
-		/* log errors */
 		if (*error < MB_ERROR_NO_ERROR)
 			mb_notice_log_error(verbose, mbio_ptr, *error);
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  New record read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       kind:          %d\n", kind);
@@ -193,7 +189,6 @@ int mb_buffer_load(int verbose, void *buff_ptr, void *mbio_ptr, int nwant, int *
 			}
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Buffer status in MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4       nbuffer:       %d\n", buff->nbuffer);
@@ -254,9 +249,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	/* get buffer structure */
 	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* figure out how much to dump */
 	*ndump = buff->nbuffer - nhold;
 	int status = MB_SUCCESS;
@@ -271,7 +263,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 		*ndump = 0;
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Buffer list in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
@@ -283,7 +274,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	/* dump records from buffer */
 	if (status == MB_SUCCESS) {
 		for (int i = 0; i < *ndump; i++) {
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Dumping record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
@@ -295,7 +285,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 			if (ombio_ptr != NULL)
 				status = mb_write_ping(verbose, ombio_ptr, buff->buffer[i], error);
 
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Deallocating record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
@@ -303,10 +292,9 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 				fprintf(stderr, "dbg4       kind:        %d\n", buff->buffer_kind[i]);
 			}
 
-			status = mb_deall(verbose, mbio_ptr, &buff->buffer[i], error);
+			status &= mb_deall(verbose, mbio_ptr, &buff->buffer[i], error);
 			buff->buffer[i] = NULL;
 
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Done dumping record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
@@ -315,7 +303,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 			}
 		}
 		for (int i = 0; i < nhold; i++) {
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Moving buffer record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       old:         %d\n", *ndump + i);
@@ -331,7 +318,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 			buff->buffer[*ndump + i] = NULL;
 			buff->buffer_kind[*ndump + i] = 0;
 
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Done moving buffer record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       old:         %d\n", *ndump + i);
@@ -345,7 +331,6 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 		buff->nbuffer = buff->nbuffer - *ndump;
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Buffer list at end of MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
@@ -383,9 +368,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 	/* get buffer structure */
 	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* figure out how much to dump */
 	*ndump = buff->nbuffer - nhold;
 	int status = MB_SUCCESS;
@@ -400,7 +382,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 		*ndump = 0;
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Buffer list in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
@@ -412,7 +393,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 	/* dump records from buffer */
 	if (status == MB_SUCCESS) {
 		for (int i = 0; i < *ndump; i++) {
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Deallocating record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
@@ -423,7 +403,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 			status = mb_deall(verbose, mbio_ptr, &buff->buffer[i], error);
 			buff->buffer[i] = NULL;
 
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Done dumping record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       record:      %d\n", i);
@@ -432,7 +411,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 			}
 		}
 		for (int i = 0; i < nhold; i++) {
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Moving buffer record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       old:         %d\n", *ndump + i);
@@ -448,7 +426,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 			buff->buffer[*ndump + i] = NULL;
 			buff->buffer_kind[*ndump + i] = 0;
 
-			/* print debug statements */
 			if (verbose >= 4) {
 				fprintf(stderr, "\ndbg4  Done moving buffer record in MBIO function <%s>\n", __func__);
 				fprintf(stderr, "dbg4       old:         %d\n", *ndump + i);
@@ -462,7 +439,6 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr, int nhold, int 
 		buff->nbuffer = buff->nbuffer - *ndump;
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Buffer list at end of MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4       nbuffer:     %d\n", buff->nbuffer);
@@ -503,9 +479,6 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr, int sta
 	/* get buffer structure */
 	struct mb_buffer_struct *buff;
 	buff = (struct mb_buffer_struct *)buff_ptr;
-
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* look for next survey data */
 	int found = MB_NO;
@@ -666,9 +639,6 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr, int id, int *
 	/* get buffer structure */
 	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* get store_ptr and kind for desired record */
 	int status = MB_SUCCESS;
 	char *store_ptr = NULL;
@@ -755,9 +725,6 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, i
 
 	/* get buffer structure */
 	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
-
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store_ptr and kind for desired record */
 	int status = MB_SUCCESS;
@@ -857,9 +824,6 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr, int id, int ti
 	/* get buffer structure */
 	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* get store_ptr for specified record */
 	int status = MB_SUCCESS;
 	if (id < 0 || id >= buff->nbuffer) {
@@ -914,9 +878,6 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr, int id, in
 	/* get buffer structure */
 	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* get store_ptr for specified record */
 	int status = MB_SUCCESS;
 	if (id < 0 || id >= buff->nbuffer) {
@@ -952,9 +913,6 @@ int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr, int id, int 
 	/* get buffer structure */
 	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
 
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
 	/* get store_ptr for specified record */
 	int status = MB_SUCCESS;
 	if (id < 0 || id >= buff->nbuffer) {
@@ -988,9 +946,6 @@ int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr, int id, void 
 
 	/* get buffer structure */
 	struct mb_buffer_struct *buff = (struct mb_buffer_struct *)buff_ptr;
-
-	/* get mbio descriptor */
-	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
 	/* get store_ptr for specified record */
 	int status = MB_SUCCESS;

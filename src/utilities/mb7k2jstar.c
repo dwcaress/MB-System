@@ -52,209 +52,76 @@
 #define MBES_ONLINE_THRESHOLD 15.0
 #define MBES_ONLINE_COUNT 30
 
+static const char help_message[] =
+    "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data \nfrom "
+    "Reson 7k format data and outputs in the Edgetech Jstar format.";
+static const char program_name[] = "mb7k2jstar";
+static const char usage_message[] =
+    "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat "
+    "-Lstartline/lineroot -Ooutfile -Rroutefile -X -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mb7k2jstar";
-	char help_message[] = "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data \nfrom Reson 7k format data and "
-	                      "outputs in the Edgetech Jstar format.";
-	char usage_message[] =
-	    "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile -X -H -V]";
 	extern char *optarg;
 	int errflg = 0;
-	int c;
 	int help = 0;
-	int flag = 0;
 
-	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
-
-	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
-	char read_file[MB_PATH_MAXLINE];
-	char output_file[MB_PATH_MAXLINE] = "";
-	char current_output_file[MB_PATH_MAXLINE];
-	int new_output_file = MB_YES;
-	int output_file_set = MB_NO;
-	void *datalist;
-	int look_processed = MB_DATALIST_LOOK_YES;
-	double file_weight;
 	int format = 0;
 	int pings;
 	int lonflip;
 	double bounds[4];
 	int btime_i[7];
 	int etime_i[7];
-	double btime_d;
-	double etime_d;
 	double speedmin;
 	double timegap;
-	char file[MB_PATH_MAXLINE] = "";
-	char dfile[MB_PATH_MAXLINE];
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-	double timeshift = 0.0;
 
-	/* MBIO read values */
-	void *imbio_ptr = NULL;
-	struct mb_io_struct *imb_io_ptr = NULL;
-	void *istore_ptr = NULL;
-	struct mbsys_reson7k_struct *istore = NULL;
-	void *ombio_ptr = NULL;
-	struct mb_io_struct *omb_io_ptr = NULL;
-	void *ostore_ptr = NULL;
-	struct mbsys_jstar_struct *ostore = NULL;
-	int kind;
-	int time_i[7];
-	int time_j[5];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
-	double roll;
-	double pitch;
-	double heave;
-	char *beamflag = NULL;
-	double *bath = NULL;
-	double *bathacrosstrack = NULL;
-	double *bathalongtrack = NULL;
-	double *amp = NULL;
-	double *ss = NULL;
-	double *ssacrosstrack = NULL;
-	double *ssalongtrack = NULL;
-	double *ttimes = NULL;
-	double *angles = NULL;
-	double *angles_forward = NULL;
-	double *angles_null = NULL;
-	double *bheave = NULL;
-	double *alongtrack_offset = NULL;
-	double draft;
-	double ssv;
-	double ssv_use = 1500.0;
+	/* get current default values */
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
-	char comment[MB_COMMENT_MAXLINE];
-	int icomment = 0;
+	/* set default input to datalist.mb-1 */
+	char read_file[MB_PATH_MAXLINE];
+	strcpy(read_file, "datalist.mb-1");
 
-	/* jstar data */
-	s7k_fsdwchannel *s7kchannel;       /* Channel header and data */
-	s7k_fsdwssheader *s7kssheader;     /* Edgetech sidescan header */
-	s7k_fsdwsegyheader *s7ksegyheader; /* Segy header for subbottom trace */
-	struct mbsys_jstar_channel_struct *channel;
-	int obeams_bath;
-	int obeams_amp;
-	int opixels_ss;
+	int startline = 1;
+	char lineroot[MB_PATH_MAXLINE];
+	strcpy(lineroot, "jstar");
 
-	/* extract modes */
-	int extract_sbp = MB_NO;
 	int extract_sslow = MB_NO;
 	int extract_sshigh = MB_NO;
+	int extract_sbp = MB_NO;
 	int print_comments = MB_NO;
+
+	int mode;
 
 	/* bottompick mode */
 	int bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
 	double bottompickthreshold = 0.4;
 
 	/* sidescan gain mode */
+	int ssflip = MB_NO;
 	int gainmode = MB7K2JSTAR_SSGAIN_OFF;
 	double gainfactor = 1.0;
-	int ssflip = MB_NO;
 
-	/* route and auto-line data */
+	int checkroutebearing = MB_NO;
+
+	char output_file[MB_PATH_MAXLINE+12] = "";
+	int output_file_set = MB_NO;
+
 	char route_file[MB_PATH_MAXLINE];
 	int route_file_set = MB_NO;
-	int checkroutebearing = MB_NO;
-	int rawroutefile = MB_NO;
-	char lineroot[MB_PATH_MAXLINE];
-	int nroutepoint = 0;
-	int nroutepointalloc = 0;
-	double lon;
-	double lat;
-	double topo;
-	int waypoint;
-	double *routelon = NULL;
-	double *routelat = NULL;
-	double *routeheading = NULL;
-	int *routewaypoint = NULL;
-	double range;
-	double rangethreshold = 50.0;
-	double rangelast;
-	int activewaypoint = 0;
-	int startline = 1;
-	int linenumber;
 
-	/* counting variables */
-	int nreaddata = 0;
-	int nreadheader = 0;
-	int nreadssv = 0;
-	int nreadnav1 = 0;
-	int nreadsbp = 0;
-	int nreadsslo = 0;
-	int nreadsshi = 0;
-	int nwritesbp = 0;
-	int nwritesslo = 0;
-	int nwritesshi = 0;
-	int nreaddatatot = 0;
-	int nreadheadertot = 0;
-	int nreadssvtot = 0;
-	int nreadnav1tot = 0;
-	int nreadsbptot = 0;
-	int nreadsslotot = 0;
-	int nreadsshitot = 0;
-	int nwritesbptot = 0;
-	int nwritesslotot = 0;
-	int nwritesshitot = 0;
-
-	int mode;
-	int format_status, format_guess;
-	int format_output = MBF_EDGJSTAR;
-	int shortspersample;
-	int trace_size;
-	char *data;
-	unsigned short *datashort;
-	double value, threshold;
-	double channelmax;
-	int channelpick;
-	double ttime_min;
-	double ttime_min_use;
-	int ttime_min_ok = MB_NO;
-	int beam_min;
 	int smooth = 0;
-	double factor;
-	double mtodeglon, mtodeglat;
-	double lastlon;
-	double lastlat;
-	double lastheading;
-	double headingdiff;
-	int oktowrite;
-	double dx, dy;
-	FILE *fp = NULL;
-	char *result;
-	int nget;
-	int point_ok;
 
-	int read_data;
-	int found;
-	int i, j, n;
+	double timeshift = 0.0;
 
-	startline = 1;
-	strcpy(lineroot, "jstar");
-
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
+	int error = MB_ERROR_NO_ERROR;
 
 	/* process argument list */
+	{
+	int flag = 0;
+	int c;
 	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
 		switch (c) {
 		case 'H':
@@ -298,14 +165,15 @@ int main(int argc, char **argv) {
 			flag++;
 			break;
 		case 'B':
-		case 'b':
-			n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+		case 'b': {
+			const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
 			if (n == 0)
 				bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
 			else if (n == 1 && bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
 				bottompickthreshold = 0.5;
 			flag++;
 			break;
+		}
 		case 'C':
 		case 'c':
 			print_comments = MB_YES;
@@ -365,8 +233,8 @@ int main(int argc, char **argv) {
 		case '?':
 			errflg++;
 		}
+	}
 
-	/* if error flagged then print it and exit */
 	if (errflg) {
 		fprintf(stderr, "usage: %s\n", usage_message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -374,13 +242,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -416,7 +282,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
 		fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
 		fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
-		fprintf(stderr, "dbg2       file:                %s\n", file);
+		/* fprintf(stderr, "dbg2       file:                %s\n", file); */
 		fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
 		fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
 		fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
@@ -429,12 +295,127 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
 	}
 
-	/* if help desired then print it and exit */
 	if (help) {
 		fprintf(stderr, "\n%s\n", help_message);
 		fprintf(stderr, "\nusage: %s\n", usage_message);
 		exit(error);
 	}
+
+	char *message;
+
+	/* MBIO read control parameters */
+	int read_datalist = MB_NO;
+	char current_output_file[MB_PATH_MAXLINE];
+	int new_output_file = MB_YES;
+	void *datalist;
+	double file_weight;
+	double btime_d;
+	double etime_d;
+	char dfile[MB_PATH_MAXLINE];
+	int beams_bath;
+	int beams_amp;
+	int pixels_ss;
+
+	/* MBIO read values */
+	void *imbio_ptr = NULL;
+	struct mb_io_struct *imb_io_ptr = NULL;
+	void *istore_ptr = NULL;
+	struct mbsys_reson7k_struct *istore = NULL;
+	void *ombio_ptr = NULL;
+	struct mb_io_struct *omb_io_ptr = NULL;
+	void *ostore_ptr = NULL;
+	struct mbsys_jstar_struct *ostore = NULL;
+	int kind;
+	int time_i[7];
+	int time_j[5];
+	double time_d;
+	double navlon;
+	double navlat;
+	double speed;
+	double heading;
+	double distance;
+	double altitude;
+	double sonardepth;
+	double roll;
+	double pitch;
+	double heave;
+	char *beamflag = NULL;
+	double *bath = NULL;
+	double *bathacrosstrack = NULL;
+	double *bathalongtrack = NULL;
+	double *amp = NULL;
+	double *ss = NULL;
+	double *ssacrosstrack = NULL;
+	double *ssalongtrack = NULL;
+	double *ttimes = NULL;
+	double *angles = NULL;
+	double *angles_forward = NULL;
+	double *angles_null = NULL;
+	double *bheave = NULL;
+	double *alongtrack_offset = NULL;
+	double draft;
+	double ssv;
+
+	char comment[MB_COMMENT_MAXLINE];
+	int icomment = 0;
+
+	/* jstar data */
+	s7k_fsdwchannel *s7kchannel;       /* Channel header and data */
+	s7k_fsdwssheader *s7kssheader;     /* Edgetech sidescan header */
+	s7k_fsdwsegyheader *s7ksegyheader = NULL; /* Segy header for subbottom trace */
+	struct mbsys_jstar_channel_struct *channel;
+	int obeams_bath;
+	int obeams_amp;
+	int opixels_ss;
+
+	/* route and auto-line data */
+	int nroutepoint = 0;
+	double lon;
+	double lat;
+	double topo;
+	int waypoint;
+	double *routelon = NULL;
+	double *routelat = NULL;
+	double *routeheading = NULL;
+	int *routewaypoint = NULL;
+	double range;
+	double rangethreshold = 50.0;
+	double rangelast;
+	int activewaypoint = 0;
+
+	/* counting variables */
+	int nwritesbp = 0;
+	int nwritesslo = 0;
+	int nwritesshi = 0;
+	int nreaddatatot = 0;
+	int nreadheadertot = 0;
+	int nreadssvtot = 0;
+	int nreadnav1tot = 0;
+	int nreadsbptot = 0;
+	int nreadsslotot = 0;
+	int nreadsshitot = 0;
+	int nwritesbptot = 0;
+	int nwritesslotot = 0;
+	int nwritesshitot = 0;
+
+	int format_status, format_guess;
+	int format_output = MBF_EDGJSTAR;
+	int shortspersample;
+	int trace_size;
+	char *data;
+	unsigned short *datashort;
+	double value, threshold;
+	double channelmax;
+	int channelpick;
+	double ttime_min;
+	double factor;
+	double mtodeglon, mtodeglat;
+	double headingdiff;
+	int oktowrite;
+	double dx, dy;
+	FILE *fp = NULL;
+
+	int read_data;
 
 	/* set output types if needed */
 	if (extract_sbp == MB_NO && extract_sslow == MB_NO && extract_sshigh == MB_NO) {
@@ -455,6 +436,7 @@ int main(int argc, char **argv) {
 		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
 
 	/* set starting line number and output file if route read */
+	int linenumber = 0;
 	if (route_file_set == MB_YES) {
 		linenumber = startline;
 		sprintf(output_file, "%s_%4.4d.mb132", lineroot, linenumber);
@@ -467,12 +449,12 @@ int main(int argc, char **argv) {
 	if (route_file_set == MB_YES) {
 		/* open the input file */
 		if ((fp = fopen(route_file, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
-			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
-			exit(status);
+			exit(MB_FAILURE);
 		}
-		rawroutefile = MB_NO;
+		int rawroutefile = MB_NO;
+		int nroutepointalloc = 0;
+		char *result;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
@@ -480,13 +462,14 @@ int main(int argc, char **argv) {
 				}
 			}
 			else {
-				nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
+				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
 						rawroutefile = MB_NO;
 					}
 				}
+				int point_ok;
 				if ((rawroutefile == MB_YES && nget >= 2) ||
 				    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
 					point_ok = MB_YES;
@@ -498,11 +481,11 @@ int main(int argc, char **argv) {
 					nroutepointalloc += MBES_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading,
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading,
 					                     &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
 					if (status != MB_SUCCESS) {
 						mb_error(verbose, error, &message);
@@ -549,7 +532,9 @@ int main(int argc, char **argv) {
 		read_datalist = MB_YES;
 
 	/* open file list */
+	char file[MB_PATH_MAXLINE] = "";
 	if (read_datalist == MB_YES) {
+		int look_processed = MB_DATALIST_LOOK_YES;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
@@ -672,21 +657,21 @@ int main(int argc, char **argv) {
 		}
 
 		/* read and print data */
-		nreaddata = 0;
-		nreadheader = 0;
-		nreadssv = 0;
-		nreadnav1 = 0;
-		nreadsbp = 0;
-		nreadsslo = 0;
-		nreadsshi = 0;
-		ttime_min_ok = MB_NO;
+		int nreaddata = 0;
+		int nreadheader = 0;
+		int nreadssv = 0;
+		int nreadnav1 = 0;
+		int nreadsbp = 0;
+		int nreadsslo = 0;
+		int nreadsshi = 0;
 
+		double ttime_min_use = 0.0;
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* reset error */
 			error = MB_ERROR_NO_ERROR;
 
 			/* read next data record */
-			status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+			status &= mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 			/*fprintf(stderr,"kind:%d %s \n\ttime_i:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %f    time_i:%4.4d/%2.2d/%2.2d
@@ -698,16 +683,6 @@ int main(int argc, char **argv) {
 			if (kind == MB_DATA_DATA && error < 0) {
 				status = MB_SUCCESS;
 				error = MB_ERROR_NO_ERROR;
-			}
-
-			/* save last nav and heading */
-			if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
-				if (navlon != 0.0)
-					lastlon = navlon;
-				if (navlat != 0.0)
-					lastlat = navlat;
-				if (heading != 0.0)
-					lastheading = heading;
 			}
 
 			/* check survey data position against waypoints */
@@ -765,25 +740,20 @@ int main(int argc, char **argv) {
 				status = mb_ttimes(verbose, imbio_ptr, istore_ptr, &kind, &beams_bath, ttimes, angles, angles_forward,
 				                   angles_null, bheave, alongtrack_offset, &draft, &ssv, &error);
 
-				/* check surface sound velocity */
-				if (ssv > 0.0)
-					ssv_use = ssv;
-
 				/* get bottom arrival time, if possible */
 				ttime_min = 0.0;
-				found = MB_NO;
-				for (i = 0; i < beams_bath; i++) {
+				int found = MB_NO;
+				for (int i = 0; i < beams_bath; i++) {
 					if (mb_beam_ok(beamflag[i])) {
 						if (found == MB_NO || ttimes[i] < ttime_min) {
 							ttime_min = ttimes[i];
-							beam_min = i;
+							/* beam_min = i; */
 							found = MB_YES;
 						}
 					}
 				}
 				if (found == MB_YES) {
 					ttime_min_use = ttime_min;
-					ttime_min_ok = MB_YES;
 				}
 				/*fprintf(stderr,"found:%d beam_min:%d ttime_min_use:%f\n", found, beam_min, ttime_min_use);*/
 			}
@@ -824,7 +794,7 @@ int main(int argc, char **argv) {
 				nwritesbp = 0;
 				nwritesslo = 0;
 				nwritesshi = 0;
-				if ((status = mb_write_init(verbose, output_file, MBF_EDGJSTAR, &ombio_ptr, &obeams_bath, &obeams_amp,
+				if ((status &= mb_write_init(verbose, output_file, MBF_EDGJSTAR, &ombio_ptr, &obeams_bath, &obeams_amp,
 				                            &opixels_ss, &error)) != MB_SUCCESS) {
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
@@ -948,12 +918,12 @@ int main(int argc, char **argv) {
 					channel->pingTime = s7ksegyheader->sequenceNumber; /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7ksegyheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7ksegyheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					for (i = 0; i < 2; i++) /* 12-15 */
+					for (int i = 0; i < 2; i++) /* 12-15 */
 						channel->reserved1[i] = 0; /* 16-27 */
 					channel->msb = 0; /* 16-17 */
 					channel->lsb1 = 0; /* 18-19 */
 					channel->lsb2 = 0; /* 20-21 */
-					for (i = 0; i < 3; i++) /* 22-27 */
+					for (int i = 0; i < 3; i++) /* 22-27 */
 						channel->reserved2[i] = s7ksegyheader->unused1[i+3];
 
 					channel->traceIDCode = s7ksegyheader->traceIDCode; /* 28-29 : ID Code (always 1 => seismic data) ** */
@@ -970,11 +940,11 @@ int main(int argc, char **argv) {
 					channel->NMEAantennaeR = s7ksegyheader->NMEAantennaeR; /* 36-37 : Distance from towfish to antennae in cm */
 					channel->NMEAantennaeO =
 					    s7ksegyheader->NMEAantennaeO; /* 38-39 : Distance to antennae starboard direction in cm */
-					for (i = 0; i < 2; i++) {
+					for (int i = 0; i < 2; i++) {
 						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
 					}
 					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
-					for (i = 0; i < 16; i++) {
+					for (int i = 0; i < 16; i++) {
 						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
 					}
 
@@ -992,10 +962,10 @@ int main(int argc, char **argv) {
                                   *         1 = X,Y in millimeters
                                   *         2 = X,Y in iminutes of arc times 10000
                                   *         3 = X,Y in decimeters */
-					for (i = 0; i < 24; i++)
+					for (int i = 0; i < 24; i++)
 						channel->annotation[i] = s7ksegyheader->annotation[i]; /* 90-113 : Annotation string */
 					channel->samples = s7ksegyheader->samples;
-								 /* 114-115 : Samples in this packet  
+								 /* 114-115 : Samples in this packet
 	                              *           Large sample sizes require multiple packets.
 	                              *           For protocol versions 0xA and above, the
 	                              *           MSB1 field should include the MSBs
@@ -1073,7 +1043,7 @@ int main(int argc, char **argv) {
 					    s7ksegyheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
 					channel->reserved10 = 0;   /* 206-207 : Reserved */
 					channel->reserved11 = 0; /* 208-209 : Reserved */
-					for (i = 0; i < 6; i++)
+					for (int i = 0; i < 6; i++)
 						channel->softwareVersion[i] = s7ksegyheader->softwareVersion[i]; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
 					channel->sphericalCorrection =
@@ -1110,7 +1080,7 @@ int main(int argc, char **argv) {
 					/* copy the trace */
 					if (status == MB_SUCCESS) {
 						data = (char *)channel->trace;
-						for (i = 0; i < trace_size; i++)
+						for (int i = 0; i < trace_size; i++)
 							data[i] = s7kchannel->data[i];
 					}
 
@@ -1119,14 +1089,14 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in trace */
 						if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC) {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								if (value >= threshold)
@@ -1135,13 +1105,13 @@ int main(int argc, char **argv) {
 						}
 						else {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = (double)(channel->trace[i]);
 								if (value >= threshold)
 									channelpick = i;
@@ -1219,12 +1189,12 @@ int main(int argc, char **argv) {
 					channel->pingTime = 0;                   /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7kssheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7kssheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					for (i = 0; i < 2; i++) /* 12-15 */
+					for (int i = 0; i < 2; i++) /* 12-15 */
 						channel->reserved1[i] = 0; /* 16-27 */
 					channel->msb = 0; /* 16-17 */
 					channel->lsb1 = 0; /* 18-19 */
 					channel->lsb2 = 0; /* 20-21 */
-					for (i = 0; i < 3; i++) /* 22-27 */
+					for (int i = 0; i < 3; i++) /* 22-27 */
 						channel->reserved2[i] = 0;
 
 					channel->traceIDCode = 1; /* 28-29 : ID Code (always 1 => seismic data) ** */
@@ -1237,11 +1207,11 @@ int main(int argc, char **argv) {
 					                                               /*   2 = 1 short  per sample  - before matched filter */
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
-					for (i = 0; i < 2; i++) {
+					for (int i = 0; i < 2; i++) {
 						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
 					}
 					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
-					for (i = 0; i < 16; i++) {
+					for (int i = 0; i < 16; i++) {
 						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
 					}
 
@@ -1255,7 +1225,7 @@ int main(int argc, char **argv) {
 					channel->coordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
 					channel->coordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
 					channel->coordUnits = 0;   /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
-					for (i = 0; i < 24; i++)
+					for (int i = 0; i < 24; i++)
 						channel->annotation[i] = 0;          /* 90-113 : Annotation string */
 					channel->samples = s7kssheader->samples; /* 114-115 : Samples in this packet ** */
 					                                         /* Note:  Large sample sizes require multiple packets. */
@@ -1320,7 +1290,7 @@ int main(int argc, char **argv) {
 					channel->ADCMax = s7kssheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
 					channel->reserved10 = 0;   /* 206-207 : Reserved */
 					channel->reserved11 = 0; /* 208-209 : Reserved */
-					for (i = 0; i < 6; i++)
+					for (int i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
 					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
@@ -1356,10 +1326,10 @@ int main(int argc, char **argv) {
 					if (status == MB_SUCCESS) {
 						if (smooth > 0 && channel->dataFormat == 0) {
 							datashort = (unsigned short *)s7kchannel->data;
-							for (i = 0; i < channel->samples; i++) {
-								n = 0;
+							for (int i = 0; i < channel->samples; i++) {
+								int n = 0;
 								channel->trace[i] = 0.0;
-								for (j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
+								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
 									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
@@ -1370,10 +1340,10 @@ int main(int argc, char **argv) {
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
 							datashort = (unsigned short *)s7kchannel->data;
-							for (i = 0; i < channel->samples; i++) {
-								n = 0;
+							for (int i = 0; i < channel->samples; i++) {
+								int n = 0;
 								value = 0.0;
-								for (j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
+								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
 									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
@@ -1384,7 +1354,7 @@ int main(int argc, char **argv) {
 						}
 						else {
 							data = (char *)channel->trace;
-							for (i = 0; i < trace_size; i++) {
+							for (int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -1395,14 +1365,14 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in trace */
 						if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC) {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								if (value >= threshold)
@@ -1411,13 +1381,13 @@ int main(int argc, char **argv) {
 						}
 						else {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = (double)(channel->trace[i]);
 								if (value >= threshold)
 									channelpick = i;
@@ -1442,10 +1412,10 @@ int main(int argc, char **argv) {
 						channelpick = MAX(channelpick, 1);
 						/*fprintf(stderr,"altitude:%d sampleInterval:%d
 						 * channelpick:%d\n",channel->sonarAltitude,channel->sampleInterval,channelpick);*/
-						for (i = 0; i < channelpick; i++) {
+						for (int i = 0; i < channelpick; i++) {
 							channel->trace[i] = (unsigned short)(gainfactor * channel->trace[i]);
 						}
-						for (i = channelpick; i < channel->samples; i++) {
+						for (int i = channelpick; i < channel->samples; i++) {
 							factor = gainfactor * (((double)(i * i)) / ((double)(channelpick * channelpick)));
 							/*fprintf(stderr,"sample %d: factor:%f value: %d",i,factor,channel->trace[i]);*/
 							channel->trace[i] = (unsigned short)(factor * channel->trace[i]);
@@ -1495,12 +1465,12 @@ int main(int argc, char **argv) {
 					channel->pingTime = 0;                   /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7kssheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7kssheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					for (i = 0; i < 2; i++) /* 12-15 */
+					for (int i = 0; i < 2; i++) /* 12-15 */
 						channel->reserved1[i] = 0; /* 16-27 */
 					channel->msb = 0; /* 16-17 */
 					channel->lsb1 = 0; /* 18-19 */
 					channel->lsb2 = 0; /* 20-21 */
-					for (i = 0; i < 3; i++) /* 22-27 */
+					for (int i = 0; i < 3; i++) /* 22-27 */
 						channel->reserved2[i] = 0;
 
 					channel->traceIDCode = 1; /* 28-29 : ID Code (always 1 => seismic data) ** */
@@ -1513,11 +1483,11 @@ int main(int argc, char **argv) {
 					                                               /*   2 = 1 short  per sample  - before matched filter */
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
-					for (i = 0; i < 2; i++) {
+					for (int i = 0; i < 2; i++) {
 						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
 					}
 					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
-					for (i = 0; i < 16; i++) {
+					for (int i = 0; i < 16; i++) {
 						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
 					}
 
@@ -1531,7 +1501,7 @@ int main(int argc, char **argv) {
 					channel->coordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
 					channel->coordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
 					channel->coordUnits = 0;   /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
-					for (i = 0; i < 24; i++)
+					for (int i = 0; i < 24; i++)
 						channel->annotation[i] = 0;          /* 90-113 : Annotation string */
 					channel->samples = s7kssheader->samples; /* 114-115 : Samples in this packet ** */
 					                                         /* Note:  Large sample sizes require multiple packets. */
@@ -1596,7 +1566,7 @@ int main(int argc, char **argv) {
 					channel->ADCMax = s7kssheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
 					channel->reserved10 = 0;   /* 206-207 : Reserved */
 					channel->reserved11 = 0; /* 208-209 : Reserved */
-					for (i = 0; i < 6; i++)
+					for (int i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
 					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
@@ -1632,10 +1602,10 @@ int main(int argc, char **argv) {
 					if (status == MB_SUCCESS) {
 						if (smooth > 0 && channel->dataFormat == 0) {
 							datashort = (unsigned short *)s7kchannel->data;
-							for (i = 0; i < channel->samples; i++) {
-								n = 0;
+							for (int i = 0; i < channel->samples; i++) {
+								int n = 0;
 								channel->trace[i] = 0.0;
-								for (j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
+								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
 									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
@@ -1646,10 +1616,10 @@ int main(int argc, char **argv) {
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
 							datashort = (unsigned short *)s7kchannel->data;
-							for (i = 0; i < channel->samples; i++) {
-								n = 0;
+							for (int i = 0; i < channel->samples; i++) {
+								int n = 0;
 								value = 0.0;
-								for (j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
+								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
 									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
@@ -1660,7 +1630,7 @@ int main(int argc, char **argv) {
 						}
 						else {
 							data = (char *)channel->trace;
-							for (i = 0; i < trace_size; i++) {
+							for (int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -1671,14 +1641,14 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in trace */
 						if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC) {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								if (value >= threshold)
@@ -1687,13 +1657,13 @@ int main(int argc, char **argv) {
 						}
 						else {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = (double)(channel->trace[i]);
 								if (value >= threshold)
 									channelpick = i;
@@ -1718,7 +1688,7 @@ int main(int argc, char **argv) {
 						/*fprintf(stderr,"altitude:%d sampleInterval:%d
 						 * channelpick:%d\n",channel->sonarAltitude,channel->sampleInterval,channelpick);*/
 						channelpick = MAX(channelpick, 1);
-						for (i = channelpick; i < channel->samples; i++) {
+						for (int i = channelpick; i < channel->samples; i++) {
 							factor = gainfactor * (((double)(i * i)) / ((double)(channelpick * channelpick)));
 							/*fprintf(stderr,"sample %d: factor:%f value: %d",i,factor,channel->trace[i]);*/
 							channel->trace[i] = (unsigned short)(factor * channel->trace[i]);
@@ -1782,12 +1752,12 @@ int main(int argc, char **argv) {
 					channel->pingTime = 0;                   /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7kssheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7kssheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					for (i = 0; i < 2; i++) /* 12-15 */
+					for (int i = 0; i < 2; i++) /* 12-15 */
 						channel->reserved1[i] = 0; /* 16-27 */
 					channel->msb = 0; /* 16-17 */
 					channel->lsb1 = 0; /* 18-19 */
 					channel->lsb2 = 0; /* 20-21 */
-					for (i = 0; i < 3; i++) /* 22-27 */
+					for (int i = 0; i < 3; i++) /* 22-27 */
 						channel->reserved2[i] = 0;
 
 					channel->traceIDCode = 1; /* 28-29 : ID Code (always 1 => seismic data) ** */
@@ -1800,11 +1770,11 @@ int main(int argc, char **argv) {
 					                                               /*   2 = 1 short  per sample  - before matched filter */
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
-					for (i = 0; i < 2; i++) {
+					for (int i = 0; i < 2; i++) {
 						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
 					}
 					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
-					for (i = 0; i < 16; i++) {
+					for (int i = 0; i < 16; i++) {
 						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
 					}
 
@@ -1818,7 +1788,7 @@ int main(int argc, char **argv) {
 					channel->coordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
 					channel->coordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
 					channel->coordUnits = 0;   /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
-					for (i = 0; i < 24; i++)
+					for (int i = 0; i < 24; i++)
 						channel->annotation[i] = 0;          /* 90-113 : Annotation string */
 					channel->samples = s7kssheader->samples; /* 114-115 : Samples in this packet ** */
 					                                         /* Note:  Large sample sizes require multiple packets. */
@@ -1883,7 +1853,7 @@ int main(int argc, char **argv) {
 					channel->ADCMax = s7kssheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
 					channel->reserved10 = 0;   /* 206-207 : Reserved */
 					channel->reserved11 = 0; /* 208-209 : Reserved */
-					for (i = 0; i < 6; i++)
+					for (int i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
 					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
@@ -1919,10 +1889,10 @@ int main(int argc, char **argv) {
 					if (status == MB_SUCCESS) {
 						if (smooth > 0 && channel->dataFormat == 0) {
 							datashort = (unsigned short *)s7kchannel->data;
-							for (i = 0; i < channel->samples; i++) {
-								n = 0;
+							for (int i = 0; i < channel->samples; i++) {
+								int n = 0;
 								channel->trace[i] = 0.0;
-								for (j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
+								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
 									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
@@ -1933,10 +1903,10 @@ int main(int argc, char **argv) {
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
 							datashort = (unsigned short *)s7kchannel->data;
-							for (i = 0; i < channel->samples; i++) {
-								n = 0;
+							for (int i = 0; i < channel->samples; i++) {
+								int n = 0;
 								value = 0.0;
-								for (j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
+								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
 									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
@@ -1947,7 +1917,7 @@ int main(int argc, char **argv) {
 						}
 						else {
 							data = (char *)channel->trace;
-							for (i = 0; i < trace_size; i++) {
+							for (int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -1958,14 +1928,14 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in trace */
 						if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC) {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								if (value >= threshold)
@@ -1974,13 +1944,13 @@ int main(int argc, char **argv) {
 						}
 						else {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = (double)(channel->trace[i]);
 								if (value >= threshold)
 									channelpick = i;
@@ -2038,12 +2008,12 @@ int main(int argc, char **argv) {
 					channel->pingTime = 0;                   /* 0-3 : Ping Time in epoch seconds [since (1/1/1970)] (Protocol Version 8 onwards) */
 					channel->startDepth = s7kssheader->startDepth; /* 4-7 : Starting depth (window offset) in samples. */
 					channel->pingNum = s7kssheader->pingNum;       /* 8-11: Ping number (increments with ping) ** */
-					for (i = 0; i < 2; i++) /* 12-15 */
+					for (int i = 0; i < 2; i++) /* 12-15 */
 						channel->reserved1[i] = 0; /* 16-27 */
 					channel->msb = 0; /* 16-17 */
 					channel->lsb1 = 0; /* 18-19 */
 					channel->lsb2 = 0; /* 20-21 */
-					for (i = 0; i < 3; i++) /* 22-27 */
+					for (int i = 0; i < 3; i++) /* 22-27 */
 						channel->reserved2[i] = 0;
 
 					channel->traceIDCode = 1; /* 28-29 : ID Code (always 1 => seismic data) ** */
@@ -2056,11 +2026,11 @@ int main(int argc, char **argv) {
 					                                               /*   2 = 1 short  per sample  - before matched filter */
 					                                               /*   3 = 1 short  per sample  - real part analytic signal */
 					                                               /*   4 = 1 short  per sample  - pixel data / ceros data */
-					for (i = 0; i < 2; i++) {
+					for (int i = 0; i < 2; i++) {
 						channel->reserved4[i] = 0;   /* 40-43 : Reserved – Do not use */
 					}
 					channel->kmOfPipe = 0;      /* 44-47 : Kilometers of Pipe - See Validity Flag (bytes 30 – 31). */
-					for (i = 0; i < 16; i++) {
+					for (int i = 0; i < 16; i++) {
 						channel->reserved5[i] = 0;  /* 48-79 : Reserved – Do not use */
 					}
 
@@ -2074,7 +2044,7 @@ int main(int argc, char **argv) {
 					channel->coordX = 0;  /* 80-83 : mm or 10000 * (Minutes of Arc) */
 					channel->coordY = 0;  /* 84-87 : mm or 10000 * (Minutes of Arc) */
 					channel->coordUnits = 0;   /* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
-					for (i = 0; i < 24; i++)
+					for (int i = 0; i < 24; i++)
 						channel->annotation[i] = 0;          /* 90-113 : Annotation string */
 					channel->samples = s7kssheader->samples; /* 114-115 : Samples in this packet ** */
 					                                         /* Note:  Large sample sizes require multiple packets. */
@@ -2139,7 +2109,7 @@ int main(int argc, char **argv) {
 					channel->ADCMax = s7kssheader->ADCMax; /* 204-205 : Maximum absolute value for ADC samples for this packet */
 					channel->reserved10 = 0;   /* 206-207 : Reserved */
 					channel->reserved11 = 0; /* 208-209 : Reserved */
-					for (i = 0; i < 6; i++)
+					for (int i = 0; i < 6; i++)
 						channel->softwareVersion[i] = 0; /* 210-215 : Software version number */
 					/* Following items are not in X-Star */
 					channel->sphericalCorrection = s7ksegyheader->sphericalCorrection;
@@ -2175,10 +2145,10 @@ int main(int argc, char **argv) {
 					if (status == MB_SUCCESS) {
 						if (smooth > 0 && channel->dataFormat == 0) {
 							datashort = (unsigned short *)s7kchannel->data;
-							for (i = 0; i < channel->samples; i++) {
-								n = 0;
+							for (int i = 0; i < channel->samples; i++) {
+								int n = 0;
 								channel->trace[i] = 0.0;
-								for (j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
+								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
 									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
@@ -2189,10 +2159,10 @@ int main(int argc, char **argv) {
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
 							datashort = (unsigned short *)s7kchannel->data;
-							for (i = 0; i < channel->samples; i++) {
-								n = 0;
+							for (int i = 0; i < channel->samples; i++) {
+								int n = 0;
 								value = 0.0;
-								for (j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
+								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
 									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
@@ -2203,7 +2173,7 @@ int main(int argc, char **argv) {
 						}
 						else {
 							data = (char *)channel->trace;
-							for (i = 0; i < trace_size; i++) {
+							for (int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -2214,14 +2184,14 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in trace */
 						if (channel->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ANALYTIC) {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = sqrt((double)(channel->trace[2 * i] * channel->trace[2 * i] +
 								                      channel->trace[2 * i + 1] * channel->trace[2 * i + 1]));
 								if (value >= threshold)
@@ -2230,13 +2200,13 @@ int main(int argc, char **argv) {
 						}
 						else {
 							channelmax = 0.0;
-							for (i = 0; i < channel->samples; i++) {
+							for (int i = 0; i < channel->samples; i++) {
 								value = (double)(channel->trace[i]);
 								channelmax = MAX(value, channelmax);
 							}
 							channelpick = 0;
 							threshold = bottompickthreshold * channelmax;
-							for (i = 0; i < channel->samples && channelpick == 0; i++) {
+							for (int i = 0; i < channel->samples && channelpick == 0; i++) {
 								value = (double)(channel->trace[i]);
 								if (value >= threshold)
 									channelpick = i;
@@ -2285,7 +2255,6 @@ int main(int argc, char **argv) {
 				/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
 			}
 
-			/* print debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 				fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -2293,7 +2262,6 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg2       status:         %d\n", status);
 			}
 
-			/* print comments */
 			if (print_comments == MB_YES && kind == MB_DATA_COMMENT) {
 				if (icomment == 0) {
 					fprintf(stderr, "\nComments:\n");
@@ -2303,10 +2271,8 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		/* close the swath file */
 		status = mb_close(verbose, &imbio_ptr, &error);
 
-		/* output counts */
 		fprintf(stdout, "\nData records read from: %s\n", file);
 		fprintf(stdout, "     Survey:        %d\n", nreaddata);
 		fprintf(stdout, "     File Header:   %d\n", nreadheader);
@@ -2366,24 +2332,22 @@ int main(int argc, char **argv) {
 
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES) {
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
 	}
 
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/

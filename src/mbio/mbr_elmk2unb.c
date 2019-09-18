@@ -331,7 +331,6 @@ int mbr_elmk2unb_rd_comment(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 		strncpy(data->comment, line, MBF_ELMK2UNB_COMMENT_LENGTH - 1);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -477,7 +476,6 @@ int mbr_elmk2unb_rd_parameter(int verbose, FILE *mbfp, struct mbf_elmk2unb_struc
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
@@ -602,7 +600,6 @@ int mbr_elmk2unb_rd_pos(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 	if (data->pos_year == 96 && data->pos_month >= 6 && data->pos_month <= 8)
 		data->pos_longitude = -data->pos_longitude;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
@@ -698,7 +695,6 @@ int mbr_elmk2unb_rd_svp(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct *dat
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -797,7 +793,6 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 #endif
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);
@@ -881,7 +876,6 @@ int mbr_elmk2unb_rd_bathgen(int verbose, FILE *mbfp, struct mbf_elmk2unb_struct 
 #endif
 			}
 
-			/* print debug statements */
 			if (status == MB_SUCCESS && verbose >= 5) {
 				fprintf(stderr, "\ndbg5       beam:             %d\n", i);
 				fprintf(stderr, "dbg5       bath:             %d\n", data->beams[i].bath);
@@ -1233,7 +1227,6 @@ int mbr_elmk2unb_wr_comment(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	/* get pointer to raw data structure */
 	struct mbf_elmk2unb_struct *data = (struct mbf_elmk2unb_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       comment:          %s\n", data->comment);
@@ -1305,7 +1298,6 @@ int mbr_elmk2unb_wr_parameter(int verbose, FILE *mbfp, void *data_ptr, int *erro
 	/* get pointer to raw data structure */
 	struct mbf_elmk2unb_struct *data = (struct mbf_elmk2unb_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->par_year);
@@ -1504,7 +1496,6 @@ int mbr_elmk2unb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbf_elmk2unb_struct *data = (struct mbf_elmk2unb_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->pos_year);
@@ -1636,7 +1627,6 @@ int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error) {
 	/* get pointer to raw data structure */
 	struct mbf_elmk2unb_struct *data = (struct mbf_elmk2unb_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->svp_year);
@@ -1750,7 +1740,6 @@ int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error)
 	/* get pointer to raw data structure */
 	struct mbf_elmk2unb_struct *data = (struct mbf_elmk2unb_struct *)data_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Values to be written in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       year:             %d\n", data->year);

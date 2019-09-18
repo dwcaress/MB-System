@@ -478,7 +478,6 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New header read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:             %d\n", header->type);
@@ -741,7 +740,6 @@ int mbr_rt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 #endif
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
 		fprintf(stderr, "\ndbg5  New processed data read in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", header->beams_bath);
@@ -1113,7 +1111,6 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			dataplus->client[i] = store->client[i];
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New header set in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       type:             %d\n", header->type);
@@ -1231,7 +1228,6 @@ int mbr_wt_oicmbari(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (verbose >= 5 && status == MB_SUCCESS) {
 		fprintf(stderr, "\ndbg5  New processed data set in function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       beams_bath:       %d\n", header->beams_bath);

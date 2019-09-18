@@ -466,13 +466,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -531,7 +529,6 @@ int main(int argc, char **argv) {
 		exit(status);
 	}
 
-	/* print starting debug statements */
 	if (verbose == 1) {
 		fprintf(stderr, "\nProgram <%s>\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
@@ -1949,7 +1946,6 @@ int main(int argc, char **argv) {
 				/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
 			}
 
-			/* print debug statements */
 			if (verbose >= 2) {
 				fprintf(stderr, "\ndbg2  Ping read in program <%s>\n", program_name);
 				fprintf(stderr, "dbg2       kind:           %d\n", kind);
@@ -1957,7 +1953,6 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg2       status:         %d\n", status);
 			}
 
-			/* print comments */
 			if (print_comments == MB_YES && kind == MB_DATA_COMMENT) {
 				if (icomment == 0) {
 					fprintf(stderr, "\nComments:\n");
@@ -2060,14 +2055,12 @@ int main(int argc, char **argv) {
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
 		fprintf(stderr, "dbg2  Ending status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
@@ -2080,7 +2073,6 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 	double alpha, beta, theta, phi;
 	int i;
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2114,7 +2106,6 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		table_range[i] = rr;
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -2127,7 +2118,6 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		fprintf(stderr, "dbg2       status:          %d\n", status);
 	}
 
-	/* return status */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

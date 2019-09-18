@@ -940,7 +940,6 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		}
 	}
 
-	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5) {
 		fprintf(stderr, "\ndbg5  New data record read by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5  Raw values:\n");

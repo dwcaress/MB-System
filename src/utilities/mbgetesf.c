@@ -226,13 +226,11 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
-	/* print starting message */
 	if (verbose == 1 || help) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
 
-	/* print starting debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -519,16 +517,13 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\t\t%d beams flagged by sonar\n", beam_flag_sonar);
 	}
 
-	/* end it all */
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
 int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	/* local variables */
 	int status = MB_SUCCESS;
 	//	int time_i[7];
 
-	/* print input debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -565,7 +560,6 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 		}
 	}
 
-	/* print output debug statements */
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -574,7 +568,6 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 		fprintf(stderr, "dbg2       status:      %d\n", status);
 	}
 
-	/* return */
 	return (status);
 }
 /*--------------------------------------------------------------------*/

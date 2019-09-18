@@ -80,7 +80,6 @@ int mb_navint_add(int verbose, void *mbio_ptr, double time_d, double lon_easting
 		fprintf(stderr, "mb_navint_add:    Nav fix %d %f %f added\n", mb_io_ptr->nfix, lon_easting, lat_northing);
 #endif
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Nav fix added to list by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New fix values:\n");
@@ -450,7 +449,6 @@ int mb_attint_add(int verbose, void *mbio_ptr, double time_d, double heave, doub
 		        time_d, roll, pitch, heave);
 #endif
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Attitude fix added to list by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New fix values:\n");
@@ -522,7 +520,6 @@ int mb_attint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 #endif
 		mb_io_ptr->nattitude++;
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Attitude fixes added to list by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New fix values:\n");
@@ -681,7 +678,6 @@ int mb_hedint_add(int verbose, void *mbio_ptr, double time_d, double heading, in
 		fprintf(stderr, "mb_hedint_add:    Heading fix %d %f added\n", mb_io_ptr->nheading, heading);
 #endif
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Heading fix added to list by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New fix values:\n");
@@ -745,7 +741,6 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr, int nsamples, double *time_d, do
 #endif
 		mb_io_ptr->nheading++;
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Heading fixes added to list by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New fix values:\n");
@@ -897,7 +892,6 @@ int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth,
 		fprintf(stderr, "mb_depint_add:    sonardepth fix %d %f added\n", mb_io_ptr->nsonardepth, sonardepth);
 #endif
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Sonar depth fix added to list by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New fix values:\n");
@@ -1042,7 +1036,6 @@ int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, i
 		fprintf(stderr, "mb_altint_add:    altitude fix %d %f added\n", mb_io_ptr->naltitude, altitude);
 #endif
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Altitude fix added to list by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  New fix values:\n");

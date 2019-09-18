@@ -358,7 +358,6 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			index += 2;
 		}
 
-		/* print debug statements */
 		if (verbose >= 4) {
 			fprintf(stderr, "\ndbg4  Data read by MBIO function <%s>\n", __func__);
 			fprintf(stderr, "dbg4  Read values:\n");
@@ -544,7 +543,6 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	char *datacomment = (char *)&line[80];
 	struct mbsys_simrad_struct *store = (struct mbsys_simrad_struct *)store_ptr;
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Status at beginning of MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       store->kind:    %d\n", store->kind);
@@ -625,14 +623,12 @@ int mbr_wt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		strncpy(datacomment, store->comment, MBSYS_SIMRAD_COMMENT_LENGTH);
 	}
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "\ndbg5  Ready to write data in MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg5       store->kind:       %d\n", store->kind);
 		fprintf(stderr, "dbg5       error:             %d\n", *error);
 	}
 
-	/* print debug statements */
 	if (verbose >= 4) {
 		fprintf(stderr, "\ndbg4  Data to be written by MBIO function <%s>\n", __func__);
 		fprintf(stderr, "dbg4  Status values:\n");

@@ -1071,7 +1071,6 @@ int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* read next (record of) data from file */
 	const int status = mbr_hsmdldih_rd_data(verbose, mbio_ptr, error);
 
-	/* print debug statements */
 	if (verbose >= 5) {
 		fprintf(stderr, "dbg5: In function name:\t%s\n", __func__);
 		fprintf(stderr, "dbg5:\t Returned from  mbr_hsmdldih_rd_data()\n");

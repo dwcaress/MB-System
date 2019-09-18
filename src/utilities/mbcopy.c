@@ -359,13 +359,11 @@ int main(int argc, char **argv) {
     exit(error);
   }
 
-  /* print starting message */
   if (verbose == 1 || help) {
     fprintf(stderr, "\nProgram %s\n", program_name);
     fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
   }
 
-  /* print starting debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
     fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
@@ -537,7 +535,6 @@ int main(int argc, char **argv) {
   }
 #endif
 
-  /* print debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  Copy mode set in program <%s>\n", program_name);
     fprintf(stderr, "dbg2       pings:         %d\n", pings);
@@ -1085,14 +1082,12 @@ int main(int argc, char **argv) {
     fprintf(stderr, "%d output comment records\n", ocomment);
   }
 
-  /* end it all */
   exit(error);
 }
 /*--------------------------------------------------------------------*/
 int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *iend, int *offset, int *error) {
   int status = MB_SUCCESS;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1122,7 +1117,6 @@ int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *
   *error = MB_ERROR_NO_ERROR;
   status = MB_SUCCESS;
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1134,7 +1128,6 @@ int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return status */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1144,7 +1137,6 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
   int time_i[7];
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1409,7 +1401,6 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
       ostore->raw[i] = 0;
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1418,7 +1409,6 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return status */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1428,7 +1418,6 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
   int time_i[7];
   int i, j;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1574,7 +1563,6 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -1583,7 +1571,6 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return status */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -1598,7 +1585,6 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
   int interleave = 0;
   int i;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2313,7 +2299,6 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2322,7 +2307,6 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return status */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2331,7 +2315,6 @@ int mbcopy_simrad_time_convert(int verbose, int year, int month, int day, int ho
   int status = MB_SUCCESS;
   int time_i[7];
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2356,7 +2339,6 @@ int mbcopy_simrad_time_convert(int verbose, int year, int month, int day, int ho
   *date = 10000 * time_i[0] + 100 * time_i[1] + time_i[2];
   *msec = 3600000 * time_i[3] + 60000 * time_i[4] + 1000 * time_i[5] + 0.001 * time_i[6];
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2367,7 +2349,6 @@ int mbcopy_simrad_time_convert(int verbose, int year, int month, int day, int ho
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return status */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2385,7 +2366,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
   /* get data structure pointer */
   ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2460,7 +2440,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
                   beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, error);
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -2469,7 +2448,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
     fprintf(stderr, "dbg2       status:     %d\n", status);
   }
 
-  /* return status */
   return (status);
 }
 /*--------------------------------------------------------------------*/
@@ -2502,7 +2480,6 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
   /* get gsf data structure pointer */
   ostore = omb_io_ptr->store_data;
 
-  /* print input debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -2753,7 +2730,6 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
     }
   }
 
-  /* print output debug statements */
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return value:\n");
