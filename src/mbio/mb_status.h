@@ -321,8 +321,8 @@ static char *notice_msg[] = {
     "MB_ERROR_NOT_ENOUGH_DATA (ID=-21): Not enough data to perform spline interpolation",
     "MB_ERROR_FILE_NOT_FOUND (ID=-22): Requested file cannot be found",
     "MB_ERROR_FILE_LOCKED (ID=-23): Requested file locked",
-    "MB_ERROR_FILE_NOT_FOUND (ID=-24): Initialization failed",
-    "MB_ERROR_FILE_NOT_FOUND (ID=-25): Sidescan data ignored",
+    "MB_ERROR_INIT_FAIL (ID=-24): Initialization failed",
+    "MB_ERROR_SIDESCAN_IGNORED (ID=-25): Sidescan data ignored",
 
     /* problem notices */
     "DATA PROBLEM (ID=1): No survey data found", "DATA PROBLEM (ID=2): Zero longitude or latitude in survey data",

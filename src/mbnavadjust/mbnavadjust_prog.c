@@ -247,6 +247,7 @@ int mbnavadjust_init_globals() {
   project.precision = SIGMA_MINIMUM;
   project.smoothing = MBNA_SMOOTHING_DEFAULT;
   project.zoffsetwidth = 5.0;
+  project.triangle_scale = 0.0;
   mbna_file_id_1 = MBNA_SELECT_NONE;
   mbna_section_1 = MBNA_SELECT_NONE;
   mbna_file_id_2 = MBNA_SELECT_NONE;
@@ -4141,35 +4142,8 @@ int mbnavadjust_crossing_unload() {
 
   /* unload loaded crossing */
   if (mbna_naverr_load == MB_YES) {
-    /* free raw swath data */
-    if (swathraw1 != NULL && swathraw1->pingraws != NULL) {
-      for (int i = 0; i < swathraw1->npings_max; i++) {
-        pingraw = &swathraw1->pingraws[i];
-        status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&pingraw->beamflag, &error);
-        status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&pingraw->bath, &error);
-        status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&pingraw->bathacrosstrack, &error);
-        status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&pingraw->bathalongtrack, &error);
-      }
-      status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&swathraw1->pingraws, &error);
-    }
-    if (swathraw2 != NULL && swathraw2->pingraws != NULL) {
-      for (int i = 0; i < swathraw2->npings_max; i++) {
-        pingraw = &swathraw2->pingraws[i];
-        status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&pingraw->beamflag, &error);
-        status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&pingraw->bath, &error);
-        status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&pingraw->bathacrosstrack, &error);
-        status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&pingraw->bathalongtrack, &error);
-      }
-      status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&swathraw2->pingraws, &error);
-    }
-    if (swathraw1 != NULL)
-      status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&swathraw1, &error);
-    if (swathraw2 != NULL)
-      status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&swathraw2, &error);
-
-    /* free contours */
-    status = mb_contour_deall(mbna_verbose, swath1, &error);
-    status = mb_contour_deall(mbna_verbose, swath2, &error);
+    status = mbnavadjust_section_unload(mbna_verbose, (void **)&swathraw1, (void **)&swath1, &error);
+    status = mbnavadjust_section_unload(mbna_verbose, (void **)&swathraw2, (void **)&swath2, &error);
     if (mbna_contour1.vector != NULL && mbna_contour1.nvector_alloc > 0) {
       free(mbna_contour1.vector);
     }
@@ -4254,9 +4228,9 @@ int mbnavadjust_crossing_replot() {
     status = mbnavadjust_section_translate(mbna_verbose, &project, mbna_file_id_2, swathraw2, swath2, mbna_offset_z, &error);
 
     /* generate contour data */
-        mbna_contour = &mbna_contour1;
+    mbna_contour = &mbna_contour1;
     status = mbnavadjust_section_contour(mbna_verbose, &project, mbna_file_id_1, mbna_section_1, swath1, &mbna_contour1, &error);
-        mbna_contour = &mbna_contour2;
+    mbna_contour = &mbna_contour2;
     status = mbnavadjust_section_contour(mbna_verbose, &project, mbna_file_id_2, mbna_section_2, swath2, &mbna_contour2, &error);
   }
 

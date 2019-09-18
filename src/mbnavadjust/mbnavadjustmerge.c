@@ -45,6 +45,7 @@
 #define MBNAVADJUSTMERGE_MODE_MERGE 2
 #define MBNAVADJUSTMERGE_MODE_COPY 3
 #define MBNAVADJUSTMERGE_MODE_MODIFY 4
+#define MBNAVADJUSTMERGE_MODE_TRIANGULATE 5
 #define NUMBER_MODS_MAX 1000
 #define MOD_MODE_NONE 0
 #define MOD_MODE_SET_GLOBAL_TIE 1
@@ -87,9 +88,14 @@
 #define MOD_MODE_INSERT_DISCONTINUITY 38
 #define MOD_MODE_REIMPORT_FILE 39
 #define MOD_MODE_REIMPORT_ALL_FILES 40
+#define MOD_MODE_TRIANGULATE 41
+#define MOD_MODE_TRIANGULATE_SECTION 42
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
+#define TRIANGULATE_NONE 0
+#define TRIANGULATE_NEW 1
+#define TRIANGULATE_ALL 2
 
 struct mbnavadjust_mod {
   int mode;
@@ -162,6 +168,10 @@ int main(int argc, char **argv) {
                           "\t--reimport-all-files\n"
                           "\t--import-tie-list=file\n"
                           "\t--export-tie-list=file\n"
+                          "\t--triangulate\n"
+                          "\t--triangulate-all\n"
+                          "\t--triangulate-scale=scale\n"
+                          "\t--triangulate-section=file:section\n"
                           "\t--verbose --help]\n";
   extern char *optarg;
   int option_index;
@@ -227,6 +237,10 @@ int main(int argc, char **argv) {
                                     {"reimport-all-files", no_argument, NULL, 0},
                                     {"import-tie-list", required_argument, NULL, 0},
                                     {"export-tie-list", required_argument, NULL, 0},
+                                    {"triangulate", no_argument, NULL, 0},
+                                    {"triangulate-all", no_argument, NULL, 0},
+                                    {"triangulate-section", required_argument, NULL, 0},
+                                    {"triangulate-scale", required_argument, NULL, 0},
                                     {NULL, 0, NULL, 0}};
 
   /* mbnavadjustmerge controls */
@@ -258,6 +272,9 @@ int main(int argc, char **argv) {
   struct mbna_section *section;
   struct mbna_crossing *crossing;
   struct mbna_tie *tie;
+
+  int triangulate = TRIANGULATE_NONE;
+  double triangle_scale = 0.0;
 
   int num_import_tie;
   int num_import_globaltie;
@@ -1122,6 +1139,61 @@ int main(int argc, char **argv) {
         export_tie_list_set = MB_YES;
       }
 
+      /*-------------------------------------------------------
+       * Triangulate sections in preparation for contouring
+          --triangulate
+          --triangulate-section=file:section
+          --triangulate-scale=scale */
+      else if (strcmp("triangulate", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_TRIANGULATE;
+          num_mods++;
+          triangulate = TRIANGULATE_NEW;
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\ttriangulate command ignored\n\n");
+        }
+      }
+      else if (strcmp("triangulate-all", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_TRIANGULATE;
+          num_mods++;
+          triangulate = TRIANGULATE_ALL;
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\ttriangulate-all command ignored\n\n");
+        }
+      }
+      else if (strcmp("triangulate-section", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].file1, &mods[num_mods].section1)) == 2) {
+            mods[num_mods].mode = MOD_MODE_TRIANGULATE_SECTION;
+            num_mods++;
+            triangulate = TRIANGULATE_ALL;
+          }
+          else {
+            fprintf(stderr, "Failure to parse --triangulate-section=%s\n\tmod command ignored\n\n", optarg);
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--triangulate-section=%s command ignored\n\n", optarg);
+        }
+      }
+      else if (strcmp("triangulate-scale", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          if ((nscan = sscanf(optarg, "%lf", &triangle_scale)) != 1) {
+            fprintf(stderr, "Failure to parse --triangulate-scale=%s\n\tmod command ignored\n\n", optarg);
+          }
+        }
+        else {
+          fprintf(stderr, "Maximum number of mod commands reached:\n\t--triangulate-scale=%s command ignored\n\n", optarg);
+        }
+      }
+
+      /*-------------------------------------------------------*/
+
       break;
     case '?':
       errflg++;
@@ -1185,23 +1257,38 @@ int main(int argc, char **argv) {
   }
   else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_NO && project_output_set == MB_NO) {
     strcpy(project_output_path, project_inputbase_path);
-    if (num_mods > 0 || import_tie_list_set == MB_YES)
+    int triangulate_only = MB_NO;
+    if (triangulate != TRIANGULATE_NONE && import_tie_list_set == MB_NO) {
+      triangulate_only = MB_YES;
+      for (int imod = 0; imod < num_mods; imod++) {
+        if (mods[imod].mode != MOD_MODE_TRIANGULATE
+            && mods[imod].mode != MOD_MODE_TRIANGULATE_SECTION) {
+              triangulate_only = MB_NO;
+        }
+      }
+    }
+    if (triangulate_only == MB_NO) {
       project_output_set = MB_YES;
-    mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_MODIFY;
+      mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_MODIFY;
+    }
+    else {
+      mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_TRIANGULATE;
+    }
+
   }
   else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_NO && project_output_set == MB_YES) {
     project_output_set = MB_YES;
     mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_COPY;
-        update_datalist = MB_YES;
+    update_datalist = MB_YES;
   }
   else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_YES && project_output_set == MB_NO) {
     strcpy(project_output_path, project_inputbase_path);
     project_output_set = MB_YES;
     mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_ADD;
-        update_datalist = MB_YES;
+    update_datalist = MB_YES;
   }
   else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_YES && project_output_set == MB_YES &&
-           strcmp(project_output_path, project_inputadd_path) == 0) {
+    strcmp(project_output_path, project_inputadd_path) == 0) {
     fprintf(stderr, "The output project:\n\t%s\nis identical to the input add project:\n\t%s\n", project_output_path,
             project_inputadd_path);
     fprintf(stderr, "The output project must either be the input base project or a new project.\n");
@@ -1210,7 +1297,7 @@ int main(int argc, char **argv) {
     exit(error);
   }
   else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_YES && project_output_set == MB_YES &&
-           strcmp(project_output_path, project_inputbase_path) == 0) {
+    strcmp(project_output_path, project_inputbase_path) == 0) {
     mbnavadjustmerge_mode = MBNAVADJUSTMERGE_MODE_ADD;
   }
   else if (project_inputbase_set == MB_YES && project_inputadd_set == MB_YES && project_output_set == MB_YES) {
@@ -1383,8 +1470,11 @@ int main(int argc, char **argv) {
   }
 
   /* else if adding the second project to the first, or just modifying the first,
-      open the first as the output project */
-  else if (mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_ADD || mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_MODIFY) {
+      or just making triangle files, open the first as the output project */
+  else if (mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_ADD
+            || mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_MODIFY
+            || mbnavadjustmerge_mode == MBNAVADJUSTMERGE_MODE_TRIANGULATE ) {
+
     /* read the input base project in as the output project */
     status = mbnavadjust_read_project(verbose, project_output_path, &project_output, &error);
     if (status == MB_SUCCESS) {
@@ -2687,6 +2777,58 @@ int main(int argc, char **argv) {
         }
       }
       break;
+
+    case MOD_MODE_TRIANGULATE:
+      // loop over all files and sections making the triangles for contouring
+      project_output.triangle_scale = triangle_scale;
+      for (ifile = 0; ifile < project_output.num_files; ifile++) {
+        mb_path trianglefile;
+        struct stat file_status;
+        file = &(project_output.files[ifile]);
+        for (isection = 0; isection < file->num_sections; isection++) {
+          section = &(file->sections[isection]);
+          struct mbna_swathraw *swathraw = NULL;
+          struct swath *swath = NULL;
+          sprintf(trianglefile, "%s/nvs_%4.4d_%4.4d.mb71.tri", project_output.datadir, ifile, isection);
+          const int fstat = stat(trianglefile, &file_status);
+
+          // if triangle file needs to be made (either specified or doesn't exist yet)
+          // then load the section, which makes a triangle file if it is missing
+          if (triangulate == TRIANGULATE_ALL
+                || !(fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR
+                      && file_status.st_size > 0)) {
+            if (fstat == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+              unlink(trianglefile);
+            }
+            if (verbose)
+              fprintf(stderr,"Triangulating section %2.2d:%4.4d ", ifile, isection);
+            status = mbnavadjust_section_load(verbose, &project_output, ifile, isection,
+                                              (void **)&swathraw, (void **)&swath, section->num_pings, &error);
+            status = mbnavadjust_section_unload(verbose, (void **)&swathraw, (void **)&swath, &error);
+          }
+          else {
+            fprintf(stderr,"Skip triangulating section %2.2d:%4.4d - already exists\n", ifile, isection);
+          }
+        }
+      }
+      break;
+
+    case MOD_MODE_TRIANGULATE_SECTION:
+
+      // load the section - triangles will be created if they don't already exist
+      project_output.triangle_scale = triangle_scale;
+      file1 = &(project_output.files[mods[imod].file1]);
+      section1 = &(file1->sections[mods[imod].section1]);
+      struct mbna_swathraw *swathraw = NULL;
+      struct swath *swath = NULL;
+      // load the section - the triangle file will be created as part of loading
+      if (verbose)
+        fprintf(stderr,"Triangulating section %2.2d:%4.4d ", ifile, isection);
+      status = mbnavadjust_section_load(verbose, &project_output, mods[imod].file1, mods[imod].section1,
+                                          (void **)&swathraw, (void **)&swath, section1->num_pings, &error);
+      status = mbnavadjust_section_unload(verbose, (void **)&swathraw, (void **)&swath, &error);
+      break;
+
     }
   }
 
