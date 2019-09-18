@@ -777,10 +777,12 @@ int mb_triangulate(int verbose, struct swath *data, int *error) {
   }
 
   /* get triangle network */
-  status = mb_delaun(verbose, data->npts, data->x, data->y, data->edge,
+  if (data->npts > 2) {
+    status = mb_delaun(verbose, data->npts, data->x, data->y, data->edge,
                       &data->ntri, data->iv[0], data->iv[1], data->iv[2],
                       data->ct[0], data->ct[1], data->ct[2], data->cs[0], data->cs[1], data->cs[2],
                       data->v1, data->v2, data->v3, data->istack, data->kv1, data->kv2, error);
+  }
   if (verbose > 1)
     fprintf(stderr, "\n");
   if (verbose > 0)
