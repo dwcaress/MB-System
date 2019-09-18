@@ -255,7 +255,7 @@ int main(int argc, char **argv) {
   int project_output_set = MB_NO;
   int import_tie_list_set = MB_NO;
   int export_tie_list_set = MB_NO;
-    int update_datalist = MB_NO;
+  int update_datalist = MB_NO;
   struct mbna_project project_inputbase;
   struct mbna_project project_inputadd;
   struct mbna_project project_output;
@@ -1459,7 +1459,7 @@ int main(int argc, char **argv) {
       /* copy all the section files */
       for (j = 0; j < project_output.files[i].num_sections; j++) {
         /* copy the section file */
-        sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71 %s", project_inputbase.datadir, i, j, project_output.datadir);
+        sprintf(command, "cp %s/nvs_%4.4d_%4.4d.mb71* %s", project_inputbase.datadir, i, j, project_output.datadir);
         // fprintf(stderr, "Executing in shell: %s\n", command);
         shellstatus = system(command);
       }
