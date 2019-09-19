@@ -62,7 +62,6 @@ int main(int argc, char **argv) {
                          "\t--utm-zone=zone_id/NorS\n"
                          "\t--verbose\n\n";
 
-  extern char *optarg;
   int option_index;
   int errflg = 0;
   int c;

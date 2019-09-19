@@ -47,7 +47,6 @@ int main(int argc, char **argv) {
 	char program_name[] = "MBsegyinfo";
 	char help_message[] = "MBsegyinfo lists table data from a segy data file.";
 	char usage_message[] = "MBsegyinfo -Ifile [-Llonflip -O -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

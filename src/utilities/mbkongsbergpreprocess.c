@@ -82,7 +82,6 @@ int main(int argc, char **argv) {
 	char usage_message[] = "mbkongsbergpreprocess [-C -Doutputdirectory -Eoffx/offy[/offdepth] -Fformat -Ifile -Ooutfile "
 	                       "\n\t\t\t-Pfilterlength/filterdepth -Sdatatype/source -Ttimelag -W -H -V]";
 
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

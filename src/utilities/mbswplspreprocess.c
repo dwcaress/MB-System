@@ -343,7 +343,6 @@ static void default_options(options *opts) {
 /*----------------------------------------------------------------------*/
 static int parse_options(int verbose, int argc, char **argv, options *opts, int *error) {
 	int status = MB_SUCCESS;
-	extern char *optarg;
 	int c;
 	int flag = 0;
 

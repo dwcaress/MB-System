@@ -96,7 +96,6 @@ int main(int argc, char **argv) {
 	char help_message[] = "MBsslayout reads sidescan in raw time series form, lays the sidescan \nout regularly sampled on a "
 	                      "specified topography model, and outputs \n the sidescan to format 71 (MBF_MBLDEOIH) files.\n";
 	char usage_message[] = "mbsslayout [--verbose --help --input=datalist --format=format";
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;

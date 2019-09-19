@@ -76,8 +76,6 @@ int main(int argc, char **argv) {
 	                                  {"verbose", no_argument, NULL, 0},      {"input", required_argument, NULL, 0},
 	                                  {"output", required_argument, NULL, 0}, {NULL, 0, NULL, 0}};
 
-	/* parsing variables */
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;

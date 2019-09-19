@@ -66,7 +66,6 @@ char usage_message[] = "mbsegypsd -Ifile -Oroot [-Ashotscale \n\
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

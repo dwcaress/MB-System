@@ -57,7 +57,6 @@ int main(int argc, char **argv) {
 	char program_name[] = "MBsegylist";
 	char help_message[] = "MBsegylist lists table data from a segy data file.";
 	char usage_message[] = "MBsegylist -Ifile [-A -Ddecimate -Gdelimiter -Llonflip -Olist -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

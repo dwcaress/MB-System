@@ -124,7 +124,6 @@ int main(int argc, char **argv) {
 	char help_message[] = "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand "
 	                      "applies the flags in the rules file to the esf file of the coresponding line";
 	char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

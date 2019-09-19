@@ -133,7 +133,6 @@ char usage_message[] = "mbgrid   -Ifilelist -Oroot [-Adatatype -Bborder -Cclip[/
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

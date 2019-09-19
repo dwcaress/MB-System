@@ -91,8 +91,6 @@ int main(int argc, char **argv) {
   char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  "
                          "-Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
 
-  /* parsing variables */
-  extern char *optarg;
   int errflg = 0;
   int c;
   int help = 0;

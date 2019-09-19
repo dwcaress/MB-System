@@ -57,7 +57,6 @@ int main(int argc, char **argv) {
 	char help_message[] = "mbctdlist lists all CTD records within swath data files\nThe -O option specifies how the values are "
 	                      "output\nin an mblist-likefashion.\n";
 	char usage_message[] = "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

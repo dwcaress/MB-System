@@ -280,7 +280,6 @@ int main(int argc, char **argv) {
 	                      "for each swath file.";
 	char usage_message[] = "mbsvpselect -H -N -Idatalist -Ssvplist "
 	                       "[-P0, -P1, -P2/period, -P3/range, -P3/range/1]  -V";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

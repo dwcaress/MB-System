@@ -51,7 +51,6 @@ int main(int argc, char **argv) {
 	                      "data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
 	char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat \n\t-Ifile -Jxscale/yscale "
 	                       "-Lstartline/lineroot \n\t-Osegyfile -Qtimelistfile -Rroutefile \n\t-Ssampleformat -Zplotmax -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

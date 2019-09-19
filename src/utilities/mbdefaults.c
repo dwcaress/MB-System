@@ -59,7 +59,6 @@ int main(int argc, char **argv) {
 	                      "~/.mbio_defaults \nfile exists one will be created.";
 	char usage_message[] = "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay "
 	                       "-Llonflip\n\t-Mmbviewsettings\n\t-Ttimegap -Wproject -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int status;

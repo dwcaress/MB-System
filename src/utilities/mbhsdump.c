@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
 	char usage_message[] = "mbhsdump [-Fformat -V -H -Iinfile -Okind]";
 
 	/* parsing variables */
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

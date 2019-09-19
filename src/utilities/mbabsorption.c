@@ -108,7 +108,6 @@ int main(int argc, char **argv) {
 	char help_message[] = "MBabsorption calculates the absorption of sound in sea water\nin dB/km as a function of frequency, "
 	                      "temperature, salinity, \nsound speed, pH, and depth.";
 	char usage_message[] = "mbabsorption [-Csoundspeed -Ddepth -Ffrequency -Pph -Ssalinity -Ttemperature -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int status;

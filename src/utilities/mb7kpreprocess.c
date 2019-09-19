@@ -71,7 +71,6 @@ int main(int argc, char **argv) {
 	                      "multibeam data. This program can also fix various problems\nwith 7k data.";
 	char usage_message[] = "mb7kpreprocess [-A -B -Crollbias/pitchbias -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  "
 	                       "-Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ssidescansource -Ttimelag -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

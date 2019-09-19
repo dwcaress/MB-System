@@ -50,7 +50,6 @@ int main(int argc, char **argv) {
 	                      "This (lon lat time_d) list can then be used by mbextractsegy\nor mb7k2ss to extract subbottom (or "
 	                      "sidescan) data into files corresponding\nto the lines between waypoints.";
 	char usage_message[] = "mbroutetime  -Rroutefile [-Fformat -Ifile -Owaypointtimefile -Urangethreshold -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

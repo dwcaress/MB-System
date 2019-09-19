@@ -44,7 +44,6 @@ int main(int argc, char **argv) {
 	                      "-Mtime_d for \nepoch seconds and -Tyear/month/day/hour/minute/second/microsecond for \ncalendar time. "
 	                      "The output time (in the form not specified as input) is \nwritten to stdout.";
 	char usage_message[] = "mbtime [-Mtime_d -Tyear/month/day/hour/minute/second -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
