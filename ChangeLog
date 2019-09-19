@@ -325,6 +325,9 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+Mbset: Fix to mbset so that the mbp_navadj_mode is set to MBP_NAVADJ_OFF
+instead of MBP_NAV_OFF and MBP_NAVADJ_LLZ instead of MBP_NAV_ON.
+
 -----> 5.7.6beta10 (September 18, 2019)
 
 Mbnavadjust: Changed the contouring displayed during analysis of crossings to
@@ -337,9 +340,6 @@ mbnavadjustmerge.
 Mbnavadjustmerge: Added options to pre-generate the triangular mesh files for
 each section in an mbnavadjust project (--triangulate, --triangulate-all,
 --triangulate-section=file:section, and --triangulate-scale=scale).
-
-Mbset: Fix to mbset so that the mbp_navadj_mode is set to MBP_NAVADJ_OFF
-instead of MBP_NAV_OFF and MBP_NAVADJ_LLZ instead of MBP_NAV_ON.
 
 Mbtrn library: Updated to current code written by Kent Headley.
 
