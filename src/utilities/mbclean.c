@@ -106,9 +106,51 @@ struct bad_struct {
 	double bath;
 };
 
+/*--------------------------------------------------------------------*/
 /* edit output function */
-int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
+int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
+	int status = MB_SUCCESS;
 
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       beam:            %d\n", beam);
+		fprintf(stderr, "dbg2       action:          %d\n", action);
+	}
+	/* write out the edit */
+	fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
+	if (sofp != NULL) {
+#ifdef BYTESWAPPED
+		mb_swap_double(&time_d);
+		beam = mb_swap_int(beam);
+		action = mb_swap_int(action);
+#endif
+		if (fwrite(&time_d, sizeof(double), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:       %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:      %d\n", status);
+	}
+
+	return (status);
+}
 
 /*--------------------------------------------------------------------*/
 
@@ -1780,49 +1822,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       beam:            %d\n", beam);
-		fprintf(stderr, "dbg2       action:          %d\n", action);
-	}
-	/* write out the edit */
-	fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
-	if (sofp != NULL) {
-#ifdef BYTESWAPPED
-		mb_swap_double(&time_d);
-		beam = mb_swap_int(beam);
-		action = mb_swap_int(action);
-#endif
-		if (fwrite(&time_d, sizeof(double), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:       %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/
