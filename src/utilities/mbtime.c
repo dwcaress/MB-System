@@ -35,15 +35,18 @@
 #define MBTIME_INPUT_EPOCH 0
 #define MBTIME_INPUT_CALENDAR 1
 
+static const char program_name[] = "MBTIME";
+static const char help_message[] =
+    "MBTIME converts time values between epoch seconds (seconds since \n1970/01/01 00:00:00.000000) and "
+    "calendar time (e.g. 2008/006/05/17/24/32/0). \nThe input time is set using the command line arguments "
+    "-Mtime_d for \nepoch seconds and -Tyear/month/day/hour/minute/second/microsecond for \ncalendar time. "
+    "The output time (in the form not specified as input) is \nwritten to stdout.";
+static const char usage_message[] =
+    "mbtime [-Mtime_d -Tyear/month/day/hour/minute/second -V -H]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBTIME";
-	char help_message[] = "MBTIME converts time values between epoch seconds (seconds since \n1970/01/01 00:00:00.000000) and "
-	                      "calendar time (e.g. 2008/006/05/17/24/32/0). \nThe input time is set using the command line arguments "
-	                      "-Mtime_d for \nepoch seconds and -Tyear/month/day/hour/minute/second/microsecond for \ncalendar time. "
-	                      "The output time (in the form not specified as input) is \nwritten to stdout.";
-	char usage_message[] = "mbtime [-Mtime_d -Tyear/month/day/hour/minute/second -V -H]";
 	int errflg = 0;
 	int c;
 	int help = 0;

@@ -107,6 +107,13 @@ struct mbclean_ping_struct {
 	double *bathy;
 };
 
+static const char program_name[] = "mbneptune2esf";
+static const char help_message[] =
+    "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand "
+    "applies the flags in the rules file to the esf file of the coresponding line";
+static const char usage_message[] =
+    "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
+
 /*--------------------------------------------------------------------*/
 int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
 	int status = MB_SUCCESS;
@@ -289,10 +296,6 @@ int free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbneptune2esf";
-	char help_message[] = "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand "
-	                      "applies the flags in the rules file to the esf file of the coresponding line";
-	char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
 	int errflg = 0;
 	int c;
 	int help = 0;

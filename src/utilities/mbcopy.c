@@ -61,6 +61,16 @@
 #define MBCOPY_STRIPMODE_COMMENTS   1
 #define MBCOPY_STRIPMODE_BATHYONLY  2
 
+static const char program_name[] = "MBcopy";
+static const char help_message[] =
+    "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified "
+    "conversions.  Options include \nwindowing in time and space and ping averaging.  The input and "
+    "\noutput data formats may differ, though not all possible combinations \nmake sense.  The default "
+    "input and output streams are stdin and stdout.";
+static const char usage_message[] =
+    "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  "
+    "-Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
+
 /*--------------------------------------------------------------------*/
 int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *iend, int *offset, int *error) {
   int status = MB_SUCCESS;
@@ -1722,15 +1732,6 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  /* id variables */
-  char program_name[] = "MBcopy";
-  char help_message[] = "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified "
-                        "conversions.  Options include \nwindowing in time and space and ping averaging.  The input and "
-                        "\noutput data formats may differ, though not all possible combinations \nmake sense.  The default "
-                        "input and output streams are stdin and stdout.";
-  char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  "
-                         "-Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
-
   int errflg = 0;
   int c;
   int help = 0;

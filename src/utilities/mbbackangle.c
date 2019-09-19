@@ -66,7 +66,19 @@ struct mbba_grid_struct {
 	float *data;
 };
 
-char program_name[] = "mbbackangle";
+static const char program_name[] = "mbbackangle";
+static const char help_message[] =
+    "MBbackangle reads a swath sonar data file and generates a set \n\t"
+    "of tables containing the average amplitude an/or sidescan values\n\t"
+    "as a function of the angle of interaction (grazing angle) \n\t"
+    "with the seafloor. Each table represents the symmetrical \n\t"
+    "average function for a user defined number of pings. The tables \n\t"
+    "are output to a \".aga\" and \".sga\" files that can be applied \n\t"
+    "by MBprocess.";
+static const char usage_message[] =
+    "mbbackangle -Ifile "
+    "[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows "
+    "-Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
 
 /*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
@@ -239,16 +251,6 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char help_message[] = "MBbackangle reads a swath sonar data file and generates a set \n\t\
-of tables containing the average amplitude an/or sidescan values\n\t\
-as a function of the angle of interaction (grazing angle) \n\t\
-with the seafloor. Each table represents the symmetrical \n\t\
-average function for a user defined number of pings. The tables \n\t\
-are output to a \".aga\" and \".sga\" files that can be applied \n\t\
-by MBprocess.";
-	char usage_message[] = "mbbackangle -Ifile \
-[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows \
--Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
 	int errflg = 0;
 	int c;
 	int help = 0;

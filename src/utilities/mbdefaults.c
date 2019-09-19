@@ -50,15 +50,18 @@
 #define MBV_SHADE_VIEW_OVERLAY 3
 
 
+static const char program_name[] = "MBDEFAULTS";
+static const char help_message[] =
+    "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file "
+    "~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no "
+    "~/.mbio_defaults \nfile exists one will be created.";
+static const char usage_message[] =
+    "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay "
+    "-Llonflip\n\t-Mmbviewsettings\n\t-Ttimegap -Wproject -V -H]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBDEFAULTS";
-	char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file "
-	                      "~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no "
-	                      "~/.mbio_defaults \nfile exists one will be created.";
-	char usage_message[] = "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay "
-	                       "-Llonflip\n\t-Mmbviewsettings\n\t-Ttimegap -Wproject -V -H]";
 	int errflg = 0;
 	int c;
 	int status;

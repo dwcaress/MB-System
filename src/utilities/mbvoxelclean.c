@@ -82,16 +82,19 @@ struct mbvoxelclean_ping_struct {
 #define MBVC_OCCUPIED_IGNORE    0
 #define MBVC_OCCUPIED_UNFLAG    1
 
+static const char program_name[] = "mbvoxelclean";
+static const char help_message[] =
+    "mbvoxelclean parses recursive datalist files and outputs the\ncomplete list of data files and formats. "
+    "\nThe results are dumped to stdout.";
+static const char usage_message[] =
+    "mbvoxelclean \n\t[\n\t--verbose\n\t--help\n"
+    "\t--input=datalist\n\t--format=value\n\t--voxel-size=xysize[/zsize]\n"
+    "\t--occupy-threshold=value\n\t--count-flagged\n\t--flag-empty\n\t--ignore-empty\n\t--unflag-occupied\n"
+    "\t--ignore-occupied\n\t--range-minimum=value\n\t--range-maximum=value]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbvoxelclean";
-	char help_message[] = "mbvoxelclean parses recursive datalist files and outputs the\ncomplete list of data files and formats. "
-	                      "\nThe results are dumped to stdout.";
-	char usage_message[] = "mbvoxelclean \n\t[\n\t--verbose\n\t--help\n"
-                            "\t--input=datalist\n\t--format=value\n\t--voxel-size=xysize[/zsize]\n"
-                            "\t--occupy-threshold=value\n\t--count-flagged\n\t--flag-empty\n\t--ignore-empty\n\t--unflag-occupied\n"
-                            "\t--ignore-occupied\n\t--range-minimum=value\n\t--range-maximum=value]";
 	int option_index;
 	int errflg = 0;
 	int c;

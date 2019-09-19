@@ -86,6 +86,28 @@ struct mbprocess_grid_struct {
 	float *data;
 };
 
+char program_name[] = "mbprocess";
+char help_message[] =
+    "mbprocess is a tool for processing swath sonar bathymetry data.\n"
+    "This program performs a number of functions, including:\n"
+    "  - merging navigation\n"
+    "  - recalculating bathymetry from travel time and angle data\n"
+    "    by raytracing through a layered water sound velocity model.\n"
+    "  - applying changes to ship draft, roll bias and pitch bias\n"
+    "  - applying bathymetry edits from edit save files.\n"
+    "The parameters controlling mbprocess are included in an ascii\n"
+    "parameter file. The parameter file syntax is documented by\n"
+    "the manual pages for mbprocess and mbset. The program\n"
+    "mbset is used to create and modify parameter files.\n"
+    "The input file \"infile\"  must be specified with the -I option. The\n"
+    "data format can also be specified, thought the program can\n"
+    "infer the format if the standard MB-System suffix convention\n"
+    "is used (*.mbXXX where XXX is the MB-System format id number).\n"
+    "The program will look for and use a parameter file with the \n"
+    "name \"infile.par\". If no parameter file exists, the program \n"
+    "will infer a reasonable processing path by looking for navigation\n"
+    "and mbedit edit save files.\n";
+
 /*--------------------------------------------------------------------*/
 int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int nss, double *ss,
                       double *ssacrosstrack, int *error) {
@@ -409,27 +431,6 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "mbprocess";
-	char help_message[] = "mbprocess is a tool for processing swath sonar bathymetry data.\n\
-This program performs a number of functions, including:\n\
-  - merging navigation\n\
-  - recalculating bathymetry from travel time and angle data\n\
-    by raytracing through a layered water sound velocity model.\n\
-  - applying changes to ship draft, roll bias and pitch bias\n\
-  - applying bathymetry edits from edit save files.\n\
-The parameters controlling mbprocess are included in an ascii\n\
-parameter file. The parameter file syntax is documented by\n\
-the manual pages for mbprocess and mbset. The program\n\
-mbset is used to create and modify parameter files.\n\
-The input file \"infile\"  must be specified with the -I option. The\n\
-data format can also be specified, thought the program can\n\
-infer the format if the standard MB-System suffix convention\n\
-is used (*.mbXXX where XXX is the MB-System format id number).\n\
-The program will look for and use a parameter file with the \n\
-name \"infile.par\". If no parameter file exists, the program \n\
-will infer a reasonable processing path by looking for navigation\n\
-and mbedit edit save files.\n";
 	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
 	int errflg = 0;

@@ -70,15 +70,17 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
                                  double altitude, double pitch, double *table_angle, double *table_xtrack, double *table_ltrack,
                                  double *table_altitude, double *table_range, int *error);
 
-char program_name[] = "mb7k2ss";
+static const char program_name[] = "mb7k2ss";
+static const char help_message[] =
+    "mb7k2ss extracts sidescan sonar data from Reson 7k format data, \nbins and lays the sidescan onto the "
+    "seafloor, and outputs files \nin the MBF_MBLDEOIH formst (MBIO format id 71).\n";
+static const char usage_message[] =
+    "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -D -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile "
+    "-Ttopogridfile -X -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char help_message[] = "mb7k2ss extracts sidescan sonar data from Reson 7k format data, \nbins and lays the sidescan onto the "
-	                      "seafloor, and outputs files \nin the MBF_MBLDEOIH formst (MBIO format id 71).\n";
-	char usage_message[] = "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -D -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile "
-	                       "-Ttopogridfile -X -H -V]";
 	int errflg = 0;
 	int c;
 	int help = 0;

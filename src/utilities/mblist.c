@@ -65,6 +65,16 @@
 /* NaN value */
 double NaN;
 
+static const char program_name[] = "MBLIST";
+static const char help_message[] =
+    "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is "
+    "quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns "
+    "separated by tabs.";
+static const char usage_message[] =
+    "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
+    "-Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end \n-Ooptions -Ppings "
+    "-Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+
 /*--------------------------------------------------------------------*/
 int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int use_bath, int use_amp, int use_ss, int dump_mode,
                int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
@@ -744,13 +754,6 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBLIST";
-	char help_message[] = "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is "
-	                      "quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns "
-	                      "separated by tabs.";
-	char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
-	                       "-Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end \n-Ooptions -Ppings "
-	                       "-Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
 	int errflg = 0;
 	int c;
 	int help = 0;

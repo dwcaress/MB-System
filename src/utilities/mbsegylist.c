@@ -46,6 +46,12 @@
 /* NaN value */
 double NaN;
 
+static const char program_name[] = "MBsegylist";
+static const char help_message[] =
+    "MBsegylist lists table data from a segy data file.";
+static const char usage_message[] =
+    "MBsegylist -Ifile [-A -Ddecimate -Gdelimiter -Llonflip -Olist -H -V]";
+
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
 	int status = MB_SUCCESS;
@@ -144,9 +150,6 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBsegylist";
-	char help_message[] = "MBsegylist lists table data from a segy data file.";
-	char usage_message[] = "MBsegylist -Ifile [-A -Ddecimate -Gdelimiter -Llonflip -Olist -H -V]";
 	int errflg = 0;
 	int c;
 	int help = 0;

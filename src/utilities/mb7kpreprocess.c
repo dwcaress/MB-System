@@ -62,15 +62,18 @@
 #define MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY 8
 #define MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK 9
 
+static const char program_name[] = "mb7kpreprocess";
+static const char help_message[] =
+    "mb7kpreprocess reads a Reson 7k format file, interpolates the\nasynchronous navigation and attitude "
+    "onto the multibeam data, \nand writes a new 7k file with that information correctly embedded\nin the "
+    "multibeam data. This program can also fix various problems\nwith 7k data.";
+static const char usage_message[] =
+    "mb7kpreprocess [-A -B -Crollbias/pitchbias -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  "
+    "-Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ssidescansource -Ttimelag -H -V]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mb7kpreprocess";
-	char help_message[] = "mb7kpreprocess reads a Reson 7k format file, interpolates the\nasynchronous navigation and attitude "
-	                      "onto the multibeam data, \nand writes a new 7k file with that information correctly embedded\nin the "
-	                      "multibeam data. This program can also fix various problems\nwith 7k data.";
-	char usage_message[] = "mb7kpreprocess [-A -B -Crollbias/pitchbias -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  "
-	                       "-Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ssidescansource -Ttimelag -H -V]";
 	int errflg = 0;
 	int c;
 	int help = 0;

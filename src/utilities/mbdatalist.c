@@ -32,13 +32,16 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
+static const char program_name[] = "mbdatalist";
+static const char help_message[] =
+    "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. "
+    "\nThe results are dumped to stdout.";
+static const char usage_message[] =
+    "mbdatalist [-C -D -Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbdatalist";
-	char help_message[] = "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. "
-	                      "\nThe results are dumped to stdout.";
-	char usage_message[] = "mbdatalist [-C -D -Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
 	int option_index;
 	int errflg = 0;
 	int c;

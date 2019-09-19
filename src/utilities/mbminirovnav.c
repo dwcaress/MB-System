@@ -39,29 +39,31 @@
 #include "mb_process.h"
 #include "mb_status.h"
 
+static const char program_name[] = "mbminirovnav";
+static const char help_message[] =
+    " MBminirov reads USBL tracking and CTD day files from the MBARI MiniROV\n"
+    "\tand produces a single ROV navigation file in one of the standard MBARI\n"
+    "\tformats handles preprocessing of swath sonar data as part of setting up\n"
+    "\tan MB-System processing structure for a dataset.\n";
+static const char usage_message[] =
+    "mbminirovnav\n"
+    "\t--help\n\n"
+    "\t--input=fileroot\n"
+    "\t--input-ctd-file=file\n"
+    "\t--input-dvl-file=file\n"
+    "\t--input-nav-file=file\n"
+    "\t--input-rov-file=file\n"
+    "\t--interpolate-position\n"
+    "\t--interval=seconds\n"
+    "\t--output=file\n"
+    "\t--rov-dive-start=yyyymmddhhmmss\n"
+    "\t--rov-dive-end=yyyymmddhhmmss\n"
+    "\t--utm-zone=zone_id/NorS\n"
+    "\t--verbose\n\n";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  char program_name[] = "mbminirovnav";
-  char help_message[] = " MBminirov reads USBL tracking and CTD day files from the MBARI MiniROV\n"
-                            "\tand produces a single ROV navigation file in one of the standard MBARI\n"
-                            "\tformats handles preprocessing of swath sonar data as part of setting up\n"
-                            "\tan MB-System processing structure for a dataset.\n";
-  char usage_message[] = "mbminirovnav\n"
-                         "\t--help\n\n"
-                         "\t--input=fileroot\n"
-                         "\t--input-ctd-file=file\n"
-                         "\t--input-dvl-file=file\n"
-                         "\t--input-nav-file=file\n"
-                         "\t--input-rov-file=file\n"
-                         "\t--interpolate-position\n"
-                         "\t--interval=seconds\n"
-                         "\t--output=file\n"
-                         "\t--rov-dive-start=yyyymmddhhmmss\n"
-                         "\t--rov-dive-end=yyyymmddhhmmss\n"
-                         "\t--utm-zone=zone_id/NorS\n"
-                         "\t--verbose\n\n";
-
   int option_index;
   int errflg = 0;
   int c;

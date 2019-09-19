@@ -56,13 +56,16 @@
 char *GMT_runtime_bindir_win32(char *result);
 #endif
 
+static const char program_name[] = "MBLEVITUS";
+static const char help_message[] =
+    "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus "
+    "temperature and salinity database.";
+static const char usage_message[] =
+    "mblevitus [-Rlon/lat -Ooutfile -V -H]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBLEVITUS";
-	char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus "
-	                      "temperature and salinity database.";
-	char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
 	int errflg = 0;
 	int c;
 	int status = MB_SUCCESS;

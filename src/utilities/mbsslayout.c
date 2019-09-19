@@ -85,6 +85,13 @@
 #define MBSSLAYOUT_NUM_ANGLES 171
 #define MBSSLAYOUT_ANGLE_MAX 85.0
 
+static const char program_name[] = "mbsslayout";
+static const char help_message[] =
+    "MBsslayout reads sidescan in raw time series form, lays the sidescan \nout regularly sampled on a "
+    "specified topography model, and outputs \n the sidescan to format 71 (MBF_MBLDEOIH) files.\n";
+static const char usage_message[] =
+    "mbsslayout [--verbose --help --input=datalist --format=format";
+
 /*--------------------------------------------------------------------*/
 int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
                                     double altitude, double pitch, double *table_angle, double *table_xtrack,
@@ -146,10 +153,6 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbsslayout";
-	char help_message[] = "MBsslayout reads sidescan in raw time series form, lays the sidescan \nout regularly sampled on a "
-	                      "specified topography model, and outputs \n the sidescan to format 71 (MBF_MBLDEOIH) files.\n";
-	char usage_message[] = "mbsslayout [--verbose --help --input=datalist --format=format";
 	int option_index;
 	int errflg = 0;
 	int c;
