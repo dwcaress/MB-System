@@ -174,11 +174,8 @@
  * then applied, and the depth and distances recalculated from
  * from the corrected angles.
  *
- *
  * Author:	D. W. Caress
  * Date:	December 30, 1998
- *
- *
  */
 
 #include <math.h>
@@ -200,7 +197,6 @@ int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch
 	/* convert to cartesian coordinates */
 	const double x = sin(DTR * theta) * cos(DTR * phi);
 	const double y = sin(DTR * theta) * sin(DTR * phi);
-	const double z = cos(DTR * theta);
 
 	/* convert to roll-pitch coordinates */
 	*roll = acos(x);
@@ -367,8 +363,6 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 		roll += vru_roll;
 
 		/* calculate new offsets */
-		const double x = r * cos(DTR * roll);
-		const double y = r * sin(DTR * pitch) * sin(DTR * roll);
 		const double z = r * cos(DTR * pitch) * sin(DTR * roll);
 
 		/* get heave change due to lever arm */
@@ -406,7 +400,6 @@ int mb_lever(int verbose, double sonar_offset_x, double sonar_offset_y, double s
 		/* calculate new offsets */
 		const double x = r * cos(DTR * roll);
 		const double y = r * sin(DTR * pitch) * sin(DTR * roll);
-		const double z = r * cos(DTR * pitch) * sin(DTR * roll);
 
 		/* get position change due to lever arm */
 		*lever_x = x - xx;
