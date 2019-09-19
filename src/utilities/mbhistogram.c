@@ -39,19 +39,69 @@
 #define MBHISTOGRAM_AMP 1
 #define MBHISTOGRAM_SS 2
 
-double qsnorm(double p);
+static const char program_name[] = "MBHISTOGRAM";
+static const char help_message[] =
+    "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude, "
+    " or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up "
+    "the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
+static const char usage_message[] =
+    "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip "
+    "-Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
 
+/*--------------------------------------------------------------------*/
+
+/* double qsnorm(p)
+ * double	p;
+ *
+ * Function to invert the cumulative normal probability
+ * function.  If z is a standardized normal random deviate,
+ * and Q(z) = p is the cumulative Gaussian probability
+ * function, then z = qsnorm(p).
+ *
+ * Note that 0.0 < p < 1.0.  Data values outside this range
+ * will return +/- a large number (1.0e6).
+ * To compute p from a sample of data to test for Normalcy,
+ * sort the N samples into non-decreasing order, label them
+ * i=[1, N], and then compute p = i/(N+1).
+ *
+ * Author:	Walter H. F. Smith
+ * Date:	19 February, 1991-1995.
+ *
+ * Based on a Fortran subroutine by R. L. Parker.  I had been
+ * using IMSL library routine DNORIN(DX) to do what qsnorm(p)
+ * does, when I was at the Lamont-Doherty Geological Observatory
+ * which had a site license for IMSL.  I now need to invert the
+ * gaussian CDF without calling IMSL; hence, this routine.
+ *
+ */
+
+double qsnorm(double p) {
+	double t, z;
+
+	if (p <= 0.0) {
+		return (-1.0e6);
+	}
+	else if (p >= 1.0) {
+		return (1.0e6);
+	}
+	else if (p == 0.5) {
+		return (0.0);
+	}
+	else if (p > 0.5) {
+		t = sqrt(-2.0 * log(1.0 - p));
+		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
+		return (z);
+	}
+	else {
+		t = sqrt(-2.0 * log(p));
+		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
+		return (-z);
+	}
+}
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBHISTOGRAM";
-	char help_message[] = "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude, "
-	                      " or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up "
-	                      "the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
-	char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip "
-	                       "-Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
@@ -629,55 +679,5 @@ int main(int argc, char **argv) {
 
 	fprintf(output, "\n");
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-
-/* double qsnorm(p)
- * double	p;
- *
- * Function to invert the cumulative normal probability
- * function.  If z is a standardized normal random deviate,
- * and Q(z) = p is the cumulative Gaussian probability
- * function, then z = qsnorm(p).
- *
- * Note that 0.0 < p < 1.0.  Data values outside this range
- * will return +/- a large number (1.0e6).
- * To compute p from a sample of data to test for Normalcy,
- * sort the N samples into non-decreasing order, label them
- * i=[1, N], and then compute p = i/(N+1).
- *
- * Author:	Walter H. F. Smith
- * Date:	19 February, 1991-1995.
- *
- * Based on a Fortran subroutine by R. L. Parker.  I had been
- * using IMSL library routine DNORIN(DX) to do what qsnorm(p)
- * does, when I was at the Lamont-Doherty Geological Observatory
- * which had a site license for IMSL.  I now need to invert the
- * gaussian CDF without calling IMSL; hence, this routine.
- *
- */
-
-double qsnorm(double p) {
-	double t, z;
-
-	if (p <= 0.0) {
-		return (-1.0e6);
-	}
-	else if (p >= 1.0) {
-		return (1.0e6);
-	}
-	else if (p == 0.5) {
-		return (0.0);
-	}
-	else if (p > 0.5) {
-		t = sqrt(-2.0 * log(1.0 - p));
-		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
-		return (z);
-	}
-	else {
-		t = sqrt(-2.0 * log(p));
-		z = t - (2.515517 + t * (0.802853 + t * 0.010328)) / (1.0 + t * (1.432788 + t * (0.189269 + t * 0.001308)));
-		return (-z);
-	}
 }
 /*--------------------------------------------------------------------*/

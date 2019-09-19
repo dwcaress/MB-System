@@ -39,19 +39,17 @@
 
 #define MBRTL_ALLOC_CHUNK 1000
 
+static const char program_name[] = "MBrolltimelag";
+static const char help_message[] =
+    "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath "
+    "data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a "
+    "specified set of time lags.";
+static const char usage_message[] =
+    "mbrolltimelag -Iswathdata [-Fformat -Krollsource -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "MBrolltimelag";
-	char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath "
-	                      "data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a "
-	                      "specified set of time lags.";
-	char usage_message[] =
-	    "mbrolltimelag -Iswathdata [-Fformat -Krollsource -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
-
-	/* parsing variables */
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

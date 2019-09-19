@@ -100,21 +100,92 @@ int *gsndgnum = NULL;
 int *gsndgnum_alloc = NULL;
 struct mbareaclean_sndg_struct *sndg = NULL;
 
-/* sounding pointer resolving function */
-int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct **sndgptr, int *error);
-int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct mbareaclean_sndg_struct *sndg, int *error);
-
-
-/*--------------------------------------------------------------------*/
-
 static const char program_name[] = "MBAREACLEAN";
 static const char help_message[] = "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 static const char usage_message[] =
     "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize\n"
     "\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
 
+/*--------------------------------------------------------------------*/
+int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct **sndgptr, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       soundingid:      %d\n", soundingid);
+		fprintf(stderr, "dbg2       sndgptr:         %p\n", (void *)sndgptr);
+	}
+
+	/* loop over the files until the sounding is found */
+	*sndgptr = NULL;
+	for (int i = 0; i < nfile && *sndgptr == NULL; i++) {
+		if (soundingid >= files[i].sndg_countstart && soundingid < files[i].sndg_countstart + files[i].nsndg) {
+			const int j = soundingid - files[i].sndg_countstart;
+			*sndgptr = &(files[i].sndg[j]);
+		}
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       *sndgptr:        %p\n", (void *)sndgptr);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+
+int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct mbareaclean_sndg_struct *sndg, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
+		fprintf(stderr, "dbg2       flag:          %d\n", flag);
+		fprintf(stderr, "dbg2       output_bad:    %d\n", output_bad);
+		fprintf(stderr, "dbg2       output_good:   %d\n", output_good);
+		fprintf(stderr, "dbg2       sndg->sndg_edit:     %d\n", sndg->sndg_edit);
+		fprintf(stderr, "dbg2       sndg->sndg_beam:     %d\n", sndg->sndg_beam);
+		fprintf(stderr, "dbg2       sndg->sndg_beamflag: %d\n", sndg->sndg_beamflag);
+	}
+
+	if (sndg->sndg_edit == MB_YES) {
+		if (output_bad == MB_YES && mb_beam_ok(sndg->sndg_beamflag) && flag) {
+			sndg->sndg_beamflag = MB_FLAG_FLAG + MB_FLAG_FILTER;
+			files[sndg->sndg_file].nflagged++;
+		}
+
+		else if (output_good == MB_YES && !mb_beam_ok(sndg->sndg_beamflag) && sndg->sndg_beamflag != MB_FLAG_NULL && !flag) {
+			sndg->sndg_beamflag = MB_FLAG_NONE;
+			files[sndg->sndg_file].nunflagged++;
+		}
+
+		else if (output_good == MB_YES && !mb_beam_ok(sndg->sndg_beamflag) && sndg->sndg_beamflag != MB_FLAG_NULL && flag) {
+			sndg->sndg_edit = MB_NO;
+		}
+	}
+
+	const int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       sndg->sndg_edit:     %d\n", sndg->sndg_edit);
+		fprintf(stderr, "dbg2       sndg->sndg_beamflag: %d\n", sndg->sndg_beamflag);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
 int main(int argc, char **argv) {
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
@@ -1167,82 +1238,4 @@ int main(int argc, char **argv) {
 
 	exit(error);
 }
-/*--------------------------------------------------------------------*/
-int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct **sndgptr, int *error) {
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       soundingid:      %d\n", soundingid);
-		fprintf(stderr, "dbg2       sndgptr:         %p\n", (void *)sndgptr);
-	}
-
-	/* loop over the files until the sounding is found */
-	*sndgptr = NULL;
-	for (int i = 0; i < nfile && *sndgptr == NULL; i++) {
-		if (soundingid >= files[i].sndg_countstart && soundingid < files[i].sndg_countstart + files[i].nsndg) {
-			const int j = soundingid - files[i].sndg_countstart;
-			*sndgptr = &(files[i].sndg[j]);
-		}
-	}
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       *sndgptr:        %p\n", (void *)sndgptr);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-
-int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct mbareaclean_sndg_struct *sndg, int *error) {
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:       %d\n", verbose);
-		fprintf(stderr, "dbg2       flag:          %d\n", flag);
-		fprintf(stderr, "dbg2       output_bad:    %d\n", output_bad);
-		fprintf(stderr, "dbg2       output_good:   %d\n", output_good);
-		fprintf(stderr, "dbg2       sndg->sndg_edit:     %d\n", sndg->sndg_edit);
-		fprintf(stderr, "dbg2       sndg->sndg_beam:     %d\n", sndg->sndg_beam);
-		fprintf(stderr, "dbg2       sndg->sndg_beamflag: %d\n", sndg->sndg_beamflag);
-	}
-
-	if (sndg->sndg_edit == MB_YES) {
-		if (output_bad == MB_YES && mb_beam_ok(sndg->sndg_beamflag) && flag) {
-			sndg->sndg_beamflag = MB_FLAG_FLAG + MB_FLAG_FILTER;
-			files[sndg->sndg_file].nflagged++;
-		}
-
-		else if (output_good == MB_YES && !mb_beam_ok(sndg->sndg_beamflag) && sndg->sndg_beamflag != MB_FLAG_NULL && !flag) {
-			sndg->sndg_beamflag = MB_FLAG_NONE;
-			files[sndg->sndg_file].nunflagged++;
-		}
-
-		else if (output_good == MB_YES && !mb_beam_ok(sndg->sndg_beamflag) && sndg->sndg_beamflag != MB_FLAG_NULL && flag) {
-			sndg->sndg_edit = MB_NO;
-		}
-	}
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       sndg->sndg_edit:     %d\n", sndg->sndg_edit);
-		fprintf(stderr, "dbg2       sndg->sndg_beamflag: %d\n", sndg->sndg_beamflag);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-
 /*--------------------------------------------------------------------*/

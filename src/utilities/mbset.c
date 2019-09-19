@@ -44,26 +44,24 @@
 #include "mb_status.h"
 #include "mb_swap.h"
 
+static const char program_name[] = "mbset";
+static const char help_message[] =
+    "MBset is a tool for setting values in an mbprocess parameter file.\n"
+    "MBprocess is a tool for processing swath sonar bathymetry data\n"
+    "which performs a number of functions, including:\n"
+    "  - merging navigation\n"
+    "  - recalculating bathymetry from travel time and angle data\n"
+    "    by raytracing through a layered water sound velocity model.\n"
+    "  - applying changes to ship draft, roll bias and pitch bias\n"
+    "  - applying bathymetry edits from  edit save files.\n"
+    "The parameters controlling mbprocess are included in an ascii\n"
+    "parameter file. The parameter file syntax is documented by\n"
+    "the manual pages for mbprocess and mbset. \n\n";
+static const char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N -V -H]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "mbset";
-	char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
-MBprocess is a tool for processing swath sonar bathymetry data  \n\
-which performs a number of functions, including:\n\
-  - merging navigation\n\
-  - recalculating bathymetry from travel time and angle data\n\
-    by raytracing through a layered water sound velocity model.\n\
-  - applying changes to ship draft, roll bias and pitch bias\n\
-  - applying bathymetry edits from  edit save files.\n\
-The parameters controlling mbprocess are included in an ascii\n\
-parameter file. The parameter file syntax is documented by\n\
-the manual pages for mbprocess and mbset. \n\n";
-	char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N -V -H]";
-
-	/* parsing variables */
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

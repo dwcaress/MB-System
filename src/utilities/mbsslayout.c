@@ -85,18 +85,74 @@
 #define MBSSLAYOUT_NUM_ANGLES 171
 #define MBSSLAYOUT_ANGLE_MAX 85.0
 
+static const char program_name[] = "mbsslayout";
+static const char help_message[] =
+    "MBsslayout reads sidescan in raw time series form, lays the sidescan \nout regularly sampled on a "
+    "specified topography model, and outputs \n the sidescan to format 71 (MBF_MBLDEOIH) files.\n";
+static const char usage_message[] =
+    "mbsslayout [--verbose --help --input=datalist --format=format";
+
+/*--------------------------------------------------------------------*/
 int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
                                     double altitude, double pitch, double *table_angle, double *table_xtrack,
-                                    double *table_ltrack, double *table_altitude, double *table_range, int *error);
+                                    double *table_ltrack, double *table_altitude, double *table_range, int *error) {
+	int status = MB_SUCCESS;
+	double dangle;
+	double rr, xx, zz;
+	double alpha, beta, theta, phi;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
+		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
+		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr, "dbg2       navlon:          %f\n", navlon);
+		fprintf(stderr, "dbg2       navlat:          %f\n", navlat);
+		fprintf(stderr, "dbg2       pitch:           %f\n", pitch);
+	}
+
+	/* loop over all of the angles */
+	dangle = (angle_max - angle_min) / (nangle - 1);
+	alpha = pitch;
+	zz = altitude;
+	for (i = 0; i < nangle; i++) {
+		/* get angles in takeoff coordinates */
+		table_angle[i] = angle_min + dangle * i;
+		beta = 90.0 - table_angle[i];
+		mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+
+		/* calculate range required to achieve desired altitude */
+		rr = zz / cos(DTR * theta);
+
+		/* get the position */
+		xx = rr * sin(DTR * theta);
+		table_xtrack[i] = xx * cos(DTR * phi);
+		table_ltrack[i] = xx * sin(DTR * phi);
+		table_altitude[i] = zz;
+		table_range[i] = rr;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       Lookup tables:\n");
+		for (i = 0; i < nangle; i++)
+			fprintf(stderr, "dbg2         %d %f %f %f %f %f\n", i, table_angle[i], table_xtrack[i], table_ltrack[i],
+			        table_altitude[i], table_range[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbsslayout";
-	char help_message[] = "MBsslayout reads sidescan in raw time series form, lays the sidescan \nout regularly sampled on a "
-	                      "specified topography model, and outputs \n the sidescan to format 71 (MBF_MBLDEOIH) files.\n";
-	char usage_message[] = "mbsslayout [--verbose --help --input=datalist --format=format";
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;
@@ -2918,62 +2974,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
-                                    double altitude, double pitch, double *table_angle, double *table_xtrack,
-                                    double *table_ltrack, double *table_altitude, double *table_range, int *error) {
-	int status = MB_SUCCESS;
-	double dangle;
-	double rr, xx, zz;
-	double alpha, beta, theta, phi;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
-		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
-		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
-		fprintf(stderr, "dbg2       navlon:          %f\n", navlon);
-		fprintf(stderr, "dbg2       navlat:          %f\n", navlat);
-		fprintf(stderr, "dbg2       pitch:           %f\n", pitch);
-	}
-
-	/* loop over all of the angles */
-	dangle = (angle_max - angle_min) / (nangle - 1);
-	alpha = pitch;
-	zz = altitude;
-	for (i = 0; i < nangle; i++) {
-		/* get angles in takeoff coordinates */
-		table_angle[i] = angle_min + dangle * i;
-		beta = 90.0 - table_angle[i];
-		mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-
-		/* calculate range required to achieve desired altitude */
-		rr = zz / cos(DTR * theta);
-
-		/* get the position */
-		xx = rr * sin(DTR * theta);
-		table_xtrack[i] = xx * cos(DTR * phi);
-		table_ltrack[i] = xx * sin(DTR * phi);
-		table_altitude[i] = zz;
-		table_range[i] = rr;
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       Lookup tables:\n");
-		for (i = 0; i < nangle; i++)
-			fprintf(stderr, "dbg2         %d %f %f %f %f %f\n", i, table_angle[i], table_xtrack[i], table_ltrack[i],
-			        table_altitude[i], table_range[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/

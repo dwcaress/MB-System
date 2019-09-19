@@ -89,19 +89,65 @@ struct ctd_calibration_struct {
 		double ctcor;
 		};
 
-void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr);
-double calcPressure(struct ctd_calibration_struct *calibration_ptr,
-				double presCounts, double temperature);
-double calcTemp(const struct ctd_calibration_struct *calibration_ptr,
-				double tempCounts);
-double calcCond(const struct ctd_calibration_struct *calibration_ptr,
-				double cFreq, double temp, double pressure);
-
 static const char program_name[] = "MBauvloglist";
 static const char help_message[] = "MBauvloglist lists table data from an MBARI AUV mission log file.";
 static const char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -Rid -S -H -V]";
 
 /*--------------------------------------------------------------------*/
+
+//returns pressure in dbar. Returned pressure is zero at surface, assuming
+//atmospheric pressure fixed at 14.7PSI
+double calcPressure(struct ctd_calibration_struct *calibration_ptr,
+				double presCounts, double temperature)
+{
+  double t = calibration_ptr->ptempa0
+								+ calibration_ptr->ptempa1*temperature
+								+ calibration_ptr->ptempa2*temperature*temperature;
+  double x = (double)presCounts - calibration_ptr->ptca0
+								- calibration_ptr->ptca1*t
+								- calibration_ptr->ptca2*t*t;
+  double n = x*calibration_ptr->ptcb0 / (calibration_ptr->ptcb0
+								+ calibration_ptr->ptcb1*t
+								+ calibration_ptr->ptcb2*t*t);
+  double pres = calibration_ptr->pa0
+								+ calibration_ptr->pa1*n
+								+ calibration_ptr->pa2*n*n;
+
+  pres = (pres-14.7)*.6894757; //per note on page 34 of the SBE49 Manual
+  return pres;
+}
+
+//return ITS90 temperature
+double calcTemp(const struct ctd_calibration_struct *calibration_ptr,
+				double tempCounts)
+{
+  const double mv = (double)((double)tempCounts - 524288.0) / (double)1.6e7;
+  const double r  = (mv * (double)2.295e10 + (double)9.216e8)
+                      / ((double)6.144e4 - mv*(double)5.3e5);
+  const double ln_r = log(r);
+
+  const double temp = 1. / ( calibration_ptr->a0 + calibration_ptr->a1*ln_r
+					  + calibration_ptr->a2*ln_r*ln_r
+					  + calibration_ptr->a3*ln_r*ln_r*ln_r)
+                      - (double)273.15;
+  return temp;
+}
+
+double calcCond(const struct ctd_calibration_struct *calibration_ptr,
+				double cFreq, double temp, double pressure)
+{
+
+  // pressure *= 1.45; // Convert to psia for this formula
+
+  cFreq /= 1000.0; 
+  double cond = (calibration_ptr->g + calibration_ptr->h*cFreq*cFreq
+				 + calibration_ptr->i*cFreq*cFreq*cFreq
+				 + calibration_ptr->j*cFreq*cFreq*cFreq*cFreq)
+                        / (1 + calibration_ptr->ctcor*temp
+							+ calibration_ptr->cpcor*pressure);
+
+  return cond;
+}
 
 int main(int argc, char **argv) {
 	int errflg = 0;
@@ -1054,59 +1100,5 @@ void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr)
 	calibration_ptr->j = 5.724026e-005;
 	calibration_ptr->cpcor = -9.5700e-008;
 	calibration_ptr->ctcor = 3.2500e-006;
-}
-
-//returns pressure in dbar. Returned pressure is zero at surface, assuming
-//atmospheric pressure fixed at 14.7PSI
-double calcPressure(struct ctd_calibration_struct *calibration_ptr,
-				double presCounts, double temperature)
-{
-  double t = calibration_ptr->ptempa0
-								+ calibration_ptr->ptempa1*temperature
-								+ calibration_ptr->ptempa2*temperature*temperature;
-  double x = (double)presCounts - calibration_ptr->ptca0
-								- calibration_ptr->ptca1*t
-								- calibration_ptr->ptca2*t*t;
-  double n = x*calibration_ptr->ptcb0 / (calibration_ptr->ptcb0
-								+ calibration_ptr->ptcb1*t
-								+ calibration_ptr->ptcb2*t*t);
-  double pres = calibration_ptr->pa0
-								+ calibration_ptr->pa1*n
-								+ calibration_ptr->pa2*n*n;
-
-  pres = (pres-14.7)*.6894757; //per note on page 34 of the SBE49 Manual
-  return pres;
-}
-
-//return ITS90 temperature
-double calcTemp(const struct ctd_calibration_struct *calibration_ptr,
-				double tempCounts)
-{
-  const double mv = (double)((double)tempCounts - 524288.0) / (double)1.6e7;
-  const double r  = (mv * (double)2.295e10 + (double)9.216e8)
-                      / ((double)6.144e4 - mv*(double)5.3e5);
-  const double ln_r = log(r);
-
-  const double temp = 1. / ( calibration_ptr->a0 + calibration_ptr->a1*ln_r
-					  + calibration_ptr->a2*ln_r*ln_r
-					  + calibration_ptr->a3*ln_r*ln_r*ln_r)
-                      - (double)273.15;
-  return temp;
-}
-
-double calcCond(const struct ctd_calibration_struct *calibration_ptr,
-				double cFreq, double temp, double pressure)
-{
-
-  // pressure *= 1.45; // Convert to psia for this formula
-
-  cFreq /= 1000.0; 
-  double cond = (calibration_ptr->g + calibration_ptr->h*cFreq*cFreq
-				 + calibration_ptr->i*cFreq*cFreq*cFreq
-				 + calibration_ptr->j*cFreq*cFreq*cFreq*cFreq)
-                        / (1 + calibration_ptr->ctcor*temp
-							+ calibration_ptr->cpcor*pressure);
-
-  return cond;
 }
 

@@ -107,24 +107,195 @@ struct mbclean_ping_struct {
 	double *bathy;
 };
 
-/* function prototypes */
-int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
-int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int create, struct neptune_line_tree **result,
-              int *nlines, int *error);
-int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create, struct neptune_ping_tree **result, int *error);
-int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array, int *n);
-int print_pings(FILE *output, struct neptune_ping_tree *node);
-int free_pings(int verbose, struct neptune_ping_tree **node, int *error);
+static const char program_name[] = "mbneptune2esf";
+static const char help_message[] =
+    "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand "
+    "applies the flags in the rules file to the esf file of the coresponding line";
+static const char usage_message[] =
+    "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
 
+/*--------------------------------------------------------------------*/
+int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
+	int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+
+		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       beam:            %d\n", beam);
+		fprintf(stderr, "dbg2       action:          %d\n", action);
+	}
+	/* write out the edit */
+	fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
+	if (sofp != NULL) {
+#ifdef BYTESWAPPED
+		mb_swap_double(&time_d);
+		beam = mb_swap_int(beam);
+		action = mb_swap_int(action);
+#endif
+		if (fwrite(&time_d, sizeof(double), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:       %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:      %d\n", status);
+	}
+
+	/* return */
+	return (status);
+}
+
+/*--------------------------------------------------------------------*/
+int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int create, struct neptune_line_tree **result,
+              int *nlines, int *error) {
+	int status = MB_SUCCESS;
+	int comp;
+
+	if (NULL == *node) {
+		if (MB_NO == create)
+			return MB_FAILURE;
+
+#ifdef USE_MB_MALLOC
+		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_line_tree), (void **)result, error);
+#else
+		*result = malloc(sizeof(struct neptune_line_tree));
+#endif
+		if (MB_SUCCESS == status) {
+			strncpy((*result)->name, line_name, LINE_NAME_LENGTH);
+			(*result)->name[LINE_NAME_LENGTH] = 0;
+			(*result)->prev = NULL;
+			(*result)->next = NULL;
+			(*result)->pings = NULL;
+			(*nlines)++;
+			*node = *result;
+		}
+		return status;
+	}
+
+	comp = strncmp(line_name, (*node)->name, LINE_NAME_LENGTH);
+	if (0 == comp) {
+		*result = *node;
+		return status;
+	}
+	if (0 > comp)
+		return find_line(verbose, line_name, &((*node)->prev), create, result, nlines, error);
+	return find_line(verbose, line_name, &((*node)->next), create, result, nlines, error);
+}
+/*--------------------------------------------------------------------*/
+int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create, struct neptune_ping_tree **result, int *error) {
+	int status = MB_SUCCESS;
+
+	if (NULL == *node) {
+		if (MB_NO == create)
+			return MB_FAILURE;
+
+#ifdef USE_MB_MALLOC
+		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_ping_tree), (void **)result, error);
+#else
+		*result = malloc(sizeof(struct neptune_ping_tree));
+#endif
+		if (MB_SUCCESS == status) {
+			(*result)->ping = ping;
+			(*result)->prev = NULL;
+			(*result)->next = NULL;
+			(*result)->beams = NULL;
+			*node = *result;
+		}
+		return status;
+	}
+
+	if (ping == (*node)->ping) {
+		*result = *node;
+		return status;
+	}
+	if ((*node)->ping > ping)
+		return find_ping(verbose, ping, &((*node)->prev), create, result, error);
+	return find_ping(verbose, ping, &((*node)->next), create, result, error);
+}
+/*--------------------------------------------------------------------*/
+
+int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array, int *n) {
+	if (NULL == line)
+		return MB_SUCCESS;
+
+	line_array(line->prev, array, n);
+	(*array)[(*n)++] = line;
+	line_array(line->next, array, n);
+	return MB_SUCCESS;
+}
+
+/*--------------------------------------------------------------------*/
+
+int print_pings(FILE *output, struct neptune_ping_tree *node) {
+	struct neptune_beam_list *beam;
+
+	if (NULL == node)
+		return MB_SUCCESS;
+
+	print_pings(output, node->prev);
+
+	fprintf(output, "\tPing %d beams: ", node->ping);
+	beam = node->beams;
+	while (NULL != beam) {
+		fprintf(output, " %d", beam->beam);
+		beam = beam->next;
+	}
+	fprintf(output, "\n");
+
+	print_pings(output, node->next);
+	return MB_SUCCESS;
+}
+
+/*--------------------------------------------------------------------*/
+
+int free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
+	struct neptune_beam_list *beam;
+	struct neptune_beam_list *nextbeam;
+
+	if (NULL == *node)
+		return MB_SUCCESS;
+
+	free_pings(verbose, &(*node)->prev, error);
+	free_pings(verbose, &(*node)->next, error);
+
+	beam = (*node)->beams;
+	while (NULL != beam) {
+		nextbeam = beam->next;
+#ifdef USE_MB_MALLOC
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&beam, error);
+#else
+		free(beam);
+#endif
+		beam = nextbeam;
+	}
+#ifdef USE_MB_MALLOC
+	mb_freed(verbose, __FILE__, __LINE__, (void **)node, error);
+#else
+	free(*node);
+#endif
+
+	return MB_SUCCESS;
+}
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbneptune2esf";
-	char help_message[] = "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand "
-	                      "applies the flags in the rules file to the esf file of the coresponding line";
-	char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
@@ -903,183 +1074,4 @@ int main(int argc, char **argv) {
 
 	exit(error);
 }
-/*--------------------------------------------------------------------*/
-int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-
-		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       beam:            %d\n", beam);
-		fprintf(stderr, "dbg2       action:          %d\n", action);
-	}
-	/* write out the edit */
-	fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
-	if (sofp != NULL) {
-#ifdef BYTESWAPPED
-		mb_swap_double(&time_d);
-		beam = mb_swap_int(beam);
-		action = mb_swap_int(action);
-#endif
-		if (fwrite(&time_d, sizeof(double), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:       %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
-	}
-
-	/* return */
-	return (status);
-}
-
-/*--------------------------------------------------------------------*/
-int find_line(int verbose, char *line_name, struct neptune_line_tree **node, int create, struct neptune_line_tree **result,
-              int *nlines, int *error) {
-	int status = MB_SUCCESS;
-	int comp;
-
-	if (NULL == *node) {
-		if (MB_NO == create)
-			return MB_FAILURE;
-
-#ifdef USE_MB_MALLOC
-		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_line_tree), (void **)result, error);
-#else
-		*result = malloc(sizeof(struct neptune_line_tree));
-#endif
-		if (MB_SUCCESS == status) {
-			strncpy((*result)->name, line_name, LINE_NAME_LENGTH);
-			(*result)->name[LINE_NAME_LENGTH] = 0;
-			(*result)->prev = NULL;
-			(*result)->next = NULL;
-			(*result)->pings = NULL;
-			(*nlines)++;
-			*node = *result;
-		}
-		return status;
-	}
-
-	comp = strncmp(line_name, (*node)->name, LINE_NAME_LENGTH);
-	if (0 == comp) {
-		*result = *node;
-		return status;
-	}
-	if (0 > comp)
-		return find_line(verbose, line_name, &((*node)->prev), create, result, nlines, error);
-	return find_line(verbose, line_name, &((*node)->next), create, result, nlines, error);
-}
-/*--------------------------------------------------------------------*/
-int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create, struct neptune_ping_tree **result, int *error) {
-	int status = MB_SUCCESS;
-
-	if (NULL == *node) {
-		if (MB_NO == create)
-			return MB_FAILURE;
-
-#ifdef USE_MB_MALLOC
-		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct neptune_ping_tree), (void **)result, error);
-#else
-		*result = malloc(sizeof(struct neptune_ping_tree));
-#endif
-		if (MB_SUCCESS == status) {
-			(*result)->ping = ping;
-			(*result)->prev = NULL;
-			(*result)->next = NULL;
-			(*result)->beams = NULL;
-			*node = *result;
-		}
-		return status;
-	}
-
-	if (ping == (*node)->ping) {
-		*result = *node;
-		return status;
-	}
-	if ((*node)->ping > ping)
-		return find_ping(verbose, ping, &((*node)->prev), create, result, error);
-	return find_ping(verbose, ping, &((*node)->next), create, result, error);
-}
-/*--------------------------------------------------------------------*/
-
-int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array, int *n) {
-	if (NULL == line)
-		return MB_SUCCESS;
-
-	line_array(line->prev, array, n);
-	(*array)[(*n)++] = line;
-	line_array(line->next, array, n);
-	return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-
-int print_pings(FILE *output, struct neptune_ping_tree *node) {
-	struct neptune_beam_list *beam;
-
-	if (NULL == node)
-		return MB_SUCCESS;
-
-	print_pings(output, node->prev);
-
-	fprintf(output, "\tPing %d beams: ", node->ping);
-	beam = node->beams;
-	while (NULL != beam) {
-		fprintf(output, " %d", beam->beam);
-		beam = beam->next;
-	}
-	fprintf(output, "\n");
-
-	print_pings(output, node->next);
-	return MB_SUCCESS;
-}
-
-/*--------------------------------------------------------------------*/
-
-int free_pings(int verbose, struct neptune_ping_tree **node, int *error) {
-	struct neptune_beam_list *beam;
-	struct neptune_beam_list *nextbeam;
-
-	if (NULL == *node)
-		return MB_SUCCESS;
-
-	free_pings(verbose, &(*node)->prev, error);
-	free_pings(verbose, &(*node)->next, error);
-
-	beam = (*node)->beams;
-	while (NULL != beam) {
-		nextbeam = beam->next;
-#ifdef USE_MB_MALLOC
-		mb_freed(verbose, __FILE__, __LINE__, (void **)&beam, error);
-#else
-		free(beam);
-#endif
-		beam = nextbeam;
-	}
-#ifdef USE_MB_MALLOC
-	mb_freed(verbose, __FILE__, __LINE__, (void **)node, error);
-#else
-	free(*node);
-#endif
-
-	return MB_SUCCESS;
-}
-
 /*--------------------------------------------------------------------*/

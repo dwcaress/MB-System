@@ -42,16 +42,17 @@
 #define MBES_NUM_PLOT_MAX 50
 #define MBES_MAX_SWEEP 1.0
 
+static const char program_name[] = "MBextractsegy";
+static const char help_message[] =
+    "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from "
+    "data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
+static const char usage_message[] =
+    "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat \n\t-Ifile -Jxscale/yscale "
+    "-Lstartline/lineroot \n\t-Osegyfile -Qtimelistfile -Rroutefile \n\t-Ssampleformat -Zplotmax -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBextractsegy";
-	char help_message[] = "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from "
-	                      "data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
-	char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat \n\t-Ifile -Jxscale/yscale "
-	                       "-Lstartline/lineroot \n\t-Osegyfile -Qtimelistfile -Rroutefile \n\t-Ssampleformat -Zplotmax -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

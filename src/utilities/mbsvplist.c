@@ -63,22 +63,21 @@ struct mbsvplist_svp_struct {
 	double velocity[MB_SVP_MAX];
 };
 
+static const char program_name[] = "mbsvplist";
+static const char help_message[] =
+    "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from "
+    "raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats "
+    "allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, "
+    "all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names "
+    "FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file. The -D\noption causes "
+    "duplicate SVPs to be output.\nThe -T option will output a CSV table of svp#, time, longitude, latitude and number of "
+    "points for SVPs.\nWhen the -Nmin_num_pairs option is used, only svps that have at least min_num_pairs svp values will "
+    "be output.(This is particularly useful for .xse data where the svp is entered as a single values svp.)";
+static const char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -Nmin_num_pairs -P -T -V -Z]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbsvplist";
-	char help_message[] =
-	    "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from "
-	    "raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats "
-	    "allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, "
-	    "all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names "
-	    "FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file. The -D\noption causes "
-	    "duplicate SVPs to be output.\nThe -T option will output a CSV table of svp#, time, longitude, latitude and number of "
-	    "points for SVPs.\nWhen the -Nmin_num_pairs option is used, only svps that have at least min_num_pairs svp values will "
-	    "be output.(This is particularly useful for .xse data where the svp is entered as a single values svp.)";
-	char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -Nmin_num_pairs -P -T -V -Z]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

@@ -42,15 +42,17 @@
 #define MBES_ONLINE_THRESHOLD 15.0
 #define MBES_ONLINE_COUNT 30
 
+static const char program_name[] = "MBroutetime";
+static const char help_message[] =
+    "MBroutetime outputs a list of the times when a survey hit the waypoints\nof a planned survey route. "
+    "This (lon lat time_d) list can then be used by mbextractsegy\nor mb7k2ss to extract subbottom (or "
+    "sidescan) data into files corresponding\nto the lines between waypoints.";
+static const char usage_message[] =
+    "mbroutetime  -Rroutefile [-Fformat -Ifile -Owaypointtimefile -Urangethreshold -H -V]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBroutetime";
-	char help_message[] = "MBroutetime outputs a list of the times when a survey hit the waypoints\nof a planned survey route. "
-	                      "This (lon lat time_d) list can then be used by mbextractsegy\nor mb7k2ss to extract subbottom (or "
-	                      "sidescan) data into files corresponding\nto the lines between waypoints.";
-	char usage_message[] = "mbroutetime  -Rroutefile [-Fformat -Ifile -Owaypointtimefile -Urangethreshold -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

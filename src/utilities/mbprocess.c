@@ -86,43 +86,353 @@ struct mbprocess_grid_struct {
 	float *data;
 };
 
-/* function prototypes */
+char program_name[] = "mbprocess";
+char help_message[] =
+    "mbprocess is a tool for processing swath sonar bathymetry data.\n"
+    "This program performs a number of functions, including:\n"
+    "  - merging navigation\n"
+    "  - recalculating bathymetry from travel time and angle data\n"
+    "    by raytracing through a layered water sound velocity model.\n"
+    "  - applying changes to ship draft, roll bias and pitch bias\n"
+    "  - applying bathymetry edits from edit save files.\n"
+    "The parameters controlling mbprocess are included in an ascii\n"
+    "parameter file. The parameter file syntax is documented by\n"
+    "the manual pages for mbprocess and mbset. The program\n"
+    "mbset is used to create and modify parameter files.\n"
+    "The input file \"infile\"  must be specified with the -I option. The\n"
+    "data format can also be specified, thought the program can\n"
+    "infer the format if the standard MB-System suffix convention\n"
+    "is used (*.mbXXX where XXX is the MB-System format id number).\n"
+    "The program will look for and use a parameter file with the \n"
+    "name \"infile.par\". If no parameter file exists, the program \n"
+    "will infer a reasonable processing path by looking for navigation\n"
+    "and mbedit edit save files.\n";
+
+/*--------------------------------------------------------------------*/
 int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int nss, double *ss,
-                      double *ssacrosstrack, int *error);
+                      double *ssacrosstrack, int *error) {
+	int status = MB_SUCCESS;
+	int ifirst, ilast;
+	int iss, ibath;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       nbath:           %d\n", nbath);
+		fprintf(stderr, "dbg2       bath:            %p\n", (void *)bath);
+		fprintf(stderr, "dbg2       bathacrosstrack: %p\n", (void *)bathacrosstrack);
+		fprintf(stderr, "dbg2       bath:\n");
+		for (i = 0; i < nbath; i++)
+			fprintf(stderr, "dbg2         %d %f %f\n", i, bath[i], bathacrosstrack[i]);
+	}
+
+	/* find limits of good bathy */
+	ifirst = -1;
+	ilast = -1;
+	i = 0;
+	for (i = 0; i < nbath; i++) {
+		if (mb_beam_ok(beamflag[i])) {
+			if (ifirst < 0)
+				ifirst = i;
+			ilast = i;
+		}
+	}
+
+	/* loop over sidescan looking for bathy on either side
+	   - zero sidescan if bathy lacking */
+	if (ifirst < ilast) {
+		ibath = ifirst;
+		for (iss = 0; iss < nss; iss++) {
+			/* make sure ibath sets right interval for ss */
+			while (ibath < ilast - 1 && (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]) ||
+			                             (mb_beam_ok(beamflag[ibath + 1]) && ssacrosstrack[iss] > bathacrosstrack[ibath + 1])))
+				ibath++;
+			/*fprintf(stderr,"iss:%d ibath:%d %f %f  %f %f  ss: %f %f\n",
+			iss,ibath,bath[ibath],bath[ibath+1],
+			bathacrosstrack[ibath],bathacrosstrack[ibath+1],
+			ss[iss],ssacrosstrack[iss]);*/
+
+			/* now zero sidescan if not surrounded by good bathy */
+			if (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]))
+				ss[iss] = 0.0;
+			else if (ssacrosstrack[iss] < bathacrosstrack[ibath])
+				ss[iss] = 0.0;
+			else if (ssacrosstrack[iss] > bathacrosstrack[ibath + 1])
+				ss[iss] = 0.0;
+		}
+	}
+
+	/* else if no good bathy zero all sidescan */
+	else {
+		for (iss = 0; iss < nss; iss++) {
+			ss[iss] = 0.0;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, struct mbprocess_sscorr_struct *corrtable,
-                  struct mbprocess_sscorr_struct *corrtableuse, int *error);
-int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error);
-int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error);
+                  struct mbprocess_sscorr_struct *corrtableuse, int *error) {
+	int status = MB_SUCCESS;
+	double factor;
+	int ifirst, ilast, irecent, inext;
+	int i, ii, itable;
 
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
+		fprintf(stderr, "dbg2       time_d:      %f\n", time_d);
+		fprintf(stderr, "dbg2       ncorrtable:  %d\n", ncorrtable);
+		fprintf(stderr, "dbg2       ncorrangle:  %d\n", ncorrangle);
+		fprintf(stderr, "dbg2       corrtable:   %p\n", (void *)corrtable);
+	}
 
+	/* find the correction table */
+	if (ncorrtable == 1 || time_d <= corrtable[0].time_d) {
+		corrtableuse->time_d = corrtable[0].time_d;
+		corrtableuse->nangle = corrtable[0].nangle;
+		for (i = 0; i < ncorrangle; i++) {
+			corrtableuse->angle[i] = corrtable[0].angle[i];
+			corrtableuse->amplitude[i] = corrtable[0].amplitude[i];
+			corrtableuse->sigma[i] = corrtable[0].sigma[i];
+		}
+	}
+	else if (time_d > corrtable[ncorrtable - 1].time_d) {
+		corrtableuse->time_d = corrtable[ncorrtable - 1].time_d;
+		corrtableuse->nangle = corrtable[ncorrtable - 1].nangle;
+		for (i = 0; i < ncorrangle; i++) {
+			corrtableuse->angle[i] = corrtable[ncorrtable - 1].angle[i];
+			corrtableuse->amplitude[i] = corrtable[ncorrtable - 1].amplitude[i];
+			corrtableuse->sigma[i] = corrtable[ncorrtable - 1].sigma[i];
+		}
+	}
+	else {
+		itable = 0;
+		for (i = 0; i < ncorrtable - 1; i++) {
+			if (corrtable[i].time_d <= time_d && corrtable[i + 1].time_d > time_d)
+				itable = i;
+		}
+		factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
+		corrtableuse->time_d = time_d;
+		corrtableuse->nangle = MIN(corrtable[itable].nangle, corrtable[itable].nangle);
+		for (i = 0; i < corrtableuse->nangle; i++) {
+			corrtableuse->angle[i] =
+			    corrtable[itable].angle[i] + factor * (corrtable[itable + 1].angle[i] - corrtable[itable].angle[i]);
+			if (corrtable[itable].amplitude[i] != 0.0 && corrtable[itable + 1].amplitude[i] != 0.0) {
+				corrtableuse->amplitude[i] = corrtable[itable].amplitude[i] +
+				                             factor * (corrtable[itable + 1].amplitude[i] - corrtable[itable].amplitude[i]);
+				corrtableuse->sigma[i] =
+				    corrtable[itable].sigma[i] + factor * (corrtable[itable + 1].sigma[i] - corrtable[itable].sigma[i]);
+			}
+			else if (corrtable[itable].amplitude[i] != 0.0) {
+				corrtableuse->amplitude[i] = corrtable[itable].amplitude[i];
+				corrtableuse->sigma[i] = corrtable[itable].sigma[i];
+			}
+			else {
+				corrtableuse->amplitude[i] = corrtable[itable + 1].amplitude[i];
+				corrtableuse->sigma[i] = corrtable[itable + 1].sigma[i];
+			}
+		}
+	}
+
+	/* now interpolate or extrapolate any zero values */
+	ifirst = ncorrangle;
+	ilast = -1;
+	for (i = 0; i < ncorrangle; i++) {
+		if (corrtableuse->amplitude[i] != 0.0) {
+			ifirst = MIN(i, ifirst);
+			ilast = MAX(i, ilast);
+		}
+	}
+	for (i = 0; i < ncorrangle; i++) {
+		if (corrtableuse->amplitude[i] != 0.0)
+			irecent = i;
+		if (i < ifirst) {
+			corrtableuse->amplitude[i] = corrtableuse->amplitude[ifirst];
+			corrtableuse->sigma[i] = corrtableuse->sigma[ifirst];
+		}
+		else if (i > ilast) {
+			corrtableuse->amplitude[i] = corrtableuse->amplitude[ilast];
+			corrtableuse->sigma[i] = corrtableuse->sigma[ilast];
+		}
+		else if (corrtableuse->amplitude[i] == 0.0) {
+			inext = -1;
+			for (ii = i + 1; ii < ilast; ii++) {
+				if (corrtableuse->amplitude[ii] != 0.0 && inext < 0)
+					inext = ii;
+			}
+			if (irecent < i && inext > i) {
+				factor = ((double)(i - irecent)) / ((double)(inext - irecent));
+				corrtableuse->amplitude[i] = corrtableuse->amplitude[irecent] +
+				                             factor * (corrtableuse->amplitude[inext] - corrtableuse->amplitude[irecent]);
+				corrtableuse->sigma[i] =
+				    corrtableuse->sigma[irecent] + factor * (corrtableuse->sigma[inext] - corrtableuse->sigma[irecent]);
+			}
+		}
+	}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       ncorrangle:      %d\n", ncorrangle);
+		for (i = 0; i < ncorrangle; i++)
+			fprintf(stderr, "dbg2       correction[%d]: %f %f %f\n", i, corrtableuse->angle[i], corrtableuse->amplitude[i],
+			        corrtableuse->sigma[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error) {
+	int status = MB_SUCCESS;
+	int iangle, found;
+	int ifirst, ilast;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       nangle:      %d\n", nangle);
+		fprintf(stderr, "dbg2       angles:      %p\n", (void *)angles);
+		fprintf(stderr, "dbg2       corrs:       %p\n", (void *)corrs);
+		for (i = 0; i < nangle; i++)
+			fprintf(stderr, "dbg2           angle[%d]:%f corrs[%d]:%f\n", i, angles[i], i, corrs[i]);
+		fprintf(stderr, "dbg2       angle:       %f\n", angle);
+	}
+
+	/* search for the specified angle */
+	found = MB_NO;
+	for (i = 0; i < nangle - 1; i++)
+		if (angle >= angles[i] && angle <= angles[i + 1]) {
+			found = MB_YES;
+			iangle = i;
+		}
+
+	/* interpolate the correction */
+	if (found == MB_YES) {
+		*corr = corrs[iangle] +
+		        (corrs[iangle + 1] - corrs[iangle]) * (angle - angles[iangle]) / (angles[iangle + 1] - angles[iangle]);
+	}
+	else if (angle < angles[0]) {
+		iangle = 0;
+		*corr = corrs[0];
+	}
+	else if (angle > angles[nangle - 1]) {
+		iangle = nangle - 1;
+		*corr = corrs[nangle - 1];
+	}
+	else
+		*corr = 0.0;
+
+	/* use outermost value if angle outside nonzero range */
+	if (*corr == 0.0) {
+		ifirst = nangle - 1;
+		ilast = 0;
+		for (i = 0; i < nangle; i++) {
+			if (corr[i] != 0.0) {
+				if (ifirst > i)
+					ifirst = i;
+				if (ilast < i)
+					ilast = i;
+			}
+		}
+		if (angle < 0.0)
+			*corr = corrs[ifirst];
+		if (angle > 0.0)
+			*corr = corrs[ilast];
+	}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       corr:            %f\n", *corr);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error) {
+	int status = MB_SUCCESS;
+	//	int time_i[7];
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+
+		fprintf(stderr, "dbg2       esffp:           %p\n", (void *)esffp);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       beam:            %d\n", beam);
+		fprintf(stderr, "dbg2       action:          %d\n", action);
+	}
+	// mb_get_date(verbose,time_d,time_i);
+	// fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n",
+	// time_d,time_i[0],time_i[1],time_i[2],
+	// time_i[3],time_i[4],time_i[5],time_i[6],
+	// beam,action);
+
+	/* write out the edit */
+	if (esffp != NULL) {
+#ifdef BYTESWAPPED
+		mb_swap_double(&time_d);
+		beam = mb_swap_int(beam);
+		action = mb_swap_int(action);
+#endif
+		if (fwrite(&time_d, sizeof(double), 1, esffp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, esffp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, esffp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:       %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:      %d\n", status);
+	}
+
+	return (status);
+}
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "mbprocess";
-	char help_message[] = "mbprocess is a tool for processing swath sonar bathymetry data.\n\
-This program performs a number of functions, including:\n\
-  - merging navigation\n\
-  - recalculating bathymetry from travel time and angle data\n\
-    by raytracing through a layered water sound velocity model.\n\
-  - applying changes to ship draft, roll bias and pitch bias\n\
-  - applying bathymetry edits from edit save files.\n\
-The parameters controlling mbprocess are included in an ascii\n\
-parameter file. The parameter file syntax is documented by\n\
-the manual pages for mbprocess and mbset. The program\n\
-mbset is used to create and modify parameter files.\n\
-The input file \"infile\"  must be specified with the -I option. The\n\
-data format can also be specified, thought the program can\n\
-infer the format if the standard MB-System suffix convention\n\
-is used (*.mbXXX where XXX is the MB-System format id number).\n\
-The program will look for and use a parameter file with the \n\
-name \"infile.par\". If no parameter file exists, the program \n\
-will infer a reasonable processing path by looking for navigation\n\
-and mbedit edit save files.\n";
 	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
-	/* parsing variables */
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
@@ -5849,325 +6159,5 @@ and mbedit edit save files.\n";
 	status = mb_memory_list(verbose, &error);
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int nss, double *ss,
-                      double *ssacrosstrack, int *error) {
-	int status = MB_SUCCESS;
-	int ifirst, ilast;
-	int iss, ibath;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       nbath:           %d\n", nbath);
-		fprintf(stderr, "dbg2       bath:            %p\n", (void *)bath);
-		fprintf(stderr, "dbg2       bathacrosstrack: %p\n", (void *)bathacrosstrack);
-		fprintf(stderr, "dbg2       bath:\n");
-		for (i = 0; i < nbath; i++)
-			fprintf(stderr, "dbg2         %d %f %f\n", i, bath[i], bathacrosstrack[i]);
-	}
-
-	/* find limits of good bathy */
-	ifirst = -1;
-	ilast = -1;
-	i = 0;
-	for (i = 0; i < nbath; i++) {
-		if (mb_beam_ok(beamflag[i])) {
-			if (ifirst < 0)
-				ifirst = i;
-			ilast = i;
-		}
-	}
-
-	/* loop over sidescan looking for bathy on either side
-	   - zero sidescan if bathy lacking */
-	if (ifirst < ilast) {
-		ibath = ifirst;
-		for (iss = 0; iss < nss; iss++) {
-			/* make sure ibath sets right interval for ss */
-			while (ibath < ilast - 1 && (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]) ||
-			                             (mb_beam_ok(beamflag[ibath + 1]) && ssacrosstrack[iss] > bathacrosstrack[ibath + 1])))
-				ibath++;
-			/*fprintf(stderr,"iss:%d ibath:%d %f %f  %f %f  ss: %f %f\n",
-			iss,ibath,bath[ibath],bath[ibath+1],
-			bathacrosstrack[ibath],bathacrosstrack[ibath+1],
-			ss[iss],ssacrosstrack[iss]);*/
-
-			/* now zero sidescan if not surrounded by good bathy */
-			if (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]))
-				ss[iss] = 0.0;
-			else if (ssacrosstrack[iss] < bathacrosstrack[ibath])
-				ss[iss] = 0.0;
-			else if (ssacrosstrack[iss] > bathacrosstrack[ibath + 1])
-				ss[iss] = 0.0;
-		}
-	}
-
-	/* else if no good bathy zero all sidescan */
-	else {
-		for (iss = 0; iss < nss; iss++) {
-			ss[iss] = 0.0;
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, struct mbprocess_sscorr_struct *corrtable,
-                  struct mbprocess_sscorr_struct *corrtableuse, int *error) {
-	int status = MB_SUCCESS;
-	double factor;
-	int ifirst, ilast, irecent, inext;
-	int i, ii, itable;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:     %d\n", verbose);
-		fprintf(stderr, "dbg2       time_d:      %f\n", time_d);
-		fprintf(stderr, "dbg2       ncorrtable:  %d\n", ncorrtable);
-		fprintf(stderr, "dbg2       ncorrangle:  %d\n", ncorrangle);
-		fprintf(stderr, "dbg2       corrtable:   %p\n", (void *)corrtable);
-	}
-
-	/* find the correction table */
-	if (ncorrtable == 1 || time_d <= corrtable[0].time_d) {
-		corrtableuse->time_d = corrtable[0].time_d;
-		corrtableuse->nangle = corrtable[0].nangle;
-		for (i = 0; i < ncorrangle; i++) {
-			corrtableuse->angle[i] = corrtable[0].angle[i];
-			corrtableuse->amplitude[i] = corrtable[0].amplitude[i];
-			corrtableuse->sigma[i] = corrtable[0].sigma[i];
-		}
-	}
-	else if (time_d > corrtable[ncorrtable - 1].time_d) {
-		corrtableuse->time_d = corrtable[ncorrtable - 1].time_d;
-		corrtableuse->nangle = corrtable[ncorrtable - 1].nangle;
-		for (i = 0; i < ncorrangle; i++) {
-			corrtableuse->angle[i] = corrtable[ncorrtable - 1].angle[i];
-			corrtableuse->amplitude[i] = corrtable[ncorrtable - 1].amplitude[i];
-			corrtableuse->sigma[i] = corrtable[ncorrtable - 1].sigma[i];
-		}
-	}
-	else {
-		itable = 0;
-		for (i = 0; i < ncorrtable - 1; i++) {
-			if (corrtable[i].time_d <= time_d && corrtable[i + 1].time_d > time_d)
-				itable = i;
-		}
-		factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
-		corrtableuse->time_d = time_d;
-		corrtableuse->nangle = MIN(corrtable[itable].nangle, corrtable[itable].nangle);
-		for (i = 0; i < corrtableuse->nangle; i++) {
-			corrtableuse->angle[i] =
-			    corrtable[itable].angle[i] + factor * (corrtable[itable + 1].angle[i] - corrtable[itable].angle[i]);
-			if (corrtable[itable].amplitude[i] != 0.0 && corrtable[itable + 1].amplitude[i] != 0.0) {
-				corrtableuse->amplitude[i] = corrtable[itable].amplitude[i] +
-				                             factor * (corrtable[itable + 1].amplitude[i] - corrtable[itable].amplitude[i]);
-				corrtableuse->sigma[i] =
-				    corrtable[itable].sigma[i] + factor * (corrtable[itable + 1].sigma[i] - corrtable[itable].sigma[i]);
-			}
-			else if (corrtable[itable].amplitude[i] != 0.0) {
-				corrtableuse->amplitude[i] = corrtable[itable].amplitude[i];
-				corrtableuse->sigma[i] = corrtable[itable].sigma[i];
-			}
-			else {
-				corrtableuse->amplitude[i] = corrtable[itable + 1].amplitude[i];
-				corrtableuse->sigma[i] = corrtable[itable + 1].sigma[i];
-			}
-		}
-	}
-
-	/* now interpolate or extrapolate any zero values */
-	ifirst = ncorrangle;
-	ilast = -1;
-	for (i = 0; i < ncorrangle; i++) {
-		if (corrtableuse->amplitude[i] != 0.0) {
-			ifirst = MIN(i, ifirst);
-			ilast = MAX(i, ilast);
-		}
-	}
-	for (i = 0; i < ncorrangle; i++) {
-		if (corrtableuse->amplitude[i] != 0.0)
-			irecent = i;
-		if (i < ifirst) {
-			corrtableuse->amplitude[i] = corrtableuse->amplitude[ifirst];
-			corrtableuse->sigma[i] = corrtableuse->sigma[ifirst];
-		}
-		else if (i > ilast) {
-			corrtableuse->amplitude[i] = corrtableuse->amplitude[ilast];
-			corrtableuse->sigma[i] = corrtableuse->sigma[ilast];
-		}
-		else if (corrtableuse->amplitude[i] == 0.0) {
-			inext = -1;
-			for (ii = i + 1; ii < ilast; ii++) {
-				if (corrtableuse->amplitude[ii] != 0.0 && inext < 0)
-					inext = ii;
-			}
-			if (irecent < i && inext > i) {
-				factor = ((double)(i - irecent)) / ((double)(inext - irecent));
-				corrtableuse->amplitude[i] = corrtableuse->amplitude[irecent] +
-				                             factor * (corrtableuse->amplitude[inext] - corrtableuse->amplitude[irecent]);
-				corrtableuse->sigma[i] =
-				    corrtableuse->sigma[irecent] + factor * (corrtableuse->sigma[inext] - corrtableuse->sigma[irecent]);
-			}
-		}
-	}
-
-	/* assume success */
-	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       ncorrangle:      %d\n", ncorrangle);
-		for (i = 0; i < ncorrangle; i++)
-			fprintf(stderr, "dbg2       correction[%d]: %f %f %f\n", i, corrtableuse->angle[i], corrtableuse->amplitude[i],
-			        corrtableuse->sigma[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error) {
-	int status = MB_SUCCESS;
-	int iangle, found;
-	int ifirst, ilast;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       nangle:      %d\n", nangle);
-		fprintf(stderr, "dbg2       angles:      %p\n", (void *)angles);
-		fprintf(stderr, "dbg2       corrs:       %p\n", (void *)corrs);
-		for (i = 0; i < nangle; i++)
-			fprintf(stderr, "dbg2           angle[%d]:%f corrs[%d]:%f\n", i, angles[i], i, corrs[i]);
-		fprintf(stderr, "dbg2       angle:       %f\n", angle);
-	}
-
-	/* search for the specified angle */
-	found = MB_NO;
-	for (i = 0; i < nangle - 1; i++)
-		if (angle >= angles[i] && angle <= angles[i + 1]) {
-			found = MB_YES;
-			iangle = i;
-		}
-
-	/* interpolate the correction */
-	if (found == MB_YES) {
-		*corr = corrs[iangle] +
-		        (corrs[iangle + 1] - corrs[iangle]) * (angle - angles[iangle]) / (angles[iangle + 1] - angles[iangle]);
-	}
-	else if (angle < angles[0]) {
-		iangle = 0;
-		*corr = corrs[0];
-	}
-	else if (angle > angles[nangle - 1]) {
-		iangle = nangle - 1;
-		*corr = corrs[nangle - 1];
-	}
-	else
-		*corr = 0.0;
-
-	/* use outermost value if angle outside nonzero range */
-	if (*corr == 0.0) {
-		ifirst = nangle - 1;
-		ilast = 0;
-		for (i = 0; i < nangle; i++) {
-			if (corr[i] != 0.0) {
-				if (ifirst > i)
-					ifirst = i;
-				if (ilast < i)
-					ilast = i;
-			}
-		}
-		if (angle < 0.0)
-			*corr = corrs[ifirst];
-		if (angle > 0.0)
-			*corr = corrs[ilast];
-	}
-
-	/* assume success */
-	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       corr:            %f\n", *corr);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error) {
-	int status = MB_SUCCESS;
-	//	int time_i[7];
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-
-		fprintf(stderr, "dbg2       esffp:           %p\n", (void *)esffp);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       beam:            %d\n", beam);
-		fprintf(stderr, "dbg2       action:          %d\n", action);
-	}
-	// mb_get_date(verbose,time_d,time_i);
-	// fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n",
-	// time_d,time_i[0],time_i[1],time_i[2],
-	// time_i[3],time_i[4],time_i[5],time_i[6],
-	// beam,action);
-
-	/* write out the edit */
-	if (esffp != NULL) {
-#ifdef BYTESWAPPED
-		mb_swap_double(&time_d);
-		beam = mb_swap_int(beam);
-		action = mb_swap_int(action);
-#endif
-		if (fwrite(&time_d, sizeof(double), 1, esffp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, esffp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, esffp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:       %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/

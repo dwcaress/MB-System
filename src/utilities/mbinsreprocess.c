@@ -60,24 +60,23 @@
 #define KEARFOTT_MONITOR_GPS_PROCESSED 0x40
 #define KEARFOTT_MONITOR_DEPTH_LOOP_OPEN 0x80
 
+static const char program_name[] = "MBinsreprocess";
+static const char help_message[] =
+    "MBinsreprocess reads an INS navigation file (e.g. from a Kearfott SeaDevil), \nincluding information "
+    "about the state of navigation aiding by GPS, DVL, \nand other navigation sources. It then identifies "
+    "time periods without \naiding in which the navigation drifted in free inertial. These free \ninertial "
+    "periods are typically ended with a navigation tear as the INS \ncalculates a new state. This program "
+    "removes the navigation tears by \nlinear interpolation in time. The adjusted navigation is output.\n";
+static const char usage_message[] =
+    "mbinsreprocess --input=filename --output=filename [--help --verbose]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "MBinsreprocess";
-	char help_message[] = "MBinsreprocess reads an INS navigation file (e.g. from a Kearfott SeaDevil), \nincluding information "
-	                      "about the state of navigation aiding by GPS, DVL, \nand other navigation sources. It then identifies "
-	                      "time periods without \naiding in which the navigation drifted in free inertial. These free \ninertial "
-	                      "periods are typically ended with a navigation tear as the INS \ncalculates a new state. This program "
-	                      "removes the navigation tears by \nlinear interpolation in time. The adjusted navigation is output.\n";
-	char usage_message[] = "mbinsreprocess --input=filename --output=filename [--help --verbose]";
-
 	static struct option options[] = {{"verbose", no_argument, NULL, 0},      {"help", no_argument, NULL, 0},
 	                                  {"verbose", no_argument, NULL, 0},      {"input", required_argument, NULL, 0},
 	                                  {"output", required_argument, NULL, 0}, {NULL, 0, NULL, 0}};
 
-	/* parsing variables */
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;

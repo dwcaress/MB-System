@@ -117,56 +117,934 @@ struct footprint {
 	double y[4];
 };
 
+static const char program_name[] = "mbmosaic";
+static const char help_message[] =
+    "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data "
+    "files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum "
+    "filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between "
+    "\nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
+static const char usage_message[] =
+    "mbmosaic -Ifilelist -Oroot\n"
+    "\t[-Rwest/east/south/north -Rfactor -Adatatype\n"
+    "\t-Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units\n"
+    "\t-Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings\n"
+    "\t-Sspeed -Ttopogrid -Ubearing/factor[/mode] -V -Wscale -Xextend\n"
+    "\t-Ypriority_source -Zbathdef]";
+
+/*--------------------------------------------------------------------*/
+/*
+ * function write_ascii writes output grid to an ascii file
+ */
 int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                double dx, double dy, int *error);
+                double dx, double dy, int *error) {
+	int status = MB_SUCCESS;
+	FILE *fp = NULL;
+	int i;
+	time_t right_now;
+	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char *ctime();
+	char *getenv();
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
+		fprintf(stderr, "dbg2       grid:       %p\n", (void *)grid);
+		fprintf(stderr, "dbg2       nx:         %d\n", nx);
+		fprintf(stderr, "dbg2       ny:         %d\n", ny);
+		fprintf(stderr, "dbg2       xmin:       %f\n", xmin);
+		fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
+		fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
+		fprintf(stderr, "dbg2       ymax:       %f\n", ymax);
+		fprintf(stderr, "dbg2       dx:         %f\n", dx);
+		fprintf(stderr, "dbg2       dy:         %f\n", dy);
+	}
+
+	/* open the file */
+	if ((fp = fopen(outfile, "w")) == NULL) {
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+	}
+
+	/* output grid */
+	else {
+		fprintf(fp, "grid created by program mbmosaic\n");
+		right_now = time((time_t *)0);
+		strcpy(date, ctime(&right_now));
+		date[strlen(date) - 1] = '\0';
+		if ((user_ptr = getenv("USER")) == NULL)
+			user_ptr = getenv("LOGNAME");
+		if (user_ptr != NULL)
+			strcpy(user, user_ptr);
+		else
+			strcpy(user, "unknown");
+		i = gethostname(host, MB_PATH_MAXLINE);
+		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
+		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
+		for (i = 0; i < nx * ny; i++) {
+			fprintf(fp, "%13.5g ", grid[i]);
+			if ((i + 1) % 6 == 0)
+				fprintf(fp, "\n");
+		}
+		if ((nx * ny) % 6 != 0)
+			fprintf(fp, "\n");
+		fclose(fp);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function write_arcascii writes output grid to an Arc/Info ascii file
+ */
 int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                   double dx, double dy, double nodata, int *error);
+                   double dx, double dy, double nodata, int *error) {
+	int status = MB_SUCCESS;
+	FILE *fp = NULL;
+	int i, j, k;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
+		fprintf(stderr, "dbg2       grid:       %p\n", (void *)grid);
+		fprintf(stderr, "dbg2       nx:         %d\n", nx);
+		fprintf(stderr, "dbg2       ny:         %d\n", ny);
+		fprintf(stderr, "dbg2       xmin:       %f\n", xmin);
+		fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
+		fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
+		fprintf(stderr, "dbg2       ymax:       %f\n", ymax);
+		fprintf(stderr, "dbg2       dx:         %f\n", dx);
+		fprintf(stderr, "dbg2       dy:         %f\n", dy);
+		fprintf(stderr, "dbg2       nodata:     %f\n", nodata);
+	}
+
+	/* open the file */
+	if ((fp = fopen(outfile, "w")) == NULL) {
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+	}
+
+	/* output grid */
+	else {
+		fprintf(fp, "ncols %d\n", nx);
+		fprintf(fp, "nrows %d\n", ny);
+		fprintf(fp, "xllcorner %.10g\n", xmin);
+		fprintf(fp, "yllcorner %.10g\n", ymin);
+		fprintf(fp, "cellsize %.10g\n", dx);
+		fprintf(fp, "nodata_value -99999\n");
+		for (j = 0; j < ny; j++) {
+			for (i = 0; i < nx; i++) {
+				k = i * ny + (ny - 1 - j);
+				if (grid[k] == nodata)
+					fprintf(fp, "-99999 ");
+				else
+					fprintf(fp, "%f ", grid[k]);
+			}
+			fprintf(fp, "\n");
+		}
+		fclose(fp);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function write_oldgrd writes output grid to a
+ * GMT version 1 binary grd file
+ */
 int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                 double dx, double dy, int *error);
+                 double dx, double dy, int *error) {
+	int status = MB_SUCCESS;
+	FILE *fp = NULL;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
+		fprintf(stderr, "dbg2       grid:       %p\n", (void *)grid);
+		fprintf(stderr, "dbg2       nx:         %d\n", nx);
+		fprintf(stderr, "dbg2       ny:         %d\n", ny);
+		fprintf(stderr, "dbg2       xmin:       %f\n", xmin);
+		fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
+		fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
+		fprintf(stderr, "dbg2       ymax:       %f\n", ymax);
+		fprintf(stderr, "dbg2       dx:         %f\n", dx);
+		fprintf(stderr, "dbg2       dy:         %f\n", dy);
+	}
+
+	/* open the file */
+	if ((fp = fopen(outfile, "w")) == NULL) {
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+	}
+
+	/* output grid */
+	else {
+		fwrite((char *)&nx, 1, 4, fp);
+		fwrite((char *)&ny, 1, 4, fp);
+		fwrite((char *)&xmin, 1, 8, fp);
+		fwrite((char *)&xmax, 1, 8, fp);
+		fwrite((char *)&ymin, 1, 8, fp);
+		fwrite((char *)&ymax, 1, 8, fp);
+		fwrite((char *)&dx, 1, 8, fp);
+		fwrite((char *)&dy, 1, 8, fp);
+		fwrite((char *)grid, nx * ny, 4, fp);
+		fclose(fp);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int double_compare(double *a, double *b) {
+	if (*a > *b)
+		return (1);
+	else
+		return (-1);
+}
+/*--------------------------------------------------------------------*/
+int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, double beamwidth_ltrack, double altitude,
+                           double acrosstrack, double alongtrack, double acrosstrack_spacing, struct footprint *footprint,
+                           int *error) {
+	int status = MB_SUCCESS;
+	double r;
+	double theta, phi, thetap, phip;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+		fprintf(stderr, "dbg2       mode:                %d\n", mode);
+		fprintf(stderr, "dbg2       beamwidth_xtrack:    %f\n", beamwidth_xtrack);
+		fprintf(stderr, "dbg2       beamwidth_ltrack:    %f\n", beamwidth_ltrack);
+		fprintf(stderr, "dbg2       altitude:            %f\n", altitude);
+		fprintf(stderr, "dbg2       acrosstrack:         %f\n", acrosstrack);
+		fprintf(stderr, "dbg2       alongtrack:          %f\n", alongtrack);
+		fprintf(stderr, "dbg2       acrosstrack_spacing: %f\n", acrosstrack_spacing);
+	}
+
+	/* calculate footprint location in sonar coordinates */
+	r = sqrt(altitude * altitude + acrosstrack * acrosstrack + alongtrack * alongtrack);
+	mb_xyz_to_takeoff(verbose, acrosstrack, alongtrack, altitude, &theta, &phi, error);
+
+	phip = phi - 0.5 * beamwidth_ltrack;
+	thetap = theta - 0.5 * beamwidth_xtrack;
+	if (mode == MBMOSAIC_FOOTPRINT_REAL)
+		footprint->x[0] = r * sin(DTR * thetap) * cos(DTR * phip);
+	else
+		footprint->x[0] = acrosstrack - 0.5 * acrosstrack_spacing;
+	footprint->y[0] = r * sin(DTR * thetap) * sin(DTR * phip);
+
+	phip = phi - 0.5 * beamwidth_ltrack;
+	thetap = theta + 0.5 * beamwidth_xtrack;
+	if (mode == MBMOSAIC_FOOTPRINT_REAL)
+		footprint->x[1] = r * sin(DTR * thetap) * cos(DTR * phip);
+	else
+		footprint->x[1] = acrosstrack + 0.5 * acrosstrack_spacing;
+	footprint->y[1] = r * sin(DTR * thetap) * sin(DTR * phip);
+
+	phip = phi + 0.5 * beamwidth_ltrack;
+	thetap = theta + 0.5 * beamwidth_xtrack;
+	if (mode == MBMOSAIC_FOOTPRINT_REAL)
+		footprint->x[2] = r * sin(DTR * thetap) * cos(DTR * phip);
+	else
+		footprint->x[2] = acrosstrack + 0.5 * acrosstrack_spacing;
+	footprint->y[2] = r * sin(DTR * thetap) * sin(DTR * phip);
+
+	phip = phi + 0.5 * beamwidth_ltrack;
+	thetap = theta - 0.5 * beamwidth_xtrack;
+	if (mode == MBMOSAIC_FOOTPRINT_REAL)
+		footprint->x[3] = r * sin(DTR * thetap) * cos(DTR * phip);
+	else
+		footprint->x[3] = acrosstrack - 0.5 * acrosstrack_spacing;
+	footprint->y[3] = r * sin(DTR * thetap) * sin(DTR * phip);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		for (i = 0; i < 4; i++)
+			fprintf(stderr, "dbg2       footprint: x[%d]:%f y[%d]:%f\n", i, footprint->x[i], i, footprint->y[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
-                            double *bathalongtrack, double *gangles, int *error);
+                            double *bathalongtrack, double *gangles, int *error) {
+	int status = MB_SUCCESS;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       sonardepth:      %f\n", sonardepth);
+		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
+		fprintf(stderr, "dbg2       bathymetry:\n");
+		for (i = 0; i < beams_bath; i++)
+			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
+			        bathalongtrack[i]);
+	}
+
+	/* loop over all beams, calculate grazing angles for valid beams */
+	for (i = 0; i < beams_bath; i++) {
+		if (mb_beam_ok(beamflag[i])) {
+			gangles[i] = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
+		fprintf(stderr, "dbg2       bathymetry:\n");
+		for (i = 0; i < beams_bath; i++)
+			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f %f  angle:%f\n", i, beamflag[i], bath[i],
+			        bathacrosstrack[i], bathalongtrack[i], gangles[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_angle, double *priority_angle_angle,
                                 double *priority_angle_priority, double priority_azimuth, double priority_azimuth_factor,
                                 double priority_heading, double priority_heading_factor, double heading, int beams_bath,
-                                char *beamflag, double *gangles, double *priorities, int *error);
+                                char *beamflag, double *gangles, double *priorities, int *error) {
+	int status = MB_SUCCESS;
+	double azi_starboard, azi_port, weight_starboard, weight_port;
+	double heading_difference, weight_heading;
+	int i, j;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr, "dbg2       priority_mode:             %d\n", priority_mode);
+		fprintf(stderr, "dbg2       n_priority_angle:          %d\n", n_priority_angle);
+		fprintf(stderr, "dbg2       priority angle table:\n");
+		for (i = 0; i < n_priority_angle; i++)
+			fprintf(stderr, "dbg2         %d  angle:%f  priority:%f\n", i, priority_angle_angle[i], priority_angle_priority[i]);
+		fprintf(stderr, "dbg2       priority_azimuth:          %f\n", priority_azimuth);
+		fprintf(stderr, "dbg2       priority_azimuth_factor:   %f\n", priority_azimuth_factor);
+		fprintf(stderr, "dbg2       heading:         %f\n", heading);
+		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
+		fprintf(stderr, "dbg2       bathymetry grazing angles:\n");
+		for (i = 0; i < beams_bath; i++)
+			fprintf(stderr, "dbg2         beam:%d  flag:%d angle:%f\n", i, beamflag[i], gangles[i]);
+	}
+
+	/* initialize priority array */
+	for (i = 0; i < beams_bath; i++) {
+		if (mb_beam_ok(beamflag[i])) {
+			priorities[i] = 1.0;
+		}
+		else {
+			priorities[i] = 0.0;
+		}
+	}
+
+	/* get grazing angle priorities */
+	if (priority_mode & MBMOSAIC_PRIORITY_ANGLE) {
+		/* loop over data getting angle based priorities */
+		for (i = 0; i < beams_bath; i++) {
+			if (mb_beam_ok(beamflag[i])) {
+				/* priority zero if outside the range of the priority-angle table */
+				if (gangles[i] < priority_angle_angle[0] || gangles[i] > priority_angle_angle[n_priority_angle - 1]) {
+					priorities[i] = 0.0;
+				}
+
+				/* priority set using the priority-angle table */
+				else {
+					for (j = 0; j < n_priority_angle - 1; j++) {
+						if (gangles[i] >= priority_angle_angle[j] && gangles[i] < priority_angle_angle[j + 1]) {
+							priorities[i] *=
+							    (priority_angle_priority[j] + (priority_angle_priority[j + 1] - priority_angle_priority[j]) *
+							                                      (gangles[i] - priority_angle_angle[j]) /
+							                                      (priority_angle_angle[j + 1] - priority_angle_angle[j]));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/* get look azimuth priorities */
+	if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) {
+		/* get priorities for starboard and port sides of ping */
+		azi_starboard = heading - 90.0 - priority_azimuth;
+		if (azi_starboard > 180.0)
+			azi_starboard -= 360.0 * ((int)((azi_starboard + 180.0) / 360.0));
+		else if (azi_starboard < -180.0)
+			azi_starboard += 360.0 * ((int)((-azi_starboard + 180.0) / 360.0));
+		if (priority_azimuth_factor * azi_starboard <= -90.0 || priority_azimuth_factor * azi_starboard >= 90.0)
+			weight_starboard = 0.0;
+		else
+			weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
+		azi_port = heading + 90.0 - priority_azimuth;
+		if (azi_port > 180.0)
+			azi_port -= 360.0 * ((int)((azi_port + 180.0) / 360.0));
+		else if (azi_port < -180.0)
+			azi_port += 360.0 * ((int)((-azi_port + 180.0) / 360.0));
+		if (priority_azimuth_factor * azi_port <= -90.0 || priority_azimuth_factor * azi_port >= 90.0)
+			weight_port = 0.0;
+		else
+			weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
+
+		/* apply the look azimuth priorities */
+		for (i = 0; i < beams_bath; i++) {
+			if (mb_beam_ok(beamflag[i])) {
+				if (gangles[i] < 0.0)
+					priorities[i] *= weight_starboard;
+				else
+					priorities[i] *= weight_port;
+			}
+		}
+	}
+
+	/* get heading priorities */
+	if (priority_mode & MBMOSAIC_PRIORITY_HEADING) {
+		/* get priorities for ping */
+		heading_difference = heading - priority_heading;
+		if (heading_difference > 180.0)
+			heading_difference -= 360.0;
+		else if (heading_difference < -180.0)
+			heading_difference += 360.0;
+		if (priority_heading_factor * heading_difference <= -90.0 || priority_heading_factor * heading_difference >= 90.0)
+			weight_heading = 0.0;
+		else
+			weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
+
+		/* apply the heading priorities */
+		for (i = 0; i < beams_bath; i++) {
+			if (mb_beam_ok(beamflag[i])) {
+				priorities[i] *= weight_heading;
+			}
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
+		fprintf(stderr, "dbg2       bathymetry grazing angles and priorities:\n");
+		for (i = 0; i < beams_bath; i++)
+			fprintf(stderr, "dbg2         beam:%d  flag:%d angle:%f  priority:%f\n", i, beamflag[i], gangles[i], priorities[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack, double *slopes,
-                            int *error);
+                            int *error) {
+	int status = MB_SUCCESS;
+	int found_pre, found_post;
+	int i0, i1;
+	int i, j;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
+		fprintf(stderr, "dbg2       bathymetry:\n");
+		for (i = 0; i < beams_bath; i++)
+			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
+	}
+
+	/* get grazing angle priorities */
+	/* loop over data getting angle based priorities */
+	for (i = 0; i < beams_bath; i++) {
+		if (mb_beam_ok(beamflag[i])) {
+			/* find previous good beam */
+			found_pre = MB_NO;
+			if (i > 0) {
+				for (j = i - 1; j >= 0 && found_pre == MB_NO; j--) {
+					if (mb_beam_ok(beamflag[j])) {
+						found_pre = MB_YES;
+						i0 = j;
+					}
+				}
+			}
+
+			/* find post good beam */
+			found_post = MB_NO;
+			if (i < beams_bath - 1) {
+				for (j = i + 1; j < beams_bath && found_post == MB_NO; j++) {
+					if (mb_beam_ok(beamflag[j])) {
+						found_post = MB_YES;
+						i1 = j;
+					}
+				}
+			}
+
+			/* calculate slope */
+			if (found_pre == MB_YES && found_post == MB_YES) {
+				if (bathacrosstrack[i1] != bathacrosstrack[i0])
+					slopes[i] = -(bath[i1] - bath[i0]) / (bathacrosstrack[i1] - bathacrosstrack[i0]);
+				else
+					slopes[i] = 0.0;
+			}
+			else if (found_pre == MB_YES) {
+				if (bathacrosstrack[i] != bathacrosstrack[i0])
+					slopes[i] = -(bath[i] - bath[i0]) / (bathacrosstrack[i] - bathacrosstrack[i0]);
+				else
+					slopes[i] = 0.0;
+			}
+			else if (found_post == MB_YES) {
+				if (bathacrosstrack[i1] != bathacrosstrack[i])
+					slopes[i] = -(bath[i1] - bath[i]) / (bathacrosstrack[i1] - bathacrosstrack[i]);
+				else
+					slopes[i] = 0.0;
+			}
+			else {
+				slopes[i] = 0.0;
+			}
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
+		fprintf(stderr, "dbg2       bathymetry:\n");
+		for (i = 0; i < beams_bath; i++)
+			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f  slope:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
+			        slopes[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, char *beamflag, double *bath,
                                 double *bathacrosstrack, double *bathalongtrack, double angle_min, double angle_max, int nangle,
                                 double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
-                                double *table_range, int *error);
+                                double *table_range, int *error) {
+	int status = MB_SUCCESS;
+	double dangle, angle0, angle1, factor;
+	int found, foundnext;
+	int i, j, jj, jstart, jnext;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       sonardepth:      %f\n", sonardepth);
+		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
+		fprintf(stderr, "dbg2       bathymetry:\n");
+		for (i = 0; i < beams_bath; i++)
+			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
+		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
+		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
+	}
+
+	/* loop over the angles and figure out the other table values from the bathymetry */
+	dangle = (angle_max - angle_min) / (nangle - 1);
+	jstart = 0;
+	*error = MB_ERROR_NO_ERROR;
+	for (i = 0; i < nangle; i++) {
+		/* get angles in takeoff coordinates */
+		table_angle[i] = angle_min + dangle * i;
+		table_xtrack[i] = 0.0;
+		table_ltrack[i] = 0.0;
+		table_range[i] = 0.0;
+
+		/* estimate the table values for this angle from the bathymetry */
+		found = MB_NO;
+		for (j = jstart; j < beams_bath - 1 && found == MB_NO; j++) {
+			/* check if this beam is valid */
+			if (mb_beam_ok(beamflag[j])) {
+				/* look for the next valid beam */
+				foundnext = MB_NO;
+				jnext = j;
+				for (jj = j + 1; jj < beams_bath && foundnext == MB_NO; jj++) {
+					if (mb_beam_ok(beamflag[jj])) {
+						jnext = jj;
+						foundnext = MB_YES;
+					}
+				}
+
+				/* get the angle for beam j */
+				angle0 = RTD * atan(bathacrosstrack[j] / (bath[j] - sonardepth));
+				if (foundnext == MB_YES)
+					angle1 = RTD * atan(bathacrosstrack[jnext] / (bath[jnext] - sonardepth));
+
+				/* deal with angle to port of swath edge */
+				/* fprintf(stderr,"i:%d angle:%f angle0:%f j:%d jnext:%d foundnext:%d ",
+				i,table_angle[i],angle0,j,jnext,foundnext);
+				if (foundnext == MB_YES)
+				fprintf(stderr," angle1:%f ",angle1); */
+				if (table_angle[i] <= angle0) {
+					table_altitude[i] = bath[j] - sonardepth;
+					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
+					table_ltrack[i] = bathalongtrack[j];
+					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
+					                      table_ltrack[i] * table_ltrack[i]);
+					found = MB_YES;
+					jstart = j;
+					/* fprintf(stderr," A table: %f %f %f %f %f\n",
+					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]); */
+				}
+
+				/* deal with angle to starboard of swath edge */
+				else if (foundnext == MB_NO) {
+					table_altitude[i] = bath[j] - sonardepth;
+					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
+					table_ltrack[i] = bathalongtrack[j];
+					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
+					                      table_ltrack[i] * table_ltrack[i]);
+					found = MB_YES;
+					jstart = j;
+					/* fprintf(stderr," B table: %f %f %f %f %f\n",
+					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
+				}
+
+				/* deal with angle to starboard of swath edge */
+				else if (foundnext == MB_YES && table_angle[i] > angle1) {
+					if (jnext == beams_bath - 1) {
+						table_altitude[i] = bath[j] - sonardepth;
+						table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
+						table_ltrack[i] = bathalongtrack[j];
+						table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
+						                      table_ltrack[i] * table_ltrack[i]);
+						found = MB_YES;
+					}
+					jstart = j;
+					/* fprintf(stderr," B table: %f %f %f %f %f\n",
+					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
+				}
+
+				/* deal with angle between the two valid beams */
+				else if (foundnext == MB_YES && table_angle[i] >= angle0 && table_angle[i] <= angle1) {
+					factor = (table_angle[i] - angle0) / (angle1 - angle0);
+					table_altitude[i] = (bath[j] - sonardepth) + factor * (bath[jnext] - bath[j]);
+					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
+					table_ltrack[i] = bathalongtrack[j] + factor * (bathalongtrack[jnext] - bathalongtrack[j]);
+					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
+					                      table_ltrack[i] * table_ltrack[i]);
+					found = MB_YES;
+					jstart = j;
+					/* fprintf(stderr," C factor:%f x:%f %f %f table: %f %f %f %f %f\n",
+					factor,bathacrosstrack[j],table_xtrack[i],bathacrosstrack[jnext],
+					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
+				}
+
+				/* else skip */
+				/* else
+				fprintf(stderr," SKIP\n");*/
+			}
+		}
+
+		/* set error if necessary */
+		if (found == MB_NO) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_NOT_ENOUGH_DATA;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
+		fprintf(stderr, "dbg2       tables:\n");
+		for (i = 0; i < nangle; i++)
+			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
+			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle_min, double angle_max, int nangle,
                                       double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
-                                      double *table_range, int *error);
+                                      double *table_range, int *error) {
+	int status = MB_SUCCESS;
+	double dangle;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       altitude:        %f\n", altitude);
+		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
+		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
+	}
+
+	/* loop over the angles and figure out the other table values from the bathymetry */
+	dangle = (angle_max - angle_min) / (nangle - 1);
+	*error = MB_ERROR_NO_ERROR;
+	for (i = 0; i < nangle; i++) {
+		/* get angles in takeoff coordinates */
+		table_angle[i] = angle_min + dangle * i;
+		table_xtrack[i] = altitude * tan(DTR * table_angle[i]);
+		table_ltrack[i] = 0.0;
+		table_range[i] = sqrt(altitude * altitude + table_xtrack[i] * table_xtrack[i]);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
+		fprintf(stderr, "dbg2       tables:\n");
+		for (i = 0; i < nangle; i++)
+			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
+			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *table_xtrack, double *table_ltrack,
                           double *table_altitude, double *table_range, int pixels_ss, double *ss, double *ssacrosstrack,
-                          double *gangles, int *error);
+                          double *gangles, int *error) {
+	int status = MB_SUCCESS;
+	int found;
+	int i, j, jstart;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
+		fprintf(stderr, "dbg2       tables:\n");
+		for (i = 0; i < nangle; i++)
+			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
+			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
+		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
+		fprintf(stderr, "dbg2       sidescan:\n");
+		for (i = 0; i < pixels_ss; i++)
+			fprintf(stderr, "dbg2         pixel:%d  ss:%f %f\n", i, ss[i], ssacrosstrack[i]);
+	}
+
+	/* loop over the sidescan interpolating angles from the table on the basis of ssacrosstrack */
+	jstart = 0;
+	for (i = 0; i < pixels_ss; i++) {
+		/* get angles only for valid sidescan */
+		if (ss[i] > MB_SIDESCAN_NULL) {
+			found = MB_NO;
+			for (j = jstart; j < nangle - 1 && found == MB_NO; j++) {
+				if (ssacrosstrack[i] < table_xtrack[j]) {
+					gangles[i] = table_angle[j];
+					found = MB_YES;
+				}
+				else if (ssacrosstrack[i] >= table_xtrack[j] && ssacrosstrack[i] <= table_xtrack[j + 1]) {
+					gangles[i] = table_angle[j] + (table_angle[j + 1] - table_angle[j]) * (ssacrosstrack[i] - table_xtrack[j]) /
+					                                  (table_xtrack[j + 1] - table_xtrack[j]);
+					/*fprintf(stderr,"i:%d j:%d %d angles: %f %f %f  x: %f %f %f\n",
+					i,j,j+1,table_angle[j],gangles[i],table_angle[j+1],table_xtrack[j],ssacrosstrack[i],table_xtrack[j+1]);*/
+					found = MB_YES;
+					jstart = j;
+				}
+				else if (ssacrosstrack[i] >= table_xtrack[j + 1] && j == nangle - 2) {
+					gangles[i] = table_angle[j + 1];
+					found = MB_YES;
+				}
+			}
+		}
+
+		/* zero angles for invalid sidescan */
+		else {
+			gangles[i] = 0.0;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
+		fprintf(stderr, "dbg2       sidescan grazing angles:\n");
+		for (i = 0; i < pixels_ss; i++)
+			fprintf(stderr, "dbg2         pixel:%d  ss:%f %f angle:%f\n", i, ss[i], ssacrosstrack[i], gangles[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_angle, double *priority_angle_angle,
                               double *priority_angle_priority, double priority_azimuth, double priority_azimuth_factor,
                               double priority_heading, double priority_heading_factor, double heading, int pixels_ss, double *ss,
-                              double *gangles, double *priorities, int *error);
-int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, double beamwidth_ltrack, double altitude,
-                           double acrosstrack, double alongtrack, double acrosstrack_spacing, struct footprint *footprint,
-                           int *error);
-int double_compare(double *a, double *b);
+                              double *gangles, double *priorities, int *error) {
+	int status = MB_SUCCESS;
+	double azi_starboard, azi_port, weight_starboard, weight_port;
+	double heading_difference, weight_heading;
+	int i, j;
 
-/* program identifiers */
-char program_name[] = "mbmosaic";
-char help_message[] = "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data "
-                      "files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum "
-                      "filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between "
-                      "\nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
-char usage_message[] = "mbmosaic -Ifilelist -Oroot \
-[-Rwest/east/south/north -Rfactor -Adatatype\n\
-          -Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units \n\
-          -Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings \n\
-          -Sspeed -Ttopogrid -Ubearing/factor[/mode] -V -Wscale -Xextend \n\
-          -Ypriority_source -Zbathdef]";
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr, "dbg2       priority_mode:             %d\n", priority_mode);
+		fprintf(stderr, "dbg2       n_priority_angle:          %d\n", n_priority_angle);
+		fprintf(stderr, "dbg2       priority angle table:\n");
+		for (i = 0; i < n_priority_angle; i++)
+			fprintf(stderr, "dbg2         %d  angle:%f  priority:%f\n", i, priority_angle_angle[i], priority_angle_priority[i]);
+		fprintf(stderr, "dbg2       priority_azimuth:          %f\n", priority_azimuth);
+		fprintf(stderr, "dbg2       priority_azimuth_factor:   %f\n", priority_azimuth_factor);
+		fprintf(stderr, "dbg2       heading:         %f\n", heading);
+		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
+		fprintf(stderr, "dbg2       sidescan grazing angles:\n");
+		for (i = 0; i < pixels_ss; i++)
+			fprintf(stderr, "dbg2         pixel:%d  ss:%f angle:%f\n", i, ss[i], gangles[i]);
+	}
+
+	/* initialize priority array */
+	for (i = 0; i < pixels_ss; i++) {
+		if (ss[i] > MB_SIDESCAN_NULL) {
+			priorities[i] = 1.0;
+		}
+		else {
+			priorities[i] = 0.0;
+		}
+	}
+
+	/* get grazing angle priorities */
+	if (priority_mode & MBMOSAIC_PRIORITY_ANGLE) {
+		/* loop over data getting angle based priorities */
+		for (i = 0; i < pixels_ss; i++) {
+			if (ss[i] > MB_SIDESCAN_NULL) {
+				/* priority zero if outside the range of the priority-angle table */
+				if (gangles[i] < priority_angle_angle[0] || gangles[i] > priority_angle_angle[n_priority_angle - 1]) {
+					priorities[i] = 0.0;
+				}
+
+				/* priority set using the priority-angle table */
+				else {
+					for (j = 0; j < n_priority_angle - 1; j++) {
+						if (gangles[i] >= priority_angle_angle[j] && gangles[i] < priority_angle_angle[j + 1]) {
+							priorities[i] *=
+							    (priority_angle_priority[j] + (priority_angle_priority[j + 1] - priority_angle_priority[j]) *
+							                                      (gangles[i] - priority_angle_angle[j]) /
+							                                      (priority_angle_angle[j + 1] - priority_angle_angle[j]));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/* get look azimuth priorities */
+	if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) {
+		/* get priorities for starboard and port sides of ping */
+		azi_starboard = heading - 90.0 - priority_azimuth;
+		if (azi_starboard > 180.0)
+			azi_starboard -= 360.0 * ((int)((azi_starboard + 180.0) / 360.0));
+		else if (azi_starboard < -180.0)
+			azi_starboard += 360.0 * ((int)((-azi_starboard + 180.0) / 360.0));
+		if (priority_azimuth_factor * azi_starboard <= -90.0 || priority_azimuth_factor * azi_starboard >= 90.0)
+			weight_starboard = 0.0;
+		else
+			weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
+		azi_port = heading + 90.0 - priority_azimuth;
+		if (azi_port > 180.0)
+			azi_port -= 360.0 * ((int)((azi_port + 180.0) / 360.0));
+		else if (azi_port < -180.0)
+			azi_port += 360.0 * ((int)((-azi_port + 180.0) / 360.0));
+		if (priority_azimuth_factor * azi_port <= -90.0 || priority_azimuth_factor * azi_port >= 90.0)
+			weight_port = 0.0;
+		else
+			weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
+
+		/* apply the look azimuth priorities */
+		for (i = 0; i < pixels_ss; i++) {
+			if (ss[i] > MB_SIDESCAN_NULL) {
+				if (gangles[i] < 0.0)
+					priorities[i] *= weight_starboard;
+				else
+					priorities[i] *= weight_port;
+			}
+		}
+	}
+
+	/* get heading priorities */
+	if (priority_mode & MBMOSAIC_PRIORITY_HEADING) {
+		/* get priorities for ping */
+		heading_difference = heading - priority_heading;
+		if (heading_difference > 180.0)
+			heading_difference -= 360.0;
+		else if (heading_difference < -180.0)
+			heading_difference += 360.0;
+		if (priority_heading_factor * heading_difference <= -90.0 || priority_heading_factor * heading_difference >= 90.0)
+			weight_heading = 0.0;
+		else
+			weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
+
+		/* apply the look azimuth priorities */
+		for (i = 0; i < pixels_ss; i++) {
+			if (ss[i] > MB_SIDESCAN_NULL) {
+				priorities[i] *= weight_heading;
+			}
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
+		fprintf(stderr, "dbg2       sidescan grazing angles and priorities:\n");
+		for (i = 0; i < pixels_ss; i++)
+			fprintf(stderr, "dbg2         pixel:%d  angle:%f  priority:%f\n", i, gangles[i], priorities[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
@@ -3063,915 +3941,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_ascii writes output grid to an ascii file
- */
-int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                double dx, double dy, int *error) {
-	int status = MB_SUCCESS;
-	FILE *fp = NULL;
-	int i;
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char *ctime();
-	char *getenv();
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
-		fprintf(stderr, "dbg2       grid:       %p\n", (void *)grid);
-		fprintf(stderr, "dbg2       nx:         %d\n", nx);
-		fprintf(stderr, "dbg2       ny:         %d\n", ny);
-		fprintf(stderr, "dbg2       xmin:       %f\n", xmin);
-		fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
-		fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
-		fprintf(stderr, "dbg2       ymax:       %f\n", ymax);
-		fprintf(stderr, "dbg2       dx:         %f\n", dx);
-		fprintf(stderr, "dbg2       dy:         %f\n", dy);
-	}
-
-	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
-		*error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
-		fprintf(fp, "grid created by program mbmosaic\n");
-		right_now = time((time_t *)0);
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
-			user_ptr = getenv("LOGNAME");
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		i = gethostname(host, MB_PATH_MAXLINE);
-		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
-		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
-		for (i = 0; i < nx * ny; i++) {
-			fprintf(fp, "%13.5g ", grid[i]);
-			if ((i + 1) % 6 == 0)
-				fprintf(fp, "\n");
-		}
-		if ((nx * ny) % 6 != 0)
-			fprintf(fp, "\n");
-		fclose(fp);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_arcascii writes output grid to an Arc/Info ascii file
- */
-int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                   double dx, double dy, double nodata, int *error) {
-	int status = MB_SUCCESS;
-	FILE *fp = NULL;
-	int i, j, k;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
-		fprintf(stderr, "dbg2       grid:       %p\n", (void *)grid);
-		fprintf(stderr, "dbg2       nx:         %d\n", nx);
-		fprintf(stderr, "dbg2       ny:         %d\n", ny);
-		fprintf(stderr, "dbg2       xmin:       %f\n", xmin);
-		fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
-		fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
-		fprintf(stderr, "dbg2       ymax:       %f\n", ymax);
-		fprintf(stderr, "dbg2       dx:         %f\n", dx);
-		fprintf(stderr, "dbg2       dy:         %f\n", dy);
-		fprintf(stderr, "dbg2       nodata:     %f\n", nodata);
-	}
-
-	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
-		*error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
-		fprintf(fp, "ncols %d\n", nx);
-		fprintf(fp, "nrows %d\n", ny);
-		fprintf(fp, "xllcorner %.10g\n", xmin);
-		fprintf(fp, "yllcorner %.10g\n", ymin);
-		fprintf(fp, "cellsize %.10g\n", dx);
-		fprintf(fp, "nodata_value -99999\n");
-		for (j = 0; j < ny; j++) {
-			for (i = 0; i < nx; i++) {
-				k = i * ny + (ny - 1 - j);
-				if (grid[k] == nodata)
-					fprintf(fp, "-99999 ");
-				else
-					fprintf(fp, "%f ", grid[k]);
-			}
-			fprintf(fp, "\n");
-		}
-		fclose(fp);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_oldgrd writes output grid to a
- * GMT version 1 binary grd file
- */
-int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                 double dx, double dy, int *error) {
-	int status = MB_SUCCESS;
-	FILE *fp = NULL;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       outfile:    %s\n", outfile);
-		fprintf(stderr, "dbg2       grid:       %p\n", (void *)grid);
-		fprintf(stderr, "dbg2       nx:         %d\n", nx);
-		fprintf(stderr, "dbg2       ny:         %d\n", ny);
-		fprintf(stderr, "dbg2       xmin:       %f\n", xmin);
-		fprintf(stderr, "dbg2       xmax:       %f\n", xmax);
-		fprintf(stderr, "dbg2       ymin:       %f\n", ymin);
-		fprintf(stderr, "dbg2       ymax:       %f\n", ymax);
-		fprintf(stderr, "dbg2       dx:         %f\n", dx);
-		fprintf(stderr, "dbg2       dy:         %f\n", dy);
-	}
-
-	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
-		*error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
-		fwrite((char *)&nx, 1, 4, fp);
-		fwrite((char *)&ny, 1, 4, fp);
-		fwrite((char *)&xmin, 1, 8, fp);
-		fwrite((char *)&xmax, 1, 8, fp);
-		fwrite((char *)&ymin, 1, 8, fp);
-		fwrite((char *)&ymax, 1, 8, fp);
-		fwrite((char *)&dx, 1, 8, fp);
-		fwrite((char *)&dy, 1, 8, fp);
-		fwrite((char *)grid, nx * ny, 4, fp);
-		fclose(fp);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int double_compare(double *a, double *b) {
-	if (*a > *b)
-		return (1);
-	else
-		return (-1);
-}
-/*--------------------------------------------------------------------*/
-int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, double beamwidth_ltrack, double altitude,
-                           double acrosstrack, double alongtrack, double acrosstrack_spacing, struct footprint *footprint,
-                           int *error) {
-	int status = MB_SUCCESS;
-	double r;
-	double theta, phi, thetap, phip;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
-		fprintf(stderr, "dbg2       mode:                %d\n", mode);
-		fprintf(stderr, "dbg2       beamwidth_xtrack:    %f\n", beamwidth_xtrack);
-		fprintf(stderr, "dbg2       beamwidth_ltrack:    %f\n", beamwidth_ltrack);
-		fprintf(stderr, "dbg2       altitude:            %f\n", altitude);
-		fprintf(stderr, "dbg2       acrosstrack:         %f\n", acrosstrack);
-		fprintf(stderr, "dbg2       alongtrack:          %f\n", alongtrack);
-		fprintf(stderr, "dbg2       acrosstrack_spacing: %f\n", acrosstrack_spacing);
-	}
-
-	/* calculate footprint location in sonar coordinates */
-	r = sqrt(altitude * altitude + acrosstrack * acrosstrack + alongtrack * alongtrack);
-	mb_xyz_to_takeoff(verbose, acrosstrack, alongtrack, altitude, &theta, &phi, error);
-
-	phip = phi - 0.5 * beamwidth_ltrack;
-	thetap = theta - 0.5 * beamwidth_xtrack;
-	if (mode == MBMOSAIC_FOOTPRINT_REAL)
-		footprint->x[0] = r * sin(DTR * thetap) * cos(DTR * phip);
-	else
-		footprint->x[0] = acrosstrack - 0.5 * acrosstrack_spacing;
-	footprint->y[0] = r * sin(DTR * thetap) * sin(DTR * phip);
-
-	phip = phi - 0.5 * beamwidth_ltrack;
-	thetap = theta + 0.5 * beamwidth_xtrack;
-	if (mode == MBMOSAIC_FOOTPRINT_REAL)
-		footprint->x[1] = r * sin(DTR * thetap) * cos(DTR * phip);
-	else
-		footprint->x[1] = acrosstrack + 0.5 * acrosstrack_spacing;
-	footprint->y[1] = r * sin(DTR * thetap) * sin(DTR * phip);
-
-	phip = phi + 0.5 * beamwidth_ltrack;
-	thetap = theta + 0.5 * beamwidth_xtrack;
-	if (mode == MBMOSAIC_FOOTPRINT_REAL)
-		footprint->x[2] = r * sin(DTR * thetap) * cos(DTR * phip);
-	else
-		footprint->x[2] = acrosstrack + 0.5 * acrosstrack_spacing;
-	footprint->y[2] = r * sin(DTR * thetap) * sin(DTR * phip);
-
-	phip = phi + 0.5 * beamwidth_ltrack;
-	thetap = theta - 0.5 * beamwidth_xtrack;
-	if (mode == MBMOSAIC_FOOTPRINT_REAL)
-		footprint->x[3] = r * sin(DTR * thetap) * cos(DTR * phip);
-	else
-		footprint->x[3] = acrosstrack - 0.5 * acrosstrack_spacing;
-	footprint->y[3] = r * sin(DTR * thetap) * sin(DTR * phip);
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		for (i = 0; i < 4; i++)
-			fprintf(stderr, "dbg2       footprint: x[%d]:%f y[%d]:%f\n", i, footprint->x[i], i, footprint->y[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
-                            double *bathalongtrack, double *gangles, int *error) {
-	int status = MB_SUCCESS;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       sonardepth:      %f\n", sonardepth);
-		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
-		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
-			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
-			        bathalongtrack[i]);
-	}
-
-	/* loop over all beams, calculate grazing angles for valid beams */
-	for (i = 0; i < beams_bath; i++) {
-		if (mb_beam_ok(beamflag[i])) {
-			gangles[i] = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
-		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
-			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f %f  angle:%f\n", i, beamflag[i], bath[i],
-			        bathacrosstrack[i], bathalongtrack[i], gangles[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_angle, double *priority_angle_angle,
-                                double *priority_angle_priority, double priority_azimuth, double priority_azimuth_factor,
-                                double priority_heading, double priority_heading_factor, double heading, int beams_bath,
-                                char *beamflag, double *gangles, double *priorities, int *error) {
-	int status = MB_SUCCESS;
-	double azi_starboard, azi_port, weight_starboard, weight_port;
-	double heading_difference, weight_heading;
-	int i, j;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr, "dbg2       priority_mode:             %d\n", priority_mode);
-		fprintf(stderr, "dbg2       n_priority_angle:          %d\n", n_priority_angle);
-		fprintf(stderr, "dbg2       priority angle table:\n");
-		for (i = 0; i < n_priority_angle; i++)
-			fprintf(stderr, "dbg2         %d  angle:%f  priority:%f\n", i, priority_angle_angle[i], priority_angle_priority[i]);
-		fprintf(stderr, "dbg2       priority_azimuth:          %f\n", priority_azimuth);
-		fprintf(stderr, "dbg2       priority_azimuth_factor:   %f\n", priority_azimuth_factor);
-		fprintf(stderr, "dbg2       heading:         %f\n", heading);
-		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
-		fprintf(stderr, "dbg2       bathymetry grazing angles:\n");
-		for (i = 0; i < beams_bath; i++)
-			fprintf(stderr, "dbg2         beam:%d  flag:%d angle:%f\n", i, beamflag[i], gangles[i]);
-	}
-
-	/* initialize priority array */
-	for (i = 0; i < beams_bath; i++) {
-		if (mb_beam_ok(beamflag[i])) {
-			priorities[i] = 1.0;
-		}
-		else {
-			priorities[i] = 0.0;
-		}
-	}
-
-	/* get grazing angle priorities */
-	if (priority_mode & MBMOSAIC_PRIORITY_ANGLE) {
-		/* loop over data getting angle based priorities */
-		for (i = 0; i < beams_bath; i++) {
-			if (mb_beam_ok(beamflag[i])) {
-				/* priority zero if outside the range of the priority-angle table */
-				if (gangles[i] < priority_angle_angle[0] || gangles[i] > priority_angle_angle[n_priority_angle - 1]) {
-					priorities[i] = 0.0;
-				}
-
-				/* priority set using the priority-angle table */
-				else {
-					for (j = 0; j < n_priority_angle - 1; j++) {
-						if (gangles[i] >= priority_angle_angle[j] && gangles[i] < priority_angle_angle[j + 1]) {
-							priorities[i] *=
-							    (priority_angle_priority[j] + (priority_angle_priority[j + 1] - priority_angle_priority[j]) *
-							                                      (gangles[i] - priority_angle_angle[j]) /
-							                                      (priority_angle_angle[j + 1] - priority_angle_angle[j]));
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/* get look azimuth priorities */
-	if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) {
-		/* get priorities for starboard and port sides of ping */
-		azi_starboard = heading - 90.0 - priority_azimuth;
-		if (azi_starboard > 180.0)
-			azi_starboard -= 360.0 * ((int)((azi_starboard + 180.0) / 360.0));
-		else if (azi_starboard < -180.0)
-			azi_starboard += 360.0 * ((int)((-azi_starboard + 180.0) / 360.0));
-		if (priority_azimuth_factor * azi_starboard <= -90.0 || priority_azimuth_factor * azi_starboard >= 90.0)
-			weight_starboard = 0.0;
-		else
-			weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
-		azi_port = heading + 90.0 - priority_azimuth;
-		if (azi_port > 180.0)
-			azi_port -= 360.0 * ((int)((azi_port + 180.0) / 360.0));
-		else if (azi_port < -180.0)
-			azi_port += 360.0 * ((int)((-azi_port + 180.0) / 360.0));
-		if (priority_azimuth_factor * azi_port <= -90.0 || priority_azimuth_factor * azi_port >= 90.0)
-			weight_port = 0.0;
-		else
-			weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
-
-		/* apply the look azimuth priorities */
-		for (i = 0; i < beams_bath; i++) {
-			if (mb_beam_ok(beamflag[i])) {
-				if (gangles[i] < 0.0)
-					priorities[i] *= weight_starboard;
-				else
-					priorities[i] *= weight_port;
-			}
-		}
-	}
-
-	/* get heading priorities */
-	if (priority_mode & MBMOSAIC_PRIORITY_HEADING) {
-		/* get priorities for ping */
-		heading_difference = heading - priority_heading;
-		if (heading_difference > 180.0)
-			heading_difference -= 360.0;
-		else if (heading_difference < -180.0)
-			heading_difference += 360.0;
-		if (priority_heading_factor * heading_difference <= -90.0 || priority_heading_factor * heading_difference >= 90.0)
-			weight_heading = 0.0;
-		else
-			weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
-
-		/* apply the heading priorities */
-		for (i = 0; i < beams_bath; i++) {
-			if (mb_beam_ok(beamflag[i])) {
-				priorities[i] *= weight_heading;
-			}
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
-		fprintf(stderr, "dbg2       bathymetry grazing angles and priorities:\n");
-		for (i = 0; i < beams_bath; i++)
-			fprintf(stderr, "dbg2         beam:%d  flag:%d angle:%f  priority:%f\n", i, beamflag[i], gangles[i], priorities[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack, double *slopes,
-                            int *error) {
-	int status = MB_SUCCESS;
-	int found_pre, found_post;
-	int i0, i1;
-	int i, j;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
-		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
-			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
-	}
-
-	/* get grazing angle priorities */
-	/* loop over data getting angle based priorities */
-	for (i = 0; i < beams_bath; i++) {
-		if (mb_beam_ok(beamflag[i])) {
-			/* find previous good beam */
-			found_pre = MB_NO;
-			if (i > 0) {
-				for (j = i - 1; j >= 0 && found_pre == MB_NO; j--) {
-					if (mb_beam_ok(beamflag[j])) {
-						found_pre = MB_YES;
-						i0 = j;
-					}
-				}
-			}
-
-			/* find post good beam */
-			found_post = MB_NO;
-			if (i < beams_bath - 1) {
-				for (j = i + 1; j < beams_bath && found_post == MB_NO; j++) {
-					if (mb_beam_ok(beamflag[j])) {
-						found_post = MB_YES;
-						i1 = j;
-					}
-				}
-			}
-
-			/* calculate slope */
-			if (found_pre == MB_YES && found_post == MB_YES) {
-				if (bathacrosstrack[i1] != bathacrosstrack[i0])
-					slopes[i] = -(bath[i1] - bath[i0]) / (bathacrosstrack[i1] - bathacrosstrack[i0]);
-				else
-					slopes[i] = 0.0;
-			}
-			else if (found_pre == MB_YES) {
-				if (bathacrosstrack[i] != bathacrosstrack[i0])
-					slopes[i] = -(bath[i] - bath[i0]) / (bathacrosstrack[i] - bathacrosstrack[i0]);
-				else
-					slopes[i] = 0.0;
-			}
-			else if (found_post == MB_YES) {
-				if (bathacrosstrack[i1] != bathacrosstrack[i])
-					slopes[i] = -(bath[i1] - bath[i]) / (bathacrosstrack[i1] - bathacrosstrack[i]);
-				else
-					slopes[i] = 0.0;
-			}
-			else {
-				slopes[i] = 0.0;
-			}
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
-		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
-			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f  slope:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
-			        slopes[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, char *beamflag, double *bath,
-                                double *bathacrosstrack, double *bathalongtrack, double angle_min, double angle_max, int nangle,
-                                double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
-                                double *table_range, int *error) {
-	int status = MB_SUCCESS;
-	double dangle, angle0, angle1, factor;
-	int found, foundnext;
-	int i, j, jj, jstart, jnext;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       sonardepth:      %f\n", sonardepth);
-		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
-		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
-			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
-		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
-		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
-	}
-
-	/* loop over the angles and figure out the other table values from the bathymetry */
-	dangle = (angle_max - angle_min) / (nangle - 1);
-	jstart = 0;
-	*error = MB_ERROR_NO_ERROR;
-	for (i = 0; i < nangle; i++) {
-		/* get angles in takeoff coordinates */
-		table_angle[i] = angle_min + dangle * i;
-		table_xtrack[i] = 0.0;
-		table_ltrack[i] = 0.0;
-		table_range[i] = 0.0;
-
-		/* estimate the table values for this angle from the bathymetry */
-		found = MB_NO;
-		for (j = jstart; j < beams_bath - 1 && found == MB_NO; j++) {
-			/* check if this beam is valid */
-			if (mb_beam_ok(beamflag[j])) {
-				/* look for the next valid beam */
-				foundnext = MB_NO;
-				jnext = j;
-				for (jj = j + 1; jj < beams_bath && foundnext == MB_NO; jj++) {
-					if (mb_beam_ok(beamflag[jj])) {
-						jnext = jj;
-						foundnext = MB_YES;
-					}
-				}
-
-				/* get the angle for beam j */
-				angle0 = RTD * atan(bathacrosstrack[j] / (bath[j] - sonardepth));
-				if (foundnext == MB_YES)
-					angle1 = RTD * atan(bathacrosstrack[jnext] / (bath[jnext] - sonardepth));
-
-				/* deal with angle to port of swath edge */
-				/* fprintf(stderr,"i:%d angle:%f angle0:%f j:%d jnext:%d foundnext:%d ",
-				i,table_angle[i],angle0,j,jnext,foundnext);
-				if (foundnext == MB_YES)
-				fprintf(stderr," angle1:%f ",angle1); */
-				if (table_angle[i] <= angle0) {
-					table_altitude[i] = bath[j] - sonardepth;
-					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
-					table_ltrack[i] = bathalongtrack[j];
-					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
-					                      table_ltrack[i] * table_ltrack[i]);
-					found = MB_YES;
-					jstart = j;
-					/* fprintf(stderr," A table: %f %f %f %f %f\n",
-					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]); */
-				}
-
-				/* deal with angle to starboard of swath edge */
-				else if (foundnext == MB_NO) {
-					table_altitude[i] = bath[j] - sonardepth;
-					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
-					table_ltrack[i] = bathalongtrack[j];
-					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
-					                      table_ltrack[i] * table_ltrack[i]);
-					found = MB_YES;
-					jstart = j;
-					/* fprintf(stderr," B table: %f %f %f %f %f\n",
-					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
-				}
-
-				/* deal with angle to starboard of swath edge */
-				else if (foundnext == MB_YES && table_angle[i] > angle1) {
-					if (jnext == beams_bath - 1) {
-						table_altitude[i] = bath[j] - sonardepth;
-						table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
-						table_ltrack[i] = bathalongtrack[j];
-						table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
-						                      table_ltrack[i] * table_ltrack[i]);
-						found = MB_YES;
-					}
-					jstart = j;
-					/* fprintf(stderr," B table: %f %f %f %f %f\n",
-					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
-				}
-
-				/* deal with angle between the two valid beams */
-				else if (foundnext == MB_YES && table_angle[i] >= angle0 && table_angle[i] <= angle1) {
-					factor = (table_angle[i] - angle0) / (angle1 - angle0);
-					table_altitude[i] = (bath[j] - sonardepth) + factor * (bath[jnext] - bath[j]);
-					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
-					table_ltrack[i] = bathalongtrack[j] + factor * (bathalongtrack[jnext] - bathalongtrack[j]);
-					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
-					                      table_ltrack[i] * table_ltrack[i]);
-					found = MB_YES;
-					jstart = j;
-					/* fprintf(stderr," C factor:%f x:%f %f %f table: %f %f %f %f %f\n",
-					factor,bathacrosstrack[j],table_xtrack[i],bathacrosstrack[jnext],
-					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
-				}
-
-				/* else skip */
-				/* else
-				fprintf(stderr," SKIP\n");*/
-			}
-		}
-
-		/* set error if necessary */
-		if (found == MB_NO) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_NOT_ENOUGH_DATA;
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
-		fprintf(stderr, "dbg2       tables:\n");
-		for (i = 0; i < nangle; i++)
-			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
-			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle_min, double angle_max, int nangle,
-                                      double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
-                                      double *table_range, int *error) {
-	int status = MB_SUCCESS;
-	double dangle;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       altitude:        %f\n", altitude);
-		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
-		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
-		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
-	}
-
-	/* loop over the angles and figure out the other table values from the bathymetry */
-	dangle = (angle_max - angle_min) / (nangle - 1);
-	*error = MB_ERROR_NO_ERROR;
-	for (i = 0; i < nangle; i++) {
-		/* get angles in takeoff coordinates */
-		table_angle[i] = angle_min + dangle * i;
-		table_xtrack[i] = altitude * tan(DTR * table_angle[i]);
-		table_ltrack[i] = 0.0;
-		table_range[i] = sqrt(altitude * altitude + table_xtrack[i] * table_xtrack[i]);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
-		fprintf(stderr, "dbg2       tables:\n");
-		for (i = 0; i < nangle; i++)
-			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
-			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *table_xtrack, double *table_ltrack,
-                          double *table_altitude, double *table_range, int pixels_ss, double *ss, double *ssacrosstrack,
-                          double *gangles, int *error) {
-	int status = MB_SUCCESS;
-	int found;
-	int i, j, jstart;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
-		fprintf(stderr, "dbg2       tables:\n");
-		for (i = 0; i < nangle; i++)
-			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
-			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
-		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
-		fprintf(stderr, "dbg2       sidescan:\n");
-		for (i = 0; i < pixels_ss; i++)
-			fprintf(stderr, "dbg2         pixel:%d  ss:%f %f\n", i, ss[i], ssacrosstrack[i]);
-	}
-
-	/* loop over the sidescan interpolating angles from the table on the basis of ssacrosstrack */
-	jstart = 0;
-	for (i = 0; i < pixels_ss; i++) {
-		/* get angles only for valid sidescan */
-		if (ss[i] > MB_SIDESCAN_NULL) {
-			found = MB_NO;
-			for (j = jstart; j < nangle - 1 && found == MB_NO; j++) {
-				if (ssacrosstrack[i] < table_xtrack[j]) {
-					gangles[i] = table_angle[j];
-					found = MB_YES;
-				}
-				else if (ssacrosstrack[i] >= table_xtrack[j] && ssacrosstrack[i] <= table_xtrack[j + 1]) {
-					gangles[i] = table_angle[j] + (table_angle[j + 1] - table_angle[j]) * (ssacrosstrack[i] - table_xtrack[j]) /
-					                                  (table_xtrack[j + 1] - table_xtrack[j]);
-					/*fprintf(stderr,"i:%d j:%d %d angles: %f %f %f  x: %f %f %f\n",
-					i,j,j+1,table_angle[j],gangles[i],table_angle[j+1],table_xtrack[j],ssacrosstrack[i],table_xtrack[j+1]);*/
-					found = MB_YES;
-					jstart = j;
-				}
-				else if (ssacrosstrack[i] >= table_xtrack[j + 1] && j == nangle - 2) {
-					gangles[i] = table_angle[j + 1];
-					found = MB_YES;
-				}
-			}
-		}
-
-		/* zero angles for invalid sidescan */
-		else {
-			gangles[i] = 0.0;
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
-		fprintf(stderr, "dbg2       sidescan grazing angles:\n");
-		for (i = 0; i < pixels_ss; i++)
-			fprintf(stderr, "dbg2         pixel:%d  ss:%f %f angle:%f\n", i, ss[i], ssacrosstrack[i], gangles[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_angle, double *priority_angle_angle,
-                              double *priority_angle_priority, double priority_azimuth, double priority_azimuth_factor,
-                              double priority_heading, double priority_heading_factor, double heading, int pixels_ss, double *ss,
-                              double *gangles, double *priorities, int *error) {
-	int status = MB_SUCCESS;
-	double azi_starboard, azi_port, weight_starboard, weight_port;
-	double heading_difference, weight_heading;
-	int i, j;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr, "dbg2       priority_mode:             %d\n", priority_mode);
-		fprintf(stderr, "dbg2       n_priority_angle:          %d\n", n_priority_angle);
-		fprintf(stderr, "dbg2       priority angle table:\n");
-		for (i = 0; i < n_priority_angle; i++)
-			fprintf(stderr, "dbg2         %d  angle:%f  priority:%f\n", i, priority_angle_angle[i], priority_angle_priority[i]);
-		fprintf(stderr, "dbg2       priority_azimuth:          %f\n", priority_azimuth);
-		fprintf(stderr, "dbg2       priority_azimuth_factor:   %f\n", priority_azimuth_factor);
-		fprintf(stderr, "dbg2       heading:         %f\n", heading);
-		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
-		fprintf(stderr, "dbg2       sidescan grazing angles:\n");
-		for (i = 0; i < pixels_ss; i++)
-			fprintf(stderr, "dbg2         pixel:%d  ss:%f angle:%f\n", i, ss[i], gangles[i]);
-	}
-
-	/* initialize priority array */
-	for (i = 0; i < pixels_ss; i++) {
-		if (ss[i] > MB_SIDESCAN_NULL) {
-			priorities[i] = 1.0;
-		}
-		else {
-			priorities[i] = 0.0;
-		}
-	}
-
-	/* get grazing angle priorities */
-	if (priority_mode & MBMOSAIC_PRIORITY_ANGLE) {
-		/* loop over data getting angle based priorities */
-		for (i = 0; i < pixels_ss; i++) {
-			if (ss[i] > MB_SIDESCAN_NULL) {
-				/* priority zero if outside the range of the priority-angle table */
-				if (gangles[i] < priority_angle_angle[0] || gangles[i] > priority_angle_angle[n_priority_angle - 1]) {
-					priorities[i] = 0.0;
-				}
-
-				/* priority set using the priority-angle table */
-				else {
-					for (j = 0; j < n_priority_angle - 1; j++) {
-						if (gangles[i] >= priority_angle_angle[j] && gangles[i] < priority_angle_angle[j + 1]) {
-							priorities[i] *=
-							    (priority_angle_priority[j] + (priority_angle_priority[j + 1] - priority_angle_priority[j]) *
-							                                      (gangles[i] - priority_angle_angle[j]) /
-							                                      (priority_angle_angle[j + 1] - priority_angle_angle[j]));
-						}
-					}
-				}
-			}
-		}
-	}
-
-	/* get look azimuth priorities */
-	if (priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) {
-		/* get priorities for starboard and port sides of ping */
-		azi_starboard = heading - 90.0 - priority_azimuth;
-		if (azi_starboard > 180.0)
-			azi_starboard -= 360.0 * ((int)((azi_starboard + 180.0) / 360.0));
-		else if (azi_starboard < -180.0)
-			azi_starboard += 360.0 * ((int)((-azi_starboard + 180.0) / 360.0));
-		if (priority_azimuth_factor * azi_starboard <= -90.0 || priority_azimuth_factor * azi_starboard >= 90.0)
-			weight_starboard = 0.0;
-		else
-			weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
-		azi_port = heading + 90.0 - priority_azimuth;
-		if (azi_port > 180.0)
-			azi_port -= 360.0 * ((int)((azi_port + 180.0) / 360.0));
-		else if (azi_port < -180.0)
-			azi_port += 360.0 * ((int)((-azi_port + 180.0) / 360.0));
-		if (priority_azimuth_factor * azi_port <= -90.0 || priority_azimuth_factor * azi_port >= 90.0)
-			weight_port = 0.0;
-		else
-			weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
-
-		/* apply the look azimuth priorities */
-		for (i = 0; i < pixels_ss; i++) {
-			if (ss[i] > MB_SIDESCAN_NULL) {
-				if (gangles[i] < 0.0)
-					priorities[i] *= weight_starboard;
-				else
-					priorities[i] *= weight_port;
-			}
-		}
-	}
-
-	/* get heading priorities */
-	if (priority_mode & MBMOSAIC_PRIORITY_HEADING) {
-		/* get priorities for ping */
-		heading_difference = heading - priority_heading;
-		if (heading_difference > 180.0)
-			heading_difference -= 360.0;
-		else if (heading_difference < -180.0)
-			heading_difference += 360.0;
-		if (priority_heading_factor * heading_difference <= -90.0 || priority_heading_factor * heading_difference >= 90.0)
-			weight_heading = 0.0;
-		else
-			weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
-
-		/* apply the look azimuth priorities */
-		for (i = 0; i < pixels_ss; i++) {
-			if (ss[i] > MB_SIDESCAN_NULL) {
-				priorities[i] *= weight_heading;
-			}
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
-		fprintf(stderr, "dbg2       sidescan grazing angles and priorities:\n");
-		for (i = 0; i < pixels_ss; i++)
-			fprintf(stderr, "dbg2         pixel:%d  angle:%f  priority:%f\n", i, gangles[i], priorities[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/

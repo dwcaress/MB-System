@@ -71,18 +71,18 @@
 #define MBKONSBERGPREPROCESS_FILTER_MEAN 1
 #define MBKONSBERGPREPROCESS_FILTER_MEDIAN 2
 
+static const char program_name[] = "mbkongsbergpreprocess";
+static const char help_message[] =
+    "mbkongsbergpreprocess reads a Kongsberg multibeam vendor format file (or datalist of "
+    "files),\ninterpolates the asynchronous navigation and attitude onto the multibeam data, \nand writes "
+    "the data as one or more format 59 files.";
+static const char usage_message[] =
+    "mbkongsbergpreprocess [-C -Doutputdirectory -Eoffx/offy[/offdepth] -Fformat -Ifile -Ooutfile "
+    "\n\t\t\t-Pfilterlength/filterdepth -Sdatatype/source -Ttimelag -W -H -V]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbkongsbergpreprocess";
-	char help_message[] = "mbkongsbergpreprocess reads a Kongsberg multibeam vendor format file (or datalist of "
-	                      "files),\ninterpolates the asynchronous navigation and attitude onto the multibeam data, \nand writes "
-	                      "the data as one or more format 59 files.";
-	char usage_message[] = "mbkongsbergpreprocess [-C -Doutputdirectory -Eoffx/offy[/offdepth] -Fformat -Ifile -Ooutfile "
-	                       "\n\t\t\t-Pfilterlength/filterdepth -Sdatatype/source -Ttimelag -W -H -V]";
-
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

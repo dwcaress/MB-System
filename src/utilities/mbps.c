@@ -60,19 +60,20 @@ struct ping {
 	double *yp;
 };
 
-int rgb_black[] = {0, 0, 0};
-int rgb_white[] = {255, 255, 255};
+static const int rgb_black[] = {0, 0, 0};
+static const int rgb_white[] = {255, 255, 255};
 
+static const char program_name[] = "MBPS";
+static const char help_message[] =
+    "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
+static const char usage_message[] =
+    "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha "
+    "-Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats "
+    "\n\t-Zdisplay_scales -V -H]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBPS";
-	char help_message[] = "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
-	char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha "
-	                       "-Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats "
-	                       "\n\t-Zdisplay_scales -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

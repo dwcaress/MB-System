@@ -43,22 +43,69 @@
 #define MBGETESF_IMPLICITNULL 5
 #define MBGETESF_IMPLICITGOOD 6
 
-int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
+static const char program_name[] = "mbgetesf";
+static const char help_message[] =
+    "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other "
+    "data files\ncontaining the same data (but presumably in a different\nstate of processing).  This "
+    "allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit "
+    "and\nmbprocess can be used to apply the edit events to another file.";
+static const char usage_message[] =
+    "mbgetesf [-Fformat -Iinfile -Mmode -Oesffile -V -H]";
 
+/*--------------------------------------------------------------------*/
+int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
+	int status = MB_SUCCESS;
+	//	int time_i[7];
 
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+
+		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       beam:            %d\n", beam);
+		fprintf(stderr, "dbg2       action:          %d\n", action);
+	}
+	// mb_get_date(verbose,time_d,time_i);
+	// fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n",
+	// time_d,time_i[0],time_i[1],time_i[2],
+	// time_i[3],time_i[4],time_i[5],time_i[6],
+	// beam,action);
+
+	/* write out the edit */
+	if (sofp != NULL) {
+#ifdef BYTESWAPPED
+		mb_swap_double(&time_d);
+		beam = mb_swap_int(beam);
+		action = mb_swap_int(action);
+#endif
+		if (fwrite(&time_d, sizeof(double), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, sofp) != 1) {
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:       %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:      %d\n", status);
+	}
+
+	return (status);
+}
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "mbgetesf";
-	char help_message[] = "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other "
-	                      "data files\ncontaining the same data (but presumably in a different\nstate of processing).  This "
-	                      "allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit "
-	                      "and\nmbprocess can be used to apply the edit events to another file.";
-	char usage_message[] = "mbgetesf [-Fformat -Iinfile -Mmode -Oesffile -V -H]";
-
-	/* parsing variables */
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
@@ -518,56 +565,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	int status = MB_SUCCESS;
-	//	int time_i[7];
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-
-		fprintf(stderr, "dbg2       sofp:            %p\n", (void *)sofp);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       beam:            %d\n", beam);
-		fprintf(stderr, "dbg2       action:          %d\n", action);
-	}
-	// mb_get_date(verbose,time_d,time_i);
-	// fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n",
-	// time_d,time_i[0],time_i[1],time_i[2],
-	// time_i[3],time_i[4],time_i[5],time_i[6],
-	// beam,action);
-
-	/* write out the edit */
-	if (sofp != NULL) {
-#ifdef BYTESWAPPED
-		mb_swap_double(&time_d);
-		beam = mb_swap_int(beam);
-		action = mb_swap_int(action);
-#endif
-		if (fwrite(&time_d, sizeof(double), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&beam, sizeof(int), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-		if (status == MB_SUCCESS && fwrite(&action, sizeof(int), 1, sofp) != 1) {
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:       %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:      %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/

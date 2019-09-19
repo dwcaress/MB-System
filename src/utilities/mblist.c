@@ -62,44 +62,698 @@
 #define MBLIST_SEGMENT_MODE_SWATHFILE 2
 #define MBLIST_SEGMENT_MODE_DATALIST 3
 
-int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int use_bath, int use_amp, int use_ss, int dump_mode,
-               int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
-               int *beam_exclude_percent, int *pixel_start, int *pixel_end, int *n_list, char *list, int *error);
-int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths, double *depths,
-                   double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack, int *error);
-int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
-                   double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error);
-int printsimplevalue(int verbose, FILE *output, double value, int width, int precision, int ascii, int *invert, int *flipsign,
-                     int *error);
-int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error);
-int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate, double *absorption,
-               int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop, double *bsn, double *bso, int *tx,
-               int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples, int *start_sample, int *range,
-               double *depression, double *bs, double *ss_pixels, int *error);
-int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate,
-                       double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
-                       double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
-                       int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error);
-int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate,
-                       double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
-                       double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
-                       int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error);
-
 /* NaN value */
 double NaN;
 
+static const char program_name[] = "MBLIST";
+static const char help_message[] =
+    "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is "
+    "quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns "
+    "separated by tabs.";
+static const char usage_message[] =
+    "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
+    "-Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end \n-Ooptions -Ppings "
+    "-Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+
+/*--------------------------------------------------------------------*/
+int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int use_bath, int use_amp, int use_ss, int dump_mode,
+               int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
+               int *beam_exclude_percent, int *pixel_start, int *pixel_end, int *n_list, char *list, int *error) {
+	int status = MB_SUCCESS;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBLIST function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
+		fprintf(stderr, "dbg2       beams_amp:       %d\n", beams_amp);
+		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
+		fprintf(stderr, "dbg2       use_bath:        %d\n", use_bath);
+		fprintf(stderr, "dbg2       use_amp:         %d\n", use_amp);
+		fprintf(stderr, "dbg2       use_ss:          %d\n", use_ss);
+		fprintf(stderr, "dbg2       dump_mode:       %d\n", dump_mode);
+		fprintf(stderr, "dbg2       :        %d\n", beam_set);
+		fprintf(stderr, "dbg2       pixel_set:       %d\n", pixel_set);
+		fprintf(stderr, "dbg2       beam_vertical:   %d\n", beam_vertical);
+		fprintf(stderr, "dbg2       pixel_vertical:  %d\n", pixel_vertical);
+		fprintf(stderr, "dbg2       beam_start:      %d\n", *beam_start);
+		fprintf(stderr, "dbg2       beam_end:        %d\n", *beam_end);
+		fprintf(stderr, "dbg2       beam_exclude_percent: %d\n", *beam_exclude_percent);
+		fprintf(stderr, "dbg2       pixel_start:     %d\n", *pixel_start);
+		fprintf(stderr, "dbg2       pixel_end:       %d\n", *pixel_end);
+		fprintf(stderr, "dbg2       n_list:          %d\n", *n_list);
+		for (i = 0; i < *n_list; i++)
+			fprintf(stderr, "dbg2       list[%2d]:        %c\n", i, list[i]);
+	}
+
+	/* assume success */
+	*error = MB_ERROR_NO_ERROR;
+	status = MB_SUCCESS;
+
+	if (beam_set == MBLIST_SET_OFF && pixel_set == MBLIST_SET_OFF && beams_bath <= 0 && pixels_ss <= 0) {
+		*beam_start = 0;
+		*beam_end = 1;
+		*pixel_start = 0;
+		*pixel_end = -1;
+	}
+	else if (beam_set == MBLIST_SET_OFF && pixel_set != MBLIST_SET_OFF) {
+		*beam_start = 0;
+		*beam_end = -1;
+	}
+	else if (beam_set == MBLIST_SET_OFF && beams_bath <= 0) {
+		*beam_start = 0;
+		*beam_end = -1;
+		*pixel_start = pixel_vertical;
+		*pixel_end = pixel_vertical;
+	}
+	else if (beam_set == MBLIST_SET_OFF) {
+		*beam_start = beam_vertical;
+		*beam_end = beam_vertical;
+	}
+	else if (beam_set == MBLIST_SET_ALL) {
+		*beam_start = 0;
+		*beam_end = beams_bath - 1;
+	}
+	else if (beam_set == MBLIST_SET_EXCLUDE_OUTER) {
+		*beam_start = (beams_bath * *beam_exclude_percent) / 100;
+		*beam_end = beams_bath - (*beam_start + 1);
+	}
+	if (pixel_set == MBLIST_SET_OFF && beams_bath > 0) {
+		*pixel_start = 0;
+		*pixel_end = -1;
+	}
+	else if (pixel_set == MBLIST_SET_ALL) {
+		*pixel_start = 0;
+		*pixel_end = pixels_ss - 1;
+	}
+
+	/* deal with dump_mode if set */
+	if (dump_mode == DUMP_MODE_BATH) {
+		*beam_start = 0;
+		*beam_end = beams_bath - 1;
+		*pixel_start = 0;
+		*pixel_end = -1;
+		strcpy(list, "XYz");
+		*n_list = 3;
+	}
+	else if (dump_mode == DUMP_MODE_TOPO) {
+		*beam_start = 0;
+		*beam_end = beams_bath - 1;
+		*pixel_start = 0;
+		*pixel_end = -1;
+		strcpy(list, "XYZ");
+		*n_list = 3;
+	}
+	else if (dump_mode == DUMP_MODE_AMP) {
+		*beam_start = 0;
+		*beam_end = beams_bath - 1;
+		*pixel_start = 0;
+		*pixel_end = -1;
+		strcpy(list, "XYB");
+		*n_list = 3;
+	}
+	else if (dump_mode == DUMP_MODE_SS) {
+		*beam_start = 0;
+		*beam_end = -1;
+		*pixel_start = 0;
+		*pixel_end = pixels_ss - 1;
+		strcpy(list, "XYb");
+		*n_list = 3;
+	}
+
+	/* check if beam and pixel range is ok */
+	if ((use_bath == MB_YES && *beam_end >= *beam_start) && beams_bath <= 0) {
+		fprintf(stderr, "\nBathymetry data not available\n");
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_USAGE;
+	}
+	else if (use_bath == MB_YES && *beam_end >= *beam_start && (*beam_start < 0 || *beam_end >= beams_bath)) {
+		fprintf(stderr, "\nBeam range %d to %d exceeds available beams 0 to %d\n", *beam_start, *beam_end, beams_bath - 1);
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_USAGE;
+	}
+	if (*error == MB_ERROR_NO_ERROR && use_amp == MB_YES && beams_amp <= 0) {
+		fprintf(stderr, "\nAmplitude data not available\n");
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_USAGE;
+	}
+	else if (*error == MB_ERROR_NO_ERROR && *beam_end >= *beam_start && use_amp == MB_YES &&
+	         (*beam_start < 0 || *beam_end >= beams_amp)) {
+		fprintf(stderr, "\nAmplitude beam range %d to %d exceeds available beams 0 to %d\n", *beam_start, *beam_end,
+		        beams_amp - 1);
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_USAGE;
+	}
+	if (*error == MB_ERROR_NO_ERROR && (use_ss == MB_YES || *pixel_end >= *pixel_start) && pixels_ss <= 0) {
+		fprintf(stderr, "\nSidescan data not available\n");
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_USAGE;
+	}
+	else if (*error == MB_ERROR_NO_ERROR && *pixel_end >= *pixel_start && (*pixel_start < 0 || *pixel_end >= pixels_ss)) {
+		fprintf(stderr, "\nPixels range %d to %d exceeds available pixels 0 to %d\n", *pixel_start, *pixel_end, pixels_ss - 1);
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_USAGE;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBCOPY function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:      %d\n", *error);
+		fprintf(stderr, "dbg2       beam_start:    %d\n", *beam_start);
+		fprintf(stderr, "dbg2       beam_end:      %d\n", *beam_end);
+		fprintf(stderr, "dbg2       pixel_start:   %d\n", *pixel_start);
+		fprintf(stderr, "dbg2       pixel_end:     %d\n", *pixel_end);
+		fprintf(stderr, "dbg2       n_list:        %d\n", *n_list);
+		for (i = 0; i < *n_list; i++)
+			fprintf(stderr, "dbg2       list[%2d]:      %c\n", i, list[i]);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths, double *depths,
+                   double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack, int *error) {
+	int status = MB_SUCCESS;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       nbath:           %d\n", nbath);
+		fprintf(stderr, "dbg2       bath:            %p\n", (void *)bath);
+		fprintf(stderr, "dbg2       bathacrosstrack: %p\n", (void *)bathacrosstrack);
+		fprintf(stderr, "dbg2       bath:\n");
+		for (i = 0; i < nbath; i++)
+			fprintf(stderr, "dbg2         %d %f %f\n", i, bath[i], bathacrosstrack[i]);
+	}
+
+	/* first find all depths */
+	*ndepths = 0;
+	for (i = 0; i < nbath; i++) {
+		if (mb_beam_ok(beamflag[i])) {
+			depths[*ndepths] = bath[i];
+			depthacrosstrack[*ndepths] = bathacrosstrack[i];
+			(*ndepths)++;
+		}
+	}
+
+	/* now calculate slopes */
+	*nslopes = *ndepths + 1;
+	for (i = 0; i < *ndepths - 1; i++) {
+		slopes[i + 1] = (depths[i + 1] - depths[i]) / (depthacrosstrack[i + 1] - depthacrosstrack[i]);
+		slopeacrosstrack[i + 1] = 0.5 * (depthacrosstrack[i + 1] + depthacrosstrack[i]);
+	}
+	if (*ndepths > 1) {
+		slopes[0] = 0.0;
+		slopeacrosstrack[0] = depthacrosstrack[0];
+		slopes[*ndepths] = 0.0;
+		slopeacrosstrack[*ndepths] = depthacrosstrack[*ndepths - 1];
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       ndepths:         %d\n", *ndepths);
+		fprintf(stderr, "dbg2       depths:\n");
+		for (i = 0; i < *ndepths; i++)
+			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr, "dbg2       nslopes:         %d\n", *nslopes);
+		fprintf(stderr, "dbg2       slopes:\n");
+		for (i = 0; i < *nslopes; i++)
+			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
+                   double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
+	int status = MB_SUCCESS;
+	int found_depth, found_slope;
+	int idepth, islope;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       ndepths:         %d\n", ndepths);
+		fprintf(stderr, "dbg2       depths:\n");
+		for (i = 0; i < ndepths; i++)
+			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
+		fprintf(stderr, "dbg2       nslopes:         %d\n", nslopes);
+		fprintf(stderr, "dbg2       slopes:\n");
+		for (i = 0; i < nslopes; i++)
+			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
+		fprintf(stderr, "dbg2       acrosstrack:     %f\n", acrosstrack);
+	}
+
+	/* check if acrosstrack is in defined interval */
+	found_depth = MB_NO;
+	found_slope = MB_NO;
+	if (ndepths > 1)
+		if (acrosstrack >= depthacrosstrack[0] && acrosstrack <= depthacrosstrack[ndepths - 1]) {
+
+			/* look for depth */
+			idepth = -1;
+			while (found_depth == MB_NO && idepth < ndepths - 2) {
+				idepth++;
+				if (acrosstrack >= depthacrosstrack[idepth] && acrosstrack <= depthacrosstrack[idepth + 1]) {
+					*depth = depths[idepth] + (acrosstrack - depthacrosstrack[idepth]) /
+					                              (depthacrosstrack[idepth + 1] - depthacrosstrack[idepth]) *
+					                              (depths[idepth + 1] - depths[idepth]);
+					found_depth = MB_YES;
+					*error = MB_ERROR_NO_ERROR;
+				}
+			}
+
+			/* look for slope */
+			islope = -1;
+			while (found_slope == MB_NO && islope < nslopes - 2) {
+				islope++;
+				if (acrosstrack >= slopeacrosstrack[islope] && acrosstrack <= slopeacrosstrack[islope + 1]) {
+					*slope = slopes[islope] + (acrosstrack - slopeacrosstrack[islope]) /
+					                              (slopeacrosstrack[islope + 1] - slopeacrosstrack[islope]) *
+					                              (slopes[islope + 1] - slopes[islope]);
+					found_slope = MB_YES;
+					*error = MB_ERROR_NO_ERROR;
+				}
+			}
+		}
+
+	/* translate slope to degrees */
+	if (found_slope == MB_YES)
+		*slope = RTD * atan(*slope);
+
+	/* check for failure */
+	if (found_depth != MB_YES || found_slope != MB_YES) {
+		status = MB_FAILURE;
+		*error = MB_ERROR_OTHER;
+		*depth = 0.0;
+		*slope = 0.0;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       depth:           %f\n", *depth);
+		fprintf(stderr, "dbg2       slope:           %f\n", *slope);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int printsimplevalue(int verbose, FILE *output, double value, int width, int precision, int ascii, int *invert, int *flipsign,
+                     int *error) {
+	int status = MB_SUCCESS;
+	char format[24];
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       value:           %f\n", value);
+		fprintf(stderr, "dbg2       width:           %d\n", width);
+		fprintf(stderr, "dbg2       precision:       %d\n", precision);
+		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
+		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
+		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
+	}
+
+	/* make print format */
+	format[0] = '%';
+	if (*invert == MB_YES)
+		strcpy(format, "%g");
+	else if (width > 0)
+		sprintf(&format[1], "%d.%df", width, precision);
+	else
+		sprintf(&format[1], ".%df", precision);
+
+	/* invert value if desired */
+	if (*invert == MB_YES) {
+		*invert = MB_NO;
+		if (value != 0.0)
+			value = 1.0 / value;
+	}
+
+	/* flip sign value if desired */
+	if (*flipsign == MB_YES) {
+		*flipsign = MB_NO;
+		value = -value;
+	}
+
+	/* print value */
+	if (ascii == MB_YES)
+		fprintf(output, format, value);
+	else
+		fwrite(&value, sizeof(double), 1, output);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error) {
+	int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
+		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
+		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
+	}
+
+	/* reset invert flag */
+	if (*invert == MB_YES)
+		*invert = MB_NO;
+
+	/* reset flipsign flag */
+	if (*flipsign == MB_YES)
+		*flipsign = MB_NO;
+
+	/* print value */
+	if (ascii == MB_YES)
+		fprintf(output, "NaN");
+	else
+		fwrite(&NaN, sizeof(double), 1, output);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/*
+Method to get fields from raw data, similar to mb_get_all.
+*/
+int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate, double *absorption,
+               int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop, double *bsn, double *bso, int *tx,
+               int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples, int *start_sample, int *range,
+               double *depression, double *bs, double *ss_pixels, int *error) {
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
+	}
+
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	*mode = -1;
+	*ipulse_length = 0;
+	*png_count = 0;
+	*sample_rate = 0;
+	*absorption = 0;
+	*max_range = 0;
+	*r_zero = 0;
+	*r_zero_corr = 0;
+	*tvg_start = 0;
+	*tvg_stop = 0;
+	*bsn = 0;
+	*bso = 0;
+	*tx = 0;
+	*tvg_crossover = 0;
+	*nbeams_ss = 0;
+	*npixels = 0;
+
+	for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		beam_samples[i] = 0;
+		start_sample[i] = 0;
+		range[i] = 0;
+		depression[i] = 0.0;
+		bs[i] = 0.0;
+	}
+
+	switch (mb_io_ptr->format) {
+	case MBF_EM300MBA:
+	case MBF_EM300RAW:
+		mb_get_raw_simrad2(verbose, mbio_ptr, mode, ipulse_length, png_count, sample_rate, absorption, max_range, r_zero,
+		                   r_zero_corr, tvg_start, tvg_stop, bsn, bso, tx, tvg_crossover, nbeams_ss, npixels, beam_samples,
+		                   start_sample, range, depression, bs, ss_pixels, error);
+
+		break;
+	case MBF_EM710MBA:
+	case MBF_EM710RAW:
+		mb_get_raw_simrad3(verbose, mbio_ptr, mode, ipulse_length, png_count, sample_rate, absorption, max_range, r_zero,
+		                   r_zero_corr, tvg_start, tvg_stop, bsn, bso, tx, tvg_crossover, nbeams_ss, npixels, beam_samples,
+		                   start_sample, range, depression, bs, ss_pixels, error);
+
+		break;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
+		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
+		fprintf(stderr, "dbg2       png_count:       %d\n", *png_count);
+		fprintf(stderr, "dbg2       sample_rate:     %d\n", *sample_rate);
+		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
+		fprintf(stderr, "dbg2       max_range:       %d\n", *max_range);
+		fprintf(stderr, "dbg2       r_zero:          %d\n", *r_zero);
+		fprintf(stderr, "dbg2       r_zero_corr:     %d\n", *r_zero_corr);
+		fprintf(stderr, "dbg2       tvg_start:       %d\n", *tvg_start);
+		fprintf(stderr, "dbg2       tvg_stop:        %d\n", *tvg_stop);
+		fprintf(stderr, "dbg2       bsn:             %f\n", *bsn);
+		fprintf(stderr, "dbg2       bso:             %f\n", *bso);
+		fprintf(stderr, "dbg2       tx:              %d\n", *tx);
+		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
+		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
+		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
+		}
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
+		}
+		for (i = 0; i < *npixels; i++) {
+			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
+		}
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return status;
+}
+
+/*--------------------------------------------------------------------*/
+/*
+Method to get fields from simrad2 raw data.
+*/
+
+int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate,
+                       double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
+                       double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
+                       int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error) {
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store_ptr;
+	struct mbsys_simrad2_ping_struct *ping_ptr;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
+	}
+
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	store_ptr = (struct mbsys_simrad2_struct *)mb_io_ptr->store_data;
+	ping_ptr = store_ptr->ping;
+
+	if (store_ptr->kind == MB_DATA_DATA) {
+		*mode = store_ptr->run_mode;
+		*ipulse_length = store_ptr->run_tran_pulse;
+		*png_count = ping_ptr->png_count;
+		*sample_rate = ping_ptr->png_sample_rate;
+		*absorption = ping_ptr->png_max_range * 0.01;
+		*max_range = ping_ptr->png_max_range;
+		*r_zero = ping_ptr->png_r_zero;
+		*r_zero_corr = ping_ptr->png_r_zero_corr;
+		*tvg_start = ping_ptr->png_tvg_start;
+		*tvg_stop = ping_ptr->png_tvg_stop;
+		*bsn = ping_ptr->png_bsn * 0.5;
+		*bso = ping_ptr->png_bso * 0.5;
+		*tx = ping_ptr->png_tx;
+		*tvg_crossover = ping_ptr->png_tvg_crossover;
+		*nbeams_ss = ping_ptr->png_nbeams_ss;
+		*npixels = ping_ptr->png_npixels;
+
+		for (i = 0; i < ping_ptr->png_nbeams; i++) {
+			range[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_range[i];
+			depression[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_depression[i] * .01;
+			bs[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_amp[i] * 0.5;
+		}
+		for (i = 0; i < ping_ptr->png_nbeams_ss; i++) {
+			beam_samples[ping_ptr->png_beam_index[i]] = ping_ptr->png_beam_samples[i];
+			start_sample[ping_ptr->png_beam_index[i]] = ping_ptr->png_start_sample[i];
+		}
+		for (i = 0; i < ping_ptr->png_npixels; i++)
+			ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
+		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
+		fprintf(stderr, "dbg2       png_count:       %d\n", *png_count);
+		fprintf(stderr, "dbg2       sample_rate:     %d\n", *sample_rate);
+		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
+		fprintf(stderr, "dbg2       max_range:       %d\n", *max_range);
+		fprintf(stderr, "dbg2       r_zero:          %d\n", *r_zero);
+		fprintf(stderr, "dbg2       r_zero_corr:     %d\n", *r_zero_corr);
+		fprintf(stderr, "dbg2       tvg_start:       %d\n", *tvg_start);
+		fprintf(stderr, "dbg2       tvg_stop:        %d\n", *tvg_stop);
+		fprintf(stderr, "dbg2       bsn:             %f\n", *bsn);
+		fprintf(stderr, "dbg2       bso:             %f\n", *bso);
+		fprintf(stderr, "dbg2       tx:              %d\n", *tx);
+		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
+		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
+		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
+		}
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
+		}
+		for (i = 0; i < *npixels; i++) {
+			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
+		}
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return status;
+}
+/*--------------------------------------------------------------------*/
+/*
+Method to get fields from simrad3 raw data.
+*/
+
+int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate,
+                       double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
+                       double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
+                       int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error) {
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad3_struct *store_ptr;
+	struct mbsys_simrad3_ping_struct *ping_ptr;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
+	}
+
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+	store_ptr = (struct mbsys_simrad3_struct *)mb_io_ptr->store_data;
+	ping_ptr = (struct mbsys_simrad3_ping_struct *)&(store_ptr->pings[store_ptr->ping_index]);
+
+	if (store_ptr->kind == MB_DATA_DATA) {
+		*mode = store_ptr->run_mode;
+		*ipulse_length = store_ptr->run_tran_pulse;
+		*png_count = ping_ptr->png_count;
+		*sample_rate = ping_ptr->png_sample_rate;
+		*absorption = store_ptr->run_absorption * 0.01;
+		*max_range = 0;
+		*r_zero = ping_ptr->png_r_zero;
+		*r_zero_corr = 0;
+		*tvg_start = 0;
+		*tvg_stop = 0;
+		*bsn = ping_ptr->png_bsn * 0.1;
+		*bso = ping_ptr->png_bso * 0.1;
+		*tx = ping_ptr->png_tx * 0.1;
+		*tvg_crossover = ping_ptr->png_tvg_crossover;
+		*nbeams_ss = ping_ptr->png_nbeams_ss;
+		*npixels = ping_ptr->png_npixels;
+
+		for (i = 0; i < ping_ptr->png_nbeams; i++) {
+			range[i] = ping_ptr->png_range[i];
+			depression[i] = ping_ptr->png_depression[i] * .01;
+			bs[i] = ping_ptr->png_amp[i] * 0.5;
+		}
+		for (i = 0; i < ping_ptr->png_nbeams_ss; i++) {
+			beam_samples[i] = ping_ptr->png_beam_samples[i];
+			start_sample[i] = ping_ptr->png_start_sample[i];
+		}
+		for (i = 0; i < ping_ptr->png_npixels; i++)
+			ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
+		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
+		fprintf(stderr, "dbg2       png_count:       %d\n", *png_count);
+		fprintf(stderr, "dbg2       sample_rate:     %d\n", *sample_rate);
+		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
+		fprintf(stderr, "dbg2       max_range:       %d\n", *max_range);
+		fprintf(stderr, "dbg2       r_zero:          %d\n", *r_zero);
+		fprintf(stderr, "dbg2       r_zero_corr:     %d\n", *r_zero_corr);
+		fprintf(stderr, "dbg2       tvg_start:       %d\n", *tvg_start);
+		fprintf(stderr, "dbg2       tvg_stop:        %d\n", *tvg_stop);
+		fprintf(stderr, "dbg2       bsn:             %f\n", *bsn);
+		fprintf(stderr, "dbg2       bso:             %f\n", *bso);
+		fprintf(stderr, "dbg2       tx:              %d\n", *tx);
+		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
+		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
+		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
+		}
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
+		}
+		for (i = 0; i < *npixels; i++) {
+			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
+		}
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return status;
+}
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBLIST";
-	char help_message[] = "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is "
-	                      "quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns "
-	                      "separated by tabs.";
-	char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
-	                       "-Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end \n-Ooptions -Ppings "
-	                       "-Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
@@ -4197,680 +4851,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int use_bath, int use_amp, int use_ss, int dump_mode,
-               int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
-               int *beam_exclude_percent, int *pixel_start, int *pixel_end, int *n_list, char *list, int *error) {
-	int status = MB_SUCCESS;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBLIST function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
-		fprintf(stderr, "dbg2       beams_amp:       %d\n", beams_amp);
-		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
-		fprintf(stderr, "dbg2       use_bath:        %d\n", use_bath);
-		fprintf(stderr, "dbg2       use_amp:         %d\n", use_amp);
-		fprintf(stderr, "dbg2       use_ss:          %d\n", use_ss);
-		fprintf(stderr, "dbg2       dump_mode:       %d\n", dump_mode);
-		fprintf(stderr, "dbg2       :        %d\n", beam_set);
-		fprintf(stderr, "dbg2       pixel_set:       %d\n", pixel_set);
-		fprintf(stderr, "dbg2       beam_vertical:   %d\n", beam_vertical);
-		fprintf(stderr, "dbg2       pixel_vertical:  %d\n", pixel_vertical);
-		fprintf(stderr, "dbg2       beam_start:      %d\n", *beam_start);
-		fprintf(stderr, "dbg2       beam_end:        %d\n", *beam_end);
-		fprintf(stderr, "dbg2       beam_exclude_percent: %d\n", *beam_exclude_percent);
-		fprintf(stderr, "dbg2       pixel_start:     %d\n", *pixel_start);
-		fprintf(stderr, "dbg2       pixel_end:       %d\n", *pixel_end);
-		fprintf(stderr, "dbg2       n_list:          %d\n", *n_list);
-		for (i = 0; i < *n_list; i++)
-			fprintf(stderr, "dbg2       list[%2d]:        %c\n", i, list[i]);
-	}
-
-	/* assume success */
-	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
-
-	if (beam_set == MBLIST_SET_OFF && pixel_set == MBLIST_SET_OFF && beams_bath <= 0 && pixels_ss <= 0) {
-		*beam_start = 0;
-		*beam_end = 1;
-		*pixel_start = 0;
-		*pixel_end = -1;
-	}
-	else if (beam_set == MBLIST_SET_OFF && pixel_set != MBLIST_SET_OFF) {
-		*beam_start = 0;
-		*beam_end = -1;
-	}
-	else if (beam_set == MBLIST_SET_OFF && beams_bath <= 0) {
-		*beam_start = 0;
-		*beam_end = -1;
-		*pixel_start = pixel_vertical;
-		*pixel_end = pixel_vertical;
-	}
-	else if (beam_set == MBLIST_SET_OFF) {
-		*beam_start = beam_vertical;
-		*beam_end = beam_vertical;
-	}
-	else if (beam_set == MBLIST_SET_ALL) {
-		*beam_start = 0;
-		*beam_end = beams_bath - 1;
-	}
-	else if (beam_set == MBLIST_SET_EXCLUDE_OUTER) {
-		*beam_start = (beams_bath * *beam_exclude_percent) / 100;
-		*beam_end = beams_bath - (*beam_start + 1);
-	}
-	if (pixel_set == MBLIST_SET_OFF && beams_bath > 0) {
-		*pixel_start = 0;
-		*pixel_end = -1;
-	}
-	else if (pixel_set == MBLIST_SET_ALL) {
-		*pixel_start = 0;
-		*pixel_end = pixels_ss - 1;
-	}
-
-	/* deal with dump_mode if set */
-	if (dump_mode == DUMP_MODE_BATH) {
-		*beam_start = 0;
-		*beam_end = beams_bath - 1;
-		*pixel_start = 0;
-		*pixel_end = -1;
-		strcpy(list, "XYz");
-		*n_list = 3;
-	}
-	else if (dump_mode == DUMP_MODE_TOPO) {
-		*beam_start = 0;
-		*beam_end = beams_bath - 1;
-		*pixel_start = 0;
-		*pixel_end = -1;
-		strcpy(list, "XYZ");
-		*n_list = 3;
-	}
-	else if (dump_mode == DUMP_MODE_AMP) {
-		*beam_start = 0;
-		*beam_end = beams_bath - 1;
-		*pixel_start = 0;
-		*pixel_end = -1;
-		strcpy(list, "XYB");
-		*n_list = 3;
-	}
-	else if (dump_mode == DUMP_MODE_SS) {
-		*beam_start = 0;
-		*beam_end = -1;
-		*pixel_start = 0;
-		*pixel_end = pixels_ss - 1;
-		strcpy(list, "XYb");
-		*n_list = 3;
-	}
-
-	/* check if beam and pixel range is ok */
-	if ((use_bath == MB_YES && *beam_end >= *beam_start) && beams_bath <= 0) {
-		fprintf(stderr, "\nBathymetry data not available\n");
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_USAGE;
-	}
-	else if (use_bath == MB_YES && *beam_end >= *beam_start && (*beam_start < 0 || *beam_end >= beams_bath)) {
-		fprintf(stderr, "\nBeam range %d to %d exceeds available beams 0 to %d\n", *beam_start, *beam_end, beams_bath - 1);
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_USAGE;
-	}
-	if (*error == MB_ERROR_NO_ERROR && use_amp == MB_YES && beams_amp <= 0) {
-		fprintf(stderr, "\nAmplitude data not available\n");
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_USAGE;
-	}
-	else if (*error == MB_ERROR_NO_ERROR && *beam_end >= *beam_start && use_amp == MB_YES &&
-	         (*beam_start < 0 || *beam_end >= beams_amp)) {
-		fprintf(stderr, "\nAmplitude beam range %d to %d exceeds available beams 0 to %d\n", *beam_start, *beam_end,
-		        beams_amp - 1);
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_USAGE;
-	}
-	if (*error == MB_ERROR_NO_ERROR && (use_ss == MB_YES || *pixel_end >= *pixel_start) && pixels_ss <= 0) {
-		fprintf(stderr, "\nSidescan data not available\n");
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_USAGE;
-	}
-	else if (*error == MB_ERROR_NO_ERROR && *pixel_end >= *pixel_start && (*pixel_start < 0 || *pixel_end >= pixels_ss)) {
-		fprintf(stderr, "\nPixels range %d to %d exceeds available pixels 0 to %d\n", *pixel_start, *pixel_end, pixels_ss - 1);
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_USAGE;
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBCOPY function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:      %d\n", *error);
-		fprintf(stderr, "dbg2       beam_start:    %d\n", *beam_start);
-		fprintf(stderr, "dbg2       beam_end:      %d\n", *beam_end);
-		fprintf(stderr, "dbg2       pixel_start:   %d\n", *pixel_start);
-		fprintf(stderr, "dbg2       pixel_end:     %d\n", *pixel_end);
-		fprintf(stderr, "dbg2       n_list:        %d\n", *n_list);
-		for (i = 0; i < *n_list; i++)
-			fprintf(stderr, "dbg2       list[%2d]:      %c\n", i, list[i]);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths, double *depths,
-                   double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack, int *error) {
-	int status = MB_SUCCESS;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       nbath:           %d\n", nbath);
-		fprintf(stderr, "dbg2       bath:            %p\n", (void *)bath);
-		fprintf(stderr, "dbg2       bathacrosstrack: %p\n", (void *)bathacrosstrack);
-		fprintf(stderr, "dbg2       bath:\n");
-		for (i = 0; i < nbath; i++)
-			fprintf(stderr, "dbg2         %d %f %f\n", i, bath[i], bathacrosstrack[i]);
-	}
-
-	/* first find all depths */
-	*ndepths = 0;
-	for (i = 0; i < nbath; i++) {
-		if (mb_beam_ok(beamflag[i])) {
-			depths[*ndepths] = bath[i];
-			depthacrosstrack[*ndepths] = bathacrosstrack[i];
-			(*ndepths)++;
-		}
-	}
-
-	/* now calculate slopes */
-	*nslopes = *ndepths + 1;
-	for (i = 0; i < *ndepths - 1; i++) {
-		slopes[i + 1] = (depths[i + 1] - depths[i]) / (depthacrosstrack[i + 1] - depthacrosstrack[i]);
-		slopeacrosstrack[i + 1] = 0.5 * (depthacrosstrack[i + 1] + depthacrosstrack[i]);
-	}
-	if (*ndepths > 1) {
-		slopes[0] = 0.0;
-		slopeacrosstrack[0] = depthacrosstrack[0];
-		slopes[*ndepths] = 0.0;
-		slopeacrosstrack[*ndepths] = depthacrosstrack[*ndepths - 1];
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       ndepths:         %d\n", *ndepths);
-		fprintf(stderr, "dbg2       depths:\n");
-		for (i = 0; i < *ndepths; i++)
-			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
-		fprintf(stderr, "dbg2       nslopes:         %d\n", *nslopes);
-		fprintf(stderr, "dbg2       slopes:\n");
-		for (i = 0; i < *nslopes; i++)
-			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
-                   double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
-	int status = MB_SUCCESS;
-	int found_depth, found_slope;
-	int idepth, islope;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       ndepths:         %d\n", ndepths);
-		fprintf(stderr, "dbg2       depths:\n");
-		for (i = 0; i < ndepths; i++)
-			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
-		fprintf(stderr, "dbg2       nslopes:         %d\n", nslopes);
-		fprintf(stderr, "dbg2       slopes:\n");
-		for (i = 0; i < nslopes; i++)
-			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
-		fprintf(stderr, "dbg2       acrosstrack:     %f\n", acrosstrack);
-	}
-
-	/* check if acrosstrack is in defined interval */
-	found_depth = MB_NO;
-	found_slope = MB_NO;
-	if (ndepths > 1)
-		if (acrosstrack >= depthacrosstrack[0] && acrosstrack <= depthacrosstrack[ndepths - 1]) {
-
-			/* look for depth */
-			idepth = -1;
-			while (found_depth == MB_NO && idepth < ndepths - 2) {
-				idepth++;
-				if (acrosstrack >= depthacrosstrack[idepth] && acrosstrack <= depthacrosstrack[idepth + 1]) {
-					*depth = depths[idepth] + (acrosstrack - depthacrosstrack[idepth]) /
-					                              (depthacrosstrack[idepth + 1] - depthacrosstrack[idepth]) *
-					                              (depths[idepth + 1] - depths[idepth]);
-					found_depth = MB_YES;
-					*error = MB_ERROR_NO_ERROR;
-				}
-			}
-
-			/* look for slope */
-			islope = -1;
-			while (found_slope == MB_NO && islope < nslopes - 2) {
-				islope++;
-				if (acrosstrack >= slopeacrosstrack[islope] && acrosstrack <= slopeacrosstrack[islope + 1]) {
-					*slope = slopes[islope] + (acrosstrack - slopeacrosstrack[islope]) /
-					                              (slopeacrosstrack[islope + 1] - slopeacrosstrack[islope]) *
-					                              (slopes[islope + 1] - slopes[islope]);
-					found_slope = MB_YES;
-					*error = MB_ERROR_NO_ERROR;
-				}
-			}
-		}
-
-	/* translate slope to degrees */
-	if (found_slope == MB_YES)
-		*slope = RTD * atan(*slope);
-
-	/* check for failure */
-	if (found_depth != MB_YES || found_slope != MB_YES) {
-		status = MB_FAILURE;
-		*error = MB_ERROR_OTHER;
-		*depth = 0.0;
-		*slope = 0.0;
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       depth:           %f\n", *depth);
-		fprintf(stderr, "dbg2       slope:           %f\n", *slope);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int printsimplevalue(int verbose, FILE *output, double value, int width, int precision, int ascii, int *invert, int *flipsign,
-                     int *error) {
-	int status = MB_SUCCESS;
-	char format[24];
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       value:           %f\n", value);
-		fprintf(stderr, "dbg2       width:           %d\n", width);
-		fprintf(stderr, "dbg2       precision:       %d\n", precision);
-		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
-	}
-
-	/* make print format */
-	format[0] = '%';
-	if (*invert == MB_YES)
-		strcpy(format, "%g");
-	else if (width > 0)
-		sprintf(&format[1], "%d.%df", width, precision);
-	else
-		sprintf(&format[1], ".%df", precision);
-
-	/* invert value if desired */
-	if (*invert == MB_YES) {
-		*invert = MB_NO;
-		if (value != 0.0)
-			value = 1.0 / value;
-	}
-
-	/* flip sign value if desired */
-	if (*flipsign == MB_YES) {
-		*flipsign = MB_NO;
-		value = -value;
-	}
-
-	/* print value */
-	if (ascii == MB_YES)
-		fprintf(output, format, value);
-	else
-		fwrite(&value, sizeof(double), 1, output);
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error) {
-	int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
-	}
-
-	/* reset invert flag */
-	if (*invert == MB_YES)
-		*invert = MB_NO;
-
-	/* reset flipsign flag */
-	if (*flipsign == MB_YES)
-		*flipsign = MB_NO;
-
-	/* print value */
-	if (ascii == MB_YES)
-		fprintf(output, "NaN");
-	else
-		fwrite(&NaN, sizeof(double), 1, output);
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-/*
-Method to get fields from raw data, similar to mb_get_all.
-*/
-int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate, double *absorption,
-               int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop, double *bsn, double *bso, int *tx,
-               int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples, int *start_sample, int *range,
-               double *depression, double *bs, double *ss_pixels, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
-	}
-
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	*mode = -1;
-	*ipulse_length = 0;
-	*png_count = 0;
-	*sample_rate = 0;
-	*absorption = 0;
-	*max_range = 0;
-	*r_zero = 0;
-	*r_zero_corr = 0;
-	*tvg_start = 0;
-	*tvg_stop = 0;
-	*bsn = 0;
-	*bso = 0;
-	*tx = 0;
-	*tvg_crossover = 0;
-	*nbeams_ss = 0;
-	*npixels = 0;
-
-	for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-		beam_samples[i] = 0;
-		start_sample[i] = 0;
-		range[i] = 0;
-		depression[i] = 0.0;
-		bs[i] = 0.0;
-	}
-
-	switch (mb_io_ptr->format) {
-	case MBF_EM300MBA:
-	case MBF_EM300RAW:
-		mb_get_raw_simrad2(verbose, mbio_ptr, mode, ipulse_length, png_count, sample_rate, absorption, max_range, r_zero,
-		                   r_zero_corr, tvg_start, tvg_stop, bsn, bso, tx, tvg_crossover, nbeams_ss, npixels, beam_samples,
-		                   start_sample, range, depression, bs, ss_pixels, error);
-
-		break;
-	case MBF_EM710MBA:
-	case MBF_EM710RAW:
-		mb_get_raw_simrad3(verbose, mbio_ptr, mode, ipulse_length, png_count, sample_rate, absorption, max_range, r_zero,
-		                   r_zero_corr, tvg_start, tvg_stop, bsn, bso, tx, tvg_crossover, nbeams_ss, npixels, beam_samples,
-		                   start_sample, range, depression, bs, ss_pixels, error);
-
-		break;
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
-		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
-		fprintf(stderr, "dbg2       png_count:       %d\n", *png_count);
-		fprintf(stderr, "dbg2       sample_rate:     %d\n", *sample_rate);
-		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
-		fprintf(stderr, "dbg2       max_range:       %d\n", *max_range);
-		fprintf(stderr, "dbg2       r_zero:          %d\n", *r_zero);
-		fprintf(stderr, "dbg2       r_zero_corr:     %d\n", *r_zero_corr);
-		fprintf(stderr, "dbg2       tvg_start:       %d\n", *tvg_start);
-		fprintf(stderr, "dbg2       tvg_stop:        %d\n", *tvg_stop);
-		fprintf(stderr, "dbg2       bsn:             %f\n", *bsn);
-		fprintf(stderr, "dbg2       bso:             %f\n", *bso);
-		fprintf(stderr, "dbg2       tx:              %d\n", *tx);
-		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
-		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
-		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
-		}
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
-		}
-		for (i = 0; i < *npixels; i++) {
-			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
-		}
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return status;
-}
-
-/*--------------------------------------------------------------------*/
-/*
-Method to get fields from simrad2 raw data.
-*/
-
-int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate,
-                       double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
-                       double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
-                       int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_simrad2_struct *store_ptr;
-	struct mbsys_simrad2_ping_struct *ping_ptr;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
-	}
-
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store_ptr = (struct mbsys_simrad2_struct *)mb_io_ptr->store_data;
-	ping_ptr = store_ptr->ping;
-
-	if (store_ptr->kind == MB_DATA_DATA) {
-		*mode = store_ptr->run_mode;
-		*ipulse_length = store_ptr->run_tran_pulse;
-		*png_count = ping_ptr->png_count;
-		*sample_rate = ping_ptr->png_sample_rate;
-		*absorption = ping_ptr->png_max_range * 0.01;
-		*max_range = ping_ptr->png_max_range;
-		*r_zero = ping_ptr->png_r_zero;
-		*r_zero_corr = ping_ptr->png_r_zero_corr;
-		*tvg_start = ping_ptr->png_tvg_start;
-		*tvg_stop = ping_ptr->png_tvg_stop;
-		*bsn = ping_ptr->png_bsn * 0.5;
-		*bso = ping_ptr->png_bso * 0.5;
-		*tx = ping_ptr->png_tx;
-		*tvg_crossover = ping_ptr->png_tvg_crossover;
-		*nbeams_ss = ping_ptr->png_nbeams_ss;
-		*npixels = ping_ptr->png_npixels;
-
-		for (i = 0; i < ping_ptr->png_nbeams; i++) {
-			range[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_range[i];
-			depression[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_depression[i] * .01;
-			bs[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_amp[i] * 0.5;
-		}
-		for (i = 0; i < ping_ptr->png_nbeams_ss; i++) {
-			beam_samples[ping_ptr->png_beam_index[i]] = ping_ptr->png_beam_samples[i];
-			start_sample[ping_ptr->png_beam_index[i]] = ping_ptr->png_start_sample[i];
-		}
-		for (i = 0; i < ping_ptr->png_npixels; i++)
-			ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
-		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
-		fprintf(stderr, "dbg2       png_count:       %d\n", *png_count);
-		fprintf(stderr, "dbg2       sample_rate:     %d\n", *sample_rate);
-		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
-		fprintf(stderr, "dbg2       max_range:       %d\n", *max_range);
-		fprintf(stderr, "dbg2       r_zero:          %d\n", *r_zero);
-		fprintf(stderr, "dbg2       r_zero_corr:     %d\n", *r_zero_corr);
-		fprintf(stderr, "dbg2       tvg_start:       %d\n", *tvg_start);
-		fprintf(stderr, "dbg2       tvg_stop:        %d\n", *tvg_stop);
-		fprintf(stderr, "dbg2       bsn:             %f\n", *bsn);
-		fprintf(stderr, "dbg2       bso:             %f\n", *bso);
-		fprintf(stderr, "dbg2       tx:              %d\n", *tx);
-		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
-		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
-		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
-		}
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
-		}
-		for (i = 0; i < *npixels; i++) {
-			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
-		}
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return status;
-}
-/*--------------------------------------------------------------------*/
-/*
-Method to get fields from simrad3 raw data.
-*/
-
-int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate,
-                       double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
-                       double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
-                       int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_simrad3_struct *store_ptr;
-	struct mbsys_simrad3_ping_struct *ping_ptr;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
-	}
-
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	store_ptr = (struct mbsys_simrad3_struct *)mb_io_ptr->store_data;
-	ping_ptr = (struct mbsys_simrad3_ping_struct *)&(store_ptr->pings[store_ptr->ping_index]);
-
-	if (store_ptr->kind == MB_DATA_DATA) {
-		*mode = store_ptr->run_mode;
-		*ipulse_length = store_ptr->run_tran_pulse;
-		*png_count = ping_ptr->png_count;
-		*sample_rate = ping_ptr->png_sample_rate;
-		*absorption = store_ptr->run_absorption * 0.01;
-		*max_range = 0;
-		*r_zero = ping_ptr->png_r_zero;
-		*r_zero_corr = 0;
-		*tvg_start = 0;
-		*tvg_stop = 0;
-		*bsn = ping_ptr->png_bsn * 0.1;
-		*bso = ping_ptr->png_bso * 0.1;
-		*tx = ping_ptr->png_tx * 0.1;
-		*tvg_crossover = ping_ptr->png_tvg_crossover;
-		*nbeams_ss = ping_ptr->png_nbeams_ss;
-		*npixels = ping_ptr->png_npixels;
-
-		for (i = 0; i < ping_ptr->png_nbeams; i++) {
-			range[i] = ping_ptr->png_range[i];
-			depression[i] = ping_ptr->png_depression[i] * .01;
-			bs[i] = ping_ptr->png_amp[i] * 0.5;
-		}
-		for (i = 0; i < ping_ptr->png_nbeams_ss; i++) {
-			beam_samples[i] = ping_ptr->png_beam_samples[i];
-			start_sample[i] = ping_ptr->png_start_sample[i];
-		}
-		for (i = 0; i < ping_ptr->png_npixels; i++)
-			ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
-		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
-		fprintf(stderr, "dbg2       png_count:       %d\n", *png_count);
-		fprintf(stderr, "dbg2       sample_rate:     %d\n", *sample_rate);
-		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
-		fprintf(stderr, "dbg2       max_range:       %d\n", *max_range);
-		fprintf(stderr, "dbg2       r_zero:          %d\n", *r_zero);
-		fprintf(stderr, "dbg2       r_zero_corr:     %d\n", *r_zero_corr);
-		fprintf(stderr, "dbg2       tvg_start:       %d\n", *tvg_start);
-		fprintf(stderr, "dbg2       tvg_stop:        %d\n", *tvg_stop);
-		fprintf(stderr, "dbg2       bsn:             %f\n", *bsn);
-		fprintf(stderr, "dbg2       bso:             %f\n", *bso);
-		fprintf(stderr, "dbg2       tx:              %d\n", *tx);
-		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
-		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
-		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
-		}
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
-		}
-		for (i = 0; i < *npixels; i++) {
-			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
-		}
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return status;
 }
 /*--------------------------------------------------------------------*/
