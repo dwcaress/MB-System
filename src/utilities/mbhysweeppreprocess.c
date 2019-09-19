@@ -55,15 +55,18 @@
 #define MBHYSWEEPPREPROCESS_NAVFORMAT_OFG 1
 
 
+static const char program_name[] = "mbhysweeppreprocess";
+static const char help_message[] =
+    "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\nasynchronous navigation and "
+    "attitude onto the multibeam data, \nand writes a new HSX file with that information correctly "
+    "embedded\nin the multibeam data.";
+static const char usage_message[] =
+    "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias/headingbias -Dsonardepthfile "
+    "-Idatalist -Jprojection -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbhysweeppreprocess";
-	char help_message[] = "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\nasynchronous navigation and "
-	                      "attitude onto the multibeam data, \nand writes a new HSX file with that information correctly "
-	                      "embedded\nin the multibeam data.";
-	char usage_message[] = "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias/headingbias -Dsonardepthfile "
-	                       "-Idatalist -Jprojection -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
 	int errflg = 0;
 	int c;
 	int help = 0;

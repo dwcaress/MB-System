@@ -86,14 +86,16 @@ struct mbrphsbias_file_struct {
 	struct mbrphsbias_ping_struct *pings;
 };
 
+static const char program_name[] = "MBrphsbias";
+static const char help_message[] =
+    "MBrphsbias analyzes sonar soundings to solve for bias parameters associated with the attitude sensors "
+    "and first order speed of sound.\n";
+static const char usage_message[] =
+    "mbrphsbias [-Fformat -Iinfile -Rwest/east/south/north -Sbinsize	\n\t-B]";
 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBrphsbias";
-	char help_message[] = "MBrphsbias analyzes sonar soundings to solve for bias parameters associated with the attitude sensors "
-	                      "and first order speed of sound.\n";
-	char usage_message[] = "mbrphsbias [-Fformat -Iinfile -Rwest/east/south/north -Sbinsize	\n\t-B]";
 	int errflg = 0;
 	int c;
 	int help = 0;

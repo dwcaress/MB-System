@@ -46,6 +46,13 @@
 /* NaN value */
 double NaN;
 
+static const char program_name[] = "mbctdlist";
+static const char help_message[] =
+    "mbctdlist lists all CTD records within swath data files\nThe -O option specifies how the values are "
+    "output\nin an mblist-likefashion.\n";
+static const char usage_message[] =
+    "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
+
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
 	int status = MB_SUCCESS;
@@ -144,10 +151,6 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbctdlist";
-	char help_message[] = "mbctdlist lists all CTD records within swath data files\nThe -O option specifies how the values are "
-	                      "output\nin an mblist-likefashion.\n";
-	char usage_message[] = "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
 	int errflg = 0;
 	int c;
 	int help = 0;

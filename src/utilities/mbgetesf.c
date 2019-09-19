@@ -43,6 +43,15 @@
 #define MBGETESF_IMPLICITNULL 5
 #define MBGETESF_IMPLICITGOOD 6
 
+static const char program_name[] = "mbgetesf";
+static const char help_message[] =
+    "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other "
+    "data files\ncontaining the same data (but presumably in a different\nstate of processing).  This "
+    "allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit "
+    "and\nmbprocess can be used to apply the edit events to another file.";
+static const char usage_message[] =
+    "mbgetesf [-Fformat -Iinfile -Mmode -Oesffile -V -H]";
+
 /*--------------------------------------------------------------------*/
 int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
 	int status = MB_SUCCESS;
@@ -97,14 +106,6 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "mbgetesf";
-	char help_message[] = "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other "
-	                      "data files\ncontaining the same data (but presumably in a different\nstate of processing).  This "
-	                      "allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit "
-	                      "and\nmbprocess can be used to apply the edit events to another file.";
-	char usage_message[] = "mbgetesf [-Fformat -Iinfile -Mmode -Oesffile -V -H]";
-
 	int errflg = 0;
 	int c;
 	int help = 0;

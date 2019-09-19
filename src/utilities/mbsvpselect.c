@@ -251,6 +251,17 @@ char buffer_2[BUFSIZ];
 int svp_total = 0;
 int surveyLines_total = 0;
 
+static const char program_name[] = "mbsvpselect";
+static const char help_message[] =
+    "Program mbsvpselect chooses and implements the best available sound speed\n"
+    "model for each swath file in a survey. The user provides a list of the\n"
+    "available sound speed models and specifies the criteria used for\n"
+    "model selection. The program uses mbset to turn on bathymetry\n"
+    "recalculation by raytracing through the sound speed model selected\n"
+    "for each swath file.";
+static const char usage_message[] =
+    "mbsvpselect -H -N -Idatalist -Ssvplist "
+    "[-P0, -P1, -P2/period, -P3/range, -P3/range/1]  -V";
 
 /* ---------------------------------------------------------------- */
 /* Is leap old */
@@ -1467,15 +1478,6 @@ void mid_point(long double lat1, long double lon1, long double lat2, long double
 /* ------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
-	char program_name[] = "mbsvpselect";
-	char help_message[] = "Program mbsvpselect chooses and implements the best available sound speed\n"
-	                      "model for each swath file in a survey. The user provides a list of the\n"
-	                      "available sound speed models and specifies the criteria used for\n"
-	                      "model selection. The program uses mbset to turn on bathymetry\n"
-	                      "recalculation by raytracing through the sound speed model selected\n"
-	                      "for each swath file.";
-	char usage_message[] = "mbsvpselect -H -N -Idatalist -Ssvplist "
-	                       "[-P0, -P1, -P2/period, -P3/range, -P3/range/1]  -V";
 	int errflg = 0;
 	int c;
 	int help = 0;

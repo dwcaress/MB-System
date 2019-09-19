@@ -49,13 +49,15 @@ float NaN;
     stderr if verbose > 1) */
 FILE *outfp;
 
-char program_name[] = "mbsegypsd";
-char help_message[] = "mbsegypsd calculates the power spectral density function of each trace in a segy data file, \noutputting "
-                      "the results as a GMT grid file.";
-char usage_message[] = "mbsegypsd -Ifile -Oroot [-Ashotscale \n\
-          -Ddecimatex -R \n\
-          -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
-          -Wmode/start/end -H -V]";
+static const char program_name[] = "mbsegypsd";
+static const char help_message[] =
+    "mbsegypsd calculates the power spectral density function of each trace in a segy data file, \noutputting "
+    "the results as a GMT grid file.";
+static const char usage_message[] =
+    "mbsegypsd -Ifile -Oroot [-Ashotscale\n"
+    "          -Ddecimatex -R\n"
+    "          -Smode[/start/end[/schan/echan]] -Tsweep[/delay]\n"
+    "          -Wmode/start/end -H -V]";
 
 /*--------------------------------------------------------------------*/
 /*

@@ -60,12 +60,14 @@ float NaN;
     stderr if verbose > 1) */
 FILE *outfp;
 
-char program_name[] = "MBsegygrid";
-char help_message[] = "MBsegygrid grids trace data from segy data files.";
-char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
-          -Ddecimatex/decimatey -Gmode/gain[/window] -Rdistancebin[]/startlon/startlat/endlon/endlat]\n\
-          -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
-          -Wmode/start/end -H -V]";
+static const char program_name[] = "MBsegygrid";
+static const char help_message[] =
+    "MBsegygrid grids trace data from segy data files.";
+static const char usage_message[] =
+    "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale\n"
+    "          -Ddecimatex/decimatey -Gmode/gain[/window] -Rdistancebin[]/startlon/startlat/endlon/endlat]\n"
+    "          -Smode[/start/end[/schan/echan]] -Tsweep[/delay]\n"
+    "          -Wmode/start/end -H -V]";
 
 /*--------------------------------------------------------------------*/
 /*

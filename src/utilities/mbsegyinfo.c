@@ -41,12 +41,15 @@
 #define MBLIST_SET_ON 1
 #define MBLIST_SET_ALL 2
 
+static const char program_name[] = "MBsegyinfo";
+static const char help_message[] =
+    "MBsegyinfo lists table data from a segy data file.";
+static const char usage_message[] =
+    "MBsegyinfo -Ifile [-Llonflip -O -H -V]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	char program_name[] = "MBsegyinfo";
-	char help_message[] = "MBsegyinfo lists table data from a segy data file.";
-	char usage_message[] = "MBsegyinfo -Ifile [-Llonflip -O -H -V]";
 	int errflg = 0;
 	int c;
 	int help = 0;

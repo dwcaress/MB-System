@@ -39,18 +39,18 @@
 #define OUTPUT_TEXT 0
 #define OUTPUT_ESF 1
 
+static const char program_name[] = "mbdumpesf";
+static const char help_message[] =
+    "mbdumpesf reads an MB-System edit save file and dumps the \ncontents as an ascii table to stdout.";
+static const char usage_message[] =
+    "mbdumpesf --input=esffile\n"
+    "\t[--output=esffile --ignore-unflag --ignore-flag \n"
+    "\t--ignore-filter --ignore-zero \n"
+    "\t--verbose --help]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* id variables */
-	char program_name[] = "mbdumpesf";
-	char help_message[] = "mbdumpesf reads an MB-System edit save file and dumps the \ncontents as an ascii table to stdout.";
-	// char usage_message[] = "mbdumpesf [-Iesffile -V -H]";
-	char usage_message[] = "mbdumpesf --input=esffile\n"
-	                       "\t[--output=esffile --ignore-unflag --ignore-flag \n"
-	                       "\t--ignore-filter --ignore-zero \n"
-	                       "\t--verbose --help]";
-
 	int option_index;
 	int errflg = 0;
 	int c;
