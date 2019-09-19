@@ -242,13 +242,13 @@ the manual pages for mbprocess and mbset. \n\n";
 			}
 
 			/* set NAVADJFILE and NAVADJMODE to nothing and off */
-			if (strlen(process.mbp_navadjfile) > 0 || process.mbp_navadj_mode != MBP_NAV_OFF) {
+			if (strlen(process.mbp_navadjfile) > 0 || process.mbp_navadj_mode != MBP_NAVADJ_OFF) {
 				fprintf(stderr, "Turned off navigation adjustment for %s\n", mbp_ifile);
 				write_parameter_file = MB_YES;
 			}
 
 			process.mbp_navadjfile[0] = '\0';
-			process.mbp_navadj_mode = MBP_NAV_OFF;
+			process.mbp_navadj_mode = MBP_NAVADJ_OFF;
 		}
 
 		/* if any parameters are being set, write a parameter file */
@@ -351,14 +351,14 @@ the manual pages for mbprocess and mbset. \n\n";
 			/* adjusted navigation merging */
 			else if (strncmp(pargv[i], "NAVADJMODE", 10) == 0) {
 				sscanf(pargv[i], "NAVADJMODE:%d", &process.mbp_navadj_mode);
-				if (explicit == MB_NO && process.mbp_navadj_mode == MBP_NAV_OFF) {
+				if (explicit == MB_NO && process.mbp_navadj_mode == MBP_NAVADJ_OFF) {
 					process.mbp_navadjfile[0] = '\0';
 				}
 			}
 			else if (strncmp(pargv[i], "NAVADJFILE", 10) == 0) {
 				sscanf(pargv[i], "NAVADJFILE:%s", process.mbp_navadjfile);
 				if (explicit == MB_NO) {
-					process.mbp_navadj_mode = MBP_NAV_ON;
+					process.mbp_navadj_mode = MBP_NAVADJ_LLZ;
 				}
 			}
 			else if (strncmp(pargv[i], "NAVADJINTERP", 12) == 0) {
@@ -892,7 +892,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		mb_pr_bathmode(verbose, &process, &error);
 
 		/* if any of the important modes has been turned on, write the parameter file */
-		if (process.mbp_nav_mode != MBP_NAV_OFF || process.mbp_navadj_mode != MBP_NAV_OFF || process.mbp_attitude_mode != 0 ||
+		if (process.mbp_nav_mode != MBP_NAV_OFF || process.mbp_navadj_mode != MBP_NAVADJ_OFF || process.mbp_attitude_mode != 0 ||
 		    process.mbp_sonardepth_mode != 0 || process.mbp_cut_num != 0 || process.mbp_edit_mode != MBP_EDIT_OFF ||
 		    process.mbp_bathrecalc_mode != MBP_BATHRECALC_OFF || process.mbp_draft_mode != MBP_DRAFT_OFF ||
 		    process.mbp_heave_mode != MBP_HEAVE_OFF || process.mbp_lever_mode != MBP_LEVER_OFF ||
@@ -981,7 +981,7 @@ the manual pages for mbprocess and mbset. \n\n";
 				fprintf(stderr, "  Navigation positions not shifted.\n");
 
 			fprintf(stderr, "\nAdjusted Navigation Merging:\n");
-			if (process.mbp_navadj_mode == MBP_NAV_ON) {
+			if (process.mbp_navadj_mode == MBP_NAVADJ_LLZ) {
 				fprintf(stderr, "  Navigation merged from adjusted navigation file.\n");
 				fprintf(stderr, "  Adjusted navigation file:      %s\n", process.mbp_navadjfile);
 				if (process.mbp_navadj_algorithm == MBP_NAV_LINEAR)
