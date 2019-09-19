@@ -212,7 +212,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	process->mbp_nav_shifty = 0.0;
 
 	/* adjusted navigation merging */
-	process->mbp_navadj_mode = MBP_NAV_OFF;
+	process->mbp_navadj_mode = MBP_NAVADJ_OFF;
 	process->mbp_navadjfile[0] = '\0';
 	process->mbp_navadj_algorithm = MBP_NAV_LINEAR;
 
@@ -444,7 +444,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 				else if (strncmp(buffer, "NAVADJFILE", 10) == 0) {
 					sscanf(buffer, "%s %s", dummy, process->mbp_navadjfile);
 					if (explicit == MB_NO) {
-						process->mbp_navadj_mode = MBP_NAV_ON;
+						process->mbp_navadj_mode = MBP_NAVADJ_LLZ;
 					}
 				}
 				else if (strncmp(buffer, "NAVADJINTERP", 12) == 0) {
@@ -918,14 +918,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	/* look for nav and other bath edit files if not specified */
 	if (lookforfiles == 1 || lookforfiles == 2) {
 		/* look for navadj file */
-		if (process->mbp_navadj_mode == MBP_NAV_OFF) {
-			for (int i = 9; i >= 0 && process->mbp_navadj_mode == MBP_NAV_OFF; i--) {
+		if (process->mbp_navadj_mode == MBP_NAVADJ_OFF) {
+			for (int i = 9; i >= 0 && process->mbp_navadj_mode == MBP_NAVADJ_OFF; i--) {
 				sprintf(process->mbp_navadjfile, "%s.na%d", process->mbp_ifile, i);
 				if (stat(process->mbp_navadjfile, &statbuf) == 0) {
-					process->mbp_navadj_mode = MBP_NAV_ON;
+					process->mbp_navadj_mode = MBP_NAVADJ_LLZ;
 				}
 			}
-			if (process->mbp_navadj_mode == MBP_NAV_OFF) {
+			if (process->mbp_navadj_mode == MBP_NAVADJ_OFF) {
 				process->mbp_navadjfile[0] = '\0';
 			}
 		}
@@ -2003,7 +2003,9 @@ int mb_pr_check(int verbose, char *ifile, int *nparproblem, int *ndataproblem, i
 		}
 
 		/* check if navadj file specified but does not exist */
-		if (process.mbp_navadj_mode == MBP_NAV_ON && stat(process.mbp_navadjfile, &statbuf) != 0) {
+		if ((process.mbp_navadj_mode == MBP_NAVADJ_LLZ
+          || process.mbp_navadj_mode == MBP_NAVADJ_LLZ)
+        && stat(process.mbp_navadjfile, &statbuf) != 0) {
 			missing_navadjfile = MB_YES;
 			(*nparproblem)++;
 		}
@@ -2590,7 +2592,7 @@ int mb_pr_update_navadj(int verbose, char *file, int mbp_navadj_mode, char *mbp_
 
 	/* set navadj values */
 	process.mbp_navadj_mode = mbp_navadj_mode;
-	if (mbp_navadj_mode == MBP_NAV_OFF)
+	if (mbp_navadj_mode == MBP_NAVADJ_OFF)
 		process.mbp_navadjfile[0] = '\0';
 	else if (mbp_navadjfile != NULL)
 		strcpy(process.mbp_navadjfile, mbp_navadjfile);
