@@ -96,40 +96,6 @@ struct mbtrnpreprocess_ping_struct
 
 #define MBTRNPREPROCESS_LOGFILE_TIMELENGTH 900.0
 
-int mbtrnpreprocess_openlog(int verbose, mb_path log_directory, FILE **logfp, int *error);
-int mbtrnpreprocess_closelog(int verbose, FILE **logfp, int *error);
-int mbtrnpreprocess_postlog(int verbose, FILE *logfp, char *message, int *error);
-int mbtrnpreprocess_logparameters(int verbose,
-  FILE *logfp,
-  char *input,
-  int format,
-  char *output,
-  double swath_width,
-  int n_output_soundings,
-  int median_filter,
-  int median_filter_n_across,
-  int median_filter_n_along,
-  double median_filter_threshold,
-  int n_buffer_max,
-  int *error);
-int mbtrnpreprocess_logstatistics(int verbose,
-  FILE *logfp,
-  int n_pings_read,
-  int n_soundings_read,
-  int n_soundings_valid_read,
-  int n_soundings_flagged_read,
-  int n_soundings_null_read,
-  int n_soundings_trimmed,
-  int n_soundings_decimated,
-  int n_soundings_flagged,
-  int n_soundings_written,
-  int *error);
-int mbtrnpreprocess_input_open(int verbose, void *mbio_ptr, char *inputname, int *error);
-int mbtrnpreprocess_input_read(int verbose, void *mbio_ptr, size_t size, char *buffer, int *error);
-int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error);
-int mbtrnpreprocess_init_debug(int verbose);
-int mbtrnpreprocess_close_debug();
-
 static char program_name[] = "mbtrnpreprocess";
 
 /* mbtrn_reader test configuration */
@@ -291,9 +257,958 @@ static bool log_clock_res=true;
    MBTF_READER : mbtrn reader stats*/
 #define MBTRNPP_STAT_FLAGS (MBTF_STATUS|MBTF_EVENT|MBTF_ASTAT)
 
-int mbtrnpreprocess_update_stats(mbtrnpp_stats_t *stats, mlog_id_t log_id, mbtr_stat_flags flags);
-int mbtrnpreprocess_log_min(mbtrn_stat_chan_t *stats);
+/*--------------------------------------------------------------------*/
 
+int mbtrnpreprocess_openlog
+(
+  int verbose,
+  mb_path log_directory,
+  FILE **logfp,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+
+  /* time, user, host variables */
+  struct timeval timeofday;
+  struct timezone timezone;
+  double time_d;
+  int time_i[7];
+  char date[32], user[128], *user_ptr;
+  mb_path host;
+  mb_path log_file;
+  mb_path log_message;
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       log_directory:      %s\n", log_directory);
+    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+    fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
+    }
+
+  /* close existing log file */
+  if (*logfp != NULL)
+    mbtrnpreprocess_closelog(verbose, logfp, error);
+
+  /* get time and user data */
+  gettimeofday(&timeofday, &timezone);
+  time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
+  status = mb_get_date(verbose, time_d, time_i);
+  sprintf(date,
+    "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
+    time_i[0],
+    time_i[1],
+    time_i[2],
+    time_i[3],
+    time_i[4],
+    time_i[5],
+    time_i[6]);
+  if ((user_ptr = getenv("USER")) == NULL)
+    user_ptr = getenv("LOGNAME");
+  if (user_ptr != NULL)
+    strcpy(user, user_ptr);
+  else
+    strcpy(user, "unknown");
+  gethostname(host, sizeof(mb_path));
+
+  /* open new log file */
+  sprintf(log_file, "%s/%s_mbtrnpreprocess_log.txt", log_directory,   date);
+  *logfp = fopen(log_file, "w");
+  if (*logfp != NULL)
+    {
+    fprintf(*logfp, "Program %s log file\n-------------------\n", program_name);
+    if (verbose > 0)
+      fprintf(stderr, "Program %s log file\n-------------------\n", program_name);
+    sprintf(log_message, "Opened by user %s on cpu %s", user, host);
+    mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);
+    }
+  else
+    {
+    *error = MB_ERROR_OPEN_FAIL;
+    fprintf(stderr, "\nUnable to open %s log file: %s\n", program_name, log_file);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(*error);
+    }
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+    fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_openlog */
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_closelog
+(
+  int verbose,
+  FILE **logfp,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+  char *log_message = "Closing mbtrnpreprocess log file";
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+    fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
+    }
+
+  /* close log file */
+  if (logfp != NULL)
+    {
+    mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);
+    fclose(*logfp);
+    *logfp = NULL;
+    }
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_closelog */
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_postlog
+(
+  int verbose,
+  FILE *logfp,
+  char *log_message,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+
+  /* time, user, host variables */
+  struct timeval timeofday;
+  struct timezone timezone;
+  double time_d;
+  int time_i[7];
+  char date[32];
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+    fprintf(stderr, "dbg2       log_message:        %s\n", log_message);
+    }
+
+  /* get time  */
+  gettimeofday(&timeofday, &timezone);
+  time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
+  status = mb_get_date(verbose, time_d, time_i);
+  sprintf(date,
+    "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
+    time_i[0],
+    time_i[1],
+    time_i[2],
+    time_i[3],
+    time_i[4],
+    time_i[5],
+    time_i[6]);
+
+  /* post log_message */
+  if (logfp != NULL)
+    fprintf(logfp,
+      "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
+      time_i[0],
+      time_i[1],
+      time_i[2],
+      time_i[3],
+      time_i[4],
+      time_i[5],
+      time_i[6],
+      log_message);
+  if (verbose > 0)
+    fprintf(stderr,
+      "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
+      time_i[0],
+      time_i[1],
+      time_i[2],
+      time_i[3],
+      time_i[4],
+      time_i[5],
+      time_i[6],
+      log_message);
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_postlog */
+/*--------------------------------------------------------------------*/
+int mbtrnpreprocess_logparameters
+(
+  int verbose,
+  FILE *logfp,
+  char *input,
+  int format,
+  char *output,
+  double swath_width,
+  int n_output_soundings,
+  int median_filter,
+  int median_filter_n_across,
+  int median_filter_n_along,
+  double median_filter_threshold,
+  int n_buffer_max,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+  mb_path log_message;
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
+    fprintf(stderr, "dbg2       logfp:                        %p\n", logfp);
+    fprintf(stderr, "dbg2       input:                        %s\n", input);
+    fprintf(stderr, "dbg2       format:                       %d\n", format);
+    fprintf(stderr, "dbg2       output:                       %s\n", output);
+    fprintf(stderr, "dbg2       swath_width:                  %f\n", swath_width);
+    fprintf(stderr, "dbg2       n_output_soundings:           %d\n", n_output_soundings);
+    fprintf(stderr, "dbg2       median_filter:                %d\n", median_filter);
+    fprintf(stderr, "dbg2       median_filter_n_across:       %d\n", median_filter_n_across);
+    fprintf(stderr, "dbg2       median_filter_n_along:        %d\n", median_filter_n_along);
+    fprintf(stderr, "dbg2       median_filter_threshold:      %f\n", median_filter_threshold);
+    fprintf(stderr, "dbg2       n_buffer_max:                 %d\n", n_buffer_max);
+    }
+
+  /* post log_message */
+  if (logfp != NULL)
+    {
+    sprintf(log_message, "       input:                    %s", input);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       format:                   %d", format);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       output:                   %s", output);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       swath_width:              %f", swath_width);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_output_soundings:       %d", n_output_soundings);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       median_filter:            %d", median_filter);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       median_filter_n_across:   %d", median_filter_n_across);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       median_filter_n_along:    %d", median_filter_n_along);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       median_filter_threshold:  %f", median_filter_threshold);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_buffer_max:             %d", n_buffer_max);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+    }
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_logparameters */
+/*--------------------------------------------------------------------*/
+int mbtrnpreprocess_logstatistics
+(
+  int verbose,
+  FILE *logfp,
+  int n_pings_read,
+  int n_soundings_read,
+  int n_soundings_valid_read,
+  int n_soundings_flagged_read,
+  int n_soundings_null_read,
+  int n_soundings_trimmed,
+  int n_soundings_decimated,
+  int n_soundings_flagged,
+  int n_soundings_written,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+  mb_path log_message;
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
+    fprintf(stderr, "dbg2       logfp:                        %p\n", logfp);
+    fprintf(stderr, "dbg2       n_pings_read:                 %d\n", n_pings_read);
+    fprintf(stderr, "dbg2       n_soundings_read:             %d\n", n_soundings_read);
+    fprintf(stderr, "dbg2       n_soundings_valid_read:       %d\n", n_soundings_valid_read);
+    fprintf(stderr, "dbg2       n_soundings_flagged_read:     %d\n", n_soundings_flagged_read);
+    fprintf(stderr, "dbg2       n_soundings_null_read:        %d\n", n_soundings_null_read);
+    fprintf(stderr, "dbg2       n_soundings_trimmed:          %d\n", n_pings_read);
+    fprintf(stderr, "dbg2       n_soundings_decimated:        %d\n", n_soundings_decimated);
+    fprintf(stderr, "dbg2       n_soundings_flagged:          %d\n", n_soundings_flagged);
+    fprintf(stderr, "dbg2       n_soundings_written:          %d\n", n_soundings_written);
+    }
+
+  /* post log_message */
+  if (logfp != NULL)
+    {
+    sprintf(log_message, "Log File Statistics:");
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_pings_read:                 %d", n_pings_read);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_soundings_read:             %d", n_soundings_read);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_soundings_valid_read:       %d", n_soundings_valid_read);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_soundings_flagged_read:     %d", n_soundings_flagged_read);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_soundings_null_read:        %d", n_soundings_null_read);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_soundings_trimmed:          %d", n_pings_read);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_soundings_decimated:        %d", n_soundings_decimated);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_soundings_flagged:          %d", n_soundings_flagged);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+
+    sprintf(log_message, "       n_soundings_written:          %d", n_soundings_written);
+    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
+    }
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_logstatistics */
+/*--------------------------------------------------------------------*/
+
+
+
+int mbtrnpreprocess_log_min
+(
+  mbtrn_stat_chan_t *stats
+)
+{
+  if (NULL!=stats)
+    mlog_tprintf(trn_mlog_id,
+      "ut[%lu] src[%d/%d] cli[%d/%d/%d] tx[%d/%d] rx[%d/%d]\n",
+      app_stats->uptime,
+      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_SRC_CONN]),
+      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_SRC_DISN]),
+      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN]),
+      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_CLI_CONN]),
+      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN]),
+      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_TRN_PUBN]),
+      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_TRN_TX_BYTES]),
+      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_CLI_RXN]),
+      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES]));
+
+  return 0;
+}
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_update_stats
+(
+  mbtrnpp_stats_t *stats,
+  mlog_id_t log_id,
+  mbtr_stat_flags flags
+)
+{
+  if (NULL!=stats)
+    {
+    double stats_now = mtime_dtime();
+
+    if (log_clock_res)
+      {
+      /* log the timing clock resolution (once) */
+      struct timespec res;
+      clock_getres(CLOCK_MONOTONIC, &res);
+      mlog_tprintf(trn_mlog_id,
+        "%.3lf,i,clkres_mono,s[%ld] ns[%ld]\n",
+        stats_now,
+        res.tv_sec,
+        res.tv_nsec);
+      log_clock_res=false;
+      }
+
+    /* we can only measure the previous stats cycle... */
+    if (stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n>0)
+      {
+      /* get the timing of the last cycle */
+      MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], stats_prev_start);
+      MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_STATS_XT], stats_prev_end);
+      }
+    else
+      {
+      /* seed the first cycle */
+      MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], (stats_now-0.0001));
+      MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_STATS_XT], stats_now);
+      }
+
+    /* end the cycle timer here
+       [start at the end if this function]*/
+    MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], stats_now);
+
+    /* measure dtime execution time (twice), while we're at it */
+    MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], mtime_dtime());
+    MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], mtime_dtime());
+    MBTR_SW_DIV(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], 2.0);
+
+    /* update uptime */
+    stats->uptime = stats_now-stats->session_start;
+
+    /* update throughput measurement */
+    stats->stats->measurements[MBTPP_CH_THRUPUT].value =
+      ( stats->uptime>
+      0.0 ? (double)stats->stats->status[MBTPP_STA_TRN_TX_BYTES]/stats->uptime : 0.0);
+
+    fprintf(stderr,
+      "cycle_xt: stat_now[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n",
+      stats_now,
+      app_stats->stats->measurements[MBTPP_CH_CYCLE_XT].start,
+      app_stats->stats->measurements[MBTPP_CH_CYCLE_XT].stop,
+      app_stats->stats->measurements[MBTPP_CH_CYCLE_XT].value);
+    /* update stats */
+    mbtrn_update_stats(stats->stats, MBTPP_CH_COUNT, flags);
+
+    fprintf(stderr,
+      "cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
+      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n,
+      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].sum,
+      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].min,
+      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].max,
+      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].avg);
+
+    fprintf(stderr,
+      "cycle_xt.a: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
+      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].n,
+      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].sum,
+      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].min,
+      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].max,
+      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].avg);
+
+    if (flags&MBTF_READER)
+      mbtrn_update_stats(reader_stats, MBTR_CH_COUNT, flags);
+
+/*        fprintf(stderr,"stat period sec[%.3lf] start[%.3lf] now[%.3lf] elapsed[%.3lf]\n",
+                  stats->stats->stat_period_sec,
+                  stats->stats->stat_period_start,
+                  stats_now,
+                  (stats_now - stats->stats->stat_period_start)
+                  );*/
+    /* check stats periods, process if ready */
+    if ( (stats->stats->stat_period_sec>0.0) &&
+      ((stats_now - stats->stats->stat_period_start) >  stats->stats->stat_period_sec))
+      {
+      /* start log execution timer */
+      MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_LOG_XT], mtime_dtime());
+
+      mlog_tprintf(trn_mlog_id, "%.3lf,i,uptime,%0.3lf\n", stats_now, stats->uptime);
+      mbtrn_log_stats(stats->stats, stats_now, log_id, flags);
+
+      if (flags&MBTF_READER)
+        mbtrn_log_stats(reader_stats, stats_now, log_id, flags);
+
+      /* reset period stats */
+      mbtrn_reset_pstats(stats->stats, MBTPP_CH_COUNT);
+      mbtrn_reset_pstats(reader_stats, MBTR_CH_COUNT);
+
+      /* reset period timer */
+      stats->stats->stat_period_start = stats_now;
+
+      /* stop log execution timer */
+      MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_LOG_XT], mtime_dtime());
+      }
+
+    /* start cycle timer */
+    MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], mtime_dtime());
+
+    /* update stats execution time variables */
+    stats_prev_start=stats_now;
+    stats_prev_end=mtime_dtime();
+    }
+  else
+    {
+    fprintf(stderr, "mbtrnpreprocess_update_stats: invalid argument\n");
+    }
+
+  return 0;
+} /* mbtrnpreprocess_update_stats */
+/*--------------------------------------------------------------------*/
+
+mbtrnpp_stats_t *mbtrnpreprocess_stats_new
+(
+  uint32_t ev_counters,
+  uint32_t status_counters,
+  uint32_t tm_channels,
+  double pstart,
+  double psec
+)
+{
+  mbtrnpp_stats_t *self =(mbtrnpp_stats_t *)malloc(sizeof(mbtrnpp_stats_t));
+  if (self)
+    {
+    self->session_start = mtime_dtime();
+    self->uptime = 0.0;
+    self->stats = mbtrn_stats_new(ev_counters, status_counters, tm_channels, mbtrnpp_stats_labels);
+
+    mbtrn_stats_set_period(self->stats, pstart, psec);
+    }
+
+  return self;
+}
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_init_debug
+(
+  int verbose
+)
+{
+  /* Open and initialize the socket based input for reading using function
+   * mbtrnpreprocess_input_read(). Allocate an internal, hidden buffer to hold data from
+   * full s7k records while waiting to return bytes from those records as
+   * requested by the MBIO read functions.
+   * Store the relevant pointers and parameters within the
+   * mb_io_struct structure *mb_io_ptr. */
+
+  mmd_initialize();
+  mconf_init(NULL, NULL);
+/*    mmd_channel_set(MOD_MBTRNPP,MM_ERR|MM_DEBUG);
+      mmd_channel_set(MOD_R7K,MM_ERR);
+      mmd_channel_set(MOD_MBTRN,MM_ERR);
+      mmd_channel_set(MOD_MSOCK,MM_ERR);*/
+  fprintf(stderr,
+    "%s:%d >>> MOD_MBTRNPP[id=%d]  %08X\n",
+    __FUNCTION__,
+    __LINE__,
+    MOD_MBTRNPP,
+    mmd_get_enmask(MOD_MBTRNPP, NULL));
+
+  switch (verbose)
+    {
+  case 0:
+    mmd_channel_set(MOD_MBTRNPP, MM_NONE);
+    mmd_channel_set(MOD_R7K, MM_NONE);
+    mmd_channel_set(MOD_MBTRN, MM_NONE);
+    mmd_channel_set(MOD_MSOCK, MM_NONE);
+    break;
+  case 1:
+    mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
+    mmd_channel_en(MOD_MBTRN, MBTRN_V1);
+    break;
+  case 2:
+    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
+    mmd_channel_en(MOD_MBTRN, MM_DEBUG);
+    mmd_channel_en(MOD_R7K, R7K_PARSER);
+    break;
+  case -1:
+    mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
+    mmd_channel_en(MOD_MBTRN, MM_DEBUG);
+    break;
+  case -2:
+    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
+    break;
+  case -3:
+    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2);
+    mmd_channel_en(MOD_MBTRN, MM_DEBUG);
+    mmd_channel_en(MOD_R7K, MM_WARN|R7K_PARSER);
+    break;
+  case -4:
+    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2);
+    mmd_channel_en(MOD_MBTRN, MM_DEBUG);
+    mmd_channel_en(MOD_R7K, MM_WARN|R7K_PARSER|R7K_DRFCON);
+    mmd_channel_en(MOD_MSOCK, MM_DEBUG);
+    break;
+  case -5:
+    mmd_channel_en(MOD_MBTRNPP, MM_ALL);
+    mmd_channel_en(MOD_MBTRN, MM_ALL);
+    mmd_channel_en(MOD_R7K, MM_ALL);
+    mmd_channel_en(MOD_MSOCK, MM_ALL);
+    break;
+  case -6:
+    mmd_channel_set(MOD_MBTRNPP, MBTRNPP_V6);
+    mmd_channel_set(MOD_R7K, MM_NONE);
+    mmd_channel_set(MOD_MBTRN, MM_NONE);
+    mmd_channel_set(MOD_MSOCK, MM_NONE);
+    break;
+  default:
+    break;
+    }     /* switch */
+  fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  %08X\n", __FUNCTION__, __LINE__,
+    mmd_get_enmask(MOD_MBTRNPP, NULL));
+
+  /* initialize reader
+     create and open socket connection*/
+/*    mcfg_configure(NULL,0);
+      mdb_set_name(APP,"mbtrnpreprocess");*/
+
+  /* use MDI_ALL to globally set module debug output
+     may also set per module basis using module IDs
+     defined in mconfig.h:
+     MBTRN, R7K, MREADER, RPARSER,
+     DRFCON, IOW, APP, MAX_MODULE
+     valid level values are
+     MDL_UNSET,MDL_NONE
+     MDL_FATAL, MDL_ERROR, MDL_WARN
+     MDL_INFO, MDL_DEBUG*/
+
+/*    mdb_set(MDI_ALL,MDL_NONE);
+      switch (verbose) {
+          case 0:
+              mdb_set(APP,MDL_NONE);
+              break;
+          case 1:
+              mdb_set(APP,MDL_DEBUG);
+              mdb_set(MBTRN,MDL_INFO);
+              break;
+          case 2:
+              mdb_set(APP,MDL_DEBUG);
+              mdb_set(MBTRN,MDL_DEBUG);
+              mdb_set(R7K,MDL_DEBUG);
+              mdb_set(RPARSER,MDL_DEBUG);
+              break;
+          case -1:
+              mdb_set(APP,MDL_DEBUG);
+              break;
+          case -2:
+              mdb_set(APP,MDL_DEBUG);
+              mdb_set(APP1,MDL_DEBUG);
+              mdb_set(APP2,MDL_DEBUG);
+              break;
+          case -3:
+              mdb_set(APP,MDL_DEBUG);
+              mdb_set(APP1,MDL_DEBUG);
+              mdb_set(APP2,MDL_DEBUG);
+              mdb_set(APP3,MDL_DEBUG);
+              mdb_set(MBTRN,MDL_DEBUG);
+              mdb_set(R7K,MDL_WARN);
+              mdb_set(RPARSER,MDL_WARN);
+              break;
+          case -4:
+              mdb_set(APP,MDL_DEBUG);
+              //            mdb_set(APP1,MDL_DEBUG);
+              //            mdb_set(APP2,MDL_DEBUG);
+              //            mdb_set(APP3,MDL_DEBUG);
+              mdb_set(APP4,MDL_DEBUG);
+              mdb_set(MBTRN,MDL_DEBUG);
+              mdb_set(R7K,MDL_DEBUG);
+              mdb_set(RPARSER,MDL_DEBUG);
+              mdb_set(IOW,MDL_DEBUG);
+              mdb_set(DRFCON,MDL_DEBUG);
+              break;
+          case -5:
+              mdb_set(APP,MDL_DEBUG);
+              mdb_set(APP1,MDL_DEBUG);
+              mdb_set(APP2,MDL_DEBUG);
+              mdb_set(APP3,MDL_DEBUG);
+              mdb_set(APP4,MDL_DEBUG);
+              mdb_set(APP5,MDL_DEBUG);
+              mdb_set(MBTRN,MDL_DEBUG);
+              mdb_set(R7K,MDL_DEBUG);
+              mdb_set(RPARSER,MDL_DEBUG);
+              mdb_set(IOW,MDL_DEBUG);
+              mdb_set(DRFCON,MDL_DEBUG);
+              break;
+          default:
+              mdb_set(APP,MDL_DEBUG);
+              mdb_set(APP1,MDL_DEBUG);
+              mdb_set(APP2,MDL_DEBUG);
+              mdb_set(MBTRN,MDL_DEBUG);
+              mdb_set(MREADER,MDL_DEBUG);
+              mdb_set(DRFCON,MDL_DEBUG);
+              mdb_set(R7K,MDL_DEBUG);
+              mdb_set(RPARSER,MDL_DEBUG);
+              break;
+      }*/
+
+
+  /* open trn data log */
+  if (trn_blog_en)
+    {
+    trn_blog_path = (char *)malloc(512);
+    sprintf(trn_blog_path, "%s//%s-%s%s", g_log_dir, TRN_BLOG_NAME, session_date, TRN_LOG_EXT);
+/*        trn_blog = mlog_new(trn_blog_path,&blog_conf); */
+    trn_blog_id = mlog_get_instance(trn_blog_path, &blog_conf, TRN_BLOG_NAME);
+    mlog_show(trn_blog_id, true, 5);
+    mlog_open(trn_blog_id, flags, mode);
+/*        mlog_add(trn_blog,trn_blog_id,TRN_BLOG_DESC); */
+    }
+  /* open trn message log */
+  if (trn_mlog_en)
+    {
+    trn_mlog_path = (char *)malloc(512);
+    sprintf(trn_mlog_path, "%s//%s-%s%s", g_log_dir, TRN_MLOG_NAME, session_date, TRN_LOG_EXT);
+/*        trn_mlog = mlog_new(trn_mlog_path,&mlog_conf); */
+    trn_mlog_id = mlog_get_instance(trn_mlog_path, &mlog_conf, TRN_MLOG_NAME);
+    mlog_show(trn_mlog_id, true, 5);
+    mlog_open(trn_mlog_id, flags, mode);
+/*        mlog_add(trn_mlog,trn_mlog_id,TRN_MLOG_DESC); */
+    mlog_tprintf(trn_mlog_id, "*** mbtrn session start ***\n");
+    mlog_tprintf(trn_mlog_id, "cmdline [%s]\n", g_cmd_line);
+    mlog_tprintf(trn_mlog_id, "libmbtrn v[%s] build[%s]\n", mbtrn_get_version(), mbtrn_get_build());
+    }
+  else
+    {
+    fprintf(stderr, "*** mbtrn session start ***\n");
+    fprintf(stderr, "cmdline [%s]\n", g_cmd_line);
+    }
+
+  app_stats = mbtrnpreprocess_stats_new(MBTPP_EV_COUNT,
+    MBTPP_STA_COUNT,
+    MBTPP_CH_COUNT,
+    mtime_dtime(),
+    trn_status_interval_sec);
+
+  return 0;
+} /* mbtrnpreprocess_init_debug */
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_close_debug()
+{
+    /* close trn data log */
+  if (trn_blog_en)
+    {
+    mlog_close(trn_blog_id);
+    }
+  /* open trn message log */
+  if (trn_mlog_en)
+    {
+    mlog_close(trn_mlog_id);
+    }
+
+  /* close mbr data log */
+  if (mbr_blog_en)
+    {
+    mlog_close(mbr_blog_id);
+    }
+
+  return 0;
+} /* mbtrnpreprocess_close_debug */
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_input_open
+(
+  int verbose,
+  void *mbio_ptr,
+  char *inputname,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+  struct mb_io_struct *mb_io_ptr;
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr, &mbio_ptr);
+    fprintf(stderr, "dbg2       inputname:  %s\n", inputname);
+    }
+
+  /* get pointer to mbio descriptor */
+  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* set initial status */
+  status = MB_SUCCESS;
+
+  /* Open and initialize the socket based input for reading using function
+   * mbtrnpreprocess_input_read(). Allocate an internal, hidden buffer to hold data from
+   * full s7k records while waiting to return bytes from those records as
+   * requested by the MBIO read functions.
+   * Store the relevant pointers and parameters within the
+   * mb_io_struct structure *mb_io_ptr. */
+
+  PMPRINT(MOD_MBTRNPP, MM_DEBUG,
+    (stderr, "configuring mbtrn_reader using %s:%d\n", reson_hostname, reson_port));
+  mb_io_ptr->mbsp = mbtrn_reader_new(reson_hostname,
+    reson_port,
+    reader_capacity,
+    reson_subs,
+    reson_nsubs);
+
+  if ((mb_io_ptr->mbsp->state==MBS_CONNECTED) || (mb_io_ptr->mbsp->state==MBS_SUBSCRIBED))
+    MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
+
+  /* get global reader stats reference */
+  reader_stats=mbtrn_reader_get_stats(mb_io_ptr->mbsp);
+  mbtrn_stats_set_period(reader_stats,
+    app_stats->stats->stat_period_start,
+    app_stats->stats->stat_period_sec);
+
+  /* configure reader data log */
+  if (mbr_blog_en && (NULL!=mb_io_ptr->mbsp))
+    {
+    /* open mbr data log */
+    mbr_blog_path = (char *)malloc(512);
+    sprintf(mbr_blog_path, "%s//%s-%s%s", g_log_dir, MBR_BLOG_NAME, session_date, TRN_LOG_EXT);
+
+/*        mbr_blog = mlog_new(mbr_blog_path,&mbrlog_conf); */
+    mbr_blog_id = mlog_get_instance(mbr_blog_path, &mbrlog_conf, MBR_BLOG_NAME);
+
+    mlog_show(mbr_blog_id, true, 5);
+    mlog_open(mbr_blog_id, flags, mode);
+
+
+    mbtrn_reader_set_log(mb_io_ptr->mbsp, mbr_blog_id);
+
+/*        mbr_blogs = fopen(mbr_blog_path,"a+");
+          mbtrn_reader_set_logstream(mb_io_ptr->mbsp,mbr_blogs);*/
+    }
+
+  if (verbose>=1)
+    mbtrn_reader_show(mb_io_ptr->mbsp, true, 5);
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_input_open */
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_input_read
+(
+  int verbose,
+  void *mbio_ptr,
+  size_t size,
+  char *buffer,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+  struct mb_io_struct *mb_io_ptr;
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+    fprintf(stderr, "dbg2       sizer:      %zu\n", size);
+    fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
+    }
+
+  /* get pointer to mbio descriptor */
+  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* set initial status */
+  status = MB_SUCCESS;
+
+  /* Read the requested number of bytes (= size) off the input and  place
+   * those bytes into the buffer.
+   * This requires reading full s7k records off the socket, storing the data
+   * in an internal, hidden buffer, and parceling those bytes out as requested.
+   * The internal buffer should be allocated in mbtrnpreprocess_input_init() and stored
+   * in the mb_io_struct structure *mb_io_ptr. */
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_input_read */
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_input_close
+(
+  int verbose,
+  void *mbio_ptr,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+  struct mb_io_struct *mb_io_ptr;
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
+    }
+
+  /* get pointer to mbio descriptor */
+  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+  /* set initial status */
+  status = MB_SUCCESS;
+
+  /* Close the socket based input for reading using function
+   * mbtrnpreprocess_input_read(). Deallocate the internal, hidden buffer and any
+   * other resources that were allocated by mbtrnpreprocess_input_init(). */
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_input_close */
 /*--------------------------------------------------------------------*/
 
 int main
@@ -2169,956 +3084,4 @@ int main
 
   exit(error);
 } /* main */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_openlog
-(
-  int verbose,
-  mb_path log_directory,
-  FILE **logfp,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-
-  /* time, user, host variables */
-  struct timeval timeofday;
-  struct timezone timezone;
-  double time_d;
-  int time_i[7];
-  char date[32], user[128], *user_ptr;
-  mb_path host;
-  mb_path log_file;
-  mb_path log_message;
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       log_directory:      %s\n", log_directory);
-    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
-    fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
-    }
-
-  /* close existing log file */
-  if (*logfp != NULL)
-    mbtrnpreprocess_closelog(verbose, logfp, error);
-
-  /* get time and user data */
-  gettimeofday(&timeofday, &timezone);
-  time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-  status = mb_get_date(verbose, time_d, time_i);
-  sprintf(date,
-    "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
-    time_i[0],
-    time_i[1],
-    time_i[2],
-    time_i[3],
-    time_i[4],
-    time_i[5],
-    time_i[6]);
-  if ((user_ptr = getenv("USER")) == NULL)
-    user_ptr = getenv("LOGNAME");
-  if (user_ptr != NULL)
-    strcpy(user, user_ptr);
-  else
-    strcpy(user, "unknown");
-  gethostname(host, sizeof(mb_path));
-
-  /* open new log file */
-  sprintf(log_file, "%s/%s_mbtrnpreprocess_log.txt", log_directory,   date);
-  *logfp = fopen(log_file, "w");
-  if (*logfp != NULL)
-    {
-    fprintf(*logfp, "Program %s log file\n-------------------\n", program_name);
-    if (verbose > 0)
-      fprintf(stderr, "Program %s log file\n-------------------\n", program_name);
-    sprintf(log_message, "Opened by user %s on cpu %s", user, host);
-    mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);
-    }
-  else
-    {
-    *error = MB_ERROR_OPEN_FAIL;
-    fprintf(stderr, "\nUnable to open %s log file: %s\n", program_name, log_file);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(*error);
-    }
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
-    fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_openlog */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_closelog
-(
-  int verbose,
-  FILE **logfp,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-  char *log_message = "Closing mbtrnpreprocess log file";
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
-    fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
-    }
-
-  /* close log file */
-  if (logfp != NULL)
-    {
-    mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);
-    fclose(*logfp);
-    *logfp = NULL;
-    }
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_closelog */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_postlog
-(
-  int verbose,
-  FILE *logfp,
-  char *log_message,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-
-  /* time, user, host variables */
-  struct timeval timeofday;
-  struct timezone timezone;
-  double time_d;
-  int time_i[7];
-  char date[32];
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
-    fprintf(stderr, "dbg2       log_message:        %s\n", log_message);
-    }
-
-  /* get time  */
-  gettimeofday(&timeofday, &timezone);
-  time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-  status = mb_get_date(verbose, time_d, time_i);
-  sprintf(date,
-    "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
-    time_i[0],
-    time_i[1],
-    time_i[2],
-    time_i[3],
-    time_i[4],
-    time_i[5],
-    time_i[6]);
-
-  /* post log_message */
-  if (logfp != NULL)
-    fprintf(logfp,
-      "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
-      time_i[0],
-      time_i[1],
-      time_i[2],
-      time_i[3],
-      time_i[4],
-      time_i[5],
-      time_i[6],
-      log_message);
-  if (verbose > 0)
-    fprintf(stderr,
-      "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
-      time_i[0],
-      time_i[1],
-      time_i[2],
-      time_i[3],
-      time_i[4],
-      time_i[5],
-      time_i[6],
-      log_message);
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_postlog */
-/*--------------------------------------------------------------------*/
-int mbtrnpreprocess_logparameters
-(
-  int verbose,
-  FILE *logfp,
-  char *input,
-  int format,
-  char *output,
-  double swath_width,
-  int n_output_soundings,
-  int median_filter,
-  int median_filter_n_across,
-  int median_filter_n_along,
-  double median_filter_threshold,
-  int n_buffer_max,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-  mb_path log_message;
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
-    fprintf(stderr, "dbg2       logfp:                        %p\n", logfp);
-    fprintf(stderr, "dbg2       input:                        %s\n", input);
-    fprintf(stderr, "dbg2       format:                       %d\n", format);
-    fprintf(stderr, "dbg2       output:                       %s\n", output);
-    fprintf(stderr, "dbg2       swath_width:                  %f\n", swath_width);
-    fprintf(stderr, "dbg2       n_output_soundings:           %d\n", n_output_soundings);
-    fprintf(stderr, "dbg2       median_filter:                %d\n", median_filter);
-    fprintf(stderr, "dbg2       median_filter_n_across:       %d\n", median_filter_n_across);
-    fprintf(stderr, "dbg2       median_filter_n_along:        %d\n", median_filter_n_along);
-    fprintf(stderr, "dbg2       median_filter_threshold:      %f\n", median_filter_threshold);
-    fprintf(stderr, "dbg2       n_buffer_max:                 %d\n", n_buffer_max);
-    }
-
-  /* post log_message */
-  if (logfp != NULL)
-    {
-    sprintf(log_message, "       input:                    %s", input);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       format:                   %d", format);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       output:                   %s", output);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       swath_width:              %f", swath_width);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_output_soundings:       %d", n_output_soundings);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       median_filter:            %d", median_filter);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       median_filter_n_across:   %d", median_filter_n_across);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       median_filter_n_along:    %d", median_filter_n_along);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       median_filter_threshold:  %f", median_filter_threshold);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_buffer_max:             %d", n_buffer_max);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-    }
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_logparameters */
-/*--------------------------------------------------------------------*/
-int mbtrnpreprocess_logstatistics
-(
-  int verbose,
-  FILE *logfp,
-  int n_pings_read,
-  int n_soundings_read,
-  int n_soundings_valid_read,
-  int n_soundings_flagged_read,
-  int n_soundings_null_read,
-  int n_soundings_trimmed,
-  int n_soundings_decimated,
-  int n_soundings_flagged,
-  int n_soundings_written,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-  mb_path log_message;
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:                      %d\n", verbose);
-    fprintf(stderr, "dbg2       logfp:                        %p\n", logfp);
-    fprintf(stderr, "dbg2       n_pings_read:                 %d\n", n_pings_read);
-    fprintf(stderr, "dbg2       n_soundings_read:             %d\n", n_soundings_read);
-    fprintf(stderr, "dbg2       n_soundings_valid_read:       %d\n", n_soundings_valid_read);
-    fprintf(stderr, "dbg2       n_soundings_flagged_read:     %d\n", n_soundings_flagged_read);
-    fprintf(stderr, "dbg2       n_soundings_null_read:        %d\n", n_soundings_null_read);
-    fprintf(stderr, "dbg2       n_soundings_trimmed:          %d\n", n_pings_read);
-    fprintf(stderr, "dbg2       n_soundings_decimated:        %d\n", n_soundings_decimated);
-    fprintf(stderr, "dbg2       n_soundings_flagged:          %d\n", n_soundings_flagged);
-    fprintf(stderr, "dbg2       n_soundings_written:          %d\n", n_soundings_written);
-    }
-
-  /* post log_message */
-  if (logfp != NULL)
-    {
-    sprintf(log_message, "Log File Statistics:");
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_pings_read:                 %d", n_pings_read);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_soundings_read:             %d", n_soundings_read);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_soundings_valid_read:       %d", n_soundings_valid_read);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_soundings_flagged_read:     %d", n_soundings_flagged_read);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_soundings_null_read:        %d", n_soundings_null_read);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_soundings_trimmed:          %d", n_pings_read);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_soundings_decimated:        %d", n_soundings_decimated);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_soundings_flagged:          %d", n_soundings_flagged);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-
-    sprintf(log_message, "       n_soundings_written:          %d", n_soundings_written);
-    mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
-    }
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_logstatistics */
-/*--------------------------------------------------------------------*/
-
-
-
-int mbtrnpreprocess_log_min
-(
-  mbtrn_stat_chan_t *stats
-)
-{
-  if (NULL!=stats)
-    mlog_tprintf(trn_mlog_id,
-      "ut[%lu] src[%d/%d] cli[%d/%d/%d] tx[%d/%d] rx[%d/%d]\n",
-      app_stats->uptime,
-      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_SRC_CONN]),
-      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_SRC_DISN]),
-      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN]),
-      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_CLI_CONN]),
-      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN]),
-      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_TRN_PUBN]),
-      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_TRN_TX_BYTES]),
-      MBTR_COUNTER_GET(app_stats->stats->events[MBTPP_EV_CLI_RXN]),
-      MBTR_COUNTER_GET(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES]));
-
-  return 0;
-}
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_update_stats
-(
-  mbtrnpp_stats_t *stats,
-  mlog_id_t log_id,
-  mbtr_stat_flags flags
-)
-{
-  if (NULL!=stats)
-    {
-    double stats_now = mtime_dtime();
-
-    if (log_clock_res)
-      {
-      /* log the timing clock resolution (once) */
-      struct timespec res;
-      clock_getres(CLOCK_MONOTONIC, &res);
-      mlog_tprintf(trn_mlog_id,
-        "%.3lf,i,clkres_mono,s[%ld] ns[%ld]\n",
-        stats_now,
-        res.tv_sec,
-        res.tv_nsec);
-      log_clock_res=false;
-      }
-
-    /* we can only measure the previous stats cycle... */
-    if (stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n>0)
-      {
-      /* get the timing of the last cycle */
-      MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], stats_prev_start);
-      MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_STATS_XT], stats_prev_end);
-      }
-    else
-      {
-      /* seed the first cycle */
-      MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_STATS_XT], (stats_now-0.0001));
-      MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_STATS_XT], stats_now);
-      }
-
-    /* end the cycle timer here
-       [start at the end if this function]*/
-    MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], stats_now);
-
-    /* measure dtime execution time (twice), while we're at it */
-    MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], mtime_dtime());
-    MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], mtime_dtime());
-    MBTR_SW_DIV(app_stats->stats->measurements[MBTPP_CH_DTIME_XT], 2.0);
-
-    /* update uptime */
-    stats->uptime = stats_now-stats->session_start;
-
-    /* update throughput measurement */
-    stats->stats->measurements[MBTPP_CH_THRUPUT].value =
-      ( stats->uptime>
-      0.0 ? (double)stats->stats->status[MBTPP_STA_TRN_TX_BYTES]/stats->uptime : 0.0);
-
-    fprintf(stderr,
-      "cycle_xt: stat_now[%.4lf] start[%.4lf] stop[%.4lf] value[%.4lf]\n",
-      stats_now,
-      app_stats->stats->measurements[MBTPP_CH_CYCLE_XT].start,
-      app_stats->stats->measurements[MBTPP_CH_CYCLE_XT].stop,
-      app_stats->stats->measurements[MBTPP_CH_CYCLE_XT].value);
-    /* update stats */
-    mbtrn_update_stats(stats->stats, MBTPP_CH_COUNT, flags);
-
-    fprintf(stderr,
-      "cycle_xt.p: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
-      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].n,
-      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].sum,
-      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].min,
-      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].max,
-      app_stats->stats->per_stats[MBTPP_CH_CYCLE_XT].avg);
-
-    fprintf(stderr,
-      "cycle_xt.a: N[%lld] sum[%.3lf] min[%.3lf] max[%.3lf] avg[%.3lf]\n",
-      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].n,
-      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].sum,
-      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].min,
-      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].max,
-      app_stats->stats->agg_stats[MBTPP_CH_CYCLE_XT].avg);
-
-    if (flags&MBTF_READER)
-      mbtrn_update_stats(reader_stats, MBTR_CH_COUNT, flags);
-
-/*        fprintf(stderr,"stat period sec[%.3lf] start[%.3lf] now[%.3lf] elapsed[%.3lf]\n",
-                  stats->stats->stat_period_sec,
-                  stats->stats->stat_period_start,
-                  stats_now,
-                  (stats_now - stats->stats->stat_period_start)
-                  );*/
-    /* check stats periods, process if ready */
-    if ( (stats->stats->stat_period_sec>0.0) &&
-      ((stats_now - stats->stats->stat_period_start) >  stats->stats->stat_period_sec))
-      {
-      /* start log execution timer */
-      MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_LOG_XT], mtime_dtime());
-
-      mlog_tprintf(trn_mlog_id, "%.3lf,i,uptime,%0.3lf\n", stats_now, stats->uptime);
-      mbtrn_log_stats(stats->stats, stats_now, log_id, flags);
-
-      if (flags&MBTF_READER)
-        mbtrn_log_stats(reader_stats, stats_now, log_id, flags);
-
-      /* reset period stats */
-      mbtrn_reset_pstats(stats->stats, MBTPP_CH_COUNT);
-      mbtrn_reset_pstats(reader_stats, MBTR_CH_COUNT);
-
-      /* reset period timer */
-      stats->stats->stat_period_start = stats_now;
-
-      /* stop log execution timer */
-      MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_LOG_XT], mtime_dtime());
-      }
-
-    /* start cycle timer */
-    MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_CYCLE_XT], mtime_dtime());
-
-    /* update stats execution time variables */
-    stats_prev_start=stats_now;
-    stats_prev_end=mtime_dtime();
-    }
-  else
-    {
-    fprintf(stderr, "mbtrnpreprocess_update_stats: invalid argument\n");
-    }
-
-  return 0;
-} /* mbtrnpreprocess_update_stats */
-/*--------------------------------------------------------------------*/
-
-mbtrnpp_stats_t *mbtrnpreprocess_stats_new
-(
-  uint32_t ev_counters,
-  uint32_t status_counters,
-  uint32_t tm_channels,
-  double pstart,
-  double psec
-)
-{
-  mbtrnpp_stats_t *self =(mbtrnpp_stats_t *)malloc(sizeof(mbtrnpp_stats_t));
-  if (self)
-    {
-    self->session_start = mtime_dtime();
-    self->uptime = 0.0;
-    self->stats = mbtrn_stats_new(ev_counters, status_counters, tm_channels, mbtrnpp_stats_labels);
-
-    mbtrn_stats_set_period(self->stats, pstart, psec);
-    }
-
-  return self;
-}
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_init_debug
-(
-  int verbose
-)
-{
-  /* Open and initialize the socket based input for reading using function
-   * mbtrnpreprocess_input_read(). Allocate an internal, hidden buffer to hold data from
-   * full s7k records while waiting to return bytes from those records as
-   * requested by the MBIO read functions.
-   * Store the relevant pointers and parameters within the
-   * mb_io_struct structure *mb_io_ptr. */
-
-  mmd_initialize();
-  mconf_init(NULL, NULL);
-/*    mmd_channel_set(MOD_MBTRNPP,MM_ERR|MM_DEBUG);
-      mmd_channel_set(MOD_R7K,MM_ERR);
-      mmd_channel_set(MOD_MBTRN,MM_ERR);
-      mmd_channel_set(MOD_MSOCK,MM_ERR);*/
-  fprintf(stderr,
-    "%s:%d >>> MOD_MBTRNPP[id=%d]  %08X\n",
-    __FUNCTION__,
-    __LINE__,
-    MOD_MBTRNPP,
-    mmd_get_enmask(MOD_MBTRNPP, NULL));
-
-  switch (verbose)
-    {
-  case 0:
-    mmd_channel_set(MOD_MBTRNPP, MM_NONE);
-    mmd_channel_set(MOD_R7K, MM_NONE);
-    mmd_channel_set(MOD_MBTRN, MM_NONE);
-    mmd_channel_set(MOD_MSOCK, MM_NONE);
-    break;
-  case 1:
-    mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
-    mmd_channel_en(MOD_MBTRN, MBTRN_V1);
-    break;
-  case 2:
-    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
-    mmd_channel_en(MOD_MBTRN, MM_DEBUG);
-    mmd_channel_en(MOD_R7K, R7K_PARSER);
-    break;
-  case -1:
-    mmd_channel_en(MOD_MBTRNPP, MBTRNPP_V1);
-    mmd_channel_en(MOD_MBTRN, MM_DEBUG);
-    break;
-  case -2:
-    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG);
-    break;
-  case -3:
-    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2);
-    mmd_channel_en(MOD_MBTRN, MM_DEBUG);
-    mmd_channel_en(MOD_R7K, MM_WARN|R7K_PARSER);
-    break;
-  case -4:
-    mmd_channel_en(MOD_MBTRNPP, MM_DEBUG|MBTRNPP_V1|MBTRNPP_V2);
-    mmd_channel_en(MOD_MBTRN, MM_DEBUG);
-    mmd_channel_en(MOD_R7K, MM_WARN|R7K_PARSER|R7K_DRFCON);
-    mmd_channel_en(MOD_MSOCK, MM_DEBUG);
-    break;
-  case -5:
-    mmd_channel_en(MOD_MBTRNPP, MM_ALL);
-    mmd_channel_en(MOD_MBTRN, MM_ALL);
-    mmd_channel_en(MOD_R7K, MM_ALL);
-    mmd_channel_en(MOD_MSOCK, MM_ALL);
-    break;
-  case -6:
-    mmd_channel_set(MOD_MBTRNPP, MBTRNPP_V6);
-    mmd_channel_set(MOD_R7K, MM_NONE);
-    mmd_channel_set(MOD_MBTRN, MM_NONE);
-    mmd_channel_set(MOD_MSOCK, MM_NONE);
-    break;
-  default:
-    break;
-    }     /* switch */
-  fprintf(stderr, "%s:%d >>> MOD_MBTRNPP  %08X\n", __FUNCTION__, __LINE__,
-    mmd_get_enmask(MOD_MBTRNPP, NULL));
-
-  /* initialize reader
-     create and open socket connection*/
-/*    mcfg_configure(NULL,0);
-      mdb_set_name(APP,"mbtrnpreprocess");*/
-
-  /* use MDI_ALL to globally set module debug output
-     may also set per module basis using module IDs
-     defined in mconfig.h:
-     MBTRN, R7K, MREADER, RPARSER,
-     DRFCON, IOW, APP, MAX_MODULE
-     valid level values are
-     MDL_UNSET,MDL_NONE
-     MDL_FATAL, MDL_ERROR, MDL_WARN
-     MDL_INFO, MDL_DEBUG*/
-
-/*    mdb_set(MDI_ALL,MDL_NONE);
-      switch (verbose) {
-          case 0:
-              mdb_set(APP,MDL_NONE);
-              break;
-          case 1:
-              mdb_set(APP,MDL_DEBUG);
-              mdb_set(MBTRN,MDL_INFO);
-              break;
-          case 2:
-              mdb_set(APP,MDL_DEBUG);
-              mdb_set(MBTRN,MDL_DEBUG);
-              mdb_set(R7K,MDL_DEBUG);
-              mdb_set(RPARSER,MDL_DEBUG);
-              break;
-          case -1:
-              mdb_set(APP,MDL_DEBUG);
-              break;
-          case -2:
-              mdb_set(APP,MDL_DEBUG);
-              mdb_set(APP1,MDL_DEBUG);
-              mdb_set(APP2,MDL_DEBUG);
-              break;
-          case -3:
-              mdb_set(APP,MDL_DEBUG);
-              mdb_set(APP1,MDL_DEBUG);
-              mdb_set(APP2,MDL_DEBUG);
-              mdb_set(APP3,MDL_DEBUG);
-              mdb_set(MBTRN,MDL_DEBUG);
-              mdb_set(R7K,MDL_WARN);
-              mdb_set(RPARSER,MDL_WARN);
-              break;
-          case -4:
-              mdb_set(APP,MDL_DEBUG);
-              //            mdb_set(APP1,MDL_DEBUG);
-              //            mdb_set(APP2,MDL_DEBUG);
-              //            mdb_set(APP3,MDL_DEBUG);
-              mdb_set(APP4,MDL_DEBUG);
-              mdb_set(MBTRN,MDL_DEBUG);
-              mdb_set(R7K,MDL_DEBUG);
-              mdb_set(RPARSER,MDL_DEBUG);
-              mdb_set(IOW,MDL_DEBUG);
-              mdb_set(DRFCON,MDL_DEBUG);
-              break;
-          case -5:
-              mdb_set(APP,MDL_DEBUG);
-              mdb_set(APP1,MDL_DEBUG);
-              mdb_set(APP2,MDL_DEBUG);
-              mdb_set(APP3,MDL_DEBUG);
-              mdb_set(APP4,MDL_DEBUG);
-              mdb_set(APP5,MDL_DEBUG);
-              mdb_set(MBTRN,MDL_DEBUG);
-              mdb_set(R7K,MDL_DEBUG);
-              mdb_set(RPARSER,MDL_DEBUG);
-              mdb_set(IOW,MDL_DEBUG);
-              mdb_set(DRFCON,MDL_DEBUG);
-              break;
-          default:
-              mdb_set(APP,MDL_DEBUG);
-              mdb_set(APP1,MDL_DEBUG);
-              mdb_set(APP2,MDL_DEBUG);
-              mdb_set(MBTRN,MDL_DEBUG);
-              mdb_set(MREADER,MDL_DEBUG);
-              mdb_set(DRFCON,MDL_DEBUG);
-              mdb_set(R7K,MDL_DEBUG);
-              mdb_set(RPARSER,MDL_DEBUG);
-              break;
-      }*/
-
-
-  /* open trn data log */
-  if (trn_blog_en)
-    {
-    trn_blog_path = (char *)malloc(512);
-    sprintf(trn_blog_path, "%s//%s-%s%s", g_log_dir, TRN_BLOG_NAME, session_date, TRN_LOG_EXT);
-/*        trn_blog = mlog_new(trn_blog_path,&blog_conf); */
-    trn_blog_id = mlog_get_instance(trn_blog_path, &blog_conf, TRN_BLOG_NAME);
-    mlog_show(trn_blog_id, true, 5);
-    mlog_open(trn_blog_id, flags, mode);
-/*        mlog_add(trn_blog,trn_blog_id,TRN_BLOG_DESC); */
-    }
-  /* open trn message log */
-  if (trn_mlog_en)
-    {
-    trn_mlog_path = (char *)malloc(512);
-    sprintf(trn_mlog_path, "%s//%s-%s%s", g_log_dir, TRN_MLOG_NAME, session_date, TRN_LOG_EXT);
-/*        trn_mlog = mlog_new(trn_mlog_path,&mlog_conf); */
-    trn_mlog_id = mlog_get_instance(trn_mlog_path, &mlog_conf, TRN_MLOG_NAME);
-    mlog_show(trn_mlog_id, true, 5);
-    mlog_open(trn_mlog_id, flags, mode);
-/*        mlog_add(trn_mlog,trn_mlog_id,TRN_MLOG_DESC); */
-    mlog_tprintf(trn_mlog_id, "*** mbtrn session start ***\n");
-    mlog_tprintf(trn_mlog_id, "cmdline [%s]\n", g_cmd_line);
-    mlog_tprintf(trn_mlog_id, "libmbtrn v[%s] build[%s]\n", mbtrn_get_version(), mbtrn_get_build());
-    }
-  else
-    {
-    fprintf(stderr, "*** mbtrn session start ***\n");
-    fprintf(stderr, "cmdline [%s]\n", g_cmd_line);
-    }
-
-  app_stats = mbtrnpreprocess_stats_new(MBTPP_EV_COUNT,
-    MBTPP_STA_COUNT,
-    MBTPP_CH_COUNT,
-    mtime_dtime(),
-    trn_status_interval_sec);
-
-  return 0;
-} /* mbtrnpreprocess_init_debug */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_close_debug()
-{
-    /* close trn data log */
-  if (trn_blog_en)
-    {
-    mlog_close(trn_blog_id);
-    }
-  /* open trn message log */
-  if (trn_mlog_en)
-    {
-    mlog_close(trn_mlog_id);
-    }
-
-  /* close mbr data log */
-  if (mbr_blog_en)
-    {
-    mlog_close(mbr_blog_id);
-    }
-
-  return 0;
-} /* mbtrnpreprocess_close_debug */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_input_open
-(
-  int verbose,
-  void *mbio_ptr,
-  char *inputname,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p,%p\n", mbio_ptr, &mbio_ptr);
-    fprintf(stderr, "dbg2       inputname:  %s\n", inputname);
-    }
-
-  /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* set initial status */
-  status = MB_SUCCESS;
-
-  /* Open and initialize the socket based input for reading using function
-   * mbtrnpreprocess_input_read(). Allocate an internal, hidden buffer to hold data from
-   * full s7k records while waiting to return bytes from those records as
-   * requested by the MBIO read functions.
-   * Store the relevant pointers and parameters within the
-   * mb_io_struct structure *mb_io_ptr. */
-
-  PMPRINT(MOD_MBTRNPP, MM_DEBUG,
-    (stderr, "configuring mbtrn_reader using %s:%d\n", reson_hostname, reson_port));
-  mb_io_ptr->mbsp = mbtrn_reader_new(reson_hostname,
-    reson_port,
-    reader_capacity,
-    reson_subs,
-    reson_nsubs);
-
-  if ((mb_io_ptr->mbsp->state==MBS_CONNECTED) || (mb_io_ptr->mbsp->state==MBS_SUBSCRIBED))
-    MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_SRC_CONN]);
-
-  /* get global reader stats reference */
-  reader_stats=mbtrn_reader_get_stats(mb_io_ptr->mbsp);
-  mbtrn_stats_set_period(reader_stats,
-    app_stats->stats->stat_period_start,
-    app_stats->stats->stat_period_sec);
-
-  /* configure reader data log */
-  if (mbr_blog_en && (NULL!=mb_io_ptr->mbsp))
-    {
-    /* open mbr data log */
-    mbr_blog_path = (char *)malloc(512);
-    sprintf(mbr_blog_path, "%s//%s-%s%s", g_log_dir, MBR_BLOG_NAME, session_date, TRN_LOG_EXT);
-
-/*        mbr_blog = mlog_new(mbr_blog_path,&mbrlog_conf); */
-    mbr_blog_id = mlog_get_instance(mbr_blog_path, &mbrlog_conf, MBR_BLOG_NAME);
-
-    mlog_show(mbr_blog_id, true, 5);
-    mlog_open(mbr_blog_id, flags, mode);
-
-
-    mbtrn_reader_set_log(mb_io_ptr->mbsp, mbr_blog_id);
-
-/*        mbr_blogs = fopen(mbr_blog_path,"a+");
-          mbtrn_reader_set_logstream(mb_io_ptr->mbsp,mbr_blogs);*/
-    }
-
-  if (verbose>=1)
-    mbtrn_reader_show(mb_io_ptr->mbsp, true, 5);
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_input_open */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_input_read
-(
-  int verbose,
-  void *mbio_ptr,
-  size_t size,
-  char *buffer,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
-    fprintf(stderr, "dbg2       sizer:      %zu\n", size);
-    fprintf(stderr, "dbg2       buffer:     %p\n", buffer);
-    }
-
-  /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* set initial status */
-  status = MB_SUCCESS;
-
-  /* Read the requested number of bytes (= size) off the input and  place
-   * those bytes into the buffer.
-   * This requires reading full s7k records off the socket, storing the data
-   * in an internal, hidden buffer, and parceling those bytes out as requested.
-   * The internal buffer should be allocated in mbtrnpreprocess_input_init() and stored
-   * in the mb_io_struct structure *mb_io_ptr. */
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_input_read */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_input_close
-(
-  int verbose,
-  void *mbio_ptr,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-  struct mb_io_struct *mb_io_ptr;
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       mbio_ptr:   %p\n", mbio_ptr);
-    }
-
-  /* get pointer to mbio descriptor */
-  mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* set initial status */
-  status = MB_SUCCESS;
-
-  /* Close the socket based input for reading using function
-   * mbtrnpreprocess_input_read(). Deallocate the internal, hidden buffer and any
-   * other resources that were allocated by mbtrnpreprocess_input_init(). */
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_input_close */
 /*--------------------------------------------------------------------*/

@@ -82,7 +82,6 @@ struct mbvoxelclean_ping_struct {
 #define MBVC_OCCUPIED_IGNORE    0
 #define MBVC_OCCUPIED_UNFLAG    1
 
-
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {

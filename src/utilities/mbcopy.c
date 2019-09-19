@@ -61,1027 +61,6 @@
 #define MBCOPY_STRIPMODE_COMMENTS   1
 #define MBCOPY_STRIPMODE_BATHYONLY  2
 
-/* function prototypes */
-int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *iend, int *offset, int *error);
-int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, struct mbsys_xse_struct *ostore, int *error);
-int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct mbsys_elacmk2_struct *ostore, int *error);
-int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, struct mbsys_simrad2_struct *ostore, int *error);
-int mbcopy_simrad_time_convert(int verbose, int year, int month, int day, int hour, int minute, int second, int centisecond,
-                               int *date, int *msec, int *error);
-int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype,
-                           int *time_i, double time_d, double navlon, double navlat, double speed,
-                           double heading, double draft, double altitude, double roll, double pitch, double heave,
-                           double beamwidth_xtrack, double beamwidth_ltrack, int nbath, int namp, int nss, char *beamflag,
-                           double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
-                           double *ssacrosstrack, double *ssalongtrack, char *comment, void *ombio_ptr, void *ostore_ptr,
-                           int *error);
-#ifdef ENABLE_GSF
-int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *error);
-#endif
-
-/*--------------------------------------------------------------------*/
-
-int main(int argc, char **argv) {
-  /* id variables */
-  char program_name[] = "MBcopy";
-  char help_message[] = "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified "
-                        "conversions.  Options include \nwindowing in time and space and ping averaging.  The input and "
-                        "\noutput data formats may differ, though not all possible combinations \nmake sense.  The default "
-                        "input and output streams are stdin and stdout.";
-  char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  "
-                         "-Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
-
-  int errflg = 0;
-  int c;
-  int help = 0;
-  int flag = 0;
-
-  /* MBIO status variables */
-  int status;
-  int verbose = 0;
-  int error = MB_ERROR_NO_ERROR;
-  char *message;
-
-  /* MBIO read control parameters */
-  int iformat = 0;
-  int pings;
-  int lonflip;
-  double bounds[4];
-  int btime_i[7];
-  int etime_i[7];
-  double btime_d;
-  double etime_d;
-  double speedmin;
-  double timegap;
-  int fbtversion;
-  char ifile[MB_PATH_MAXLINE];
-  int ibeams_bath;
-  int ibeams_amp;
-  int ipixels_ss;
-  void *imbio_ptr = NULL;
-
-  /* MBIO write control parameters */
-  int oformat = 0;
-  char ofile[MB_PATH_MAXLINE];
-  int obeams_bath;
-  int obeams_amp;
-  int opixels_ss;
-  void *ombio_ptr = NULL;
-
-  /* MBIO merge control parameters */
-  int merge = MB_NO;
-  int mformat = 0;
-  char mfile[MB_PATH_MAXLINE];
-  int mbeams_bath;
-  int mbeams_amp;
-  int mpixels_ss;
-  void *mmbio_ptr = NULL;
-
-  /* MBIO read and write values */
-  struct mb_io_struct *omb_io_ptr;
-  struct mb_io_struct *imb_io_ptr;
-  struct mb_io_struct *mmb_io_ptr;
-  void *istore_ptr;
-  void *ostore_ptr;
-  int kind;
-  int time_i[7];
-  double time_d;
-  double navlon;
-  double navlat;
-  double speed;
-  double heading;
-  double distance;
-  double altitude;
-  double sonardepth;
-  char *ibeamflag = NULL;
-  double *ibath = NULL;
-  double *ibathacrosstrack = NULL;
-  double *ibathalongtrack = NULL;
-  double *iamp = NULL;
-  double *iss = NULL;
-  double *issacrosstrack = NULL;
-  double *issalongtrack = NULL;
-  char *obeamflag = NULL;
-  double *obath = NULL;
-  double *obathacrosstrack = NULL;
-  double *obathalongtrack = NULL;
-  double *oamp = NULL;
-  double *oss = NULL;
-  double *ossacrosstrack = NULL;
-  double *ossalongtrack = NULL;
-  double draft;
-  double roll;
-  double pitch;
-  double heave;
-
-  int mstatus;
-  int merror = MB_ERROR_NO_ERROR;
-  int mkind = MB_DATA_NONE;
-  int mpings = 0;
-  int mtime_i[7];
-  double mtime_d = 0.0;
-  double mnavlon;
-  double mnavlat;
-  double mspeed;
-  double mheading;
-  double mdistance;
-  double maltitude;
-  double msonardepth;
-
-    int sensorhead_status = MB_SUCCESS;
-    int sensorhead_error = MB_ERROR_NO_ERROR;
-    int sensorhead = 0;
-    int sensortype = 0;
-
-  char mcomment[MB_COMMENT_MAXLINE];
-  int mnbath, mnamp, mnss;
-  char *mbeamflag = NULL;
-  double *mbath = NULL;
-  double *mbathacrosstrack = NULL;
-  double *mbathalongtrack = NULL;
-  double *mamp = NULL;
-  double *mss = NULL;
-  double *mssacrosstrack = NULL;
-  double *mssalongtrack = NULL;
-  int idata = 0;
-  int icomment = 0;
-  int odata = 0;
-  int ocomment = 0;
-  int nbath, namp, nss;
-  int istart_bath, iend_bath, offset_bath;
-  int istart_amp, iend_amp, offset_amp;
-  int istart_ss, iend_ss, offset_ss;
-  char comment[MB_COMMENT_MAXLINE];
-  int insertcomments = MB_NO;
-  int bathonly = MB_NO;
-  char commentfile[MB_PATH_MAXLINE];
-  int stripmode = MBCOPY_STRIPMODE_NONE;
-  int copymode = MBCOPY_PARTIAL;
-  int use_sleep = MB_NO;
-  int inbounds = MB_YES;
-
-  /* sleep variable */
-  double sleep_factor = 1.0;
-  double time_d_last;
-  unsigned int sleep_time;
-
-  /* time, user, host variables */
-  time_t right_now;
-  char date[32], user[128], *user_ptr, host[128];
-
-  FILE *fp;
-  char *result;
-  int format;
-  double seconds;
-  int i, j;
-
-  char *ctime();
-  char *getenv();
-
-  /* get current default values */
-  status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-  status = mb_fbtversion(verbose, &fbtversion);
-
-  /* set default input and output */
-  iformat = 0;
-  oformat = 0;
-  mformat = 0;
-  strcpy(commentfile, "\0");
-  strcpy(ifile, "stdin");
-  strcpy(ofile, "stdout");
-
-  /* process argument list */
-  while ((c = getopt(argc, argv, "B:b:C:c:DdE:e:F:f:HhI:i:L:l:M:m:NnO:o:P:p:Q:q:R:r:S:s:T:t:Vv")) != -1)
-    switch (c) {
-    case 'B':
-    case 'b':
-      sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &seconds);
-      btime_i[5] = (int)floor(seconds);
-      btime_i[6] = 1000000 * (seconds - btime_i[5]);
-      flag++;
-      break;
-    case 'C':
-    case 'c':
-      sscanf(optarg, "%s", commentfile);
-      insertcomments = MB_YES;
-      flag++;
-      break;
-    case 'D':
-    case 'd':
-      bathonly = MB_YES;
-      flag++;
-      break;
-    case 'E':
-    case 'e':
-      sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &seconds);
-      etime_i[5] = (int)floor(seconds);
-      etime_i[6] = 1000000 * (seconds - btime_i[5]);
-      flag++;
-      break;
-    case 'F':
-    case 'f':
-      i = sscanf(optarg, "%d/%d/%d", &iformat, &oformat, &mformat);
-      if (i == 1)
-        oformat = iformat;
-      flag++;
-      break;
-    case 'H':
-    case 'h':
-      help++;
-      break;
-    case 'I':
-    case 'i':
-      sscanf(optarg, "%s", ifile);
-      flag++;
-      break;
-    case 'L':
-    case 'l':
-      sscanf(optarg, "%d", &lonflip);
-      flag++;
-      break;
-    case 'M':
-    case 'm':
-      i = sscanf(optarg, "%s", mfile);
-      if (i == 1)
-        merge = MB_YES;
-      flag++;
-      break;
-    case 'N':
-    case 'n':
-      stripmode++;
-      break;
-    case 'O':
-    case 'o':
-      sscanf(optarg, "%s", ofile);
-      flag++;
-      break;
-    case 'P':
-    case 'p':
-      sscanf(optarg, "%d", &pings);
-      flag++;
-      break;
-    case 'Q':
-    case 'q':
-      sscanf(optarg, "%lf", &sleep_factor);
-      use_sleep = MB_YES;
-      flag++;
-      break;
-    case 'R':
-    case 'r':
-      mb_get_bounds(optarg, bounds);
-      flag++;
-      break;
-    case 'S':
-    case 's':
-      sscanf(optarg, "%lf", &speedmin);
-      flag++;
-      break;
-    case 'T':
-    case 't':
-      sscanf(optarg, "%lf", &timegap);
-      flag++;
-      break;
-    case 'V':
-    case 'v':
-      verbose++;
-      break;
-    case '?':
-      errflg++;
-    }
-
-  /* if error flagged then print it and exit */
-  if (errflg) {
-    fprintf(stderr, "usage: %s\n", usage_message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    error = MB_ERROR_BAD_USAGE;
-    exit(error);
-  }
-
-  if (verbose == 1 || help) {
-    fprintf(stderr, "\nProgram %s\n", program_name);
-    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-  }
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-    fprintf(stderr, "dbg2  Control Parameters:\n");
-    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-    fprintf(stderr, "dbg2       help:           %d\n", help);
-    fprintf(stderr, "dbg2       pings:          %d\n", pings);
-    fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
-    fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
-    fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
-    fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
-    fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
-    fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
-    fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
-    fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
-    fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
-    fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
-    fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
-    fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
-    fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
-    fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
-    fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
-    fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
-    fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
-    fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
-    fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
-    fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
-    fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-    fprintf(stderr, "dbg2       input format:   %d\n", iformat);
-    fprintf(stderr, "dbg2       output format:  %d\n", oformat);
-    fprintf(stderr, "dbg2       merge format:   %d\n", mformat);
-    fprintf(stderr, "dbg2       input file:     %s\n", ifile);
-    fprintf(stderr, "dbg2       output file:    %s\n", ofile);
-    fprintf(stderr, "dbg2       merge file:     %s\n", mfile);
-    fprintf(stderr, "dbg2       insert comments:%d\n", insertcomments);
-    fprintf(stderr, "dbg2       comment file:   %s\n", commentfile);
-    fprintf(stderr, "dbg2       stripmode:      %d\n", stripmode);
-    fprintf(stderr, "dbg2       bath only:      %d\n", bathonly);
-    fprintf(stderr, "dbg2       use sleep:      %d\n", use_sleep);
-    fprintf(stderr, "dbg2       sleep factor:   %f\n", sleep_factor);
-    fprintf(stderr, "dbg2       fbtversion:     %d\n", fbtversion);
-  }
-
-  /* if help desired then print it and exit */
-  if (help) {
-    fprintf(stderr, "\n%s\n", help_message);
-    fprintf(stderr, "\nusage: %s\n", usage_message);
-    exit(error);
-  }
-
-  /* get format if required */
-  if (format == 0)
-    mb_get_format(verbose, ifile, NULL, &format, &error);
-
-  /* settle the input/output formats */
-  if (iformat <= 0 && oformat <= 0) {
-    iformat = format;
-    oformat = format;
-  }
-  else if (iformat > 0 && oformat <= 0)
-    oformat = iformat;
-
-  if (merge == MB_YES && mformat <= 0)
-    mb_get_format(verbose, mfile, NULL, &mformat, &error);
-
-  /* obtain format array locations - format ids will
-      be aliased to current ids if old format ids given */
-  if ((status = mb_format(verbose, &iformat, &error)) != MB_SUCCESS) {
-    mb_error(verbose, error, &message);
-    fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding input format %d:\n%s\n", iformat, message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(error);
-  }
-  if ((status = mb_format(verbose, &oformat, &error)) != MB_SUCCESS) {
-    mb_error(verbose, error, &message);
-    fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding output format %d:\n%s\n", oformat, message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(error);
-  }
-  if (merge == MB_YES && (status = mb_format(verbose, &mformat, &error)) != MB_SUCCESS) {
-    mb_error(verbose, error, &message);
-    fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding merge format %d:\n%s\n", mformat, message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(error);
-  }
-
-  /* initialize reading the input swath sonar file */
-  if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
-                             &btime_d, &etime_d, &ibeams_bath, &ibeams_amp, &ipixels_ss, &error)) != MB_SUCCESS) {
-    mb_error(verbose, error, &message);
-    fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-    fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(error);
-  }
-  imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-
-  /* initialize reading the merge swath sonar file */
-  if (merge == MB_YES &&
-      (status = mb_read_init(verbose, mfile, mformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mmbio_ptr,
-                             &btime_d, &etime_d, &mbeams_bath, &mbeams_amp, &mpixels_ss, &error)) != MB_SUCCESS) {
-    mb_error(verbose, error, &message);
-    fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
-    fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", mfile);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(error);
-  }
-  mmb_io_ptr = (struct mb_io_struct *)mmbio_ptr;
-
-  /* initialize writing the output swath sonar file */
-  if ((status = mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
-      MB_SUCCESS) {
-    mb_error(verbose, error, &message);
-    fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
-    fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(error);
-  }
-  omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
-
-  /* bathonly mode works only if output format is mbldeoih */
-  if (bathonly == MB_YES && oformat != MBF_MBLDEOIH) {
-    bathonly = MB_NO;
-    if (verbose > 0) {
-      fprintf(stderr, "\nThe -D option (strip amplitude and sidescan) is only valid for output format %d\n", MBF_MBLDEOIH);
-      fprintf(stderr, "Program %s is ignoring the -D argument\n", program_name);
-    }
-  }
-
-  /* if bathonly mode for mbldeoih format, assume we are making an fbt file
-      - set the format to use - this allows user to set use of old format
-      in .mbio_defaults file - purpose is to keep compatibility with
-      Fledermaus */
-  if (bathonly == MB_YES && oformat == MBF_MBLDEOIH) {
-    omb_io_ptr->save1 = fbtversion;
-  }
-
-    /* if stripmode set to more than strip comments, then set flag in imb_io_ptr */
-    if (stripmode > MBCOPY_STRIPMODE_COMMENTS) {
-        omb_io_ptr->save15 = MB_YES;
-    }
-
-  /* determine if full or partial copies will be made */
-  if (pings == 1 && imb_io_ptr->system != MB_SYS_NONE && imb_io_ptr->system == omb_io_ptr->system)
-    copymode = MBCOPY_FULL;
-  else if (pings == 1 && imb_io_ptr->system == MB_SYS_ELACMK2 && omb_io_ptr->system == MB_SYS_XSE)
-    copymode = MBCOPY_ELACMK2_TO_XSE;
-  else if (pings == 1 && imb_io_ptr->system == MB_SYS_XSE && omb_io_ptr->system == MB_SYS_ELACMK2)
-    copymode = MBCOPY_XSE_TO_ELACMK2;
-  else if (pings == 1 && imb_io_ptr->system == MB_SYS_SIMRAD && omb_io_ptr->format == MBF_EM300MBA)
-    copymode = MBCOPY_SIMRAD_TO_SIMRAD2;
-  else if (pings == 1 && omb_io_ptr->format == MBF_MBLDEOIH)
-    copymode = MBCOPY_ANY_TO_MBLDEOIH;
-#ifdef ENABLE_GSF
-  else if (pings == 1 && imb_io_ptr->format == MBF_XTFR8101 && omb_io_ptr->format == MBF_GSFGENMB)
-    copymode = MBCOPY_RESON8K_TO_GSF;
-#endif
-  else
-    copymode = MBCOPY_PARTIAL;
-
-#ifdef ENABLE_GSF
-  /* quit if an unsupported copy to GSF is requested */
-  if (omb_io_ptr->format == MBF_GSFGENMB && copymode == MBCOPY_PARTIAL) {
-    fprintf(stderr, "Requested copy from format %d to GSF format %d is unsupported\n", imb_io_ptr->format,
-            omb_io_ptr->format);
-    fprintf(stderr, "Please consider writing the necessary translation code for mbcopy.c \n");
-    fprintf(stderr, "\tand contributing it to the MB-System community\n");
-    exit(error);
-  }
-#endif
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  Copy mode set in program <%s>\n", program_name);
-    fprintf(stderr, "dbg2       pings:         %d\n", pings);
-    fprintf(stderr, "dbg2       iformat:       %d\n", iformat);
-    fprintf(stderr, "dbg2       oformat:       %d\n", oformat);
-    fprintf(stderr, "dbg2       isystem:       %d\n", imb_io_ptr->system);
-    fprintf(stderr, "dbg2       osystem:       %d\n", omb_io_ptr->system);
-    fprintf(stderr, "dbg2       copymode:      %d\n", copymode);
-  }
-
-  /* allocate memory for data arrays */
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&ibeamflag, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ibath, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&iamp, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status =
-        mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ibathacrosstrack, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ibathalongtrack, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&iss, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&issacrosstrack, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&issalongtrack, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&obeamflag, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&obath, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&oamp, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status =
-        mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&obathacrosstrack, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&obathalongtrack, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&oss, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ossacrosstrack, &error);
-  if (error == MB_ERROR_NO_ERROR)
-    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ossalongtrack, &error);
-
-  if (MB_YES == merge) {
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&mbeamflag, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&mbath, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&mamp, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status =
-          mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&mbathacrosstrack, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status =
-          mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&mbathalongtrack, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&mss, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status =
-          mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&mssacrosstrack, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&mssalongtrack, &error);
-  }
-
-  /* if error initializing memory then quit */
-  if (error != MB_ERROR_NO_ERROR) {
-    mb_error(verbose, error, &message);
-    fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    exit(error);
-  }
-
-  /* set up transfer rules */
-  if (omb_io_ptr->variable_beams == MB_YES && obeams_bath != ibeams_bath)
-    obeams_bath = ibeams_bath;
-  if (omb_io_ptr->variable_beams == MB_YES && obeams_amp != ibeams_amp)
-    obeams_amp = ibeams_amp;
-  if (omb_io_ptr->variable_beams == MB_YES && opixels_ss != ipixels_ss)
-    opixels_ss = ipixels_ss;
-  setup_transfer_rules(verbose, ibeams_bath, obeams_bath, &istart_bath, &iend_bath, &offset_bath, &error);
-  setup_transfer_rules(verbose, ibeams_amp, obeams_amp, &istart_amp, &iend_amp, &offset_amp, &error);
-  setup_transfer_rules(verbose, ipixels_ss, opixels_ss, &istart_ss, &iend_ss, &offset_ss, &error);
-
-  /* insert comments from file into output */
-  if (insertcomments == MB_YES) {
-    /* open file */
-    if ((fp = fopen(commentfile, "r")) == NULL) {
-      error = MB_ERROR_OPEN_FAIL;
-      fprintf(stderr, "\nUnable to Open Comment File <%s> for reading\n", commentfile);
-      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
-    }
-
-    /* read and output comment lines */
-    strncpy(comment, "\0", 256);
-    while ((result = fgets(comment, 256, fp)) == comment) {
-      kind = MB_DATA_COMMENT;
-      comment[(int)strlen(comment) - 1] = '\0';
-      status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-      if (error == MB_ERROR_NO_ERROR)
-        ocomment++;
-    }
-
-    /* close the file */
-    fclose(fp);
-  }
-
-  /* write comments to beginning of output file */
-  if (stripmode == MBCOPY_STRIPMODE_NONE) {
-    kind = MB_DATA_COMMENT;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "These data copied by program %s", program_name);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "MB-system Version %s", MB_VERSION);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    right_now = time((time_t *)0);
-    strcpy(date, ctime(&right_now));
-    date[strlen(date) - 1] = '\0';
-    if ((user_ptr = getenv("USER")) == NULL)
-      user_ptr = getenv("LOGNAME");
-    if (user_ptr != NULL)
-      strcpy(user, user_ptr);
-    else
-      strcpy(user, "unknown");
-    gethostname(host, 128);
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "Control Parameters:");
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Input file:         %s", ifile);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Input MBIO format:  %d", iformat);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    if (merge == MB_YES) {
-      strncpy(comment, "\0", 256);
-      sprintf(comment, "  Merge file:         %s", mfile);
-      status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-      if (error == MB_ERROR_NO_ERROR)
-        ocomment++;
-      strncpy(comment, "\0", 256);
-      sprintf(comment, "  Merge MBIO format:  %d", mformat);
-      status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-      if (error == MB_ERROR_NO_ERROR)
-        ocomment++;
-    }
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Output file:        %s", ofile);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Output MBIO format: %d", oformat);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Ping averaging:     %d", pings);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Longitude flip:     %d", lonflip);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Longitude bounds:   %f %f", bounds[0], bounds[1]);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Latitude bounds:    %f %f", bounds[2], bounds[3]);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Begin time:         %d %d %d %d %d %d %d", btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4],
-            btime_i[5], btime_i[6]);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  End time:           %d %d %d %d %d %d %d", etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4],
-            etime_i[5], etime_i[6]);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Minimum speed:      %f", speedmin);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, "  Time gap:           %f", timegap);
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-    strncpy(comment, "\0", 256);
-    sprintf(comment, " ");
-    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
-    if (error == MB_ERROR_NO_ERROR)
-      ocomment++;
-  }
-
-  /* start expecting data to be in time and space bounds */
-  inbounds = MB_YES;
-
-  /* read and write */
-  while (error <= MB_ERROR_NO_ERROR) {
-
-    /* read some data */
-    error = MB_ERROR_NO_ERROR;
-    status = MB_SUCCESS;
-    inbounds = MB_YES;
-    if (copymode != MBCOPY_PARTIAL) {
-      status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
-                          &distance, &altitude, &sonardepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
-                          ibathalongtrack, iss, issacrosstrack, issalongtrack, comment, &error);
-    }
-    else {
-      status = mb_get(verbose, imbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
-                      &altitude, &sonardepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
-                      ibathalongtrack, iss, issacrosstrack, issalongtrack, comment, &error);
-    }
-
-    /* increment counters and clear errors associated */
-    if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
-      idata = idata + pings;
-    else if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_COMMENT)
-      icomment++;
-
-    /* time gaps do not matter to mbcopy */
-    if (error == MB_ERROR_TIME_GAP) {
-      status = MB_SUCCESS;
-      error = MB_ERROR_NO_ERROR;
-    }
-
-    /* check for survey data in or out of bounds */
-    if (kind == MB_DATA_DATA) {
-      if (error == MB_ERROR_NO_ERROR)
-        inbounds = MB_YES;
-      else if (error == MB_ERROR_OUT_BOUNDS || error == MB_ERROR_OUT_TIME)
-        inbounds = MB_NO;
-    }
-
-    if (merge == MB_YES && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && inbounds == MB_YES) {
-      while (merror <= MB_ERROR_NO_ERROR && (mkind != MB_DATA_DATA || time_d - .001 > mtime_d)) {
-        /* find merge record */
-
-        mstatus = mb_get(verbose, mmbio_ptr, &mkind, &mpings, mtime_i, &mtime_d, &mnavlon, &mnavlat, &mspeed, &mheading,
-                         &mdistance, &maltitude, &msonardepth, &mnbath, &mnamp, &mnss, mbeamflag, mbath, mamp,
-                         mbathacrosstrack, mbathalongtrack, mss, mssacrosstrack, mssalongtrack, mcomment, &merror);
-      }
-
-      if (time_d + .001 < mtime_d || merror > 0) {
-        inbounds = MB_NO;
-      }
-    }
-
-    /* check numbers of input and output beams */
-    if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && nbath != ibeams_bath) {
-      ibeams_bath = nbath;
-      if (omb_io_ptr->variable_beams == MB_YES)
-        obeams_bath = ibeams_bath;
-      setup_transfer_rules(verbose, ibeams_bath, obeams_bath, &istart_bath, &iend_bath, &offset_bath, &error);
-    }
-    if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && namp != ibeams_amp) {
-      ibeams_amp = namp;
-      if (omb_io_ptr->variable_beams == MB_YES)
-        obeams_amp = ibeams_amp;
-      setup_transfer_rules(verbose, ibeams_amp, obeams_amp, &istart_amp, &iend_amp, &offset_amp, &error);
-    }
-    if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && nss != ipixels_ss) {
-      ipixels_ss = nss;
-      if (omb_io_ptr->variable_beams == MB_YES)
-        opixels_ss = ipixels_ss;
-      setup_transfer_rules(verbose, ipixels_ss, opixels_ss, &istart_ss, &iend_ss, &offset_ss, &error);
-    }
-
-    /* output error messages */
-    if (verbose >= 1) {
-      if (error == MB_ERROR_COMMENT) {
-        if (icomment == 1)
-          fprintf(stderr, "\nComments:\n");
-        fprintf(stderr, "%s\n", comment);
-      }
-      else if (kind == MB_DATA_DATA && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
-        mb_error(verbose, error, &message);
-        fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
-        fprintf(stderr, "Input Record: %d\n", idata);
-        fprintf(stderr, "Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5],
-                time_i[6]);
-      }
-      else if (kind == MB_DATA_DATA && error < MB_ERROR_NO_ERROR) {
-        mb_error(verbose, error, &message);
-        fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
-        fprintf(stderr, "Number of good records so far: %d\n", idata);
-      }
-      else if (error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
-        mb_error(verbose, error, &message);
-        fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
-        fprintf(stderr, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
-                time_i[5], time_i[6]);
-      }
-    }
-
-    /* do sleep if required */
-    if (use_sleep == MB_YES && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata == 1) {
-      time_d_last = time_d;
-    }
-    else if (use_sleep == MB_YES && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata > 1) {
-      sleep_time = (unsigned int)(sleep_factor * (time_d - time_d_last));
-      sleep(sleep_time);
-      time_d_last = time_d;
-    }
-
-    /* process some data */
-    if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
-      /* zero bathymetry */
-      for (j = 0; j < offset_bath; j++) {
-        obeamflag[j] = MB_FLAG_NULL;
-        obath[j] = 0.0;
-        obathacrosstrack[j] = 0.0;
-        obathalongtrack[j] = 0.0;
-      }
-
-      /* do bathymetry */
-      if (merge == MB_YES) {
-        /* merge data */
-        for (i = istart_bath; i < iend_bath; i++) {
-          j = i + offset_bath;
-          obeamflag[j] = mbeamflag[i];
-          obath[j] = mbath[i];
-          obathacrosstrack[j] = mbathacrosstrack[i];
-          obathalongtrack[j] = mbathalongtrack[i];
-        }
-      }
-      else {
-        for (i = istart_bath; i < iend_bath; i++) {
-          j = i + offset_bath;
-          obeamflag[j] = ibeamflag[i];
-          obath[j] = ibath[i];
-          obathacrosstrack[j] = ibathacrosstrack[i];
-          obathalongtrack[j] = ibathalongtrack[i];
-        }
-      }
-      for (j = iend_bath + offset_bath; j < obeams_bath; j++) {
-        obeamflag[j] = MB_FLAG_NULL;
-        obath[j] = 0.0;
-        obathacrosstrack[j] = 0.0;
-        obathalongtrack[j] = 0.0;
-      }
-
-      /* do amplitudes */
-      for (j = 0; j < offset_amp; j++) {
-        oamp[j] = 0.0;
-      }
-      for (i = istart_amp; i < iend_amp; i++) {
-        j = i + offset_amp;
-        oamp[j] = iamp[i];
-      }
-      for (j = iend_amp + offset_amp; j < obeams_amp; j++) {
-        oamp[j] = 0.0;
-      }
-
-      /* do sidescan */
-      for (j = 0; j < offset_ss; j++) {
-        oss[j] = 0.0;
-        ossacrosstrack[j] = 0.0;
-        ossalongtrack[j] = 0.0;
-      }
-      for (i = istart_ss; i < iend_ss; i++) {
-        j = i + offset_ss;
-        oss[j] = iss[i];
-        ossacrosstrack[j] = issacrosstrack[i];
-        ossalongtrack[j] = issalongtrack[i];
-      }
-      for (j = iend_ss + offset_ss; j < opixels_ss; j++) {
-        oss[j] = 0.0;
-        ossacrosstrack[j] = 0.0;
-        ossalongtrack[j] = 0.0;
-      }
-    }
-
-    /* handle special full translation cases */
-    if (copymode == MBCOPY_FULL && error == MB_ERROR_NO_ERROR) {
-      ostore_ptr = istore_ptr;
-    }
-    else if (copymode == MBCOPY_ELACMK2_TO_XSE && error == MB_ERROR_NO_ERROR) {
-      ostore_ptr = omb_io_ptr->store_data;
-      status = mbcopy_elacmk2_to_xse(verbose, istore_ptr, ostore_ptr, &error);
-    }
-    else if (copymode == MBCOPY_XSE_TO_ELACMK2 && error == MB_ERROR_NO_ERROR) {
-      ostore_ptr = omb_io_ptr->store_data;
-      status = mbcopy_xse_to_elacmk2(verbose, istore_ptr, ostore_ptr, &error);
-    }
-    else if (copymode == MBCOPY_SIMRAD_TO_SIMRAD2 && error == MB_ERROR_NO_ERROR) {
-      ostore_ptr = omb_io_ptr->store_data;
-      status = mbcopy_simrad_to_simrad2(verbose, istore_ptr, ostore_ptr, &error);
-    }
-#ifdef ENABLE_GSF
-    else if (copymode == MBCOPY_RESON8K_TO_GSF && error == MB_ERROR_NO_ERROR) {
-
-      ostore_ptr = omb_io_ptr->store_data;
-      status = mbcopy_reson8k_to_gsf(verbose, imbio_ptr, ombio_ptr, &error);
-    }
-#endif
-    else if (copymode == MBCOPY_ANY_TO_MBLDEOIH && error == MB_ERROR_NO_ERROR) {
-      if (kind == MB_DATA_DATA) {
-        mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &draft,
-                       &roll, &pitch, &heave, &error);
-        sensorhead_status = mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
-        sensorhead_status = mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
-      }
-      ostore_ptr = omb_io_ptr->store_data;
-      if (kind == MB_DATA_DATA || kind == MB_DATA_COMMENT) {
-        /* strip amplitude and sidescan if requested */
-        if (bathonly == MB_YES) {
-          namp = 0;
-          nss = 0;
-        }
-
-        /* copy the data to mbldeoih */
-        if (merge == MB_YES) {
-          status =
-              mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, sensortype,
-                                               time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
-                                     roll, pitch, heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack,
-                                     nbath, namp, nss, mbeamflag, mbath, iamp, mbathacrosstrack, mbathalongtrack, iss,
-                                     issacrosstrack, issalongtrack, comment, ombio_ptr, ostore_ptr, &error);
-        }
-        else {
-          status =
-              mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, sensortype,
-                                               time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
-                                     roll, pitch, heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack,
-                                     nbath, namp, nss, ibeamflag, ibath, iamp, ibathacrosstrack, ibathalongtrack, iss,
-                                     issacrosstrack, issalongtrack, comment, ombio_ptr, ostore_ptr, &error);
-        }
-      }
-      else
-        error = MB_ERROR_OTHER;
-    }
-    else if (copymode == MBCOPY_PARTIAL && error == MB_ERROR_NO_ERROR) {
-      istore_ptr = imb_io_ptr->store_data;
-      ostore_ptr = omb_io_ptr->store_data;
-      if (pings == 1 && (kind == MB_DATA_DATA
-                          || kind == MB_DATA_NAV ||kind == MB_DATA_NAV1
-                          || kind == MB_DATA_NAV2 ||kind == MB_DATA_NAV3)) {
-        mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &draft,
-                       &roll, &pitch, &heave, &error);
-        mb_insert_nav(verbose, ombio_ptr, ostore_ptr, time_i, time_d, navlon, navlat, speed, heading, draft, roll, pitch,
-                      heave, &error);
-      }
-      if (kind == MB_DATA_DATA) {
-        status = mb_insert(verbose, ombio_ptr, ostore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading, obeams_bath,
-                         obeams_amp, opixels_ss, obeamflag, obath, oamp, obathacrosstrack, obathalongtrack, oss,
-                         ossacrosstrack, ossalongtrack, comment, &error);
-      }
-    }
-
-    if (merge == MB_YES && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
-      switch (copymode) {
-      case MBCOPY_PARTIAL:
-      case MBCOPY_ANY_TO_MBLDEOIH:
-        /* Already looked after */
-        break;
-      case MBCOPY_FULL:
-      case MBCOPY_SIMRAD_TO_SIMRAD2:
-      case MBCOPY_ELACMK2_TO_XSE:
-      case MBCOPY_XSE_TO_ELACMK2:
-#ifdef ENABLE_GSF
-      case MBCOPY_RESON8K_TO_GSF:
-#endif
-        status = mb_insert(verbose, ombio_ptr, ostore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
-                           mbeams_bath, ibeams_amp, ipixels_ss, mbeamflag, mbath, iamp, mbathacrosstrack, mbathalongtrack,
-                           iss, issacrosstrack, issalongtrack, comment, &error);
-        break;
-      }
-    }
-
-    /* write some data */
-    if ((kind != MB_DATA_COMMENT && error == MB_ERROR_NO_ERROR && inbounds == MB_YES) ||
-        (kind == MB_DATA_COMMENT && stripmode == MBCOPY_STRIPMODE_NONE)) {
-      error = MB_ERROR_NO_ERROR;
-      status = mb_put_all(verbose, ombio_ptr, ostore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed, heading,
-                          obeams_bath, obeams_amp, opixels_ss, obeamflag, obath, oamp, obathacrosstrack, obathalongtrack,
-                          oss, ossacrosstrack, ossalongtrack, comment, &error);
-      if (status == MB_SUCCESS) {
-        if (kind == MB_DATA_DATA)
-          odata++;
-        else if (kind == MB_DATA_COMMENT)
-          ocomment++;
-      }
-      else {
-        mb_error(verbose, error, &message);
-        if (copymode != MBCOPY_PARTIAL)
-          fprintf(stderr, "\nMBIO Error returned from function <mb_put_all>:\n%s\n", message);
-        else
-          fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
-        fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
-        fprintf(stderr, "Output Record: %d\n", odata + 1);
-        fprintf(stderr, "Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5],
-                time_i[6]);
-        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(error);
-      }
-    }
-  }
-
-  /* close the files */
-  status = mb_close(verbose, &imbio_ptr, &error);
-  status = mb_close(verbose, &ombio_ptr, &error);
-
-  /* check memory */
-  if (verbose >= 4)
-    status = mb_memory_list(verbose, &error);
-
-  /* give the statistics */
-  if (verbose >= 1) {
-    fprintf(stderr, "\n%d input data records\n", idata);
-    fprintf(stderr, "%d input comment records\n", icomment);
-    fprintf(stderr, "%d output data records\n", odata);
-    fprintf(stderr, "%d output comment records\n", ocomment);
-  }
-
-  exit(error);
-}
 /*--------------------------------------------------------------------*/
 int setup_transfer_rules(int verbose, int ibeams, int obeams, int *istart, int *iend, int *offset, int *error) {
   int status = MB_SUCCESS;
@@ -2739,4 +1718,1008 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
   return (status);
 }
 #endif  // ENABLE_GSF
+
+/*--------------------------------------------------------------------*/
+
+int main(int argc, char **argv) {
+  /* id variables */
+  char program_name[] = "MBcopy";
+  char help_message[] = "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified "
+                        "conversions.  Options include \nwindowing in time and space and ping averaging.  The input and "
+                        "\noutput data formats may differ, though not all possible combinations \nmake sense.  The default "
+                        "input and output streams are stdin and stdout.";
+  char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  "
+                         "-Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
+
+  int errflg = 0;
+  int c;
+  int help = 0;
+  int flag = 0;
+
+  /* MBIO status variables */
+  int status;
+  int verbose = 0;
+  int error = MB_ERROR_NO_ERROR;
+  char *message;
+
+  /* MBIO read control parameters */
+  int iformat = 0;
+  int pings;
+  int lonflip;
+  double bounds[4];
+  int btime_i[7];
+  int etime_i[7];
+  double btime_d;
+  double etime_d;
+  double speedmin;
+  double timegap;
+  int fbtversion;
+  char ifile[MB_PATH_MAXLINE];
+  int ibeams_bath;
+  int ibeams_amp;
+  int ipixels_ss;
+  void *imbio_ptr = NULL;
+
+  /* MBIO write control parameters */
+  int oformat = 0;
+  char ofile[MB_PATH_MAXLINE];
+  int obeams_bath;
+  int obeams_amp;
+  int opixels_ss;
+  void *ombio_ptr = NULL;
+
+  /* MBIO merge control parameters */
+  int merge = MB_NO;
+  int mformat = 0;
+  char mfile[MB_PATH_MAXLINE];
+  int mbeams_bath;
+  int mbeams_amp;
+  int mpixels_ss;
+  void *mmbio_ptr = NULL;
+
+  /* MBIO read and write values */
+  struct mb_io_struct *omb_io_ptr;
+  struct mb_io_struct *imb_io_ptr;
+  struct mb_io_struct *mmb_io_ptr;
+  void *istore_ptr;
+  void *ostore_ptr;
+  int kind;
+  int time_i[7];
+  double time_d;
+  double navlon;
+  double navlat;
+  double speed;
+  double heading;
+  double distance;
+  double altitude;
+  double sonardepth;
+  char *ibeamflag = NULL;
+  double *ibath = NULL;
+  double *ibathacrosstrack = NULL;
+  double *ibathalongtrack = NULL;
+  double *iamp = NULL;
+  double *iss = NULL;
+  double *issacrosstrack = NULL;
+  double *issalongtrack = NULL;
+  char *obeamflag = NULL;
+  double *obath = NULL;
+  double *obathacrosstrack = NULL;
+  double *obathalongtrack = NULL;
+  double *oamp = NULL;
+  double *oss = NULL;
+  double *ossacrosstrack = NULL;
+  double *ossalongtrack = NULL;
+  double draft;
+  double roll;
+  double pitch;
+  double heave;
+
+  int mstatus;
+  int merror = MB_ERROR_NO_ERROR;
+  int mkind = MB_DATA_NONE;
+  int mpings = 0;
+  int mtime_i[7];
+  double mtime_d = 0.0;
+  double mnavlon;
+  double mnavlat;
+  double mspeed;
+  double mheading;
+  double mdistance;
+  double maltitude;
+  double msonardepth;
+
+    int sensorhead_status = MB_SUCCESS;
+    int sensorhead_error = MB_ERROR_NO_ERROR;
+    int sensorhead = 0;
+    int sensortype = 0;
+
+  char mcomment[MB_COMMENT_MAXLINE];
+  int mnbath, mnamp, mnss;
+  char *mbeamflag = NULL;
+  double *mbath = NULL;
+  double *mbathacrosstrack = NULL;
+  double *mbathalongtrack = NULL;
+  double *mamp = NULL;
+  double *mss = NULL;
+  double *mssacrosstrack = NULL;
+  double *mssalongtrack = NULL;
+  int idata = 0;
+  int icomment = 0;
+  int odata = 0;
+  int ocomment = 0;
+  int nbath, namp, nss;
+  int istart_bath, iend_bath, offset_bath;
+  int istart_amp, iend_amp, offset_amp;
+  int istart_ss, iend_ss, offset_ss;
+  char comment[MB_COMMENT_MAXLINE];
+  int insertcomments = MB_NO;
+  int bathonly = MB_NO;
+  char commentfile[MB_PATH_MAXLINE];
+  int stripmode = MBCOPY_STRIPMODE_NONE;
+  int copymode = MBCOPY_PARTIAL;
+  int use_sleep = MB_NO;
+  int inbounds = MB_YES;
+
+  /* sleep variable */
+  double sleep_factor = 1.0;
+  double time_d_last;
+  unsigned int sleep_time;
+
+  /* time, user, host variables */
+  time_t right_now;
+  char date[32], user[128], *user_ptr, host[128];
+
+  FILE *fp;
+  char *result;
+  int format;
+  double seconds;
+  int i, j;
+
+  char *ctime();
+  char *getenv();
+
+  /* get current default values */
+  status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+  status = mb_fbtversion(verbose, &fbtversion);
+
+  /* set default input and output */
+  iformat = 0;
+  oformat = 0;
+  mformat = 0;
+  strcpy(commentfile, "\0");
+  strcpy(ifile, "stdin");
+  strcpy(ofile, "stdout");
+
+  /* process argument list */
+  while ((c = getopt(argc, argv, "B:b:C:c:DdE:e:F:f:HhI:i:L:l:M:m:NnO:o:P:p:Q:q:R:r:S:s:T:t:Vv")) != -1)
+    switch (c) {
+    case 'B':
+    case 'b':
+      sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &seconds);
+      btime_i[5] = (int)floor(seconds);
+      btime_i[6] = 1000000 * (seconds - btime_i[5]);
+      flag++;
+      break;
+    case 'C':
+    case 'c':
+      sscanf(optarg, "%s", commentfile);
+      insertcomments = MB_YES;
+      flag++;
+      break;
+    case 'D':
+    case 'd':
+      bathonly = MB_YES;
+      flag++;
+      break;
+    case 'E':
+    case 'e':
+      sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &seconds);
+      etime_i[5] = (int)floor(seconds);
+      etime_i[6] = 1000000 * (seconds - btime_i[5]);
+      flag++;
+      break;
+    case 'F':
+    case 'f':
+      i = sscanf(optarg, "%d/%d/%d", &iformat, &oformat, &mformat);
+      if (i == 1)
+        oformat = iformat;
+      flag++;
+      break;
+    case 'H':
+    case 'h':
+      help++;
+      break;
+    case 'I':
+    case 'i':
+      sscanf(optarg, "%s", ifile);
+      flag++;
+      break;
+    case 'L':
+    case 'l':
+      sscanf(optarg, "%d", &lonflip);
+      flag++;
+      break;
+    case 'M':
+    case 'm':
+      i = sscanf(optarg, "%s", mfile);
+      if (i == 1)
+        merge = MB_YES;
+      flag++;
+      break;
+    case 'N':
+    case 'n':
+      stripmode++;
+      break;
+    case 'O':
+    case 'o':
+      sscanf(optarg, "%s", ofile);
+      flag++;
+      break;
+    case 'P':
+    case 'p':
+      sscanf(optarg, "%d", &pings);
+      flag++;
+      break;
+    case 'Q':
+    case 'q':
+      sscanf(optarg, "%lf", &sleep_factor);
+      use_sleep = MB_YES;
+      flag++;
+      break;
+    case 'R':
+    case 'r':
+      mb_get_bounds(optarg, bounds);
+      flag++;
+      break;
+    case 'S':
+    case 's':
+      sscanf(optarg, "%lf", &speedmin);
+      flag++;
+      break;
+    case 'T':
+    case 't':
+      sscanf(optarg, "%lf", &timegap);
+      flag++;
+      break;
+    case 'V':
+    case 'v':
+      verbose++;
+      break;
+    case '?':
+      errflg++;
+    }
+
+  /* if error flagged then print it and exit */
+  if (errflg) {
+    fprintf(stderr, "usage: %s\n", usage_message);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    error = MB_ERROR_BAD_USAGE;
+    exit(error);
+  }
+
+  if (verbose == 1 || help) {
+    fprintf(stderr, "\nProgram %s\n", program_name);
+    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+  }
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Control Parameters:\n");
+    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+    fprintf(stderr, "dbg2       help:           %d\n", help);
+    fprintf(stderr, "dbg2       pings:          %d\n", pings);
+    fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
+    fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
+    fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
+    fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
+    fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
+    fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
+    fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
+    fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
+    fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
+    fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
+    fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
+    fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
+    fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
+    fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
+    fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
+    fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
+    fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
+    fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
+    fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
+    fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
+    fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
+    fprintf(stderr, "dbg2       input format:   %d\n", iformat);
+    fprintf(stderr, "dbg2       output format:  %d\n", oformat);
+    fprintf(stderr, "dbg2       merge format:   %d\n", mformat);
+    fprintf(stderr, "dbg2       input file:     %s\n", ifile);
+    fprintf(stderr, "dbg2       output file:    %s\n", ofile);
+    fprintf(stderr, "dbg2       merge file:     %s\n", mfile);
+    fprintf(stderr, "dbg2       insert comments:%d\n", insertcomments);
+    fprintf(stderr, "dbg2       comment file:   %s\n", commentfile);
+    fprintf(stderr, "dbg2       stripmode:      %d\n", stripmode);
+    fprintf(stderr, "dbg2       bath only:      %d\n", bathonly);
+    fprintf(stderr, "dbg2       use sleep:      %d\n", use_sleep);
+    fprintf(stderr, "dbg2       sleep factor:   %f\n", sleep_factor);
+    fprintf(stderr, "dbg2       fbtversion:     %d\n", fbtversion);
+  }
+
+  /* if help desired then print it and exit */
+  if (help) {
+    fprintf(stderr, "\n%s\n", help_message);
+    fprintf(stderr, "\nusage: %s\n", usage_message);
+    exit(error);
+  }
+
+  /* get format if required */
+  if (format == 0)
+    mb_get_format(verbose, ifile, NULL, &format, &error);
+
+  /* settle the input/output formats */
+  if (iformat <= 0 && oformat <= 0) {
+    iformat = format;
+    oformat = format;
+  }
+  else if (iformat > 0 && oformat <= 0)
+    oformat = iformat;
+
+  if (merge == MB_YES && mformat <= 0)
+    mb_get_format(verbose, mfile, NULL, &mformat, &error);
+
+  /* obtain format array locations - format ids will
+      be aliased to current ids if old format ids given */
+  if ((status = mb_format(verbose, &iformat, &error)) != MB_SUCCESS) {
+    mb_error(verbose, error, &message);
+    fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding input format %d:\n%s\n", iformat, message);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(error);
+  }
+  if ((status = mb_format(verbose, &oformat, &error)) != MB_SUCCESS) {
+    mb_error(verbose, error, &message);
+    fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding output format %d:\n%s\n", oformat, message);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(error);
+  }
+  if (merge == MB_YES && (status = mb_format(verbose, &mformat, &error)) != MB_SUCCESS) {
+    mb_error(verbose, error, &message);
+    fprintf(stderr, "\nMBIO Error returned from function <mb_format> regarding merge format %d:\n%s\n", mformat, message);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(error);
+  }
+
+  /* initialize reading the input swath sonar file */
+  if ((status = mb_read_init(verbose, ifile, iformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
+                             &btime_d, &etime_d, &ibeams_bath, &ibeams_amp, &ipixels_ss, &error)) != MB_SUCCESS) {
+    mb_error(verbose, error, &message);
+    fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+    fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", ifile);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(error);
+  }
+  imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+
+  /* initialize reading the merge swath sonar file */
+  if (merge == MB_YES &&
+      (status = mb_read_init(verbose, mfile, mformat, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &mmbio_ptr,
+                             &btime_d, &etime_d, &mbeams_bath, &mbeams_amp, &mpixels_ss, &error)) != MB_SUCCESS) {
+    mb_error(verbose, error, &message);
+    fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
+    fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", mfile);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(error);
+  }
+  mmb_io_ptr = (struct mb_io_struct *)mmbio_ptr;
+
+  /* initialize writing the output swath sonar file */
+  if ((status = mb_write_init(verbose, ofile, oformat, &ombio_ptr, &obeams_bath, &obeams_amp, &opixels_ss, &error)) !=
+      MB_SUCCESS) {
+    mb_error(verbose, error, &message);
+    fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
+    fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", ofile);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(error);
+  }
+  omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
+
+  /* bathonly mode works only if output format is mbldeoih */
+  if (bathonly == MB_YES && oformat != MBF_MBLDEOIH) {
+    bathonly = MB_NO;
+    if (verbose > 0) {
+      fprintf(stderr, "\nThe -D option (strip amplitude and sidescan) is only valid for output format %d\n", MBF_MBLDEOIH);
+      fprintf(stderr, "Program %s is ignoring the -D argument\n", program_name);
+    }
+  }
+
+  /* if bathonly mode for mbldeoih format, assume we are making an fbt file
+      - set the format to use - this allows user to set use of old format
+      in .mbio_defaults file - purpose is to keep compatibility with
+      Fledermaus */
+  if (bathonly == MB_YES && oformat == MBF_MBLDEOIH) {
+    omb_io_ptr->save1 = fbtversion;
+  }
+
+    /* if stripmode set to more than strip comments, then set flag in imb_io_ptr */
+    if (stripmode > MBCOPY_STRIPMODE_COMMENTS) {
+        omb_io_ptr->save15 = MB_YES;
+    }
+
+  /* determine if full or partial copies will be made */
+  if (pings == 1 && imb_io_ptr->system != MB_SYS_NONE && imb_io_ptr->system == omb_io_ptr->system)
+    copymode = MBCOPY_FULL;
+  else if (pings == 1 && imb_io_ptr->system == MB_SYS_ELACMK2 && omb_io_ptr->system == MB_SYS_XSE)
+    copymode = MBCOPY_ELACMK2_TO_XSE;
+  else if (pings == 1 && imb_io_ptr->system == MB_SYS_XSE && omb_io_ptr->system == MB_SYS_ELACMK2)
+    copymode = MBCOPY_XSE_TO_ELACMK2;
+  else if (pings == 1 && imb_io_ptr->system == MB_SYS_SIMRAD && omb_io_ptr->format == MBF_EM300MBA)
+    copymode = MBCOPY_SIMRAD_TO_SIMRAD2;
+  else if (pings == 1 && omb_io_ptr->format == MBF_MBLDEOIH)
+    copymode = MBCOPY_ANY_TO_MBLDEOIH;
+#ifdef ENABLE_GSF
+  else if (pings == 1 && imb_io_ptr->format == MBF_XTFR8101 && omb_io_ptr->format == MBF_GSFGENMB)
+    copymode = MBCOPY_RESON8K_TO_GSF;
+#endif
+  else
+    copymode = MBCOPY_PARTIAL;
+
+#ifdef ENABLE_GSF
+  /* quit if an unsupported copy to GSF is requested */
+  if (omb_io_ptr->format == MBF_GSFGENMB && copymode == MBCOPY_PARTIAL) {
+    fprintf(stderr, "Requested copy from format %d to GSF format %d is unsupported\n", imb_io_ptr->format,
+            omb_io_ptr->format);
+    fprintf(stderr, "Please consider writing the necessary translation code for mbcopy.c \n");
+    fprintf(stderr, "\tand contributing it to the MB-System community\n");
+    exit(error);
+  }
+#endif
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Copy mode set in program <%s>\n", program_name);
+    fprintf(stderr, "dbg2       pings:         %d\n", pings);
+    fprintf(stderr, "dbg2       iformat:       %d\n", iformat);
+    fprintf(stderr, "dbg2       oformat:       %d\n", oformat);
+    fprintf(stderr, "dbg2       isystem:       %d\n", imb_io_ptr->system);
+    fprintf(stderr, "dbg2       osystem:       %d\n", omb_io_ptr->system);
+    fprintf(stderr, "dbg2       copymode:      %d\n", copymode);
+  }
+
+  /* allocate memory for data arrays */
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&ibeamflag, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ibath, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&iamp, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status =
+        mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ibathacrosstrack, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&ibathalongtrack, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&iss, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&issacrosstrack, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&issalongtrack, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&obeamflag, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&obath, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&oamp, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status =
+        mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&obathacrosstrack, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&obathalongtrack, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&oss, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ossacrosstrack, &error);
+  if (error == MB_ERROR_NO_ERROR)
+    status = mb_register_array(verbose, ombio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ossalongtrack, &error);
+
+  if (MB_YES == merge) {
+    if (error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&mbeamflag, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&mbath, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_AMPLITUDE, sizeof(double), (void **)&mamp, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      status =
+          mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&mbathacrosstrack, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      status =
+          mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), (void **)&mbathalongtrack, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&mss, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      status =
+          mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&mssacrosstrack, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      status = mb_register_array(verbose, mmbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&mssalongtrack, &error);
+  }
+
+  /* if error initializing memory then quit */
+  if (error != MB_ERROR_NO_ERROR) {
+    mb_error(verbose, error, &message);
+    fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
+    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+    exit(error);
+  }
+
+  /* set up transfer rules */
+  if (omb_io_ptr->variable_beams == MB_YES && obeams_bath != ibeams_bath)
+    obeams_bath = ibeams_bath;
+  if (omb_io_ptr->variable_beams == MB_YES && obeams_amp != ibeams_amp)
+    obeams_amp = ibeams_amp;
+  if (omb_io_ptr->variable_beams == MB_YES && opixels_ss != ipixels_ss)
+    opixels_ss = ipixels_ss;
+  setup_transfer_rules(verbose, ibeams_bath, obeams_bath, &istart_bath, &iend_bath, &offset_bath, &error);
+  setup_transfer_rules(verbose, ibeams_amp, obeams_amp, &istart_amp, &iend_amp, &offset_amp, &error);
+  setup_transfer_rules(verbose, ipixels_ss, opixels_ss, &istart_ss, &iend_ss, &offset_ss, &error);
+
+  /* insert comments from file into output */
+  if (insertcomments == MB_YES) {
+    /* open file */
+    if ((fp = fopen(commentfile, "r")) == NULL) {
+      error = MB_ERROR_OPEN_FAIL;
+      fprintf(stderr, "\nUnable to Open Comment File <%s> for reading\n", commentfile);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(error);
+    }
+
+    /* read and output comment lines */
+    strncpy(comment, "\0", 256);
+    while ((result = fgets(comment, 256, fp)) == comment) {
+      kind = MB_DATA_COMMENT;
+      comment[(int)strlen(comment) - 1] = '\0';
+      status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+      if (error == MB_ERROR_NO_ERROR)
+        ocomment++;
+    }
+
+    /* close the file */
+    fclose(fp);
+  }
+
+  /* write comments to beginning of output file */
+  if (stripmode == MBCOPY_STRIPMODE_NONE) {
+    kind = MB_DATA_COMMENT;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "These data copied by program %s", program_name);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "MB-system Version %s", MB_VERSION);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    right_now = time((time_t *)0);
+    strcpy(date, ctime(&right_now));
+    date[strlen(date) - 1] = '\0';
+    if ((user_ptr = getenv("USER")) == NULL)
+      user_ptr = getenv("LOGNAME");
+    if (user_ptr != NULL)
+      strcpy(user, user_ptr);
+    else
+      strcpy(user, "unknown");
+    gethostname(host, 128);
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "Run by user <%s> on cpu <%s> at <%s>", user, host, date);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "Control Parameters:");
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Input file:         %s", ifile);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Input MBIO format:  %d", iformat);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    if (merge == MB_YES) {
+      strncpy(comment, "\0", 256);
+      sprintf(comment, "  Merge file:         %s", mfile);
+      status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+      if (error == MB_ERROR_NO_ERROR)
+        ocomment++;
+      strncpy(comment, "\0", 256);
+      sprintf(comment, "  Merge MBIO format:  %d", mformat);
+      status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+      if (error == MB_ERROR_NO_ERROR)
+        ocomment++;
+    }
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Output file:        %s", ofile);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Output MBIO format: %d", oformat);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Ping averaging:     %d", pings);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Longitude flip:     %d", lonflip);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Longitude bounds:   %f %f", bounds[0], bounds[1]);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Latitude bounds:    %f %f", bounds[2], bounds[3]);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Begin time:         %d %d %d %d %d %d %d", btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4],
+            btime_i[5], btime_i[6]);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  End time:           %d %d %d %d %d %d %d", etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4],
+            etime_i[5], etime_i[6]);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Minimum speed:      %f", speedmin);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, "  Time gap:           %f", timegap);
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+    strncpy(comment, "\0", 256);
+    sprintf(comment, " ");
+    status = mb_put_comment(verbose, ombio_ptr, comment, &error);
+    if (error == MB_ERROR_NO_ERROR)
+      ocomment++;
+  }
+
+  /* start expecting data to be in time and space bounds */
+  inbounds = MB_YES;
+
+  /* read and write */
+  while (error <= MB_ERROR_NO_ERROR) {
+
+    /* read some data */
+    error = MB_ERROR_NO_ERROR;
+    status = MB_SUCCESS;
+    inbounds = MB_YES;
+    if (copymode != MBCOPY_PARTIAL) {
+      status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+                          &distance, &altitude, &sonardepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
+                          ibathalongtrack, iss, issacrosstrack, issalongtrack, comment, &error);
+    }
+    else {
+      status = mb_get(verbose, imbio_ptr, &kind, &pings, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
+                      &altitude, &sonardepth, &nbath, &namp, &nss, ibeamflag, ibath, iamp, ibathacrosstrack,
+                      ibathalongtrack, iss, issacrosstrack, issalongtrack, comment, &error);
+    }
+
+    /* increment counters and clear errors associated */
+    if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
+      idata = idata + pings;
+    else if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_COMMENT)
+      icomment++;
+
+    /* time gaps do not matter to mbcopy */
+    if (error == MB_ERROR_TIME_GAP) {
+      status = MB_SUCCESS;
+      error = MB_ERROR_NO_ERROR;
+    }
+
+    /* check for survey data in or out of bounds */
+    if (kind == MB_DATA_DATA) {
+      if (error == MB_ERROR_NO_ERROR)
+        inbounds = MB_YES;
+      else if (error == MB_ERROR_OUT_BOUNDS || error == MB_ERROR_OUT_TIME)
+        inbounds = MB_NO;
+    }
+
+    if (merge == MB_YES && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && inbounds == MB_YES) {
+      while (merror <= MB_ERROR_NO_ERROR && (mkind != MB_DATA_DATA || time_d - .001 > mtime_d)) {
+        /* find merge record */
+
+        mstatus = mb_get(verbose, mmbio_ptr, &mkind, &mpings, mtime_i, &mtime_d, &mnavlon, &mnavlat, &mspeed, &mheading,
+                         &mdistance, &maltitude, &msonardepth, &mnbath, &mnamp, &mnss, mbeamflag, mbath, mamp,
+                         mbathacrosstrack, mbathalongtrack, mss, mssacrosstrack, mssalongtrack, mcomment, &merror);
+      }
+
+      if (time_d + .001 < mtime_d || merror > 0) {
+        inbounds = MB_NO;
+      }
+    }
+
+    /* check numbers of input and output beams */
+    if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && nbath != ibeams_bath) {
+      ibeams_bath = nbath;
+      if (omb_io_ptr->variable_beams == MB_YES)
+        obeams_bath = ibeams_bath;
+      setup_transfer_rules(verbose, ibeams_bath, obeams_bath, &istart_bath, &iend_bath, &offset_bath, &error);
+    }
+    if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && namp != ibeams_amp) {
+      ibeams_amp = namp;
+      if (omb_io_ptr->variable_beams == MB_YES)
+        obeams_amp = ibeams_amp;
+      setup_transfer_rules(verbose, ibeams_amp, obeams_amp, &istart_amp, &iend_amp, &offset_amp, &error);
+    }
+    if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR && nss != ipixels_ss) {
+      ipixels_ss = nss;
+      if (omb_io_ptr->variable_beams == MB_YES)
+        opixels_ss = ipixels_ss;
+      setup_transfer_rules(verbose, ipixels_ss, opixels_ss, &istart_ss, &iend_ss, &offset_ss, &error);
+    }
+
+    /* output error messages */
+    if (verbose >= 1) {
+      if (error == MB_ERROR_COMMENT) {
+        if (icomment == 1)
+          fprintf(stderr, "\nComments:\n");
+        fprintf(stderr, "%s\n", comment);
+      }
+      else if (kind == MB_DATA_DATA && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
+        mb_error(verbose, error, &message);
+        fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
+        fprintf(stderr, "Input Record: %d\n", idata);
+        fprintf(stderr, "Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5],
+                time_i[6]);
+      }
+      else if (kind == MB_DATA_DATA && error < MB_ERROR_NO_ERROR) {
+        mb_error(verbose, error, &message);
+        fprintf(stderr, "\nNonfatal MBIO Error:\n%s\n", message);
+        fprintf(stderr, "Number of good records so far: %d\n", idata);
+      }
+      else if (error > MB_ERROR_NO_ERROR && error != MB_ERROR_EOF) {
+        mb_error(verbose, error, &message);
+        fprintf(stderr, "\nFatal MBIO Error:\n%s\n", message);
+        fprintf(stderr, "Last Good Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4],
+                time_i[5], time_i[6]);
+      }
+    }
+
+    /* do sleep if required */
+    if (use_sleep == MB_YES && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata == 1) {
+      time_d_last = time_d;
+    }
+    else if (use_sleep == MB_YES && kind == MB_DATA_DATA && error <= MB_ERROR_NO_ERROR && idata > 1) {
+      sleep_time = (unsigned int)(sleep_factor * (time_d - time_d_last));
+      sleep(sleep_time);
+      time_d_last = time_d;
+    }
+
+    /* process some data */
+    if (copymode == MBCOPY_PARTIAL && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
+      /* zero bathymetry */
+      for (j = 0; j < offset_bath; j++) {
+        obeamflag[j] = MB_FLAG_NULL;
+        obath[j] = 0.0;
+        obathacrosstrack[j] = 0.0;
+        obathalongtrack[j] = 0.0;
+      }
+
+      /* do bathymetry */
+      if (merge == MB_YES) {
+        /* merge data */
+        for (i = istart_bath; i < iend_bath; i++) {
+          j = i + offset_bath;
+          obeamflag[j] = mbeamflag[i];
+          obath[j] = mbath[i];
+          obathacrosstrack[j] = mbathacrosstrack[i];
+          obathalongtrack[j] = mbathalongtrack[i];
+        }
+      }
+      else {
+        for (i = istart_bath; i < iend_bath; i++) {
+          j = i + offset_bath;
+          obeamflag[j] = ibeamflag[i];
+          obath[j] = ibath[i];
+          obathacrosstrack[j] = ibathacrosstrack[i];
+          obathalongtrack[j] = ibathalongtrack[i];
+        }
+      }
+      for (j = iend_bath + offset_bath; j < obeams_bath; j++) {
+        obeamflag[j] = MB_FLAG_NULL;
+        obath[j] = 0.0;
+        obathacrosstrack[j] = 0.0;
+        obathalongtrack[j] = 0.0;
+      }
+
+      /* do amplitudes */
+      for (j = 0; j < offset_amp; j++) {
+        oamp[j] = 0.0;
+      }
+      for (i = istart_amp; i < iend_amp; i++) {
+        j = i + offset_amp;
+        oamp[j] = iamp[i];
+      }
+      for (j = iend_amp + offset_amp; j < obeams_amp; j++) {
+        oamp[j] = 0.0;
+      }
+
+      /* do sidescan */
+      for (j = 0; j < offset_ss; j++) {
+        oss[j] = 0.0;
+        ossacrosstrack[j] = 0.0;
+        ossalongtrack[j] = 0.0;
+      }
+      for (i = istart_ss; i < iend_ss; i++) {
+        j = i + offset_ss;
+        oss[j] = iss[i];
+        ossacrosstrack[j] = issacrosstrack[i];
+        ossalongtrack[j] = issalongtrack[i];
+      }
+      for (j = iend_ss + offset_ss; j < opixels_ss; j++) {
+        oss[j] = 0.0;
+        ossacrosstrack[j] = 0.0;
+        ossalongtrack[j] = 0.0;
+      }
+    }
+
+    /* handle special full translation cases */
+    if (copymode == MBCOPY_FULL && error == MB_ERROR_NO_ERROR) {
+      ostore_ptr = istore_ptr;
+    }
+    else if (copymode == MBCOPY_ELACMK2_TO_XSE && error == MB_ERROR_NO_ERROR) {
+      ostore_ptr = omb_io_ptr->store_data;
+      status = mbcopy_elacmk2_to_xse(verbose, istore_ptr, ostore_ptr, &error);
+    }
+    else if (copymode == MBCOPY_XSE_TO_ELACMK2 && error == MB_ERROR_NO_ERROR) {
+      ostore_ptr = omb_io_ptr->store_data;
+      status = mbcopy_xse_to_elacmk2(verbose, istore_ptr, ostore_ptr, &error);
+    }
+    else if (copymode == MBCOPY_SIMRAD_TO_SIMRAD2 && error == MB_ERROR_NO_ERROR) {
+      ostore_ptr = omb_io_ptr->store_data;
+      status = mbcopy_simrad_to_simrad2(verbose, istore_ptr, ostore_ptr, &error);
+    }
+#ifdef ENABLE_GSF
+    else if (copymode == MBCOPY_RESON8K_TO_GSF && error == MB_ERROR_NO_ERROR) {
+
+      ostore_ptr = omb_io_ptr->store_data;
+      status = mbcopy_reson8k_to_gsf(verbose, imbio_ptr, ombio_ptr, &error);
+    }
+#endif
+    else if (copymode == MBCOPY_ANY_TO_MBLDEOIH && error == MB_ERROR_NO_ERROR) {
+      if (kind == MB_DATA_DATA) {
+        mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &draft,
+                       &roll, &pitch, &heave, &error);
+        sensorhead_status = mb_sensorhead(verbose, imbio_ptr, istore_ptr, &sensorhead, &sensorhead_error);
+        sensorhead_status = mb_sonartype(verbose, imbio_ptr, istore_ptr, &sensortype, &sensorhead_error);
+      }
+      ostore_ptr = omb_io_ptr->store_data;
+      if (kind == MB_DATA_DATA || kind == MB_DATA_COMMENT) {
+        /* strip amplitude and sidescan if requested */
+        if (bathonly == MB_YES) {
+          namp = 0;
+          nss = 0;
+        }
+
+        /* copy the data to mbldeoih */
+        if (merge == MB_YES) {
+          status =
+              mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, sensortype,
+                                               time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
+                                     roll, pitch, heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack,
+                                     nbath, namp, nss, mbeamflag, mbath, iamp, mbathacrosstrack, mbathalongtrack, iss,
+                                     issacrosstrack, issalongtrack, comment, ombio_ptr, ostore_ptr, &error);
+        }
+        else {
+          status =
+              mbcopy_any_to_mbldeoih(verbose, kind, sensorhead, sensortype,
+                                               time_i, time_d, navlon, navlat, speed, heading, draft, altitude,
+                                     roll, pitch, heave, imb_io_ptr->beamwidth_xtrack, imb_io_ptr->beamwidth_ltrack,
+                                     nbath, namp, nss, ibeamflag, ibath, iamp, ibathacrosstrack, ibathalongtrack, iss,
+                                     issacrosstrack, issalongtrack, comment, ombio_ptr, ostore_ptr, &error);
+        }
+      }
+      else
+        error = MB_ERROR_OTHER;
+    }
+    else if (copymode == MBCOPY_PARTIAL && error == MB_ERROR_NO_ERROR) {
+      istore_ptr = imb_io_ptr->store_data;
+      ostore_ptr = omb_io_ptr->store_data;
+      if (pings == 1 && (kind == MB_DATA_DATA
+                          || kind == MB_DATA_NAV ||kind == MB_DATA_NAV1
+                          || kind == MB_DATA_NAV2 ||kind == MB_DATA_NAV3)) {
+        mb_extract_nav(verbose, imbio_ptr, istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &draft,
+                       &roll, &pitch, &heave, &error);
+        mb_insert_nav(verbose, ombio_ptr, ostore_ptr, time_i, time_d, navlon, navlat, speed, heading, draft, roll, pitch,
+                      heave, &error);
+      }
+      if (kind == MB_DATA_DATA) {
+        status = mb_insert(verbose, ombio_ptr, ostore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading, obeams_bath,
+                         obeams_amp, opixels_ss, obeamflag, obath, oamp, obathacrosstrack, obathalongtrack, oss,
+                         ossacrosstrack, ossalongtrack, comment, &error);
+      }
+    }
+
+    if (merge == MB_YES && kind == MB_DATA_DATA && error == MB_ERROR_NO_ERROR) {
+      switch (copymode) {
+      case MBCOPY_PARTIAL:
+      case MBCOPY_ANY_TO_MBLDEOIH:
+        /* Already looked after */
+        break;
+      case MBCOPY_FULL:
+      case MBCOPY_SIMRAD_TO_SIMRAD2:
+      case MBCOPY_ELACMK2_TO_XSE:
+      case MBCOPY_XSE_TO_ELACMK2:
+#ifdef ENABLE_GSF
+      case MBCOPY_RESON8K_TO_GSF:
+#endif
+        status = mb_insert(verbose, ombio_ptr, ostore_ptr, kind, time_i, time_d, navlon, navlat, speed, heading,
+                           mbeams_bath, ibeams_amp, ipixels_ss, mbeamflag, mbath, iamp, mbathacrosstrack, mbathalongtrack,
+                           iss, issacrosstrack, issalongtrack, comment, &error);
+        break;
+      }
+    }
+
+    /* write some data */
+    if ((kind != MB_DATA_COMMENT && error == MB_ERROR_NO_ERROR && inbounds == MB_YES) ||
+        (kind == MB_DATA_COMMENT && stripmode == MBCOPY_STRIPMODE_NONE)) {
+      error = MB_ERROR_NO_ERROR;
+      status = mb_put_all(verbose, ombio_ptr, ostore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed, heading,
+                          obeams_bath, obeams_amp, opixels_ss, obeamflag, obath, oamp, obathacrosstrack, obathalongtrack,
+                          oss, ossacrosstrack, ossalongtrack, comment, &error);
+      if (status == MB_SUCCESS) {
+        if (kind == MB_DATA_DATA)
+          odata++;
+        else if (kind == MB_DATA_COMMENT)
+          ocomment++;
+      }
+      else {
+        mb_error(verbose, error, &message);
+        if (copymode != MBCOPY_PARTIAL)
+          fprintf(stderr, "\nMBIO Error returned from function <mb_put_all>:\n%s\n", message);
+        else
+          fprintf(stderr, "\nMBIO Error returned from function <mb_put>:\n%s\n", message);
+        fprintf(stderr, "\nMultibeam Data Not Written To File <%s>\n", ofile);
+        fprintf(stderr, "Output Record: %d\n", odata + 1);
+        fprintf(stderr, "Time: %d %d %d %d %d %d %d\n", time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5],
+                time_i[6]);
+        fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+        exit(error);
+      }
+    }
+  }
+
+  /* close the files */
+  status = mb_close(verbose, &imbio_ptr, &error);
+  status = mb_close(verbose, &ombio_ptr, &error);
+
+  /* check memory */
+  if (verbose >= 4)
+    status = mb_memory_list(verbose, &error);
+
+  /* give the statistics */
+  if (verbose >= 1) {
+    fprintf(stderr, "\n%d input data records\n", idata);
+    fprintf(stderr, "%d input comment records\n", icomment);
+    fprintf(stderr, "%d output data records\n", odata);
+    fprintf(stderr, "%d output comment records\n", ocomment);
+  }
+
+  exit(error);
+}
 /*--------------------------------------------------------------------*/

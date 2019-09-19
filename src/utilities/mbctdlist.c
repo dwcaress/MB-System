@@ -43,12 +43,103 @@
 #define MAX_OPTIONS 25
 #define MBCTDLIST_ALLOC_CHUNK 1024
 
-int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error);
-int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
-
 /* NaN value */
 double NaN;
 
+/*--------------------------------------------------------------------*/
+int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
+	int status = MB_SUCCESS;
+	char format[24];
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       value:           %f\n", value);
+		fprintf(stderr, "dbg2       width:           %d\n", width);
+		fprintf(stderr, "dbg2       precision:       %d\n", precision);
+		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
+		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
+		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
+	}
+
+	/* make print format */
+	format[0] = '%';
+	if (*invert == MB_YES)
+		strcpy(format, "%g");
+	else if (width > 0)
+		sprintf(&format[1], "%d.%df", width, precision);
+	else
+		sprintf(&format[1], ".%df", precision);
+
+	/* invert value if desired */
+	if (*invert == MB_YES) {
+		*invert = MB_NO;
+		if (value != 0.0)
+			value = 1.0 / value;
+	}
+
+	/* flip sign value if desired */
+	if (*flipsign == MB_YES) {
+		*flipsign = MB_NO;
+		value = -value;
+	}
+
+	/* print value */
+	if (ascii == MB_YES)
+		printf(format, value);
+	else
+		fwrite(&value, sizeof(double), 1, stdout);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
+	int status = MB_SUCCESS;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
+		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
+		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
+	}
+
+	/* reset invert flag */
+	if (*invert == MB_YES)
+		*invert = MB_NO;
+
+	/* reset flipsign flag */
+	if (*flipsign == MB_YES)
+		*flipsign = MB_NO;
+
+	/* print value */
+	if (ascii == MB_YES)
+		printf("NaN");
+	else
+		fwrite(&NaN, sizeof(double), 1, stdout);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
 
 /*--------------------------------------------------------------------*/
 
@@ -1043,99 +1134,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
-	int status = MB_SUCCESS;
-	char format[24];
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       value:           %f\n", value);
-		fprintf(stderr, "dbg2       width:           %d\n", width);
-		fprintf(stderr, "dbg2       precision:       %d\n", precision);
-		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
-	}
-
-	/* make print format */
-	format[0] = '%';
-	if (*invert == MB_YES)
-		strcpy(format, "%g");
-	else if (width > 0)
-		sprintf(&format[1], "%d.%df", width, precision);
-	else
-		sprintf(&format[1], ".%df", precision);
-
-	/* invert value if desired */
-	if (*invert == MB_YES) {
-		*invert = MB_NO;
-		if (value != 0.0)
-			value = 1.0 / value;
-	}
-
-	/* flip sign value if desired */
-	if (*flipsign == MB_YES) {
-		*flipsign = MB_NO;
-		value = -value;
-	}
-
-	/* print value */
-	if (ascii == MB_YES)
-		printf(format, value);
-	else
-		fwrite(&value, sizeof(double), 1, stdout);
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
-	int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       ascii:           %d\n", ascii);
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       flipsign:        %d\n", *flipsign);
-	}
-
-	/* reset invert flag */
-	if (*invert == MB_YES)
-		*invert = MB_NO;
-
-	/* reset flipsign flag */
-	if (*flipsign == MB_YES)
-		*flipsign = MB_NO;
-
-	/* print value */
-	if (ascii == MB_YES)
-		printf("NaN");
-	else
-		fwrite(&NaN, sizeof(double), 1, stdout);
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       invert:          %d\n", *invert);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/

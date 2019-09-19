@@ -45,12 +45,6 @@
 
 /* NaN value */
 float NaN;
-
-int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
-                    double *timesweep, double *timedelay, int *error);
-char *ctime();
-char *getenv();
-
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
 FILE *outfp;
@@ -62,6 +56,134 @@ char usage_message[] = "mbsegypsd -Ifile -Oroot [-Ashotscale \n\
           -Ddecimatex -R \n\
           -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
           -Wmode/start/end -H -V]";
+
+/*--------------------------------------------------------------------*/
+/*
+ * function get_segy_limits gets info for default segy gridding
+ */
+int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
+                    double *timesweep, double *timedelay, int *error) {
+	int status = MB_SUCCESS;
+	char sinffile[MB_PATH_MAXLINE] = "";
+	char command[MB_PATH_MAXLINE] = "";
+	char line[MB_PATH_MAXLINE] = "";
+	FILE *sfp;
+	int datmodtime = 0;
+	int sinfmodtime = 0;
+	struct stat file_status;
+	int fstat;
+	double delay0 = 0.0;
+	double delay1 = 0.0;
+	double delaydel = 0.0;
+	int shot0 = 0;
+	int shot1 = 0;
+	int shotdel = 0;
+	int shottrace0 = 0;
+	int shottrace1 = 0;
+	int shottracedel = 0;
+	int rp0 = 0;
+	int rp1 = 0;
+	int rpdel = 0;
+	int rptrace0 = 0;
+	int rptrace1 = 0;
+	int rptracedel = 0;
+	int nscan;
+	int shellstatus;
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
+		fprintf(outfp, "dbg2  Input arguments:\n");
+		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
+		fprintf(outfp, "dbg2       segyfile:   %s\n", segyfile);
+	}
+
+	/* set sinf filename */
+	sprintf(sinffile, "%s.sinf", segyfile);
+
+	/* check status of segy and sinf file */
+	datmodtime = 0;
+	sinfmodtime = 0;
+	if ((fstat = stat(segyfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+		datmodtime = file_status.st_mtime;
+	}
+	if ((fstat = stat(sinffile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+		sinfmodtime = file_status.st_mtime;
+	}
+
+	/* if sinf file is missing or out of date, make it */
+	if (datmodtime > 0 && datmodtime > sinfmodtime) {
+		if (verbose >= 1)
+			fprintf(stderr, "\nGenerating sinf file for %s\n", segyfile);
+		sprintf(command, "mbsegyinfo -I %s -O", segyfile);
+		shellstatus = system(command);
+	}
+
+	/* read sinf file if possible */
+	sprintf(sinffile, "%s.sinf", segyfile);
+	if ((sfp = fopen(sinffile, "r")) != NULL) {
+		/* read the sinf file */
+		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL) {
+			if (strncmp(line, "  Trace length (sec):", 21) == 0) {
+				nscan = sscanf(line, "  Trace length (sec):%lf", timesweep);
+			}
+			else if (strncmp(line, "    Delay (sec):", 16) == 0) {
+				nscan = sscanf(line, "    Delay (sec): %lf %lf %lf", &delay0, &delay1, &delaydel);
+			}
+			else if (strncmp(line, "    Shot number:", 16) == 0) {
+				nscan = sscanf(line, "    Shot number: %d %d %d", &shot0, &shot1, &shotdel);
+			}
+			else if (strncmp(line, "    Shot trace:", 15) == 0) {
+				nscan = sscanf(line, "    Shot trace: %d %d %d", &shottrace0, &shottrace1, &shottracedel);
+			}
+			else if (strncmp(line, "    RP number:", 14) == 0) {
+				nscan = sscanf(line, "    RP number: %d %d %d", &rp0, &rp1, &rpdel);
+			}
+			else if (strncmp(line, "    RP trace:", 13) == 0) {
+				nscan = sscanf(line, "    RP trace: %d %d %d", &rptrace0, &rptrace1, &rptracedel);
+			}
+		}
+		fclose(sfp);
+	}
+
+	/* set the trace mode */
+	if (rpdel > 1) {
+		*tracemode = MBSEGYPSD_USECMP;
+		*tracestart = rp0;
+		*traceend = rp1;
+		*chanstart = rptrace0;
+		*chanend = rptrace1;
+	}
+	else {
+		*tracemode = MBSEGYPSD_USESHOT;
+		*tracestart = shot0;
+		*traceend = shot1;
+		*chanstart = shottrace0;
+		*chanend = shottrace1;
+	}
+
+	/* set the sweep and delay */
+	if (delaydel > 0.0) {
+		*timesweep += delaydel;
+	}
+	*timedelay = delay0;
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(outfp, "dbg2  Return values:\n");
+		fprintf(outfp, "dbg2       tracemode:  %d\n", *tracemode);
+		fprintf(outfp, "dbg2       tracestart: %d\n", *tracestart);
+		fprintf(outfp, "dbg2       traceend:   %d\n", *traceend);
+		fprintf(outfp, "dbg2       chanstart:  %d\n", *chanstart);
+		fprintf(outfp, "dbg2       chanend:    %d\n", *chanend);
+		fprintf(outfp, "dbg2       timesweep:  %f\n", *timesweep);
+		fprintf(outfp, "dbg2       timedelay:  %f\n", *timedelay);
+		fprintf(outfp, "dbg2       error:      %d\n", *error);
+		fprintf(outfp, "dbg2  Return status:\n");
+		fprintf(outfp, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
 
 /*--------------------------------------------------------------------*/
 
@@ -727,132 +849,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function get_segy_limits gets info for default segy gridding
- */
-int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
-                    double *timesweep, double *timedelay, int *error) {
-	int status = MB_SUCCESS;
-	char sinffile[MB_PATH_MAXLINE] = "";
-	char command[MB_PATH_MAXLINE] = "";
-	char line[MB_PATH_MAXLINE] = "";
-	FILE *sfp;
-	int datmodtime = 0;
-	int sinfmodtime = 0;
-	struct stat file_status;
-	int fstat;
-	double delay0 = 0.0;
-	double delay1 = 0.0;
-	double delaydel = 0.0;
-	int shot0 = 0;
-	int shot1 = 0;
-	int shotdel = 0;
-	int shottrace0 = 0;
-	int shottrace1 = 0;
-	int shottracedel = 0;
-	int rp0 = 0;
-	int rp1 = 0;
-	int rpdel = 0;
-	int rptrace0 = 0;
-	int rptrace1 = 0;
-	int rptracedel = 0;
-	int nscan;
-	int shellstatus;
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
-		fprintf(outfp, "dbg2  Input arguments:\n");
-		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
-		fprintf(outfp, "dbg2       segyfile:   %s\n", segyfile);
-	}
-
-	/* set sinf filename */
-	sprintf(sinffile, "%s.sinf", segyfile);
-
-	/* check status of segy and sinf file */
-	datmodtime = 0;
-	sinfmodtime = 0;
-	if ((fstat = stat(segyfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-		datmodtime = file_status.st_mtime;
-	}
-	if ((fstat = stat(sinffile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-		sinfmodtime = file_status.st_mtime;
-	}
-
-	/* if sinf file is missing or out of date, make it */
-	if (datmodtime > 0 && datmodtime > sinfmodtime) {
-		if (verbose >= 1)
-			fprintf(stderr, "\nGenerating sinf file for %s\n", segyfile);
-		sprintf(command, "mbsegyinfo -I %s -O", segyfile);
-		shellstatus = system(command);
-	}
-
-	/* read sinf file if possible */
-	sprintf(sinffile, "%s.sinf", segyfile);
-	if ((sfp = fopen(sinffile, "r")) != NULL) {
-		/* read the sinf file */
-		while (fgets(line, MB_PATH_MAXLINE, sfp) != NULL) {
-			if (strncmp(line, "  Trace length (sec):", 21) == 0) {
-				nscan = sscanf(line, "  Trace length (sec):%lf", timesweep);
-			}
-			else if (strncmp(line, "    Delay (sec):", 16) == 0) {
-				nscan = sscanf(line, "    Delay (sec): %lf %lf %lf", &delay0, &delay1, &delaydel);
-			}
-			else if (strncmp(line, "    Shot number:", 16) == 0) {
-				nscan = sscanf(line, "    Shot number: %d %d %d", &shot0, &shot1, &shotdel);
-			}
-			else if (strncmp(line, "    Shot trace:", 15) == 0) {
-				nscan = sscanf(line, "    Shot trace: %d %d %d", &shottrace0, &shottrace1, &shottracedel);
-			}
-			else if (strncmp(line, "    RP number:", 14) == 0) {
-				nscan = sscanf(line, "    RP number: %d %d %d", &rp0, &rp1, &rpdel);
-			}
-			else if (strncmp(line, "    RP trace:", 13) == 0) {
-				nscan = sscanf(line, "    RP trace: %d %d %d", &rptrace0, &rptrace1, &rptracedel);
-			}
-		}
-		fclose(sfp);
-	}
-
-	/* set the trace mode */
-	if (rpdel > 1) {
-		*tracemode = MBSEGYPSD_USECMP;
-		*tracestart = rp0;
-		*traceend = rp1;
-		*chanstart = rptrace0;
-		*chanend = rptrace1;
-	}
-	else {
-		*tracemode = MBSEGYPSD_USESHOT;
-		*tracestart = shot0;
-		*traceend = shot1;
-		*chanstart = shottrace0;
-		*chanend = shottrace1;
-	}
-
-	/* set the sweep and delay */
-	if (delaydel > 0.0) {
-		*timesweep += delaydel;
-	}
-	*timedelay = delay0;
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(outfp, "dbg2  Return values:\n");
-		fprintf(outfp, "dbg2       tracemode:  %d\n", *tracemode);
-		fprintf(outfp, "dbg2       tracestart: %d\n", *tracestart);
-		fprintf(outfp, "dbg2       traceend:   %d\n", *traceend);
-		fprintf(outfp, "dbg2       chanstart:  %d\n", *chanstart);
-		fprintf(outfp, "dbg2       chanend:    %d\n", *chanend);
-		fprintf(outfp, "dbg2       timesweep:  %f\n", *timesweep);
-		fprintf(outfp, "dbg2       timedelay:  %f\n", *timedelay);
-		fprintf(outfp, "dbg2       error:      %d\n", *error);
-		fprintf(outfp, "dbg2  Return status:\n");
-		fprintf(outfp, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/

@@ -225,23 +225,6 @@ struct svp_holder {
 };
 typedef struct svp_holder svp;
 
-int Is_Leap(int year);
-char *my_strcpy(char *a, char *b);
-void calc_ave_dateTime(inf *inf_hold);
-void JulianToGregorian(int year, int yearDay, int *year_tm, int *month, int *wDay);
-void GregorianToJulian(int year, int month, int day, int *yearDay);
-void fill_struct_inf(inf *inf_hold, char *holder);
-void fill_struct_svp(svp *svp_hold, char *holder);
-int read_recursive(char *fileName);
-int read_recursive2(char *fileName);
-void read_list(char *list, char *list_2);
-void trim_newline(char string[]);
-void pause_screen();
-double convert_decimal(int deg, int min, int sec);
-void print_inf(inf *cd);
-void print_svp(svp *cd);
-void mid_point(long double lat1, long double lon1, long double lat2, long double lon2, long double *lat3, long double *lon3);
-void pause_screen(void);
 
 /* global variables */
 int counter_i_i2 = 0;
@@ -268,169 +251,6 @@ char buffer_2[BUFSIZ];
 int svp_total = 0;
 int surveyLines_total = 0;
 
-/* ------------------------------------------------------------------- */
-
-int main(int argc, char **argv) {
-	char program_name[] = "mbsvpselect";
-	char help_message[] = "Program mbsvpselect chooses and implements the best available sound speed\n"
-	                      "model for each swath file in a survey. The user provides a list of the\n"
-	                      "available sound speed models and specifies the criteria used for\n"
-	                      "model selection. The program uses mbset to turn on bathymetry\n"
-	                      "recalculation by raytracing through the sound speed model selected\n"
-	                      "for each swath file.";
-	char usage_message[] = "mbsvpselect -H -N -Idatalist -Ssvplist "
-	                       "[-P0, -P1, -P2/period, -P3/range, -P3/range/1]  -V";
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
-	int status = MB_SUCCESS;
-
-	int error = MB_ERROR_NO_ERROR;
-
-	char datalist[BUFSIZ];
-	char svplist[BUFSIZ];
-
-	int n;
-	int n1, n2, n3;
-
-	my_strcpy(datalist, "datalist.mb-1");
-	my_strcpy(svplist, "svplist.mb-1");
-	while ((c = getopt(argc, argv, "HhI:i:S:s:P:p:VvNn")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", datalist);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			zero_test += 1;
-			break;
-		case 'P':
-		case 'p':
-			n = sscanf(optarg, "%d/%d/%d", &n1, &n2, &n3);
-			n_p2 = n;
-			/* printf("\nthis is n %d \n", n); */
-			if ((n1 != 0) && (n1 != 1) && (n1 != 2) && (n1 != 3)) {
-				puts("Only four options are available: 0 for nearest position, 1 for nearest in time, 2 for both, 3 for nearest "
-				     "in time within range");
-				puts("The default is svp_nearest in position");
-				puts("If option 2 is chosen without specifying time period, 10 hours is the default value");
-				puts("If option 3 is chosen without specifying range, 10000 meters is the default value");
-				puts("If option 3 is chosen two options are available : nearest in time and nearest in month");
-				pause_screen();
-				exit(0);
-			}
-			else {
-				if (n == 0)
-					p_flag = 0;
-				if (n == 1) {
-					p_flag = n1;
-					if (p_flag == 2) {
-						p_3_time = 10;
-						n2 = p_3_time;
-					}
-					if (p_flag == 3) {
-						p_4_range = 10000;
-						n2 = p_4_range;
-					}
-				}
-				if (n == 2) {
-					p_flag = n1;
-					if ((p_flag == 0) || (p_flag == 1))
-						puts("The options -P0 for nearest in position or -P1 for nearest in time do not need further arguments");
-
-					if (p_flag == 2)
-						p_3_time = n2;
-					if (p_flag == 3)
-						p_4_range = n2;
-				}
-				if (n == 3) {
-					p_flag = n1;
-					p_4_range = n2;
-					p_4_flage = n3;
-					if ((p_flag == 0) || (p_flag == 1))
-						puts("The options -P0 for nearest in position or -P1 for nearest in time do not need further arguments");
-
-					if ((p_4_flage != 0) && (p_4_flage != 1)) {
-						puts("If option 3 is chosen two options are available : nearest in time with -P3/0 and nearest in month "
-						     "with -P3/1");
-						pause_screen();
-						exit(0);
-					}
-				}
-			}
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%s", svplist);
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		default:
-			break;
-		}
-
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       help:       %d\n", help);
-		fprintf(stderr, "dbg2       datalist:   %s\n", datalist);
-		fprintf(stderr, "dbg2       svplist:    %s\n", svplist);
-		fprintf(stderr, "dbg2       p_flag:     %d\n", p_flag);
-		fprintf(stderr, "dbg2       p_3_time:   %d\n", p_3_time);
-		fprintf(stderr, "dbg2       p_4_range:  %d\n", p_4_range);
-		fprintf(stderr, "dbg2       p_4_flage:  %d\n", p_4_flage);
-		fprintf(stderr, "dbg2       zero_test:  %d\n", zero_test);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
-
-	/* do the work */
-	read_list(datalist, svplist);
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
-		fprintf(stderr, "dbg2  Ending status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-		fprintf(stderr, "dbg2       error:   %d\n", error);
-	}
-
-	exit(error);
-
-} /* main */
-/* ---------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------- */
 /* Is leap old */
@@ -744,6 +564,17 @@ void fill_struct_inf(inf *inf_hold, char *holder) {
 
 	fclose(fileName);
 } /* fill_struct_inf */
+/* ---------------------------------------------------------------- */
+/*
+ * convert_decimal function
+ * convert lat or lon from deg(int):min(int):sec(int) to decimal format
+ */
+double convert_decimal(int deg, int min, int sec) {
+	if (deg >= 0)
+		return (double)deg + (((double)min) / 60) + (((double)sec) / 3600);
+
+	return -(fabs((double)deg) + (((double)min) / 60) + (((double)sec) / 3600));
+}
 /* ------------------------------------------------------------------- */
 /* SVP tool is able to read only two SVP formats
  *
@@ -840,6 +671,17 @@ void fill_struct_svp(svp *svp_hold, char *holder) {
 
 	fclose(fileName);
 } /* fill_struct_svp */
+/* --------------------------------------------------------------- */
+/*copy string and handle possible buffer overlap*/
+char *my_strcpy(char *a, char *b) {
+
+	if (a == NULL || b == NULL) {
+		return NULL;
+	}
+
+	memmove(a, b, strlen(b) + 1);
+	return a;
+}
 /*---------------------------------------------------------------------*/
 int read_recursive2(char *fname) {
 	//char original[strlen(fname)];		This no valid C  JL
@@ -943,6 +785,15 @@ int read_recursive(char *fileName) {
 	return counter;
 }
 
+/* ---------------------------------------------------------------- */
+/*
+ * pause the screen at the exit of the program
+ */
+void pause_screen() {
+	printf("\nEnd the program press ENTER");
+	fflush(stdin);
+	getchar();
+}
 /* ------------------------------------------------------------------- */
 void read_list(char *list, char *list_2) {
 	int size = 0;
@@ -1559,26 +1410,6 @@ void trim_newline(char string[]) {
 		string[strlen(string) - 1] = '\0';
 }
 /* ---------------------------------------------------------------- */
-/*
- * pause the screen at the exit of the program
- */
-void pause_screen() {
-	printf("\nEnd the program press ENTER");
-	fflush(stdin);
-	getchar();
-}
-/* ---------------------------------------------------------------- */
-/*
- * convert_decimal function
- * convert lat or lon from deg(int):min(int):sec(int) to decimal format
- */
-double convert_decimal(int deg, int min, int sec) {
-	if (deg >= 0)
-		return (double)deg + (((double)min) / 60) + (((double)sec) / 3600);
-
-	return -(fabs((double)deg) + (((double)min) / 60) + (((double)sec) / 3600));
-}
-/* ---------------------------------------------------------------- */
 /* print the inf information on the screen */
 void print_inf(inf *cd) {
 	struct tm *temp = &cd->s_datum_time;
@@ -1633,14 +1464,166 @@ void mid_point(long double lat1, long double lon1, long double lat2, long double
 	*(lat3) = atan2(sin(lat1_rad) + sin(lat2_rad), sqrt((((cos(lat1_rad)) + bx) * ((cos(lat1_rad)) + bx)) + (by * by))) * RTD;
 	*(lon3) = (lon1_rad + atan2(by, (cos(lat1_rad) + bx))) * RTD;
 }
-/* --------------------------------------------------------------- */
-/*copy string and handle possible buffer overlap*/
-char *my_strcpy(char *a, char *b) {
+/* ------------------------------------------------------------------- */
 
-	if (a == NULL || b == NULL) {
-		return NULL;
+int main(int argc, char **argv) {
+	char program_name[] = "mbsvpselect";
+	char help_message[] = "Program mbsvpselect chooses and implements the best available sound speed\n"
+	                      "model for each swath file in a survey. The user provides a list of the\n"
+	                      "available sound speed models and specifies the criteria used for\n"
+	                      "model selection. The program uses mbset to turn on bathymetry\n"
+	                      "recalculation by raytracing through the sound speed model selected\n"
+	                      "for each swath file.";
+	char usage_message[] = "mbsvpselect -H -N -Idatalist -Ssvplist "
+	                       "[-P0, -P1, -P2/period, -P3/range, -P3/range/1]  -V";
+	int errflg = 0;
+	int c;
+	int help = 0;
+	int flag = 0;
+
+	/* MBIO status variables */
+	int status = MB_SUCCESS;
+
+	int error = MB_ERROR_NO_ERROR;
+
+	char datalist[BUFSIZ];
+	char svplist[BUFSIZ];
+
+	int n;
+	int n1, n2, n3;
+
+	my_strcpy(datalist, "datalist.mb-1");
+	my_strcpy(svplist, "svplist.mb-1");
+	while ((c = getopt(argc, argv, "HhI:i:S:s:P:p:VvNn")) != -1)
+		switch (c) {
+		case 'H':
+		case 'h':
+			help++;
+			break;
+		case 'I':
+		case 'i':
+			sscanf(optarg, "%s", datalist);
+			flag++;
+			break;
+		case 'N':
+		case 'n':
+			zero_test += 1;
+			break;
+		case 'P':
+		case 'p':
+			n = sscanf(optarg, "%d/%d/%d", &n1, &n2, &n3);
+			n_p2 = n;
+			/* printf("\nthis is n %d \n", n); */
+			if ((n1 != 0) && (n1 != 1) && (n1 != 2) && (n1 != 3)) {
+				puts("Only four options are available: 0 for nearest position, 1 for nearest in time, 2 for both, 3 for nearest "
+				     "in time within range");
+				puts("The default is svp_nearest in position");
+				puts("If option 2 is chosen without specifying time period, 10 hours is the default value");
+				puts("If option 3 is chosen without specifying range, 10000 meters is the default value");
+				puts("If option 3 is chosen two options are available : nearest in time and nearest in month");
+				pause_screen();
+				exit(0);
+			}
+			else {
+				if (n == 0)
+					p_flag = 0;
+				if (n == 1) {
+					p_flag = n1;
+					if (p_flag == 2) {
+						p_3_time = 10;
+						n2 = p_3_time;
+					}
+					if (p_flag == 3) {
+						p_4_range = 10000;
+						n2 = p_4_range;
+					}
+				}
+				if (n == 2) {
+					p_flag = n1;
+					if ((p_flag == 0) || (p_flag == 1))
+						puts("The options -P0 for nearest in position or -P1 for nearest in time do not need further arguments");
+
+					if (p_flag == 2)
+						p_3_time = n2;
+					if (p_flag == 3)
+						p_4_range = n2;
+				}
+				if (n == 3) {
+					p_flag = n1;
+					p_4_range = n2;
+					p_4_flage = n3;
+					if ((p_flag == 0) || (p_flag == 1))
+						puts("The options -P0 for nearest in position or -P1 for nearest in time do not need further arguments");
+
+					if ((p_4_flage != 0) && (p_4_flage != 1)) {
+						puts("If option 3 is chosen two options are available : nearest in time with -P3/0 and nearest in month "
+						     "with -P3/1");
+						pause_screen();
+						exit(0);
+					}
+				}
+			}
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			sscanf(optarg, "%s", svplist);
+			flag++;
+			break;
+		case 'V':
+		case 'v':
+			verbose++;
+			break;
+		default:
+			break;
+		}
+
+	/* if error flagged then print it and exit */
+	if (errflg) {
+		fprintf(stderr, "usage: %s\n", usage_message);
+		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+		error = MB_ERROR_BAD_USAGE;
+		exit(error);
 	}
 
-	memmove(a, b, strlen(b) + 1);
-	return a;
-}
+	if (verbose == 1 || help) {
+		fprintf(stderr, "\nProgram %s\n", program_name);
+		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+		fprintf(stderr, "dbg2  Control Parameters:\n");
+		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+		fprintf(stderr, "dbg2       help:       %d\n", help);
+		fprintf(stderr, "dbg2       datalist:   %s\n", datalist);
+		fprintf(stderr, "dbg2       svplist:    %s\n", svplist);
+		fprintf(stderr, "dbg2       p_flag:     %d\n", p_flag);
+		fprintf(stderr, "dbg2       p_3_time:   %d\n", p_3_time);
+		fprintf(stderr, "dbg2       p_4_range:  %d\n", p_4_range);
+		fprintf(stderr, "dbg2       p_4_flage:  %d\n", p_4_flage);
+		fprintf(stderr, "dbg2       zero_test:  %d\n", zero_test);
+	}
+
+	/* if help desired then print it and exit */
+	if (help) {
+		fprintf(stderr, "\n%s\n", help_message);
+		fprintf(stderr, "\nusage: %s\n", usage_message);
+		exit(error);
+	}
+
+	/* do the work */
+	read_list(datalist, svplist);
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
+		fprintf(stderr, "dbg2  Ending status:\n");
+		fprintf(stderr, "dbg2       status:  %d\n", status);
+		fprintf(stderr, "dbg2       error:   %d\n", error);
+	}
+
+	exit(error);
+
+} /* main */
+/* ---------------------------------------------------------------- */
