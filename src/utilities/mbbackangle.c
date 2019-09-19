@@ -66,15 +66,176 @@ struct mbba_grid_struct {
 	float *data;
 };
 
-/* function prototypes */
-int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
-                 int symmetry, int *nmean, double *mean, double *sigma, int *error);
-int output_model(int verbose, FILE *tfp, double ssbeamwidth, double ssdepression, double ref_angle, int ntable, int nping,
-                 double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
-                 double *mean, double *sigma, int *error);
-
 char program_name[] = "mbbackangle";
 
+/*--------------------------------------------------------------------*/
+int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
+                 int symmetry, int *nmean, double *mean, double *sigma, int *error) {
+	int status = MB_SUCCESS;
+	double angle, amean, asigma, sum, sumsq, sumn;
+	int time_i[7];
+	int ii, jj, i0, i1;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
+		fprintf(stderr, "dbg2       ntable:          %d\n", ntable);
+		fprintf(stderr, "dbg2       nping:           %d\n", nping);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       nangles:         %d\n", nangles);
+		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
+		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
+		fprintf(stderr, "dbg2       mean and sigma:\n");
+		for (i = 0; i < nangles; i++)
+			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
+	}
+
+	/* process sums and print out results */
+	mb_get_date(verbose, time_d, time_i);
+	fprintf(tfp, "# table: %d\n", ntable);
+	fprintf(tfp, "# nping: %d\n", nping);
+	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
+	        time_i[4], time_i[5], time_i[6], time_d);
+	fprintf(tfp, "# nangles: %d\n", nangles);
+	for (i = 0; i < nangles; i++) {
+		amean = 0.0;
+		asigma = 0.0;
+		sum = 0.0;
+		sumsq = 0.0;
+		sumn = 0.0;
+		angle = -angle_max + i * dangle;
+		if (fabs(angle) > MBBACKANGLE_INNERSWATHLIMIT) {
+			i0 = MAX(i - 1, 0);
+			i1 = MIN(i + 1, nangles - 1);
+		}
+		else {
+			i0 = i;
+			i1 = i;
+		}
+		for (ii = i0; ii <= i1; ii++) {
+			sum += mean[ii];
+			sumsq += sigma[ii];
+			sumn += nmean[ii];
+			if (symmetry == MB_YES) {
+				jj = nangles - ii - 1;
+				sum += mean[jj];
+				sumsq += sigma[jj];
+				sumn += nmean[jj];
+			}
+		}
+		if (sumn > 0.0) {
+			amean = sum / sumn;
+			asigma = sqrt((sumsq / sumn) - amean * amean);
+		}
+		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+	}
+	fprintf(tfp, "#\n");
+	fprintf(tfp, "#\n");
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+int output_model(int verbose, FILE *tfp, double beamwidth, double depression, double ref_angle, int ntable, int nping,
+                 double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
+                 double *mean, double *sigma, int *error) {
+	int status = MB_SUCCESS;
+	double ref_amp, range, del, factor, aa;
+	double angle, amean, asigma, sum, sumsq, sumn;
+	int time_i[7];
+	int ii, jj, i0, i1, iref;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
+		fprintf(stderr, "dbg2       beamwidth:       %f\n", beamwidth);
+		fprintf(stderr, "dbg2       depression:      %f\n", depression);
+		fprintf(stderr, "dbg2       ref_angle:       %f\n", ref_angle);
+		fprintf(stderr, "dbg2       ntable:          %d\n", ntable);
+		fprintf(stderr, "dbg2       nping:           %d\n", nping);
+		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
+		fprintf(stderr, "dbg2       altitude:        %f\n", altitude);
+		fprintf(stderr, "dbg2       nangles:         %d\n", nangles);
+		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
+		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
+		fprintf(stderr, "dbg2       mean and sigma:\n");
+		for (i = 0; i < nangles; i++)
+			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
+	}
+
+	/* get average amplitude at reference angle */
+	iref = (angle_max - ref_angle) / dangle;
+	i0 = MAX(iref - 1, 0);
+	i1 = MIN(iref + 1, nangles - 1);
+	ref_amp = 0.0;
+	sum = 0.0;
+	sumsq = 0.0;
+	sumn = 0.0;
+	for (ii = i0; ii <= i1; ii++) {
+		sum += mean[ii];
+		sumsq += sigma[ii];
+		sumn += nmean[ii];
+		jj = nangles - ii - 1;
+		sum += mean[jj];
+		sumsq += sigma[jj];
+		sumn += nmean[jj];
+	}
+	if (sumn > 0.0) {
+		ref_amp = sum / sumn;
+		asigma = sqrt((sumsq / sumn) - ref_amp * ref_amp);
+	}
+
+	/* get model that combines gaussian with 1/r
+	    - gaussian must drop to 0.7 max at 0.5 * beamwidth
+	    - model must equal ref_amp at ref_angle */
+	del = (90.0 - depression) - 0.5 * beamwidth;
+	aa = -log(0.1) / (del * del);
+	del = 90.0 - depression - ref_angle;
+	range = altitude / cos(DTR * ref_angle);
+	factor = ref_amp * range * range / exp(-aa * del * del);
+
+	/* process sums and print out results */
+	mb_get_date(verbose, time_d, time_i);
+	fprintf(tfp, "# table: %d\n", ntable);
+	fprintf(tfp, "# nping: %d\n", nping);
+	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
+	        time_i[4], time_i[5], time_i[6], time_d);
+	fprintf(tfp, "# nangles: %d\n", nangles);
+	for (i = 0; i < nangles; i++) {
+		angle = -angle_max + i * dangle;
+		del = fabs(angle) - (90 - depression);
+		range = altitude / cos(DTR * fabs(angle));
+		amean = factor * exp(-aa * del * del) / (range * range);
+		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
+	}
+	fprintf(tfp, "#\n");
+	fprintf(tfp, "#\n");
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return (status);
+}
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
@@ -1557,173 +1718,5 @@ by MBprocess.";
 		fprintf(stderr, "\n");
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
-                 int symmetry, int *nmean, double *mean, double *sigma, int *error) {
-	int status = MB_SUCCESS;
-	double angle, amean, asigma, sum, sumsq, sumn;
-	int time_i[7];
-	int ii, jj, i0, i1;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
-		fprintf(stderr, "dbg2       ntable:          %d\n", ntable);
-		fprintf(stderr, "dbg2       nping:           %d\n", nping);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       nangles:         %d\n", nangles);
-		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
-		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
-		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
-		fprintf(stderr, "dbg2       mean and sigma:\n");
-		for (i = 0; i < nangles; i++)
-			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
-	}
-
-	/* process sums and print out results */
-	mb_get_date(verbose, time_d, time_i);
-	fprintf(tfp, "# table: %d\n", ntable);
-	fprintf(tfp, "# nping: %d\n", nping);
-	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
-	        time_i[4], time_i[5], time_i[6], time_d);
-	fprintf(tfp, "# nangles: %d\n", nangles);
-	for (i = 0; i < nangles; i++) {
-		amean = 0.0;
-		asigma = 0.0;
-		sum = 0.0;
-		sumsq = 0.0;
-		sumn = 0.0;
-		angle = -angle_max + i * dangle;
-		if (fabs(angle) > MBBACKANGLE_INNERSWATHLIMIT) {
-			i0 = MAX(i - 1, 0);
-			i1 = MIN(i + 1, nangles - 1);
-		}
-		else {
-			i0 = i;
-			i1 = i;
-		}
-		for (ii = i0; ii <= i1; ii++) {
-			sum += mean[ii];
-			sumsq += sigma[ii];
-			sumn += nmean[ii];
-			if (symmetry == MB_YES) {
-				jj = nangles - ii - 1;
-				sum += mean[jj];
-				sumsq += sigma[jj];
-				sumn += nmean[jj];
-			}
-		}
-		if (sumn > 0.0) {
-			amean = sum / sumn;
-			asigma = sqrt((sumsq / sumn) - amean * amean);
-		}
-		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
-	}
-	fprintf(tfp, "#\n");
-	fprintf(tfp, "#\n");
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-int output_model(int verbose, FILE *tfp, double beamwidth, double depression, double ref_angle, int ntable, int nping,
-                 double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
-                 double *mean, double *sigma, int *error) {
-	int status = MB_SUCCESS;
-	double ref_amp, range, del, factor, aa;
-	double angle, amean, asigma, sum, sumsq, sumn;
-	int time_i[7];
-	int ii, jj, i0, i1, iref;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       tfp:             %p\n", (void *)tfp);
-		fprintf(stderr, "dbg2       beamwidth:       %f\n", beamwidth);
-		fprintf(stderr, "dbg2       depression:      %f\n", depression);
-		fprintf(stderr, "dbg2       ref_angle:       %f\n", ref_angle);
-		fprintf(stderr, "dbg2       ntable:          %d\n", ntable);
-		fprintf(stderr, "dbg2       nping:           %d\n", nping);
-		fprintf(stderr, "dbg2       time_d:          %f\n", time_d);
-		fprintf(stderr, "dbg2       altitude:        %f\n", altitude);
-		fprintf(stderr, "dbg2       nangles:         %d\n", nangles);
-		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
-		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
-		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
-		fprintf(stderr, "dbg2       mean and sigma:\n");
-		for (i = 0; i < nangles; i++)
-			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
-	}
-
-	/* get average amplitude at reference angle */
-	iref = (angle_max - ref_angle) / dangle;
-	i0 = MAX(iref - 1, 0);
-	i1 = MIN(iref + 1, nangles - 1);
-	ref_amp = 0.0;
-	sum = 0.0;
-	sumsq = 0.0;
-	sumn = 0.0;
-	for (ii = i0; ii <= i1; ii++) {
-		sum += mean[ii];
-		sumsq += sigma[ii];
-		sumn += nmean[ii];
-		jj = nangles - ii - 1;
-		sum += mean[jj];
-		sumsq += sigma[jj];
-		sumn += nmean[jj];
-	}
-	if (sumn > 0.0) {
-		ref_amp = sum / sumn;
-		asigma = sqrt((sumsq / sumn) - ref_amp * ref_amp);
-	}
-
-	/* get model that combines gaussian with 1/r
-	    - gaussian must drop to 0.7 max at 0.5 * beamwidth
-	    - model must equal ref_amp at ref_angle */
-	del = (90.0 - depression) - 0.5 * beamwidth;
-	aa = -log(0.1) / (del * del);
-	del = 90.0 - depression - ref_angle;
-	range = altitude / cos(DTR * ref_angle);
-	factor = ref_amp * range * range / exp(-aa * del * del);
-
-	/* process sums and print out results */
-	mb_get_date(verbose, time_d, time_i);
-	fprintf(tfp, "# table: %d\n", ntable);
-	fprintf(tfp, "# nping: %d\n", nping);
-	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
-	        time_i[4], time_i[5], time_i[6], time_d);
-	fprintf(tfp, "# nangles: %d\n", nangles);
-	for (i = 0; i < nangles; i++) {
-		angle = -angle_max + i * dangle;
-		del = fabs(angle) - (90 - depression);
-		range = altitude / cos(DTR * fabs(angle));
-		amean = factor * exp(-aa * del * del) / (range * range);
-		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
-	}
-	fprintf(tfp, "#\n");
-	fprintf(tfp, "#\n");
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/
