@@ -103,19 +103,6 @@
     change this uncomment the define below. */
 /* #define USESURFACE */
 
-/* approximate complementary error function */
-double erfcc(double x);
-double mbgrid_erf(double x);
-
-int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                double dx, double dy, int *error);
-int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                   double dx, double dy, double nodata, int *error);
-int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                 double dx, double dy, int *error);
-int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double pcy, double dx, double dy, double *px, double *py,
-                  double *weight, int *use, int *error);
-
 /* output stream for basic stuff (stdout if verbose <= 1,
     stderr if verbose > 1) */
 FILE *outfp = NULL;
@@ -130,6 +117,330 @@ char usage_message[] = "mbgrid   -Ifilelist -Oroot [-Adatatype -Bborder -Cclip[/
                       "          -Edx/dy/units[!]  -Fmode[/threshold] -Ggridkind -Jprojection\n"
                       "          -Kbackground -Llonflip -M -N -Ppings -Q  -Rwest/east/south/north\n"
                       "          -Rfactor  -Sspeed  -Ttension  -Utime  -V -Wscale -Xextend]";
+
+/*--------------------------------------------------------------------*/
+/* approximate complementary error function from numerical recipies */
+double erfcc(double x) {
+	double t, z, ans;
+
+	z = fabs(x);
+	t = 1.0 / (1.0 + 0.5 * z);
+	ans =
+	    t *
+	    exp(-z * z - 1.26551223 +
+	        t * (1.00002368 +
+	             t * (0.37409196 +
+	                  t * (0.09678418 +
+	                       t * (-0.18628806 +
+	                            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+	/* fprintf(outfp, "x:%f ans:%f\n", x, ans); */
+	return x >= 0.0 ? ans : 2.0 - ans;
+}
+/*--------------------------------------------------------------------*/
+/* approximate error function altered from numerical recipies */
+double mbgrid_erf(double x) {
+	double t, z, erfc_d, erf_d;
+
+	z = fabs(x);
+	t = 1.0 / (1.0 + 0.5 * z);
+	erfc_d =
+	    t *
+	    exp(-z * z - 1.26551223 +
+	        t * (1.00002368 +
+	             t * (0.37409196 +
+	                  t * (0.09678418 +
+	                       t * (-0.18628806 +
+	                            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+	erfc_d = x >= 0.0 ? erfc_d : 2.0 - erfc_d;
+	erf_d = 1.0 - erfc_d;
+	return erf_d;
+}
+
+/*--------------------------------------------------------------------*/
+/*
+ * function write_ascii writes output grid to an ascii file
+ */
+int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
+                double dx, double dy, int *error) {
+	int status = MB_SUCCESS;
+	FILE *fp = NULL;
+	int i;
+	time_t right_now;
+	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char *ctime();
+	char *getenv();
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
+		fprintf(outfp, "dbg2  Input arguments:\n");
+		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
+		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
+		fprintf(outfp, "dbg2       grid:       %p\n", (void *)grid);
+		fprintf(outfp, "dbg2       nx:         %d\n", nx);
+		fprintf(outfp, "dbg2       ny:         %d\n", ny);
+		fprintf(outfp, "dbg2       xmin:       %f\n", xmin);
+		fprintf(outfp, "dbg2       xmax:       %f\n", xmax);
+		fprintf(outfp, "dbg2       ymin:       %f\n", ymin);
+		fprintf(outfp, "dbg2       ymax:       %f\n", ymax);
+		fprintf(outfp, "dbg2       dx:         %f\n", dx);
+		fprintf(outfp, "dbg2       dy:         %f\n", dy);
+	}
+
+	/* open the file */
+	if ((fp = fopen(outfile, "w")) == NULL) {
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+	}
+
+	/* output grid */
+	else {
+		fprintf(fp, "grid created by program MBGRID\n");
+		right_now = time((time_t *)0);
+		strcpy(date, ctime(&right_now));
+		date[strlen(date) - 1] = '\0';
+		if ((user_ptr = getenv("USER")) == NULL)
+			user_ptr = getenv("LOGNAME");
+		if (user_ptr != NULL)
+			strcpy(user, user_ptr);
+		else
+			strcpy(user, "unknown");
+		i = gethostname(host, MB_PATH_MAXLINE);
+		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
+		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
+		for (i = 0; i < nx * ny; i++) {
+			fprintf(fp, "%13.5g ", grid[i]);
+			if ((i + 1) % 6 == 0)
+				fprintf(fp, "\n");
+		}
+		if ((nx * ny) % 6 != 0)
+			fprintf(fp, "\n");
+		fclose(fp);
+	}
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(outfp, "dbg2  Return values:\n");
+		fprintf(outfp, "dbg2       error:      %d\n", *error);
+		fprintf(outfp, "dbg2  Return status:\n");
+		fprintf(outfp, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function write_arcascii writes output grid to an Arc/Info ascii file
+ */
+int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
+                   double dx, double dy, double nodata, int *error) {
+	int status = MB_SUCCESS;
+	FILE *fp = NULL;
+	int i, j, k;
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
+		fprintf(outfp, "dbg2  Input arguments:\n");
+		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
+		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
+		fprintf(outfp, "dbg2       grid:       %p\n", (void *)grid);
+		fprintf(outfp, "dbg2       nx:         %d\n", nx);
+		fprintf(outfp, "dbg2       ny:         %d\n", ny);
+		fprintf(outfp, "dbg2       xmin:       %f\n", xmin);
+		fprintf(outfp, "dbg2       xmax:       %f\n", xmax);
+		fprintf(outfp, "dbg2       ymin:       %f\n", ymin);
+		fprintf(outfp, "dbg2       ymax:       %f\n", ymax);
+		fprintf(outfp, "dbg2       dx:         %f\n", dx);
+		fprintf(outfp, "dbg2       dy:         %f\n", dy);
+		fprintf(outfp, "dbg2       nodata:     %f\n", nodata);
+	}
+
+	/* open the file */
+	if ((fp = fopen(outfile, "w")) == NULL) {
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+	}
+
+	/* output grid */
+	else {
+		fprintf(fp, "ncols %d\n", nx);
+		fprintf(fp, "nrows %d\n", ny);
+		fprintf(fp, "xllcorner %.10g\n", xmin - 0.5 * dx);
+		fprintf(fp, "yllcorner %.10g\n", ymin - 0.5 * dy);
+		fprintf(fp, "cellsize %.10g\n", dx);
+		fprintf(fp, "nodata_value -99999\n");
+		for (j = 0; j < ny; j++) {
+			for (i = 0; i < nx; i++) {
+				k = i * ny + (ny - 1 - j);
+				if (grid[k] == nodata)
+					fprintf(fp, "-99999 ");
+				else
+					fprintf(fp, "%f ", grid[k]);
+			}
+			fprintf(fp, "\n");
+		}
+		fclose(fp);
+	}
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(outfp, "dbg2  Return values:\n");
+		fprintf(outfp, "dbg2       error:      %d\n", *error);
+		fprintf(outfp, "dbg2  Return status:\n");
+		fprintf(outfp, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function write_oldgrd writes output grid to a
+ * GMT version 1 binary grd file
+ */
+int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
+                 double dx, double dy, int *error) {
+	int status = MB_SUCCESS;
+	FILE *fp = NULL;
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
+		fprintf(outfp, "dbg2  Input arguments:\n");
+		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
+		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
+		fprintf(outfp, "dbg2       grid:       %p\n", (void *)grid);
+		fprintf(outfp, "dbg2       nx:         %d\n", nx);
+		fprintf(outfp, "dbg2       ny:         %d\n", ny);
+		fprintf(outfp, "dbg2       xmin:       %f\n", xmin);
+		fprintf(outfp, "dbg2       xmax:       %f\n", xmax);
+		fprintf(outfp, "dbg2       ymin:       %f\n", ymin);
+		fprintf(outfp, "dbg2       ymax:       %f\n", ymax);
+		fprintf(outfp, "dbg2       dx:         %f\n", dx);
+		fprintf(outfp, "dbg2       dy:         %f\n", dy);
+	}
+
+	/* open the file */
+	if ((fp = fopen(outfile, "w")) == NULL) {
+		*error = MB_ERROR_OPEN_FAIL;
+		status = MB_FAILURE;
+	}
+
+	/* output grid */
+	else {
+		fwrite((char *)&nx, 1, 4, fp);
+		fwrite((char *)&ny, 1, 4, fp);
+		fwrite((char *)&xmin, 1, 8, fp);
+		fwrite((char *)&xmax, 1, 8, fp);
+		fwrite((char *)&ymin, 1, 8, fp);
+		fwrite((char *)&ymax, 1, 8, fp);
+		fwrite((char *)&dx, 1, 8, fp);
+		fwrite((char *)&dy, 1, 8, fp);
+		fwrite((char *)grid, nx * ny, 4, fp);
+		fclose(fp);
+	}
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(outfp, "dbg2  Return values:\n");
+		fprintf(outfp, "dbg2       error:      %d\n", *error);
+		fprintf(outfp, "dbg2  Return status:\n");
+		fprintf(outfp, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+/*--------------------------------------------------------------------*/
+/*
+ * function mbgrid_weight calculates the integrated weight over a bin
+ * given the footprint of a sounding
+ */
+int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double pcy, double dx, double dy, double *px, double *py,
+                  double *weight, int *use, int *error) {
+	int status = MB_SUCCESS;
+	double fa, fb;
+	double xe, ye, ang, ratio;
+	int i;
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
+		fprintf(outfp, "dbg2  Input arguments:\n");
+		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
+		fprintf(outfp, "dbg2       foot_a:     %f\n", foot_a);
+		fprintf(outfp, "dbg2       foot_b:     %f\n", foot_b);
+		fprintf(outfp, "dbg2       pcx:        %f\n", pcx);
+		fprintf(outfp, "dbg2       pcy:        %f\n", pcy);
+		fprintf(outfp, "dbg2       dx:         %f\n", dx);
+		fprintf(outfp, "dbg2       dy:         %f\n", dy);
+		fprintf(outfp, "dbg2       p1 x:       %f\n", px[0]);
+		fprintf(outfp, "dbg2       p1 y:       %f\n", py[0]);
+		fprintf(outfp, "dbg2       p2 x:       %f\n", px[1]);
+		fprintf(outfp, "dbg2       p2 y:       %f\n", py[1]);
+		fprintf(outfp, "dbg2       p3 x:       %f\n", px[2]);
+		fprintf(outfp, "dbg2       p3 y:       %f\n", py[2]);
+		fprintf(outfp, "dbg2       p4 x:       %f\n", px[3]);
+		fprintf(outfp, "dbg2       p4 y:       %f\n", py[3]);
+	}
+
+	/* The weighting function is
+	    w(x, y) = (1 / (PI * a * b)) * exp(-(x**2/a**2 + y**2/b**2))
+	    in the footprint coordinate system, where the x axis
+	    is along the horizontal projection of the beam and the
+	    y axix is perpendicular to that. The integral of the
+	    weighting function over an simple rectangle defined
+	    by corners (x1, y1), (x2, y1), (x1, y2), (x2, y2) is
+	        x2 y2
+	    W = I  I { w(x, y) } dx dy
+	        x1 y1
+
+	      = 1 / 4 * ( erfc(x1/a) - erfc(x2/a)) * ( erfc(y1/a) - erfc(y2/a))
+	    where erfc(u) is the complementary error function.
+	    Each bin is represented as a simple integral in geographic
+	    coordinates, but is rotated in the footprint coordinate system.
+	    I can't figure out how to evaluate this integral over a
+	    rotated rectangle,  and so I am crudely and incorrectly
+	    approximating the integrated weight value by evaluating it over
+	    the same sized rectangle centered at the same location.
+	    Maybe someday I'll figure out how to do it correctly.
+	    DWC 11/18/99 */
+
+	/* get integrated weight */
+	fa = foot_a;
+	fb = foot_b;
+	/*	*weight = 0.25 * ( erfcc((pcx - dx) / fa) - erfcc((pcx + dx) / fa))
+	 * ( erfcc((pcy - dy) / fb) - erfcc((pcy + dy) / fb));*/
+	*weight = 0.25 * (mbgrid_erf((pcx + dx) / fa) - mbgrid_erf((pcx - dx) / fa)) *
+	          (mbgrid_erf((pcy + dy) / fb) - mbgrid_erf((pcy - dy) / fb));
+
+	/* use if weight large or any ratio <= 1 */
+	if (*weight > 0.05) {
+		*use = MBGRID_USE_YES;
+	}
+	/* check ratio of each corner footprint 1/e distance */
+	else {
+		*use = MBGRID_USE_NO;
+		for (i = 0; i < 4; i++) {
+			ang = RTD * atan2(py[i], px[i]);
+			xe = foot_a * cos(DTR * ang);
+			ye = foot_b * sin(DTR * ang);
+			ratio = sqrt((px[i] * px[i] + py[i] * py[i]) / (xe * xe + ye * ye));
+			if (ratio <= 1.0)
+				*use = MBGRID_USE_YES;
+			else if (ratio <= 2.0)
+				*use = MBGRID_USE_CONDITIONAL;
+		}
+	}
+
+	if (verbose >= 2) {
+		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
+		fprintf(outfp, "dbg2  Return values:\n");
+		fprintf(outfp, "dbg2       error:      %d\n", *error);
+		fprintf(outfp, "dbg2       weight:     %f\n", *weight);
+		fprintf(outfp, "dbg2       use:        %d\n", *use);
+		fprintf(outfp, "dbg2  Return status:\n");
+		fprintf(outfp, "dbg2       status:     %d\n", status);
+	}
+
+	return (status);
+}
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
@@ -5349,326 +5660,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_ascii writes output grid to an ascii file
- */
-int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                double dx, double dy, int *error) {
-	int status = MB_SUCCESS;
-	FILE *fp = NULL;
-	int i;
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char *ctime();
-	char *getenv();
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
-		fprintf(outfp, "dbg2  Input arguments:\n");
-		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
-		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
-		fprintf(outfp, "dbg2       grid:       %p\n", (void *)grid);
-		fprintf(outfp, "dbg2       nx:         %d\n", nx);
-		fprintf(outfp, "dbg2       ny:         %d\n", ny);
-		fprintf(outfp, "dbg2       xmin:       %f\n", xmin);
-		fprintf(outfp, "dbg2       xmax:       %f\n", xmax);
-		fprintf(outfp, "dbg2       ymin:       %f\n", ymin);
-		fprintf(outfp, "dbg2       ymax:       %f\n", ymax);
-		fprintf(outfp, "dbg2       dx:         %f\n", dx);
-		fprintf(outfp, "dbg2       dy:         %f\n", dy);
-	}
-
-	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
-		*error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
-		fprintf(fp, "grid created by program MBGRID\n");
-		right_now = time((time_t *)0);
-		strcpy(date, ctime(&right_now));
-		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
-			user_ptr = getenv("LOGNAME");
-		if (user_ptr != NULL)
-			strcpy(user, user_ptr);
-		else
-			strcpy(user, "unknown");
-		i = gethostname(host, MB_PATH_MAXLINE);
-		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
-		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
-		for (i = 0; i < nx * ny; i++) {
-			fprintf(fp, "%13.5g ", grid[i]);
-			if ((i + 1) % 6 == 0)
-				fprintf(fp, "\n");
-		}
-		if ((nx * ny) % 6 != 0)
-			fprintf(fp, "\n");
-		fclose(fp);
-	}
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(outfp, "dbg2  Return values:\n");
-		fprintf(outfp, "dbg2       error:      %d\n", *error);
-		fprintf(outfp, "dbg2  Return status:\n");
-		fprintf(outfp, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_arcascii writes output grid to an Arc/Info ascii file
- */
-int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                   double dx, double dy, double nodata, int *error) {
-	int status = MB_SUCCESS;
-	FILE *fp = NULL;
-	int i, j, k;
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
-		fprintf(outfp, "dbg2  Input arguments:\n");
-		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
-		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
-		fprintf(outfp, "dbg2       grid:       %p\n", (void *)grid);
-		fprintf(outfp, "dbg2       nx:         %d\n", nx);
-		fprintf(outfp, "dbg2       ny:         %d\n", ny);
-		fprintf(outfp, "dbg2       xmin:       %f\n", xmin);
-		fprintf(outfp, "dbg2       xmax:       %f\n", xmax);
-		fprintf(outfp, "dbg2       ymin:       %f\n", ymin);
-		fprintf(outfp, "dbg2       ymax:       %f\n", ymax);
-		fprintf(outfp, "dbg2       dx:         %f\n", dx);
-		fprintf(outfp, "dbg2       dy:         %f\n", dy);
-		fprintf(outfp, "dbg2       nodata:     %f\n", nodata);
-	}
-
-	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
-		*error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
-		fprintf(fp, "ncols %d\n", nx);
-		fprintf(fp, "nrows %d\n", ny);
-		fprintf(fp, "xllcorner %.10g\n", xmin - 0.5 * dx);
-		fprintf(fp, "yllcorner %.10g\n", ymin - 0.5 * dy);
-		fprintf(fp, "cellsize %.10g\n", dx);
-		fprintf(fp, "nodata_value -99999\n");
-		for (j = 0; j < ny; j++) {
-			for (i = 0; i < nx; i++) {
-				k = i * ny + (ny - 1 - j);
-				if (grid[k] == nodata)
-					fprintf(fp, "-99999 ");
-				else
-					fprintf(fp, "%f ", grid[k]);
-			}
-			fprintf(fp, "\n");
-		}
-		fclose(fp);
-	}
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(outfp, "dbg2  Return values:\n");
-		fprintf(outfp, "dbg2       error:      %d\n", *error);
-		fprintf(outfp, "dbg2  Return status:\n");
-		fprintf(outfp, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function write_oldgrd writes output grid to a
- * GMT version 1 binary grd file
- */
-int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
-                 double dx, double dy, int *error) {
-	int status = MB_SUCCESS;
-	FILE *fp = NULL;
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
-		fprintf(outfp, "dbg2  Input arguments:\n");
-		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
-		fprintf(outfp, "dbg2       outfile:    %s\n", outfile);
-		fprintf(outfp, "dbg2       grid:       %p\n", (void *)grid);
-		fprintf(outfp, "dbg2       nx:         %d\n", nx);
-		fprintf(outfp, "dbg2       ny:         %d\n", ny);
-		fprintf(outfp, "dbg2       xmin:       %f\n", xmin);
-		fprintf(outfp, "dbg2       xmax:       %f\n", xmax);
-		fprintf(outfp, "dbg2       ymin:       %f\n", ymin);
-		fprintf(outfp, "dbg2       ymax:       %f\n", ymax);
-		fprintf(outfp, "dbg2       dx:         %f\n", dx);
-		fprintf(outfp, "dbg2       dy:         %f\n", dy);
-	}
-
-	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
-		*error = MB_ERROR_OPEN_FAIL;
-		status = MB_FAILURE;
-	}
-
-	/* output grid */
-	else {
-		fwrite((char *)&nx, 1, 4, fp);
-		fwrite((char *)&ny, 1, 4, fp);
-		fwrite((char *)&xmin, 1, 8, fp);
-		fwrite((char *)&xmax, 1, 8, fp);
-		fwrite((char *)&ymin, 1, 8, fp);
-		fwrite((char *)&ymax, 1, 8, fp);
-		fwrite((char *)&dx, 1, 8, fp);
-		fwrite((char *)&dy, 1, 8, fp);
-		fwrite((char *)grid, nx * ny, 4, fp);
-		fclose(fp);
-	}
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(outfp, "dbg2  Return values:\n");
-		fprintf(outfp, "dbg2       error:      %d\n", *error);
-		fprintf(outfp, "dbg2  Return status:\n");
-		fprintf(outfp, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-/*
- * function mbgrid_weight calculates the integrated weight over a bin
- * given the footprint of a sounding
- */
-int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double pcy, double dx, double dy, double *px, double *py,
-                  double *weight, int *use, int *error) {
-	int status = MB_SUCCESS;
-	double fa, fb;
-	double xe, ye, ang, ratio;
-	int i;
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
-		fprintf(outfp, "dbg2  Input arguments:\n");
-		fprintf(outfp, "dbg2       verbose:    %d\n", verbose);
-		fprintf(outfp, "dbg2       foot_a:     %f\n", foot_a);
-		fprintf(outfp, "dbg2       foot_b:     %f\n", foot_b);
-		fprintf(outfp, "dbg2       pcx:        %f\n", pcx);
-		fprintf(outfp, "dbg2       pcy:        %f\n", pcy);
-		fprintf(outfp, "dbg2       dx:         %f\n", dx);
-		fprintf(outfp, "dbg2       dy:         %f\n", dy);
-		fprintf(outfp, "dbg2       p1 x:       %f\n", px[0]);
-		fprintf(outfp, "dbg2       p1 y:       %f\n", py[0]);
-		fprintf(outfp, "dbg2       p2 x:       %f\n", px[1]);
-		fprintf(outfp, "dbg2       p2 y:       %f\n", py[1]);
-		fprintf(outfp, "dbg2       p3 x:       %f\n", px[2]);
-		fprintf(outfp, "dbg2       p3 y:       %f\n", py[2]);
-		fprintf(outfp, "dbg2       p4 x:       %f\n", px[3]);
-		fprintf(outfp, "dbg2       p4 y:       %f\n", py[3]);
-	}
-
-	/* The weighting function is
-	    w(x, y) = (1 / (PI * a * b)) * exp(-(x**2/a**2 + y**2/b**2))
-	    in the footprint coordinate system, where the x axis
-	    is along the horizontal projection of the beam and the
-	    y axix is perpendicular to that. The integral of the
-	    weighting function over an simple rectangle defined
-	    by corners (x1, y1), (x2, y1), (x1, y2), (x2, y2) is
-	        x2 y2
-	    W = I  I { w(x, y) } dx dy
-	        x1 y1
-
-	      = 1 / 4 * ( erfc(x1/a) - erfc(x2/a)) * ( erfc(y1/a) - erfc(y2/a))
-	    where erfc(u) is the complementary error function.
-	    Each bin is represented as a simple integral in geographic
-	    coordinates, but is rotated in the footprint coordinate system.
-	    I can't figure out how to evaluate this integral over a
-	    rotated rectangle,  and so I am crudely and incorrectly
-	    approximating the integrated weight value by evaluating it over
-	    the same sized rectangle centered at the same location.
-	    Maybe someday I'll figure out how to do it correctly.
-	    DWC 11/18/99 */
-
-	/* get integrated weight */
-	fa = foot_a;
-	fb = foot_b;
-	/*	*weight = 0.25 * ( erfcc((pcx - dx) / fa) - erfcc((pcx + dx) / fa))
-	 * ( erfcc((pcy - dy) / fb) - erfcc((pcy + dy) / fb));*/
-	*weight = 0.25 * (mbgrid_erf((pcx + dx) / fa) - mbgrid_erf((pcx - dx) / fa)) *
-	          (mbgrid_erf((pcy + dy) / fb) - mbgrid_erf((pcy - dy) / fb));
-
-	/* use if weight large or any ratio <= 1 */
-	if (*weight > 0.05) {
-		*use = MBGRID_USE_YES;
-	}
-	/* check ratio of each corner footprint 1/e distance */
-	else {
-		*use = MBGRID_USE_NO;
-		for (i = 0; i < 4; i++) {
-			ang = RTD * atan2(py[i], px[i]);
-			xe = foot_a * cos(DTR * ang);
-			ye = foot_b * sin(DTR * ang);
-			ratio = sqrt((px[i] * px[i] + py[i] * py[i]) / (xe * xe + ye * ye));
-			if (ratio <= 1.0)
-				*use = MBGRID_USE_YES;
-			else if (ratio <= 2.0)
-				*use = MBGRID_USE_CONDITIONAL;
-		}
-	}
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
-		fprintf(outfp, "dbg2  Return values:\n");
-		fprintf(outfp, "dbg2       error:      %d\n", *error);
-		fprintf(outfp, "dbg2       weight:     %f\n", *weight);
-		fprintf(outfp, "dbg2       use:        %d\n", *use);
-		fprintf(outfp, "dbg2  Return status:\n");
-		fprintf(outfp, "dbg2       status:     %d\n", status);
-	}
-
-	return (status);
-}
-/*--------------------------------------------------------------------*/
-/* approximate complementary error function from numerical recipies */
-double erfcc(double x) {
-	double t, z, ans;
-
-	z = fabs(x);
-	t = 1.0 / (1.0 + 0.5 * z);
-	ans =
-	    t *
-	    exp(-z * z - 1.26551223 +
-	        t * (1.00002368 +
-	             t * (0.37409196 +
-	                  t * (0.09678418 +
-	                       t * (-0.18628806 +
-	                            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
-	/* fprintf(outfp, "x:%f ans:%f\n", x, ans); */
-	return x >= 0.0 ? ans : 2.0 - ans;
-}
-/*--------------------------------------------------------------------*/
-/* approximate error function altered from numerical recipies */
-double mbgrid_erf(double x) {
-	double t, z, erfc_d, erf_d;
-
-	z = fabs(x);
-	t = 1.0 / (1.0 + 0.5 * z);
-	erfc_d =
-	    t *
-	    exp(-z * z - 1.26551223 +
-	        t * (1.00002368 +
-	             t * (0.37409196 +
-	                  t * (0.09678418 +
-	                       t * (-0.18628806 +
-	                            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
-	erfc_d = x >= 0.0 ? erfc_d : 2.0 - erfc_d;
-	erf_d = 1.0 - erfc_d;
-	return erf_d;
 }
 /*--------------------------------------------------------------------*/
