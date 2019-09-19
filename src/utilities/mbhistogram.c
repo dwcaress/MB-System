@@ -51,7 +51,6 @@ int main(int argc, char **argv) {
 	                      "the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip "
 	                       "-Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

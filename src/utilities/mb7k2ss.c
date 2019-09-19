@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
 	                      "seafloor, and outputs files \nin the MBF_MBLDEOIH formst (MBIO format id 71).\n";
 	char usage_message[] = "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -D -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile "
 	                       "-Ttopogridfile -X -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

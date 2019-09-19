@@ -39,7 +39,6 @@ int main(int argc, char **argv) {
 	char help_message[] = "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. "
 	                      "\nThe results are dumped to stdout.";
 	char usage_message[] = "mbdatalist [-C -D -Fformat -Ifile -N -O -P -Q -Rw/e/s/n -S -U -Y -Z -V -H]";
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;

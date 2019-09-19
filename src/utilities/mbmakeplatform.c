@@ -203,7 +203,6 @@ static const char usage_message[] =
     "\t--modify-time-latency-model=file\n"
     "\t]\n";
 
-extern char *optarg;
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char **argv) {

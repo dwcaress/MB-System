@@ -82,7 +82,6 @@ int main(int argc, char **argv) {
 	    "MBgpstide generates tide files from the GPS altitude data in the input files.";
 	static char usage_message[] =
 	    "mbgpstide [-Atideformat -Dinterval -Fformat -Idatalist -M -Ooutput -Roffset -S -Tgeoid -Usource,sensor -V]";
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;

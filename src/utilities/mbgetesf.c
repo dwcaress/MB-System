@@ -57,8 +57,6 @@ int main(int argc, char **argv) {
 	                      "and\nmbprocess can be used to apply the edit events to another file.";
 	char usage_message[] = "mbgetesf [-Fformat -Iinfile -Mmode -Oesffile -V -H]";
 
-	/* parsing variables */
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

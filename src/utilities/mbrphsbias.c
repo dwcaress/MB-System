@@ -94,7 +94,6 @@ int main(int argc, char **argv) {
 	char help_message[] = "MBrphsbias analyzes sonar soundings to solve for bias parameters associated with the attitude sensors "
 	                      "and first order speed of sound.\n";
 	char usage_message[] = "mbrphsbias [-Fformat -Iinfile -Rwest/east/south/north -Sbinsize	\n\t-B]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

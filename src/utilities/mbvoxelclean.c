@@ -93,7 +93,6 @@ int main(int argc, char **argv) {
                             "\t--input=datalist\n\t--format=value\n\t--voxel-size=xysize[/zsize]\n"
                             "\t--occupy-threshold=value\n\t--count-flagged\n\t--flag-empty\n\t--ignore-empty\n\t--unflag-occupied\n"
                             "\t--ignore-occupied\n\t--range-minimum=value\n\t--range-maximum=value]";
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;

@@ -133,7 +133,6 @@ int main(int argc, char **argv) {
                           "\t--kluge-zero-alongtrack-angles\n"
                           "\t--kluge-fix-wissl-timestamps\n";
 
-  extern char *optarg;
   int option_index;
   int errflg = 0;
   int c;

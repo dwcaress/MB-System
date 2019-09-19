@@ -114,7 +114,6 @@ static const char usage_message[] =
     "\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
 
 int main(int argc, char **argv) {
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

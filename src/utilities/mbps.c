@@ -72,7 +72,6 @@ int main(int argc, char **argv) {
 	char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha "
 	                       "-Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats "
 	                       "\n\t-Zdisplay_scales -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

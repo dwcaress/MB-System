@@ -123,7 +123,6 @@ int main(int argc, char **argv) {
 	                       "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate\n"
 	                       "\t-Sspike_slope/mode/format -Ttolerance -Wwest/east/south/north \n"
 	                       "\t-Xbeamsleft/beamsright -Ydistanceleft/distanceright[/mode] -Z\n\t-V -H]\n\n";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

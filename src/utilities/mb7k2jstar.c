@@ -63,7 +63,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	extern char *optarg;
 	int errflg = 0;
 	int help = 0;
 

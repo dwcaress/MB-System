@@ -63,7 +63,6 @@ int main(int argc, char **argv) {
 	char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus "
 	                      "temperature and salinity database.";
 	char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int status = MB_SUCCESS;

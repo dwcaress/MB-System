@@ -78,7 +78,6 @@ int main(int argc, char **argv) {
 	    "points for SVPs.\nWhen the -Nmin_num_pairs option is used, only svps that have at least min_num_pairs svp values will "
 	    "be output.(This is particularly useful for .xse data where the svp is entered as a single values svp.)";
 	char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -Nmin_num_pairs -P -T -V -Z]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

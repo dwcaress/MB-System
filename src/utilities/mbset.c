@@ -62,8 +62,6 @@ parameter file. The parameter file syntax is documented by\n\
 the manual pages for mbprocess and mbset. \n\n";
 	char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N -V -H]";
 
-	/* parsing variables */
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

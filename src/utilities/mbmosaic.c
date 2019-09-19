@@ -166,7 +166,6 @@ char usage_message[] = "mbmosaic -Ifilelist -Oroot \
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

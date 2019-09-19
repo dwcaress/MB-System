@@ -43,7 +43,6 @@ int main(int argc, char **argv) {
 	                      "correction software.\n";
 	char usage_message[] = "mbconfig --verbose --help --prefix --cflags --libs "
 	                       "--version --version-id --version-major --version-minor --version-archive";
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;

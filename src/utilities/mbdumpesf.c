@@ -51,8 +51,6 @@ int main(int argc, char **argv) {
 	                       "\t--ignore-filter --ignore-zero \n"
 	                       "\t--verbose --help]";
 
-	/* parsing variables */
-	extern char *optarg;
 	int option_index;
 	int errflg = 0;
 	int c;

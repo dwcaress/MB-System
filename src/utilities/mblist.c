@@ -99,7 +99,6 @@ int main(int argc, char **argv) {
 	char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
 	                       "-Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end \n-Ooptions -Ppings "
 	                       "-Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

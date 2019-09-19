@@ -173,7 +173,6 @@ The default input and output streams are stdin and stdout.\n";
 -Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Nbuffersize\n\t\
 -Rwest/east/south/north -Smode/xdim/ldim/iteration\n\t\
 -Tthreshold -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

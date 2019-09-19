@@ -64,7 +64,6 @@ int main(int argc, char **argv) {
 	                      "embedded\nin the multibeam data.";
 	char usage_message[] = "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias/headingbias -Dsonardepthfile "
 	                       "-Idatalist -Jprojection -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

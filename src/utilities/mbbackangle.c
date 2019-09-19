@@ -88,7 +88,6 @@ by MBprocess.";
 	char usage_message[] = "mbbackangle -Ifile \
 [-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/min/max/n_columns/n_rows \
 -Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

@@ -121,8 +121,6 @@ will infer a reasonable processing path by looking for navigation\n\
 and mbedit edit save files.\n";
 	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
-	/* parsing variables */
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;

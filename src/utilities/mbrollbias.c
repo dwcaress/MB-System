@@ -76,7 +76,6 @@ char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	extern char *optarg;
 	int errflg = 0;
 	int c;
 	int help = 0;
