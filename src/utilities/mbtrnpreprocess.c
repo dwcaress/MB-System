@@ -1409,7 +1409,7 @@ int main
 
   int idataread, n_ping_process, i_ping_process;
   int beam_start, beam_end, beam_decimation;
-  int i, ii, j, jj, n;
+  int ii, j, jj, n;
   int jj0, jj1, dj;
   int ii0, ii1, di;
 
@@ -2073,7 +2073,7 @@ int main
 
     /* allocate memory for data arrays */
     memset(ping, 0, MBTRNPREPROCESS_BUFFER_DEFAULT * sizeof(struct mbtrnpreprocess_ping_struct));
-    for (i = 0; i < n_buffer_max; i++)
+    for (int i = 0; i < n_buffer_max; i++)
       {
       if (error == MB_ERROR_NO_ERROR)
         status =
@@ -2279,7 +2279,7 @@ int main
         ndata++;
         n_pings_read++;
         n_soundings_read += ping[idataread].beams_bath;
-        for (i=0; i<ping[idataread].beams_bath; i++)
+        for (int i = 0; i<ping[idataread].beams_bath; i++)
           {
           ping[idataread].beamflag_filter[i] = ping[idataread].beamflag[i];
           if (mb_beam_ok(ping[idataread].beamflag[i]))
@@ -2317,11 +2317,11 @@ int main
         /* only process and output if enough data have been read */
         if (ndata == n_buffer_max)
           {
-          for (i = 0; i < n_buffer_max; i++)
+          for (int i = 0; i < n_buffer_max; i++)
             if (ping[i].count == n_ping_process)
               i_ping_process = i;
 /*fprintf(stdout, "\nProcess some data: ndata:%d counts: ", ndata);
-   for (i = 0; i < n_buffer_max; i++) {
+   for (int i = 0; i < n_buffer_max; i++) {
       fprintf(stdout,"%d ", ping[i].count);
    }
    fprintf(stdout," : process %d\n", i_ping_process);*/
@@ -2835,7 +2835,7 @@ int main
         if (ndata >= n_buffer_max)
           {
           ndata--;
-          for (i = 0; i < n_buffer_max; i++)
+          for (int i = 0; i < n_buffer_max; i++)
             {
             ping[i].count--;
             if (ping[i].count < 0)

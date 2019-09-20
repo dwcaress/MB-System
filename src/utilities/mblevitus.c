@@ -113,7 +113,6 @@ int main(int argc, char **argv) {
 
 	char *lonptr, *latptr;
 	int last_good;
-	int i;
 
 	char *ctime();
 	char *getenv();
@@ -256,7 +255,7 @@ int main(int argc, char **argv) {
 
 /* byte swap the data if necessary */
 #ifdef BYTESWAPPED
-	for (i = 0; i < NLEVITUS_MAX; i++) {
+	for (int i = 0; i < NLEVITUS_MAX; i++) {
 		mb_swap_float(&temperature[i][ilat]);
 		mb_swap_float(&salinity[i][ilat]);
 	}
@@ -266,7 +265,7 @@ int main(int argc, char **argv) {
 	nvelocity = 0;
 	nvelocity_tot = 0;
 	last_good = -1;
-	for (i = 0; i < NDEPTH_MAX; i++) {
+	for (int i = 0; i < NDEPTH_MAX; i++) {
 		if (i < NLEVITUS_MAX)
 			if (salinity[i][ilat] > MBLEVITUS_NO_DATA) {
 				last_good = i;
@@ -354,7 +353,7 @@ int main(int argc, char **argv) {
 	fprintf(ofp, "# calculated using the deepest temperature\n");
 	fprintf(ofp, "# and salinity value available.\n");
 
-	for (i = 0; i < nvelocity_tot; i++)
+	for (int i = 0; i < nvelocity_tot; i++)
 		fprintf(ofp, "%f %f\n", depth[i], velocity[i]);
 	fprintf(outfp, "Values defined directly by Levitus database:      %2d\n", nvelocity);
 	fprintf(outfp, "Values assuming deepest salinity and temperature: %2d\n", nvelocity_tot - nvelocity);
@@ -363,7 +362,7 @@ int main(int argc, char **argv) {
 	if (verbose >= 1) {
 		fprintf(outfp, "\nMean annual water column profile:\n");
 		fprintf(outfp, "     Depth Temperature Salinity   Velocity\n");
-		for (i = 0; i < nvelocity_tot; i++) {
+		for (int i = 0; i < nvelocity_tot; i++) {
 			if (i < nvelocity)
 				fprintf(outfp, "%10.4f %9.4f %9.4f   %9.4f\n", depth[i], temperature[i][ilat], salinity[i][ilat], velocity[i]);
 			else

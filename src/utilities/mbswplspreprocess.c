@@ -572,7 +572,6 @@ static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct
 /*----------------------------------------------------------------------*/
 static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -581,7 +580,7 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 		fprintf(stderr, "dbg2       ping:        %p\n", (void *)ping);
 	}
 
-	for (i = 0; i < ping->nosampsfile; i++) {
+	for (int i = 0; i < ping->nosampsfile; i++) {
 		if (ping->points[i].status != SWPLS_POINT_REJECTED) {
 			ping->points[i].status = SWPLS_POINT_REJECTED;
 		}
@@ -605,7 +604,7 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 	int status = MB_SUCCESS;
 	swpls_point *points;
-	int valid, i;
+	int valid;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -616,7 +615,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 
 	/* count the number of valid samples */
 	valid = 0;
-	for (i = 0; i < ping->nosampsfile; i++) {
+	for (int i = 0; i < ping->nosampsfile; i++) {
 		if (ping->points[i].status != SWPLS_POINT_REJECTED) {
 			valid++;
 		}
@@ -632,7 +631,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 
 	/* copy the valid samples to the temporary array */
 	valid = 0;
-	for (i = 0; i < ping->nosampsfile; i++) {
+	for (int i = 0; i < ping->nosampsfile; i++) {
 		if (ping->points[i].status != SWPLS_POINT_REJECTED) {
 			points[valid++] = ping->points[i];
 		}
@@ -640,7 +639,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 
 	/* copy the valid samples to the front of the ping->points array and adjust
 	   the sample count. This effectively truncates the ping on write. */
-	for (i = 0; i < valid; i++) {
+	for (int i = 0; i < valid; i++) {
 		ping->points[i] = points[i];
 	}
 	ping->nosampsfile = valid;
@@ -665,7 +664,6 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	mb_path fileroot;
 	int format;
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -676,7 +674,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	}
 
 	/* clear ofile array */
-	for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		strncpy(ofile[i], "", sizeof(ofile[i]));
 	}
 
@@ -696,17 +694,17 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	}
 	else if ((ofile_set == MB_NO) && (split_txers == MB_YES)) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
-			for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", fileroot, i + 1, format);
 			}
 		}
 		else if ((format == MBF_SWPLSSXI) && (strncmp(".sxi", &ifile[strlen(ifile) - 4], 4) == 0)) {
-			for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", fileroot, i + 1, format);
 			}
 		}
 		else {
-			for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", ifile, i + 1, format);
 			}
 		}
@@ -724,17 +722,17 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	}
 	else if ((ofile_set == MB_YES) && (split_txers == MB_YES)) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
-			for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", *basename, i + 1, format);
 			}
 		}
 		else if ((format == MBF_SWPLSSXI) && (strncmp(".sxi", &ifile[strlen(ifile) - 4], 4) == 0)) {
-			for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", *basename, i + 1, format);
 			}
 		}
 		else {
-			for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+			for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 				sprintf(ofile[i], "%s_txer%d.mb%d", ifile, i + 1, format);
 			}
 		}
@@ -743,7 +741,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
-		for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+		for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 			fprintf(stderr, "dbg2    ofile[%d]:      %s\n", i, ofile[i]);
 		}
 		fprintf(stderr, "dbg2       error:      %d\n", *error);
@@ -793,7 +791,6 @@ static int ping_txno(int verbose, struct mbsys_swathplus_struct *store, int *txn
 /*----------------------------------------------------------------------*/
 static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -802,7 +799,7 @@ static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 		fprintf(stderr, "dbg2       ping:        %p\n", (void *)ping);
 	}
 
-	for (i = 0; i < ping->nosampsfile; i++) {
+	for (int i = 0; i < ping->nosampsfile; i++) {
 		ping->points[i].procamp = ping->points[i].amp;
 	}
 
@@ -820,7 +817,6 @@ static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 /*---------------------------------------------------------------*/
 static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_path ifile, counts *recs, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 	void *imbio_ptr = NULL;
 	double btime_d, etime_d;
 	int beams_bath_alloc, beams_amp_alloc, pixels_ss_alloc;
@@ -860,7 +856,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 	/* setup the output filename(s) for writing */
 	status = set_outfile_names(opts->verbose, ofile, ifile, &opts->basename, opts->ofile_set, opts->split_txers, error);
-	for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		ombio_ptr[i] = NULL;
 		ofile_init[i] = MB_NO;
 	}
@@ -959,7 +955,7 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 	/* close the files */
 	status = mb_close(opts->verbose, &imbio_ptr, error);
-	for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		if (ofile_init[i] == MB_YES) {
 			status = mb_close(opts->verbose, &ombio_ptr[i], error);
 			ofile_init[i] = MB_NO;
@@ -984,7 +980,6 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 
 static int zero_counts(int verbose, counts *recs, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -1012,7 +1007,7 @@ static int zero_counts(int verbose, counts *recs, int *error) {
 	recs->txer_offset = 0;
 	recs->wl_offset = 0;
 	recs->other = 0;
-	for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		recs->pings_per_txer[i] = 0;
 	}
 	recs->ping_sel_off = 0;
@@ -1033,7 +1028,6 @@ static int zero_counts(int verbose, counts *recs, int *error) {
 /*----------------------------------------------------------------------*/
 static int add_counts(int verbose, counts *to, counts *from, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -1062,7 +1056,7 @@ static int add_counts(int verbose, counts *to, counts *from, int *error) {
 	to->txer_offset += from->txer_offset;
 	to->wl_offset += from->wl_offset;
 	to->other += from->other;
-	for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		to->pings_per_txer[i] += from->pings_per_txer[i];
 	}
 	to->ping_sel_off += from->ping_sel_off;
@@ -1083,7 +1077,6 @@ static int add_counts(int verbose, counts *to, counts *from, int *error) {
 /*----------------------------------------------------------------------*/
 static int print_counts(int verbose, counts *recs, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -1113,7 +1106,7 @@ static int print_counts(int verbose, counts *recs, int *error) {
 	fprintf(stdout, "  wl_offset        = %d\n", recs->wl_offset);
 	fprintf(stdout, "  other            = %d\n", recs->other);
 	fprintf(stdout, "\nTransducers Observed:\n");
-	for (i = 0; i < SWPLS_MAX_TXERS; i++) {
+	for (int i = 0; i < SWPLS_MAX_TXERS; i++) {
 		fprintf(stdout, "  Channel %d        = %d\n", i + 1, recs->pings_per_txer[i]);
 	}
 	fprintf(stdout, "\nPing Modes Observed:\n");

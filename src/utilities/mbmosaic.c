@@ -139,7 +139,6 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
                 double dx, double dy, int *error) {
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
-	int i;
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char *ctime();
@@ -179,10 +178,10 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
-		i = gethostname(host, MB_PATH_MAXLINE);
+		/* i = */ gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
 		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
-		for (i = 0; i < nx * ny; i++) {
+		for (int i = 0; i < nx * ny; i++) {
 			fprintf(fp, "%13.5g ", grid[i]);
 			if ((i + 1) % 6 == 0)
 				fprintf(fp, "\n");
@@ -210,7 +209,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
                    double dx, double dy, double nodata, int *error) {
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
-	int i, j, k;
+	int j, k;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
@@ -244,7 +243,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 		fprintf(fp, "cellsize %.10g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
 		for (j = 0; j < ny; j++) {
-			for (i = 0; i < nx; i++) {
+			for (int i = 0; i < nx; i++) {
 				k = i * ny + (ny - 1 - j);
 				if (grid[k] == nodata)
 					fprintf(fp, "-99999 ");
@@ -336,7 +335,6 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 	int status = MB_SUCCESS;
 	double r;
 	double theta, phi, thetap, phip;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -390,7 +388,7 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			fprintf(stderr, "dbg2       footprint: x[%d]:%f y[%d]:%f\n", i, footprint->x[i], i, footprint->y[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -403,7 +401,6 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
                             double *bathalongtrack, double *gangles, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -412,13 +409,13 @@ int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char
 		fprintf(stderr, "dbg2       sonardepth:      %f\n", sonardepth);
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
+		for (int i = 0; i < beams_bath; i++)
 			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
 			        bathalongtrack[i]);
 	}
 
 	/* loop over all beams, calculate grazing angles for valid beams */
-	for (i = 0; i < beams_bath; i++) {
+	for (int i = 0; i < beams_bath; i++) {
 		if (mb_beam_ok(beamflag[i])) {
 			gangles[i] = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
 		}
@@ -429,7 +426,7 @@ int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
+		for (int i = 0; i < beams_bath; i++)
 			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f %f  angle:%f\n", i, beamflag[i], bath[i],
 			        bathacrosstrack[i], bathalongtrack[i], gangles[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -447,7 +444,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 	int status = MB_SUCCESS;
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
-	int i, j;
+	int j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -456,19 +453,19 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 		fprintf(stderr, "dbg2       priority_mode:             %d\n", priority_mode);
 		fprintf(stderr, "dbg2       n_priority_angle:          %d\n", n_priority_angle);
 		fprintf(stderr, "dbg2       priority angle table:\n");
-		for (i = 0; i < n_priority_angle; i++)
+		for (int i = 0; i < n_priority_angle; i++)
 			fprintf(stderr, "dbg2         %d  angle:%f  priority:%f\n", i, priority_angle_angle[i], priority_angle_priority[i]);
 		fprintf(stderr, "dbg2       priority_azimuth:          %f\n", priority_azimuth);
 		fprintf(stderr, "dbg2       priority_azimuth_factor:   %f\n", priority_azimuth_factor);
 		fprintf(stderr, "dbg2       heading:         %f\n", heading);
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry grazing angles:\n");
-		for (i = 0; i < beams_bath; i++)
+		for (int i = 0; i < beams_bath; i++)
 			fprintf(stderr, "dbg2         beam:%d  flag:%d angle:%f\n", i, beamflag[i], gangles[i]);
 	}
 
 	/* initialize priority array */
-	for (i = 0; i < beams_bath; i++) {
+	for (int i = 0; i < beams_bath; i++) {
 		if (mb_beam_ok(beamflag[i])) {
 			priorities[i] = 1.0;
 		}
@@ -480,7 +477,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 	/* get grazing angle priorities */
 	if (priority_mode & MBMOSAIC_PRIORITY_ANGLE) {
 		/* loop over data getting angle based priorities */
-		for (i = 0; i < beams_bath; i++) {
+		for (int i = 0; i < beams_bath; i++) {
 			if (mb_beam_ok(beamflag[i])) {
 				/* priority zero if outside the range of the priority-angle table */
 				if (gangles[i] < priority_angle_angle[0] || gangles[i] > priority_angle_angle[n_priority_angle - 1]) {
@@ -525,7 +522,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 			weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
 
 		/* apply the look azimuth priorities */
-		for (i = 0; i < beams_bath; i++) {
+		for (int i = 0; i < beams_bath; i++) {
 			if (mb_beam_ok(beamflag[i])) {
 				if (gangles[i] < 0.0)
 					priorities[i] *= weight_starboard;
@@ -549,7 +546,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 			weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
 
 		/* apply the heading priorities */
-		for (i = 0; i < beams_bath; i++) {
+		for (int i = 0; i < beams_bath; i++) {
 			if (mb_beam_ok(beamflag[i])) {
 				priorities[i] *= weight_heading;
 			}
@@ -561,7 +558,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry grazing angles and priorities:\n");
-		for (i = 0; i < beams_bath; i++)
+		for (int i = 0; i < beams_bath; i++)
 			fprintf(stderr, "dbg2         beam:%d  flag:%d angle:%f  priority:%f\n", i, beamflag[i], gangles[i], priorities[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -576,7 +573,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 	int status = MB_SUCCESS;
 	int found_pre, found_post;
 	int i0, i1;
-	int i, j;
+	int j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -584,13 +581,13 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
+		for (int i = 0; i < beams_bath; i++)
 			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 	}
 
 	/* get grazing angle priorities */
 	/* loop over data getting angle based priorities */
-	for (i = 0; i < beams_bath; i++) {
+	for (int i = 0; i < beams_bath; i++) {
 		if (mb_beam_ok(beamflag[i])) {
 			/* find previous good beam */
 			found_pre = MB_NO;
@@ -644,7 +641,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
+		for (int i = 0; i < beams_bath; i++)
 			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f  slope:%f\n", i, beamflag[i], bath[i], bathacrosstrack[i],
 			        slopes[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -662,7 +659,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 	int status = MB_SUCCESS;
 	double dangle, angle0, angle1, factor;
 	int found, foundnext;
-	int i, j, jj, jstart, jnext;
+	int j, jj, jstart, jnext;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -671,7 +668,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 		fprintf(stderr, "dbg2       sonardepth:      %f\n", sonardepth);
 		fprintf(stderr, "dbg2       beams_bath:      %d\n", beams_bath);
 		fprintf(stderr, "dbg2       bathymetry:\n");
-		for (i = 0; i < beams_bath; i++)
+		for (int i = 0; i < beams_bath; i++)
 			fprintf(stderr, "dbg2         beam:%d  flag:%d  bath:%f %f\n", i, beamflag[i], bath[i], bathacrosstrack[i]);
 		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
 		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
@@ -682,7 +679,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 	dangle = (angle_max - angle_min) / (nangle - 1);
 	jstart = 0;
 	*error = MB_ERROR_NO_ERROR;
-	for (i = 0; i < nangle; i++) {
+	for (int i = 0; i < nangle; i++) {
 		/* get angles in takeoff coordinates */
 		table_angle[i] = angle_min + dangle * i;
 		table_xtrack[i] = 0.0;
@@ -787,7 +784,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
 		fprintf(stderr, "dbg2       tables:\n");
-		for (i = 0; i < nangle; i++)
+		for (int i = 0; i < nangle; i++)
 			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
 			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -803,7 +800,6 @@ int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle
                                       double *table_range, int *error) {
 	int status = MB_SUCCESS;
 	double dangle;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -818,7 +814,7 @@ int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle
 	/* loop over the angles and figure out the other table values from the bathymetry */
 	dangle = (angle_max - angle_min) / (nangle - 1);
 	*error = MB_ERROR_NO_ERROR;
-	for (i = 0; i < nangle; i++) {
+	for (int i = 0; i < nangle; i++) {
 		/* get angles in takeoff coordinates */
 		table_angle[i] = angle_min + dangle * i;
 		table_xtrack[i] = altitude * tan(DTR * table_angle[i]);
@@ -831,7 +827,7 @@ int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
 		fprintf(stderr, "dbg2       tables:\n");
-		for (i = 0; i < nangle; i++)
+		for (int i = 0; i < nangle; i++)
 			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
 			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -847,7 +843,7 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
                           double *gangles, int *error) {
 	int status = MB_SUCCESS;
 	int found;
-	int i, j, jstart;
+	int j, jstart;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -855,18 +851,18 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
 		fprintf(stderr, "dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
 		fprintf(stderr, "dbg2       tables:\n");
-		for (i = 0; i < nangle; i++)
+		for (int i = 0; i < nangle; i++)
 			fprintf(stderr, "dbg2         %d angle:%f  xtrack:%f ltrack:%f altitude:%f range:%f\n", i, table_angle[i],
 			        table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
 		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
 		fprintf(stderr, "dbg2       sidescan:\n");
-		for (i = 0; i < pixels_ss; i++)
+		for (int i = 0; i < pixels_ss; i++)
 			fprintf(stderr, "dbg2         pixel:%d  ss:%f %f\n", i, ss[i], ssacrosstrack[i]);
 	}
 
 	/* loop over the sidescan interpolating angles from the table on the basis of ssacrosstrack */
 	jstart = 0;
-	for (i = 0; i < pixels_ss; i++) {
+	for (int i = 0; i < pixels_ss; i++) {
 		/* get angles only for valid sidescan */
 		if (ss[i] > MB_SIDESCAN_NULL) {
 			found = MB_NO;
@@ -901,7 +897,7 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
 		fprintf(stderr, "dbg2       sidescan grazing angles:\n");
-		for (i = 0; i < pixels_ss; i++)
+		for (int i = 0; i < pixels_ss; i++)
 			fprintf(stderr, "dbg2         pixel:%d  ss:%f %f angle:%f\n", i, ss[i], ssacrosstrack[i], gangles[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -918,7 +914,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 	int status = MB_SUCCESS;
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
-	int i, j;
+	int j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -927,19 +923,19 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 		fprintf(stderr, "dbg2       priority_mode:             %d\n", priority_mode);
 		fprintf(stderr, "dbg2       n_priority_angle:          %d\n", n_priority_angle);
 		fprintf(stderr, "dbg2       priority angle table:\n");
-		for (i = 0; i < n_priority_angle; i++)
+		for (int i = 0; i < n_priority_angle; i++)
 			fprintf(stderr, "dbg2         %d  angle:%f  priority:%f\n", i, priority_angle_angle[i], priority_angle_priority[i]);
 		fprintf(stderr, "dbg2       priority_azimuth:          %f\n", priority_azimuth);
 		fprintf(stderr, "dbg2       priority_azimuth_factor:   %f\n", priority_azimuth_factor);
 		fprintf(stderr, "dbg2       heading:         %f\n", heading);
 		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
 		fprintf(stderr, "dbg2       sidescan grazing angles:\n");
-		for (i = 0; i < pixels_ss; i++)
+		for (int i = 0; i < pixels_ss; i++)
 			fprintf(stderr, "dbg2         pixel:%d  ss:%f angle:%f\n", i, ss[i], gangles[i]);
 	}
 
 	/* initialize priority array */
-	for (i = 0; i < pixels_ss; i++) {
+	for (int i = 0; i < pixels_ss; i++) {
 		if (ss[i] > MB_SIDESCAN_NULL) {
 			priorities[i] = 1.0;
 		}
@@ -951,7 +947,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 	/* get grazing angle priorities */
 	if (priority_mode & MBMOSAIC_PRIORITY_ANGLE) {
 		/* loop over data getting angle based priorities */
-		for (i = 0; i < pixels_ss; i++) {
+		for (int i = 0; i < pixels_ss; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL) {
 				/* priority zero if outside the range of the priority-angle table */
 				if (gangles[i] < priority_angle_angle[0] || gangles[i] > priority_angle_angle[n_priority_angle - 1]) {
@@ -996,7 +992,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 			weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
 
 		/* apply the look azimuth priorities */
-		for (i = 0; i < pixels_ss; i++) {
+		for (int i = 0; i < pixels_ss; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL) {
 				if (gangles[i] < 0.0)
 					priorities[i] *= weight_starboard;
@@ -1020,7 +1016,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 			weight_heading = MAX(cos(DTR * priority_heading_factor * heading_difference), 0.0);
 
 		/* apply the look azimuth priorities */
-		for (i = 0; i < pixels_ss; i++) {
+		for (int i = 0; i < pixels_ss; i++) {
 			if (ss[i] > MB_SIDESCAN_NULL) {
 				priorities[i] *= weight_heading;
 			}
@@ -1032,7 +1028,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       pixels_ss:       %d\n", pixels_ss);
 		fprintf(stderr, "dbg2       sidescan grazing angles and priorities:\n");
-		for (i = 0; i < pixels_ss; i++)
+		for (int i = 0; i < pixels_ss; i++)
 			fprintf(stderr, "dbg2         pixel:%d  angle:%f  priority:%f\n", i, gangles[i], priorities[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -1255,7 +1251,7 @@ int main(int argc, char **argv) {
 	int inside;
 	double acrosstrackspacing;
 	double slope;
-	int i, j, ii, jj, iii, jjj, kkk, n;
+	int j, ii, jj, iii, jjj, kkk, n;
 	int i1, i2, j1, j2;
 	int ir;
 	double r;
@@ -2149,7 +2145,7 @@ int main(int argc, char **argv) {
 			else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESDN)
 				fprintf(outfp, "  Pixel prioritization model: default 170 degree swath decreasing out\n");
 			fprintf(outfp, "  Grazing angle priorities:\n");
-			for (i = 0; i < n_priority_angle; i++) {
+			for (int i = 0; i < n_priority_angle; i++) {
 				fprintf(outfp, "    %3d  %10.3f  %10.3f\n", i, priority_angle_angle[i], priority_angle_priority[i]);
 			}
 		}
@@ -2227,7 +2223,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* initialize arrays */
-	for (i = 0; i < gxdim; i++)
+	for (int i = 0; i < gxdim; i++)
 		for (j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			grid[kgrid] = 0.0;
@@ -2754,7 +2750,7 @@ int main(int argc, char **argv) {
 	/***** do second pass gridding *****/
 	if (grid_mode == MBMOSAIC_AVERAGE) {
 		/* initialize arrays */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
@@ -3296,7 +3292,7 @@ int main(int argc, char **argv) {
 
 	/* deal with single best mode */
 	if (grid_mode == MBMOSAIC_SINGLE_BEST) {
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
@@ -3308,7 +3304,7 @@ int main(int argc, char **argv) {
 			}
 	}
 	else if (grid_mode == MBMOSAIC_AVERAGE) {
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
@@ -3328,7 +3324,7 @@ int main(int argc, char **argv) {
 		ndata = 0;
 		if (border > 0.0)
 			ndata = 2 * gxdim + 2 * gydim - 2;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue)
@@ -3358,7 +3354,7 @@ int main(int argc, char **argv) {
 		sxmin = gbnd[0] - offx * dx;
 		symin = gbnd[2] - offy * dy;
 		ndata = 0;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue) {
@@ -3369,7 +3365,7 @@ int main(int argc, char **argv) {
 			}
 		/* if desired set border */
 		if (border > 0.0) {
-			for (i = 0; i < gxdim; i++) {
+			for (int i = 0; i < gxdim; i++) {
 				j = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] == clipvalue) {
@@ -3386,7 +3382,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			for (j = 1; j < gydim - 1; j++) {
-				i = 0;
+				int i = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] == clipvalue) {
 					sdata[ndata++] = (float)(sxmin + dx * i - bdata_origin_x);
@@ -3427,7 +3423,7 @@ int main(int argc, char **argv) {
 		    filling only data gaps */
 		zflag = 5.0e34;
 		if (clipmode == MBMOSAIC_INTERP_GAP) {
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -3507,7 +3503,7 @@ int main(int argc, char **argv) {
 						}
 					}
 				}
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -3525,7 +3521,7 @@ int main(int argc, char **argv) {
 		/* translate the interpolation into the grid array
 		    filling by proximity */
 		else if (clipmode == MBMOSAIC_INTERP_NEAR) {
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -3574,7 +3570,7 @@ int main(int argc, char **argv) {
 						}
 					}
 				}
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -3592,7 +3588,7 @@ int main(int argc, char **argv) {
 		/* translate the interpolation into the grid array
 		    filling all empty bins */
 		else {
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -3608,7 +3604,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* deallocate the interpolation arrays */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				kint = i + j * gxdim;
@@ -3628,7 +3624,7 @@ int main(int argc, char **argv) {
 	zclip = clipvalue;
 	zmin = zclip;
 	zmax = zclip;
-	for (i = 0; i < gxdim; i++)
+	for (int i = 0; i < gxdim; i++)
 		for (j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
@@ -3648,7 +3644,7 @@ int main(int argc, char **argv) {
 
 	/* get min max of data distribution */
 	nmax = 0;
-	for (i = 0; i < gxdim; i++)
+	for (int i = 0; i < gxdim; i++)
 		for (j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
@@ -3659,7 +3655,7 @@ int main(int argc, char **argv) {
 	/* get min max of standard deviation */
 	smin = 0.0;
 	smax = 0.0;
-	for (i = 0; i < gxdim; i++)
+	for (int i = 0; i < gxdim; i++)
 		for (j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
@@ -3724,7 +3720,7 @@ int main(int argc, char **argv) {
 	/* write first output file */
 	if (verbose > 0)
 		fprintf(outfp, "\nOutputting results...\n");
-	for (i = 0; i < xdim; i++)
+	for (int i = 0; i < xdim; i++)
 		for (j = 0; j < ydim; j++) {
 			kgrid = (i + offx) * gydim + (j + offy);
 			kout = i * ydim + j;
@@ -3770,7 +3766,7 @@ int main(int argc, char **argv) {
 
 	/* write second output file */
 	if (more == MB_YES) {
-		for (i = 0; i < xdim; i++)
+		for (int i = 0; i < xdim; i++)
 			for (j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;
@@ -3816,7 +3812,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* write third output file */
-		for (i = 0; i < xdim; i++)
+		for (int i = 0; i < xdim; i++)
 			for (j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;

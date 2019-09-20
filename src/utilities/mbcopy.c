@@ -122,7 +122,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
   int status = MB_SUCCESS;
   double time_d;
   int time_i[7];
-  int i, j;
+  int j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
@@ -185,7 +185,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     ostore->svp_nsvp = istore->svp_num;                               /* number of depth values */
     ostore->svp_nctd = 0;                                             /* number of ctd values */
     ostore->svp_ssv = istore->sound_vel;                              /* m/s */
-    for (i = 0; i < ostore->svp_nsvp; i++) {
+    for (int i = 0; i < ostore->svp_nsvp; i++) {
       ostore->svp_depth[i] = 0.1 * istore->svp_depth[i];  /* m */
       ostore->svp_velocity[i] = 0.1 * istore->svp_vel[i]; /* m/s */
       ostore->svp_conductivity[i] = 0.0;                  /* mmho/cm */
@@ -209,7 +209,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     ostore->nav_quality = 0;
     ostore->nav_status = 0;
     ostore->nav_description_len = 0;
-    for (i = 0; i < MBSYS_XSE_DESCRIPTION_LENGTH; i++)
+    for (int i = 0; i < MBSYS_XSE_DESCRIPTION_LENGTH; i++)
       ostore->nav_description[i] = 0;
     ostore->nav_x = DTR * 0.00000009 * istore->pos_longitude; /* eastings (m) or
               longitude (radians) */
@@ -290,7 +290,7 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     ostore->mul_sample = 0.0;                                         /* receive sample interval (sec) */
     ostore->mul_swath = 0.0;                                          /* swath width (radians) */
     ostore->mul_num_beams = istore->beams_bath;                       /* number of beams */
-    for (i = 0; i < ostore->mul_num_beams; i++) {
+    for (int i = 0; i < ostore->mul_num_beams; i++) {
       j = istore->beams_bath - i - 1;
       ostore->beams[i].tt = 0.0001 * istore->beams[j].tt;
       ostore->beams[i].delay = 0.0005 * istore->beams[j].time_offset;
@@ -328,29 +328,29 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     ostore->sid_avt_sampleus = 0;        /* sample interval (usec) */
     ostore->sid_avt_offset = 0;          /* time offset (usec) */
     ostore->sid_avt_num_samples = 0;     /* number of samples */
-    for (i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
+    for (int i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
       ostore->sid_avt_amp[i] = 0;  /* sidescan amplitude (dB) */
     ostore->sid_pvt_sampleus = 0;    /* sample interval (usec) */
     ostore->sid_pvt_offset = 0;      /* time offset (usec) */
     ostore->sid_pvt_num_samples = 0; /* number of samples */
-    for (i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
+    for (int i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
       ostore->sid_pvt_phase[i] = 0; /* sidescan phase (radians) */
     ostore->sid_avl_binsize = 0;      /* bin size (mm) */
     ostore->sid_avl_offset = 0;       /* lateral offset (mm) */
     ostore->sid_avl_num_samples = 0;  /* number of samples */
-    for (i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
+    for (int i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
       ostore->sid_avl_amp[i] = 0;  /* sidescan amplitude (dB) */
     ostore->sid_pvl_binsize = 0;     /* bin size (mm) */
     ostore->sid_pvl_offset = 0;      /* lateral offset (mm) */
     ostore->sid_pvl_num_samples = 0; /* number of samples */
-    for (i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
+    for (int i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
       ostore->sid_pvl_phase[i] = 0; /* sidescan phase (radians) */
     ostore->sid_sig_ping = 0;         /* ping number */
     ostore->sid_sig_channel = 0;      /* channel number */
     ostore->sid_sig_offset = 0.0;     /* start offset */
     ostore->sid_sig_sample = 0.0;     /* bin size / sample interval */
     ostore->sid_sig_num_samples = 0;  /* number of samples */
-    for (i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
+    for (int i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
       ostore->sid_sig_phase[i] = 0;     /* sidescan phase in radians */
     ostore->sid_png_pulse = 0;            /* pulse type (0=constant, 1=linear sweep) */
     ostore->sid_png_startfrequency = 0.0; /* start frequency (Hz) */
@@ -358,16 +358,16 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     ostore->sid_png_duration = 0.0;       /* pulse duration (msec) */
     ostore->sid_png_mancode = 0;          /* manufacturer code (1=Edgetech, 2=Elac) */
     ostore->sid_png_pulseid = 0;          /* pulse identifier */
-    for (i = 0; i < MBSYS_XSE_DESCRIPTION_LENGTH; i++)
+    for (int i = 0; i < MBSYS_XSE_DESCRIPTION_LENGTH; i++)
       ostore->sid_png_pulsename[i] = 0; /* pulse name */
     ostore->sid_cmp_ping = 0;             /* ping number */
     ostore->sid_cmp_channel = 0;          /* channel number */
     ostore->sid_cmp_offset = 0.0;         /* start offset (usec) */
     ostore->sid_cmp_sample = 0.0;         /* bin size / sample interval (usec) */
     ostore->sid_cmp_num_samples = 0;      /* number of samples */
-    for (i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
+    for (int i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
       ostore->sid_cmp_real[i] = 0; /* real sidescan signal */
-    for (i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
+    for (int i = 0; i < MBSYS_XSE_MAXPIXELS; i++)
       ostore->sid_cmp_imaginary[i] = 0; /* imaginary sidescan signal */
     ostore->sid_wgt_factorleft = 0;       /* weighting factor for block floating
                       point expansion  --
@@ -379,12 +379,12 @@ int mbcopy_elacmk2_to_xse(int verbose, struct mbsys_elacmk2_struct *istore, stru
     ostore->sid_wgt_samplesright = 0; /* number of right samples */
 
     /* comment */
-    for (i = 0; i < MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
+    for (int i = 0; i < MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
       ostore->comment[i] = istore->comment[i];
 
     /* unsupported frame */
     ostore->rawsize = 0;
-    for (i = 0; i < MBSYS_XSE_BUFFER_SIZE; i++)
+    for (int i = 0; i < MBSYS_XSE_BUFFER_SIZE; i++)
       ostore->raw[i] = 0;
   }
 
@@ -403,7 +403,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
   int status = MB_SUCCESS;
   double time_d;
   int time_i[7];
-  int i, j;
+  int j;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
@@ -454,7 +454,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
     ostore->line_number = 0;
     ostore->start_or_stop = 0;
     ostore->transducer_serial_number = 0;
-    for (i = 0; i < MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
+    for (int i = 0; i < MIN(MBSYS_ELACMK2_COMMENT_LENGTH, MBSYS_XSE_COMMENT_LENGTH); i++)
       ostore->comment[i] = istore->comment[i];
 
     /* position (position telegrams) */
@@ -492,7 +492,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
     ostore->svp_hundredth_sec = time_i[6] / 10000;
     ostore->svp_thousandth_sec = (time_i[6] - 10000 * ostore->svp_hundredth_sec) / 100;
     ostore->svp_num = istore->svp_nsvp;
-    for (i = 0; i < 500; i++) {
+    for (int i = 0; i < 500; i++) {
       ostore->svp_depth[i] = 10 * istore->svp_depth[i];  /* 0.1 meters */
       ostore->svp_vel[i] = 10 * istore->svp_velocity[i]; /* 0.1 meters/sec */
     }
@@ -520,7 +520,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
     ostore->receiver_gain_port = 0;
     ostore->reserved = 0;
     ostore->beams_bath = 0;
-    for (i = 0; i < MBSYS_ELACMK2_MAXBEAMS; i++) {
+    for (int i = 0; i < MBSYS_ELACMK2_MAXBEAMS; i++) {
       ostore->beams[i].bath = 0;
       ostore->beams[i].bath_acrosstrack = 0;
       ostore->beams[i].bath_alongtrack = 0;
@@ -534,7 +534,7 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
       ostore->beams[i].angle = 0;
     }
     ostore->beams_bath = istore->beams[istore->mul_num_beams - 1].beam;
-    for (i = 0; i < istore->mul_num_beams; i++) {
+    for (int i = 0; i < istore->mul_num_beams; i++) {
       j = ostore->beams_bath - istore->beams[i].beam;
       ostore->beams[j].bath = 100 * istore->beams[i].depth;
       ostore->beams[j].bath_acrosstrack = -100 * istore->beams[i].lateral;
@@ -570,7 +570,6 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
   double alpha, beta, theta, phi;
   int istep = 0;
   int interleave = 0;
-  int i;
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
@@ -652,7 +651,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
     ostore->par_s2n = 0;                      /* transducer 2 number of modules */
     ostore->par_go1 = 0.0;                    /* system (sonar head 1) gain offset */
     ostore->par_go2 = 0.0;                    /* sonar head 2 gain offset */
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       ostore->par_tsv[i] = '\0'; /* transmitter (sonar head 1) software version */
       ostore->par_rsv[i] = '\0'; /* receiver (sonar head 2) software version */
       ostore->par_bsv[i] = '\0'; /* beamformer software version */
@@ -672,7 +671,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
     ostore->par_p1x = 0.0; /* position system 1 along location (m) */
     ostore->par_p1y = 0.0; /* position system 1 athwart location (m) */
     ostore->par_p1d = istore->pos_delay; /* position system 1 time delay (sec) */
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       ostore->par_p1g[i] = '\0'; /* position system 1 geodetic datum */
     }
     ostore->par_p2m = 0;   /* position system 2 motion compensation (boolean) */
@@ -682,7 +681,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
     ostore->par_p2x = 0.0; /* position system 2 along location (m) */
     ostore->par_p2y = 0.0; /* position system 2 athwart location (m) */
     ostore->par_p2d = 0.0; /* position system 2 time delay (sec) */
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       ostore->par_p2g[i] = '\0'; /* position system 2 geodetic datum */
     }
     ostore->par_p3m = 0;   /* position system 3 motion compensation (boolean) */
@@ -692,7 +691,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
     ostore->par_p3x = 0.0; /* position system 3 along location (m) */
     ostore->par_p3y = 0.0; /* position system 3 athwart location (m) */
     ostore->par_p3d = 0.0; /* position system 3 time delay (sec) */
-    for (i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++) {
       ostore->par_p3g[i] = '\0'; /* position system 3 geodetic datum */
     }
     ostore->par_msz = 0.0;    /* motion sensor vertical location (m) */
@@ -705,10 +704,10 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
     ostore->par_msp = 0.0;    /* motion sensor pitch offset (deg) */
     ostore->par_msg = 0.0;    /* motion sensor heading offset (deg) */
     ostore->par_gcg = 0.0;    /* gyro compass heading offset (deg) */
-    for (i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       ostore->par_cpr[i] = '\0'; /* cartographic projection */
     }
-    for (i = 0; i < MBSYS_SIMRAD2_COMMENT_LENGTH; i++) {
+    for (int i = 0; i < MBSYS_SIMRAD2_COMMENT_LENGTH; i++) {
       ostore->par_rop[i] = '\0'; /* responsible operator */
       ostore->par_sid[i] = '\0'; /* survey identifier */
       ostore->par_pll[i] = '\0'; /* survey line identifier (planned line number) */
@@ -780,7 +779,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
                        01 : to survey line heading
                        10 : to mean vessel heading
                        11 : to manually entered heading */
-    for (i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) {
       ostore->run_spare[i] = '\0';
     }
 
@@ -802,7 +801,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
                  08:12:51.234 = 29570234 */
     ostore->svp_num = istore->svp_num; /* number of svp entries */
     ostore->svp_depth_res = 100;       /* depth resolution (cm) */
-    for (i = 0; i < MBSYS_SIMRAD_MAXSVP; i++) {
+    for (int i = 0; i < MBSYS_SIMRAD_MAXSVP; i++) {
       ostore->svp_depth[i] = istore->svp_depth[i]; /* depth of svp entries (according to svp_depth_res) */
       ostore->svp_vel[i] = istore->svp_vel[i];     /* sound speed of svp entries (0.1 m/sec) */
     }
@@ -843,7 +842,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
         - sixth bit set means valid time is that of
         input datagram */
     ostore->pos_input_size = 0; /* number of bytes in input position datagram */
-    for (i = 0; i < 256; i++) {
+    for (int i = 0; i < 256; i++) {
       ostore->pos_input[i] = 0; /* position input datagram as received, minus
                 header and tail (such as NMEA 0183 $ and CRLF) */
     }
@@ -1128,7 +1127,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
       }
 
       /* set beam values */
-      for (i = 0; i < oping->png_nbeams; i++) {
+      for (int i = 0; i < oping->png_nbeams; i++) {
         oping->png_depth[i] = (int)((unsigned short)iping->bath[i]);
         /* depths in depth resolution units */
         if (oping->png_depth[i] != 0)
@@ -1247,7 +1246,7 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
       oping->png_nbeams_ss = oping->png_nbeams;
       /* number of beams with sidescan */
       oping->png_npixels = iping->pixels_ssraw;
-      for (i = 0; i < oping->png_nbeams_ss; i++) {
+      for (int i = 0; i < oping->png_nbeams_ss; i++) {
         oping->png_beam_index[i] = i;
         /* beam index number */
         oping->png_sort_direction[i] = 0;
@@ -1261,13 +1260,13 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
         oping->png_center_sample[i] = iping->beam_center_sample[i];
         /* center sample number */
       }
-      for (i = 0; i < oping->png_npixels; i++) {
+      for (int i = 0; i < oping->png_npixels; i++) {
         oping->png_ssraw[i] = iping->ssraw[i];
         /* the raw sidescan ordered port to starboard */
       }
       oping->png_pixel_size = iping->pixel_size;
       oping->png_pixels_ss = iping->pixels_ss;
-      for (i = 0; i < oping->png_pixels_ss; i++) {
+      for (int i = 0; i < oping->png_pixels_ss; i++) {
         if (iping->ss[i] != 0) {
           oping->png_ss[i] = iping->ss[i];
           /* the processed sidescan ordered port to starboard */
@@ -1348,7 +1347,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
                            int *error) {
   int status = MB_SUCCESS;
   struct mbsys_ldeoih_struct *ostore;
-  int i;
 
   /* get data structure pointer */
   ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
@@ -1389,17 +1387,17 @@ int mbcopy_any_to_mbldeoih(int verbose, int kind, int sensorhead, int sensortype
   if (verbose >= 2 && kind == MB_DATA_DATA) {
     fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
     if (verbose >= 3)
-      for (i = 0; i < nbath; i++)
+      for (int i = 0; i < nbath; i++)
         fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
                 bathacrosstrack[i], bathalongtrack[i]);
     fprintf(stderr, "dbg2       namp:       %d\n", namp);
     if (verbose >= 3)
-      for (i = 0; i < namp; i++)
+      for (int i = 0; i < namp; i++)
         fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
                 bathalongtrack[i]);
     fprintf(stderr, "dbg2        nss:       %d\n", nss);
     if (verbose >= 3)
-      for (i = 0; i < nss; i++)
+      for (int i = 0; i < nss; i++)
         fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
                 ssalongtrack[i]);
   }
@@ -1456,7 +1454,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
   double theta;
   double phi;
   int icenter;
-  int i, ret;
+  int ret;
 
   imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
   omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
@@ -1591,7 +1589,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
           beam flags - unset ping flag if any
           good beams found */
       if (mb_ping->ping_flags != 0) {
-        for (i = 0; i < istore->beams_bath; i++) {
+        for (int i = 0; i < istore->beams_bath; i++) {
           if (mb_beam_ok(istore->beamflag[i]))
             mb_ping->ping_flags = 0;
         }
@@ -1600,7 +1598,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
       /* read depth and beam location values into storage arrays */
       icenter = istore->beams_bath / 2;
       angscale = ((double)istore->beam_width_num) / ((double)istore->beam_width_denom);
-      for (i = 0; i < istore->beams_bath; i++) {
+      for (int i = 0; i < istore->beams_bath; i++) {
         mb_ping->beam_flags[i] = istore->beamflag[i];
         if (istore->beamflag[i] != MB_FLAG_NULL) {
           mb_ping->depth[i] = istore->bath[i];
@@ -1627,7 +1625,7 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
           mb_ping->beam_angle_forward[i] = 0;
         }
       }
-      for (i = 0; i < istore->beams_amp; i++) {
+      for (int i = 0; i < istore->beams_amp; i++) {
         mb_ping->mr_amplitude[i] = istore->amp[i];
       }
 
@@ -1637,13 +1635,13 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
 
       /* read amplitude values into storage arrays */
       if (mb_ping->mc_amplitude != NULL) {
-        for (i = 0; i < istore->beams_amp; i++) {
+        for (int i = 0; i < istore->beams_amp; i++) {
           /* note - we are storing 1/2 db increments */
           mb_ping->mc_amplitude[i] = 40 * log10(istore->intensity[i]);
         }
       }
       else if (mb_ping->mr_amplitude != NULL) {
-        for (i = 0; i < istore->beams_amp; i++) {
+        for (int i = 0; i < istore->beams_amp; i++) {
           mb_ping->mr_amplitude[i] = 40 * log10(istore->intensity[i]) - gain_correction;
         }
       }
@@ -1874,7 +1872,7 @@ int main(int argc, char **argv) {
   char *result;
   int format;
   double seconds;
-  int i, j;
+  int j;
 
   char *ctime();
   char *getenv();
@@ -1921,11 +1919,13 @@ int main(int argc, char **argv) {
       break;
     case 'F':
     case 'f':
-      i = sscanf(optarg, "%d/%d/%d", &iformat, &oformat, &mformat);
+    {
+      const int i = sscanf(optarg, "%d/%d/%d", &iformat, &oformat, &mformat);
       if (i == 1)
         oformat = iformat;
       flag++;
       break;
+    }
     case 'H':
     case 'h':
       help++;
@@ -1942,11 +1942,13 @@ int main(int argc, char **argv) {
       break;
     case 'M':
     case 'm':
-      i = sscanf(optarg, "%s", mfile);
+    {
+      const int i = sscanf(optarg, "%s", mfile);
       if (i == 1)
         merge = MB_YES;
       flag++;
       break;
+    }
     case 'N':
     case 'n':
       stripmode++;
@@ -2524,7 +2526,7 @@ int main(int argc, char **argv) {
       /* do bathymetry */
       if (merge == MB_YES) {
         /* merge data */
-        for (i = istart_bath; i < iend_bath; i++) {
+        for (int i = istart_bath; i < iend_bath; i++) {
           j = i + offset_bath;
           obeamflag[j] = mbeamflag[i];
           obath[j] = mbath[i];
@@ -2533,7 +2535,7 @@ int main(int argc, char **argv) {
         }
       }
       else {
-        for (i = istart_bath; i < iend_bath; i++) {
+        for (int i = istart_bath; i < iend_bath; i++) {
           j = i + offset_bath;
           obeamflag[j] = ibeamflag[i];
           obath[j] = ibath[i];
@@ -2552,7 +2554,7 @@ int main(int argc, char **argv) {
       for (j = 0; j < offset_amp; j++) {
         oamp[j] = 0.0;
       }
-      for (i = istart_amp; i < iend_amp; i++) {
+      for (int i = istart_amp; i < iend_amp; i++) {
         j = i + offset_amp;
         oamp[j] = iamp[i];
       }
@@ -2566,7 +2568,7 @@ int main(int argc, char **argv) {
         ossacrosstrack[j] = 0.0;
         ossalongtrack[j] = 0.0;
       }
-      for (i = istart_ss; i < iend_ss; i++) {
+      for (int i = istart_ss; i < iend_ss; i++) {
         j = i + offset_ss;
         oss[j] = iss[i];
         ossacrosstrack[j] = issacrosstrack[i];

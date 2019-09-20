@@ -166,7 +166,6 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
                 double dx, double dy, int *error) {
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
-	int i;
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char *ctime();
@@ -206,10 +205,10 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
-		i = gethostname(host, MB_PATH_MAXLINE);
+		/* i = */ gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
 		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
-		for (i = 0; i < nx * ny; i++) {
+		for (int i = 0; i < nx * ny; i++) {
 			fprintf(fp, "%13.5g ", grid[i]);
 			if ((i + 1) % 6 == 0)
 				fprintf(fp, "\n");
@@ -237,7 +236,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
                    double dx, double dy, double nodata, int *error) {
 	int status = MB_SUCCESS;
 	FILE *fp = NULL;
-	int i, j, k;
+	int j, k;
 
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
@@ -271,7 +270,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 		fprintf(fp, "cellsize %.10g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
 		for (j = 0; j < ny; j++) {
-			for (i = 0; i < nx; i++) {
+			for (int i = 0; i < nx; i++) {
 				k = i * ny + (ny - 1 - j);
 				if (grid[k] == nodata)
 					fprintf(fp, "-99999 ");
@@ -359,7 +358,6 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 	int status = MB_SUCCESS;
 	double fa, fb;
 	double xe, ye, ang, ratio;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
@@ -418,7 +416,7 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 	/* check ratio of each corner footprint 1/e distance */
 	else {
 		*use = MBGRID_USE_NO;
-		for (i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			ang = RTD * atan2(py[i], px[i]);
 			xe = foot_a * cos(DTR * ang);
 			ye = foot_b * sin(DTR * ang);
@@ -633,7 +631,7 @@ int main(int argc, char **argv) {
 	/* other variables */
 	FILE *dfp = NULL;
 	FILE *rfp = NULL;
-	int i, j, k, ii, jj, iii, jjj, kkk, ir, n;
+	int j, k, ii, jj, iii, jjj, kkk, ir, n;
 	int i1, i2, j1, j2, k1, k2;
 	double r;
 	int dmask[9];
@@ -1785,7 +1783,7 @@ int main(int argc, char **argv) {
 	/***** do weighted footprint slope gridding *****/
 	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT_SLOPE) {
 		/* set up parameters for first cut low resolution slope grid */
-		for (i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			sbnd[i] = wbnd[i];
 		sdx = 2.0 * dx;
 		sdy = 2.0 * dy;
@@ -1810,7 +1808,7 @@ int main(int argc, char **argv) {
 		    estimates for footprint gridding */
 
 		/* initialize arrays */
-		for (i = 0; i < sxdim; i++)
+		for (int i = 0; i < sxdim; i++)
 			for (j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 				gridsmall[kgrid] = 0.0;
@@ -1997,7 +1995,7 @@ int main(int argc, char **argv) {
 		if (verbose >= 1)
 			fprintf(outfp, "\nMaking low resolution slope grid...\n");
 		ndata = 8;
-		for (i = 0; i < sxdim; i++)
+		for (int i = 0; i < sxdim; i++)
 			for (j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 				if (cnt[kgrid] > 0) {
@@ -2031,7 +2029,7 @@ int main(int argc, char **argv) {
 		/* get points from grid */
 		/* simultaneously find the depth values nearest to the grid corners and edge midpoints */
 		ndata = 0;
-		for (i = 0; i < sxdim; i++)
+		for (int i = 0; i < sxdim; i++)
 			for (j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 				if (cnt[kgrid] > 0) {
@@ -2073,7 +2071,7 @@ int main(int argc, char **argv) {
 		/* get points from grid */
 		/* simultaneously find the depth values nearest to the grid corners and edge midpoints */
 		ndata = 0;
-		for (i = 0; i < sxdim; i++)
+		for (int i = 0; i < sxdim; i++)
 			for (j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 				if (cnt[kgrid] > 0) {
@@ -2100,7 +2098,7 @@ int main(int argc, char **argv) {
 #endif
 
 		zflag = 5.0e34;
-		for (i = 0; i < sxdim; i++)
+		for (int i = 0; i < sxdim; i++)
 			for (j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 #ifdef USESURFACE
@@ -2171,7 +2169,7 @@ int main(int argc, char **argv) {
 		/* do second pass footprint gridding using slope estimates from first pass interpolated grid */
 
 		/* initialize arrays */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
@@ -2589,7 +2587,7 @@ int main(int argc, char **argv) {
 		nbinzero = 0;
 		nbinspline = 0;
 		nbinbackground = 0;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (num[kgrid] > 0) {
@@ -2619,7 +2617,7 @@ int main(int argc, char **argv) {
 		status = mb_mallocd(verbose, __FILE__, __LINE__, gxdim * gydim * sizeof(double), (void **)&norm, &error);
 
 		/* initialize arrays */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
@@ -3014,7 +3012,7 @@ int main(int argc, char **argv) {
 		nbinzero = 0;
 		nbinspline = 0;
 		nbinbackground = 0;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (num[kgrid] > 0) {
@@ -3052,7 +3050,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize arrays */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
@@ -3493,7 +3491,7 @@ int main(int argc, char **argv) {
 		nbinzero = 0;
 		nbinspline = 0;
 		nbinbackground = 0;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
@@ -3526,7 +3524,7 @@ int main(int argc, char **argv) {
 			}
 
 		/* now deallocate space for the data */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0)
@@ -3556,7 +3554,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize arrays */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
@@ -4083,7 +4081,7 @@ int main(int argc, char **argv) {
 		nbinzero = 0;
 		nbinspline = 0;
 		nbinbackground = 0;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
@@ -4129,7 +4127,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize arrays */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
@@ -4489,7 +4487,7 @@ int main(int argc, char **argv) {
        the minimum or maximum values */
 
 		/* reinitialize cnt array */
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				cnt[kgrid] = 0;
@@ -4885,7 +4883,7 @@ int main(int argc, char **argv) {
 		nbinzero = 0;
 		nbinspline = 0;
 		nbinbackground = 0;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
@@ -4916,7 +4914,7 @@ int main(int argc, char **argv) {
 			ndata = 2 * gxdim + 2 * gydim - 2;
 		else
 			ndata = 8;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue)
@@ -4947,7 +4945,7 @@ int main(int argc, char **argv) {
 		/* get points from grid */
 		/* simultaneously find the depth values nearest to the grid corners and edge midpoints */
 		ndata = 0;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue) {
@@ -4960,7 +4958,7 @@ int main(int argc, char **argv) {
 
 		/* if desired set border */
 		if (setborder == MB_YES) {
-			for (i = 0; i < gxdim; i++) {
+			for (int i = 0; i < gxdim; i++) {
 				j = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue) {
@@ -5029,7 +5027,7 @@ int main(int argc, char **argv) {
 		/* get points from grid */
 		/* simultaneously find the depth values nearest to the grid corners and edge midpoints */
 		ndata = 0;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue) {
@@ -5041,7 +5039,7 @@ int main(int argc, char **argv) {
 
 		/* if desired set border */
 		if (setborder == MB_YES) {
-			for (i = 0; i < gxdim; i++) {
+			for (int i = 0; i < gxdim; i++) {
 				j = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue) {
@@ -5058,7 +5056,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			for (j = 1; j < gydim - 1; j++) {
-				i = 0;
+				int i = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue) {
 					sdata[ndata++] = (float)(wbnd[0] + dx * i - bdata_origin_x);
@@ -5104,7 +5102,7 @@ int main(int argc, char **argv) {
 		    filling only data gaps */
 		zflag = 5.0e34;
 		if (clipmode == MBGRID_INTERP_GAP) {
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -5184,7 +5182,7 @@ int main(int argc, char **argv) {
 						}
 					}
 				}
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -5202,7 +5200,7 @@ int main(int argc, char **argv) {
 		/* translate the interpolation into the grid array
 		    filling by proximity */
 		else if (clipmode == MBGRID_INTERP_NEAR) {
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -5251,7 +5249,7 @@ int main(int argc, char **argv) {
 						}
 					}
 				}
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -5269,7 +5267,7 @@ int main(int argc, char **argv) {
 		/* translate the interpolation into the grid array
 		    filling all empty bins */
 		else {
-			for (i = 0; i < gxdim; i++)
+			for (int i = 0; i < gxdim; i++)
 				for (j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -5355,7 +5353,7 @@ int main(int argc, char **argv) {
 		/* translate the interpolation into the grid array
 		    - interpolate only to fill a data gap */
 		zflag = 5.0e34;
-		for (i = 0; i < gxdim; i++)
+		for (int i = 0; i < gxdim; i++)
 			for (j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 #ifdef USESURFACE
@@ -5386,7 +5384,7 @@ int main(int argc, char **argv) {
 	zclip = clipvalue;
 	zmin = zclip;
 	zmax = zclip;
-	for (i = 0; i < gxdim; i++)
+	for (int i = 0; i < gxdim; i++)
 		for (j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			if (zmin == zclip && grid[kgrid] < zclip)
@@ -5405,7 +5403,7 @@ int main(int argc, char **argv) {
 
 	/* get min max of data distribution */
 	nmax = 0;
-	for (i = 0; i < gxdim; i++)
+	for (int i = 0; i < gxdim; i++)
 		for (j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			if (cnt[kgrid] > nmax)
@@ -5415,7 +5413,7 @@ int main(int argc, char **argv) {
 	/* get min max of standard deviation */
 	smin = 0.0;
 	smax = 0.0;
-	for (i = 0; i < gxdim; i++)
+	for (int i = 0; i < gxdim; i++)
 		for (j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			if (smin == 0.0 && cnt[kgrid] > 0)
@@ -5440,7 +5438,7 @@ int main(int argc, char **argv) {
 	/* write first output file */
 	if (verbose > 0)
 		fprintf(outfp, "\nOutputting results...\n");
-	for (i = 0; i < xdim; i++)
+	for (int i = 0; i < xdim; i++)
 		for (j = 0; j < ydim; j++) {
 			kgrid = (i + offx) * gydim + (j + offy);
 			kout = i * ydim + j;
@@ -5488,7 +5486,7 @@ int main(int argc, char **argv) {
 
 	/* write second output file */
 	if (more == MB_YES) {
-		for (i = 0; i < xdim; i++)
+		for (int i = 0; i < xdim; i++)
 			for (j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;
@@ -5534,7 +5532,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* write third output file */
-		for (i = 0; i < xdim; i++)
+		for (int i = 0; i < xdim; i++)
 			for (j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;

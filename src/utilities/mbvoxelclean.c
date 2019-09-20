@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
     double sensorx, sensory, sensorz;
     int first, done;
     int ix, iy, iz, kk;
-    int i, j;
+    int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &defaultpings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -580,7 +580,7 @@ int main(int argc, char **argv) {
                 memset((void *)&pings[npings_alloc], 0, (mb_info.nrecords - npings_alloc) * sizeof(struct mbvoxelclean_ping_struct));
                 npings_alloc = mb_info.nrecords;
             }
-            for (i=0; i<mb_info.nrecords; i++) {
+            for (int i = 0; i<mb_info.nrecords; i++) {
                 if (pings[i].beams_bath_alloc < mb_info.nbeams_bath) {
                     if (error == MB_ERROR_NO_ERROR)
                         status = mb_reallocd(verbose, __FILE__, __LINE__, mb_info.nbeams_bath * sizeof(char),
@@ -933,7 +933,7 @@ int main(int argc, char **argv) {
             }
 
             /* count the soundings in each voxel */
-            for (i=0; i < n_pings; i++) {
+            for (int i = 0; i < n_pings; i++) {
                 for (j=0; j< pings[i].beams_bath; j++) {
                     if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                         ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
@@ -961,7 +961,7 @@ int main(int argc, char **argv) {
 
             /* apply density filter to the soundings  */
             if (occupied_mode == MBVC_OCCUPIED_UNFLAG || empty_mode == MBVC_EMPTY_FLAG) {
-                for (i=0; i < n_pings; i++) {
+                for (int i = 0; i < n_pings; i++) {
                     for (j=0; j< pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                             ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
@@ -995,7 +995,7 @@ int main(int argc, char **argv) {
 
             /* apply range filter to the soundings */
             if (apply_range_minimum == MB_YES || apply_range_maximum == MB_YES) {
-                for (i=0; i < n_pings; i++) {
+                for (int i = 0; i < n_pings; i++) {
                     for (j=0; j< pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                             if (apply_range_minimum == MB_YES
@@ -1102,7 +1102,7 @@ int main(int argc, char **argv) {
 	}
 
     /* free memory */
-    for (i=0; i<npings_alloc; i++) {
+    for (int i = 0; i<npings_alloc; i++) {
        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].beamflag, &error);
        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].beamflagorg, &error);
        status = mb_freed(verbose, __FILE__, __LINE__, (void **)&pings[i].bathz, &error);

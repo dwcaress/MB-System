@@ -140,7 +140,6 @@ int main(int argc, char **argv) {
 	char output_file[MB_PATH_MAXLINE];
 
 	int format;
-	int i;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -376,11 +375,11 @@ int main(int argc, char **argv) {
 				latend = navlat;
 				timbeg = time_d;
 				timend = time_d;
-				for (i = 0; i < 7; i++) {
+				for (int i = 0; i < 7; i++) {
 					timbeg_i[i] = time_i[i];
 					timend_i[i] = time_i[i];
 				}
-				for (i = 0; i < 5; i++) {
+				for (int i = 0; i < 5; i++) {
 					timbeg_j[i] = time_j[i];
 					timend_j[i] = time_j[i];
 				}
@@ -408,10 +407,10 @@ int main(int argc, char **argv) {
 				lonend = navlon;
 				latend = navlat;
 				timend = time_d;
-				for (i = 0; i < 7; i++) {
+				for (int i = 0; i < 7; i++) {
 					timend_i[i] = time_i[i];
 				}
-				for (i = 0; i < 5; i++) {
+				for (int i = 0; i < 5; i++) {
 					timend_j[i] = time_j[i];
 				}
 				rangemin = MIN(rangemin, range);

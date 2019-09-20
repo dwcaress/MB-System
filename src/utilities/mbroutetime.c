@@ -143,7 +143,6 @@ int main(int argc, char **argv) {
 	int point_ok;
 	int read_data;
 	int nread;
-	int i;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -508,7 +507,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nUnable to open output waypoint time list file <%s> for writing\n", output_file);
 		exit(status);
 	}
-	for (i = 0; i < nroutepointfound; i++) {
+	for (int i = 0; i < nroutepointfound; i++) {
 		fprintf(fp, "%3d %3d %11.6f %10.6f %10.6f %.6f\n", i, routewaypoint[i], routelon[i], routelat[i], routeheading[i],
 		        routetime_d[i]);
 		if (verbose > 0)

@@ -377,7 +377,7 @@ int main(int argc, char **argv) {
 	int nmedian_alloc = 0;
 
 	int nscan;
-	int i, j, j1, j2;
+	int j, j1, j2;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -1192,7 +1192,7 @@ int main(int argc, char **argv) {
 
 				/* store the attitude data */
 				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph - 1] < time_d) {
-					for (i = 0; i < attitude->att_ndata; i++) {
+					for (int i = 0; i < attitude->att_ndata; i++) {
 						dat_rph_time_d[ndat_rph] = (double)(time_d + 0.001 * attitude->att_time[i]);
 						dat_rph_heave[ndat_rph] = (double)(0.01 * attitude->att_heave[i]);
 						dat_rph_roll[ndat_rph] = (double)(0.01 * attitude->att_roll[i]);
@@ -1255,7 +1255,7 @@ int main(int argc, char **argv) {
 
 				/* store the attitude data */
 				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph - 1] < time_d) {
-					for (i = 0; i < netattitude->nat_ndata; i++) {
+					for (int i = 0; i < netattitude->nat_ndata; i++) {
 						dat_rph_time_d[ndat_rph] = (double)(time_d + 0.001 * netattitude->nat_time[i]);
 						dat_rph_heave[ndat_rph] = (double)(0.01 * netattitude->nat_heave[i]);
 						dat_rph_roll[ndat_rph] = (double)(0.01 * netattitude->nat_roll[i]);
@@ -1313,7 +1313,7 @@ int main(int argc, char **argv) {
 
 				/* store the heading data */
 				if (ndat_heading == 0 || dat_heading_time_d[ndat_heading - 1] < time_d) {
-					for (i = 0; i < headingr->hed_ndata; i++) {
+					for (int i = 0; i < headingr->hed_ndata; i++) {
 						dat_heading_time_d[ndat_heading] = (double)(time_d + 0.001 * headingr->hed_time[i]);
 						dat_heading_heading[ndat_heading] = (double)(0.01 * headingr->hed_heading[i]);
 
@@ -1564,7 +1564,7 @@ int main(int argc, char **argv) {
 				nmedian_alloc = 2 * nhalffilter + 1;
 				median = NULL;
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
-				for (i = 0; i < ndat_sonardepth; i++) {
+				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = dat_sonardepth_sonardepth[i];
 					j1 = MAX(i - nhalffilter, 0);
 					j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
@@ -1587,7 +1587,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "Applying running Gaussian mean filtering to %d sonardepth data filter length %f seconds\n",
 				        ndat_sonardepth, sonardepthfilterlength);
 				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-				for (i = 0; i < ndat_sonardepth; i++) {
+				for (int i = 0; i < ndat_sonardepth; i++) {
 					dat_sonardepth_sonardepthfilter[i] = 0.0;
 					sonardepth_filterweight = 0.0;
 					j1 = MAX(i - nhalffilter, 0);
@@ -1604,7 +1604,7 @@ int main(int argc, char **argv) {
 						dat_sonardepth_sonardepthfilter[i] = dat_sonardepth_sonardepth[i];
 				}
 			}
-			for (i = 0; i < ndat_sonardepth; i++) {
+			for (int i = 0; i < ndat_sonardepth; i++) {
 				if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -1624,7 +1624,7 @@ int main(int argc, char **argv) {
 				nmedian_alloc = 2 * nhalffilter + 1;
 				median = NULL;
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nmedian_alloc * sizeof(double), (void **)&median, &error);
-				for (i = 0; i < nsonardepth; i++) {
+				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = sonardepth_sonardepth[i];
 					j1 = MAX(i - nhalffilter, 0);
 					j2 = MIN(i + nhalffilter, nsonardepth - 1);
@@ -1647,7 +1647,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "Applying running Gaussian mean filtering to %d sonardepth nav data filter length %f seconds\n",
 				        nsonardepth, sonardepthfilterlength);
 				nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-				for (i = 0; i < nsonardepth; i++) {
+				for (int i = 0; i < nsonardepth; i++) {
 					sonardepth_sonardepthfilter[i] = 0.0;
 					sonardepth_filterweight = 0.0;
 					j1 = MAX(i - nhalffilter, 0);
@@ -1662,7 +1662,7 @@ int main(int argc, char **argv) {
 						sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 				}
 			}
-			for (i = 0; i < nsonardepth; i++) {
+			for (int i = 0; i < nsonardepth; i++) {
 				if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -1675,7 +1675,7 @@ int main(int argc, char **argv) {
 	/* output auv sonardepth data */
 	if (nsonardepth > 0 && (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)) {
 		fprintf(stdout, "\nTotal auv sonardepth data read: %d\n", nsonardepth);
-		for (i = 0; i < nsonardepth; i++) {
+		for (int i = 0; i < nsonardepth; i++) {
 			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n", i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
 		}
 	}
@@ -1684,25 +1684,25 @@ int main(int argc, char **argv) {
 	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal navigation data read: %d\n", ndat_nav);
 	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_nav; i++) {
+		for (int i = 0; i < ndat_nav; i++) {
 			fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f\n", i, dat_nav_time_d[i], dat_nav_lon[i], dat_nav_lat[i]);
 		}
 	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", ndat_sonardepth);
 	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_sonardepth; i++) {
+		for (int i = 0; i < ndat_sonardepth; i++) {
 			fprintf(stdout, "  DEP: %5d %17.6f %8.3f\n", i, dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
 		}
 	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal heading data read: %d\n", ndat_heading);
 	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_heading; i++) {
+		for (int i = 0; i < ndat_heading; i++) {
 			fprintf(stdout, "  HDG: %5d %17.6f %8.3f\n", i, dat_heading_time_d[i], dat_heading_heading[i]);
 		}
 	if (verbose > 0 || mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal attitude data read: %d\n", ndat_rph);
 	if (mode == MBKONSBERGPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_rph; i++) {
+		for (int i = 0; i < ndat_rph; i++) {
 			fprintf(stdout, "  HCP: %5d %17.6f %8.3f %8.3f %8.3f\n", i, dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i],
 			        dat_rph_heave[i]);
 		}
@@ -2399,7 +2399,7 @@ int main(int argc, char **argv) {
 					fprintf(stafp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
 
 					/* calculate corrected ranges, angles, and bathymetry for each beam */
-					for (i = 0; i < ping->png_nbeams; i++) {
+					for (int i = 0; i < ping->png_nbeams; i++) {
 						/* calculate time of transmit and receive */
 						transmit_time_d = time_d + (double)ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
 						receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
@@ -2753,7 +2753,7 @@ int main(int argc, char **argv) {
 				/* output asynchronous heading output file */
 				sprintf(athfile, "%s.ath", ofile);
 				if ((athfp = fopen(athfile, "w")) != NULL) {
-					for (i = 0; i < ndat_heading; i++) {
+					for (int i = 0; i < ndat_heading; i++) {
 						if (dat_heading_time_d[i] > start_time_d && dat_heading_time_d[i] < end_time_d)
 							fprintf(athfp, "%0.6f\t%7.3f\n", dat_heading_time_d[i], dat_heading_heading[i]);
 					}
@@ -2769,7 +2769,7 @@ int main(int argc, char **argv) {
 				/* output asynchronous sonardepth output file */
 				sprintf(atsfile, "%s.ats", ofile);
 				if ((atsfp = fopen(atsfile, "w")) != NULL) {
-					for (i = 0; i < ndat_sonardepth; i++) {
+					for (int i = 0; i < ndat_sonardepth; i++) {
 						if (dat_sonardepth_time_d[i] > start_time_d && dat_sonardepth_time_d[i] < end_time_d)
 							fprintf(atsfp, "%0.6f\t%7.3f\n", dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
 					}
@@ -2785,7 +2785,7 @@ int main(int argc, char **argv) {
 				/* output asynchronous attitude output file */
 				sprintf(atafile, "%s.ata", ofile);
 				if ((atafp = fopen(atafile, "w")) != NULL) {
-					for (i = 0; i < ndat_rph; i++) {
+					for (int i = 0; i < ndat_rph; i++) {
 						if (dat_rph_time_d[i] > start_time_d && dat_rph_time_d[i] < end_time_d)
 							fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n", dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i]);
 					}
