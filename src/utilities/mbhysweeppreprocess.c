@@ -287,7 +287,7 @@ int main(int argc, char **argv) {
 	double offset_roll, offset_pitch, offset_heading;
 	double offset_x, offset_y, offset_z, offset_t;
 	// double	lever_x, lever_y, lever_z;
-	int i, j;
+	int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -480,7 +480,7 @@ int main(int argc, char **argv) {
 		if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL) {
 			fprintf(stderr, "dbg2       timelagfile:           %s\n", timelagfile);
 			fprintf(stderr, "dbg2       ntimelag:              %d\n", ntimelag);
-			for (i = 0; i < ntimelag; i++)
+			for (int i = 0; i < ntimelag; i++)
 				fprintf(stderr, "dbg2       timelag[%d]:           %f   %f\n", i, timelag_time_d[i], timelag_model[i]);
 		}
 		else {
@@ -1250,7 +1250,7 @@ int main(int argc, char **argv) {
 		    read from asynchronous records in files */
 		fprintf(stderr, "Applying timelag to %d nav data\n", ndat_nav);
 		j = 0;
-		for (i = 0; i < ndat_nav; i++) {
+		for (int i = 0; i < ndat_nav; i++) {
 			/* get timelag value */
 			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) {
@@ -1265,7 +1265,7 @@ int main(int argc, char **argv) {
 		}
 		fprintf(stderr, "Applying timelag to %d heading data\n", ndat_heading);
 		j = 0;
-		for (i = 0; i < ndat_heading; i++) {
+		for (int i = 0; i < ndat_heading; i++) {
 			/* get timelag value */
 			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) {
@@ -1280,7 +1280,7 @@ int main(int argc, char **argv) {
 		}
 		fprintf(stderr, "Applying timelag to %d attitude data\n", ndat_rph);
 		j = 0;
-		for (i = 0; i < ndat_rph; i++) {
+		for (int i = 0; i < ndat_rph; i++) {
 			/* get timelag value */
 			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) {
@@ -1295,7 +1295,7 @@ int main(int argc, char **argv) {
 		}
 		fprintf(stderr, "Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 		j = 0;
-		for (i = 0; i < ndat_sonardepth; i++) {
+		for (int i = 0; i < ndat_sonardepth; i++) {
 			/* get timelag value */
 			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) {
@@ -1310,7 +1310,7 @@ int main(int argc, char **argv) {
 		}
 		fprintf(stderr, "Applying timelag to %d altitude data\n", ndat_altitude);
 		j = 0;
-		for (i = 0; i < ndat_altitude; i++) {
+		for (int i = 0; i < ndat_altitude; i++) {
 			/* get timelag value */
 			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) {
@@ -1326,7 +1326,7 @@ int main(int argc, char **argv) {
 
 		/* correct time of nav data read from separate file */
 		fprintf(stderr, "Applying timelag to %d INS data\n", nnav);
-		for (i = 0; i < nnav; i++) {
+		for (int i = 0; i < nnav; i++) {
 			/* get timelag value */
 			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) {
@@ -1342,7 +1342,7 @@ int main(int argc, char **argv) {
 
 		/* correct time of sonar depth data read from separate file */
 		fprintf(stderr, "Applying timelag to %d sonardepth nav data\n", nsonardepth);
-		for (i = 0; i < nsonardepth; i++) {
+		for (int i = 0; i < nsonardepth; i++) {
 			/* get timelag value */
 			timelag = 0.0;
 			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) {
@@ -1359,28 +1359,28 @@ int main(int argc, char **argv) {
 
 	/* apply roll bias */
 	if (offset_sonar_roll != 0.0) {
-		for (i = 0; i < ndat_rph; i++) {
+		for (int i = 0; i < ndat_rph; i++) {
 			dat_rph_roll[i] += offset_sonar_roll;
 		}
 	}
 
 	/* apply pitch bias */
 	if (offset_sonar_pitch != 0.0) {
-		for (i = 0; i < ndat_rph; i++) {
+		for (int i = 0; i < ndat_rph; i++) {
 			dat_rph_pitch[i] += offset_sonar_pitch;
 		}
 	}
 
 	/* apply heading bias */
 	if (offset_sonar_heading != 0.0) {
-		for (i = 0; i < ndat_heading; i++) {
+		for (int i = 0; i < ndat_heading; i++) {
 			dat_heading_heading[i] += offset_sonar_heading;
 			if (dat_heading_heading[i] >= 360.0)
 				dat_heading_heading[i] -= 360.0;
 			else if (dat_heading_heading[i] < 0.0)
 				dat_heading_heading[i] += 360.0;
 		}
-		for (i = 0; i < nnav; i++) {
+		for (int i = 0; i < nnav; i++) {
 			nav_heading[i] += offset_sonar_heading;
 			if (nav_heading[i] >= 360.0)
 				nav_heading[i] -= 360.0;
@@ -1394,7 +1394,7 @@ int main(int argc, char **argv) {
 		fprintf(stdout, "\nTotal navigation data read: %d\n", nnav);
 	if (nnav > 0 && (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)) {
 		fprintf(stdout, "\nTotal navigation data read: %d\n", nnav);
-		for (i = 0; i < nnav; i++) {
+		for (int i = 0; i < nnav; i++) {
 			fprintf(stdout, "  NAVIGATION: %12d %17.6f %11.6f %10.6f %8.3f %7.3f %6.3f\n", i, nav_time_d[i], nav_lon[i],
 			        nav_lat[i], nav_heading[i], nav_sonardepth[i], nav_altitude[i]);
 		}
@@ -1405,7 +1405,7 @@ int main(int argc, char **argv) {
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", nsonardepth);
 	if (nsonardepth > 0 && (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)) {
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", nsonardepth);
-		for (i = 0; i < nnav; i++) {
+		for (int i = 0; i < nnav; i++) {
 			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n", i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
 		}
 	}
@@ -1414,31 +1414,31 @@ int main(int argc, char **argv) {
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal navigation data read: %d\n", ndat_nav);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_nav; i++) {
+		for (int i = 0; i < ndat_nav; i++) {
 			fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f\n", i, dat_nav_time_d[i], dat_nav_lon[i], dat_nav_lat[i]);
 		}
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal heading data read: %d\n", ndat_heading);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_heading; i++) {
+		for (int i = 0; i < ndat_heading; i++) {
 			fprintf(stdout, "  HDG: %5d %17.6f %8.3f\n", i, dat_heading_time_d[i], dat_heading_heading[i]);
 		}
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", ndat_sonardepth);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_sonardepth; i++) {
+		for (int i = 0; i < ndat_sonardepth; i++) {
 			fprintf(stdout, "  DEP: %5d %17.6f %8.3f\n", i, dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
 		}
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal altitude data read: %d\n", ndat_altitude);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_altitude; i++) {
+		for (int i = 0; i < ndat_altitude; i++) {
 			fprintf(stdout, "  ALT: %5d %17.6f %8.3f\n", i, dat_altitude_time_d[i], dat_altitude_altitude[i]);
 		}
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		fprintf(stdout, "\nTotal attitude data read: %d\n", ndat_rph);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
-		for (i = 0; i < ndat_rph; i++) {
+		for (int i = 0; i < ndat_rph; i++) {
 			fprintf(stdout, "  HCP: %5d %17.6f %8.3f %8.3f %8.3f\n", i, dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i],
 			        dat_rph_heave[i]);
 		}
@@ -1609,7 +1609,7 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "dbg4       RMB_num_beams_alloc:               %d\n", istore->RMB_num_beams_alloc);
 						fprintf(stderr, "dbg4       RMB_sound_velocity:                %f\n", istore->RMB_sound_velocity);
 						fprintf(stderr, "dbg4       RMB_ping_number:                   %d\n", istore->RMB_ping_number);
-						for (i = 0; i < istore->RMB_num_beams; i++) {
+						for (int i = 0; i < istore->RMB_num_beams; i++) {
 							fprintf(stderr, "dbg4       beam:%4d", i);
 
 							if (istore->RMB_beam_data_available & 0x0001)
@@ -1796,7 +1796,7 @@ int main(int argc, char **argv) {
 						if (istore->RMB_sonar_type == 1 || istore->RMB_sonar_type == 2) {
 							/* get beam roll angles from sonar parameters if necessary */
 							if (!(istore->RMB_beam_data_available & 0x0080)) {
-								for (i = 0; i < istore->RMB_num_beams; i++) {
+								for (int i = 0; i < istore->RMB_num_beams; i++) {
 									istore->RMB_sounding_rollangles[i] =
 									    device->MBI_first_beam_angle + i * device->MBI_angle_increment;
 								}
@@ -1805,14 +1805,14 @@ int main(int argc, char **argv) {
 
 							/* set zero beam pitch angles if necessary */
 							if (!(istore->RMB_beam_data_available & 0x0040)) {
-								for (i = 0; i < istore->RMB_num_beams; i++) {
+								for (int i = 0; i < istore->RMB_num_beams; i++) {
 									istore->RMB_sounding_pitchangles[i] = 0.0;
 								}
 								istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0040;
 							}
 
 							/* get beam takeoff and azimuthal angles */
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								/* get attitude at beam receive time from best available source */
 								if (ndat_rph > 0) {
 									interp_status = mb_linear_interp(verbose, dat_rph_time_d - 1, dat_rph_roll - 1, ndat_rph,
@@ -1919,7 +1919,7 @@ int main(int argc, char **argv) {
 						 *		can happen with hysweep data logging */
 						else if ((istore->RMB_beam_data_available & 0x0300) &&
 						         (!(istore->RMB_sonar_flags & 0x0001) || !(istore->RMB_sonar_flags & 0x0002))) {
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								/* convert to roll pitch angles */
 								theta = istore->RMB_sounding_takeoffangles[i];
 								phi = 90.0 - istore->RMB_sounding_azimuthalangles[i];
@@ -1947,7 +1947,7 @@ int main(int argc, char **argv) {
 						/* recalculate beam bathymetry if beam takeoff and azimuthal angles are available */
 						if ((istore->RMB_beam_data_available & 0x0300)) {
 							/* recalculate bathymetry using beam takeoff and azimuthal angles */
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								rr = istore->RMB_beam_ranges[i];
 								theta = istore->RMB_sounding_takeoffangles[i];
 								phi = 90.0 - istore->RMB_sounding_azimuthalangles[i];
@@ -1962,7 +1962,7 @@ int main(int argc, char **argv) {
 
 						/* get beam flags if necessary */
 						if (!(istore->RMB_beam_data_available & 0x2000)) {
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								istore->RMB_sounding_flags[i] = MB_FLAG_NONE;
 							}
 							istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x2000;
@@ -1970,7 +1970,7 @@ int main(int argc, char **argv) {
 							/* incorporate quality values */
 							if ((istore->RMB_beam_data_available & 0x1000) &&
 							    strncmp(device->DEV_device_name, "Reson Seabat 8", 14) == 0) {
-								for (i = 0; i < istore->RMB_num_beams; i++) {
+								for (int i = 0; i < istore->RMB_num_beams; i++) {
 									if (istore->RMB_sounding_quality[i] < 2)
 										istore->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
 								}
@@ -1978,7 +1978,7 @@ int main(int argc, char **argv) {
 
 							/* check for null ranges */
 							if ((istore->RMB_beam_data_available & 0x0001)) {
-								for (i = 0; i < istore->RMB_num_beams; i++) {
+								for (int i = 0; i < istore->RMB_num_beams; i++) {
 									if (istore->RMB_beam_ranges[i] <= 0.0)
 										istore->RMB_sounding_flags[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
 								}
@@ -1990,7 +1990,7 @@ int main(int argc, char **argv) {
 					if (istore->RMB_beam_data_available & 0x0002) {
 						/* get beam roll angles if necessary */
 						if (!(istore->RMB_beam_data_available & 0x0080)) {
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								istore->RMB_sounding_rollangles[i] = 0.0;
 							}
 							istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0080;
@@ -1998,7 +1998,7 @@ int main(int argc, char **argv) {
 
 						/* correct beam roll angles for roll if necessary */
 						if (!(istore->RMB_sonar_flags & 0x0001) || kluge_force_attitude_compensation == 1) {
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								istore->RMB_sounding_rollangles[i] += istore->RMBint_roll;
 							}
 						}
@@ -2006,12 +2006,12 @@ int main(int argc, char **argv) {
 						/* get beam pitch angles if necessary */
 						if (!(istore->RMB_beam_data_available & 0x0040)) {
 							if (!(istore->RMB_sonar_flags & 0x0002) || kluge_force_attitude_compensation == 1) {
-								for (i = 0; i < istore->RMB_num_beams; i++) {
+								for (int i = 0; i < istore->RMB_num_beams; i++) {
 									istore->RMB_sounding_pitchangles[i] = istore->RMBint_pitch;
 								}
 							}
 							else {
-								for (i = 0; i < istore->RMB_num_beams; i++) {
+								for (int i = 0; i < istore->RMB_num_beams; i++) {
 									istore->RMB_sounding_pitchangles[i] = 0.0;
 								}
 							}
@@ -2020,7 +2020,7 @@ int main(int argc, char **argv) {
 
 						/* get beam takeoff and azimuthal angles if necessary */
 						if (!(istore->RMB_beam_data_available & 0x0100) || !(istore->RMB_beam_data_available & 0x0200)) {
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								alpha = istore->RMB_sounding_pitchangles[i];
 								beta = 90.0 - istore->RMB_sounding_rollangles[i];
 								mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, &error);
@@ -2033,7 +2033,7 @@ int main(int argc, char **argv) {
 						/* get beam bathymetry if necessary */
 						if (!(istore->RMB_beam_data_available & 0x0004) || !(istore->RMB_beam_data_available & 0x0008) ||
 						    !(istore->RMB_beam_data_available & 0x0010) || !(istore->RMB_beam_data_available & 0x0020)) {
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								rr = istore->RMB_multi_ranges[i];
 								theta = istore->RMB_sounding_takeoffangles[i];
 								phi = 90.0 - istore->RMB_sounding_azimuthalangles[i];
@@ -2048,7 +2048,7 @@ int main(int argc, char **argv) {
 
 						/* get beam flags if necessary */
 						if (!(istore->RMB_beam_data_available & 0x2000)) {
-							for (i = 0; i < istore->RMB_num_beams; i++) {
+							for (int i = 0; i < istore->RMB_num_beams; i++) {
 								istore->RMB_sounding_flags[i] = MB_FLAG_NONE;
 							}
 							istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x2000;
@@ -2066,7 +2066,7 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "dbg4       RMB_num_beams_alloc:               %d\n", istore->RMB_num_beams_alloc);
 						fprintf(stderr, "dbg4       RMB_sound_velocity:                %f\n", istore->RMB_sound_velocity);
 						fprintf(stderr, "dbg4       RMB_ping_number:                   %d\n", istore->RMB_ping_number);
-						for (i = 0; i < istore->RMB_num_beams; i++) {
+						for (int i = 0; i < istore->RMB_num_beams; i++) {
 							fprintf(stderr, "dbg4       beam:%4d", i);
 
 							if (istore->RMB_beam_data_available & 0x0001)

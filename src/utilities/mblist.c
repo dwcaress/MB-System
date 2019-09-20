@@ -80,7 +80,6 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
                int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
                int *beam_exclude_percent, int *pixel_start, int *pixel_end, int *n_list, char *list, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBLIST function <%s> called\n", __func__);
@@ -103,7 +102,7 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
 		fprintf(stderr, "dbg2       pixel_start:     %d\n", *pixel_start);
 		fprintf(stderr, "dbg2       pixel_end:       %d\n", *pixel_end);
 		fprintf(stderr, "dbg2       n_list:          %d\n", *n_list);
-		for (i = 0; i < *n_list; i++)
+		for (int i = 0; i < *n_list; i++)
 			fprintf(stderr, "dbg2       list[%2d]:        %c\n", i, list[i]);
 	}
 
@@ -225,7 +224,7 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
 		fprintf(stderr, "dbg2       pixel_start:   %d\n", *pixel_start);
 		fprintf(stderr, "dbg2       pixel_end:     %d\n", *pixel_end);
 		fprintf(stderr, "dbg2       n_list:        %d\n", *n_list);
-		for (i = 0; i < *n_list; i++)
+		for (int i = 0; i < *n_list; i++)
 			fprintf(stderr, "dbg2       list[%2d]:      %c\n", i, list[i]);
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:     %d\n", status);
@@ -237,7 +236,6 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
 int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths, double *depths,
                    double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
@@ -247,13 +245,13 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 		fprintf(stderr, "dbg2       bath:            %p\n", (void *)bath);
 		fprintf(stderr, "dbg2       bathacrosstrack: %p\n", (void *)bathacrosstrack);
 		fprintf(stderr, "dbg2       bath:\n");
-		for (i = 0; i < nbath; i++)
+		for (int i = 0; i < nbath; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, bath[i], bathacrosstrack[i]);
 	}
 
 	/* first find all depths */
 	*ndepths = 0;
-	for (i = 0; i < nbath; i++) {
+	for (int i = 0; i < nbath; i++) {
 		if (mb_beam_ok(beamflag[i])) {
 			depths[*ndepths] = bath[i];
 			depthacrosstrack[*ndepths] = bathacrosstrack[i];
@@ -263,7 +261,7 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 
 	/* now calculate slopes */
 	*nslopes = *ndepths + 1;
-	for (i = 0; i < *ndepths - 1; i++) {
+	for (int i = 0; i < *ndepths - 1; i++) {
 		slopes[i + 1] = (depths[i + 1] - depths[i]) / (depthacrosstrack[i + 1] - depthacrosstrack[i]);
 		slopeacrosstrack[i + 1] = 0.5 * (depthacrosstrack[i + 1] + depthacrosstrack[i]);
 	}
@@ -279,11 +277,11 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ndepths:         %d\n", *ndepths);
 		fprintf(stderr, "dbg2       depths:\n");
-		for (i = 0; i < *ndepths; i++)
+		for (int i = 0; i < *ndepths; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr, "dbg2       nslopes:         %d\n", *nslopes);
 		fprintf(stderr, "dbg2       slopes:\n");
-		for (i = 0; i < *nslopes; i++)
+		for (int i = 0; i < *nslopes; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
@@ -298,7 +296,6 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 	int status = MB_SUCCESS;
 	int found_depth, found_slope;
 	int idepth, islope;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
@@ -306,11 +303,11 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr, "dbg2       ndepths:         %d\n", ndepths);
 		fprintf(stderr, "dbg2       depths:\n");
-		for (i = 0; i < ndepths; i++)
+		for (int i = 0; i < ndepths; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr, "dbg2       nslopes:         %d\n", nslopes);
 		fprintf(stderr, "dbg2       slopes:\n");
-		for (i = 0; i < nslopes; i++)
+		for (int i = 0; i < nslopes; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr, "dbg2       acrosstrack:     %f\n", acrosstrack);
 	}
@@ -477,7 +474,6 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
                double *depression, double *bs, double *ss_pixels, int *error) {
 	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
@@ -505,7 +501,7 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
 	*nbeams_ss = 0;
 	*npixels = 0;
 
-	for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+	for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 		beam_samples[i] = 0;
 		start_sample[i] = 0;
 		range[i] = 0;
@@ -549,13 +545,13 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
 		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
 		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
 		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
 		}
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
 		}
-		for (i = 0; i < *npixels; i++) {
+		for (int i = 0; i < *npixels; i++) {
 			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
 		}
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -579,7 +575,6 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad2_struct *store_ptr;
 	struct mbsys_simrad2_ping_struct *ping_ptr;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
@@ -610,16 +605,16 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 		*nbeams_ss = ping_ptr->png_nbeams_ss;
 		*npixels = ping_ptr->png_npixels;
 
-		for (i = 0; i < ping_ptr->png_nbeams; i++) {
+		for (int i = 0; i < ping_ptr->png_nbeams; i++) {
 			range[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_range[i];
 			depression[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_depression[i] * .01;
 			bs[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_amp[i] * 0.5;
 		}
-		for (i = 0; i < ping_ptr->png_nbeams_ss; i++) {
+		for (int i = 0; i < ping_ptr->png_nbeams_ss; i++) {
 			beam_samples[ping_ptr->png_beam_index[i]] = ping_ptr->png_beam_samples[i];
 			start_sample[ping_ptr->png_beam_index[i]] = ping_ptr->png_start_sample[i];
 		}
-		for (i = 0; i < ping_ptr->png_npixels; i++)
+		for (int i = 0; i < ping_ptr->png_npixels; i++)
 			ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
 	}
 
@@ -642,13 +637,13 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
 		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
 		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
 		}
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
 		}
-		for (i = 0; i < *npixels; i++) {
+		for (int i = 0; i < *npixels; i++) {
 			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
 		}
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -671,7 +666,6 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store_ptr;
 	struct mbsys_simrad3_ping_struct *ping_ptr;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
@@ -702,16 +696,16 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 		*nbeams_ss = ping_ptr->png_nbeams_ss;
 		*npixels = ping_ptr->png_npixels;
 
-		for (i = 0; i < ping_ptr->png_nbeams; i++) {
+		for (int i = 0; i < ping_ptr->png_nbeams; i++) {
 			range[i] = ping_ptr->png_range[i];
 			depression[i] = ping_ptr->png_depression[i] * .01;
 			bs[i] = ping_ptr->png_amp[i] * 0.5;
 		}
-		for (i = 0; i < ping_ptr->png_nbeams_ss; i++) {
+		for (int i = 0; i < ping_ptr->png_nbeams_ss; i++) {
 			beam_samples[i] = ping_ptr->png_beam_samples[i];
 			start_sample[i] = ping_ptr->png_start_sample[i];
 		}
-		for (i = 0; i < ping_ptr->png_npixels; i++)
+		for (int i = 0; i < ping_ptr->png_npixels; i++)
 			ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
 	}
 
@@ -734,13 +728,13 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
 		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
 		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
 		}
-		for (i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
 			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
 		}
-		for (i = 0; i < *npixels; i++) {
+		for (int i = 0; i < *npixels; i++) {
 			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
 		}
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -959,7 +953,7 @@ int main(int argc, char **argv) {
 	int shellstatus;
 	int read_data;
 	int nbeams;
-	int i, j, k, m;
+	int j, k, m;
 
 	/* output files */
 	FILE **output;
@@ -1243,7 +1237,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       use_projection: %d\n", use_projection);
 		fprintf(stderr, "dbg2       projection_pars:%s\n", projection_pars);
 		fprintf(stderr, "dbg2       n_list:         %d\n", n_list);
-		for (i = 0; i < n_list; i++)
+		for (int i = 0; i < n_list; i++)
 			fprintf(stderr, "dbg2         list[%d]:      %c\n", i, list[i]);
 	}
 
@@ -1306,7 +1300,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* for non netcdf all output goes to the same file */
-		for (i = 0; i < n_list; i++)
+		for (int i = 0; i < n_list; i++)
 			output[i] = outfile;
 	}
 	else {
@@ -1333,7 +1327,7 @@ int main(int argc, char **argv) {
 
 		/* output CDL headers */
 		fprintf(outfile, "netcdf mlist {\n\n\t// ");
-		for (i = 0; i < argc; i++)
+		for (int i = 0; i < argc; i++)
 			fprintf(outfile, "%s ", argv[i]);
 		fprintf(outfile, "\n");
 		fprintf(outfile, "dimensions:\n\ttimestring = 26, timestring_J = 24, timestring_j = 23, \n\t");
@@ -1341,7 +1335,7 @@ int main(int argc, char **argv) {
 
 		/* find dimensions in format list */
 		raw_next_value = MB_NO;
-		for (i = 0; i < n_list; i++)
+		for (int i = 0; i < n_list; i++)
 			if (list[i] == '/' || list[i] == '-' || list[i] == '=' || list[i] == '+') {
 				// ignore
 			}
@@ -1362,7 +1356,7 @@ int main(int argc, char **argv) {
 		fprintf(outfile, "\n\tdata = unlimited ;\n\n");
 		fprintf(outfile, "variables:\n\t");
 		fprintf(outfile, ":command_line = \"");
-		for (i = 0; i < argc; i++)
+		for (int i = 0; i < argc; i++)
 			fprintf(outfile, "%s ", argv[i]);
 		fprintf(outfile, "\n");
 		fprintf(outfile, "\t:mbsystem_version = \"%s\";\n", MB_VERSION);
@@ -1381,7 +1375,7 @@ int main(int argc, char **argv) {
 		fprintf(outfile, "\t:run = \"by <%s> on cpu <%s> at <%s>\";\n\n", user, host, date);
 
 		/* get temporary output file for each variable */
-		for (i = 0; i < n_list; i++) {
+		for (int i = 0; i < n_list; i++) {
 			output[i] = tmpfile();
 			if (output[i] == NULL) {
 				fprintf(stderr, "Unable to open temp files\n");
@@ -2725,7 +2719,7 @@ int main(int argc, char **argv) {
 		else if (dump_mode == DUMP_MODE_SS)
 			use_ss = MB_YES;
 		else
-			for (i = 0; i < n_list; i++) {
+			for (int i = 0; i < n_list; i++) {
 				if (raw_next_value == MB_NO) {
 					if (list[i] == 'Z' || list[i] == 'z' || list[i] == 'A' || list[i] == 'a' || list[i] == 'Q' || list[i] == 'q')
 						use_bath = MB_YES;
@@ -3000,7 +2994,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "dbg2       check_amp:    %d\n", check_amp);
 					fprintf(stderr, "dbg2       check_ss:     %d\n", check_ss);
 					fprintf(stderr, "dbg2       n_list:       %d\n", n_list);
-					for (i = 0; i < n_list; i++)
+					for (int i = 0; i < n_list; i++)
 						fprintf(stderr, "dbg2       list[%d]:      %c\n", i, list[i]);
 				}
 			}
@@ -3129,7 +3123,7 @@ int main(int argc, char **argv) {
 						sensorrelative_next_value = MB_NO;
 						projectednav_next_value = MB_NO;
 						special_character = MB_NO;
-						for (i = 0; i < n_list; i++) {
+						for (int i = 0; i < n_list; i++) {
 							if (netcdf == MB_YES && lcount > 0)
 								fprintf(output[i], ", ");
 							if (port_next_value == MB_YES) {
@@ -4038,7 +4032,7 @@ int main(int argc, char **argv) {
 						sensornav_next_value = MB_NO;
 						projectednav_next_value = MB_NO;
 						special_character = MB_NO;
-						for (i = 0; i < n_list; i++) {
+						for (int i = 0; i < n_list; i++) {
 							if (netcdf == MB_YES && lcount > 0)
 								fprintf(output[i], ", ");
 							if (port_next_value == MB_YES) {
@@ -4807,7 +4801,7 @@ int main(int argc, char **argv) {
 
 	/* compile CDL file */
 	if (netcdf == MB_YES) {
-		for (i = 0; i < n_list; i++) {
+		for (int i = 0; i < n_list; i++) {
 			if (list[i] != '/' && list[i] != '-' && list[i] != '.' && !(list[i] >= '0' && list[i] <= '9')) {
 				fprintf(output[i], " ;\n\n");
 				rewind(output[i]);

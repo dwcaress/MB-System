@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
 	int nrec, nvalue;
 	int nrectot = 0;
 	int nvaluetot = 0;
-	int i, j;
+	int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -391,7 +391,7 @@ int main(int argc, char **argv) {
 	value_bin_max = value_max + 0.5 * dvalue_bin;
 
 	/* initialize histogram */
-	for (i = 0; i < nbins; i++)
+	for (int i = 0; i < nbins; i++)
 		histogram[i] = 0;
 
 	/* determine whether to read one file or a list of files */
@@ -486,7 +486,7 @@ int main(int argc, char **argv) {
 
 				/* do the bathymetry */
 				if (mode == MBHISTOGRAM_BATH)
-					for (i = 0; i < beams_bath; i++) {
+					for (int i = 0; i < beams_bath; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							nvalue++;
 							j = (bath[i] - value_bin_min) / dvalue_bin;
@@ -506,7 +506,7 @@ int main(int argc, char **argv) {
 
 				/* do the amplitude */
 				if (mode == MBHISTOGRAM_AMP)
-					for (i = 0; i < beams_amp; i++) {
+					for (int i = 0; i < beams_amp; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							nvalue++;
 							j = (amp[i] - value_bin_min) / dvalue_bin;
@@ -526,7 +526,7 @@ int main(int argc, char **argv) {
 
 				/* do the sidescan */
 				if (mode == MBHISTOGRAM_SS)
-					for (i = 0; i < pixels_ss; i++) {
+					for (int i = 0; i < pixels_ss; i++) {
 						if (ss[i] > MB_SIDESCAN_NULL) {
 							nvalue++;
 							j = (ss[i] - value_bin_min) / dvalue_bin;
@@ -582,12 +582,12 @@ int main(int argc, char **argv) {
 	if (gaussian == MB_YES) {
 		/* get total number of good values */
 		total = 0.0;
-		for (i = 0; i < nbins; i++)
+		for (int i = 0; i < nbins; i++)
 			total = total + histogram[i];
 
 		/* recast histogram */
 		sum = 0.0;
-		for (i = 0; i < nbins; i++) {
+		for (int i = 0; i < nbins; i++) {
 			p = (histogram[i] / 2 + sum) / (total + 1);
 			sum = sum + histogram[i];
 			histogram[i] = qsnorm(p);
@@ -621,7 +621,7 @@ int main(int argc, char **argv) {
 	else if (nintervals > 0) {
 		/* get total number of good values */
 		total = 0.0;
-		for (i = 0; i < nbins; i++)
+		for (int i = 0; i < nbins; i++)
 			total = total + histogram[i];
 
 		/* get interval spacing */
@@ -646,17 +646,17 @@ int main(int argc, char **argv) {
 
 	/* print out the results */
 	if (nintervals <= 0 && gaussian == MB_YES) {
-		for (i = 0; i < nbins; i++) {
+		for (int i = 0; i < nbins; i++) {
 			fprintf(output, "%f %f\n", value_min + i * dvalue_bin, histogram[i]);
 		}
 	}
 	else if (nintervals <= 0) {
-		for (i = 0; i < nbins; i++) {
+		for (int i = 0; i < nbins; i++) {
 			fprintf(output, "%f %d\n", value_min + i * dvalue_bin, (int)histogram[i]);
 		}
 	}
 	else {
-		for (i = 0; i < nintervals; i++)
+		for (int i = 0; i < nintervals; i++)
 			fprintf(output, "%f\n", intervals[i]);
 	}
 

@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 	int nscan;
 	int j0, j1;
 	int shellstatus;
-	int i, j, k, l;
+	int j, k, l;
 
 	/* set default input */
 	strcpy(swathdata, "datalist.mb-1");
@@ -412,7 +412,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* now do cross correlation calculations */
-		for (i = 0; i < nslope / npings; i++) {
+		for (int i = 0; i < nslope / npings; i++) {
 			/* get ping range in this chunk */
 			j0 = i * npings;
 			j1 = j0 + npings - 1;

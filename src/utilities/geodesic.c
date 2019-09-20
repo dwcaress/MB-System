@@ -1242,8 +1242,7 @@ real Lambda12(const struct geod_geodesic *g, real sbet1, real cbet1, real dn1, r
 real A3f(const struct geod_geodesic *g, real eps) {
 	/* Evaluate sum(A3x[k] * eps^k, k, 0, nA3x-1) by Horner's method */
 	real v = 0;
-	int i;
-	for (i = nA3x; i;)
+	for (int i = nA3x; i;)
 		v = eps * v + g->A3x[--i];
 	return v;
 }
@@ -1251,16 +1250,15 @@ real A3f(const struct geod_geodesic *g, real eps) {
 void C3f(const struct geod_geodesic *g, real eps, real c[]) {
 	/* Evaluate C3 coeffs by Horner's method
 	 * Elements c[1] through c[nC3 - 1] are set */
-	int i, j, k;
 	real mult = 1;
-	for (j = nC3x, k = nC3 - 1; k;) {
+	for (int j = nC3x, k = nC3 - 1; k;) {
 		real t = 0;
-		for (i = nC3 - k; i; --i)
+		for (int i = nC3 - k; i; --i)
 			t = eps * t + g->C3x[--j];
 		c[k--] = t;
 	}
 
-	for (k = 1; k < nC3;) {
+	for (int k = 1; k < nC3;) {
 		mult *= eps;
 		c[k++] *= mult;
 	}
@@ -1269,16 +1267,15 @@ void C3f(const struct geod_geodesic *g, real eps, real c[]) {
 void C4f(const struct geod_geodesic *g, real eps, real c[]) {
 	/* Evaluate C4 coeffs by Horner's method
 	 * Elements c[0] through c[nC4 - 1] are set */
-	int i, j, k;
 	real mult = 1;
-	for (j = nC4x, k = nC4; k;) {
+	for (int j = nC4x, k = nC4; k;) {
 		real t = 0;
-		for (i = nC4 - k + 1; i; --i)
+		for (int i = nC4 - k + 1; i; --i)
 			t = eps * t + g->C4x[--j];
 		c[--k] = t;
 	}
 
-	for (k = 1; k < nC4;) {
+	for (int k = 1; k < nC4;) {
 		mult *= eps;
 		c[k++] *= mult;
 	}
@@ -1541,7 +1538,7 @@ unsigned geod_polygon_compute(const struct geod_geodesic *g, const struct geod_p
 unsigned geod_polygon_testpoint(const struct geod_geodesic *g, const struct geod_polygon *p, real lat, real lon, boolx reverse,
                                 boolx sign, real *pA, real *pP) {
 	real perimeter, tempsum, area0;
-	int crossings, i;
+	int crossings;
 	unsigned num = p->num + 1;
 	if (num == 1) {
 		if (pP)
@@ -1553,7 +1550,7 @@ unsigned geod_polygon_testpoint(const struct geod_geodesic *g, const struct geod
 	perimeter = p->P[0];
 	tempsum = p->polyline ? 0 : p->A[0];
 	crossings = p->crossings;
-	for (i = 0; i < (p->polyline ? 1 : 2); ++i) {
+	for (int i = 0; i < (p->polyline ? 1 : 2); ++i) {
 		real s12, S12;
 		geod_geninverse(g, i == 0 ? p->lat : lat, i == 0 ? p->lon : lon, i != 0 ? p->lat0 : lat, i != 0 ? p->lon0 : lon, &s12, 0,
 		                0, 0, 0, 0, p->polyline ? 0 : &S12);
@@ -1654,10 +1651,9 @@ unsigned geod_polygon_testedge(const struct geod_geodesic *g, const struct geod_
 }
 
 void geod_polygonarea(const struct geod_geodesic *g, real lats[], real lons[], int n, real *pA, real *pP) {
-	int i;
 	struct geod_polygon p;
 	geod_polygon_init(&p, FALSE);
-	for (i = 0; i < n; ++i)
+	for (int i = 0; i < n; ++i)
 		geod_polygon_addpoint(g, &p, lats[i], lons[i]);
 	geod_polygon_compute(g, &p, FALSE, TRUE, pA, pP);
 }

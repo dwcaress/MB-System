@@ -205,7 +205,7 @@ int main(int argc, char **argv) {
 	double linetracemin, linetracemax, linetracelength, endofdata;
 	double draft, roll, pitch, heave;
 	int shellstatus;
-	int i, j;
+	int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
 
 	/* initialize output segy structures */
 	for (j = 0; j < 40; j++)
-		for (i = 0; i < 80; i++)
+		for (int i = 0; i < 80; i++)
 			segyasciiheader.line[j][i] = 0;
 	segyfileheader.jobid = 0;
 	segyfileheader.line = 0;
@@ -247,7 +247,7 @@ int main(int argc, char **argv) {
 	segyfileheader.units = 0;
 	segyfileheader.impulse_polarity = 0;
 	segyfileheader.domain = 0;
-	for (i = 0; i < 338; i++)
+	for (int i = 0; i < 338; i++)
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
@@ -424,6 +424,7 @@ int main(int argc, char **argv) {
 		rawroutefile = MB_NO;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
+				int i;
 				nget = sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &waypoint, &lon, &lat, &heading, &time_d);
 
 				/* if good data check for need to allocate more space */
@@ -470,7 +471,7 @@ int main(int argc, char **argv) {
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
 		nplot = 0;
-		for (i = 0; i < MBES_NUM_PLOT_MAX; i++) {
+		for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
 			seafloordepthminplot[i] = -1;
 			seafloordepthmaxplot[i] = -1;
 		}
@@ -555,7 +556,7 @@ int main(int argc, char **argv) {
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
 		nplot = 0;
-		for (i = 0; i < MBES_NUM_PLOT_MAX; i++) {
+		for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
 			seafloordepthminplot[i] = -1;
 			seafloordepthmaxplot[i] = -1;
 		}
@@ -792,7 +793,7 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
 						fprintf(stderr, "#   Section length: %f km\n", linedistance);
 						fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
-						for (i = 0; i < nplot; i++) {
+						for (int i = 0; i < nplot; i++) {
 							if (recalculatesweep == MB_YES) {
 								seafloordepthmin = seafloordepthminplot[i];
 								seafloordepthmax = seafloordepthmaxplot[i];
@@ -862,7 +863,7 @@ int main(int argc, char **argv) {
 					seafloordepthmin = -1.0;
 					seafloordepthmax = -1.0;
 					nplot = 0;
-					for (i = 0; i < MBES_NUM_PLOT_MAX; i++) {
+					for (int i = 0; i < MBES_NUM_PLOT_MAX; i++) {
 						seafloordepthminplot[i] = -1;
 						seafloordepthmaxplot[i] = -1;
 					}
@@ -993,7 +994,7 @@ int main(int argc, char **argv) {
 					tracemin = segydata[0];
 					tracemax = segydata[0];
 					tracerms = 0.0;
-					for (i = 0; i < segytraceheader.nsamps; i++) {
+					for (int i = 0; i < segytraceheader.nsamps; i++) {
 						tracemin = MIN(tracemin, segydata[i]);
 						tracemax = MAX(tracemax, segydata[i]);
 						tracerms += segydata[i] * segydata[i];
@@ -1131,7 +1132,7 @@ int main(int argc, char **argv) {
 							index += 2;
 							mb_put_binary_short(MB_NO, segyfileheader.domain, (void *)&(buffer[index]));
 							index += 2;
-							for (i = 0; i < 338; i++) {
+							for (int i = 0; i < 338; i++) {
 								buffer[index] = segyfileheader.extra[i];
 								index++;
 							}
@@ -1228,7 +1229,7 @@ int main(int argc, char **argv) {
 						index += 2;
 						mb_put_binary_short(MB_NO, segytraceheader.si_micros, (void *)&buffer[index]);
 						index += 2;
-						for (i = 0; i < 19; i++) {
+						for (int i = 0; i < 19; i++) {
 							mb_put_binary_short(MB_NO, segytraceheader.other_1[i], (void *)&buffer[index]);
 							index += 2;
 						}
@@ -1246,7 +1247,7 @@ int main(int argc, char **argv) {
 						index += 2;
 						mb_put_binary_short(MB_NO, segytraceheader.tr_weight, (void *)&buffer[index]);
 						index += 2;
-						for (i = 0; i < 5; i++) {
+						for (int i = 0; i < 5; i++) {
 							mb_put_binary_short(MB_NO, segytraceheader.other_2[i], (void *)&buffer[index]);
 							index += 2;
 						}
@@ -1289,7 +1290,7 @@ int main(int argc, char **argv) {
 
 						/* insert segy data into output buffer */
 						index = 0;
-						for (i = 0; i < segytraceheader.nsamps; i++) {
+						for (int i = 0; i < segytraceheader.nsamps; i++) {
 							mb_put_binary_float(MB_NO, segydata[i], (void *)&buffer[index]);
 							index += 4;
 						}
@@ -1406,7 +1407,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
 				fprintf(stderr, "#   Section length: %f km\n", linedistance);
 				fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
-				for (i = 0; i < nplot; i++) {
+				for (int i = 0; i < nplot; i++) {
 					if (recalculatesweep == MB_YES) {
 						seafloordepthmin = seafloordepthminplot[i];
 						seafloordepthmax = seafloordepthmaxplot[i];

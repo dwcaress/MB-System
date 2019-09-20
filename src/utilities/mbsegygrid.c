@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
 	int iagchalfwindow;
 	int iyc;
 	int jstart, jend;
-	int i, ii, j, k, n;
+	int ii, j, k, n;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -802,7 +802,7 @@ int main(int argc, char **argv) {
 				/* get trace min and max */
 				tracemin = trace[0];
 				tracemax = trace[0];
-				for (i = 0; i < traceheader.nsamps; i++) {
+				for (int i = 0; i < traceheader.nsamps; i++) {
 					tracemin = MIN(tracemin, trace[i]);
 					tracemax = MAX(tracemin, trace[i]);
 				}
@@ -853,10 +853,10 @@ int main(int argc, char **argv) {
 						}
 						/*fprintf(stderr,"gainmode:%d btime:%f stime:%f igainstart:%d igainend:%d\n",
 						gainmode,btime,stime,igainstart,igainend);*/
-						for (i = 0; i <= igainstart; i++) {
+						for (int i = 0; i <= igainstart; i++) {
 							trace[i] = 0.0;
 						}
-						for (i = igainstart; i <= igainend; i++) {
+						for (int i = igainstart; i <= igainend; i++) {
 							gtime = (i - igainstart) * sampleinterval;
 							factor = 1.0 + gain * gtime;
 							/*fprintf(stderr,"i:%d iy:%d factor:%f trace[%d]: %f",
@@ -864,7 +864,7 @@ int main(int argc, char **argv) {
 							trace[i] = trace[i] * factor;
 							/*fprintf(stderr," %f\n",trace[i]);*/
 						}
-						for (i = igainend + 1; i <= traceheader.nsamps; i++) {
+						for (int i = igainend + 1; i <= traceheader.nsamps; i++) {
 							trace[i] = 0.0;
 						}
 					}
@@ -874,14 +874,14 @@ int main(int argc, char **argv) {
 						igainend = (stime - btime + 0.5 * gainwindow) / sampleinterval;
 						igainend = MIN(traceheader.nsamps - 1, igainend);
 						tmax = fabs(trace[igainstart]);
-						for (i = igainstart; i <= igainend; i++) {
+						for (int i = igainstart; i <= igainend; i++) {
 							tmax = MAX(tmax, fabs(trace[i]));
 						}
 						if (tmax > 0.0)
 							factor = gain / tmax;
 						else
 							factor = 1.0;
-						for (i = 0; i <= traceheader.nsamps; i++) {
+						for (int i = 0; i <= traceheader.nsamps; i++) {
 							trace[i] *= factor;
 						}
 						/*fprintf(stderr,"igainstart:%d igainend:%d tmax:%f factor:%f\n",
@@ -909,7 +909,7 @@ int main(int argc, char **argv) {
 							/*fprintf(stderr,"FILTER: j:%d nfilter:%d cos_arg:%f cos:%f filtertrace:%f
 							 * sum:%f\n",j,nfilter,cos_arg,cos(cos_arg),filtertrace[j],filtersum);*/
 						}
-						for (i = 0; i <= traceheader.nsamps; i++) {
+						for (int i = 0; i <= traceheader.nsamps; i++) {
 							worktrace[i] = 0.0;
 							filtersum = 0.0;
 							jstart = MAX(nfilter / 2 - i, 0);
@@ -923,7 +923,7 @@ int main(int argc, char **argv) {
 							worktrace[i] /= filtersum;
 							/* fprintf(stderr,"i:%d jstart:%d jend:%d trace: %f %f\n",i,jstart,jend,trace[i], worktrace[i]);*/
 						}
-						for (i = 0; i <= traceheader.nsamps; i++) {
+						for (int i = 0; i <= traceheader.nsamps; i++) {
 							trace[i] = worktrace[i];
 						}
 					}
@@ -936,7 +936,7 @@ int main(int argc, char **argv) {
 							worktrace_alloc = traceheader.nsamps;
 						}
 						iagchalfwindow = 0.5 * agcwindow / sampleinterval;
-						for (i = 0; i <= traceheader.nsamps; i++) {
+						for (int i = 0; i <= traceheader.nsamps; i++) {
 							igainstart = i - iagchalfwindow;
 							igainstart = MAX(0, igainstart);
 							igainend = i + iagchalfwindow;
@@ -950,27 +950,27 @@ int main(int argc, char **argv) {
 							else
 								worktrace[i] = trace[i];
 						}
-						for (i = 0; i <= traceheader.nsamps; i++) {
+						for (int i = 0; i <= traceheader.nsamps; i++) {
 							trace[i] = worktrace[i];
 						}
 					}
 					else if (agcmode == MB_YES) {
 						tmax = 0.0;
-						for (i = 0; i <= traceheader.nsamps; i++) {
+						for (int i = 0; i <= traceheader.nsamps; i++) {
 							tmax = MAX(tmax, fabs(trace[i]));
 						}
 						if (tmax > 0.0)
 							factor = agcmaxvalue / tmax;
 						else
 							factor = 1.0;
-						for (i = 0; i <= traceheader.nsamps; i++) {
+						for (int i = 0; i <= traceheader.nsamps; i++) {
 							trace[i] *= factor;
 						}
 					}
 
 					/* process trace for simple vertical geometry */
 					if (geometrymode == MBSEGYGRID_GEOMETRY_VERTICAL) {
-						for (i = 0; i < traceheader.nsamps; i++) {
+						for (int i = 0; i < traceheader.nsamps; i++) {
 							iy = (ngridy - 1) - (iys + i / decimatey);
 							k = ix * ngridy + iy;
 							if (iy >= iystart && iy <= iyend) {
@@ -984,7 +984,7 @@ int main(int argc, char **argv) {
 					else /* if (geometrymode == MBSEGYGRID_GEOMETRY_REAL) */
 					{
 						cosfactor = cos(DTR * traceheader.pitch);
-						for (i = 0; i < traceheader.nsamps; i++) {
+						for (int i = 0; i < traceheader.nsamps; i++) {
 							/* get corrected y location of this sample
 							  in the section grid using the pitch angle */
 							iyc = iys + (int)(cosfactor * ((double)i)) / decimatey;

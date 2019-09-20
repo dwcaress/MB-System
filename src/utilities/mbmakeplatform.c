@@ -274,7 +274,7 @@ int main(int argc, char **argv) {
 	double d1, d2, d3, d4, d5, d6;
 	double seconds;
 	int index;
-	int i, j;
+	int j;
 
 	static struct option options[] = {{"verbose", no_argument, NULL, 0},
 	                                  {"help", no_argument, NULL, 0},
@@ -539,7 +539,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "    platform->source_heave2:               %d\n", platform->source_heave2);
 					fprintf(stderr, "    platform->source_heave3:               %d\n", platform->source_heave3);
 					fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
-					for (i = 0; i < platform->num_sensors; i++) {
+					for (int i = 0; i < platform->num_sensors; i++) {
 						index = 0;
 						for (j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 							if (mb_sensor_type_id[j] == platform->sensors[i].type)
@@ -737,7 +737,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "    platform->source_heave2:               %d\n", platform->source_heave2);
 					fprintf(stderr, "    platform->source_heave3:               %d\n", platform->source_heave3);
 					fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
-					for (i = 0; i < platform->num_sensors; i++) {
+					for (int i = 0; i < platform->num_sensors; i++) {
 						index = 0;
 						for (j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 							if (mb_sensor_type_id[j] == platform->sensors[i].type)
@@ -2074,7 +2074,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "    platform->source_heave2:               %d\n", platform->source_heave2);
 		fprintf(stderr, "    platform->source_heave3:               %d\n", platform->source_heave3);
 		fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
-		for (i = 0; i < platform->num_sensors; i++) {
+		for (int i = 0; i < platform->num_sensors; i++) {
 			index = 0;
 			for (j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 				if (mb_sensor_type_id[j] == platform->sensors[i].type)

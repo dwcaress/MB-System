@@ -286,7 +286,7 @@ int main(int argc, char **argv) {
 
 	int read_data;
 	int ictd;
-	int i, j;
+	int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -423,7 +423,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       delimiter:      %s\n", delimiter);
 		fprintf(stderr, "dbg2       file:           %s\n", file);
 		fprintf(stderr, "dbg2       n_list:         %d\n", n_list);
-		for (i = 0; i < n_list; i++)
+		for (int i = 0; i < n_list; i++)
 			fprintf(stderr, "dbg2         list[%d]:      %c\n", i, list[i]);
 	}
 
@@ -769,7 +769,7 @@ int main(int argc, char **argv) {
 							ctd_count++;
 							ctd_count_tot++;
 							if (nctd % decimate == 0)
-								for (i = 0; i < n_list; i++) {
+								for (int i = 0; i < n_list; i++) {
 									switch (list[i]) {
 									case '/': /* Inverts next simple value */
 										invert_next_value = MB_YES;

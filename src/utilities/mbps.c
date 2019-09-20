@@ -160,13 +160,13 @@ int main(int argc, char **argv) {
 	int forward;
 	double xx, yy, zz;
 	double heading_start, dheading, dheadingx, dheadingy;
-	int i, j, jj, k;
+	int j, jj, k;
 
 	void Polygon_Fill();
 	void Good_Polygon();
 
 	/* initialize some time variables */
-	for (i = 0; i < 7; i++) {
+	for (int i = 0; i < 7; i++) {
 		timbeg_i[i] = 0;
 		timend_i[i] = 0;
 	}
@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
 		} /* switch */
 
 	/* Process the title of the plot */
-	for (i = 1; i < argc; i++) {
+	for (int i = 1; i < argc; i++) {
 		if (argv[i][0] == '-' && ((argv[i][1] == 'T') || (argv[i][1] == 't'))) {
 			strcpy(title, argv[i]);
 			title[0] = ' ';
@@ -384,7 +384,7 @@ int main(int argc, char **argv) {
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), (void **)&ssalongtrack, &error);
-	for (i = 0; i < num_pings_max + 3; i++) {
+	for (int i = 0; i < num_pings_max + 3; i++) {
 		data[i].beams_bath = 0;
 		data[i].beamflag = NULL;
 		data[i].bath = NULL;
@@ -427,7 +427,7 @@ int main(int argc, char **argv) {
 			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath * sizeof(double), (void **)&(data[nread].yp), &error);
 
 			/* copy data to storage arrays */
-			for (i = 0; i < beams_bath; i++) {
+			for (int i = 0; i < beams_bath; i++) {
 				data[nread].beamflag[i] = beamflag[i];
 				data[nread].bath[i] = bath[i];
 				data[nread].bathacrosstrack[i] = bathacrosstrack[i];
@@ -581,7 +581,7 @@ int main(int argc, char **argv) {
 
 	/* rescale xp[],yp[] to zero mean; get min and max */
 	max_yp = min_yp = max_xp = min_xp = 0.0;
-	for (i = 0; i < nread; i++) {
+	for (int i = 0; i < nread; i++) {
 		beamflag = data[i].beamflag;
 		xp = data[i].xp;
 		yp = data[i].yp;
@@ -658,7 +658,7 @@ int main(int argc, char **argv) {
 			forward = MB_NO;
 	}
 	for (j = 0; j < beams_bath - 1; j++) {
-		for (i = 0; i < nread - 1; i++) {
+		for (int i = 0; i < nread - 1; i++) {
 			if (forward == MB_YES)
 				jj = j;
 			else
@@ -788,7 +788,7 @@ int main(int argc, char **argv) {
 		ps_text(xl[0] - 1.7, yl[0], 15., "direction", 0., 1, 0);
 
 		/* plot the three axes */
-		for (i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			xl[0] = 0.; /* point in center of page */
 			yl[0] = 0.;
 			rotate = 0; /* set to 1 if arrow is rotated below */
@@ -858,7 +858,7 @@ int main(int argc, char **argv) {
 	ps_plotend(1);
 
 	/* deallocate arrays */
-	for (i = 0; i < nread; i++) {
+	for (int i = 0; i < nread; i++) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(data[i].beams_bath), &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(data[i].bath), &error);
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&(data[i].bathacrosstrack), &error);

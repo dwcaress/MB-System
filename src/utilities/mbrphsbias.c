@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
 
 	int done;
 	int nbeams;
-	int i, j;
+	int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -381,7 +381,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if error initializing memory then quit */
-	for (i = 0; i < nx * ny; i++) {
+	for (int i = 0; i < nx * ny; i++) {
 		gsndgnum[i] = 0;
 		gsndgsqsum[i] = 0.0;
 	}
@@ -612,7 +612,7 @@ int main(int argc, char **argv) {
 				/* update counters */
 				pings_tot++;
 				file->num_pings++;
-				for (i = 0; i < beams_bath; i++) {
+				for (int i = 0; i < beams_bath; i++) {
 					beams_tot++;
 					file->num_beams_tot++;
 					if (mb_beam_ok(beamflag[i])) {
@@ -630,7 +630,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* store the ping data */
-				for (i = 0; i < 7; i++)
+				for (int i = 0; i < 7; i++)
 					ping->time_i[i] = time_i[i];
 				ping->time_d = time_d;
 				if (file->num_pings > 0 && fabs(ping->time_d - file->pings[file->num_pings - 1].time_d) < MB_ESF_MAXTIMEDIFF) {
@@ -652,7 +652,7 @@ int main(int argc, char **argv) {
 				ping->heave = heave;
 				ping->ssv = ssv;
 				ping->beams_bath = beams_bath;
-				for (i = 0; i < ping->beams_bath; i++) {
+				for (int i = 0; i < ping->beams_bath; i++) {
 					ping->beamflag[i] = beamflag[i];
 					ping->bath[i] = bath[i];
 					ping->bathacrosstrack[i] = bathacrosstrack[i];
@@ -690,7 +690,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%d total pings processed\n", pings_tot);
 		fprintf(stderr, "%d total soundings processed\n", beams_tot);
 		fprintf(stderr, "-------------------------\n");
-		for (i = 0; i < nfile; i++) {
+		for (int i = 0; i < nfile; i++) {
 		}
 	}
 
@@ -698,7 +698,7 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndgnum, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&gsndgsqsum, &error);
 
-	for (i = 0; i < nfile; i++) {
+	for (int i = 0; i < nfile; i++) {
 		file = &(files[nfile]);
 		for (j = 0; j < file->num_pings; j++) {
 			ping = &(file->pings[j]);

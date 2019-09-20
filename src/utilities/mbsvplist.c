@@ -192,7 +192,7 @@ int main(int argc, char **argv) {
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int read_data;
-	int i, j, isvp;
+	int j, isvp;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -549,7 +549,7 @@ int main(int argc, char **argv) {
 					svp_last.time_set = MB_NO;
 					svp_last.position_set = MB_NO;
 					svp_last.n = svp.n;
-					for (i = 0; i < svp.n; i++) {
+					for (int i = 0; i < svp.n; i++) {
 						svp_last.depth[i] = svp.depth[i];
 						svp_last.velocity[i] = svp.velocity[i];
 					}
@@ -573,7 +573,7 @@ int main(int argc, char **argv) {
 					svp_save[svp_save_count].longitude = svp.longitude;
 					svp_save[svp_save_count].latitude = svp.latitude;
 					svp_save[svp_save_count].n = svp.n;
-					for (i = 0; i < svp.n; i++) {
+					for (int i = 0; i < svp.n; i++) {
 						svp_save[svp_save_count].depth[i] = svp.depth[i];
 						svp_save[svp_save_count].velocity[i] = svp.velocity[i];
 					}
@@ -696,7 +696,7 @@ int main(int argc, char **argv) {
 							fprintf(stderr, "Initial depth reset from %f to 0.0 meters\n", svp_save[isvp].depthzero);
 						}
 						fprintf(svp_fp, "## Number of SVP Points: %d\n", svp_save[isvp].n);
-						for (i = 0; i < svp_save[isvp].n; i++)
+						for (int i = 0; i < svp_save[isvp].n; i++)
 							fprintf(svp_fp, "%8.2f\t%7.2f\n", svp_save[isvp].depth[i], svp_save[isvp].velocity[i]);
 						if (svp_file_output == MB_NO) {
 							fprintf(svp_fp, "## \n");

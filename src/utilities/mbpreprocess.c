@@ -588,7 +588,7 @@ int main(int argc, char **argv) {
   double *dptr = NULL;
   int index = 0;
   char buffer[16] = "";
-  int i, ii, n, nn;
+  int ii, n, nn;
 
   /* get current default values */
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -1792,7 +1792,7 @@ int main(int argc, char **argv) {
 
         /* copy the nav data */
         if (status == MB_SUCCESS && nanav > 0) {
-          for (i = 0; i < nanav; i++) {
+          for (int i = 0; i < nanav; i++) {
             if (atime_d[i] > 0.0 && alon[i] != 0.0 && alat[i] != 0.0) {
               nav_time_d[n_nav] = atime_d[i];
               nav_navlon[n_nav] = alon[i];
@@ -1827,7 +1827,7 @@ int main(int argc, char **argv) {
 
         /* copy the sensordepth data */
         if (status == MB_SUCCESS && nanav > 0) {
-          for (i = 0; i < nanav; i++) {
+          for (int i = 0; i < nanav; i++) {
             sensordepth_time_d[n_sensordepth] = atime_d[i];
             sensordepth_sensordepth[n_sensordepth] = asensordepth[i];
             n_sensordepth++;
@@ -1858,7 +1858,7 @@ int main(int argc, char **argv) {
 
         /* copy the heading data */
         if (status == MB_SUCCESS && nanav > 0) {
-          for (i = 0; i < nanav; i++) {
+          for (int i = 0; i < nanav; i++) {
             heading_time_d[n_heading] = atime_d[i];
             heading_heading[n_heading] = aheading[i];
             n_heading++;
@@ -1921,7 +1921,7 @@ int main(int argc, char **argv) {
 
         /* copy the attitude data */
         if (status == MB_SUCCESS && nanav > 0) {
-          for (i = 0; i < nanav; i++) {
+          for (int i = 0; i < nanav; i++) {
             attitude_time_d[n_attitude] = atime_d[i];
             attitude_roll[n_attitude] = aroll[i];
             attitude_pitch[n_attitude] = apitch[i];
@@ -1952,7 +1952,7 @@ int main(int argc, char **argv) {
       /* copy the index */
       memcpy(&indextable[num_indextable], i_indextable,
                  i_num_indextable * sizeof(struct mb_io_indextable_struct));
-      for (i = num_indextable; i < num_indextable + i_num_indextable; i++) {
+      for (int i = num_indextable; i < num_indextable + i_num_indextable; i++) {
         indextable[i].file_index = n_rt_files;
       }
       num_indextable += i_num_indextable;
@@ -2071,7 +2071,7 @@ int main(int argc, char **argv) {
       dtime_d_expect = (sensordepth_time_d[n_sensordepth-1] - sensordepth_time_d[0]) / (n_sensordepth - 1);
       if (fabs((sensordepth_time_d[1] - sensordepth_time_d[0]) -  dtime_d_expect) < kluge_timejumps_mba_threshold)
           dtime_d_expect = (sensordepth_time_d[1] - sensordepth_time_d[0]);
-      for (i=2;i<n_sensordepth;i++) {
+      for (int i = 2;i<n_sensordepth;i++) {
         dtime_d = sensordepth_time_d[i] - sensordepth_time_d[i-1];
         if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_mba_threshold) {
           if (correction_on == MB_NO) {
@@ -2103,7 +2103,7 @@ int main(int argc, char **argv) {
 
       /* remove any samples that have had the timestamps zeroed */
       nn = n_sensordepth;
-      for (i=n_sensordepth-1;i>=0;i--) {
+      for (int i = n_sensordepth-1;i>=0;i--) {
         if (sensordepth_time_d[i] == 0.0) {
           for (ii=i;ii<nn-1;ii++) {
             sensordepth_time_d[ii] = sensordepth_time_d[ii+1];
@@ -2128,7 +2128,7 @@ int main(int argc, char **argv) {
       dtime_d_expect = (nav_time_d[n_nav-1] - nav_time_d[0]) / (n_nav - 1);
       if (fabs((nav_time_d[1] - nav_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
           dtime_d_expect = (nav_time_d[1] - nav_time_d[0]);
-      for (i=2;i<n_nav;i++) {
+      for (int i = 2;i<n_nav;i++) {
         dtime_d = nav_time_d[i] - nav_time_d[i-1];
         if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
           fprintf(stderr, "NAV TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
@@ -2144,7 +2144,7 @@ int main(int argc, char **argv) {
       dtime_d_expect = (sensordepth_time_d[n_sensordepth-1] - sensordepth_time_d[0]) / (n_sensordepth - 1);
       if (fabs((sensordepth_time_d[1] - sensordepth_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
           dtime_d_expect = (sensordepth_time_d[1] - sensordepth_time_d[0]);
-      for (i=2;i<n_sensordepth;i++) {
+      for (int i = 2;i<n_sensordepth;i++) {
         dtime_d = sensordepth_time_d[i] - sensordepth_time_d[i-1];
         if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
           fprintf(stderr, "DEP TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
@@ -2160,7 +2160,7 @@ int main(int argc, char **argv) {
       dtime_d_expect = (heading_time_d[n_heading-1] - heading_time_d[0]) / (n_heading - 1);
       if (fabs((heading_time_d[1] - heading_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
           dtime_d_expect = (heading_time_d[1] - heading_time_d[0]);
-      for (i=2;i<n_heading;i++) {
+      for (int i = 2;i<n_heading;i++) {
         dtime_d = heading_time_d[i] - heading_time_d[i-1];
         if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
           fprintf(stderr, "HDG TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
@@ -2176,7 +2176,7 @@ int main(int argc, char **argv) {
       dtime_d_expect = (altitude_time_d[n_altitude-1] - altitude_time_d[0]) / (n_altitude - 1);
       if (fabs((altitude_time_d[1] - altitude_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
           dtime_d_expect = (altitude_time_d[1] - altitude_time_d[0]);
-      for (i=2;i<n_altitude;i++) {
+      for (int i = 2;i<n_altitude;i++) {
         dtime_d = altitude_time_d[i] - altitude_time_d[i-1];
         if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
           fprintf(stderr, "ALT TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
@@ -2192,7 +2192,7 @@ int main(int argc, char **argv) {
       dtime_d_expect = (attitude_time_d[n_attitude-1] - attitude_time_d[0]) / (n_attitude - 1);
       if (fabs((attitude_time_d[1] - attitude_time_d[0]) -  dtime_d_expect) < kluge_timejumps_anc_threshold)
           dtime_d_expect = (attitude_time_d[1] - attitude_time_d[0]);
-      for (i=2;i<n_attitude;i++) {
+      for (int i = 2;i<n_attitude;i++) {
         dtime_d = attitude_time_d[i] - attitude_time_d[i-1];
         if (fabs(dtime_d - dtime_d_expect) >= kluge_timejumps_anc_threshold) {
           fprintf(stderr, "ATT TIME JUMP FIX: i:%d t: %f %f dt: %f %f ",
@@ -2204,35 +2204,35 @@ int main(int argc, char **argv) {
     }
 
 #ifdef DEBUG_MBPREPROCESS
-    for (i=0;i<n_nav;i++) {
+    for (int i = 0;i<n_nav;i++) {
       mb_get_date(verbose,nav_time_d[i],time_i);
       fprintf(stderr,"NAV: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.6f %.6f\n",
         time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
         nav_navlon[i], nav_navlat[i]);
     }
 
-    for (i=0;i<n_sensordepth;i++) {
+    for (int i = 0;i<n_sensordepth;i++) {
       mb_get_date(verbose,sensordepth_time_d[i],time_i);
       fprintf(stderr,"DEP: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
         time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
         sensordepth_sensordepth[i]);
     }
 
-    for (i=0;i<n_heading;i++) {
+    for (int i = 0;i<n_heading;i++) {
       mb_get_date(verbose,heading_time_d[i],time_i);
       fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
         time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
         heading_heading[i]);
     }
 
-    for (i=0;i<n_altitude;i++) {
+    for (int i = 0;i<n_altitude;i++) {
       mb_get_date(verbose,altitude_time_d[i],time_i);
       fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
         time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
         altitude_altitude[i]);
     }
 
-    for (i=0;i<n_attitude;i++) {
+    for (int i = 0;i<n_attitude;i++) {
       mb_get_date(verbose,attitude_time_d[i],time_i);
       fprintf(stderr,"RPH: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f %.3f\n",
         time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
@@ -2240,7 +2240,7 @@ int main(int argc, char **argv) {
     }
 #endif
 
-    for (i=0;i<n_sensordepth;i++) {
+    for (int i = 0;i<n_sensordepth;i++) {
       mb_get_date(verbose,sensordepth_time_d[i],time_i);
       fprintf(stderr,"DEP: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
         time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
@@ -2481,7 +2481,7 @@ int main(int argc, char **argv) {
 
   /*-------------------------------------------------------------------*/
 
-  // for (i=0;i<n_nav;i++)
+  // for (int i = 0;i<n_nav;i++)
   // fprintf(stderr,"NAV %d %f %f %f\n",i,nav_time_d[i],nav_navlon[i],nav_navlat[i]);
   // fprintf(stderr," \n");
 
@@ -3031,7 +3031,7 @@ int main(int argc, char **argv) {
             /* if attitude changed apply rigid rotations to any bathymetry */
             if (attitude_changed == MB_YES) {
               /* loop over the beams */
-              for (i = 0; i < beams_bath; i++) {
+              for (int i = 0; i < beams_bath; i++) {
                 if (beamflag[i] != MB_FLAG_NULL) {
                   /* strip off original heave + draft */
                   bath[i] -= sensordepth_org;
@@ -3055,7 +3055,7 @@ int main(int argc, char **argv) {
               depth_offset_change = draft - draft_org;
 
               /* loop over the beams */
-              for (i = 0; i < beams_bath; i++) {
+              for (int i = 0; i < beams_bath; i++) {
                 if (beamflag[i] != MB_FLAG_NULL) {
                   /* apply transducer depth change to depths */
                   bath[i] += depth_offset_change;
@@ -3249,7 +3249,7 @@ int main(int argc, char **argv) {
            * do not overshoot the data */
           istart = 0;
           iend = 0;
-          for (i = 0; i < n_heading; i++) {
+          for (int i = 0; i < n_heading; i++) {
             if (heading_time_d[i] < start_time_d - 10.0)
               istart = i;
             if (heading_time_d[i] < end_time_d + 10.0)
@@ -3267,7 +3267,7 @@ int main(int argc, char **argv) {
             }
             if (verbose > 0)
               fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n", ofile, istart, iend, n_heading);
-            for (i = istart; i < iend; i++) {
+            for (int i = istart; i < iend; i++) {
               index = 0;
               mb_put_binary_double(MB_YES, heading_time_d[i], &buffer[index]);
               index += 8;
@@ -3287,7 +3287,7 @@ int main(int argc, char **argv) {
            * do not overshoot the data */
           istart = 0;
           iend = 0;
-          for (i = 0; i < n_sensordepth; i++) {
+          for (int i = 0; i < n_sensordepth; i++) {
             if (sensordepth_time_d[i] < start_time_d - 10.0)
               istart = i;
             if (sensordepth_time_d[i] < end_time_d + 10.0)
@@ -3306,7 +3306,7 @@ int main(int argc, char **argv) {
             if (verbose > 0)
               fprintf(stderr, "Generating bas file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
                 n_sensordepth);
-            for (i = istart; i < iend; i++) {
+            for (int i = istart; i < iend; i++) {
               index = 0;
               mb_put_binary_double(MB_YES, sensordepth_time_d[i], &buffer[index]);
               index += 8;
@@ -3326,7 +3326,7 @@ int main(int argc, char **argv) {
            * do not overshoot the data */
           istart = 0;
           iend = 0;
-          for (i = 0; i < n_attitude; i++) {
+          for (int i = 0; i < n_attitude; i++) {
             if (attitude_time_d[i] < start_time_d - 10.0)
               istart = i;
             if (attitude_time_d[i] < end_time_d + 10.0)
@@ -3345,7 +3345,7 @@ int main(int argc, char **argv) {
             if (verbose > 0)
               fprintf(stderr, "Generating baa file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
                 n_attitude);
-            for (i = istart; i < iend; i++) {
+            for (int i = istart; i < iend; i++) {
               index = 0;
               mb_put_binary_double(MB_YES, attitude_time_d[i], &buffer[index]);
               index += 8;
