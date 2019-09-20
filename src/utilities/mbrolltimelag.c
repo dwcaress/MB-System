@@ -56,7 +56,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 
@@ -266,8 +265,8 @@ int main(int argc, char **argv) {
 
 	/* get time lag step */
 	lagstep = (lagend - lagstart) / (nlag - 1);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(double), (void **)&rr, &error);
-	status = mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(int), (void **)&timelaghistogram, &error);
+	int status = mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(double), (void **)&rr, &error);
+	status &= mb_reallocd(verbose, __FILE__, __LINE__, nlag * sizeof(int), (void **)&timelaghistogram, &error);
 
 	if (verbose > 0) {
 		fprintf(stderr, "Program %s parameters:\n", program_name);

@@ -70,7 +70,6 @@ int main(int argc, char **argv) {
 	char **pargv = NULL;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 
@@ -190,6 +189,8 @@ int main(int argc, char **argv) {
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
+
+	int status = MB_SUCCESS;
 
 	/* open file list */
 	if (read_datalist == MB_YES) {

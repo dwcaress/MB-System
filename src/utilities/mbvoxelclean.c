@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 	/* MBIO read control parameters */
 	void *mbio_ptr = NULL;
 	void *store_ptr = NULL;
-    int kind = MB_DATA_NONE;
+	int kind = MB_DATA_NONE;
 	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	char swathfile[MB_PATH_MAXLINE];
@@ -1133,8 +1133,6 @@ int main(int argc, char **argv) {
 }
 /*--------------------------------------------------------------------*/
 int mbvoxelclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1145,6 +1143,9 @@ int mbvoxelclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int
 	}
 	/* write out the edit */
 	fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
+
+	int status = MB_SUCCESS;
+
 	if (sofp != NULL) {
 #ifdef BYTESWAPPED
 		mb_swap_double(&time_d);

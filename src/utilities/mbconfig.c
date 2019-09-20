@@ -63,7 +63,6 @@ int main(int argc, char **argv) {
 	int mode_otps = MB_NO;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	mb_path version_string;
@@ -104,7 +103,7 @@ int main(int argc, char **argv) {
 	                                  {"otps", no_argument, NULL, 0},
 	                                  {NULL, 0, NULL, 0}};
 
-	status = mb_version(verbose, version_string, &version_id, &version_major, &version_minor, &version_archive, &error);
+	int status = mb_version(verbose, version_string, &version_id, &version_major, &version_minor, &version_archive, &error);
 
 	/* process argument list */
 	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)

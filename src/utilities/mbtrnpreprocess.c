@@ -267,8 +267,6 @@ int mbtrnpreprocess_postlog
   int *error
 )
 {
-  int status = MB_SUCCESS;
-
   /* time, user, host variables */
   struct timeval timeofday;
   struct timezone timezone;
@@ -288,7 +286,7 @@ int mbtrnpreprocess_postlog
   /* get time  */
   gettimeofday(&timeofday, &timezone);
   time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-  status = mb_get_date(verbose, time_d, time_i);
+  const int status = mb_get_date(verbose, time_d, time_i);
   sprintf(date,
     "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
     time_i[0],
@@ -343,7 +341,6 @@ int mbtrnpreprocess_closelog
   int *error
 )
 {
-  int status = MB_SUCCESS;
   char *log_message = "Closing mbtrnpreprocess log file";
 
   if (verbose >= 2)
@@ -362,6 +359,8 @@ int mbtrnpreprocess_closelog
     fclose(*logfp);
     *logfp = NULL;
     }
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2)
     {
@@ -385,8 +384,6 @@ int mbtrnpreprocess_openlog
   int *error
 )
 {
-  int status = MB_SUCCESS;
-
   /* time, user, host variables */
   struct timeval timeofday;
   struct timezone timezone;
@@ -414,7 +411,7 @@ int mbtrnpreprocess_openlog
   /* get time and user data */
   gettimeofday(&timeofday, &timezone);
   time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-  status = mb_get_date(verbose, time_d, time_i);
+  const int status = mb_get_date(verbose, time_d, time_i);
   sprintf(date,
     "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
     time_i[0],
@@ -482,7 +479,6 @@ int mbtrnpreprocess_logparameters
   int *error
 )
 {
-  int status = MB_SUCCESS;
   mb_path log_message;
 
   if (verbose >= 2)
@@ -537,6 +533,8 @@ int mbtrnpreprocess_logparameters
     mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
     }
 
+  const int status = MB_SUCCESS;
+
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -565,7 +563,6 @@ int mbtrnpreprocess_logstatistics
   int *error
 )
 {
-  int status = MB_SUCCESS;
   mb_path log_message;
 
   if (verbose >= 2)
@@ -618,6 +615,8 @@ int mbtrnpreprocess_logstatistics
     sprintf(log_message, "       n_soundings_written:          %d", n_soundings_written);
     mbtrnpreprocess_postlog(verbose, logfp, log_message, error);
     }
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2)
     {
@@ -1044,7 +1043,6 @@ int mbtrnpreprocess_input_open
   int *error
 )
 {
-  int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
 
   if (verbose >= 2)
@@ -1058,9 +1056,6 @@ int mbtrnpreprocess_input_open
 
   /* get pointer to mbio descriptor */
   mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-  /* set initial status */
-  status = MB_SUCCESS;
 
   /* Open and initialize the socket based input for reading using function
    * mbtrnpreprocess_input_read(). Allocate an internal, hidden buffer to hold data from
@@ -1109,6 +1104,8 @@ int mbtrnpreprocess_input_open
   if (verbose>=1)
     mbtrn_reader_show(mb_io_ptr->mbsp, true, 5);
 
+  const int status = MB_SUCCESS;
+
   if (verbose >= 2)
     {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -1131,7 +1128,6 @@ int mbtrnpreprocess_input_read
   int *error
 )
 {
-  int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
 
   if (verbose >= 2)
@@ -1147,15 +1143,14 @@ int mbtrnpreprocess_input_read
   /* get pointer to mbio descriptor */
   mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* set initial status */
-  status = MB_SUCCESS;
-
   /* Read the requested number of bytes (= size) off the input and  place
    * those bytes into the buffer.
    * This requires reading full s7k records off the socket, storing the data
    * in an internal, hidden buffer, and parceling those bytes out as requested.
    * The internal buffer should be allocated in mbtrnpreprocess_input_init() and stored
    * in the mb_io_struct structure *mb_io_ptr. */
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2)
     {
@@ -1177,7 +1172,6 @@ int mbtrnpreprocess_input_close
   int *error
 )
 {
-  int status = MB_SUCCESS;
   struct mb_io_struct *mb_io_ptr;
 
   if (verbose >= 2)
@@ -1191,12 +1185,11 @@ int mbtrnpreprocess_input_close
   /* get pointer to mbio descriptor */
   mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
 
-  /* set initial status */
-  status = MB_SUCCESS;
-
   /* Close the socket based input for reading using function
    * mbtrnpreprocess_input_read(). Deallocate the internal, hidden buffer and any
    * other resources that were allocated by mbtrnpreprocess_input_init(). */
+
+  const int status = MB_SUCCESS;
 
   if (verbose >= 2)
     {

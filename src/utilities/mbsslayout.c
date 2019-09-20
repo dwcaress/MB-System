@@ -96,7 +96,6 @@ static const char usage_message[] =
 int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
                                     double altitude, double pitch, double *table_angle, double *table_xtrack,
                                     double *table_ltrack, double *table_altitude, double *table_range, int *error) {
-	int status = MB_SUCCESS;
 	double dangle;
 	double rr, xx, zz;
 	double alpha, beta, theta, phi;
@@ -135,6 +134,8 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 		table_range[i] = rr;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBSSLAYOUT function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -159,7 +160,6 @@ int main(int argc, char **argv) {
 	int help = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -606,7 +606,7 @@ int main(int argc, char **argv) {
 	int i, j, jj, n;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");

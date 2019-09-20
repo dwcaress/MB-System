@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
   int interpolate_position = MB_NO;
 
   /* MBIO status variables */
-  int status = MB_SUCCESS;
   int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
   char *message;
@@ -414,6 +413,8 @@ int main(int argc, char **argv) {
 
   /*-------------------------------------------------------------------*/
   /* load input nav data */
+
+  int status = MB_SUCCESS;
 
   /* count the records */
   error = MB_ERROR_NO_ERROR;
