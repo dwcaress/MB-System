@@ -54,7 +54,6 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	int status = MB_SUCCESS;
 	//	int time_i[7];
 
 	if (verbose >= 2) {
@@ -71,6 +70,8 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 	// time_d,time_i[0],time_i[1],time_i[2],
 	// time_i[3],time_i[4],time_i[5],time_i[6],
 	// beam,action);
+
+	int status = MB_SUCCESS;
 
 	/* write out the edit */
 	if (sofp != NULL) {

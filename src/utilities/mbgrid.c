@@ -164,7 +164,6 @@ double mbgrid_erf(double x) {
  */
 int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                 double dx, double dy, int *error) {
-	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -186,6 +185,8 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 		fprintf(outfp, "dbg2       dx:         %f\n", dx);
 		fprintf(outfp, "dbg2       dy:         %f\n", dy);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* open the file */
 	if ((fp = fopen(outfile, "w")) == NULL) {
@@ -299,7 +300,6 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
  */
 int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                  double dx, double dy, int *error) {
-	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 
 	if (verbose >= 2) {
@@ -317,6 +317,8 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
 		fprintf(outfp, "dbg2       dx:         %f\n", dx);
 		fprintf(outfp, "dbg2       dy:         %f\n", dy);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* open the file */
 	if ((fp = fopen(outfile, "w")) == NULL) {
@@ -355,7 +357,6 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
  */
 int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double pcy, double dx, double dy, double *px, double *py,
                   double *weight, int *use, int *error) {
-	int status = MB_SUCCESS;
 	double fa, fb;
 	double xe, ye, ang, ratio;
 
@@ -428,6 +429,8 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
@@ -450,7 +453,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message = NULL;
@@ -651,10 +653,10 @@ int main(int argc, char **argv) {
 	int fork_status;
 	char *bufptr;
 	size_t freadsize;
-  double dvalue;
+	double dvalue;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input and output */
 	strcpy(filelist, "datalist.mb-1");

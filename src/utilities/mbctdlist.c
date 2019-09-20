@@ -55,7 +55,6 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
-	int status = MB_SUCCESS;
 	char format[24];
 
 	if (verbose >= 2) {
@@ -98,6 +97,8 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 	else
 		fwrite(&value, sizeof(double), 1, stdout);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -111,8 +112,6 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 }
 /*--------------------------------------------------------------------*/
 int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -136,6 +135,8 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error) {
 	else
 		fwrite(&NaN, sizeof(double), 1, stdout);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -157,7 +158,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int interp_status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
 	int j;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 	pings = 1;
 	bounds[0] = -360.0;
 	bounds[1] = 360.0;

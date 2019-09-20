@@ -83,7 +83,6 @@ int main(int argc, char **argv) {
 	int help = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -162,7 +161,7 @@ int main(int argc, char **argv) {
 	double dx, dy, rr;
 
 	/* get current default values - only interested in lonflip */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input and output */
 	strcpy(ifile, "stdin");

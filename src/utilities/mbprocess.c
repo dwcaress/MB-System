@@ -111,7 +111,6 @@ char help_message[] =
 /*--------------------------------------------------------------------*/
 int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int nss, double *ss,
                       double *ssacrosstrack, int *error) {
-	int status = MB_SUCCESS;
 	int ifirst, ilast;
 	int iss, ibath;
 
@@ -169,6 +168,8 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -182,7 +183,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 /*--------------------------------------------------------------------*/
 int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, struct mbprocess_sscorr_struct *corrtable,
                   struct mbprocess_sscorr_struct *corrtableuse, int *error) {
-	int status = MB_SUCCESS;
 	double factor;
 	int ifirst, ilast, irecent, inext;
 	int ii, itable;
@@ -283,7 +283,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
@@ -301,7 +301,6 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 }
 /*--------------------------------------------------------------------*/
 int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error) {
-	int status = MB_SUCCESS;
 	int iangle, found;
 	int ifirst, ilast;
 
@@ -361,7 +360,7 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
@@ -376,7 +375,6 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 }
 /*--------------------------------------------------------------------*/
 int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error) {
-	int status = MB_SUCCESS;
 	//	int time_i[7];
 
 	if (verbose >= 2) {
@@ -393,6 +391,8 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
 	// time_d,time_i[0],time_i[1],time_i[2],
 	// time_i[3],time_i[4],time_i[5],time_i[6],
 	// beam,action);
+
+	int status = MB_SUCCESS;
 
 	/* write out the edit */
 	if (esffp != NULL) {
@@ -436,7 +436,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message = NULL;
@@ -733,8 +732,8 @@ int main(int argc, char **argv) {
 	char *getenv();
 
 	/* get current default values */
-	status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-	status = mb_uselockfiles(verbose, &uselockfiles);
+	int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	status &= mb_uselockfiles(verbose, &uselockfiles);
 
 	/* reset all defaults */
 	pings = 1;

@@ -76,7 +76,6 @@ static const char usage_message[] =
 int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
                     double *timesweep, double *timedelay, double *startlon, double *startlat, double *endlon, double *endlat,
                     int *error) {
-	int status = MB_SUCCESS;
 	char sinffile[MB_PATH_MAXLINE] = "";
 	char command[MB_PATH_MAXLINE] = "";
 	char line[MB_PATH_MAXLINE] = "";
@@ -179,6 +178,8 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	}
 	*timedelay = delay0;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
@@ -210,7 +211,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -329,7 +329,7 @@ int main(int argc, char **argv) {
 	int ii, j, k, n;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set file to null */
 	segyfile[0] = '\0';

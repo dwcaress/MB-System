@@ -65,7 +65,6 @@ static const char usage_message[] =
  */
 int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart, int *traceend, int *chanstart, int *chanend,
                     double *timesweep, double *timedelay, int *error) {
-	int status = MB_SUCCESS;
 	char sinffile[MB_PATH_MAXLINE] = "";
 	char command[MB_PATH_MAXLINE] = "";
 	char line[MB_PATH_MAXLINE] = "";
@@ -169,6 +168,8 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 	}
 	*timedelay = delay0;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  MBIO function <%s> completed\n", __func__);
 		fprintf(outfp, "dbg2  Return values:\n");
@@ -196,7 +197,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -496,11 +496,11 @@ int main(int argc, char **argv) {
 	}
 
 	/* allocate memory for grid array */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, 2 * ngridxy * sizeof(float), (void **)&grid, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsd, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsd, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsdtot, &error);
-	status = mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsdtot, &error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, 2 * ngridxy * sizeof(float), (void **)&grid, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsd, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsd, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&spsdtot, &error);
+	status &= mb_mallocd(verbose, __FILE__, __LINE__, ngridy * sizeof(double), (void **)&wpsdtot, &error);
 
 	/* zero working psd array */
 	for (iy = 0; iy < ngridy; iy++) {

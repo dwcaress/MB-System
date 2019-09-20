@@ -179,7 +179,6 @@ static void default_options(options *opts) {
 } /* default_options */
 /*----------------------------------------------------------------------*/
 static int parse_options(int verbose, int argc, char **argv, options *opts, int *error) {
-	int status = MB_SUCCESS;
 	int c;
 	int flag = 0;
 
@@ -253,6 +252,8 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		} /* switch */
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -268,7 +269,6 @@ static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *
 	char *tagdebug2 = "dbg2 ";
 	char *tagdebug0 = "";
 	char *tag = NULL;
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -320,6 +320,8 @@ static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *
 	fprintf(stderr, "%sflip_rejected:            %d\n", tag, opts->flip_rejected);
 	fprintf(stderr, "%scopy_rawamp:              %d\n", tag, opts->copy_rawamp);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -342,7 +344,6 @@ static void error_exit(int verbose, int error, char *funcname, char *message) {
 }
 /*----------------------------------------------------------------------*/
 static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store, int *error) {
-	int status = MB_SUCCESS;
 	FILE *stream;
 
 	if (verbose >= 2) {
@@ -412,6 +413,8 @@ static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store
 		fprintf(stream, "UNKNOWN RECORD [ID: 0x%o]\n", store->type);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -425,14 +428,14 @@ static int print_latest_record(int verbose, struct mbsys_swathplus_struct *store
 
 /*----------------------------------------------------------------------*/
 static int ping_mode(int verbose, struct mbsys_swathplus_struct *store, int *mode, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* use bitmask in ping status field to return ping mode */
 	if (store->kind == MB_DATA_DATA) {
@@ -467,8 +470,6 @@ static int ping_mode(int verbose, struct mbsys_swathplus_struct *store, int *mod
 
 /*---------------------------------------------------------------*/
 static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct *store, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -558,6 +559,8 @@ static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -571,8 +574,6 @@ static int count_record(int verbose, counts *recs, struct mbsys_swathplus_struct
 
 /*----------------------------------------------------------------------*/
 static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -589,6 +590,8 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -602,7 +605,6 @@ static int flip_sample_flags(int verbose, swpls_sxpping *ping, int *error) {
 
 /*----------------------------------------------------------------------*/
 static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
-	int status = MB_SUCCESS;
 	swpls_point *points;
 	int valid;
 
@@ -622,7 +624,7 @@ static int remove_rejected_samps(int verbose, swpls_sxpping *ping, int *error) {
 	}
 
 	/* create a temporary array to hold the valid samples */
-	status = mb_mallocd(verbose, __FILE__, __LINE__, valid * sizeof(swpls_point), (void **)&points, error);
+	int status = mb_mallocd(verbose, __FILE__, __LINE__, valid * sizeof(swpls_point), (void **)&points, error);
 	if (status != MB_SUCCESS) {
 		char message[MAX_ERROR_STRING] = {0};
 		sprintf(message, "Failure to allocate memory for temporary array (%lu bytes)", valid * sizeof(swpls_point));
@@ -663,7 +665,6 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
                              int *error) {
 	mb_path fileroot;
 	int format;
-	int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -679,7 +680,7 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 	}
 
 	/* get the fileroot name and format from the input name */
-	status = mb_get_format(verbose, ifile, fileroot, &format, error);
+	int status = mb_get_format(verbose, ifile, fileroot, &format, error);
 
 	if ((ofile_set == MB_NO) && (split_txers == MB_NO)) {
 		if ((format == MBF_SWPLSSXP) && (strncmp(".sxp", &ifile[strlen(ifile) - 4], 4) == 0)) {
@@ -754,14 +755,14 @@ static int set_outfile_names(int verbose, mb_path *ofile, mb_path ifile, mb_path
 
 /*----------------------------------------------------------------------*/
 static int ping_txno(int verbose, struct mbsys_swathplus_struct *store, int *txno, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       store:      %p\n", (void *)store);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* get the transducer channe */
 	if ((store->kind == MB_DATA_DATA) &&
@@ -790,8 +791,6 @@ static int ping_txno(int verbose, struct mbsys_swathplus_struct *store, int *txn
 
 /*----------------------------------------------------------------------*/
 static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -802,6 +801,8 @@ static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 	for (int i = 0; i < ping->nosampsfile; i++) {
 		ping->points[i].procamp = ping->points[i].amp;
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
@@ -816,7 +817,6 @@ static int copy_rawamp(int verbose, swpls_sxpping *ping, int *error) {
 
 /*---------------------------------------------------------------*/
 static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_path ifile, counts *recs, int *error) {
-	int status = MB_SUCCESS;
 	void *imbio_ptr = NULL;
 	double btime_d, etime_d;
 	int beams_bath_alloc, beams_amp_alloc, pixels_ss_alloc;
@@ -833,6 +833,8 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       options:    %p\n", (void *)opts);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* open the input file */
 	if ((status = mb_read_init(opts->verbose, ifile, opts->format, mbdflts->pings_get, mbdflts->lonflip, mbdflts->bounds,
@@ -979,8 +981,6 @@ static int process_output(int verbose, mbdefaults *mbdflts, options *opts, mb_pa
  *----------------------------------------------------------------------*/
 
 static int zero_counts(int verbose, counts *recs, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1015,6 +1015,8 @@ static int zero_counts(int verbose, counts *recs, int *error) {
 	recs->ping_sel_alt = 0;
 	recs->ping_sel_sim = 0;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1027,8 +1029,6 @@ static int zero_counts(int verbose, counts *recs, int *error) {
 } /* zero_counts */
 /*----------------------------------------------------------------------*/
 static int add_counts(int verbose, counts *to, counts *from, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1064,6 +1064,8 @@ static int add_counts(int verbose, counts *to, counts *from, int *error) {
 	to->ping_sel_alt += from->ping_sel_alt;
 	to->ping_sel_sim += from->ping_sel_sim;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1076,8 +1078,6 @@ static int add_counts(int verbose, counts *to, counts *from, int *error) {
 } /* add_counts */
 /*----------------------------------------------------------------------*/
 static int print_counts(int verbose, counts *recs, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -1115,6 +1115,8 @@ static int print_counts(int verbose, counts *recs, int *error) {
 	fprintf(stdout, "  Alternate Sides: = %d\n", recs->ping_sel_alt);
 	fprintf(stdout, "  Simultaneous:    = %d\n", recs->ping_sel_sim);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1129,7 +1131,6 @@ static int print_counts(int verbose, counts *recs, int *error) {
 /*----------------------------------------------------------------------*/
 int main(int argc, char **argv) {
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int error = MB_ERROR_NO_ERROR;
 
 	/* MBIO read control parameters */
@@ -1157,7 +1158,7 @@ int main(int argc, char **argv) {
 	/* mb_mem_debug_on(opts.verbose, &error); */
 
 	/* get mbsystem default values */
-	status = mb_defaults(opts.verbose, &(mbdflts.format), &(mbdflts.pings_get), &(mbdflts.lonflip), mbdflts.bounds,
+	int status = mb_defaults(opts.verbose, &(mbdflts.format), &(mbdflts.pings_get), &(mbdflts.lonflip), mbdflts.bounds,
 	                     mbdflts.btime_i, mbdflts.etime_i, &(mbdflts.speedmin), &(mbdflts.timegap));
 
 	if (status == MB_SUCCESS) {

@@ -53,7 +53,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 
@@ -142,8 +141,7 @@ int main(int argc, char **argv) {
 		fprintf(stdout, "%f\n", time_d);
 	}
 
-	/* set program status */
-	status = MB_SUCCESS;
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);

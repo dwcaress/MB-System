@@ -1483,9 +1483,6 @@ int main(int argc, char **argv) {
 	int help = 0;
 	int flag = 0;
 
-	/* MBIO status variables */
-	int status = MB_SUCCESS;
-
 	int error = MB_ERROR_NO_ERROR;
 
 	char datalist[BUFSIZ];
@@ -1617,6 +1614,8 @@ int main(int argc, char **argv) {
 
 	/* do the work */
 	read_list(datalist, svplist);
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
