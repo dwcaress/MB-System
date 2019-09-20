@@ -411,7 +411,7 @@ int main(int argc, char **argv) {
 	double time_d_lastping;
 	int read_data;
 	int start, done;
-	int i, j, k;
+	int j, k;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -586,7 +586,7 @@ int main(int argc, char **argv) {
 					status = MB_FAILURE;
 
 				if (MB_SUCCESS == status)
-					for (i = 0; i < nlines; i++) {
+					for (int i = 0; i < nlines; i++) {
 						if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 							status = MB_FAILURE;
 
@@ -670,7 +670,7 @@ int main(int argc, char **argv) {
 
 	/* put lines in an array */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, no_lines * sizeof(void *), (void **)&lines, &error);
-	i = 0;
+	int i = 0;
 	line_array(rule_lines, &lines, &i);
 
 	/* output rules found */
@@ -1053,7 +1053,7 @@ int main(int argc, char **argv) {
 	status = MB_SUCCESS;
 
 	/* free memory associated with lines. */
-	for (i = 0; i < no_lines; i++) {
+	for (int i = 0; i < no_lines; i++) {
 		free_pings(verbose, &lines[i]->pings, &error);
 #ifdef USE_MB_MALLOC
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&lines[i], &error);

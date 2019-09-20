@@ -119,8 +119,6 @@ int main(int argc, char **argv) {
 	    stderr if verbose > 1) */
 	FILE *output;
 
-	int i;
-
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
@@ -357,15 +355,15 @@ int main(int argc, char **argv) {
 			fprintf(output, "  Depth Scale:      %f\n", store->depth_scale);
 			fprintf(output, "  Spare:            %d\n", store->spare);
 			fprintf(output, "  Crosstrack Distances and Depths:\n");
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 				fprintf(output, "                    %5d %5d\n", store->distance[i], store->depth[i]);
 			fprintf(output, "  Center Travel Time: %f\n", store->time_center);
 			fprintf(output, "  Time Scale:       %f\n", store->time_scale);
 			fprintf(output, "  Travel Times:\n");
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 				fprintf(output, "            %5d\n", store->time[i]);
 			fprintf(output, "  Gyro Headings:\n");
-			for (i = 0; i < 11; i++)
+			for (int i = 0; i < 11; i++)
 				fprintf(output, "            %f\n", store->gyro[i]);
 			fprintf(output, "  Mode:             %c%c\n", store->mode[0], store->mode[1]);
 			fprintf(output, "  Transmit Starboard: %d\n", store->trans_strbd);
@@ -389,10 +387,10 @@ int main(int argc, char **argv) {
 			fprintf(output, "  Echo Scale:         %d\n", store->echo_scale_center);
 
 			fprintf(output, "  Amplitudes and Durations:\n");
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 				fprintf(output, "            %5d %5d\n", store->amplitude[i], store->echo_duration[i]);
 			fprintf(output, "  Echo Gains and Scales:\n");
-			for (i = 0; i < 16; i++)
+			for (int i = 0; i < 16; i++)
 				fprintf(output, "            %5d %5d\n", store->gain[i], store->echo_scale[i]);
 		}
 
@@ -428,15 +426,15 @@ int main(int argc, char **argv) {
 			fprintf(output, "  Depth Scale:      %f\n", store->depth_scale);
 			fprintf(output, "  Spare:            %d\n", store->spare);
 			fprintf(output, "  Crosstrack Distances and Depths:\n");
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 				fprintf(output, "                    %5d %5d\n", store->distance[i], store->depth[i]);
 			fprintf(output, "  Center Travel Time: %f\n", store->time_center);
 			fprintf(output, "  Time Scale:       %f\n", store->time_scale);
 			fprintf(output, "  Travel Times:\n");
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 				fprintf(output, "            %5d\n", store->time[i]);
 			fprintf(output, "  Gyro Headings:\n");
-			for (i = 0; i < 11; i++)
+			for (int i = 0; i < 11; i++)
 				fprintf(output, "            %f\n", store->gyro[i]);
 			fprintf(output, "  Mode:             %c%c\n", store->mode[0], store->mode[1]);
 			fprintf(output, "  Transmit Starboard: %d\n", store->trans_strbd);
@@ -460,10 +458,10 @@ int main(int argc, char **argv) {
 			fprintf(output, "  Echo Scale:         %d\n", store->echo_scale_center);
 
 			fprintf(output, "  Amplitudes and Durations:\n");
-			for (i = 0; i < MBSYS_HSDS_BEAMS; i++)
+			for (int i = 0; i < MBSYS_HSDS_BEAMS; i++)
 				fprintf(output, "            %5d %5d\n", store->amplitude[i], store->echo_duration[i]);
 			fprintf(output, "  Echo Gains and Scales:\n");
-			for (i = 0; i < 16; i++)
+			for (int i = 0; i < 16; i++)
 				fprintf(output, "            %5d %5d\n", store->gain[i], store->echo_scale[i]);
 		}
 
@@ -494,7 +492,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "  Latitude:         %f\n", store->lat);
 			fprintf(output, "  Number of points: %d\n", store->num_vel);
 			fprintf(output, "  Water Velocity Profile:\n");
-			for (i = 0; i < store->num_vel; i++)
+			for (int i = 0; i < store->num_vel; i++)
 				fprintf(output, "    %f %f\n", store->vdepth[i], store->velocity[i]);
 		}
 
@@ -523,7 +521,7 @@ int main(int argc, char **argv) {
 			fprintf(output, "  X Correction:     %f\n", store->pos_corr_x);
 			fprintf(output, "  Y Correction:     %f\n", store->pos_corr_y);
 			fprintf(output, "  Sensors:          ");
-			for (i = 0; i < 10; i++)
+			for (int i = 0; i < 10; i++)
 				fprintf(output, "%c", store->sensors[i]);
 			fprintf(output, "\n");
 		}

@@ -611,7 +611,7 @@ int main(int argc, char **argv) {
 	double second, id;
 	char sensor[24];
 	int n;
-	int i, j;
+	int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -1055,7 +1055,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       rollpitch_offset_heading:        %f\n", rollpitch_offset_heading);
 		fprintf(stderr, "dbg2       rollpitch_offset_roll:           %f\n", rollpitch_offset_roll);
 		fprintf(stderr, "dbg2       rollpitch_offset_pitch:          %f\n", rollpitch_offset_pitch);
-		for (i = 0; i < nrangeoffset; i++)
+		for (int i = 0; i < nrangeoffset; i++)
 			fprintf(stderr, "dbg2       rangeoffset[%d]:                 %d %d %f\n", i, rangeoffsetstart[i], rangeoffsetend[i],
 			        rangeoffset[i]);
 	}
@@ -2440,7 +2440,7 @@ int main(int argc, char **argv) {
 						}
 					}
 					/* store the customattitude data */
-					for (i = 0; i < customattitude->n; i++) {
+					for (int i = 0; i < customattitude->n; i++) {
 						if (ndat_rph == 0 || dat_rph_time_d[ndat_rph - 1] < time_d) {
 							dat_rph_time_d[ndat_rph] = time_d + i / customattitude->frequency;
 							dat_rph_roll[ndat_rph] = RTD * customattitude->roll[i];
@@ -2876,7 +2876,7 @@ int main(int argc, char **argv) {
 						}
 					}
 					/* store the attitude data */
-					for (i = 0; i < attitude->n; i++) {
+					for (int i = 0; i < attitude->n; i++) {
 						if (ndat_rph == 0 || dat_rph_time_d[ndat_rph - 1] < time_d) {
 							dat_rph_time_d[ndat_rph] = time_d + i * attitude->delta_time[i];
 							dat_rph_roll[ndat_rph] = RTD * attitude->roll[i];
@@ -2977,7 +2977,7 @@ int main(int argc, char **argv) {
 					        "n:%d\n",
 					        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 					        bluefin->number_frames);
-				for (i = 0; i < bluefin->number_frames; i++) {
+				for (int i = 0; i < bluefin->number_frames; i++) {
 					time_j[0] = bluefin->environmental[i].s7kTime.Year;
 					time_j[1] = bluefin->environmental[i].s7kTime.Day;
 					time_j[2] = 60 * bluefin->environmental[i].s7kTime.Hours + bluefin->environmental[i].s7kTime.Minutes;
@@ -3033,7 +3033,7 @@ int main(int argc, char **argv) {
 					        "R7KRECID_Bluefin Nav: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
 					        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], header->RecordNumber,
 					        bluefin->number_frames);
-				for (i = 0; i < bluefin->number_frames; i++) {
+				for (int i = 0; i < bluefin->number_frames; i++) {
 					time_j[0] = bluefin->nav[i].s7kTime.Year;
 					time_j[1] = bluefin->nav[i].s7kTime.Day;
 					time_j[2] = 60 * bluefin->nav[i].s7kTime.Hours + bluefin->nav[i].s7kTime.Minutes;
@@ -3170,7 +3170,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* store the navigation and attitude data */
-				for (i = 0; i < bluefin->number_frames; i++) {
+				for (int i = 0; i < bluefin->number_frames; i++) {
 					/*
 					 * store regular nav and attitude
 					 * values
@@ -3289,7 +3289,7 @@ int main(int argc, char **argv) {
 				time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				for (i = 0; i < fsdwsslo->number_channels; i++) {
+				for (int i = 0; i < fsdwsslo->number_channels; i++) {
 					fsdwchannel = &(fsdwsslo->channel[i]);
 					fsdwssheader = &(fsdwsslo->ssheader[i]);
 					if (verbose > 0)
@@ -3374,7 +3374,7 @@ int main(int argc, char **argv) {
 				time_j[4] = (int)(1000000 * (header->s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				for (i = 0; i < fsdwsshi->number_channels; i++) {
+				for (int i = 0; i < fsdwsshi->number_channels; i++) {
 					fsdwchannel = &(fsdwsshi->channel[i]);
 					fsdwssheader = &(fsdwsshi->ssheader[i]);
 					if (verbose > 0)
@@ -3621,7 +3621,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "No time lag correction\n");
 			fprintf(stderr, "Applying timelag to %d nav data\n", ndat_nav);
 			j = 0;
-			for (i = 0; i < ndat_nav; i++) {
+			for (int i = 0; i < ndat_nav; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3639,7 +3639,7 @@ int main(int argc, char **argv) {
 			}
 			fprintf(stderr, "Applying timelag to %d heading data\n", ndat_heading);
 			j = 0;
-			for (i = 0; i < ndat_heading; i++) {
+			for (int i = 0; i < ndat_heading; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3657,7 +3657,7 @@ int main(int argc, char **argv) {
 			}
 			fprintf(stderr, "Applying timelag to %d attitude data\n", ndat_rph);
 			j = 0;
-			for (i = 0; i < ndat_rph; i++) {
+			for (int i = 0; i < ndat_rph; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3675,7 +3675,7 @@ int main(int argc, char **argv) {
 			}
 			fprintf(stderr, "Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 			j = 0;
-			for (i = 0; i < ndat_sonardepth; i++) {
+			for (int i = 0; i < ndat_sonardepth; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3693,7 +3693,7 @@ int main(int argc, char **argv) {
 			}
 			fprintf(stderr, "Applying timelag to %d altitude data\n", ndat_altitude);
 			j = 0;
-			for (i = 0; i < ndat_altitude; i++) {
+			for (int i = 0; i < ndat_altitude; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3715,7 +3715,7 @@ int main(int argc, char **argv) {
 			 * file
 			 */
 			fprintf(stderr, "Applying timelag to %d INS data\n", nins);
-			for (i = 0; i < nins; i++) {
+			for (int i = 0; i < nins; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3732,7 +3732,7 @@ int main(int argc, char **argv) {
 				ins_time_d[i] += timelag;
 			}
 			fprintf(stderr, "Applying timelag to %d INS altitude data\n", nins_altitude);
-			for (i = 0; i < nins_altitude; i++) {
+			for (int i = 0; i < nins_altitude; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3749,7 +3749,7 @@ int main(int argc, char **argv) {
 				ins_altitude_time_d[i] += timelag;
 			}
 			fprintf(stderr, "Applying timelag to %d INS speed data\n", nins_speed);
-			for (i = 0; i < nins_speed; i++) {
+			for (int i = 0; i < nins_speed; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3771,7 +3771,7 @@ int main(int argc, char **argv) {
 			 * from WHOI DSL nav and attitude file
 			 */
 			fprintf(stderr, "Applying timelag to %d DSL nav data\n", ndsl);
-			for (i = 0; i < ndsl; i++) {
+			for (int i = 0; i < ndsl; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3793,7 +3793,7 @@ int main(int argc, char **argv) {
 			 * from Steve Rock file
 			 */
 			fprintf(stderr, "Applying timelag to %d Steve Rock nav data\n", nrock);
-			for (i = 0; i < nrock; i++) {
+			for (int i = 0; i < nrock; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3815,7 +3815,7 @@ int main(int argc, char **argv) {
 			 * separate file
 			 */
 			fprintf(stderr, "Applying timelag to %d sonardepth nav data\n", nsonardepth);
-			for (i = 0; i < nsonardepth; i++) {
+			for (int i = 0; i < nsonardepth; i++) {
 				/* get timelag value */
 				timelag = 0.0;
 				if (timedelaymode == MB7KPREPROCESS_TIMEDELAY_ON && ntimedelay > 0)
@@ -3843,7 +3843,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Applying filtering to %d sonardepth data\n", ndat_sonardepth);
 			dtime = (dat_sonardepth_time_d[ndat_sonardepth - 1] - dat_sonardepth_time_d[0]) / ndat_sonardepth;
 			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-			for (i = 0; i < ndat_sonardepth; i++) {
+			for (int i = 0; i < ndat_sonardepth; i++) {
 				dat_sonardepth_sonardepthfilter[i] = 0.0;
 				sonardepth_filterweight = 0.0;
 				j1 = MAX(i - nhalffilter, 0);
@@ -3857,7 +3857,7 @@ int main(int argc, char **argv) {
 				if (sonardepth_filterweight > 0.0)
 					dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-			for (i = 0; i < ndat_sonardepth; i++) {
+			for (int i = 0; i < ndat_sonardepth; i++) {
 				if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3871,7 +3871,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Applying filtering to %d sonardepth nav data\n", nsonardepth);
 			dtime = (sonardepth_time_d[nsonardepth - 1] - sonardepth_time_d[0]) / nsonardepth;
 			nhalffilter = (int)(4.0 * sonardepthfilterlength / dtime);
-			for (i = 0; i < nsonardepth; i++) {
+			for (int i = 0; i < nsonardepth; i++) {
 				sonardepth_sonardepthfilter[i] = 0.0;
 				sonardepth_filterweight = 0.0;
 				j1 = MAX(i - nhalffilter, 0);
@@ -3885,7 +3885,7 @@ int main(int argc, char **argv) {
 				if (sonardepth_filterweight > 0.0)
 					sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-			for (i = 0; i < nsonardepth; i++) {
+			for (int i = 0; i < nsonardepth; i++) {
 				if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3896,7 +3896,7 @@ int main(int argc, char **argv) {
 		/* filter sonardepth data from separate INS file */
 		if (nins > 1) {
 			fprintf(stderr, "Applying filtering to %d INS nav data\n", nins);
-			for (i = 0; i < nins; i++) {
+			for (int i = 0; i < nins; i++) {
 				ins_sonardepthfilter[i] = 0.0;
 				sonardepth_filterweight = 0.0;
 				dtime = (ins_time_d[nins - 1] - ins_time_d[0]) / nins;
@@ -3912,7 +3912,7 @@ int main(int argc, char **argv) {
 				if (sonardepth_filterweight > 0.0)
 					ins_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-			for (i = 0; i < nins; i++) {
+			for (int i = 0; i < nins; i++) {
 				if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3923,7 +3923,7 @@ int main(int argc, char **argv) {
 		/* filter sonardepth data from separate WHOI DSL file */
 		if (ndsl > 1) {
 			fprintf(stderr, "Applying filtering to %d DSL nav data\n", ndsl);
-			for (i = 0; i < ndsl; i++) {
+			for (int i = 0; i < ndsl; i++) {
 				dsl_sonardepthfilter[i] = 0.0;
 				sonardepth_filterweight = 0.0;
 				dtime = (dsl_time_d[ndsl - 1] - dsl_time_d[0]) / ndsl;
@@ -3939,7 +3939,7 @@ int main(int argc, char **argv) {
 				if (sonardepth_filterweight > 0.0)
 					dsl_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-			for (i = 0; i < ndsl; i++) {
+			for (int i = 0; i < ndsl; i++) {
 				if (dsl_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3950,7 +3950,7 @@ int main(int argc, char **argv) {
 		/* filter sonardepth data from separate Steve Rock file */
 		if (nrock > 1) {
 			fprintf(stderr, "Applying filtering to %d Rock nav data\n", nrock);
-			for (i = 0; i < nrock; i++) {
+			for (int i = 0; i < nrock; i++) {
 				rock_sonardepthfilter[i] = 0.0;
 				sonardepth_filterweight = 0.0;
 				dtime = (rock_time_d[nrock - 1] - rock_time_d[0]) / nrock;
@@ -3966,7 +3966,7 @@ int main(int argc, char **argv) {
 				if (sonardepth_filterweight > 0.0)
 					rock_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-			for (i = 0; i < nrock; i++) {
+			for (int i = 0; i < nrock; i++) {
 				if (rock_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 					factor = 1.0;
 				else
@@ -3983,7 +3983,7 @@ int main(int argc, char **argv) {
 		 * calculate how far off the raw timestamp is from the
 		 * expected time
 		 */
-		for (i = 0; i < nbatht; i++) {
+		for (int i = 0; i < nbatht; i++) {
 			batht_time_offset[i] = batht_time_d[0] + (batht_ping[i] - batht_ping[0]) * kluge_timejump_interval - batht_time_d[i];
 			batht_ping_offset[i] = batht_time_offset[i] / kluge_timejump_interval;
 		}
@@ -3993,7 +3993,7 @@ int main(int argc, char **argv) {
 		 * locally offset by more than the threshold - do not adjust
 		 * things if there is a static offset
 		 */
-		for (i = 3; i < nbatht - 3; i++) {
+		for (int i = 3; i < nbatht - 3; i++) {
 			/*
 			 * if the time interval between three pings ago and
 			 * three pings in the future is close enough to the
@@ -4010,7 +4010,7 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		for (i = 0; i < nbatht; i++) {
+		for (int i = 0; i < nbatht; i++) {
 			mb_get_date(verbose, batht_time_d[i], time_i);
 			fprintf(stderr, "Ping: %7d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %15.6f %10.6f %2d  %15.6f", batht_ping[i],
 			        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6], batht_time_d[i],
@@ -4021,7 +4021,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* print out roll pitch heave data */
-		/*for (i = 1; i < ndat_rph; i++)
+		/*for (int i = 1; i < ndat_rph; i++)
 		    {
 		    mb_get_date(verbose, dat_rph_time_d[i], time_i);
 		    fprintf(stderr, "INS RPH: %7d  %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %15.6f %10.6f",
@@ -4039,7 +4039,7 @@ int main(int argc, char **argv) {
 	}
 	/* fix problems with batht timestamp arrays */
 	else if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
-		for (i = 0; i < nbatht; i++) {
+		for (int i = 0; i < nbatht; i++) {
 			if (batht_good_offset[i] == MB_NO) {
 				foundstart = MB_NO;
 				foundend = MB_NO;
@@ -4071,7 +4071,7 @@ int main(int argc, char **argv) {
 	}
 	/* fix problems with edget timestamp arrays */
 	if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-		for (i = 0; i < nedget; i++) {
+		for (int i = 0; i < nedget; i++) {
 			if (edget_good_offset[i] == MB_NO) {
 				foundstart = MB_NO;
 				foundend = MB_NO;
@@ -4109,7 +4109,7 @@ int main(int argc, char **argv) {
 		longitude_offset = 0.0;
 		latitude_offset = 0.0;
 		mb_coor_scale(verbose, dat_nav_lat[0], &mtodeglon, &mtodeglat);
-		for (i = 1; i < ndat_nav; i++) {
+		for (int i = 1; i < ndat_nav; i++) {
 			dat_nav_lon[i] -= longitude_offset;
 			dat_nav_lat[i] -= latitude_offset;
 
@@ -4129,58 +4129,58 @@ int main(int argc, char **argv) {
 	/* output ins navigation and attitude data */
 	if (nins > 0 && (verbose > 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST)) {
 		fprintf(stdout, "\nTotal INS navigation/attitude data read: %d\n", nins);
-		for (i = 0; i < nins; i++) {
+		for (int i = 0; i < nins; i++) {
 			fprintf(stdout, "  INS: %12d %17.6f %11.6f %10.6f %8.3f %7.3f %6.3f %6.3f %6.3f %6.3f\n", i, ins_time_d[i],
 			        ins_lon[i], ins_lat[i], ins_heading[i], ins_sonardepth[i], ins_altitude[i], ins_speed[i], ins_roll[i],
 			        ins_pitch[i]);
 		}
 		fprintf(stdout, "\nTotal INS altitude data read: %d\n", nins_altitude);
-		for (i = 0; i < nins_altitude; i++) {
+		for (int i = 0; i < nins_altitude; i++) {
 			fprintf(stdout, "  INS ALT: %12d %17.6f %6.3f\n", i, ins_altitude_time_d[i], ins_altitude[i]);
 		}
 		fprintf(stdout, "\nTotal INS speed data read: %d\n", nins_speed);
-		for (i = 0; i < nins_speed; i++) {
+		for (int i = 0; i < nins_speed; i++) {
 			fprintf(stdout, "  INS SPD: %12d %17.6f %6.3f\n", i, ins_speed_time_d[i], ins_speed[i]);
 		}
 	}
 	/* output auv sonardepth data */
 	if (nsonardepth > 0 && (verbose > 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST)) {
 		fprintf(stdout, "\nTotal auv sonardepth data read: %d\n", nsonardepth);
-		for (i = 0; i < nins; i++) {
+		for (int i = 0; i < nins; i++) {
 			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n", i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
 		}
 	}
 	/* output 7k navigation and attitude data */
 	if (verbose > 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST) {
 		fprintf(stdout, "\nTotal 7k navigation data read: %d\n", ndat_nav);
-		for (i = 0; i < ndat_nav; i++) {
+		for (int i = 0; i < ndat_nav; i++) {
 			fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f %6.3f\n", i, dat_nav_time_d[i], dat_nav_lon[i], dat_nav_lat[i],
 			        dat_nav_speed[i]);
 		}
 		fprintf(stdout, "\nTotal heading data read: %d\n", ndat_heading);
-		for (i = 0; i < ndat_heading; i++) {
+		for (int i = 0; i < ndat_heading; i++) {
 			fprintf(stdout, "  HDG: %5d %17.6f %8.3f\n", i, dat_heading_time_d[i], dat_heading_heading[i]);
 		}
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", ndat_sonardepth);
-		for (i = 0; i < ndat_sonardepth; i++) {
+		for (int i = 0; i < ndat_sonardepth; i++) {
 			fprintf(stdout, "  DEP: %5d %17.6f %8.3f\n", i, dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
 		}
 		fprintf(stdout, "\nTotal altitude data read: %d\n", ndat_altitude);
-		for (i = 0; i < ndat_altitude; i++) {
+		for (int i = 0; i < ndat_altitude; i++) {
 			fprintf(stdout, "  ALT: %5d %17.6f %8.3f\n", i, dat_altitude_time_d[i], dat_altitude_altitude[i]);
 		}
 		fprintf(stdout, "\nTotal attitude data read: %d\n", ndat_rph);
-		for (i = 0; i < ndat_rph; i++) {
+		for (int i = 0; i < ndat_rph; i++) {
 			fprintf(stdout, "  ATT: %5d %17.6f %8.3f %8.3f %8.3f\n", i, dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i],
 			        dat_rph_heave[i]);
 		}
 		fprintf(stdout, "\nTotal Edgetech time stamp data read: %d\n", nedget);
-		for (i = 0; i < nedget; i++) {
+		for (int i = 0; i < nedget; i++) {
 			fprintf(stdout, "  EDG: %5d %17.6f %17.6f %5d   offsets: %17.6f %5d  %5d\n", i, edget_time_d[i], edget_time_d_new[i],
 			        edget_ping[i], edget_time_offset[i], edget_ping_offset[i], edget_good_offset[i]);
 		}
 		fprintf(stdout, "\nTotal multibeam time stamp data read: %d\n", nbatht);
-		for (i = 0; i < nbatht; i++) {
+		for (int i = 0; i < nbatht; i++) {
 			fprintf(stdout, "  BAT: %5d %17.6f %17.6f %5d   offsets: %17.6f %5d  %5d\n", i, batht_time_d[i], batht_time_d_new[i],
 			        batht_ping[i], batht_time_offset[i], batht_ping_offset[i], batht_good_offset[i]);
 		}
@@ -4552,13 +4552,13 @@ int main(int argc, char **argv) {
 						bathymetry = &(istore->bathymetry);
 						header = &(bathymetry->header);
 						found = MB_NO;
-						for (i = iping; i < nbatht && found == MB_NO; i++) {
+						for (int i = iping; i < nbatht && found == MB_NO; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
 								found = MB_YES;
 							}
 						}
-						for (i = 0; i < nbatht && found == MB_NO; i++) {
+						for (int i = 0; i < nbatht && found == MB_NO; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
 								found = MB_YES;
@@ -4645,7 +4645,7 @@ int main(int argc, char **argv) {
 							 * beam edits
 							 */
 							if (esffile_open == MB_YES) {
-								for (i = 0; i < esf.nedit; i++) {
+								for (int i = 0; i < esf.nedit; i++) {
 									if (fabs(esf.edit[i].time_d - time_d_org) < time_d_tolerance) {
 										esf.edit[i].time_d = time_d;
 										fprintf(stderr,
@@ -4775,7 +4775,7 @@ int main(int argc, char **argv) {
 							 * fix version 4 quality flags
 							 */
 							if (bathymetry->header.Version < 5) {
-								for (i = 0; i < bathymetry->number_beams; i++) {
+								for (int i = 0; i < bathymetry->number_beams; i++) {
 									if ((bathymetry->quality[i]) < 16) {
 										if (bathymetry->range[i] > 0.007) {
 											bathymetry->quality[i] = 23;
@@ -4793,7 +4793,7 @@ int main(int argc, char **argv) {
 							 * fix early version 5 quality flags
 							 */
 							else if (bathymetry->header.Version == 5 && header->s7kTime.Year < 2006) {
-								for (i = 0; i < bathymetry->number_beams; i++) {
+								for (int i = 0; i < bathymetry->number_beams; i++) {
 									/* phase picks */
 									if ((bathymetry->quality[i]) == 8) {
 										/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
@@ -4811,7 +4811,7 @@ int main(int argc, char **argv) {
 							 * fix early MBARI version 5 quality flags
 							 */
 							else if (bathymetry->header.Version == 5 && MBARIdata == MB_YES && header->s7kTime.Year < 2008) {
-								for (i = 0; i < bathymetry->number_beams; i++) {
+								for (int i = 0; i < bathymetry->number_beams; i++) {
 									/*
 									 * phase picks
 									 */
@@ -4831,7 +4831,7 @@ int main(int argc, char **argv) {
 							 * fix upgraded MBARI version 5 quality flags
 							 */
 							else if (bathymetry->header.Version >= 5 && MBARIdata == MB_YES && header->s7kTime.Year <= 2010) {
-								for (i = 0; i < bathymetry->number_beams; i++) {
+								for (int i = 0; i < bathymetry->number_beams; i++) {
 									/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
 									bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
@@ -4863,7 +4863,7 @@ int main(int argc, char **argv) {
 							 * fix upgraded version 5 quality flags
 							 */
 							else if (bathymetry->header.Version >= 5) {
-								for (i = 0; i < bathymetry->number_beams; i++) {
+								for (int i = 0; i < bathymetry->number_beams; i++) {
 									// fprintf(stderr, "S Flag[%d]: %d\n", i, bathymetry->quality[i]);
 									bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
@@ -4898,7 +4898,7 @@ int main(int argc, char **argv) {
 							 * apply specified offsets to range values
 							 */
 							for (j = 0; j < nrangeoffset; j++) {
-								for (i = rangeoffsetstart[j]; i <= rangeoffsetend[j]; i++) {
+								for (int i = rangeoffsetstart[j]; i <= rangeoffsetend[j]; i++) {
 									bathymetry->range[i] += rangeoffset[j];
 								}
 							}
@@ -5129,7 +5129,7 @@ int main(int argc, char **argv) {
 							/*
 							 * initialize all of the beams
 							 */
-							for (i = 0; i < bathymetry->number_beams; i++) {
+							for (int i = 0; i < bathymetry->number_beams; i++) {
 								if (istore->read_v2rawdetection == MB_YES ||
 								    (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES))
 									bathymetry->quality[i] = 0;
@@ -5186,7 +5186,7 @@ int main(int argc, char **argv) {
 							 * zero alongtrack angles if requested
 							 */
 							if (kluge_zeroalongtrackangles == MB_YES) {
-								for (i = 0; i < bathymetry->number_beams; i++) {
+								for (int i = 0; i < bathymetry->number_beams; i++) {
 									beamgeometry->angle_alongtrack[i] = 0.0;
 								}
 							}
@@ -5198,7 +5198,7 @@ int main(int argc, char **argv) {
 								 * v2rawdetect ion record
 								 */
 								if (istore->read_v2rawdetection == MB_YES) {
-									for (i = 0; i < v2rawdetection->number_beams; i++) {
+									for (int i = 0; i < v2rawdetection->number_beams; i++) {
 										v2rawdetection->rx_angle[i] *= kluge_beampatternfactor;
 									}
 								}
@@ -5206,7 +5206,7 @@ int main(int argc, char **argv) {
 								 * v2detection record with or without v2detectionsetup
 								 */
 								if (istore->read_v2detection == MB_YES) {
-									for (i = 0; i < v2detection->number_beams; i++) {
+									for (int i = 0; i < v2detection->number_beams; i++) {
 										v2detection->angle_x[i] *= kluge_beampatternfactor;
 									}
 								}
@@ -5214,7 +5214,7 @@ int main(int argc, char **argv) {
 								 * beamgeometry record
 								 */
 								if (istore->read_beamgeometry == MB_YES) {
-									for (i = 0; i < bathymetry->number_beams; i++) {
+									for (int i = 0; i < bathymetry->number_beams; i++) {
 										beamgeometry->angle_acrosstrack[i] *= kluge_beampatternfactor;
 									}
 								}
@@ -5227,7 +5227,7 @@ int main(int argc, char **argv) {
 								 * v2rawdetection record
 								 */
 								if (istore->read_v2rawdetection == MB_YES) {
-									for (i = 0; i < v2rawdetection->number_beams; i++) {
+									for (int i = 0; i < v2rawdetection->number_beams; i++) {
 										v2rawdetection->rx_angle[i] =
 										    asin(kluge_beampatternsnellfactor * sin(v2rawdetection->rx_angle[i]));
 									}
@@ -5236,7 +5236,7 @@ int main(int argc, char **argv) {
 								 * v2detection record with or without v2detectionsetup
 								 */
 								if (istore->read_v2detection == MB_YES) {
-									for (i = 0; i < v2detection->number_beams; i++) {
+									for (int i = 0; i < v2detection->number_beams; i++) {
 										v2detection->angle_x[i] =
 										    asin(kluge_beampatternsnellfactor * sin(v2detection->angle_x[i]));
 									}
@@ -5245,7 +5245,7 @@ int main(int argc, char **argv) {
 								 * beamgeometry record
 								 */
 								if (istore->read_beamgeometry == MB_YES) {
-									for (i = 0; i < bathymetry->number_beams; i++) {
+									for (int i = 0; i < bathymetry->number_beams; i++) {
 										beamgeometry->angle_acrosstrack[i] =
 										    asin(kluge_beampatternsnellfactor * sin(beamgeometry->angle_acrosstrack[i]));
 									}
@@ -5279,7 +5279,7 @@ int main(int argc, char **argv) {
 									/*
 									 * beam id
 									 */
-									i = v2rawdetection->beam_descriptor[j];
+									const int i = v2rawdetection->beam_descriptor[j];
 
 									/*
 									 * get range and quality
@@ -5466,7 +5466,7 @@ int main(int argc, char **argv) {
 							 */
 							else if (istore->read_v2detection == MB_YES && istore->read_v2detectionsetup == MB_YES) {
 								for (j = 0; j < v2detection->number_beams; j++) {
-									i = v2detectionsetup->beam_descriptor[j];
+									const int i = v2detectionsetup->beam_descriptor[j];
 
 									bathymetry->range[i] = v2detection->range[j];
 									bathymetry->quality[i] = v2detectionsetup->quality[j];
@@ -5659,7 +5659,7 @@ int main(int argc, char **argv) {
 								/*
 								 * now loop over the detects
 								 */
-								for (i = 0; i < v2detection->number_beams; i++) {
+								for (int i = 0; i < v2detection->number_beams; i++) {
 									bathymetry->range[i] = v2detection->range[i];
 									/*
 									 * bathymetry->quality[i] set in bathymetry record
@@ -5845,7 +5845,7 @@ int main(int argc, char **argv) {
 								/*
 								 * loop over all beams
 								 */
-								for (i = 0; i < bathymetry->number_beams; i++) {
+								for (int i = 0; i < bathymetry->number_beams; i++) {
 									/*
 									 * bathymetry->range[i] set
 									 * bathymetry->quality[i] set
@@ -6277,7 +6277,7 @@ int main(int argc, char **argv) {
 					 * output asynchronous heading and
 					 * attitude
 					 */
-					for (i = 0; i < customattitude->n; i++) {
+					for (int i = 0; i < customattitude->n; i++) {
 						fprintf(athfp, "%0.6f\t%7.3f\n", time_d, RTD * customattitude->heading[i]);
 						fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n", time_d, RTD * customattitude->roll[i],
 						        RTD * customattitude->pitch[i]);
@@ -6515,7 +6515,7 @@ int main(int argc, char **argv) {
 						        ctd->n);
 
 					/* output ctd data to file */
-					for (i = 0; i < ctd->n; i++) {
+					for (int i = 0; i < ctd->n; i++) {
 						fprintf(tfp, "%.3f %11.6f %10.6f %.3f %.3f %.2f %.3f\n", time_d, navlon, navlat, sonardepth, altitude,
 						        ctd->temperature[i], ctd->conductivity_salinity[i]);
 					}
@@ -6732,7 +6732,7 @@ int main(int argc, char **argv) {
 						        attitude->n);
 
 					/* output asynchronous attitude */
-					for (i = 0; i < attitude->n; i++) {
+					for (int i = 0; i < attitude->n; i++) {
 						fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n", time_d, RTD * attitude->roll[i], RTD * attitude->pitch[i]);
 					}
 				}
@@ -6838,7 +6838,7 @@ int main(int argc, char **argv) {
 						        "record_number:%d\n",
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 						        header->RecordNumber);
-					for (i = 0; i < bluefin->number_frames; i++) {
+					for (int i = 0; i < bluefin->number_frames; i++) {
 						time_j[0] = bluefin->environmental[i].s7kTime.Year;
 						time_j[1] = bluefin->environmental[i].s7kTime.Day;
 						time_j[2] = 60 * bluefin->environmental[i].s7kTime.Hours + bluefin->environmental[i].s7kTime.Minutes;
@@ -6998,7 +6998,7 @@ int main(int argc, char **argv) {
 						        "record_number:%d\n",
 						        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 						        header->RecordNumber);
-					for (i = 0; i < bluefin->number_frames; i++) {
+					for (int i = 0; i < bluefin->number_frames; i++) {
 						time_j[0] = bluefin->nav[i].s7kTime.Year;
 						time_j[1] = bluefin->nav[i].s7kTime.Day;
 						time_j[2] = 60 * bluefin->nav[i].s7kTime.Hours + bluefin->nav[i].s7kTime.Minutes;
@@ -7114,7 +7114,7 @@ int main(int argc, char **argv) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
 					}
-					for (i = 0; i < fsdwsslo->number_channels; i++) {
+					for (int i = 0; i < fsdwsslo->number_channels; i++) {
 						fsdwchannel = &(fsdwsslo->channel[i]);
 						fsdwssheader = &(fsdwsslo->ssheader[i]);
 						if (verbose > 0)
@@ -7138,7 +7138,7 @@ int main(int argc, char **argv) {
 								time_d = istore->time_d + edget_time_offset[j];
 								mb_get_date(verbose, time_d, time_i);
 								mb_get_jtime(verbose, time_i, time_j);
-								for (i = 0; i < fsdwsslo->number_channels; i++) {
+								for (int i = 0; i < fsdwsslo->number_channels; i++) {
 									fsdwchannel = &(fsdwsslo->channel[i]);
 									fsdwssheader = &(fsdwsslo->ssheader[i]);
 									fsdwssheader->year = time_i[0];
@@ -7183,7 +7183,7 @@ int main(int argc, char **argv) {
 						status = MB_FAILURE;
 						error = MB_ERROR_IGNORE;
 					}
-					for (i = 0; i < fsdwsshi->number_channels; i++) {
+					for (int i = 0; i < fsdwsshi->number_channels; i++) {
 						fsdwchannel = &(fsdwsshi->channel[i]);
 						fsdwssheader = &(fsdwsshi->ssheader[i]);
 						if (verbose > 0)
@@ -7207,7 +7207,7 @@ int main(int argc, char **argv) {
 								time_d = istore->time_d + edget_time_offset[j];
 								mb_get_date(verbose, time_d, time_i);
 								mb_get_jtime(verbose, time_i, time_j);
-								for (i = 0; i < fsdwsslo->number_channels; i++) {
+								for (int i = 0; i < fsdwsslo->number_channels; i++) {
 									fsdwchannel = &(fsdwsshi->channel[i]);
 									fsdwssheader = &(fsdwsshi->ssheader[i]);
 									fsdwssheader->year = time_i[0];
@@ -7275,7 +7275,8 @@ int main(int argc, char **argv) {
 					 * data
 					 */
 					if (ins_output_index < 0) {
-						for (i = 0; i < nins && ins_time_d[i] < time_d - 1; i++) {
+						int i = 0;
+						for (; i < nins && ins_time_d[i] < time_d - 1; i++) {
 							/*
 							 * fprintf(stderr,"i:%
 							 * d time: %f
@@ -7319,7 +7320,7 @@ int main(int argc, char **argv) {
 						header->SystemEnumerator = 0;
 						header->DataSetNumber = 0;
 						header->RecordNumber = 0;
-						for (i = 0; i < 8; i++) {
+						for (int i = 0; i < 8; i++) {
 							header->PreviousRecord[i] = 0;
 							header->NextRecord[i] = 0;
 						}
@@ -7337,7 +7338,7 @@ int main(int argc, char **argv) {
 						 */
 						bluefin->frame_size = 128;
 						bluefin->data_format = R7KRECID_BluefinNav;
-						for (i = 0; i < 16; i++)
+						for (int i = 0; i < 16; i++)
 							bluefin->reserved[i] = 0;
 						if (verbose > 0)
 							fprintf(stderr,
@@ -7346,7 +7347,7 @@ int main(int argc, char **argv) {
 							        time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],
 							        header->RecordNumber);
 
-						for (i = 0; i < bluefin->number_frames; i++) {
+						for (int i = 0; i < bluefin->number_frames; i++) {
 							bluefin->nav[i].packet_size = 128;
 							bluefin->nav[i].version = 2;
 							bluefin->nav[i].offset = 32;
@@ -7538,7 +7539,7 @@ int main(int argc, char **argv) {
 			 * out and close the edit save file
 			 */
 			if (kluge_fixtimejump == MB_YES && kluge_fixtimejumpbeamedits == MB_YES && esffile_open == MB_YES) {
-				for (i = 0; i < esf.nedit; i++) {
+				for (int i = 0; i < esf.nedit; i++) {
 					status = mb_esf_save(verbose, &esf, esf.edit[i].time_d, esf.edit[i].beam, esf.edit[i].action, &error);
 				}
 				esf_status = mb_esf_close(verbose, &esf, &error);

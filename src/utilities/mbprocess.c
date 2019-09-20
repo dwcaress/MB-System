@@ -114,7 +114,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 	int status = MB_SUCCESS;
 	int ifirst, ilast;
 	int iss, ibath;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
@@ -124,15 +123,14 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 		fprintf(stderr, "dbg2       bath:            %p\n", (void *)bath);
 		fprintf(stderr, "dbg2       bathacrosstrack: %p\n", (void *)bathacrosstrack);
 		fprintf(stderr, "dbg2       bath:\n");
-		for (i = 0; i < nbath; i++)
+		for (int i = 0; i < nbath; i++)
 			fprintf(stderr, "dbg2         %d %f %f\n", i, bath[i], bathacrosstrack[i]);
 	}
 
 	/* find limits of good bathy */
 	ifirst = -1;
 	ilast = -1;
-	i = 0;
-	for (i = 0; i < nbath; i++) {
+	for (int i = 0; i < nbath; i++) {
 		if (mb_beam_ok(beamflag[i])) {
 			if (ifirst < 0)
 				ifirst = i;
@@ -187,7 +185,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 	int status = MB_SUCCESS;
 	double factor;
 	int ifirst, ilast, irecent, inext;
-	int i, ii, itable;
+	int ii, itable;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
@@ -203,7 +201,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 	if (ncorrtable == 1 || time_d <= corrtable[0].time_d) {
 		corrtableuse->time_d = corrtable[0].time_d;
 		corrtableuse->nangle = corrtable[0].nangle;
-		for (i = 0; i < ncorrangle; i++) {
+		for (int i = 0; i < ncorrangle; i++) {
 			corrtableuse->angle[i] = corrtable[0].angle[i];
 			corrtableuse->amplitude[i] = corrtable[0].amplitude[i];
 			corrtableuse->sigma[i] = corrtable[0].sigma[i];
@@ -212,7 +210,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 	else if (time_d > corrtable[ncorrtable - 1].time_d) {
 		corrtableuse->time_d = corrtable[ncorrtable - 1].time_d;
 		corrtableuse->nangle = corrtable[ncorrtable - 1].nangle;
-		for (i = 0; i < ncorrangle; i++) {
+		for (int i = 0; i < ncorrangle; i++) {
 			corrtableuse->angle[i] = corrtable[ncorrtable - 1].angle[i];
 			corrtableuse->amplitude[i] = corrtable[ncorrtable - 1].amplitude[i];
 			corrtableuse->sigma[i] = corrtable[ncorrtable - 1].sigma[i];
@@ -220,14 +218,14 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 	}
 	else {
 		itable = 0;
-		for (i = 0; i < ncorrtable - 1; i++) {
+		for (int i = 0; i < ncorrtable - 1; i++) {
 			if (corrtable[i].time_d <= time_d && corrtable[i + 1].time_d > time_d)
 				itable = i;
 		}
 		factor = (time_d - corrtable[itable].time_d) / (corrtable[itable + 1].time_d - corrtable[itable].time_d);
 		corrtableuse->time_d = time_d;
 		corrtableuse->nangle = MIN(corrtable[itable].nangle, corrtable[itable].nangle);
-		for (i = 0; i < corrtableuse->nangle; i++) {
+		for (int i = 0; i < corrtableuse->nangle; i++) {
 			corrtableuse->angle[i] =
 			    corrtable[itable].angle[i] + factor * (corrtable[itable + 1].angle[i] - corrtable[itable].angle[i]);
 			if (corrtable[itable].amplitude[i] != 0.0 && corrtable[itable + 1].amplitude[i] != 0.0) {
@@ -250,13 +248,13 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 	/* now interpolate or extrapolate any zero values */
 	ifirst = ncorrangle;
 	ilast = -1;
-	for (i = 0; i < ncorrangle; i++) {
+	for (int i = 0; i < ncorrangle; i++) {
 		if (corrtableuse->amplitude[i] != 0.0) {
 			ifirst = MIN(i, ifirst);
 			ilast = MAX(i, ilast);
 		}
 	}
-	for (i = 0; i < ncorrangle; i++) {
+	for (int i = 0; i < ncorrangle; i++) {
 		if (corrtableuse->amplitude[i] != 0.0)
 			irecent = i;
 		if (i < ifirst) {
@@ -291,7 +289,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       ncorrangle:      %d\n", ncorrangle);
-		for (i = 0; i < ncorrangle; i++)
+		for (int i = 0; i < ncorrangle; i++)
 			fprintf(stderr, "dbg2       correction[%d]: %f %f %f\n", i, corrtableuse->angle[i], corrtableuse->amplitude[i],
 			        corrtableuse->sigma[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);
@@ -306,7 +304,6 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 	int status = MB_SUCCESS;
 	int iangle, found;
 	int ifirst, ilast;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBPROCESS function <%s> called\n", __func__);
@@ -315,14 +312,14 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 		fprintf(stderr, "dbg2       nangle:      %d\n", nangle);
 		fprintf(stderr, "dbg2       angles:      %p\n", (void *)angles);
 		fprintf(stderr, "dbg2       corrs:       %p\n", (void *)corrs);
-		for (i = 0; i < nangle; i++)
+		for (int i = 0; i < nangle; i++)
 			fprintf(stderr, "dbg2           angle[%d]:%f corrs[%d]:%f\n", i, angles[i], i, corrs[i]);
 		fprintf(stderr, "dbg2       angle:       %f\n", angle);
 	}
 
 	/* search for the specified angle */
 	found = MB_NO;
-	for (i = 0; i < nangle - 1; i++)
+	for (int i = 0; i < nangle - 1; i++)
 		if (angle >= angles[i] && angle <= angles[i + 1]) {
 			found = MB_YES;
 			iangle = i;
@@ -348,7 +345,7 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 	if (*corr == 0.0) {
 		ifirst = nangle - 1;
 		ilast = 0;
-		for (i = 0; i < nangle; i++) {
+		for (int i = 0; i < nangle; i++) {
 			if (corr[i] != 0.0) {
 				if (ifirst > i)
 					ifirst = i;
@@ -728,7 +725,7 @@ int main(int argc, char **argv) {
 	int istart, iend, icut;
 	int intstat;
 	int ioff;
-	int i, j, k, mm;
+	int j, k, mm;
 	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
@@ -1358,7 +1355,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "  Data cutting enabled (%d commands).\n", process.mbp_cut_num);
 				else
 					fprintf(stderr, "  Data cutting disabled.\n");
-				for (i = 0; i < process.mbp_cut_num; i++) {
+				for (int i = 0; i < process.mbp_cut_num; i++) {
 					if (process.mbp_cut_kind[i] == MBP_CUT_DATA_BATH)
 						fprintf(stderr, "  Cut[%d]: bathymetry", i);
 					else if (process.mbp_cut_kind[i] == MBP_CUT_DATA_AMP)
@@ -1774,7 +1771,7 @@ int main(int argc, char **argv) {
 
 				/* get velocity sums */
 				velocity_sum[0] = 0.5 * (velocity[1] + velocity[0]) * (depth[1] - depth[0]);
-				for (i = 1; i < nsvp - 1; i++) {
+				for (int i = 1; i < nsvp - 1; i++) {
 					velocity_sum[i] = velocity_sum[i - 1] + 0.5 * (velocity[i + 1] + velocity[i]) * (depth[i + 1] - depth[i]);
 				}
 			}
@@ -2171,7 +2168,7 @@ int main(int argc, char **argv) {
 
 				/* apply time shift if needed */
 				if (process.mbp_nav_timeshift != 0.0)
-					for (i = 0; i < nnav; i++)
+					for (int i = 0; i < nnav; i++)
 						ntime[i] += process.mbp_nav_timeshift;
 
 				/* set up spline interpolation of nav points */
@@ -3022,7 +3019,7 @@ int main(int argc, char **argv) {
 					size = nampcorrtable * sizeof(struct mbprocess_sscorr_struct);
 					ampcorrtable = NULL;
 					status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&ampcorrtable, &error);
-					for (i = 0; i < nampcorrtable; i++) {
+					for (int i = 0; i < nampcorrtable; i++) {
 						ampcorrtable[i].angle = NULL;
 						ampcorrtable[i].amplitude = NULL;
 						ampcorrtable[i].sigma = NULL;
@@ -3095,7 +3092,7 @@ int main(int argc, char **argv) {
 				/* force amplitude correction tables to be symmetric if desired */
 				if (process.mbp_ampcorr_symmetry == MBP_AMPCORR_SYMMETRIC) {
 					for (itable = 0; itable < nampcorrtable; itable++) {
-						for (i = 0; i < ampcorrtable[itable].nangle / 2; i++) {
+						for (int i = 0; i < ampcorrtable[itable].nangle / 2; i++) {
 							j = ampcorrtable[itable].nangle - 1 - i;
 							if (ampcorrtable[itable].amplitude[i] != 0.0 && ampcorrtable[itable].amplitude[j] != 0.0)
 								factor = 0.5;
@@ -3149,7 +3146,7 @@ int main(int argc, char **argv) {
 					size = nsscorrtable * sizeof(struct mbprocess_sscorr_struct);
 					sscorrtable = NULL;
 					status = mb_mallocd(verbose, __FILE__, __LINE__, size, (void **)&sscorrtable, &error);
-					for (i = 0; i < nsscorrtable; i++) {
+					for (int i = 0; i < nsscorrtable; i++) {
 						sscorrtable[i].angle = NULL;
 						sscorrtable[i].amplitude = NULL;
 						sscorrtable[i].sigma = NULL;
@@ -3222,7 +3219,7 @@ int main(int argc, char **argv) {
 				/* force sidescan correction tables to be symmetric if desired */
 				if (process.mbp_sscorr_symmetry == MBP_SSCORR_SYMMETRIC) {
 					for (itable = 0; itable < nsscorrtable; itable++) {
-						for (i = 0; i < sscorrtable[itable].nangle / 2; i++) {
+						for (int i = 0; i < sscorrtable[itable].nangle / 2; i++) {
 							j = sscorrtable[itable].nangle - 1 - i;
 							if (sscorrtable[itable].amplitude[i] != 0.0 && sscorrtable[itable].amplitude[j] != 0.0)
 								factor = 0.5;
@@ -3780,7 +3777,7 @@ int main(int argc, char **argv) {
 					status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 					if (error == MB_ERROR_NO_ERROR)
 						ocomment++;
-					for (i = 0; i < nsvp; i++) {
+					for (int i = 0; i < nsvp; i++) {
 						strncpy(comment, "\0", MBP_FILENAMESIZE);
 						sprintf(comment, "     %10.2f     %10.2f", depth[i], velocity[i]);
 						status = mb_put_comment(verbose, ombio_ptr, comment, &error);
@@ -4382,7 +4379,7 @@ int main(int argc, char **argv) {
 				status = mb_put_comment(verbose, ombio_ptr, comment, &error);
 				if (error == MB_ERROR_NO_ERROR)
 					ocomment++;
-				for (i = 0; i < process.mbp_cut_num; i++) {
+				for (int i = 0; i < process.mbp_cut_num; i++) {
 					strncpy(comment, "\0", MBP_FILENAMESIZE);
 					sprintf(comment, "  Cut[%d]: %d %d %f %f", i, process.mbp_cut_kind[i], process.mbp_cut_mode[i],
 					        process.mbp_cut_min[i], process.mbp_cut_max[i]);
@@ -4558,7 +4555,7 @@ int main(int argc, char **argv) {
 
 				/* save the orignal beamflag states */
 				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-					for (i = 0; i < nbath; i++) {
+					for (int i = 0; i < nbath; i++) {
 						beamflagorg[i] = beamflag[i];
 					}
 				}
@@ -4625,11 +4622,11 @@ int main(int argc, char **argv) {
 
 				/* apply kluge007 - zero alongtrack distances > half the altitude */
 				if (process.mbp_kluge007 == MB_YES && kind == MB_DATA_DATA) {
-					for (i = 0; i < nbath; i++) {
+					for (int i = 0; i < nbath; i++) {
 						if (fabs(bathalongtrack[i]) > 0.5 * altitude)
 							bathalongtrack[i] = 0.0;
 					}
-					for (i = 0; i < nss; i++) {
+					for (int i = 0; i < nss; i++) {
 						if (fabs(ssalongtrack[i]) > 0.5 * altitude)
 							ssalongtrack[i] = 0.0;
 					}
@@ -4952,7 +4949,7 @@ int main(int argc, char **argv) {
 						draft_org = sonardepth - heave;
 						ssv = 1500.0;
 						nbeams = nbath;
-						for (i = 0; i < nbath; i++) {
+						for (int i = 0; i < nbath; i++) {
 							if (beamflag[i] != MB_FLAG_NULL) {
 								zz = bath[i] - sonardepth;
 								rr = sqrt(zz * zz + bathacrosstrack[i] * bathacrosstrack[i] +
@@ -4984,18 +4981,18 @@ int main(int argc, char **argv) {
 					/* if heave adjustment specified do it */
 					if (process.mbp_heave_mode != MBP_HEAVE_OFF) {
 						if (process.mbp_heave_mode == MBP_HEAVE_MULTIPLY || process.mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET) {
-							for (i = 0; i < nbath; i++)
+							for (int i = 0; i < nbath; i++)
 								bheave[i] *= process.mbp_heave_mult;
 						}
 						if (process.mbp_heave_mode == MBP_HEAVE_OFFSET || process.mbp_heave_mode == MBP_HEAVE_MULTIPLYOFFSET) {
-							for (i = 0; i < nbath; i++)
+							for (int i = 0; i < nbath; i++)
 								bheave[i] += process.mbp_heave;
 						}
 					}
 
 					/* if tt adjustment specified do it */
 					if (process.mbp_tt_mode == MBP_TT_MULTIPLY) {
-						for (i = 0; i < nbath; i++)
+						for (int i = 0; i < nbath; i++)
 							ttimes[i] *= process.mbp_tt_mult;
 					}
 
@@ -5025,7 +5022,7 @@ int main(int argc, char **argv) {
 						time_i[3], time_i[4], time_i[5], time_i[6],
 						time_d); */
 						/* loop over the beams */
-						for (i = 0; i < nbeams; i++) {
+						for (int i = 0; i < nbeams; i++) {
 							if (ttimes[i] > 0.0) {
 								/* if needed, translate angles from takeoff
 								    angle coordinates to roll-pitch
@@ -5153,7 +5150,7 @@ int main(int argc, char **argv) {
 					/* recalculate bathymetry by rigid rotations  */
 					else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_ROTATE) {
 						/* loop over the beams */
-						for (i = 0; i < nbath; i++) {
+						for (int i = 0; i < nbath; i++) {
 							if (beamflag[i] != MB_FLAG_NULL) {
 								/* output some debug messages */
 								if (verbose >= 5) {
@@ -5239,7 +5236,7 @@ int main(int argc, char **argv) {
 						// time_d, draft, draft_org, lever_heave, tideval, depth_offset_change);
 
 						/* loop over the beams */
-						for (i = 0; i < nbath; i++) {
+						for (int i = 0; i < nbath; i++) {
 							if (beamflag[i] != MB_FLAG_NULL) {
 								/* apply transducer depth change to depths */
 								bath[i] += depth_offset_change;
@@ -5273,7 +5270,7 @@ int main(int argc, char **argv) {
 					/* change bathymetry water sound reference if required */
 					if (process.mbp_svp_mode == MBP_SVP_SOUNDSPEEDREF ||
 					    (process.mbp_svp_mode == MBP_SVP_ON && process.mbp_corrected == MB_NO)) {
-						for (i = 0; i < nbath; i++) {
+						for (int i = 0; i < nbath; i++) {
 							if (beamflag[i] != MB_FLAG_NULL) {
 								/* calculate average water sound speed
 								for current depth value */
@@ -5313,7 +5310,7 @@ int main(int argc, char **argv) {
 
 					/* apply static corrections */
 					if (process.mbp_static_mode == MBP_STATIC_BEAM_ON && nstatic > 0 && nstatic <= nbath) {
-						for (i = 0; i < nstatic; i++) {
+						for (int i = 0; i < nstatic; i++) {
 							if (staticbeam[i] >= 0 && staticbeam[i] < nbath) {
 								if (beamflag[staticbeam[i]] != MB_FLAG_NULL)
 									bath[staticbeam[i]] -= staticoffset[i];
@@ -5329,7 +5326,7 @@ int main(int argc, char **argv) {
 					if (process.mbp_static_mode == MBP_STATIC_ANGLE_ON && nstatic > 0) {
 						mb_pr_set_bathyslope(verbose, nsmooth, nbath, beamflag, bath, bathacrosstrack, &ndepths, depths,
 						                     depthacrosstrack, &nslopes, slopes, slopeacrosstrack, depthsmooth, &error);
-						for (i = 0; i < nbath; i++) {
+						for (int i = 0; i < nbath; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								bathy = 0.0;
 								if (ndepths > 1) {
@@ -5361,7 +5358,7 @@ int main(int argc, char **argv) {
 						fprintf(stderr, "\ndbg5  Depth values calculated in program <%s>:\n", program_name);
 						fprintf(stderr, "dbg5       kind:  %d\n", kind);
 						fprintf(stderr, "dbg5      beam    ttime      depth        xtrack    ltrack      flag\n");
-						for (i = 0; i < nbath; i++)
+						for (int i = 0; i < nbath; i++)
 							fprintf(stderr, "dbg5       %2d   %f   %f   %f   %f   %d\n", i, ttimes[i], bath[i],
 							        bathacrosstrack[i], bathalongtrack[i], beamflag[i]);
 					}
@@ -5389,7 +5386,7 @@ int main(int argc, char **argv) {
 						    process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER) {
 							istart = MAX((int)process.mbp_cut_min[icut], 0);
 							iend = MIN((int)process.mbp_cut_max[icut], nbath - 1);
-							for (i = istart; i <= iend; i++) {
+							for (int i = istart; i <= iend; i++) {
 								if (mb_beam_ok(beamflag[i]))
 									beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 							}
@@ -5399,7 +5396,7 @@ int main(int argc, char **argv) {
 						    acrosstrack distance */
 						else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_BATH &&
 						         process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE) {
-							for (i = 0; i < nbath; i++) {
+							for (int i = 0; i < nbath; i++) {
 								if (mb_beam_ok(beamflag[i]) && bathacrosstrack[i] >= process.mbp_cut_min[icut] &&
 								    bathacrosstrack[i] <= process.mbp_cut_max[icut])
 									beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -5410,7 +5407,7 @@ int main(int argc, char **argv) {
 						else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_BATH &&
 						         process.mbp_cut_mode[icut] == MBP_CUT_MODE_SPEED) {
 							if (speed < process.mbp_cut_min[icut] || speed > process.mbp_cut_max[icut]) {
-								for (i = 0; i < nbath; i++) {
+								for (int i = 0; i < nbath; i++) {
 									if (mb_beam_ok(beamflag[i]))
 										beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 								}
@@ -5468,7 +5465,7 @@ int main(int argc, char **argv) {
 						if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP && process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER) {
 							istart = MAX((int)process.mbp_cut_min[icut], 0);
 							iend = MIN((int)process.mbp_cut_max[icut], namp - 1);
-							for (i = istart; i <= iend; i++) {
+							for (int i = istart; i <= iend; i++) {
 								if (mb_beam_ok(beamflag[i]))
 									beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
 							}
@@ -5478,7 +5475,7 @@ int main(int argc, char **argv) {
 						    acrosstrack distance */
 						else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP &&
 						         process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE) {
-							for (i = 0; i < namp; i++) {
+							for (int i = 0; i < namp; i++) {
 								if (mb_beam_ok(beamflag[i]) && bathacrosstrack[i] >= process.mbp_cut_min[icut] &&
 								    bathacrosstrack[i] <= process.mbp_cut_max[icut])
 									beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
@@ -5489,7 +5486,7 @@ int main(int argc, char **argv) {
 						else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_AMP &&
 						         process.mbp_cut_mode[icut] == MBP_CUT_MODE_SPEED) {
 							if (speed < process.mbp_cut_min[icut] || speed > process.mbp_cut_max[icut]) {
-								for (i = 0; i < namp; i++) {
+								for (int i = 0; i < namp; i++) {
 									amp[i] = 0.0;
 								}
 							}
@@ -5500,7 +5497,7 @@ int main(int argc, char **argv) {
 						         process.mbp_cut_mode[icut] == MBP_CUT_MODE_NUMBER) {
 							istart = MAX((int)process.mbp_cut_min[icut], 0);
 							iend = MIN((int)process.mbp_cut_max[icut], nss - 1);
-							for (i = istart; i <= iend; i++) {
+							for (int i = istart; i <= iend; i++) {
 								ss[i] = MB_SIDESCAN_NULL;
 							}
 						}
@@ -5509,7 +5506,7 @@ int main(int argc, char **argv) {
 						    acrosstrack distance */
 						else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS &&
 						         process.mbp_cut_mode[icut] == MBP_CUT_MODE_DISTANCE) {
-							for (i = 0; i < nss; i++) {
+							for (int i = 0; i < nss; i++) {
 								if (ssacrosstrack[i] >= process.mbp_cut_min[icut] &&
 								    ssacrosstrack[i] <= process.mbp_cut_max[icut])
 									ss[i] = MB_SIDESCAN_NULL;
@@ -5520,7 +5517,7 @@ int main(int argc, char **argv) {
 						else if (process.mbp_cut_kind[icut] == MBP_CUT_DATA_SS &&
 						         process.mbp_cut_mode[icut] == MBP_CUT_MODE_SPEED) {
 							if (speed < process.mbp_cut_min[icut] || speed > process.mbp_cut_max[icut]) {
-								for (i = 0; i < nss; i++) {
+								for (int i = 0; i < nss; i++) {
 									ss[i] = MB_SIDESCAN_NULL;
 								}
 							}
@@ -5566,7 +5563,7 @@ int main(int argc, char **argv) {
 						i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
 
 						/* get seafloor slopes */
-						for (i = 0; i < namp; i++) {
+						for (int i = 0; i < namp; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								bathy = 0.0;
 								if (ndepths > 1) {
@@ -5627,7 +5624,7 @@ int main(int argc, char **argv) {
 						i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*/
 
 						/* get seafloor slopes */
-						for (i = 0; i < nss; i++) {
+						for (int i = 0; i < nss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
 								bathy = 0.0;
 								if (ndepths > 1) {
@@ -5705,7 +5702,7 @@ int main(int argc, char **argv) {
 						i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
 
 						/* get seafloor slopes */
-						for (i = 0; i < namp; i++) {
+						for (int i = 0; i < namp; i++) {
 							if (mb_beam_ok(beamflag[i])) {
 								/* get position in grid */
 								r[0] = headingy * bathacrosstrack[i] + headingx * bathalongtrack[i];
@@ -5808,7 +5805,7 @@ int main(int argc, char **argv) {
 						i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); */
 
 						/* get seafloor slopes */
-						for (i = 0; i < nss; i++) {
+						for (int i = 0; i < nss; i++) {
 							if (ss[i] > MB_SIDESCAN_NULL) {
 								/* get position in grid */
 								r[0] = headingy * ssacrosstrack[i] + headingx * ssalongtrack[i];
@@ -5911,7 +5908,7 @@ int main(int argc, char **argv) {
 				  the processed flag state)
 				  --------------------------------------------*/
 				if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA) {
-					for (i = 0; i < nbath; i++) {
+					for (int i = 0; i < nbath; i++) {
 						if (beamflag[i] != beamflagorg[i]) {
 							if (mb_beam_ok(beamflagorg[i])) {
 								action = MBP_EDIT_UNFLAG;
@@ -5973,7 +5970,7 @@ int main(int argc, char **argv) {
 			neditnotused = 0;
 			neditused = 0;
 			if (process.mbp_edit_mode == MBP_EDIT_ON) {
-				for (i = 0; i < esf.nedit; i++) {
+				for (int i = 0; i < esf.nedit; i++) {
 					if (esf.edit[i].use == 1000) {
 						neditnull++;
 						if (verbose >= 2)
@@ -6029,7 +6026,7 @@ int main(int argc, char **argv) {
 				mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.angle), &error);
 				mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.amplitude), &error);
 				mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtableuse.sigma), &error);
-				for (i = 0; i < nampcorrtable; i++) {
+				for (int i = 0; i < nampcorrtable; i++) {
 					mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].angle), &error);
 					mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].amplitude), &error);
 					mb_freed(verbose, __FILE__, __LINE__, (void **)&(ampcorrtable[i].sigma), &error);
@@ -6042,7 +6039,7 @@ int main(int argc, char **argv) {
 				mb_freed(verbose, __FILE__, __LINE__, (void **)&(sscorrtableuse.angle), &error);
 				mb_freed(verbose, __FILE__, __LINE__, (void **)&(sscorrtableuse.amplitude), &error);
 				mb_freed(verbose, __FILE__, __LINE__, (void **)&(sscorrtableuse.sigma), &error);
-				for (i = 0; i < nsscorrtable; i++) {
+				for (int i = 0; i < nsscorrtable; i++) {
 					mb_freed(verbose, __FILE__, __LINE__, (void **)&(sscorrtable[i].angle), &error);
 					mb_freed(verbose, __FILE__, __LINE__, (void **)&(sscorrtable[i].amplitude), &error);
 					mb_freed(verbose, __FILE__, __LINE__, (void **)&(sscorrtable[i].sigma), &error);

@@ -87,7 +87,6 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 	double angle, amean, asigma, sum, sumsq, sumn;
 	int time_i[7];
 	int ii, jj, i0, i1;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
@@ -102,7 +101,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
 		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
 		fprintf(stderr, "dbg2       mean and sigma:\n");
-		for (i = 0; i < nangles; i++)
+		for (int i = 0; i < nangles; i++)
 			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
 	}
 
@@ -113,7 +112,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
 	        time_i[4], time_i[5], time_i[6], time_d);
 	fprintf(tfp, "# nangles: %d\n", nangles);
-	for (i = 0; i < nangles; i++) {
+	for (int i = 0; i < nangles; i++) {
 		amean = 0.0;
 		asigma = 0.0;
 		sum = 0.0;
@@ -167,7 +166,6 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 	double angle, amean, asigma, sum, sumsq, sumn;
 	int time_i[7];
 	int ii, jj, i0, i1, iref;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
@@ -186,7 +184,7 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 		fprintf(stderr, "dbg2       dangle:          %f\n", dangle);
 		fprintf(stderr, "dbg2       symmetry:        %d\n", symmetry);
 		fprintf(stderr, "dbg2       mean and sigma:\n");
-		for (i = 0; i < nangles; i++)
+		for (int i = 0; i < nangles; i++)
 			fprintf(stderr, "dbg2         %d %f %d %f %f\n", i, (i * dangle), nmean[i], mean[i], sigma[i]);
 	}
 
@@ -228,7 +226,7 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
 	        time_i[4], time_i[5], time_i[6], time_d);
 	fprintf(tfp, "# nangles: %d\n", nangles);
-	for (i = 0; i < nangles; i++) {
+	for (int i = 0; i < nangles; i++) {
 		angle = -angle_max + i * dangle;
 		del = fabs(angle) - (90 - depression);
 		range = altitude / cos(DTR * fabs(angle));
@@ -423,7 +421,7 @@ int main(int argc, char **argv) {
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	double d1, d2;
-	int i, j;
+	int j;
 	int ix, jy, kgrid, k, n;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
@@ -484,6 +482,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'G':
 		case 'g':
+		{
+			int i;
 			n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
 			if (n == 5) {
 				n = sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
@@ -512,6 +512,7 @@ int main(int argc, char **argv) {
 			}
 			flag++;
 			break;
+		}
 		case 'H':
 		case 'h':
 			help++;
@@ -741,7 +742,7 @@ int main(int argc, char **argv) {
 
 	/* initialize histogram */
 	if (amplitude_on == MB_YES)
-		for (i = 0; i < nangles; i++) {
+		for (int i = 0; i < nangles; i++) {
 			nmeanamp[i] = 0;
 			meanamp[i] = 0.0;
 			sigmaamp[i] = 0.0;
@@ -750,7 +751,7 @@ int main(int argc, char **argv) {
 			sigmatotamp[i] = 0.0;
 		}
 	if (sidescan_on == MB_YES)
-		for (i = 0; i < nangles; i++) {
+		for (int i = 0; i < nangles; i++) {
 			nmeanss[i] = 0;
 			meanss[i] = 0.0;
 			sigmass[i] = 0.0;
@@ -981,13 +982,13 @@ int main(int argc, char **argv) {
 		if (error == MB_ERROR_NO_ERROR) {
 			if (gridamp == MB_YES) {
 				/* initialize the memory */
-				for (i = 0; i < gridampn_columns * gridampn_rows; i++) {
+				for (int i = 0; i < gridampn_columns * gridampn_rows; i++) {
 					gridamphist[i] = 0.0;
 				}
 			}
 			if (gridss == MB_YES) {
 				/* initialize the memory */
-				for (i = 0; i < gridssn_columns * gridssn_rows; i++) {
+				for (int i = 0; i < gridssn_columns * gridssn_rows; i++) {
 					gridsshist[i] = 0.0;
 				}
 			}
@@ -1127,13 +1128,13 @@ int main(int argc, char **argv) {
 				time_d_avg = 0.0;
 				altitude_avg = 0.0;
 				if (amplitude_on == MB_YES)
-					for (i = 0; i < nangles; i++) {
+					for (int i = 0; i < nangles; i++) {
 						nmeanamp[i] = 0;
 						meanamp[i] = 0.0;
 						sigmaamp[i] = 0.0;
 					}
 				if (sidescan_on == MB_YES)
-					for (i = 0; i < nangles; i++) {
+					for (int i = 0; i < nangles; i++) {
 						nmeanss[i] = 0;
 						meanss[i] = 0.0;
 						sigmass[i] = 0.0;
@@ -1181,7 +1182,7 @@ int main(int argc, char **argv) {
 
 				/* do the amplitude */
 				if (amplitude_on == MB_YES)
-					for (i = 0; i < beams_amp; i++) {
+					for (int i = 0; i < beams_amp; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							namp++;
 							if (corr_topogrid == MB_YES) {
@@ -1311,7 +1312,7 @@ int main(int argc, char **argv) {
 
 				/* do the sidescan */
 				if (sidescan_on == MB_YES)
-					for (i = 0; i < pixels_ss; i++) {
+					for (int i = 0; i < pixels_ss; i++) {
 						if (ss[i] > MB_SIDESCAN_NULL) {
 							nss++;
 							if (corr_topogrid == MB_YES) {

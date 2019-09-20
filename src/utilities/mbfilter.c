@@ -155,7 +155,7 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, int *error) {
 	int status = MB_SUCCESS;
-	int i, nn;
+	int nn;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -164,14 +164,14 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 		fprintf(stderr, "dbg2       n:               %d\n", n);
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
 	}
 
 	/* get mean */
 	*hipass = 0.0;
 	nn = 0;
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		*hipass += val[i];
 		nn++;
 	}
@@ -192,7 +192,6 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *hipass, int *error) {
 	int status = MB_SUCCESS;
 	double wgtsum;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -202,14 +201,14 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
 		fprintf(stderr, "dbg2       dis:             %p\n", (void *)dis);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f  dis[%d]: %f\n", i, val[i], i, dis[i]);
 	}
 
 	/* get weights */
 	*hipass = 0.0;
 	wgtsum = 0.0;
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		wgt[i] = exp(-dis[i] * dis[i]);
 		wgtsum += wgt[i];
 	}
@@ -217,7 +216,7 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 	if (wgtsum > 0.0) {
 		/* get value */
 		*hipass = 0.0;
-		for (i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++) {
 			*hipass += wgt[i] * val[i];
 		}
 		*hipass = val[0] - *hipass / wgtsum;
@@ -236,7 +235,6 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 /*--------------------------------------------------------------------*/
 int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, int *error) {
 	int status = MB_SUCCESS;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -245,7 +243,7 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, 
 		fprintf(stderr, "dbg2       n:               %d\n", n);
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
 	}
 
@@ -271,7 +269,7 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, 
 /*--------------------------------------------------------------------*/
 int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
 	int status = MB_SUCCESS;
-	int i, nn;
+	int nn;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -280,14 +278,14 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 		fprintf(stderr, "dbg2       n:               %d\n", n);
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
 	}
 
 	/* get mean */
 	*smooth = 0.0;
 	nn = 0;
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		*smooth += val[i];
 		nn++;
 	}
@@ -308,7 +306,6 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *smooth, int *error) {
 	int status = MB_SUCCESS;
 	double wgtsum;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -318,14 +315,14 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
 		fprintf(stderr, "dbg2       dis:             %p\n", (void *)dis);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f  dis[%d]: %f\n", i, val[i], i, dis[i]);
 	}
 
 	/* get weights */
 	*smooth = 0.0;
 	wgtsum = 0.0;
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		wgt[i] = exp(-dis[i] * dis[i]);
 		wgtsum += wgt[i];
 	}
@@ -333,7 +330,7 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 	if (wgtsum > 0.0) {
 		/* get value */
 		*smooth = 0.0;
-		for (i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++) {
 			*smooth += wgt[i] * val[i];
 		}
 		*smooth = *smooth / wgtsum;
@@ -354,7 +351,6 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
                   double *wgt, double *smooth, int *error) {
 	int status = MB_SUCCESS;
 	double ratio;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -365,7 +361,7 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 		fprintf(stderr, "dbg2       n:               %d\n", n);
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
 	}
 
@@ -406,7 +402,7 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 	int status = MB_SUCCESS;
 	double wgtsum;
 	double diff;
-	int i, nn;
+	int nn;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -415,7 +411,7 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 		fprintf(stderr, "dbg2       n:               %d\n", n);
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
 	}
 
@@ -424,7 +420,7 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 	wgtsum = 0.0;
 	nn = 0;
 	wgt[0] = 0.5;
-	for (i = 1; i < n; i++) {
+	for (int i = 1; i < n; i++) {
 		diff = fabs(val[i] - val[0]);
 		if (diff < 0.01)
 			diff = 0.01;
@@ -434,7 +430,7 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 	}
 	if (nn > 0) {
 		*smooth = wgt[0] * val[0];
-		for (i = 1; i < n; i++) {
+		for (int i = 1; i < n; i++) {
 			*smooth += 0.5 * wgt[i] * val[i] / wgtsum;
 		}
 	}
@@ -455,7 +451,7 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 	double edge;
 	double gradsum;
 	double contrast;
-	int i, ii;
+	int ii;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -464,14 +460,14 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 		fprintf(stderr, "dbg2       n:               %d\n", n);
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       grad:            %p\n", (void *)grad);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
 	}
 
 	/* get gradients */
 	gradsum = 0.0;
 	edge = 0.0;
-	for (i = 0; i < n; i++) {
+	for (int i = 0; i < n; i++) {
 		grad[i] = 0.0;
 		for (ii = 0; ii < n; ii++) {
 			if (val[ii] > 0.0 && i != ii) {
@@ -504,7 +500,7 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 int contrast_gradient(int verbose, int n, double *val, double *wgt, double *result, int *error) {
 	int status = MB_SUCCESS;
 	double gradient;
-	int i, nn;
+	int nn;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
@@ -513,7 +509,7 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt, double *resu
 		fprintf(stderr, "dbg2       n:               %d\n", n);
 		fprintf(stderr, "dbg2       val:             %p\n", (void *)val);
 		fprintf(stderr, "dbg2       wgt:             %p\n", (void *)wgt);
-		for (i = 0; i < n; i++)
+		for (int i = 0; i < n; i++)
 			fprintf(stderr, "dbg2       val[%d]: %f\n", i, val[i]);
 	}
 
@@ -521,7 +517,7 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt, double *resu
 	*result = 0.0;
 	gradient = 0.0;
 	nn = 0;
-	for (i = 1; i < n; i++) {
+	for (int i = 1; i < n; i++) {
 		gradient += (val[i] - val[0]) * (val[i] - val[0]);
 		nn++;
 	}
@@ -547,7 +543,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
                            int *error) {
 	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *ostore;
-	int i;
 
 	/* get data structure pointer */
 	ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
@@ -585,17 +580,17 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
 	if (verbose >= 2 && kind == MB_DATA_DATA) {
 		fprintf(stderr, "dbg2       nbath:      %d\n", nbath);
 		if (verbose >= 3)
-			for (i = 0; i < nbath; i++)
+			for (int i = 0; i < nbath; i++)
 				fprintf(stderr, "dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n", i, beamflag[i], bath[i],
 				        bathacrosstrack[i], bathalongtrack[i]);
 		fprintf(stderr, "dbg2       namp:       %d\n", namp);
 		if (verbose >= 3)
-			for (i = 0; i < namp; i++)
+			for (int i = 0; i < namp; i++)
 				fprintf(stderr, "dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n", i, amp[i], bathacrosstrack[i],
 				        bathalongtrack[i]);
 		fprintf(stderr, "dbg2        nss:       %d\n", nss);
 		if (verbose >= 3)
-			for (i = 0; i < nss; i++)
+			for (int i = 0; i < nss; i++)
 				fprintf(stderr, "dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n", i, ss[i], ssacrosstrack[i],
 				        ssalongtrack[i]);
 	}
@@ -743,7 +738,7 @@ int main(int argc, char **argv) {
 	int ifilter, ndx, ndl;
 	int ia, ib;
 	int ja, jb, jbeg, jend;
-	int i, j, ii, jj, n;
+	int j, ii, jj, n;
 
 	char *ctime();
 	char *getenv();
@@ -956,7 +951,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       datakind:       %d\n", datakind);
 		fprintf(stderr, "dbg2       n_buffer_max:   %d\n", n_buffer_max);
 		fprintf(stderr, "dbg2       num_filters:    %d\n", num_filters);
-		for (i = 0; i < num_filters; i++) {
+		for (int i = 0; i < num_filters; i++) {
 			fprintf(stderr, "dbg2       filters[%d].mode:          %d\n", i, filters[i].mode);
 			fprintf(stderr, "dbg2       filters[%d].xdim:          %d\n", i, filters[i].xdim);
 			fprintf(stderr, "dbg2       filters[%d].ldim:          %d\n", i, filters[i].ldim);
@@ -992,7 +987,7 @@ int main(int argc, char **argv) {
 		else if (datakind == MBFILTER_SS)
 			fprintf(stderr, "\nProcessing sidescan data...\n");
 		fprintf(stderr, "Number of filters to be applied: %d\n\n", num_filters);
-		for (i = 0; i < num_filters; i++) {
+		for (int i = 0; i < num_filters; i++) {
 			if (filters[i].mode == MBFILTER_A_HIPASS_MEAN)
 				fprintf(stderr, "Filter %d: High pass mean subtraction\n", i);
 			else if (filters[i].mode == MBFILTER_A_HIPASS_GAUSSIAN)
@@ -1116,7 +1111,7 @@ int main(int argc, char **argv) {
 		omb_io_ptr = (struct mb_io_struct *)ombio_ptr;
 
 		/* allocate memory for data arrays */
-		for (i = 0; i < n_buffer_max; i++) {
+		for (int i = 0; i < n_buffer_max; i++) {
 			ping[i].beamflag = NULL;
 			ping[i].bath = NULL;
 			ping[i].amp = NULL;
@@ -1190,7 +1185,7 @@ int main(int argc, char **argv) {
 		/* get ideal number of ping records to hold */
 		nhold_ping = 1;
 		nweightmax = 1;
-		for (i = 0; i < num_filters; i++) {
+		for (int i = 0; i < num_filters; i++) {
 			nhold_ping = MAX(nhold_ping, filters[i].ldim);
 			nweightmax = MAX(nweightmax, filters[i].xdim * filters[i].ldim);
 		}
@@ -1353,7 +1348,7 @@ int main(int argc, char **argv) {
 				                    ping[ndata].ss, ping[ndata].ssacrosstrack, ping[ndata].ssalongtrack, comment, &error);
 				if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
 					if (datakind == MBFILTER_SS) {
-						for (i = 0; i < ping[ndata].pixels_ss; i++) {
+						for (int i = 0; i < ping[ndata].pixels_ss; i++) {
 							if (ping[ndata].ss[i] > MB_SIDESCAN_NULL)
 								ping[ndata].pixelflag[i] = MB_FLAG_NONE;
 							else
@@ -1468,7 +1463,7 @@ int main(int argc, char **argv) {
 						ndatapts = ping[j].ndatapts;
 
 						/* loop over each value */
-						for (i = 0; i < ndatapts; i++) {
+						for (int i = 0; i < ndatapts; i++) {
 							/* get beginning and end values */
 							ia = i - ndx;
 							ib = i + ndx;
@@ -1541,17 +1536,17 @@ int main(int argc, char **argv) {
 					    if done with final iteration */
 					if (iteration == filters[ifilter].iteration - 1)
 						for (j = 0; j < ndata; j++)
-							for (i = 0; i < ping[j].ndatapts; i++)
+							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i] + filters[ifilter].hipass_offset;
 					else
 						for (j = 0; j < ndata; j++)
-							for (i = 0; i < ping[j].ndatapts; i++)
+							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i];
 
 					/* save results if done with final iteration */
 					if (ndata > 0 && iteration == filters[ifilter].iteration - 1) {
 						for (j = jbeg; j <= jend; j++)
-							for (i = 0; i < ping[j].ndatapts; i++)
+							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].datasave[i] = ping[j].data_i_ptr[i];
 					}
 
@@ -1608,7 +1603,7 @@ int main(int argc, char **argv) {
 			if (ndata > nhold) {
 				for (j = 0; j < nhold; j++) {
 					jj = ndata - nhold + j;
-					for (i = 0; i < 7; i++)
+					for (int i = 0; i < 7; i++)
 						ping[j].time_i[i] = ping[jj].time_i[i];
 					ping[j].time_d = ping[jj].time_d;
 					ping[j].navlon = ping[jj].navlon;
@@ -1624,22 +1619,22 @@ int main(int argc, char **argv) {
 					ping[j].beams_bath = ping[jj].beams_bath;
 					ping[j].beams_amp = ping[jj].beams_amp;
 					ping[j].pixels_ss = ping[jj].pixels_ss;
-					for (i = 0; i < ping[j].beams_bath; i++) {
+					for (int i = 0; i < ping[j].beams_bath; i++) {
 						ping[j].beamflag[i] = ping[jj].beamflag[i];
 						ping[j].bath[i] = ping[jj].bath[i];
 						ping[j].bathacrosstrack[i] = ping[jj].bathacrosstrack[i];
 						ping[j].bathalongtrack[i] = ping[jj].bathalongtrack[i];
 					}
-					for (i = 0; i < ping[j].beams_amp; i++) {
+					for (int i = 0; i < ping[j].beams_amp; i++) {
 						ping[j].amp[i] = ping[jj].amp[i];
 					}
-					for (i = 0; i < ping[j].pixels_ss; i++) {
+					for (int i = 0; i < ping[j].pixels_ss; i++) {
 						ping[j].pixelflag[i] = ping[jj].pixelflag[i];
 						ping[j].ss[i] = ping[jj].ss[i];
 						ping[j].ssacrosstrack[i] = ping[jj].ssacrosstrack[i];
 						ping[j].ssalongtrack[i] = ping[jj].ssalongtrack[i];
 					}
-					for (i = 0; i < ping[jj].ndatapts; i++)
+					for (int i = 0; i < ping[jj].ndatapts; i++)
 						ping[j].datasave[i] = ping[jj].datasave[i];
 				}
 				ndata = nhold;

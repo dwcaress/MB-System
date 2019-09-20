@@ -295,7 +295,7 @@ int main(int argc, char **argv) {
 	FILE *outfp;
 
 	/* other variables */
-	int i, j, k;
+	int j, k;
 	int ii, jj, kk;
 	int ib, ix, iy, indx;
 
@@ -487,7 +487,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* initialize arrays */
-	for (i = 0; i < xdim * ydim; i++) {
+	for (int i = 0; i < xdim * ydim; i++) {
 		icount[i] = 0;
 		jcount[i] = 0;
 	}
@@ -657,7 +657,7 @@ int main(int argc, char **argv) {
 	/* allocate space for data */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&idata, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&jdata, &error);
-	for (i = 0; i < xdim; i++)
+	for (int i = 0; i < xdim; i++)
 		for (j = 0; j < ydim; j++) {
 			k = i * ydim + j;
 			idata[k].ptr = NULL;
@@ -856,7 +856,7 @@ int main(int argc, char **argv) {
 	fprintf(outfp, "%d depth points read from %s\n", ndatafile, jfile);
 
 	/* loop over regions */
-	for (i = 0; i < xdim; i++)
+	for (int i = 0; i < xdim; i++)
 		for (j = 0; j < ydim; j++) {
 			/* set index */
 			indx = i + j * xdim;
@@ -1002,7 +1002,7 @@ int main(int argc, char **argv) {
 		}
 
 	/* deallocate space for data */
-	for (i = 0; i < xdim; i++)
+	for (int i = 0; i < xdim; i++)
 		for (j = 0; j < ydim; j++) {
 			k = i * ydim + j;
 			if (icount[k] > 0) {

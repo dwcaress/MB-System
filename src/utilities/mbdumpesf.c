@@ -108,8 +108,6 @@ int main(int argc, char **argv) {
 	int beam_zero_ignore = 0;
 	int beam_filter_ignore = 0;
 
-	int i;
-
 	/* get current default values */
 	byteswapped = mb_swap_check();
 
@@ -271,7 +269,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* loop over reading edit events and printing them out */
-		for (i = 0; i < nedit && error == MB_ERROR_NO_ERROR; i++) {
+		for (int i = 0; i < nedit && error == MB_ERROR_NO_ERROR; i++) {
 			ignore = MB_NO;
 			if (fread(&(time_d), sizeof(double), 1, iesffp) != 1 || fread(&(beam), sizeof(int), 1, iesffp) != 1 ||
 			    fread(&(action), sizeof(int), 1, iesffp) != 1) {

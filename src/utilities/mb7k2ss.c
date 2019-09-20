@@ -322,7 +322,7 @@ int main(int argc, char **argv) {
 	int read_data;
 	int found, done;
 	int shellstatus;
-	int i, j, n;
+	int j, n;
 
 	startline = 1;
 	strcpy(lineroot, "sidescan");
@@ -610,6 +610,7 @@ int main(int argc, char **argv) {
 		rawroutefile = MB_NO;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
+				int i;
 				nget = sscanf(comment, "%d %d %lf %lf %lf %lf", &i, &waypoint, &lon, &lat, &heading, &time_d);
 
 				/* if good data check for need to allocate more space */
@@ -1210,7 +1211,7 @@ int main(int argc, char **argv) {
 				/* get bottom arrival time, if possible */
 				ttime_min = 0.0;
 				found = MB_NO;
-				for (i = 0; i < beams_bath; i++) {
+				for (int i = 0; i < beams_bath; i++) {
 					if (mb_beam_ok(beamflag[i])) {
 						if (found == MB_NO || ttimes[i] < ttime_min) {
 							ttime_min = ttimes[i];
@@ -1370,7 +1371,7 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in port trace */
 						datashort = (unsigned short *)sschannelport->data;
 						channelmax = 0.0;
-						for (i = 0; i < ssheaderport->samples; i++) {
+						for (int i = 0; i < ssheaderport->samples; i++) {
 							if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 								value = sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
@@ -1380,7 +1381,7 @@ int main(int argc, char **argv) {
 						}
 						portchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
-						for (i = 0; i < ssheaderport->samples && portchannelpick == 0; i++) {
+						for (int i = 0; i < ssheaderport->samples && portchannelpick == 0; i++) {
 							if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 								value = sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
@@ -1393,7 +1394,7 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in starboard trace */
 						datashort = (unsigned short *)sschannelstbd->data;
 						channelmax = 0.0;
-						for (i = 0; i < ssheaderstbd->samples; i++) {
+						for (int i = 0; i < ssheaderstbd->samples; i++) {
 							if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 								value = sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
@@ -1403,7 +1404,7 @@ int main(int argc, char **argv) {
 						}
 						stbdchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
-						for (i = 0; i < ssheaderstbd->samples && stbdchannelpick == 0; i++) {
+						for (int i = 0; i < ssheaderstbd->samples && stbdchannelpick == 0; i++) {
 							if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 								value = sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
@@ -1476,7 +1477,7 @@ int main(int argc, char **argv) {
 					istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 					istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
-					for (i = istart; i < ssheaderport->samples; i++) {
+					for (int i = istart; i < ssheaderport->samples; i++) {
 						/* get sample value */
 						if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 							value =
@@ -1546,7 +1547,7 @@ int main(int argc, char **argv) {
 					istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 					istart = rangemin / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderstbd->weightingFactor));
-					for (i = istart; i < ssheaderstbd->samples; i++) {
+					for (int i = istart; i < ssheaderstbd->samples; i++) {
 						/* get sample value */
 						if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 							value =
@@ -1688,7 +1689,7 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in port trace */
 						datashort = (unsigned short *)sschannelport->data;
 						channelmax = 0.0;
-						for (i = 0; i < ssheaderport->samples; i++) {
+						for (int i = 0; i < ssheaderport->samples; i++) {
 							if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 								value = sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
@@ -1698,7 +1699,7 @@ int main(int argc, char **argv) {
 						}
 						portchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
-						for (i = 0; i < ssheaderport->samples && portchannelpick == 0; i++) {
+						for (int i = 0; i < ssheaderport->samples && portchannelpick == 0; i++) {
 							if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 								value = sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
@@ -1711,7 +1712,7 @@ int main(int argc, char **argv) {
 						/* get bottom arrival in starboard trace */
 						datashort = (unsigned short *)sschannelstbd->data;
 						channelmax = 0.0;
-						for (i = 0; i < ssheaderstbd->samples; i++) {
+						for (int i = 0; i < ssheaderstbd->samples; i++) {
 							if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 								value = sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
@@ -1721,7 +1722,7 @@ int main(int argc, char **argv) {
 						}
 						stbdchannelpick = 0;
 						threshold = bottompickthreshold * channelmax;
-						for (i = 0; i < ssheaderstbd->samples && stbdchannelpick == 0; i++) {
+						for (int i = 0; i < ssheaderstbd->samples && stbdchannelpick == 0; i++) {
 							if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 								value = sqrt(
 								    (double)(datashort[2 * i] * datashort[2 * i] + datashort[2 * i + 1] * datashort[2 * i + 1]));
@@ -1785,7 +1786,7 @@ int main(int argc, char **argv) {
 					istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 					istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
-					for (i = istart; i < ssheaderport->samples; i++) {
+					for (int i = istart; i < ssheaderport->samples; i++) {
 						/* get sample value */
 						if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 							value =
@@ -1847,7 +1848,7 @@ int main(int argc, char **argv) {
 					datashort = (unsigned short *)sschannelstbd->data;
 					istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderstbd->weightingFactor));
-					for (i = istart; i < ssheaderstbd->samples; i++) {
+					for (int i = istart; i < ssheaderstbd->samples; i++) {
 						/* get sample value */
 						if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
 							value =
@@ -2072,7 +2073,6 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 	double dangle;
 	double rr, xx, zz;
 	double alpha, beta, theta, phi;
-	int i;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> called\n", __func__);
@@ -2090,7 +2090,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 	dangle = (angle_max - angle_min) / (nangle - 1);
 	alpha = pitch;
 	zz = altitude;
-	for (i = 0; i < nangle; i++) {
+	for (int i = 0; i < nangle; i++) {
 		/* get angles in takeoff coordinates */
 		table_angle[i] = angle_min + dangle * i;
 		beta = 90.0 - table_angle[i];
@@ -2111,7 +2111,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2       Lookup tables:\n");
-		for (i = 0; i < nangle; i++)
+		for (int i = 0; i < nangle; i++)
 			fprintf(stderr, "dbg2         %d %f %f %f %f %f\n", i, table_angle[i], table_xtrack[i], table_ltrack[i],
 			        table_altitude[i], table_range[i]);
 		fprintf(stderr, "dbg2       error:           %d\n", *error);

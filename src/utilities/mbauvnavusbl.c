@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
 	double rov_altitude, rov_roll, rov_pitch;
 	int position_flag, heading_flag, altitude_flag, attitude_flag, pressure_flag;
 	double sec;
-	int i, j;
+	int j;
 
 	/* get current default values - only interested in lonflip */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -457,7 +457,7 @@ int main(int argc, char **argv) {
 	ntie = 0;
 	loncoravg = 0.0;
 	latcoravg = 0.0;
-	for (i = 0; i < nnav; i++) {
+	for (int i = 0; i < nnav; i++) {
 		if (ntie == 0 || (ntime[i] - ttime[ntie - 1]) > tieinterval) {
 			/* get time */
 			ttime[ntie] = ntime[i];
@@ -493,7 +493,7 @@ int main(int argc, char **argv) {
 	}
 
 	fprintf(stderr, "\nCalculated %d adjustment points:\n", ntie);
-	for (i = 0; i < ntie; i++)
+	for (int i = 0; i < ntie; i++)
 		fprintf(stderr, "time:%f lon:%f lat:%f heading:%f sonardepth:%f\n", ttime[i], tlon[i], tlat[i], theading[i],
 		        tsonardepth[i]);
 	fprintf(stderr, "Average lon:%f lat:%f\n", loncoravg, latcoravg);
@@ -508,7 +508,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* now loop over nav data applying adjustments */
-	for (i = 0; i < nnav; i++) {
+	for (int i = 0; i < nnav; i++) {
 		/* interpolate adjustment */
 		if (useaverage == MB_NO) {
 			/* get adjustment by interpolation */
