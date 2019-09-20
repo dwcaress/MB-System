@@ -259,6 +259,124 @@ static bool log_clock_res=true;
 
 /*--------------------------------------------------------------------*/
 
+int mbtrnpreprocess_postlog
+(
+  int verbose,
+  FILE *logfp,
+  char *log_message,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+
+  /* time, user, host variables */
+  struct timeval timeofday;
+  struct timezone timezone;
+  double time_d;
+  int time_i[7];
+  char date[32];
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+    fprintf(stderr, "dbg2       log_message:        %s\n", log_message);
+    }
+
+  /* get time  */
+  gettimeofday(&timeofday, &timezone);
+  time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
+  status = mb_get_date(verbose, time_d, time_i);
+  sprintf(date,
+    "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
+    time_i[0],
+    time_i[1],
+    time_i[2],
+    time_i[3],
+    time_i[4],
+    time_i[5],
+    time_i[6]);
+
+  /* post log_message */
+  if (logfp != NULL)
+    fprintf(logfp,
+      "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
+      time_i[0],
+      time_i[1],
+      time_i[2],
+      time_i[3],
+      time_i[4],
+      time_i[5],
+      time_i[6],
+      log_message);
+  if (verbose > 0)
+    fprintf(stderr,
+      "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
+      time_i[0],
+      time_i[1],
+      time_i[2],
+      time_i[3],
+      time_i[4],
+      time_i[5],
+      time_i[6],
+      log_message);
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_postlog */
+/*--------------------------------------------------------------------*/
+
+int mbtrnpreprocess_closelog
+(
+  int verbose,
+  FILE **logfp,
+  int *error
+)
+{
+  int status = MB_SUCCESS;
+  char *log_message = "Closing mbtrnpreprocess log file";
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
+    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+    fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
+    }
+
+  /* close log file */
+  if (logfp != NULL)
+    {
+    mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);
+    fclose(*logfp);
+    *logfp = NULL;
+    }
+
+  if (verbose >= 2)
+    {
+    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
+    fprintf(stderr, "dbg2       error:              %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:             %d\n", status);
+    }
+
+  return status;
+} /* mbtrnpreprocess_closelog */
+/*--------------------------------------------------------------------*/
+
 int mbtrnpreprocess_openlog
 (
   int verbose,
@@ -346,124 +464,6 @@ int mbtrnpreprocess_openlog
 
   return status;
 } /* mbtrnpreprocess_openlog */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_closelog
-(
-  int verbose,
-  FILE **logfp,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-  char *log_message = "Closing mbtrnpreprocess log file";
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
-    fprintf(stderr, "dbg2       *logfp:             %p\n", *logfp);
-    }
-
-  /* close log file */
-  if (logfp != NULL)
-    {
-    mbtrnpreprocess_postlog(verbose, *logfp, log_message, error);
-    fclose(*logfp);
-    *logfp = NULL;
-    }
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_closelog */
-/*--------------------------------------------------------------------*/
-
-int mbtrnpreprocess_postlog
-(
-  int verbose,
-  FILE *logfp,
-  char *log_message,
-  int *error
-)
-{
-  int status = MB_SUCCESS;
-
-  /* time, user, host variables */
-  struct timeval timeofday;
-  struct timezone timezone;
-  double time_d;
-  int time_i[7];
-  char date[32];
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:            %d\n", verbose);
-    fprintf(stderr, "dbg2       logfp:              %p\n", logfp);
-    fprintf(stderr, "dbg2       log_message:        %s\n", log_message);
-    }
-
-  /* get time  */
-  gettimeofday(&timeofday, &timezone);
-  time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-  status = mb_get_date(verbose, time_d, time_i);
-  sprintf(date,
-    "%4.4d%2.2d%2.2d_%2.2d%2.2d%2.2d%6.6d",
-    time_i[0],
-    time_i[1],
-    time_i[2],
-    time_i[3],
-    time_i[4],
-    time_i[5],
-    time_i[6]);
-
-  /* post log_message */
-  if (logfp != NULL)
-    fprintf(logfp,
-      "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
-      time_i[0],
-      time_i[1],
-      time_i[2],
-      time_i[3],
-      time_i[4],
-      time_i[5],
-      time_i[6],
-      log_message);
-  if (verbose > 0)
-    fprintf(stderr,
-      "<%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d>: %s\n",
-      time_i[0],
-      time_i[1],
-      time_i[2],
-      time_i[3],
-      time_i[4],
-      time_i[5],
-      time_i[6],
-      log_message);
-
-  if (verbose >= 2)
-    {
-    fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:              %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:             %d\n", status);
-    }
-
-  return status;
-} /* mbtrnpreprocess_postlog */
 /*--------------------------------------------------------------------*/
 int mbtrnpreprocess_logparameters
 (

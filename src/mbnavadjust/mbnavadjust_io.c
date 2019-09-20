@@ -60,7 +60,7 @@ extern int isnanf(float x);
 #define check_fnan(x) ((x) != (x))
 #endif
 
-static char program_name[] = "mbnavadjust i/o functions";
+static const char program_name[] = "mbnavadjust i/o functions";
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_new_project(int verbose, char *projectpath, double section_length, int section_soundings, double cont_int,

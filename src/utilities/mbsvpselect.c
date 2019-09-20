@@ -486,6 +486,19 @@ void GregorianToJulian(int year, int month, int day, int *yearDay) {
 			break;
 		} /* switch */
 } /* GregorianToJulian */
+/* --------------------------------------------------------------- */
+/* calculate the average position of two points */
+/* http://www.movable-type.co.uk/scripts/latlong.html */
+void mid_point(long double lat1, long double lon1, long double lat2, long double lon2, long double *lat3, long double *lon3) {
+	double dLon = DTR * ((lon2) - (lon1));
+	double lat1_rad = DTR * ((lat1));
+	double lat2_rad = DTR * ((lat2));
+	double lon1_rad = DTR * ((lon1));
+	double bx = cos(lat2_rad) * cos(dLon);
+	double by = cos(lat2_rad) * sin(dLon);
+	*(lat3) = atan2(sin(lat1_rad) + sin(lat2_rad), sqrt((((cos(lat1_rad)) + bx) * ((cos(lat1_rad)) + bx)) + (by * by))) * RTD;
+	*(lon3) = (lon1_rad + atan2(by, (cos(lat1_rad) + bx))) * RTD;
+}
 /* ---------------------------------------------------------------- */
 /*this function fills the inf struct with the appropriate values
  * it takes a pointer to the inf_struct and the file_name (file_name.inf) to read information from
@@ -693,6 +706,15 @@ char *my_strcpy(char *a, char *b) {
 	memmove(a, b, strlen(b) + 1);
 	return a;
 }
+/* ---------------------------------------------------------------- */
+/*
+ *  Function trim_newline
+ *	Delete the '\n' char from string
+ */
+void trim_newline(char string[]) {
+	if (string[strlen(string) - 1] == '\n')
+		string[strlen(string) - 1] = '\0';
+}
 /*---------------------------------------------------------------------*/
 int read_recursive2(char *fname) {
 	//char original[strlen(fname)];		This no valid C  JL
@@ -794,6 +816,48 @@ int read_recursive(char *fileName) {
 		fclose(dataFile);
 	}
 	return counter;
+}
+/* ---------------------------------------------------------------- */
+/* print the inf information on the screen */
+void print_inf(inf *cd) {
+	struct tm *temp = &cd->s_datum_time;
+	puts("==================================================");
+	printf("file_name: %s\n", cd->file_name);
+	puts("starting Date and time");
+	printf("\n%s\n", asctime(temp));
+	temp = NULL;
+	temp = &cd->e_datum_time;
+	puts("ending Date and time");
+	printf("\n%s\n", asctime(temp));
+	puts("Start position");
+	printf("lat: %Lf\t", cd->s_lat);
+	printf("lon: %Lf\n", cd->s_lon);
+	puts("End position");
+	printf("e_lat: %Lf\t", cd->e_lat);
+	printf("e_lon: %Lf\n", cd->e_lon);
+	puts("Average position");
+	printf("ave_lat: %Lf\t", cd->ave_lat);
+	printf("ave_lon: %Lf\n", cd->ave_lon);
+	puts("==================================================");
+	temp = NULL;
+}
+/* --------------------------------------------------------------- */
+/* print the svp information on the screen */
+void print_svp(svp *cd) {
+	struct tm *temp = &cd->svp_datum_time;
+	puts("==================================================");
+	printf("file_name: %s\n", cd->file_name);
+	puts("Date and time");
+	printf("\n%s\n", asctime(temp));
+	/*printf("%d-",cd->svp_datum_time.tm_year);
+	 printf("%d\t",cd->svp_datum_time.tm_yday);
+	 printf("%d:",cd->svp_datum_time.tm_hour);
+	 printf("%d:",cd->svp_datum_time.tm_min);
+	 printf("%d\n",cd->svp_datum_time.tm_sec);*/
+	puts("position");
+	printf("lat: %Lf\t", cd->s_lat);
+	printf("lon: %Lf\n", cd->s_lon);
+	puts("==================================================");
 }
 
 /* ---------------------------------------------------------------- */
@@ -1411,70 +1475,6 @@ void read_list(char *list, char *list_2) {
 	fclose(fSvp);
 	fclose(fresult);
 } /* read_list */
-/* ---------------------------------------------------------------- */
-/*
- *  Function trim_newline
- *	Delete the '\n' char from string
- */
-void trim_newline(char string[]) {
-	if (string[strlen(string) - 1] == '\n')
-		string[strlen(string) - 1] = '\0';
-}
-/* ---------------------------------------------------------------- */
-/* print the inf information on the screen */
-void print_inf(inf *cd) {
-	struct tm *temp = &cd->s_datum_time;
-	puts("==================================================");
-	printf("file_name: %s\n", cd->file_name);
-	puts("starting Date and time");
-	printf("\n%s\n", asctime(temp));
-	temp = NULL;
-	temp = &cd->e_datum_time;
-	puts("ending Date and time");
-	printf("\n%s\n", asctime(temp));
-	puts("Start position");
-	printf("lat: %Lf\t", cd->s_lat);
-	printf("lon: %Lf\n", cd->s_lon);
-	puts("End position");
-	printf("e_lat: %Lf\t", cd->e_lat);
-	printf("e_lon: %Lf\n", cd->e_lon);
-	puts("Average position");
-	printf("ave_lat: %Lf\t", cd->ave_lat);
-	printf("ave_lon: %Lf\n", cd->ave_lon);
-	puts("==================================================");
-	temp = NULL;
-}
-/* --------------------------------------------------------------- */
-/* print the svp information on the screen */
-void print_svp(svp *cd) {
-	struct tm *temp = &cd->svp_datum_time;
-	puts("==================================================");
-	printf("file_name: %s\n", cd->file_name);
-	puts("Date and time");
-	printf("\n%s\n", asctime(temp));
-	/*printf("%d-",cd->svp_datum_time.tm_year);
-	 printf("%d\t",cd->svp_datum_time.tm_yday);
-	 printf("%d:",cd->svp_datum_time.tm_hour);
-	 printf("%d:",cd->svp_datum_time.tm_min);
-	 printf("%d\n",cd->svp_datum_time.tm_sec);*/
-	puts("position");
-	printf("lat: %Lf\t", cd->s_lat);
-	printf("lon: %Lf\n", cd->s_lon);
-	puts("==================================================");
-}
-/* --------------------------------------------------------------- */
-/* calculate the average position of two points */
-/* http://www.movable-type.co.uk/scripts/latlong.html */
-void mid_point(long double lat1, long double lon1, long double lat2, long double lon2, long double *lat3, long double *lon3) {
-	double dLon = DTR * ((lon2) - (lon1));
-	double lat1_rad = DTR * ((lat1));
-	double lat2_rad = DTR * ((lat2));
-	double lon1_rad = DTR * ((lon1));
-	double bx = cos(lat2_rad) * cos(dLon);
-	double by = cos(lat2_rad) * sin(dLon);
-	*(lat3) = atan2(sin(lat1_rad) + sin(lat2_rad), sqrt((((cos(lat1_rad)) + bx) * ((cos(lat1_rad)) + bx)) + (by * by))) * RTD;
-	*(lon3) = (lon1_rad + atan2(by, (cos(lat1_rad) + bx))) * RTD;
-}
 /* ------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {

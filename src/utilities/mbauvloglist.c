@@ -75,12 +75,12 @@ struct ctd_calibration_struct {
 		double ptcb0;
 		double ptcb1;
 		double ptcb2;
-		
+
 		double a0;
 		double a1;
 		double a2;
 		double a3;
-		
+
 		double g;
 		double h;
 		double i;
@@ -116,6 +116,7 @@ double calcPressure(struct ctd_calibration_struct *calibration_ptr,
   pres = (pres-14.7)*.6894757; //per note on page 34 of the SBE49 Manual
   return pres;
 }
+/*--------------------------------------------------------------------*/
 
 //return ITS90 temperature
 double calcTemp(const struct ctd_calibration_struct *calibration_ptr,
@@ -132,6 +133,7 @@ double calcTemp(const struct ctd_calibration_struct *calibration_ptr,
                       - (double)273.15;
   return temp;
 }
+/*--------------------------------------------------------------------*/
 
 double calcCond(const struct ctd_calibration_struct *calibration_ptr,
 				double cFreq, double temp, double pressure)
@@ -139,7 +141,7 @@ double calcCond(const struct ctd_calibration_struct *calibration_ptr,
 
   // pressure *= 1.45; // Convert to psia for this formula
 
-  cFreq /= 1000.0; 
+  cFreq /= 1000.0;
   double cond = (calibration_ptr->g + calibration_ptr->h*cFreq*cFreq
 				 + calibration_ptr->i*cFreq*cFreq*cFreq
 				 + calibration_ptr->j*cFreq*cFreq*cFreq*cFreq)
@@ -148,6 +150,37 @@ double calcCond(const struct ctd_calibration_struct *calibration_ptr,
 
   return cond;
 }
+/*--------------------------------------------------------------------*/
+
+void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr)
+{
+	calibration_ptr->pa0 = 8.580044e-001;
+	calibration_ptr->pa1 = 1.108702e-001;
+	calibration_ptr->pa2 = -2.247276e-009;
+	calibration_ptr->ptempa0 = 5.929376e+001;
+	calibration_ptr->ptempa1 = -3.132766e+001;
+	calibration_ptr->ptempa2 = 3.934270e+000;
+	calibration_ptr->ptca0 = 5.247614e+005;
+	calibration_ptr->ptca1 = 1.857443e+000;
+	calibration_ptr->ptca2 = 2.311606e-003;
+	calibration_ptr->ptcb0 = 2.769200e+001;
+	calibration_ptr->ptcb1 = 4.400000e-003;
+	calibration_ptr->ptcb2 = 0.;
+
+	calibration_ptr->a0 = 8.391167e-004;
+	calibration_ptr->a1 = 2.789202e-004;
+	calibration_ptr->a2 = -1.769508e-006;
+	calibration_ptr->a3 = 1.831480e-007;
+
+	calibration_ptr->g = -1.000098e+000;
+	calibration_ptr->h = 1.542017e-001;
+	calibration_ptr->i = -4.018137e-004;
+	calibration_ptr->j = 5.724026e-005;
+	calibration_ptr->cpcor = -9.5700e-008;
+	calibration_ptr->ctcor = 3.2500e-006;
+}
+
+/*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
 	int errflg = 0;
@@ -212,13 +245,13 @@ int main(int argc, char **argv) {
 	double *nav_roll = NULL;
 	double *nav_pitch = NULL;
 	double *nav_heave = NULL;
-    
+
     /* calculate time by adding time of date  to Kearfott time of day value */
     int calc_ktime = MB_NO;
     int ktime_available = MB_NO;
     double startofday_time_d = 0.0;
     double ktime_calc = 0.0;
-    
+
     /* recalculate ctd data from fundamental observations */
     int recalculate_ctd = MB_NO;
     int ctd_calibration_id = 0;
@@ -552,11 +585,11 @@ int main(int argc, char **argv) {
 					fields[nfields].scale = 1.0;
 				recordsize += 8;
 			}
-            
+
             /* check if kearfott time is in this file */
             if (strcmp(fields[nfields].name, "utcTime") == 0)
                 ktime_available = MB_YES;
-            
+
             /* check if raw and processed ctd data are in this file */
             if (strcmp(fields[nfields].name, "cond_frequency") == 0)
                 cond_frequency_available = MB_YES;
@@ -572,7 +605,7 @@ int main(int argc, char **argv) {
                 temperature_available = MB_YES;
             else if (strcmp(fields[nfields].name, "pressure") == 0)
                 pressure_available = MB_YES;
-            
+
             /* increment counter */
 			nfields++;
 		}
@@ -592,7 +625,7 @@ int main(int argc, char **argv) {
 			strcpy(printfields[i].format, fields[i].format);
 		}
 	}
-    
+
     /* if recalculating CTD data then check for available raw CTD data */
     if (recalculate_ctd == MB_YES) {
         if (cond_frequency_available == MB_NO
@@ -813,7 +846,7 @@ int main(int argc, char **argv) {
                                         &potentialtemperature_calc, &error);
             /* interp_status = */ mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
         }
-    
+
         /* calculate timestamp by adding Kearfott second-of-day value (utcTime) to seconds to the start of day
          * from the overall timestamp (time) */
         if (ktime_available == MB_YES && calc_ktime == MB_YES) {
@@ -1073,32 +1106,3 @@ int main(int argc, char **argv) {
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-
-void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr)
-{
-	calibration_ptr->pa0 = 8.580044e-001;
-	calibration_ptr->pa1 = 1.108702e-001;
-	calibration_ptr->pa2 = -2.247276e-009;
-	calibration_ptr->ptempa0 = 5.929376e+001;
-	calibration_ptr->ptempa1 = -3.132766e+001;
-	calibration_ptr->ptempa2 = 3.934270e+000;
-	calibration_ptr->ptca0 = 5.247614e+005;
-	calibration_ptr->ptca1 = 1.857443e+000;
-	calibration_ptr->ptca2 = 2.311606e-003;
-	calibration_ptr->ptcb0 = 2.769200e+001;
-	calibration_ptr->ptcb1 = 4.400000e-003;
-	calibration_ptr->ptcb2 = 0.;
-
-	calibration_ptr->a0 = 8.391167e-004;
-	calibration_ptr->a1 = 2.789202e-004;
-	calibration_ptr->a2 = -1.769508e-006;
-	calibration_ptr->a3 = 1.831480e-007;
-
-	calibration_ptr->g = -1.000098e+000;
-	calibration_ptr->h = 1.542017e-001;
-	calibration_ptr->i = -4.018137e-004;
-	calibration_ptr->j = 5.724026e-005;
-	calibration_ptr->cpcor = -9.5700e-008;
-	calibration_ptr->ctcor = 3.2500e-006;
-}
-

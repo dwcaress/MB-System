@@ -561,6 +561,48 @@ int mbcopy_xse_to_elacmk2(int verbose, struct mbsys_xse_struct *istore, struct m
   return (status);
 }
 /*--------------------------------------------------------------------*/
+int mbcopy_simrad_time_convert(int verbose, int year, int month, int day, int hour, int minute, int second, int centisecond,
+                               int *date, int *msec, int *error) {
+  int status = MB_SUCCESS;
+  int time_i[7];
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
+    fprintf(stderr, "dbg2  Input arguments:\n");
+    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+    fprintf(stderr, "dbg2       year:       %d\n", year);
+    fprintf(stderr, "dbg2       month:      %d\n", month);
+    fprintf(stderr, "dbg2       day:        %d\n", day);
+    fprintf(stderr, "dbg2       hour:       %d\n", hour);
+    fprintf(stderr, "dbg2       minute:     %d\n", minute);
+    fprintf(stderr, "dbg2       second:     %d\n", second);
+    fprintf(stderr, "dbg2       centisecond:%d\n", centisecond);
+  }
+
+  /* get time */
+  mb_fix_y2k(verbose, year, &time_i[0]);
+  time_i[1] = month;
+  time_i[2] = day;
+  time_i[3] = hour;
+  time_i[4] = minute;
+  time_i[5] = second;
+  time_i[6] = 10000 * centisecond;
+  *date = 10000 * time_i[0] + 100 * time_i[1] + time_i[2];
+  *msec = 3600000 * time_i[3] + 60000 * time_i[4] + 1000 * time_i[5] + 0.001 * time_i[6];
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
+    fprintf(stderr, "dbg2  Return values:\n");
+    fprintf(stderr, "dbg2       date:       %d\n", *date);
+    fprintf(stderr, "dbg2       msec:       %d\n", *msec);
+    fprintf(stderr, "dbg2       error:      %d\n", *error);
+    fprintf(stderr, "dbg2  Return status:\n");
+    fprintf(stderr, "dbg2       status:     %d\n", status);
+  }
+
+  return (status);
+}
+/*--------------------------------------------------------------------*/
 int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, struct mbsys_simrad2_struct *ostore, int *error) {
   int status = MB_SUCCESS;
   struct mbsys_simrad_survey_struct *iping;
@@ -1288,48 +1330,6 @@ int mbcopy_simrad_to_simrad2(int verbose, struct mbsys_simrad_struct *istore, st
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       error:      %d\n", *error);
-    fprintf(stderr, "dbg2  Return status:\n");
-    fprintf(stderr, "dbg2       status:     %d\n", status);
-  }
-
-  return (status);
-}
-/*--------------------------------------------------------------------*/
-int mbcopy_simrad_time_convert(int verbose, int year, int month, int day, int hour, int minute, int second, int centisecond,
-                               int *date, int *msec, int *error) {
-  int status = MB_SUCCESS;
-  int time_i[7];
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
-    fprintf(stderr, "dbg2  Input arguments:\n");
-    fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-    fprintf(stderr, "dbg2       year:       %d\n", year);
-    fprintf(stderr, "dbg2       month:      %d\n", month);
-    fprintf(stderr, "dbg2       day:        %d\n", day);
-    fprintf(stderr, "dbg2       hour:       %d\n", hour);
-    fprintf(stderr, "dbg2       minute:     %d\n", minute);
-    fprintf(stderr, "dbg2       second:     %d\n", second);
-    fprintf(stderr, "dbg2       centisecond:%d\n", centisecond);
-  }
-
-  /* get time */
-  mb_fix_y2k(verbose, year, &time_i[0]);
-  time_i[1] = month;
-  time_i[2] = day;
-  time_i[3] = hour;
-  time_i[4] = minute;
-  time_i[5] = second;
-  time_i[6] = 10000 * centisecond;
-  *date = 10000 * time_i[0] + 100 * time_i[1] + time_i[2];
-  *msec = 3600000 * time_i[3] + 60000 * time_i[4] + 1000 * time_i[5] + 0.001 * time_i[6];
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  MBcopy function <%s> completed\n", __func__);
-    fprintf(stderr, "dbg2  Return values:\n");
-    fprintf(stderr, "dbg2       date:       %d\n", *date);
-    fprintf(stderr, "dbg2       msec:       %d\n", *msec);
     fprintf(stderr, "dbg2       error:      %d\n", *error);
     fprintf(stderr, "dbg2  Return status:\n");
     fprintf(stderr, "dbg2       status:     %d\n", status);

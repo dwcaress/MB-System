@@ -112,7 +112,7 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 /*--------------------------------------------------------------------*/
 
 /* id variables */
-static char program_name[] = "MBnavadjust";
+static const char program_name[] = "MBnavadjust";
 
 /* XG variable declarations */
 #define xgfont "-*-" FIXED "-bold-r-normal-*-13-*-75-75-c-70-iso8859-1"

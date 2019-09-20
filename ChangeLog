@@ -20,6 +20,7 @@ include "beta" in the tag name are preliminary and generally not announced.
 Distributions that do not include "beta" in the tag name correspond to the major,
 announced releases.
 
+  Version 5.7.6beta11    September 20, 2019
   Version 5.7.6beta10    September 18, 2019
   Version 5.7.6beta8     September 9, 2019
   Version 5.7.6beta6     August 26, 2019
@@ -325,6 +326,22 @@ announced releases.
 MB-SYSTEM VERSION 5.7 RELEASE NOTES:
 -------------------------------------------------------------------------------
 
+-----> 5.7.6beta11 (September 20, 2019)
+
+Mbset: Fix to mbset so that the mbp_navadj_mode is set to MBP_NAVADJ_OFF
+instead of MBP_NAV_OFF and MBP_NAVADJ_LLZ instead of MBP_NAV_ON.
+
+Mbminirovnav: Fix so that variations in the NAV* and CTD* files are handled
+properly.
+
+Mbnavadjustmerge: Fixed handling of
+--unset-skipped-crossings-by-block=survey1/survey2
+commands.
+
+Code stye: Kurt Schwehr is systematically altering the code to conform to best
+practices regarding header inclusion and reduced variable scope, particularly
+for loop indices.
+
 -----> 5.7.6beta10 (September 18, 2019)
 
 Mbnavadjust: Changed the contouring displayed during analysis of crossings to
@@ -337,9 +354,6 @@ mbnavadjustmerge.
 Mbnavadjustmerge: Added options to pre-generate the triangular mesh files for
 each section in an mbnavadjust project (--triangulate, --triangulate-all,
 --triangulate-section=file:section, and --triangulate-scale=scale).
-
-Mbset: Fix to mbset so that the mbp_navadj_mode is set to MBP_NAVADJ_OFF
-instead of MBP_NAV_OFF and MBP_NAVADJ_LLZ instead of MBP_NAV_ON.
 
 Mbtrn library: Updated to current code written by Kent Headley.
 

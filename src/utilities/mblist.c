@@ -466,104 +466,6 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 }
 /*--------------------------------------------------------------------*/
 /*
-Method to get fields from raw data, similar to mb_get_all.
-*/
-int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate, double *absorption,
-               int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop, double *bsn, double *bso, int *tx,
-               int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples, int *start_sample, int *range,
-               double *depression, double *bs, double *ss_pixels, int *error) {
-	int status = MB_SUCCESS;
-	struct mb_io_struct *mb_io_ptr;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
-	}
-
-	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-
-	*mode = -1;
-	*ipulse_length = 0;
-	*png_count = 0;
-	*sample_rate = 0;
-	*absorption = 0;
-	*max_range = 0;
-	*r_zero = 0;
-	*r_zero_corr = 0;
-	*tvg_start = 0;
-	*tvg_stop = 0;
-	*bsn = 0;
-	*bso = 0;
-	*tx = 0;
-	*tvg_crossover = 0;
-	*nbeams_ss = 0;
-	*npixels = 0;
-
-	for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-		beam_samples[i] = 0;
-		start_sample[i] = 0;
-		range[i] = 0;
-		depression[i] = 0.0;
-		bs[i] = 0.0;
-	}
-
-	switch (mb_io_ptr->format) {
-	case MBF_EM300MBA:
-	case MBF_EM300RAW:
-		mb_get_raw_simrad2(verbose, mbio_ptr, mode, ipulse_length, png_count, sample_rate, absorption, max_range, r_zero,
-		                   r_zero_corr, tvg_start, tvg_stop, bsn, bso, tx, tvg_crossover, nbeams_ss, npixels, beam_samples,
-		                   start_sample, range, depression, bs, ss_pixels, error);
-
-		break;
-	case MBF_EM710MBA:
-	case MBF_EM710RAW:
-		mb_get_raw_simrad3(verbose, mbio_ptr, mode, ipulse_length, png_count, sample_rate, absorption, max_range, r_zero,
-		                   r_zero_corr, tvg_start, tvg_stop, bsn, bso, tx, tvg_crossover, nbeams_ss, npixels, beam_samples,
-		                   start_sample, range, depression, bs, ss_pixels, error);
-
-		break;
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
-		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
-		fprintf(stderr, "dbg2       png_count:       %d\n", *png_count);
-		fprintf(stderr, "dbg2       sample_rate:     %d\n", *sample_rate);
-		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
-		fprintf(stderr, "dbg2       max_range:       %d\n", *max_range);
-		fprintf(stderr, "dbg2       r_zero:          %d\n", *r_zero);
-		fprintf(stderr, "dbg2       r_zero_corr:     %d\n", *r_zero_corr);
-		fprintf(stderr, "dbg2       tvg_start:       %d\n", *tvg_start);
-		fprintf(stderr, "dbg2       tvg_stop:        %d\n", *tvg_stop);
-		fprintf(stderr, "dbg2       bsn:             %f\n", *bsn);
-		fprintf(stderr, "dbg2       bso:             %f\n", *bso);
-		fprintf(stderr, "dbg2       tx:              %d\n", *tx);
-		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
-		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
-		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
-		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
-		}
-		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
-			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
-		}
-		for (int i = 0; i < *npixels; i++) {
-			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
-		}
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return status;
-}
-
-/*--------------------------------------------------------------------*/
-/*
 Method to get fields from simrad2 raw data.
 */
 
@@ -707,6 +609,104 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 		}
 		for (int i = 0; i < ping_ptr->png_npixels; i++)
 			ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       mode:            %d\n", *mode);
+		fprintf(stderr, "dbg2       ipulse_length:   %d\n", *ipulse_length);
+		fprintf(stderr, "dbg2       png_count:       %d\n", *png_count);
+		fprintf(stderr, "dbg2       sample_rate:     %d\n", *sample_rate);
+		fprintf(stderr, "dbg2       absorption:      %f\n", *absorption);
+		fprintf(stderr, "dbg2       max_range:       %d\n", *max_range);
+		fprintf(stderr, "dbg2       r_zero:          %d\n", *r_zero);
+		fprintf(stderr, "dbg2       r_zero_corr:     %d\n", *r_zero_corr);
+		fprintf(stderr, "dbg2       tvg_start:       %d\n", *tvg_start);
+		fprintf(stderr, "dbg2       tvg_stop:        %d\n", *tvg_stop);
+		fprintf(stderr, "dbg2       bsn:             %f\n", *bsn);
+		fprintf(stderr, "dbg2       bso:             %f\n", *bso);
+		fprintf(stderr, "dbg2       tx:              %d\n", *tx);
+		fprintf(stderr, "dbg2       tvg_crossover:   %d\n", *tvg_crossover);
+		fprintf(stderr, "dbg2       nbeams_ss:       %d\n", *nbeams_ss);
+		fprintf(stderr, "dbg2       npixels:         %d\n", *npixels);
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			fprintf(stderr, "dbg2       beam:%d range:%d depression:%f bs:%f\n", i, range[i], depression[i], bs[i]);
+		}
+		for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+			fprintf(stderr, "dbg2       beam:%d samples:%d start:%d\n", i, beam_samples[i], start_sample[i]);
+		}
+		for (int i = 0; i < *npixels; i++) {
+			fprintf(stderr, "dbg2       pixel:%d ss:%f\n", i, ss_pixels[i]);
+		}
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", status);
+	}
+
+	return status;
+}
+
+/*--------------------------------------------------------------------*/
+/*
+Method to get fields from raw data, similar to mb_get_all.
+*/
+int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *png_count, int *sample_rate, double *absorption,
+               int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop, double *bsn, double *bso, int *tx,
+               int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples, int *start_sample, int *range,
+               double *depression, double *bs, double *ss_pixels, int *error) {
+	int status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       mbio_ptr:        %p\n", (void *)mbio_ptr);
+	}
+
+	mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
+
+	*mode = -1;
+	*ipulse_length = 0;
+	*png_count = 0;
+	*sample_rate = 0;
+	*absorption = 0;
+	*max_range = 0;
+	*r_zero = 0;
+	*r_zero_corr = 0;
+	*tvg_start = 0;
+	*tvg_stop = 0;
+	*bsn = 0;
+	*bso = 0;
+	*tx = 0;
+	*tvg_crossover = 0;
+	*nbeams_ss = 0;
+	*npixels = 0;
+
+	for (int i = 0; i < mb_io_ptr->beams_bath_max; i++) {
+		beam_samples[i] = 0;
+		start_sample[i] = 0;
+		range[i] = 0;
+		depression[i] = 0.0;
+		bs[i] = 0.0;
+	}
+
+	switch (mb_io_ptr->format) {
+	case MBF_EM300MBA:
+	case MBF_EM300RAW:
+		mb_get_raw_simrad2(verbose, mbio_ptr, mode, ipulse_length, png_count, sample_rate, absorption, max_range, r_zero,
+		                   r_zero_corr, tvg_start, tvg_stop, bsn, bso, tx, tvg_crossover, nbeams_ss, npixels, beam_samples,
+		                   start_sample, range, depression, bs, ss_pixels, error);
+
+		break;
+	case MBF_EM710MBA:
+	case MBF_EM710RAW:
+		mb_get_raw_simrad3(verbose, mbio_ptr, mode, ipulse_length, png_count, sample_rate, absorption, max_range, r_zero,
+		                   r_zero_corr, tvg_start, tvg_stop, bsn, bso, tx, tvg_crossover, nbeams_ss, npixels, beam_samples,
+		                   start_sample, range, depression, bs, ss_pixels, error);
+
+		break;
 	}
 
 	if (verbose >= 2) {

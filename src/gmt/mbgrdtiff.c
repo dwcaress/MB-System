@@ -720,7 +720,7 @@ void GMT_mbgrdtiff_set_proj_limits(struct GMT_CTRL *GMT, struct GMT_GRID_HEADER 
 	}
 
 int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
-	char program_name[] = "mbgrdtiff";
+	static const char program_name[] = "mbgrdtiff";
 
 	/* TIFF arrays */
 	mb_path world_file;

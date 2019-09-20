@@ -110,7 +110,7 @@ WidgetList BxWidgetIdsFromNames PROTOTYPE((Widget, char *, char *));
 /*--------------------------------------------------------------------*/
 
 /* id variables */
-static char program_name[] = "MBedit";
+static const char program_name[] = "MBedit";
 
 /* additional widgets */
 Widget fileSelectionList;

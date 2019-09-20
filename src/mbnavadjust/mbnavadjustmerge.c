@@ -83,13 +83,14 @@
 #define MOD_MODE_UNSET_TIES_BLOCK 33
 #define MOD_MODE_UNSET_TIES_ALL 34
 #define MOD_MODE_SKIP_UNSET_CROSSINGS 35
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 36
-#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 37
-#define MOD_MODE_INSERT_DISCONTINUITY 38
-#define MOD_MODE_REIMPORT_FILE 39
-#define MOD_MODE_REIMPORT_ALL_FILES 40
-#define MOD_MODE_TRIANGULATE 41
-#define MOD_MODE_TRIANGULATE_SECTION 42
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS 36
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK 37
+#define MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS 38
+#define MOD_MODE_INSERT_DISCONTINUITY 39
+#define MOD_MODE_REIMPORT_FILE 40
+#define MOD_MODE_REIMPORT_ALL_FILES 41
+#define MOD_MODE_TRIANGULATE 42
+#define MOD_MODE_TRIANGULATE_SECTION 43
 #define IMPORT_NONE 0
 #define IMPORT_TIE 1
 #define IMPORT_GLOBALTIE 2
@@ -161,6 +162,7 @@ int main(int argc, char **argv) {
                           "\t--unset-ties-by-block=survey1/survey2\n"
                           "\t--unset-all-ties\n"
                           "\t--skip-unset-crossings\n"
+                          "\t--unset-skipped-crossings\n"
                           "\t--unset-skipped-crossings-by-block=survey1/survey2\n"
                           "\t--unset-skipped-crossings-between-surveys\n"
                           "\t--insert-discontinuity=file:section\n"
@@ -230,6 +232,7 @@ int main(int argc, char **argv) {
                                     {"unset-ties-all", required_argument, NULL, 0},
                                     {"unset-all-ties", required_argument, NULL, 0},
                                     {"skip-unset-crossings", no_argument, NULL, 0},
+                                    {"unset-skipped-crossings", no_argument, NULL, 0},
                                     {"unset-skipped-crossings-by-block", required_argument, NULL, 0},
                                     {"unset-skipped-crossings-between-surveys", no_argument, NULL, 0},
                                     {"insert-discontinuity", required_argument, NULL, 0},
@@ -1073,8 +1076,32 @@ int main(int argc, char **argv) {
       }
 
       /*-------------------------------------------------------
-       * unset all skipped crossings between two surveys
-          --unset-skipped-crossings-between-surveys */
+       * unset all skipped crossings in a specified survey by survey block
+          --unset-skipped-crossings
+          --unset-skipped-crossings-by-block
+          --unset-skipped-crossings-betweeen-surveys */
+      else if (strcmp("unset-skipped-crossings", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          mods[num_mods].mode = MOD_MODE_UNSET_SKIPPED_CROSSINGS;
+          num_mods++;
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\tunset-skipped-crossings command ignored\n\n");
+        }
+      }
+      else if (strcmp("unset-skipped-crossings-by-block", options[option_index].name) == 0) {
+        if (num_mods < NUMBER_MODS_MAX) {
+          if ((nscan = sscanf(optarg, "%d:%d", &mods[num_mods].survey1, &mods[num_mods].survey2)) == 2) {
+            mods[num_mods].mode = MOD_MODE_UNSET_SKIPPED_CROSSINGS_BLOCK;
+            num_mods++;
+          }
+        }
+        else {
+          fprintf(stderr,
+                  "Maximum number of mod commands reached:\n\tunset-skipped-crossings-by-block command ignored\n\n");
+        }
+      }
       else if (strcmp("unset-skipped-crossings-between-surveys", options[option_index].name) == 0) {
         if (num_mods < NUMBER_MODS_MAX) {
           mods[num_mods].mode = MOD_MODE_UNSET_SKIPPED_CROSSINGS_BETWEEN_SURVEYS;
@@ -2702,6 +2729,21 @@ int main(int argc, char **argv) {
                   file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
                   crossing->section_2);
         }
+      }
+      break;
+
+    case MOD_MODE_UNSET_SKIPPED_CROSSINGS:
+      fprintf(stderr, "\nCommand unset-skipped-crossings\n");
+
+      for (icrossing = 0; icrossing < project_output.num_crossings; icrossing++) {
+        crossing = &(project_output.crossings[icrossing]);
+        file1 = (struct mbna_file *)&project_output.files[crossing->file_id_1];
+        file2 = (struct mbna_file *)&project_output.files[crossing->file_id_2];
+        if (crossing->status == MBNA_CROSSING_STATUS_SKIP)
+            crossing->status = MBNA_CROSSING_STATUS_NONE;
+        fprintf(stderr, "Unset skipped crossing:   %d:%d  %2.2d:%4.4d:%4.4d   %2.2d:%4.4d:%4.4d\n", icrossing, itie,
+                  file1->block, crossing->file_id_1, crossing->section_1, file2->block, crossing->file_id_2,
+                  crossing->section_2);
       }
       break;
 
