@@ -131,6 +131,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
     fprintf(stderr, "dbg2       beam:            %d\n", beam);
     fprintf(stderr, "dbg2       action:          %d\n", action);
   }
+  
   /* write out the edit */
   fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
   if (sofp != NULL) {
@@ -167,6 +168,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
+
   int errflg = 0;
   int c;
   int help = 0;
@@ -1188,8 +1190,9 @@ int main(int argc, char **argv) {
           /* check for max heading rate if requested */
           if (zap_max_heading_rate == MB_YES) {
             double dh, heading_rate;
+
                         if (nrec > 1) {
-                            dh = ping[nrec-1].heading - ping[0].heading;
+                            double dh = ping[nrec-1].heading - ping[0].heading;
                             if (dh > 180)
                                 dh -= 360;
                             if (dh < -180)
@@ -1595,235 +1598,6 @@ int main(int argc, char **argv) {
             }
             if (ndevsqsum > (ping[irec].beams_bath / 4)) {
               ping_deviation = sqrt(devsqsum / ndevsqsum);
-//if (ping_deviation > ping_deviation_tolerance/2)
-//fprintf(stderr, "PING DEVIATION: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f - %3d %f %f - %d\n",
-//ping[irec].time_i[0], ping[irec].time_i[1], ping[irec].time_i[2],
-//ping[irec].time_i[3], ping[irec].time_i[4], ping[irec].time_i[5],
-//ping[irec].time_i[6], i, ping[irec].bath[i],
-//ndevsqsum, ping_deviation, ping_deviation_tolerance,
-//(ping_deviation > ping_deviation_tolerance));
-              if (ping_deviation > ping_deviation_tolerance) {
-                for (int i = 0; i < ping[irec].beams_bath; i++) {
-                  if (mb_beam_ok(ping[irec].beamflag[i])) {
-                    if (verbose >= 1)
-                      fprintf(stderr, "p: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f %3d %f %f\n",
-                              ping[irec].time_i[0], ping[irec].time_i[1], ping[irec].time_i[2],
-                              ping[irec].time_i[3], ping[irec].time_i[4], ping[irec].time_i[5],
-                              ping[irec].time_i[6], i, ping[irec].bath[i],
-                              ndevsqsum, ping_deviation, ping_deviation_tolerance);
-                    ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
-                    npingdeviation++;
-                    nflag++;
-                    mb_ess_save(verbose, &esf, ping[irec].time_d,
-                                i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_FILTER,
-                                &error);
-                  }
-                }
-              }
-            }
-          }
-        }
 
-        /* write out edits from completed pings */
-        if ((status == MB_SUCCESS && nrec == 3) || done == MB_YES) {
-          int k;
-          if (done == MB_YES)
-            k = nrec;
-          else
-            k = 1;
-          for (int irec = 0; irec < k; irec++) {
-            for (int i = 0; i < ping[irec].beams_bath; i++) {
-              if (ping[irec].beamflag[i] != ping[irec].beamflagorg[i]) {
-                if (mb_beam_ok(ping[irec].beamflag[i]))
-                  action = MBP_EDIT_UNFLAG;
-                else if (mb_beam_check_flag_filter2(ping[irec].beamflag[i]))
-                  action = MBP_EDIT_FILTER;
-                else if (mb_beam_check_flag_filter(ping[irec].beamflag[i]))
-                  action = MBP_EDIT_FILTER;
-                else if (ping[irec].beamflag[i] != MB_FLAG_NULL)
-                  action = MBP_EDIT_FLAG;
-                else
-                  action = MBP_EDIT_ZERO;
-                mb_esf_save(verbose, &esf, ping[irec].time_d,
-                            i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, action, &error);
-              }
-            }
-          }
-        }
-
-        /* reset counters and data */
-        if (status == MB_SUCCESS && nrec == 3) {
-          /* copy data back one */
-          nrec = 2;
-          for (int j = 0; j < 2; j++) {
-            for (int i = 0; i < 7; i++)
-              ping[j].time_i[i] = ping[j + 1].time_i[i];
-            ping[j].time_d = ping[j + 1].time_d;
-            ping[j].navlon = ping[j + 1].navlon;
-            ping[j].navlat = ping[j + 1].navlat;
-            ping[j].speed = ping[j + 1].speed;
-            ping[j].heading = ping[j + 1].heading;
-            ping[j].beams_bath = ping[j + 1].beams_bath;
-            for (int i = 0; i < ping[j].beams_bath; i++) {
-              ping[j].beamflag[i] = ping[j + 1].beamflag[i];
-              ping[j].beamflagorg[i] = ping[j + 1].beamflagorg[i];
-              ping[j].bath[i] = ping[j + 1].bath[i];
-              ping[j].bathacrosstrack[i] = ping[j + 1].bathacrosstrack[i];
-              ping[j].bathalongtrack[i] = ping[j + 1].bathalongtrack[i];
-              ping[j].bathx[i] = ping[j + 1].bathx[i];
-              ping[j].bathy[i] = ping[j + 1].bathy[i];
-            }
-          }
-        }
-      }
-
-      /* close the file */
-      status = mb_close(verbose, &mbio_ptr, &error);
-
-      /*for (int i=0;i<esf.nedit;i++)
-      {
-      if (esf.edit_use[i] == 1000)
-      fprintf(stderr,"BEAM FLAG TIED TO NULL BEAM: i:%d edit: %f %d %d   %d\n",
-      i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
-      else if (esf.edit_use[i] == 100)
-      fprintf(stderr,"DUPLICATE BEAM FLAG: i:%d edit: %f %d %d   %d\n",
-      i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
-      else if (esf.edit_use[i] == 1)
-      fprintf(stderr,"BEAM FLAG USED:      i:%d edit: %f %d %d   %d\n",
-      i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
-      else if (esf.edit_use[i] != 1)
-      fprintf(stderr,"BEAM FLAG NOT USED:  i:%d edit: %f %d %d   %d\n",
-      i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
-      }*/
-
-      /* close edit save file */
-      status = mb_esf_close(verbose, &esf, &error);
-
-      /* update mbprocess parameter file */
-      if (esffile_open == MB_YES) {
-        /* update mbprocess parameter file */
-        status = mb_pr_update_format(verbose, swathfile, MB_YES, format, &error);
-        status = mb_pr_update_edit(verbose, swathfile, MBP_EDIT_ON, esffile, &error);
-      }
-
-      /* unlock the raw swath file */
-      if (uselockfiles == MB_YES)
-        status = mb_pr_unlockswathfile(verbose, swathfile, MBP_LOCK_EDITBATHY, program_name, &error);
-
-      /* check memory */
-      if (verbose >= 4)
-        status = mb_memory_list(verbose, &error);
-
-      /* increment the total counting variables */
-      nfiletot++;
-      ndatatot += ndata;
-      nflagesftot += nflagesf;
-      nunflagesftot += nunflagesf;
-      nzeroesftot += nzeroesf;
-      ndepthrangetot += ndepthrange;
-      nminrangetot += nminrange;
-      nfractiontot += nfraction;
-      ndeviationtot += ndeviation;
-      nouterbeamstot += nouterbeams;
-      nouterdistancetot += nouterdistance;
-      ninnerdistancetot += ninnerdistance;
-      nrailtot += nrail;
-      nlong_acrosstot += nlong_across;
-      nmax_heading_ratetot += nmax_heading_rate;
-      nmintot += nmin;
-      nbadtot += nbad;
-      nspiketot += nspike;
-      npingdeviationtot += npingdeviation;
-      nflagtot += nflag;
-      nunflagtot += nunflag;
-
-      /* give the statistics */
-      if (verbose >= 0) {
-        fprintf(stderr, "%d bathymetry data records processed\n", ndata);
-        if (esf.nedit > 0) {
-          fprintf(stderr, "%d beams flagged in old esf file\n", nflagesf);
-          fprintf(stderr, "%d beams unflagged in old esf file\n", nunflagesf);
-          fprintf(stderr, "%d beams zeroed in old esf file\n", nzeroesf);
-        }
-        fprintf(stderr, "%d beams zapped by beam number\n", nouterbeams);
-        fprintf(stderr, "%d beams zapped by distance\n", nouterdistance);
-        fprintf(stderr, "%d beams unzapped by distance\n", ninnerdistance);
-        fprintf(stderr, "%d beams zapped for too few good beams in ping\n", nmin);
-        fprintf(stderr, "%d beams out of acceptable depth range\n", ndepthrange);
-        fprintf(stderr, "%d beams less than minimum range\n", nminrange);
-        fprintf(stderr, "%d beams out of acceptable fractional depth range\n", nfraction);
-        fprintf(stderr, "%d beams out of acceptable speed range\n", nspeed);
-        fprintf(stderr, "%d beams have zero position (lat/lon)\n", nzeropos);
-        fprintf(stderr, "%d beams exceed acceptable deviation from median depth\n", ndeviation);
-        fprintf(stderr, "%d bad rail beams identified\n", nrail);
-        fprintf(stderr, "%d long acrosstrack beams identified\n", nlong_across);
-        fprintf(stderr, "%d max heading rate pings identified\n", nmax_heading_rate);
-        fprintf(stderr, "%d excessive slopes identified\n", nbad);
-        fprintf(stderr, "%d excessive spikes identified\n", nspike);
-        fprintf(stderr, "%d ping deviations identified\n", npingdeviation);
-        fprintf(stderr, "%d beams flagged\n", nflag);
-        fprintf(stderr, "%d beams unflagged\n", nunflag);
-      }
-    }
-
-    /* figure out whether and what to read next */
-    if (read_datalist == MB_YES) {
-      if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-        read_data = MB_YES;
-      else
-        read_data = MB_NO;
-    }
-    else {
-      read_data = MB_NO;
-    }
-
-    /* end loop over files in list */
-  }
-  if (read_datalist == MB_YES)
-    mb_datalist_close(verbose, &datalist, &error);
-
-  /* give the total statistics */
-  if (verbose >= 0) {
-    fprintf(stderr, "\nMBclean Processing Totals:\n");
-    fprintf(stderr, "-------------------------\n");
-    fprintf(stderr, "%d total swath data files processed\n", nfiletot);
-    fprintf(stderr, "%d total bathymetry data records processed\n", ndatatot);
-    fprintf(stderr, "%d total beams flagged in old esf files\n", nflagesftot);
-    fprintf(stderr, "%d total beams unflagged in old esf files\n", nunflagesftot);
-    fprintf(stderr, "%d total beams zeroed in old esf files\n", nzeroesftot);
-    fprintf(stderr, "%d total beams zapped by beam number\n", nouterbeamstot);
-    fprintf(stderr, "%d total beams zapped by distance\n", nouterdistancetot);
-    fprintf(stderr, "%d total beams unzapped by distance\n", ninnerdistancetot);
-    fprintf(stderr, "%d total beams zapped for too few good beams in ping\n", nmintot);
-    fprintf(stderr, "%d total beams out of acceptable depth range\n", ndepthrangetot);
-    fprintf(stderr, "%d total beams less than minimum range\n", nminrangetot);
-    fprintf(stderr, "%d total beams out of acceptable fractional depth range\n", nfractiontot);
-    fprintf(stderr, "%d total beams out of acceptable speed range\n", nspeedtot);
-    fprintf(stderr, "%d total beams zero position (lat/lon)\n", nzeropostot);
-    fprintf(stderr, "%d total beams exceed acceptable deviation from median depth\n", ndeviationtot);
-    fprintf(stderr, "%d total bad rail beams identified\n", nrailtot);
-    fprintf(stderr, "%d total long acrosstrack beams identified\n", nlong_acrosstot);
-    fprintf(stderr, "%d total max heading rate beams identified\n", nmax_heading_ratetot);
-    fprintf(stderr, "%d total excessive spikes identified\n", nspiketot);
-    fprintf(stderr, "%d total excessive slopes identified\n", nbadtot);
-    fprintf(stderr, "%d ping deviations identified\n", npingdeviationtot);
-    fprintf(stderr, "%d total beams flagged\n", nflagtot);
-    fprintf(stderr, "%d total beams unflagged\n", nunflagtot);
-  }
-
-  /* set program status */
-  status = MB_SUCCESS;
-
-  /* check memory */
-  if (verbose >= 4)
-    status = mb_memory_list(verbose, &error);
-
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
-    fprintf(stderr, "dbg2  Ending status:\n");
-    fprintf(stderr, "dbg2       status:  %d\n", status);
-  }
-
-  exit(error);
 }
 /*--------------------------------------------------------------------*/
