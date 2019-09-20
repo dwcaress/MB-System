@@ -90,7 +90,7 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile, int *found, int *e
             existing esf file will be backed up first.
         If both load and output are MB_NO, nothing will be
         done. */
-int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
+int mb_esf_load(int verbose, const char *program_name, char *swathfile, int load, int output, char *esffile, struct mb_esf_struct *esf,
                 int *error) {
 	int found;
 
@@ -156,7 +156,7 @@ int mb_esf_load(int verbose, char *program_name, char *swathfile, int load, int 
             MBP_ESF_APPEND then edit events are appended
             to any existing esf file. Any
             existing esf file will be backed up first. */
-int mb_esf_open(int verbose, char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error) {
+int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, int output, struct mb_esf_struct *esf, int *error) {
 	int status = MB_SUCCESS;
 	char command[MB_PATH_MAXLINE];
 	FILE *esffp;

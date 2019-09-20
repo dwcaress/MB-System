@@ -127,7 +127,7 @@ static int survey_color = MBV_COLOR_BLACK;
 static char survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
-static char program_name[] = "MBgrdviz";
+static const char program_name[] = "MBgrdviz";
 
 /* status variables */
 static int verbose;

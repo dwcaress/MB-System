@@ -4474,7 +4474,7 @@ int mb_pr_point_in_quad(int verbose, double px, double py, double *x, double *y,
 }
 /*--------------------------------------------------------------------*/
 
-int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int *error) {
+int mb_pr_lockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error) {
 	mb_path lockfile;
 	FILE *fp;
 
@@ -4491,7 +4491,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 		fprintf(stderr, "dbg2  Input arguments:\n");
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       file:       %s\n", file);
-		fprintf(stderr, "dbg2       program:    %s\n", program);
+		fprintf(stderr, "dbg2       program_name: %s\n", program_name);
 		fprintf(stderr, "dbg2       purpose:    %d\n", purpose);
 	}
 
@@ -4513,7 +4513,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose, char *program, int
 				strcpy(user, "unknown");
 			gethostname(host, MBP_FILENAMESIZE);
 			fprintf(fp, "# File %s \n# Locked by user <%s> on cpu <%s> at <%s>\n", file, user, host, date);
-			fprintf(fp, "Locking Program: %s\n", program);
+			fprintf(fp, "Locking Program: %s\n", program_name);
 			fprintf(fp, "Locking User: %s\n", user);
 			fprintf(fp, "Locking CPU: %s\n", host);
 			fprintf(fp, "Locking Time: %s\n", date);
@@ -4572,7 +4572,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 	/* initialize return parameters */
 	*locked = MB_NO;
 	*purpose = 0;
-	program[0] = '\0';
+  program[0] = '\0';
 	user[0] = '\0';
 	cpu[0] = '\0';
 	date[0] = '\0';
@@ -4634,7 +4634,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked, int *purpose, char *pro
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, int *error) {
+int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *program_name, int *error) {
 	mb_path lockfile;
 	int locked;
 	mb_path lock_program;
@@ -4658,7 +4658,7 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, i
 		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
 		fprintf(stderr, "dbg2       file:       %s\n", file);
 		fprintf(stderr, "dbg2       purpose:    %d\n", purpose);
-		fprintf(stderr, "dbg2       program:    %s\n", program);
+		fprintf(stderr, "dbg2       program_name: %s\n", program_name);
 	}
 
 	int status = MB_SUCCESS;
@@ -4678,8 +4678,9 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, char *program, i
 			strcpy(user, "unknown");
 
 		/* if locked and everything matches remove lock file */
-		if (locked == MB_YES && strncmp(program, lock_program, strlen(program)) == 0 &&
-		    strncmp(user, lock_user, strlen(user)) == 0 && purpose == lock_purpose) {
+		if (locked == MB_YES && strncmp(program_name, lock_program, MAX(strlen(program_name), strlen(lock_program))) == 0
+        && strncmp(user, lock_user, MAX(strlen(user), strlen(lock_user))) == 0
+        && purpose == lock_purpose) {
 			sprintf(command, "/bin/rm -f %s", lockfile);
 			shellstatus = system(command);
 			status = MB_SUCCESS;

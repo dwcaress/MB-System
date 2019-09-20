@@ -561,7 +561,7 @@ int GMT_mbcontour_parse(struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struc
 
 int GMT_mbcontour(void *V_API, int mode, void *args) {
 
-	char program_name[] = "mbcontour";
+	static const char program_name[] = "mbcontour";
 
 	struct GMT_PALETTE *CPTcolor = NULL;
 	struct GMT_CTRL *GMT_cpy = NULL; /* General GMT interal parameters */

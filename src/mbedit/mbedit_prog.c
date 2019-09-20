@@ -144,14 +144,14 @@ struct mbedit_ping_struct {
 };
 
 /* id variables */
-static char program_name[] = "MBedit";
-static char help_message[] = "MBedit is an interactive editor used to identify and flag\n\
+static const char program_name[] = "MBedit";
+static const char help_message[] = "MBedit is an interactive editor used to identify and flag\n\
 artifacts in swath sonar bathymetry data. Once a file has\n\
 been read in, MBedit displays the bathymetry profiles from\n\
 several pings, allowing the user to identify and flag\n\
 anomalous beams. Flagging is handled internally by setting\n\
 depth values negative, so that no information is lost.";
-static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -S -X -V -H]";
+static const char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -S -X -V -H]";
 
 /* status variables */
 static int error = MB_ERROR_NO_ERROR;

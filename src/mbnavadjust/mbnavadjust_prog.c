@@ -87,9 +87,9 @@ struct swathraw {
 };
 
 /* id variables */
-static char program_name[] = "mbnavadjust";
-static char help_message[] = "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
-static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
+static const char program_name[] = "mbnavadjust";
+static const char help_message[] = "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
+static const char usage_message[] = "mbnavadjust [-Iproject -V -H]";
 
 /* status variables */
 int error = MB_ERROR_NO_ERROR;

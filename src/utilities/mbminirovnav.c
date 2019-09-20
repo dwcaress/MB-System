@@ -450,19 +450,13 @@ int main(int argc, char **argv) {
       while ((result = fgets(buffer, (MB_PATH_MAXLINE - 1), fp)) == buffer) {
         nget = sscanf(buffer, "%lf,$GPGLL,%lf,%c,%lf,%c,%lf,%s",
                 &time_d, &rawlat, &NorS, &rawlon, &EorW, &dummydouble, dummystring);
-        if (nget >= 1) {
+        if (nget >= 5) {
           if (start_time_d <= 0.0)
             start_time_d = time_d;
           if (time_d > 0.0 && time_d < start_time_d)
             start_time_d = time_d;
           if (time_d > end_time_d)
             end_time_d = time_d;
-          rawlat = 0.0;
-          NorS = 'N';
-          rawlon = 0.0;
-          EorW = 'E';
-        }
-        if (nget >= 5) {
           nav_time_d[num_nav] = time_d;
           ldegrees = floor(rawlat / 100.0);
           lminutes = rawlat - ldegrees * 100;
@@ -474,16 +468,17 @@ int main(int argc, char **argv) {
           nav_lon[num_nav] = ldegrees + (lminutes / 60.0);
           if (EorW == 'W' || EorW == 'w')
             nav_lon[num_nav] *= -1;
-        }
 
-        if (interpolate_position == MB_NO
-          || num_nav <= 1
-          || nav_lon[num_nav] != nav_lon[num_nav-1]
-          || nav_lat[num_nav] != nav_lat[num_nav-1]) {
-          reference_lon += nav_lon[num_nav];
-          reference_lat += nav_lat[num_nav];
-          if (num_nav < num_nav_alloc)
-            num_nav++;
+          if ((num_nav < num_nav_alloc)
+              && (interpolate_position == MB_NO
+                  || num_nav <= 1
+                  || nav_lon[num_nav] != nav_lon[num_nav-1]
+                  || nav_lat[num_nav] != nav_lat[num_nav-1])) {
+            reference_lon += nav_lon[num_nav];
+            reference_lat += nav_lat[num_nav];
+            if (num_nav < num_nav_alloc)
+              num_nav++;
+          }
         }
       }
 
@@ -544,7 +539,7 @@ int main(int argc, char **argv) {
         nget = sscanf(buffer, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
                 &time_d, &ctd_C, &ctd_T, &ctd_D, &ctd_S,
                 &ctd_O2uM, &ctd_O2raw, &ctd_DGH_T, &ctd_C2_T, &ctd_C2_C);
-        if (nget == 10) {
+        if (nget >= 4) {
           if (start_time_d <= 0.0)
             start_time_d = time_d;
           if (time_d > 0.0 && time_d < start_time_d)
@@ -556,8 +551,8 @@ int main(int argc, char **argv) {
           ctd_depth[num_ctd] = ctd_D;
           if (num_ctd < num_ctd_alloc)
             num_ctd++;
-          }
         }
+      }
     }
 
     /* close the file */

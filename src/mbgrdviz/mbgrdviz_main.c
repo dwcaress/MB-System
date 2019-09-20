@@ -154,9 +154,9 @@ void do_mbgrdviz_realtimesetup_updaterate(Widget w, XtPointer client_data, XtPoi
 void do_mbgrdviz_realtimesetup_path_test(Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_realtimesetup_pathmode(Widget w, XtPointer client_data, XtPointer call_data);
 
-static char program_name[] = "MBgrdviz";
-static char help_message[] = "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
-static char usage_message[] = "mbgrdviz [-Igrdfile -T -V -H]";
+static const char program_name[] = "MBgrdviz";
+static const char help_message[] = "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
+static const char usage_message[] = "mbgrdviz [-Igrdfile -T -V -H]";
 char ifile[MB_PATH_MAXLINE];
 char jfile[MB_PATH_MAXLINE];
 

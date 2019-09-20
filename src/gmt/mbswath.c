@@ -668,7 +668,7 @@ int GMT_mbswath(void *V_API, int mode, void *args) {
 	//	struct GMT_GRID_HEADER *header_work = NULL;	/* Pointer to a GMT header for the image or grid */
 	//	struct GMTAPI_CTRL *API = gmt_get_api_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
 
-	char program_name[] = "mbswath";
+	static const char program_name[] = "mbswath";
 	//	char help_message[] =  "mbswath is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry
 	//or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction
 	//with the usual GMT programs."; 	char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north
