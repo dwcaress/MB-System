@@ -87,7 +87,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -327,8 +326,7 @@ int main(int argc, char **argv) {
 	startline = 1;
 	strcpy(lineroot, "sidescan");
 
-	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
@@ -2069,7 +2067,6 @@ int main(int argc, char **argv) {
 int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
                                  double altitude, double pitch, double *table_angle, double *table_xtrack, double *table_ltrack,
                                  double *table_altitude, double *table_range, int *error) {
-	int status = MB_SUCCESS;
 	double dangle;
 	double rr, xx, zz;
 	double alpha, beta, theta, phi;
@@ -2106,6 +2103,8 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		table_altitude[i] = zz;
 		table_range[i] = rr;
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);

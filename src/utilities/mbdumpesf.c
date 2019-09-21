@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 
@@ -110,6 +109,8 @@ int main(int argc, char **argv) {
 
 	/* get current default values */
 	byteswapped = mb_swap_check();
+
+	int status = MB_SUCCESS;
 
 	/* process argument list */
 	while ((c = getopt_long(argc, argv, "VvHhI:i:", options, &option_index)) != -1)

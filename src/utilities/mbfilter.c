@@ -154,7 +154,6 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, int *error) {
-	int status = MB_SUCCESS;
 	int nn;
 
 	if (verbose >= 2) {
@@ -178,6 +177,8 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 	if (nn > 0)
 		*hipass = val[0] - *hipass / nn;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -190,7 +191,6 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 }
 /*--------------------------------------------------------------------*/
 int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *hipass, int *error) {
-	int status = MB_SUCCESS;
 	double wgtsum;
 
 	if (verbose >= 2) {
@@ -222,6 +222,8 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 		*hipass = val[0] - *hipass / wgtsum;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -234,8 +236,6 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 }
 /*--------------------------------------------------------------------*/
 int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -256,6 +256,8 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, 
 		*hipass = val[0] - val[n / 2];
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -268,7 +270,6 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, 
 }
 /*--------------------------------------------------------------------*/
 int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
-	int status = MB_SUCCESS;
 	int nn;
 
 	if (verbose >= 2) {
@@ -292,6 +293,8 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 	if (nn > 0)
 		*smooth = *smooth / nn;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -304,7 +307,6 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 }
 /*--------------------------------------------------------------------*/
 int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *smooth, int *error) {
-	int status = MB_SUCCESS;
 	double wgtsum;
 
 	if (verbose >= 2) {
@@ -336,6 +338,8 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 		*smooth = *smooth / wgtsum;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -349,7 +353,6 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 /*--------------------------------------------------------------------*/
 int smooth_median(int verbose, double original, int apply_threshold, double threshold_lo, double threshold_hi, int n, double *val,
                   double *wgt, double *smooth, int *error) {
-	int status = MB_SUCCESS;
 	double ratio;
 
 	if (verbose >= 2) {
@@ -387,6 +390,8 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 		ratio, threshold_lo, threshold_hi, original, *smooth);*/
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -399,7 +404,6 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 }
 /*--------------------------------------------------------------------*/
 int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
-	int status = MB_SUCCESS;
 	double wgtsum;
 	double diff;
 	int nn;
@@ -435,6 +439,8 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -447,7 +453,6 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 }
 /*--------------------------------------------------------------------*/
 int contrast_edge(int verbose, int n, double *val, double *grad, double *result, int *error) {
-	int status = MB_SUCCESS;
 	double edge;
 	double gradsum;
 	double contrast;
@@ -486,6 +491,8 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 	/*fprintf(stderr, "val: %f %f  edge:%f contrast:%f\n",
 	val[0], *result, edge, contrast);*/
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -498,7 +505,6 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 }
 /*--------------------------------------------------------------------*/
 int contrast_gradient(int verbose, int n, double *val, double *wgt, double *result, int *error) {
-	int status = MB_SUCCESS;
 	double gradient;
 	int nn;
 
@@ -524,6 +530,8 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt, double *resu
 	gradient = sqrt(gradient);
 	*result = val[0] - 2 * gradient;
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -541,7 +549,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, char *ombio_ptr, char *ostore_ptr,
                            int *error) {
-	int status = MB_SUCCESS;
 	struct mbsys_ldeoih_struct *ostore;
 
 	/* get data structure pointer */
@@ -598,6 +605,8 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
 		fprintf(stderr, "dbg2       comment:     \ndbg2       %s\n", comment);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* copy the data  */
 	if (ostore != NULL) {
 		/* set beam widths */
@@ -640,7 +649,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -744,7 +752,7 @@ int main(int argc, char **argv) {
 	char *getenv();
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* reset all defaults but the format and lonflip */
 	pings = 1;

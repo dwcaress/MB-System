@@ -83,7 +83,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
                  int symmetry, int *nmean, double *mean, double *sigma, int *error) {
-	int status = MB_SUCCESS;
 	double angle, amean, asigma, sum, sumsq, sumn;
 	int time_i[7];
 	int ii, jj, i0, i1;
@@ -147,6 +146,8 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 	fprintf(tfp, "#\n");
 	fprintf(tfp, "#\n");
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -161,7 +162,6 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 int output_model(int verbose, FILE *tfp, double beamwidth, double depression, double ref_angle, int ntable, int nping,
                  double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
                  double *mean, double *sigma, int *error) {
-	int status = MB_SUCCESS;
 	double ref_amp, range, del, factor, aa;
 	double angle, amean, asigma, sum, sumsq, sumn;
 	int time_i[7];
@@ -235,6 +235,8 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 	}
 	fprintf(tfp, "#\n");
 	fprintf(tfp, "#\n");
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> completed\n", __func__);

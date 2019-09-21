@@ -137,7 +137,6 @@ static const char usage_message[] =
  */
 int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                 double dx, double dy, int *error) {
-	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -159,6 +158,8 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 		fprintf(stderr, "dbg2       dx:         %f\n", dx);
 		fprintf(stderr, "dbg2       dy:         %f\n", dy);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* open the file */
 	if ((fp = fopen(outfile, "w")) == NULL) {
@@ -207,7 +208,6 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
  */
 int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                    double dx, double dy, double nodata, int *error) {
-	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 	int j, k;
 
@@ -227,6 +227,8 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 		fprintf(stderr, "dbg2       dy:         %f\n", dy);
 		fprintf(stderr, "dbg2       nodata:     %f\n", nodata);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* open the file */
 	if ((fp = fopen(outfile, "w")) == NULL) {
@@ -272,7 +274,6 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
  */
 int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                  double dx, double dy, int *error) {
-	int status = MB_SUCCESS;
 	FILE *fp = NULL;
 
 	if (verbose >= 2) {
@@ -290,6 +291,8 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
 		fprintf(stderr, "dbg2       dx:         %f\n", dx);
 		fprintf(stderr, "dbg2       dy:         %f\n", dy);
 	}
+
+	int status = MB_SUCCESS;
 
 	/* open the file */
 	if ((fp = fopen(outfile, "w")) == NULL) {
@@ -332,7 +335,6 @@ int double_compare(double *a, double *b) {
 int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, double beamwidth_ltrack, double altitude,
                            double acrosstrack, double alongtrack, double acrosstrack_spacing, struct footprint *footprint,
                            int *error) {
-	int status = MB_SUCCESS;
 	double r;
 	double theta, phi, thetap, phip;
 
@@ -385,6 +387,8 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 		footprint->x[3] = acrosstrack - 0.5 * acrosstrack_spacing;
 	footprint->y[3] = r * sin(DTR * thetap) * sin(DTR * phip);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -400,8 +404,6 @@ int mbmosaic_get_footprint(int verbose, int mode, double beamwidth_xtrack, doubl
 /*--------------------------------------------------------------------*/
 int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack,
                             double *bathalongtrack, double *gangles, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -420,6 +422,8 @@ int mbmosaic_get_beamangles(int verbose, double sonardepth, int beams_bath, char
 			gangles[i] = RTD * atan(bathacrosstrack[i] / (bath[i] - sonardepth));
 		}
 	}
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
@@ -441,7 +445,6 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
                                 double *priority_angle_priority, double priority_azimuth, double priority_azimuth_factor,
                                 double priority_heading, double priority_heading_factor, double heading, int beams_bath,
                                 char *beamflag, double *gangles, double *priorities, int *error) {
-	int status = MB_SUCCESS;
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
 	int j;
@@ -553,6 +556,8 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -570,7 +575,6 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 /*--------------------------------------------------------------------*/
 int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack, double *slopes,
                             int *error) {
-	int status = MB_SUCCESS;
 	int found_pre, found_post;
 	int i0, i1;
 	int j;
@@ -636,6 +640,8 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -656,7 +662,6 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
                                 double *bathacrosstrack, double *bathalongtrack, double angle_min, double angle_max, int nangle,
                                 double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                                 double *table_range, int *error) {
-	int status = MB_SUCCESS;
 	double dangle, angle0, angle1, factor;
 	int found, foundnext;
 	int j, jj, jstart, jnext;
@@ -679,6 +684,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 	dangle = (angle_max - angle_min) / (nangle - 1);
 	jstart = 0;
 	*error = MB_ERROR_NO_ERROR;
+	int status = MB_SUCCESS;
 	for (int i = 0; i < nangle; i++) {
 		/* get angles in takeoff coordinates */
 		table_angle[i] = angle_min + dangle * i;
@@ -798,7 +804,6 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle_min, double angle_max, int nangle,
                                       double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                                       double *table_range, int *error) {
-	int status = MB_SUCCESS;
 	double dangle;
 
 	if (verbose >= 2) {
@@ -822,6 +827,8 @@ int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle
 		table_range[i] = sqrt(altitude * altitude + table_xtrack[i] * table_xtrack[i]);
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -841,7 +848,6 @@ int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle
 int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *table_xtrack, double *table_ltrack,
                           double *table_altitude, double *table_range, int pixels_ss, double *ss, double *ssacrosstrack,
                           double *gangles, int *error) {
-	int status = MB_SUCCESS;
 	int found;
 	int j, jstart;
 
@@ -892,6 +898,8 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -911,7 +919,6 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
                               double *priority_angle_priority, double priority_azimuth, double priority_azimuth_factor,
                               double priority_heading, double priority_heading_factor, double heading, int pixels_ss, double *ss,
                               double *gangles, double *priorities, int *error) {
-	int status = MB_SUCCESS;
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
 	int j;
@@ -1023,6 +1030,8 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 		}
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -1047,7 +1056,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message = NULL;
@@ -1262,7 +1270,7 @@ int main(int argc, char **argv) {
 	double t1, t2;
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input and output */
 	strcpy(filelist, "datalist.mb-1");

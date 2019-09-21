@@ -68,7 +68,6 @@ static const char usage_message[] =
 int main(int argc, char **argv) {
 	int errflg = 0;
 	int c;
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int help = 0;
 	int flag = 0;
@@ -228,7 +227,7 @@ int main(int argc, char **argv) {
 	/* read the temperature */
 	record_size = sizeof(float) * NLEVITUS_MAX * 180;
 	location = ilon * record_size;
-	status = fseek(ifp, location, 0);
+	int status = fseek(ifp, location, 0);
 	if ((status = fread(&temperature[0][0], 1, record_size, ifp)) == record_size) {
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;

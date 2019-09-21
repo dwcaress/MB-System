@@ -79,8 +79,6 @@ static const char usage_message[] =
 int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int use_bath, int use_amp, int use_ss, int dump_mode,
                int beam_set, int pixel_set, int beam_vertical, int pixel_vertical, int *beam_start, int *beam_end,
                int *beam_exclude_percent, int *pixel_start, int *pixel_end, int *n_list, char *list, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBLIST function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -108,7 +106,7 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
 
 	/* assume success */
 	*error = MB_ERROR_NO_ERROR;
-	status = MB_SUCCESS;
+	int status = MB_SUCCESS;
 
 	if (beam_set == MBLIST_SET_OFF && pixel_set == MBLIST_SET_OFF && beams_bath <= 0 && pixels_ss <= 0) {
 		*beam_start = 0;
@@ -235,8 +233,6 @@ int set_output(int verbose, int beams_bath, int beams_amp, int pixels_ss, int us
 /*--------------------------------------------------------------------*/
 int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double *bathacrosstrack, int *ndepths, double *depths,
                    double *depthacrosstrack, int *nslopes, double *slopes, double *slopeacrosstrack, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -272,6 +268,8 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 		slopeacrosstrack[*ndepths] = depthacrosstrack[*ndepths - 1];
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -293,7 +291,6 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 /*--------------------------------------------------------------------*/
 int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
                    double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
-	int status = MB_SUCCESS;
 	int found_depth, found_slope;
 	int idepth, islope;
 
@@ -349,6 +346,8 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 	if (found_slope == MB_YES)
 		*slope = RTD * atan(*slope);
 
+	int status = MB_SUCCESS;
+
 	/* check for failure */
 	if (found_depth != MB_YES || found_slope != MB_YES) {
 		status = MB_FAILURE;
@@ -372,7 +371,6 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, FILE *output, double value, int width, int precision, int ascii, int *invert, int *flipsign,
                      int *error) {
-	int status = MB_SUCCESS;
 	char format[24];
 
 	if (verbose >= 2) {
@@ -415,6 +413,8 @@ int printsimplevalue(int verbose, FILE *output, double value, int width, int pre
 	else
 		fwrite(&value, sizeof(double), 1, output);
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -428,8 +428,6 @@ int printsimplevalue(int verbose, FILE *output, double value, int width, int pre
 }
 /*--------------------------------------------------------------------*/
 int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -452,6 +450,8 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 		fprintf(output, "NaN");
 	else
 		fwrite(&NaN, sizeof(double), 1, output);
+
+	const int status = MB_SUCCESS;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
@@ -564,7 +564,6 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
                        double *absorption, int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop,
                        double *bsn, double *bso, int *tx, int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples,
                        int *start_sample, int *range, double *depression, double *bs, double *ss_pixels, int *error) {
-	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store_ptr;
 	struct mbsys_simrad3_ping_struct *ping_ptr;
@@ -611,6 +610,8 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr, int *mode, int *ipulse_lengt
 			ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
 	}
 
+	const int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -655,7 +656,6 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
                int *max_range, int *r_zero, int *r_zero_corr, int *tvg_start, int *tvg_stop, double *bsn, double *bso, int *tx,
                int *tvg_crossover, int *nbeams_ss, int *npixels, int *beam_samples, int *start_sample, int *range,
                double *depression, double *bs, double *ss_pixels, int *error) {
-	int status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 
 	if (verbose >= 2) {
@@ -709,6 +709,8 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
 		break;
 	}
 
+	int status = MB_SUCCESS;
+
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
@@ -754,7 +756,6 @@ int main(int argc, char **argv) {
 	int flag = 0;
 
 	/* MBIO status variables */
-	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -969,7 +970,7 @@ int main(int argc, char **argv) {
 	char date[32], user[128], *user_ptr, host[128];
 
 	/* get current default values */
-	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");

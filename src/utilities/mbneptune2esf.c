@@ -116,8 +116,6 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error) {
-	int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -129,6 +127,9 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 	}
 	/* write out the edit */
 	fprintf(stderr, "OUTPUT EDIT: %f %d %d\n", time_d, beam, action);
+
+	int status = MB_SUCCESS;
+
 	if (sofp != NULL) {
 #ifdef BYTESWAPPED
 		mb_swap_double(&time_d);
