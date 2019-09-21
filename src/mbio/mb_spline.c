@@ -27,17 +27,14 @@
  *
  */
 
-/* standard global include files */
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
-
-/* mbio include files */
-#include "mb_status.h"
 #include "mb_define.h"
+#include "mb_status.h"
 
 /*--------------------------------------------------------------------------*/
-int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double ypn, double *y2, int *error) {
+int mb_spline_init(int verbose, const double *x, const double *y, int n, double yp1, double ypn, double *y2, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -106,7 +103,7 @@ int mb_spline_init(int verbose, double *x, double *y, int n, double yp1, double 
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, double x, double *y, int *i, int *error) {
+int mb_spline_interp(int verbose, const double *xa, const double *ya, double *y2a, int n, double x, double *y, int *i, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -161,7 +158,8 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a, int n, do
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
+// TODO(schwehr): What is the semantic meaning of the args?  i appears to be output only.
+int mb_linear_interp(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -229,7 +227,7 @@ int mb_linear_interp(int verbose, double *xa, double *ya, int n, double x, doubl
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
+int mb_linear_interp_longitude(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -305,7 +303,7 @@ int mb_linear_interp_longitude(int verbose, double *xa, double *ya, int n, doubl
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
+int mb_linear_interp_latitude(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -377,7 +375,7 @@ int mb_linear_interp_latitude(int verbose, double *xa, double *ya, int n, double
 	return (status);
 }
 /*--------------------------------------------------------------------*/
-int mb_linear_interp_heading(int verbose, double *xa, double *ya, int n, double x, double *y, int *i, int *error) {
+int mb_linear_interp_heading(int verbose, const double *xa, const double *ya, int n, double x, double *y, int *i, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
