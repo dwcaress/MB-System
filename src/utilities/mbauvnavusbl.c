@@ -1,7 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvnavusbl.c	11/21/2004
  *
- *
  *    Copyright (c) 2004-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -25,6 +24,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,102 +51,48 @@ static const char usage_message[] =
     "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
+	int status;
+
+	/* get current default values - only interested in lonflip */
+	int lonflip;
+	{
+		int format;
+		int pings;
+		double bounds[4];
+		int btime_i[7];
+		int etime_i[7];
+		double speedmin;
+		double timegap;
+		status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i,
+                                     etime_i, &speedmin, &timegap);
+	}
 
 	/* Files and formats */
 	char ifile[MB_PATH_MAXLINE];
 	char ofile[MB_PATH_MAXLINE];
 	char ufile[MB_PATH_MAXLINE];
-	int navformat = 9;
-	int usblformat = 165;
-	FILE *fp;
-
-	/* MBIO default parameters - only use lonflip */
-	int format;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
-	double speedmin;
-	double timegap;
-
-	/* read and write values */
-	int time_i[7];
-	double navlon;
-	double navlat;
-	double heading;
-	double sonardepth;
-
-	/* navigation handling variables */
-	int useaverage = MB_NO;
-	double tieinterval = 600.0;
-	int nnav;
-	double *ntime = NULL;
-	double *nlon = NULL;
-	double *nlat = NULL;
-	double *nheading = NULL;
-	double *nspeed = NULL;
-	double *nsonardepth = NULL;
-	double *nroll = NULL;
-	double *npitch = NULL;
-	double *nheave = NULL;
-	int nusbl;
-	double *utime = NULL;
-	double *ulon = NULL;
-	double *ulat = NULL;
-	double *uheading = NULL;
-	double *usonardepth = NULL;
-	double *alon = NULL;
-	double *alat = NULL;
-	double *aheading = NULL;
-	double *asonardepth = NULL;
-	int ntie;
-	double *ttime = NULL;
-	double *tlon = NULL;
-	double *tlat = NULL;
-	double *theading = NULL;
-	double *tsonardepth = NULL;
-	double loncoravg;
-	double latcoravg;
-
-	int nav_ok;
-	int nstime_i[7], nftime_i[7];
-	int ustime_i[7], uftime_i[7];
-
-	char buffer[NCHARMAX];
-	char *result;
-	int year;
-	int jday;
-	double timetag;
-	double easting, northing;
-	double rov_altitude, rov_roll, rov_pitch;
-	int position_flag, heading_flag, altitude_flag, attitude_flag, pressure_flag;
-	double sec;
-	int j;
-
-	/* get current default values - only interested in lonflip */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
 	/* set default input and output */
 	strcpy(ifile, "stdin");
 	strcpy(ofile, "stdout");
 	strcpy(ufile, "\0");
+	int navformat = 9;
+	int usblformat = 165;
+
+	int useaverage = MB_NO;
+	int error = MB_ERROR_NO_ERROR;
 
 	/* process argument list */
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		int flag = 0;
 	while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
 		switch (c) {
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'V':
 		case 'v':
@@ -188,10 +134,9 @@ int main(int argc, char **argv) {
 			flag++;
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
-	/* if error flagged then print it and exit */
 	if (errflg) {
 		fprintf(stderr, "usage: %s\n", usage_message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -225,17 +170,71 @@ int main(int argc, char **argv) {
 		exit(error);
 	}
 
+	} // end command line arg parsing
+
 	/* count the nav points */
-	nnav = 0;
-	if ((fp = fopen(ifile, "r")) == NULL) {
+	int nnav = 0;
+	FILE *fp = fopen(ifile, "r");
+	if (fp == NULL) {
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", ifile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		exit(error);
 	}
+	char *result;
+	char buffer[NCHARMAX];
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer)
 		nnav++;
 	fclose(fp);
+
+	/* read and write values */
+	int time_i[7];
+	double navlon;
+	double navlat;
+	double heading;
+	double sonardepth;
+
+	/* navigation handling variables */
+	double tieinterval = 600.0;
+	double *ntime = NULL;
+	double *nlon = NULL;
+	double *nlat = NULL;
+	double *nheading = NULL;
+	double *nspeed = NULL;
+	double *nsonardepth = NULL;
+	double *nroll = NULL;
+	double *npitch = NULL;
+	double *nheave = NULL;
+	int nusbl;
+	double *utime = NULL;
+	double *ulon = NULL;
+	double *ulat = NULL;
+	double *uheading = NULL;
+	double *usonardepth = NULL;
+	double *alon = NULL;
+	double *alat = NULL;
+	double *aheading = NULL;
+	double *asonardepth = NULL;
+	int ntie;
+	double *ttime = NULL;
+	double *tlon = NULL;
+	double *tlat = NULL;
+	double *theading = NULL;
+	double *tsonardepth = NULL;
+	double loncoravg;
+	double latcoravg;
+
+	int nav_ok;
+	int nstime_i[7], nftime_i[7];
+	int ustime_i[7], uftime_i[7];
+
+	int year;
+	int jday;
+	double timetag;
+	double easting, northing;
+	double rov_altitude, rov_roll, rov_pitch;
+	int position_flag, heading_flag, altitude_flag, attitude_flag, pressure_flag;
+	double sec;
 
 	/* allocate space for the nav points */
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ntime, &error);
@@ -258,6 +257,7 @@ int main(int argc, char **argv) {
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tsonardepth, &error);
 
 	/* if error initializing memory then quit */
+	char *message;
 	if (error != MB_ERROR_NO_ERROR) {
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
@@ -464,6 +464,7 @@ int main(int argc, char **argv) {
 
 			/* interpolate navigation from usbl navigation */
 			/* int intstat; */
+			int j;
 			/* intstat = */ mb_linear_interp(verbose, utime - 1, ulon - 1, nusbl, ttime[ntie], &navlon, &j, &error);
 			/* intstat = */ mb_linear_interp(verbose, utime - 1, ulat - 1, nusbl, ttime[ntie], &navlat, &j, &error);
 			/* intstat = */ mb_linear_interp(verbose, utime - 1, uheading - 1, nusbl, ttime[ntie], &heading, &j, &error);
@@ -512,6 +513,7 @@ int main(int argc, char **argv) {
 		/* interpolate adjustment */
 		if (useaverage == MB_NO) {
 			/* get adjustment by interpolation */
+			int j;
 			/* intstat = */ mb_linear_interp(verbose, ttime - 1, tlon - 1, ntie, ntime[i], &navlon, &j, &error);
 			/* intstat = */ mb_linear_interp(verbose, ttime - 1, tlat - 1, ntie, ntime[i], &navlat, &j, &error);
 
