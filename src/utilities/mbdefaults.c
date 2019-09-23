@@ -90,7 +90,6 @@ int main(int argc, char **argv) {
 	double illuminate_elevation;
 	double illuminate_azimuth;
 	double slope_magnitude;
-	char *getenv();
 
 	/* MBIO control parameters */
 	int format;

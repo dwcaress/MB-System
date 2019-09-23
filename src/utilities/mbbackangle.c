@@ -419,9 +419,6 @@ int main(int argc, char **argv) {
 	int ix, jy, kgrid, k, n;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
-	char *ctime();
-	char *getenv();
-
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 

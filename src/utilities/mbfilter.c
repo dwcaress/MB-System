@@ -722,9 +722,6 @@ int main(int argc, char **argv) {
 	int ja, jb, jbeg, jend;
 	int ii, jj, n;
 
-	char *ctime();
-	char *getenv();
-
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 

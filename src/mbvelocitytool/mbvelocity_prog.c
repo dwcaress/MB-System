@@ -22,20 +22,18 @@
  *
  * Author:      D. W. Caress
  * Date:        June 6, 1993
- *
- *
  */
 
 /*--------------------------------------------------------------------*/
 
 /* standard include files */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -192,12 +190,6 @@ int beam_last = 100;
 #define XG_DASHLINE 1
 int ncolors;
 int pixel_values[256];
-
-/* system function declarations */
-char *ctime();
-#ifndef WIN32
-char *getenv();
-#endif
 
 /*--------------------------------------------------------------------*/
 /* Initialize the 'mbio' struct                                       */
