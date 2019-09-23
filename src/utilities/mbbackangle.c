@@ -25,6 +25,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,10 +84,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, int nangles, double angle_max, double dangle,
                  int symmetry, int *nmean, double *mean, double *sigma, int *error) {
-	double angle, amean, asigma, sum, sumsq, sumn;
-	int time_i[7];
-	int ii, jj, i0, i1;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -105,19 +102,18 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 	}
 
 	/* process sums and print out results */
+	int time_i[7];
 	mb_get_date(verbose, time_d, time_i);
 	fprintf(tfp, "# table: %d\n", ntable);
 	fprintf(tfp, "# nping: %d\n", nping);
 	fprintf(tfp, "# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n", time_i[0], time_i[1], time_i[2], time_i[3],
 	        time_i[4], time_i[5], time_i[6], time_d);
 	fprintf(tfp, "# nangles: %d\n", nangles);
+
 	for (int i = 0; i < nangles; i++) {
-		amean = 0.0;
-		asigma = 0.0;
-		sum = 0.0;
-		sumsq = 0.0;
-		sumn = 0.0;
-		angle = -angle_max + i * dangle;
+		const double angle = -angle_max + i * dangle;
+		int i0;
+		int i1;
 		if (fabs(angle) > MBBACKANGLE_INNERSWATHLIMIT) {
 			i0 = MAX(i - 1, 0);
 			i1 = MIN(i + 1, nangles - 1);
@@ -126,12 +122,17 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 			i0 = i;
 			i1 = i;
 		}
-		for (ii = i0; ii <= i1; ii++) {
+		double amean = 0.0;
+		double asigma = 0.0;
+		double sum = 0.0;
+		double sumsq = 0.0;
+		double sumn = 0.0;
+		for (int ii = i0; ii <= i1; ii++) {
 			sum += mean[ii];
 			sumsq += sigma[ii];
 			sumn += nmean[ii];
 			if (symmetry == MB_YES) {
-				jj = nangles - ii - 1;
+				const int jj = nangles - ii - 1;
 				sum += mean[jj];
 				sumsq += sigma[jj];
 				sumn += nmean[jj];
@@ -162,11 +163,6 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d, i
 int output_model(int verbose, FILE *tfp, double beamwidth, double depression, double ref_angle, int ntable, int nping,
                  double time_d, double altitude, int nangles, double angle_max, double dangle, int symmetry, int *nmean,
                  double *mean, double *sigma, int *error) {
-	double ref_amp, range, del, factor, aa;
-	double angle, amean, asigma, sum, sumsq, sumn;
-	int time_i[7];
-	int ii, jj, i0, i1, iref;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBBACKANGLE function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -189,22 +185,23 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 	}
 
 	/* get average amplitude at reference angle */
-	iref = (angle_max - ref_angle) / dangle;
-	i0 = MAX(iref - 1, 0);
-	i1 = MIN(iref + 1, nangles - 1);
-	ref_amp = 0.0;
-	sum = 0.0;
-	sumsq = 0.0;
-	sumn = 0.0;
-	for (ii = i0; ii <= i1; ii++) {
+	const int iref = (angle_max - ref_angle) / dangle;
+	const int i0 = MAX(iref - 1, 0);
+	const int i1 = MIN(iref + 1, nangles - 1);
+	double ref_amp = 0.0;
+	double sum = 0.0;
+	double sumsq = 0.0;
+	double sumn = 0.0;
+	for (int ii = i0; ii <= i1; ii++) {
 		sum += mean[ii];
 		sumsq += sigma[ii];
 		sumn += nmean[ii];
-		jj = nangles - ii - 1;
+		const int jj = nangles - ii - 1;
 		sum += mean[jj];
 		sumsq += sigma[jj];
 		sumn += nmean[jj];
 	}
+	double asigma;
 	if (sumn > 0.0) {
 		ref_amp = sum / sumn;
 		asigma = sqrt((sumsq / sumn) - ref_amp * ref_amp);
@@ -213,13 +210,14 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 	/* get model that combines gaussian with 1/r
 	    - gaussian must drop to 0.7 max at 0.5 * beamwidth
 	    - model must equal ref_amp at ref_angle */
-	del = (90.0 - depression) - 0.5 * beamwidth;
-	aa = -log(0.1) / (del * del);
+	double del = (90.0 - depression) - 0.5 * beamwidth;
+	const double aa = -log(0.1) / (del * del);
 	del = 90.0 - depression - ref_angle;
-	range = altitude / cos(DTR * ref_angle);
-	factor = ref_amp * range * range / exp(-aa * del * del);
+	double range = altitude / cos(DTR * ref_angle);
+	const double factor = ref_amp * range * range / exp(-aa * del * del);
 
 	/* process sums and print out results */
+	int time_i[7];
 	mb_get_date(verbose, time_d, time_i);
 	fprintf(tfp, "# table: %d\n", ntable);
 	fprintf(tfp, "# nping: %d\n", nping);
@@ -227,10 +225,10 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 	        time_i[4], time_i[5], time_i[6], time_d);
 	fprintf(tfp, "# nangles: %d\n", nangles);
 	for (int i = 0; i < nangles; i++) {
-		angle = -angle_max + i * dangle;
+		const double angle = -angle_max + i * dangle;
 		del = fabs(angle) - (90 - depression);
 		range = altitude / cos(DTR * fabs(angle));
-		amean = factor * exp(-aa * del * del) / (range * range);
+		const double amean = factor * exp(-aa * del * del) / (range * range);
 		fprintf(tfp, "%7.4f %12.4f %12.4f\n", angle, amean, asigma);
 	}
 	fprintf(tfp, "#\n");
@@ -251,11 +249,6 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	/* MBIO status variables */
 	int status = MB_SUCCESS;
 	int verbose = 0;
@@ -423,7 +416,6 @@ int main(int argc, char **argv) {
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	double d1, d2;
-	int j;
 	int ix, jy, kgrid, k, n;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
@@ -444,6 +436,12 @@ int main(int argc, char **argv) {
 	memset(&grid, 0, sizeof(struct mbba_grid_struct));
 
 	/* process argument list */
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		int flag = 0;
+
 	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
 		switch (c) {
 		case 'A':
@@ -486,6 +484,7 @@ int main(int argc, char **argv) {
 		case 'g':
 		{
 			int i;
+			int j;
 			n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
 			if (n == 5) {
 				n = sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
@@ -517,7 +516,7 @@ int main(int argc, char **argv) {
 		}
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'I':
 		case 'i':
@@ -560,7 +559,7 @@ int main(int argc, char **argv) {
 			flag++;
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* if error flagged then print it and exit */
@@ -575,6 +574,15 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "\nProgram %s\n", program_name);
 		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 	}
+
+	/* if help desired then print it and exit */
+	if (help) {
+		fprintf(stderr, "\n%s\n", help_message);
+		fprintf(stderr, "\nusage: %s\n", usage_message);
+		exit(error);
+	}
+
+	} // end command line arg parsing
 
 	/* set mode if necessary */
 	if (amplitude_on != MB_YES && sidescan_on != MB_YES) {
@@ -603,7 +611,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "dbg2  Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:      %d\n", verbose);
-		fprintf(stderr, "dbg2       help:         %d\n", help);
 		fprintf(stderr, "dbg2       format:       %d\n", format);
 		fprintf(stderr, "dbg2       pings:        %d\n", pings);
 		fprintf(stderr, "dbg2       lonflip:      %d\n", lonflip);
@@ -661,13 +668,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       gridssn_rows:     %d\n", gridssn_rows);
 		fprintf(stderr, "dbg2       gridssdx:     %f\n", gridssdx);
 		fprintf(stderr, "dbg2       gridssdy:     %f\n", gridssdy);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
 	}
 
 	/* allocate memory for angle arrays */
@@ -1284,7 +1284,7 @@ int main(int argc, char **argv) {
 							}
 							if (bathy > 0.0) {
 								/* load amplitude into table */
-								j = (angle - angle_start) / dangle;
+								const int j = (angle - angle_start) / dangle;
 								if (j >= 0 && j < nangles) {
 									meanamp[j] += amp[i];
 									sigmaamp[j] += amp[i] * amp[i];
@@ -1306,8 +1306,8 @@ int main(int argc, char **argv) {
 							}
 
 							if (verbose >= 5) {
-								fprintf(stderr, "dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n", nrec, i, slope,
-								        altitude_use, bathacrosstrack[i], angle, j);
+								fprintf(stderr, "dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f\n", nrec, i, slope,
+								        altitude_use, bathacrosstrack[i], angle);
 							}
 						}
 					}
@@ -1414,7 +1414,7 @@ int main(int argc, char **argv) {
 							}
 							if (bathy > 0.0) {
 								/* load amplitude into table */
-								j = (angle - angle_start) / dangle;
+								const int j = (angle - angle_start) / dangle;
 								if (j >= 0 && j < nangles) {
 									meanss[j] += ss[i];
 									sigmass[j] += ss[i] * ss[i];
@@ -1436,8 +1436,8 @@ int main(int argc, char **argv) {
 							}
 
 							if (verbose >= 5) {
-								fprintf(stderr, "dbg5kkk       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n", nrec, i,
-								        slope, altitude_use, ssacrosstrack[i], angle, j);
+								fprintf(stderr, "dbg5kkk       %d %d: slope:%f altitude:%f xtrack:%f ang:%f\n", nrec, i,
+								        slope, altitude_use, ssacrosstrack[i], angle);
 							}
 						}
 					}
