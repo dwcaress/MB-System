@@ -113,9 +113,6 @@ int main(int argc, char **argv) {
 	char *lonptr, *latptr;
 	int last_good;
 
-	char *ctime();
-	char *getenv();
-
 	/* set default output */
 	strcpy(ofile, "velocity");
 

@@ -24,13 +24,12 @@
  */
 /*--------------------------------------------------------------------*/
 
-/* include files */
+#include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
-#include <math.h>
-#include <assert.h>
 
 /* Need to include windows.h BEFORE the the Xm stuff otherwise VC14+ barf with conflicts */
 #if defined(_MSC_VER) && (_MSC_VER >= 1900)
@@ -41,7 +40,6 @@
 #include <windows.h>
 #endif
 
-/* X11 includes */
 #include <X11/cursorfont.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -5262,8 +5260,6 @@ int do_info_add(char *info, int timetag) {
 	char tag[STRING_MAX];
 	time_t right_now;
 	char date[32], user[128], *user_ptr, host[128];
-	char *ctime();
-	char *getenv();
 
 	/* reposition to end of text */
 	pos = XmTextGetLastPosition(text_messages);

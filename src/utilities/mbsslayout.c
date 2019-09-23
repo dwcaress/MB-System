@@ -549,8 +549,6 @@ int main(int argc, char **argv) {
 
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char *ctime();
-	char *getenv();
 
 	mb_path command;
 	int interp_status = MB_SUCCESS;

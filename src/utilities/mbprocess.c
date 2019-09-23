@@ -728,9 +728,6 @@ int main(int argc, char **argv) {
 	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
-	char *ctime();
-	char *getenv();
-
 	/* get current default values */
 	int status = mb_defaults(verbose, &mbp_format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 	status &= mb_uselockfiles(verbose, &uselockfiles);

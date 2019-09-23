@@ -67,13 +67,6 @@
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 
-
-/* system function declarations */
-char *ctime();
-#ifndef WIN32
-char *getenv();
-#endif
-
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {

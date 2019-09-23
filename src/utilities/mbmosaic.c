@@ -140,8 +140,6 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 	FILE *fp = NULL;
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char *ctime();
-	char *getenv();
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);

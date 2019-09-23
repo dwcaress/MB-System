@@ -81,14 +81,6 @@
 #define MBOTPS_MODE_NAV_WRT_STATION     0x03
 #define MBOTPS_DEFAULT_MODEL "atlas_v1"
 
-/* system function declarations */
-char *ctime();
-
-#ifndef WIN32
-char *getenv();
-
-#endif
-
 /*--------------------------------------------------------------------*/
 
 int main
