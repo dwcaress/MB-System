@@ -207,7 +207,7 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                    double dx, double dy, double nodata, int *error) {
 	FILE *fp = NULL;
-	int j, k;
+	int k;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
@@ -242,7 +242,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 		fprintf(fp, "yllcorner %.10g\n", ymin);
 		fprintf(fp, "cellsize %.10g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
-		for (j = 0; j < ny; j++) {
+		for (int j = 0; j < ny; j++) {
 			for (int i = 0; i < nx; i++) {
 				k = i * ny + (ny - 1 - j);
 				if (grid[k] == nodata)
@@ -445,7 +445,6 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
                                 char *beamflag, double *gangles, double *priorities, int *error) {
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
-	int j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -487,7 +486,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 
 				/* priority set using the priority-angle table */
 				else {
-					for (j = 0; j < n_priority_angle - 1; j++) {
+					for (int j = 0; j < n_priority_angle - 1; j++) {
 						if (gangles[i] >= priority_angle_angle[j] && gangles[i] < priority_angle_angle[j + 1]) {
 							priorities[i] *=
 							    (priority_angle_priority[j] + (priority_angle_priority[j + 1] - priority_angle_priority[j]) *
@@ -575,8 +574,6 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
                             int *error) {
 	int found_pre, found_post;
 	int i0, i1;
-	int j;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -594,7 +591,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 			/* find previous good beam */
 			found_pre = MB_NO;
 			if (i > 0) {
-				for (j = i - 1; j >= 0 && found_pre == MB_NO; j--) {
+				for (int j = i - 1; j >= 0 && found_pre == MB_NO; j--) {
 					if (mb_beam_ok(beamflag[j])) {
 						found_pre = MB_YES;
 						i0 = j;
@@ -605,7 +602,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 			/* find post good beam */
 			found_post = MB_NO;
 			if (i < beams_bath - 1) {
-				for (j = i + 1; j < beams_bath && found_post == MB_NO; j++) {
+				for (int j = i + 1; j < beams_bath && found_post == MB_NO; j++) {
 					if (mb_beam_ok(beamflag[j])) {
 						found_post = MB_YES;
 						i1 = j;
@@ -662,7 +659,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
                                 double *table_range, int *error) {
 	double dangle, angle0, angle1, factor;
 	int found, foundnext;
-	int j, jj, jstart, jnext;
+	int jj, jstart, jnext;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -692,7 +689,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 
 		/* estimate the table values for this angle from the bathymetry */
 		found = MB_NO;
-		for (j = jstart; j < beams_bath - 1 && found == MB_NO; j++) {
+		for (int j = jstart; j < beams_bath - 1 && found == MB_NO; j++) {
 			/* check if this beam is valid */
 			if (mb_beam_ok(beamflag[j])) {
 				/* look for the next valid beam */
@@ -847,7 +844,7 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
                           double *table_altitude, double *table_range, int pixels_ss, double *ss, double *ssacrosstrack,
                           double *gangles, int *error) {
 	int found;
-	int j, jstart;
+	int jstart;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -870,7 +867,7 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
 		/* get angles only for valid sidescan */
 		if (ss[i] > MB_SIDESCAN_NULL) {
 			found = MB_NO;
-			for (j = jstart; j < nangle - 1 && found == MB_NO; j++) {
+			for (int j = jstart; j < nangle - 1 && found == MB_NO; j++) {
 				if (ssacrosstrack[i] < table_xtrack[j]) {
 					gangles[i] = table_angle[j];
 					found = MB_YES;
@@ -919,7 +916,6 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
                               double *gangles, double *priorities, int *error) {
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
-	int j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -961,7 +957,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 
 				/* priority set using the priority-angle table */
 				else {
-					for (j = 0; j < n_priority_angle - 1; j++) {
+					for (int j = 0; j < n_priority_angle - 1; j++) {
 						if (gangles[i] >= priority_angle_angle[j] && gangles[i] < priority_angle_angle[j + 1]) {
 							priorities[i] *=
 							    (priority_angle_priority[j] + (priority_angle_priority[j + 1] - priority_angle_priority[j]) *
@@ -1257,7 +1253,7 @@ int main(int argc, char **argv) {
 	int inside;
 	double acrosstrackspacing;
 	double slope;
-	int j, ii, jj, iii, jjj, kkk, n;
+	int ii, jj, iii, jjj, kkk, n;
 	int i1, i2, j1, j2;
 	int ir;
 	double r;
@@ -2230,7 +2226,7 @@ int main(int argc, char **argv) {
 
 	/* initialize arrays */
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			grid[kgrid] = 0.0;
 			norm[kgrid] = 0.0;
@@ -2450,7 +2446,7 @@ int main(int argc, char **argv) {
 										mbmosaic_get_footprint(verbose, MBMOSAIC_FOOTPRINT_REAL, beamwidth_xtrack,
 										                       beamwidth_ltrack, (bath[ib] - sonardepth), bathacrosstrack[ib],
 										                       bathalongtrack[ib], 0.0, &footprints[ib], &error);
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											xx = navlon + headingy * mtodeglon * footprints[ib].x[j] +
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
@@ -2481,7 +2477,7 @@ int main(int argc, char **argv) {
 										if (mb_beam_ok(beamflag[ib])) {
 											mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
 											                &error);
-											for (j = 0; j < 4; j++) {
+											for (int j = 0; j < 4; j++) {
 												mb_proj_forward(verbose, pjptr, footprints[ib].x[j], footprints[ib].y[j],
 												                &footprints[ib].x[j], &footprints[ib].y[j], &error);
 											}
@@ -2492,7 +2488,7 @@ int main(int argc, char **argv) {
 								for (ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib])) {
 										/* get position in grid */
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
@@ -2500,7 +2496,7 @@ int main(int argc, char **argv) {
 										iy1 = iyy[0];
 										ix2 = ixx[0];
 										iy2 = iyy[0];
-										for (j = 1; j < 4; j++) {
+										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
@@ -2599,7 +2595,7 @@ int main(int argc, char **argv) {
 										mbmosaic_get_footprint(verbose, footprint_mode, beamwidth_xtrack, beamwidth_ltrack,
 										                       altitude, ssacrosstrack[ib], ssalongtrack[ib], acrosstrackspacing,
 										                       &footprints[ib], &error);
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											xx = navlon + headingy * mtodeglon * footprints[ib].x[j] +
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
@@ -2667,7 +2663,7 @@ int main(int argc, char **argv) {
 									for (ib = 0; ib < pixels_ss; ib++)
 										if (ss[ib] > MB_SIDESCAN_NULL) {
 											mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
-											for (j = 0; j < 4; j++) {
+											for (int j = 0; j < 4; j++) {
 												mb_proj_forward(verbose, pjptr, footprints[ib].x[j], footprints[ib].y[j],
 												                &footprints[ib].x[j], &footprints[ib].y[j], &error);
 											}
@@ -2678,7 +2674,7 @@ int main(int argc, char **argv) {
 								for (ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL) {
 										/* get position in grid */
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
@@ -2686,7 +2682,7 @@ int main(int argc, char **argv) {
 										iy1 = iyy[0];
 										ix2 = ixx[0];
 										iy2 = iyy[0];
-										for (j = 1; j < 4; j++) {
+										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
@@ -2757,7 +2753,7 @@ int main(int argc, char **argv) {
 	if (grid_mode == MBMOSAIC_AVERAGE) {
 		/* initialize arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
 				cnt[kgrid] = 0;
@@ -2961,7 +2957,7 @@ int main(int argc, char **argv) {
 										mbmosaic_get_footprint(verbose, MBMOSAIC_FOOTPRINT_REAL, beamwidth_xtrack,
 										                       beamwidth_ltrack, (bath[ib] - sonardepth), bathacrosstrack[ib],
 										                       bathalongtrack[ib], 0.0, &footprints[ib], &error);
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											xx = navlon + headingy * mtodeglon * footprints[ib].x[j] +
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
@@ -2992,7 +2988,7 @@ int main(int argc, char **argv) {
 										if (mb_beam_ok(beamflag[ib])) {
 											mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
 											                &error);
-											for (j = 0; j < 4; j++) {
+											for (int j = 0; j < 4; j++) {
 												mb_proj_forward(verbose, pjptr, footprints[ib].x[j], footprints[ib].y[j],
 												                &footprints[ib].x[j], &footprints[ib].y[j], &error);
 											}
@@ -3003,7 +2999,7 @@ int main(int argc, char **argv) {
 								for (ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib])) {
 										/* get position in grid */
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
@@ -3011,7 +3007,7 @@ int main(int argc, char **argv) {
 										iy1 = iyy[0];
 										ix2 = ixx[0];
 										iy2 = iyy[0];
-										for (j = 1; j < 4; j++) {
+										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
@@ -3120,7 +3116,7 @@ int main(int argc, char **argv) {
 										mbmosaic_get_footprint(verbose, footprint_mode, beamwidth_xtrack, beamwidth_ltrack,
 										                       altitude, ssacrosstrack[ib], ssalongtrack[ib], acrosstrackspacing,
 										                       &footprints[ib], &error);
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											xx = navlon + headingy * mtodeglon * footprints[ib].x[j] +
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
@@ -3182,7 +3178,7 @@ int main(int argc, char **argv) {
 									for (ib = 0; ib < pixels_ss; ib++)
 										if (ss[ib] > MB_SIDESCAN_NULL) {
 											mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
-											for (j = 0; j < 4; j++) {
+											for (int j = 0; j < 4; j++) {
 												mb_proj_forward(verbose, pjptr, footprints[ib].x[j], footprints[ib].y[j],
 												                &footprints[ib].x[j], &footprints[ib].y[j], &error);
 											}
@@ -3193,7 +3189,7 @@ int main(int argc, char **argv) {
 								for (ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL) {
 										/* get position in grid */
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
@@ -3201,7 +3197,7 @@ int main(int argc, char **argv) {
 										iy1 = iyy[0];
 										ix2 = ixx[0];
 										iy2 = iyy[0];
-										for (j = 1; j < 4; j++) {
+										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
@@ -3299,7 +3295,7 @@ int main(int argc, char **argv) {
 	/* deal with single best mode */
 	if (grid_mode == MBMOSAIC_SINGLE_BEST) {
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
 					nbinset++;
@@ -3311,7 +3307,7 @@ int main(int argc, char **argv) {
 	}
 	else if (grid_mode == MBMOSAIC_AVERAGE) {
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
 					nbinset++;
@@ -3331,7 +3327,7 @@ int main(int argc, char **argv) {
 		if (border > 0.0)
 			ndata = 2 * gxdim + 2 * gydim - 2;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue)
 					ndata++;
@@ -3361,7 +3357,7 @@ int main(int argc, char **argv) {
 		symin = gbnd[2] - offy * dy;
 		ndata = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue) {
 					sdata[ndata++] = (float)(sxmin + dx * i - bdata_origin_x);
@@ -3372,7 +3368,7 @@ int main(int argc, char **argv) {
 		/* if desired set border */
 		if (border > 0.0) {
 			for (int i = 0; i < gxdim; i++) {
-				j = 0;
+				int j = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] == clipvalue) {
 					sdata[ndata++] = (float)(sxmin + dx * i - bdata_origin_x);
@@ -3387,7 +3383,7 @@ int main(int argc, char **argv) {
 					sdata[ndata++] = (float)border;
 				}
 			}
-			for (j = 1; j < gydim - 1; j++) {
+			for (int j = 1; j < gydim - 1; j++) {
 				int i = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] == clipvalue) {
@@ -3430,7 +3426,7 @@ int main(int argc, char **argv) {
 		zflag = 5.0e34;
 		if (clipmode == MBMOSAIC_INTERP_GAP) {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3510,7 +3506,7 @@ int main(int argc, char **argv) {
 					}
 				}
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3528,7 +3524,7 @@ int main(int argc, char **argv) {
 		    filling by proximity */
 		else if (clipmode == MBMOSAIC_INTERP_NEAR) {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3577,7 +3573,7 @@ int main(int argc, char **argv) {
 					}
 				}
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3595,7 +3591,7 @@ int main(int argc, char **argv) {
 		    filling all empty bins */
 		else {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3611,7 +3607,7 @@ int main(int argc, char **argv) {
 
 		/* deallocate the interpolation arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				kint = i + j * gxdim;
 				if (num[kgrid] == MB_YES) {
@@ -3631,7 +3627,7 @@ int main(int argc, char **argv) {
 	zmin = zclip;
 	zmax = zclip;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
 			if (zmin == zclip && grid[kgrid] < zclip)
@@ -3651,7 +3647,7 @@ int main(int argc, char **argv) {
 	/* get min max of data distribution */
 	nmax = 0;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
 			if (cnt[kgrid] > nmax)
@@ -3662,7 +3658,7 @@ int main(int argc, char **argv) {
 	smin = 0.0;
 	smax = 0.0;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
 			if (smin == 0.0 && cnt[kgrid] > 1)
@@ -3727,7 +3723,7 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\nOutputting results...\n");
 	for (int i = 0; i < xdim; i++)
-		for (j = 0; j < ydim; j++) {
+		for (int j = 0; j < ydim; j++) {
 			kgrid = (i + offx) * gydim + (j + offy);
 			kout = i * ydim + j;
 			output[kout] = (float)grid[kgrid];
@@ -3773,7 +3769,7 @@ int main(int argc, char **argv) {
 	/* write second output file */
 	if (more == MB_YES) {
 		for (int i = 0; i < xdim; i++)
-			for (j = 0; j < ydim; j++) {
+			for (int j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;
 				output[kout] = (float)cnt[kgrid];
@@ -3819,7 +3815,7 @@ int main(int argc, char **argv) {
 
 		/* write third output file */
 		for (int i = 0; i < xdim; i++)
-			for (j = 0; j < ydim; j++) {
+			for (int j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;
 				output[kout] = (float)sigma[kgrid];

@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
 
 	double b;
 	int format;
-	int i, j;
+	int i;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'O':
 		case 'o':
-			for (j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
+			for (int j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
 				if (n_list < MAX_OPTIONS)
 					list[n_list] = optarg[j];
 			flag++;

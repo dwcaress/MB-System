@@ -159,8 +159,9 @@ int main(int argc, char **argv) {
 	int forward;
 	double xx, yy, zz;
 	double heading_start, dheading, dheadingx, dheadingy;
-	int j, jj, k;
+	int jj, k;
 
+	// TODO(schwehr): Remove embedded prototypes.
 	void Polygon_Fill();
 	void Good_Polygon();
 
@@ -482,7 +483,7 @@ int main(int argc, char **argv) {
 				distot += distance * 1000.0; /* distance in meters */
 
 				/* loop over the beams */
-				for (j = 0; j < beams_bath; j++) {
+				for (int j = 0; j < beams_bath; j++) {
 					if (j >= data[nread].beams_bath) {
 						data[nread].beamflag[j] = MB_FLAG_NULL;
 						data[nread].xp[j] = BAD;
@@ -584,7 +585,7 @@ int main(int argc, char **argv) {
 		beamflag = data[i].beamflag;
 		xp = data[i].xp;
 		yp = data[i].yp;
-		for (j = 0; j < data[i].beams_bath; j++) {
+		for (int j = 0; j < data[i].beams_bath; j++) {
 			if (mb_beam_ok(beamflag[j])) {
 				yp[j] -= mean_yp;
 				xp[j] -= mean_xp;
@@ -656,7 +657,7 @@ int main(int argc, char **argv) {
 		else
 			forward = MB_NO;
 	}
-	for (j = 0; j < beams_bath - 1; j++) {
+	for (int j = 0; j < beams_bath - 1; j++) {
 		for (int i = 0; i < nread - 1; i++) {
 			if (forward == MB_YES)
 				jj = j;

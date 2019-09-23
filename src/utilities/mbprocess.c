@@ -724,7 +724,7 @@ int main(int argc, char **argv) {
 	int istart, iend, icut;
 	int intstat;
 	int ioff;
-	int j, k, mm;
+	int k, mm;
 	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
@@ -3089,7 +3089,7 @@ int main(int argc, char **argv) {
 				if (process.mbp_ampcorr_symmetry == MBP_AMPCORR_SYMMETRIC) {
 					for (itable = 0; itable < nampcorrtable; itable++) {
 						for (int i = 0; i < ampcorrtable[itable].nangle / 2; i++) {
-							j = ampcorrtable[itable].nangle - 1 - i;
+							const int j = ampcorrtable[itable].nangle - 1 - i;
 							if (ampcorrtable[itable].amplitude[i] != 0.0 && ampcorrtable[itable].amplitude[j] != 0.0)
 								factor = 0.5;
 							else
@@ -3216,7 +3216,7 @@ int main(int argc, char **argv) {
 				if (process.mbp_sscorr_symmetry == MBP_SSCORR_SYMMETRIC) {
 					for (itable = 0; itable < nsscorrtable; itable++) {
 						for (int i = 0; i < sscorrtable[itable].nangle / 2; i++) {
-							j = sscorrtable[itable].nangle - 1 - i;
+							const int j = sscorrtable[itable].nangle - 1 - i;
 							if (sscorrtable[itable].amplitude[i] != 0.0 && sscorrtable[itable].amplitude[j] != 0.0)
 								factor = 0.5;
 							else
@@ -5273,7 +5273,7 @@ int main(int argc, char **argv) {
 								depth_offset_use = bheave[i] + draft + lever_heave;
 								zz = bath[i] - depth_offset_use;
 								k = -1;
-								for (j = 0; j < nsvp - 1; j++) {
+								for (int j = 0; j < nsvp - 1; j++) {
 									if ((depth[j] < zz) && (depth[j + 1] >= zz))
 										k = j;
 								}

@@ -412,7 +412,7 @@ int main(int argc, char **argv) {
 	double time_d_lastping;
 	int read_data;
 	int start, done;
-	int j, k;
+	int k;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -610,7 +610,7 @@ int main(int argc, char **argv) {
 							status = MB_FAILURE;
 
 						if (MB_SUCCESS == status)
-							for (j = 0; j < npings; j++) {
+							for (int j = 0; j < npings; j++) {
 								if (buffer != fgets(buffer, MB_PATH_MAXLINE, rules_fp))
 									status = MB_FAILURE;
 
@@ -725,7 +725,7 @@ int main(int argc, char **argv) {
 				strcpy(line_name, lines[i]->name);
 				nlen = strlen(line_name);
 				slen = strlen(swathfile);
-				for (j = 0; j <= slen - nlen; j++)
+				for (int j = 0; j <= slen - nlen; j++)
 					if (0 == strncmp(line_name, &swathfile[j], nlen)) {
 						usable_rule = MB_YES;
 						line = lines[i];

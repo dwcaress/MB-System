@@ -602,7 +602,7 @@ int main(int argc, char **argv) {
     int status_format = MB_SUCCESS;
     int format_nottobeused = 0;
 
-	int i, j, jj, n;
+	int i, jj, n;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -2612,7 +2612,7 @@ int main(int argc, char **argv) {
 				pixel_width = swath_width / (opixels_ss - 1);
 
 				/* initialize the output sidescan */
-				for (j = 0; j < opixels_ss; j++) {
+				for (int j = 0; j < opixels_ss; j++) {
 					oss[j] = 0.0;
 					ossacrosstrack[j] = pixel_width * (double)(j - (opixels_ss / 2));
 					ossalongtrack[j] = 0.0;
@@ -2663,7 +2663,7 @@ int main(int argc, char **argv) {
 
 						/* bin the value and position */
 						if (found == MB_YES) {
-							j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+							const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
 							if (j >= 0 && j < opixels_ss) {
 								oss[j] += raw_samples_port[i];
 								ossbincount[j]++;
@@ -2723,7 +2723,7 @@ int main(int argc, char **argv) {
 
 						/* bin the value and position */
 						if (found == MB_YES) {
-							j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+							const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
 							if (j >= 0 && j < opixels_ss) {
 								oss[j] += raw_samples_stbd[i];
 								ossbincount[j]++;
@@ -2738,7 +2738,7 @@ int main(int argc, char **argv) {
 				/* calculate the output sidescan */
 				jport = -1;
 				jstbd = -1;
-				for (j = 0; j < opixels_ss; j++) {
+				for (int j = 0; j < opixels_ss; j++) {
 					if (ossbincount[j] > 0) {
 						oss[j] /= (double)ossbincount[j];
 						ossalongtrack[j] /= (double)ossbincount[j];
@@ -2758,7 +2758,7 @@ int main(int argc, char **argv) {
 
 				/* interpolate gaps in the output sidescan */
 				previous = opixels_ss;
-				for (j = 0; j < opixels_ss; j++) {
+				for (int j = 0; j < opixels_ss; j++) {
 					if (ossbincount[j] > 0) {
 						interpable = j - previous - 1;
 						if (interpable > 0 && interpable <= interpolation) {

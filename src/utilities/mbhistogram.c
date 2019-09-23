@@ -189,7 +189,6 @@ int main(int argc, char **argv) {
 	int nrec, nvalue;
 	int nrectot = 0;
 	int nvaluetot = 0;
-	int j;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -488,7 +487,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < beams_bath; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							nvalue++;
-							j = (bath[i] - value_bin_min) / dvalue_bin;
+							const int j = (bath[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
 							if (data_first == MB_YES) {
@@ -508,7 +507,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < beams_amp; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							nvalue++;
-							j = (amp[i] - value_bin_min) / dvalue_bin;
+							const int j = (amp[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
 							if (data_first == MB_YES) {
@@ -528,7 +527,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < pixels_ss; i++) {
 						if (ss[i] > MB_SIDESCAN_NULL) {
 							nvalue++;
-							j = (ss[i] - value_bin_min) / dvalue_bin;
+							const int j = (ss[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
 							if (data_first == MB_YES) {
@@ -604,7 +603,7 @@ int main(int argc, char **argv) {
 		intervals[0] = MAX(data_min, value_min);
 		intervals[nintervals - 1] = MIN(data_max, value_max);
 		ibin = 0;
-		for (j = 1; j < nintervals - 1; j++) {
+		for (int j = 1; j < nintervals - 1; j++) {
 			target = target_min + j * dinterval;
 			while (histogram[ibin] < target && ibin < nbins - 1)
 				ibin++;
@@ -630,7 +629,7 @@ int main(int argc, char **argv) {
 		intervals[0] = value_bin_min;
 		total = 0.0;
 		ibin = -1;
-		for (j = 1; j < nintervals; j++) {
+		for (int j = 1; j < nintervals; j++) {
 			target = j * dinterval;
 			while (total < target && ibin < nbins - 1) {
 				ibin++;

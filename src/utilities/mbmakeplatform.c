@@ -274,7 +274,6 @@ int main(int argc, char **argv) {
 	double d1, d2, d3, d4, d5, d6;
 	double seconds;
 	int index;
-	int j;
 
 	static struct option options[] = {{"verbose", no_argument, NULL, 0},
 	                                  {"help", no_argument, NULL, 0},
@@ -541,7 +540,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
 					for (int i = 0; i < platform->num_sensors; i++) {
 						index = 0;
-						for (j = 0; j < NUM_MB_SENSOR_TYPES; j++)
+						for (int j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 							if (mb_sensor_type_id[j] == platform->sensors[i].type)
 								index = j;
 						fprintf(stderr, "    platform->sensors[%d].type:                 %d <%s>\n", i, platform->sensors[i].type,
@@ -557,7 +556,7 @@ int main(int argc, char **argv) {
 						        platform->sensors[i].capability2);
 						fprintf(stderr, "    platform->sensors[%d].num_offsets:          %d\n", i,
 						        platform->sensors[i].num_offsets);
-						for (j = 0; j < platform->sensors[i].num_offsets; j++) {
+						for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
 							fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_mode:       %d\n", i, j,
 							        platform->sensors[i].offsets[j].position_offset_mode);
 							fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_x:          %f\n", i, j,
@@ -581,7 +580,7 @@ int main(int argc, char **argv) {
 						        platform->sensors[i].time_latency_static);
 						fprintf(stderr, "    platform->sensors[%d].num_time_latency:     %d\n", i,
 						        platform->sensors[i].num_time_latency);
-						for (j = 0; j < platform->sensors[i].num_time_latency; j++) {
+						for (int j = 0; j < platform->sensors[i].num_time_latency; j++) {
 							fprintf(stderr, "    platform->sensors[%d].time_latency[%d]:                       %16.6f %8.6f\n", i,
 							        j, platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
 						}
@@ -739,7 +738,7 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
 					for (int i = 0; i < platform->num_sensors; i++) {
 						index = 0;
-						for (j = 0; j < NUM_MB_SENSOR_TYPES; j++)
+						for (int j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 							if (mb_sensor_type_id[j] == platform->sensors[i].type)
 								index = j;
 						fprintf(stderr, "    platform->sensors[%d].type:                 %d <%s>\n", i, platform->sensors[i].type,
@@ -755,7 +754,7 @@ int main(int argc, char **argv) {
 						        platform->sensors[i].capability2);
 						fprintf(stderr, "    platform->sensors[%d].num_offsets:          %d\n", i,
 						        platform->sensors[i].num_offsets);
-						for (j = 0; j < platform->sensors[i].num_offsets; j++) {
+						for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
 							fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_mode:       %d\n", i, j,
 							        platform->sensors[i].offsets[j].position_offset_mode);
 							fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_x:          %f\n", i, j,
@@ -779,7 +778,7 @@ int main(int argc, char **argv) {
 						        platform->sensors[i].time_latency_static);
 						fprintf(stderr, "    platform->sensors[%d].num_time_latency:     %d\n", i,
 						        platform->sensors[i].num_time_latency);
-						for (j = 0; j < platform->sensors[i].num_time_latency; j++) {
+						for (int j = 0; j < platform->sensors[i].num_time_latency; j++) {
 							fprintf(stderr, "    platform->sensors[%d].time_latency[%d]:                       %16.6f %8.6f\n", i,
 							        j, platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
 						}
@@ -2076,7 +2075,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "    platform->num_sensors:                 %d\n", platform->num_sensors);
 		for (int i = 0; i < platform->num_sensors; i++) {
 			index = 0;
-			for (j = 0; j < NUM_MB_SENSOR_TYPES; j++)
+			for (int j = 0; j < NUM_MB_SENSOR_TYPES; j++)
 				if (mb_sensor_type_id[j] == platform->sensors[i].type)
 					index = j;
 			fprintf(stderr, "    platform->sensors[%d].type:                 %d <%s>\n", i, platform->sensors[i].type,
@@ -2087,7 +2086,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "    platform->sensors[%d].capability1:          %d\n", i, platform->sensors[i].capability1);
 			fprintf(stderr, "    platform->sensors[%d].capability2:          %d\n", i, platform->sensors[i].capability2);
 			fprintf(stderr, "    platform->sensors[%d].num_offsets:          %d\n", i, platform->sensors[i].num_offsets);
-			for (j = 0; j < platform->sensors[i].num_offsets; j++) {
+			for (int j = 0; j < platform->sensors[i].num_offsets; j++) {
 				fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_mode:       %d\n", i, j,
 				        platform->sensors[i].offsets[j].position_offset_mode);
 				fprintf(stderr, "    platform->sensors[%d].offsets[%d].position_offset_x:          %f\n", i, j,
@@ -2108,7 +2107,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "    platform->sensors[%d].time_latency_mode:    %d\n", i, platform->sensors[i].time_latency_mode);
 			fprintf(stderr, "    platform->sensors[%d].time_latency_static:  %f\n", i, platform->sensors[i].time_latency_static);
 			fprintf(stderr, "    platform->sensors[%d].num_time_latency:     %d\n", i, platform->sensors[i].num_time_latency);
-			for (j = 0; j < platform->sensors[i].num_time_latency; j++) {
+			for (int j = 0; j < platform->sensors[i].num_time_latency; j++) {
 				fprintf(stderr, "    platform->sensors[%d].time_latency[%d]:                       %16.6f %8.6f\n", i, j,
 				        platform->sensors[i].time_latency_time_d[j], platform->sensors[i].time_latency_value[j]);
 			}

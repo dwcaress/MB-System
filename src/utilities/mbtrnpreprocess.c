@@ -1402,7 +1402,7 @@ int main
 
   int idataread, n_ping_process, i_ping_process;
   int beam_start, beam_end, beam_decimation;
-  int ii, j, jj, n;
+  int ii, jj, n;
   int jj0, jj1, dj;
   int ii0, ii1, di;
 
@@ -2323,7 +2323,7 @@ int main
           threshold_tangent = tan(DTR * 0.5 * swath_width);
           beam_start = ping[i_ping_process].beams_bath - 1;
           beam_end = 0;
-          for (j = 0; j < ping[i_ping_process].beams_bath; j++)
+          for (int j = 0; j < ping[i_ping_process].beams_bath; j++)
             if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j]))
               {
               tangent = ping[i_ping_process].bathacrosstrack[j]/
@@ -2346,7 +2346,7 @@ int main
           dj = median_filter_n_across / 2;
           di = median_filter_n_along / 2;
           n_output = 0;
-          for (j = beam_start; j <= beam_end; j++)
+          for (int j = beam_start; j <= beam_end; j++)
             {
             if ((j - beam_start) % beam_decimation == 0)
               {
@@ -2427,7 +2427,7 @@ int main
                 ping[i_ping_process].sonardepth,
                 (double)(DTR * ping[i_ping_process].heading),
                 n_output);
-              for (j = 0; j < ping[i_ping_process].beams_bath; j++)
+              for (int j = 0; j < ping[i_ping_process].beams_bath; j++)
                 if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j]))
                   {
                   fprintf(stdout,
@@ -2502,7 +2502,7 @@ int main
                 ping[i_ping_process].sonardepth, ping[i_ping_process].speed,
                 ping[i_ping_process].pitch, ping[i_ping_process].roll, ping[i_ping_process].heave));
 
-              for (j = 0; j < ping[i_ping_process].beams_bath; j++)
+              for (int j = 0; j < ping[i_ping_process].beams_bath; j++)
                 if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j]))
                   {
                   mb_put_binary_int(MB_YES, j, &output_buffer[index]);
@@ -2531,7 +2531,7 @@ int main
               /* add the checksum */
               checksum = 0;
               unsigned char *cp = (unsigned char *)output_buffer;
-              for (j = 0; j < index; j++)
+              for (int j = 0; j < index; j++)
 /*                            checksum += (unsigned int) output_buffer[j]; */
                 checksum += (unsigned int) (*cp++);
               PMPRINT(MOD_MBTRNPP, MBTRNPP_V1,

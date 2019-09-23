@@ -376,7 +376,7 @@ int main(int argc, char **argv) {
 	int nmedian_alloc = 0;
 
 	int nscan;
-	int j, j1, j2;
+	int j1, j2;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -1568,7 +1568,7 @@ int main(int argc, char **argv) {
 					j1 = MAX(i - nhalffilter, 0);
 					j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
 					nmedian = 0;
-					for (j = j1; j <= j2; j++) {
+					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
 						nmedian++;
 					}
@@ -1591,7 +1591,7 @@ int main(int argc, char **argv) {
 					sonardepth_filterweight = 0.0;
 					j1 = MAX(i - nhalffilter, 0);
 					j2 = MIN(i + nhalffilter, ndat_sonardepth - 1);
-					for (j = j1; j <= j2; j++) {
+					for (int j = j1; j <= j2; j++) {
 						dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
 						weight = exp(-dtol * dtol);
 						dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
@@ -1628,7 +1628,7 @@ int main(int argc, char **argv) {
 					j1 = MAX(i - nhalffilter, 0);
 					j2 = MIN(i + nhalffilter, nsonardepth - 1);
 					nmedian = 0;
-					for (j = j1; j <= j2; j++) {
+					for (int j = j1; j <= j2; j++) {
 						median[nmedian] = dat_sonardepth_sonardepth[j];
 						nmedian++;
 					}
@@ -1651,7 +1651,7 @@ int main(int argc, char **argv) {
 					sonardepth_filterweight = 0.0;
 					j1 = MAX(i - nhalffilter, 0);
 					j2 = MIN(i + nhalffilter, nsonardepth - 1);
-					for (j = j1; j <= j2; j++) {
+					for (int j = j1; j <= j2; j++) {
 						dtol = (sonardepth_time_d[j] - sonardepth_time_d[i]) / sonardepthfilterlength;
 						weight = exp(-dtol * dtol);
 						sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];

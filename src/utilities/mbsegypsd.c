@@ -286,7 +286,7 @@ int main(int argc, char **argv) {
 	double dtimesave = 0.0;
 	int plot_status;
 	int kstart, kend;
-	int i, j, k, n;
+	int i, k, n;
 
 	/* set file to null */
 	segyfile[0] = '\0';
@@ -670,7 +670,7 @@ int main(int argc, char **argv) {
 					nsection = (itend - itstart + 1) / nfft;
 					if (((itend - itstart + 1) % nfft) > 0)
 						nsection++;
-					for (j = 0; j < nsection; j++) {
+					for (int j = 0; j < nsection; j++) {
 						/* initialize normalization factors */
 						normraw = 0.0;
 						normtaper = 0.0;

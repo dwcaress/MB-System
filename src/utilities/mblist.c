@@ -954,7 +954,7 @@ int main(int argc, char **argv) {
 	int shellstatus;
 	int read_data;
 	int nbeams;
-	int j, k, m;
+	int k, m;
 
 	/* output files */
 	FILE **output;
@@ -1105,7 +1105,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'O':
 		case 'o':
-			for (j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
+			for (int j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
 				if (n_list < MAX_OPTIONS) {
 					list[n_list] = optarg[j];
 					if (list[n_list] == '^')
@@ -3094,7 +3094,7 @@ int main(int argc, char **argv) {
 
 			/* now loop over beams */
 			if (error == MB_ERROR_NO_ERROR && (nread - 1) % decimate == 0)
-				for (j = beam_start; j <= beam_end; j++) {
+				for (int j = beam_start; j <= beam_end; j++) {
 					/* check beam status */
 					beam_status = MB_SUCCESS;
 					if (check_bath == MB_YES && check_values == MBLIST_CHECK_ON && !mb_beam_ok(beamflag[j]))
@@ -3999,7 +3999,7 @@ int main(int argc, char **argv) {
 
 			/* now loop over pixels */
 			if (error == MB_ERROR_NO_ERROR && (nread - 1) % decimate == 0)
-				for (j = pixel_start; j <= pixel_end; j++) {
+				for (int j = pixel_start; j <= pixel_end; j++) {
 					/* check pixel status */
 					pixel_status = MB_SUCCESS;
 					if (check_bath == MB_YES && j != pixel_vertical)
@@ -4808,7 +4808,8 @@ int main(int argc, char **argv) {
 				rewind(output[i]);
 
 				/* copy data to CDL file */
-				for (j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]); j > 0;
+				/* TODO(schwehr): Convert this abuse of for to a while. */
+				for (int j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]); j > 0;
 				     j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i])) {
 					if (j != fwrite(buffer, sizeof(char), j, outfile)) {
 						fprintf(stderr, "Error writing to CDL file");
