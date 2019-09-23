@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
 	int iagchalfwindow;
 	int iyc;
 	int jstart, jend;
-	int ii, j, k, n;
+	int ii, k, n;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -902,7 +902,7 @@ int main(int argc, char **argv) {
 							filtertrace_alloc = nfilter;
 						}
 						filtersum = 0.0;
-						for (j = 0; j < nfilter; j++) {
+						for (int j = 0; j < nfilter; j++) {
 							cos_arg = (0.5 * M_PI * (j - nfilter / 2)) / (0.5 * nfilter);
 							filtertrace[j] = cos(cos_arg);
 							filtersum += filtertrace[j];
@@ -914,7 +914,7 @@ int main(int argc, char **argv) {
 							filtersum = 0.0;
 							jstart = MAX(nfilter / 2 - i, 0);
 							jend = MIN(nfilter - 1, nfilter - 1 + (traceheader.nsamps - 1 - nfilter / 2 - i));
-							for (j = jstart; j <= jend; j++) {
+							for (int j = jstart; j <= jend; j++) {
 								ii = i - nfilter / 2 + j;
 								worktrace[i] += filtertrace[j] * trace[ii];
 								filtersum += filtertrace[j];
@@ -942,7 +942,7 @@ int main(int argc, char **argv) {
 							igainend = i + iagchalfwindow;
 							igainend = MIN(traceheader.nsamps - 1, igainend);
 							tmax = 0.0;
-							for (j = igainstart; j <= igainend; j++) {
+							for (int j = igainstart; j <= igainend; j++) {
 								tmax = MAX(tmax, fabs(trace[j]));
 							}
 							if (tmax > 0.0)

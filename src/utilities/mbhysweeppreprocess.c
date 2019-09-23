@@ -285,10 +285,7 @@ int main(int argc, char **argv) {
 	int type;
 	double offset_roll, offset_pitch, offset_heading;
 	double offset_x, offset_y, offset_z, offset_t;
-	// double	lever_x, lever_y, lever_z;
-	int j;
 
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
@@ -1244,11 +1241,11 @@ int main(int argc, char **argv) {
 	/* apply time lag to all relevant data
 	    timelag value calculated either from model imported from file (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL)
 	        or by a constant offset (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) */
+	int j = 0;
 	if (timelagmode != MBHYSWEEPPREPROCESS_TIMELAG_OFF) {
 		/* correct time of navigation, heading, attitude, sonardepth, altitude
 		    read from asynchronous records in files */
 		fprintf(stderr, "Applying timelag to %d nav data\n", ndat_nav);
-		j = 0;
 		for (int i = 0; i < ndat_nav; i++) {
 			/* get timelag value */
 			timelag = 0.0;

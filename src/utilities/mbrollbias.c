@@ -294,7 +294,7 @@ int main(int argc, char **argv) {
 	FILE *outfp;
 
 	/* other variables */
-	int j, k;
+	int k;
 	int ii, jj, kk;
 	int ib, ix, iy, indx;
 
@@ -657,7 +657,7 @@ int main(int argc, char **argv) {
 	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&idata, &error);
 	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&jdata, &error);
 	for (int i = 0; i < xdim; i++)
-		for (j = 0; j < ydim; j++) {
+		for (int j = 0; j < ydim; j++) {
 			k = i * ydim + j;
 			idata[k].ptr = NULL;
 			jdata[k].ptr = NULL;
@@ -856,7 +856,7 @@ int main(int argc, char **argv) {
 
 	/* loop over regions */
 	for (int i = 0; i < xdim; i++)
-		for (j = 0; j < ydim; j++) {
+		for (int j = 0; j < ydim; j++) {
 			/* set index */
 			indx = i + j * xdim;
 
@@ -1002,7 +1002,7 @@ int main(int argc, char **argv) {
 
 	/* deallocate space for data */
 	for (int i = 0; i < xdim; i++)
-		for (j = 0; j < ydim; j++) {
+		for (int j = 0; j < ydim; j++) {
 			k = i * ydim + j;
 			if (icount[k] > 0) {
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&idata[k].ptr, &error);

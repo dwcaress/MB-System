@@ -199,7 +199,6 @@ int main(int argc, char **argv) {
 
 	int done;
 	int nbeams;
-	int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -700,7 +699,7 @@ int main(int argc, char **argv) {
 
 	for (int i = 0; i < nfile; i++) {
 		file = &(files[nfile]);
-		for (j = 0; j < file->num_pings; j++) {
+		for (int j = 0; j < file->num_pings; j++) {
 			ping = &(file->pings[j]);
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&(ping->beamflag), &error);
 			mb_freed(verbose, __FILE__, __LINE__, (void **)&(ping->bath), &error);

@@ -278,7 +278,6 @@ int main(int argc, char **argv) {
     double sensorx, sensory, sensorz;
     int first, done;
     int ix, iy, iz, kk;
-    int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &defaultpings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -784,7 +783,7 @@ int main(int argc, char **argv) {
                     sensorx = (navlon - mb_info.lon_start) / mtodeglon;
                     sensory = (navlat - mb_info.lat_start) / mtodeglat;
                     sensorz = -sensordepth;
-					for (j = 0; j < beams_bath; j++) {
+					for (int j = 0; j < beams_bath; j++) {
                         pings[n_pings].beamflag[j] = beamflag[j];
                         pings[n_pings].beamflagorg[j] = beamflag[j];
                         if (!mb_beam_check_flag_null(beamflag[j])) {
@@ -824,7 +823,7 @@ int main(int argc, char **argv) {
 					}
 					if (verbose >= 2) {
 						fprintf(stderr, "\ndbg2  beam locations (ping:beam xxx.xxx yyy.yyy zzz.zzz)\n");
-						for (j = 0; j < pings[n_pings].beams_bath; j++) {
+						for (int j = 0; j < pings[n_pings].beams_bath; j++) {
 								fprintf(stderr, "dbg2    %d:%3.3d %10.3f %10.3f %10.3f\n",
                                         n_pings, j, pings[n_pings].bathx[j],
                                         pings[n_pings].bathy[j], pings[n_pings].bathz[j]);
@@ -841,7 +840,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* update counters */
-					for (j = 0; j < pings[n_pings].beams_bath; j++) {
+					for (int j = 0; j < pings[n_pings].beams_bath; j++) {
 						if (mb_beam_ok(pings[n_pings].beamflag[j]))
                              n_beamflag_good++;
                         else if (pings[n_pings].beamflag[j] == MB_FLAG_NULL)
@@ -855,7 +854,7 @@ int main(int argc, char **argv) {
 					                      pings[n_pings].beamflag, &error);
 
 					/* update counters */
-					for (j = 0; j < pings[n_pings].beams_bath; j++) {
+					for (int j = 0; j < pings[n_pings].beams_bath; j++) {
 						if (pings[n_pings].beamflag[j] != pings[n_pings].beamflagorg[j]) {
 							if (mb_beam_ok(pings[n_pings].beamflag[j]))
 								n_esf_unflag++;
@@ -934,7 +933,7 @@ int main(int argc, char **argv) {
 
             /* count the soundings in each voxel */
             for (int i = 0; i < n_pings; i++) {
-                for (j=0; j< pings[i].beams_bath; j++) {
+                for (int j = 0; j< pings[i].beams_bath; j++) {
                     if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                         ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
                         iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
@@ -962,7 +961,7 @@ int main(int argc, char **argv) {
             /* apply density filter to the soundings  */
             if (occupied_mode == MBVC_OCCUPIED_UNFLAG || empty_mode == MBVC_EMPTY_FLAG) {
                 for (int i = 0; i < n_pings; i++) {
-                    for (j=0; j< pings[i].beams_bath; j++) {
+                    for (int j = 0; j < pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                             ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
                             iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
@@ -996,7 +995,7 @@ int main(int argc, char **argv) {
             /* apply range filter to the soundings */
             if (apply_range_minimum == MB_YES || apply_range_maximum == MB_YES) {
                 for (int i = 0; i < n_pings; i++) {
-                    for (j=0; j< pings[i].beams_bath; j++) {
+                    for (int j = 0; j< pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                             if (apply_range_minimum == MB_YES
                                 && mb_beam_ok(pings[i].beamflag[j])

@@ -152,7 +152,7 @@ int main(int argc, char **argv) {
 	int nscan;
 	int j0, j1;
 	int shellstatus;
-	int j, k, l;
+	int k, l;
 
 	/* set default input */
 	strcpy(swathdata, "datalist.mb-1");
@@ -418,7 +418,7 @@ int main(int argc, char **argv) {
 
 			/* get mean slope in this chunk */
 			slopemean = 0.0;
-			for (j = j0; j <= j1; j++) {
+			for (int j = j0; j <= j1; j++) {
 				slopemean += slope_slope[j];
 			}
 			slopemean /= npings;
@@ -426,7 +426,7 @@ int main(int argc, char **argv) {
 			/* get mean roll in this chunk */
 			rollmean = 0.0;
 			nrollmean = 0;
-			for (j = 0; j < nroll; j++) {
+			for (int j = 0; j < nroll; j++) {
 				if ((roll_time_d[j] >= slope_time_d[j0] + lagstart) && (roll_time_d[j] <= slope_time_d[j1] + lagend)) {
 					rollmean += roll_roll[j];
 					nrollmean++;
@@ -448,7 +448,7 @@ int main(int argc, char **argv) {
 					sumrollsq = 0.0;
 					nr = 0;
 
-					for (j = j0; j <= j1; j++) {
+					for (int j = j0; j <= j1; j++) {
 						/* interpolate lagged roll value */
 						found = MB_NO;
 						time_d = slope_time_d[j] + timelag;
