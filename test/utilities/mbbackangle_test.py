@@ -41,9 +41,6 @@ class MbbackangleTest(unittest.TestCase):
     self.assertIn('Version', output)
     self.assertIn('reads a swath sonar data file', output)
     self.assertIn('tables containing the average amplitude', output)
-    self.assertIn('dbg2', output)
-    self.assertIn('lonflip', output)
-    self.assertIn('angle_max:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 
