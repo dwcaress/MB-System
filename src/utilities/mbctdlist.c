@@ -43,7 +43,6 @@
 #define MAX_OPTIONS 25
 #define MBCTDLIST_ALLOC_CHUNK 1024
 
-/* NaN value */
 double NaN;
 
 static const char program_name[] = "mbctdlist";
@@ -55,7 +54,6 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, double value, int width, int precision, int ascii, int *invert, int *flipsign, int *error) {
-	char format[24];
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBlist function <%s> called\n", __func__);
@@ -70,6 +68,7 @@ int printsimplevalue(int verbose, double value, int width, int precision, int as
 	}
 
 	/* make print format */
+	char format[24];
 	format[0] = '%';
 	if (*invert == MB_YES)
 		strcpy(format, "%g");
@@ -286,7 +285,6 @@ int main(int argc, char **argv) {
 
 	int read_data;
 	int ictd;
-	int j;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -360,7 +358,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'O':
 		case 'o':
-			for (j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
+			for (int j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
 				if (n_list < MAX_OPTIONS)
 					list[n_list] = optarg[j];
 			break;
@@ -705,7 +703,7 @@ int main(int argc, char **argv) {
 						soundspeed = ctd_soundspeed[ictd];
 
 						/* get navigation */
-						j = 0;
+						int j = 0;
 						speed = 0.0;
 						interp_status =
 						    mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_lon - 1, nnav, time_d, &navlon, &j, &error);
