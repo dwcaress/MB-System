@@ -29,8 +29,6 @@
  *
  * Author:	D. W. Caress
  * Date:	January 16, 1995
- *
- *
  */
 
 #include <math.h>
@@ -153,9 +151,7 @@ static const char usage_message[] =
     "-Tthreshold -V -H]";
 
 /*--------------------------------------------------------------------*/
-int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, int *error) {
-	int nn;
-
+int hipass_mean(int verbose, int n, const double *val, double *wgt, double *hipass, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -169,7 +165,7 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 
 	/* get mean */
 	*hipass = 0.0;
-	nn = 0;
+	int nn = 0;
 	for (int i = 0; i < n; i++) {
 		*hipass += val[i];
 		nn++;
@@ -191,8 +187,6 @@ int hipass_mean(int verbose, int n, double *val, double *wgt, double *hipass, in
 }
 /*--------------------------------------------------------------------*/
 int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *hipass, int *error) {
-	double wgtsum;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -207,7 +201,7 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 
 	/* get weights */
 	*hipass = 0.0;
-	wgtsum = 0.0;
+	double wgtsum = 0.0;
 	for (int i = 0; i < n; i++) {
 		wgt[i] = exp(-dis[i] * dis[i]);
 		wgtsum += wgt[i];
@@ -270,8 +264,6 @@ int hipass_median(int verbose, int n, double *val, double *wgt, double *hipass, 
 }
 /*--------------------------------------------------------------------*/
 int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
-	int nn;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -285,7 +277,7 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 
 	/* get mean */
 	*smooth = 0.0;
-	nn = 0;
+	int nn = 0;
 	for (int i = 0; i < n; i++) {
 		*smooth += val[i];
 		nn++;
@@ -307,8 +299,6 @@ int smooth_mean(int verbose, int n, double *val, double *wgt, double *smooth, in
 }
 /*--------------------------------------------------------------------*/
 int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, double *smooth, int *error) {
-	double wgtsum;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -323,7 +313,7 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 
 	/* get weights */
 	*smooth = 0.0;
-	wgtsum = 0.0;
+	double wgtsum = 0.0;
 	for (int i = 0; i < n; i++) {
 		wgt[i] = exp(-dis[i] * dis[i]);
 		wgtsum += wgt[i];
@@ -353,8 +343,6 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, d
 /*--------------------------------------------------------------------*/
 int smooth_median(int verbose, double original, int apply_threshold, double threshold_lo, double threshold_hi, int n, double *val,
                   double *wgt, double *smooth, int *error) {
-	double ratio;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -379,7 +367,7 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 
 	/* apply thresholding */
 	if (apply_threshold == MB_YES) {
-		ratio = original / (*smooth);
+		const double ratio = original / (*smooth);
 		if (ratio < threshold_hi && ratio > threshold_lo) {
 			/*fprintf(stderr,"IGNORE MEDIAN FILTER: ratio:%f threshold:%f %f original:%f smooth:%f\n",
 			ratio, threshold_lo, threshold_hi, original, *smooth);*/
@@ -404,10 +392,6 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 }
 /*--------------------------------------------------------------------*/
 int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth, int *error) {
-	double wgtsum;
-	double diff;
-	int nn;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -421,11 +405,11 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 
 	/* get weights */
 	*smooth = 0.0;
-	wgtsum = 0.0;
-	nn = 0;
+	double wgtsum = 0.0;
+	int nn = 0;
 	wgt[0] = 0.5;
 	for (int i = 1; i < n; i++) {
-		diff = fabs(val[i] - val[0]);
+		double diff = fabs(val[i] - val[0]);
 		if (diff < 0.01)
 			diff = 0.01;
 		wgt[i] = 1.0 / diff;
@@ -453,11 +437,6 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt, double *smooth
 }
 /*--------------------------------------------------------------------*/
 int contrast_edge(int verbose, int n, double *val, double *grad, double *result, int *error) {
-	double edge;
-	double gradsum;
-	double contrast;
-	int ii;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -470,11 +449,11 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 	}
 
 	/* get gradients */
-	gradsum = 0.0;
-	edge = 0.0;
+	double gradsum = 0.0;
+	double edge = 0.0;
 	for (int i = 0; i < n; i++) {
 		grad[i] = 0.0;
-		for (ii = 0; ii < n; ii++) {
+		for (int ii = 0; ii < n; ii++) {
 			if (val[ii] > 0.0 && i != ii) {
 				grad[i] += (val[ii] - val[i]) * (val[ii] - val[i]);
 			}
@@ -483,7 +462,7 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 		edge += val[i] * grad[i];
 	}
 	edge = edge / gradsum;
-	contrast = pow((fabs(val[0] - edge) / fabs(val[0] + edge)), 0.75);
+	const double contrast = pow((fabs(val[0] - edge) / fabs(val[0] + edge)), 0.75);
 	if (val[0] >= edge)
 		*result = edge * (1.0 + contrast) / (1.0 - contrast);
 	else
@@ -505,9 +484,6 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 }
 /*--------------------------------------------------------------------*/
 int contrast_gradient(int verbose, int n, double *val, double *wgt, double *result, int *error) {
-	double gradient;
-	int nn;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBFILTER function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -521,8 +497,8 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt, double *resu
 
 	/* get weights */
 	*result = 0.0;
-	gradient = 0.0;
-	nn = 0;
+	double gradient = 0.0;
+	int nn = 0;
 	for (int i = 1; i < n; i++) {
 		gradient += (val[i] - val[0]) * (val[i] - val[0]);
 		nn++;
@@ -549,10 +525,8 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
                            double *bath, double *amp, double *bathacrosstrack, double *bathalongtrack, double *ss,
                            double *ssacrosstrack, double *ssalongtrack, char *comment, char *ombio_ptr, char *ostore_ptr,
                            int *error) {
-	struct mbsys_ldeoih_struct *ostore;
-
 	/* get data structure pointer */
-	ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
+	struct mbsys_ldeoih_struct *ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBcopy function <%s> called\n", __func__);
@@ -746,7 +720,7 @@ int main(int argc, char **argv) {
 	int ifilter, ndx, ndl;
 	int ia, ib;
 	int ja, jb, jbeg, jend;
-	int j, ii, jj, n;
+	int ii, jj, n;
 
 	char *ctime();
 	char *getenv();
@@ -1435,7 +1409,7 @@ int main(int argc, char **argv) {
 						        filters[ifilter].iteration);
 
 					/* set in and out data arrays */
-					for (j = 0; j < ndata; j++) {
+					for (int j = 0; j < ndata; j++) {
 						if (datakind == MBFILTER_BATH) {
 							ping[j].ndatapts = ping[j].beams_bath;
 							ping[j].data_i_ptr = ping[j].bath;
@@ -1455,7 +1429,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* loop over all the data */
-					for (j = 0; j < ndata; j++) {
+					for (int j = 0; j < ndata; j++) {
 
 						/* get beginning and end pings */
 						ja = j - ndl;
@@ -1543,17 +1517,17 @@ int main(int argc, char **argv) {
 					/* reset initial array and add offset
 					    if done with final iteration */
 					if (iteration == filters[ifilter].iteration - 1)
-						for (j = 0; j < ndata; j++)
+						for (int j = 0; j < ndata; j++)
 							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i] + filters[ifilter].hipass_offset;
 					else
-						for (j = 0; j < ndata; j++)
+						for (int j = 0; j < ndata; j++)
 							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i];
 
 					/* save results if done with final iteration */
 					if (ndata > 0 && iteration == filters[ifilter].iteration - 1) {
-						for (j = jbeg; j <= jend; j++)
+						for (int j = jbeg; j <= jend; j++)
 							for (int i = 0; i < ping[j].ndatapts; i++)
 								ping[j].datasave[i] = ping[j].data_i_ptr[i];
 					}
@@ -1564,7 +1538,7 @@ int main(int argc, char **argv) {
 
 			/* output pings to be cleared from buffer */
 			if (ndata > 0)
-				for (j = jbeg; j <= jend; j++) {
+				for (int j = jbeg; j <= jend; j++) {
 					if (datakind == MBFILTER_BATH) {
 						status = mbcopy_any_to_mbldeoih(
 						    verbose, system, MB_DATA_DATA, ping[j].time_i, ping[j].time_d, ping[j].navlon, ping[j].navlat,
@@ -1609,7 +1583,7 @@ int main(int argc, char **argv) {
 
 			/* save processed data in buffer */
 			if (ndata > nhold) {
-				for (j = 0; j < nhold; j++) {
+				for (int j = 0; j < nhold; j++) {
 					jj = ndata - nhold + j;
 					for (int i = 0; i < 7; i++)
 						ping[j].time_i[i] = ping[jj].time_i[i];
