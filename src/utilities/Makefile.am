@@ -1,18 +1,6 @@
 if BUILD_FFTW
  FFTW_PROG = mbsegypsd
 endif
-if BUILD_MBTRN
-  MBTRN_PROG = mbtrnpreprocess
-  MBTRN_INC = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrnav/trnw
-  MBTRN_LIB = ${top_builddir}/src/mbtrn/libr7kr.la
-if BUILD_MBTNAV
-  MBTNAV_LIB = ${top_builddir}/src/mbtrnav/libtrnw.la ${top_builddir}/src/mbtrnav/libqnx.la \
- ${top_builddir}/src/mbtrnav/libnewmat.la  ${top_builddir}/src/mbtrnav/libtnav.la  \
- ${top_builddir}/src/mbtrnav/libgeolib.la
- MBTNAV_INC=-I${top_builddir}/src/mbtrnav/terrain-nav -I${top_builddir}/src/mbtrnav/gctp -I${top_builddir}/src/mbtrnav/newmat -I${top_builddir}/src/mbtrnav/qnx-utils -I${top_builddir}/src/mbtrnav/trnw
- MBTNAV_OPT=-DWITH_MBTNAV
-endif
-endif
 
 # TODO(schwehr): What happened to mbps?
 
@@ -67,8 +55,7 @@ bin_PROGRAMS = mbconfig \
         mbswplspreprocess \
         mbtime \
         mbvoxelclean \
-        $(FFTW_PROG) \
-		$(MBTRN_PROG)
+        $(FFTW_PROG)
 
 
 include_HEADERS = levitus.h
@@ -78,8 +65,6 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio \
 	    -I${top_srcdir}/src/mbaux \
 	    -I${top_srcdir}/src/gsf \
-        $(MBTRN_INC) \
-		$(MBTNAV_INC) \
 	    ${libgmt_CPPFLAGS} \
 	    ${libnetcdf_CPPFLAGS} \
 	    ${libfftw_CPPFLAGS}
@@ -161,14 +146,6 @@ mbsegypsd_LDADD = ${top_builddir}/src/mbaux/libmbaux.la \
                   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} ${libfftw_LIBS}
 mbsegypsd_SOURCES = mbsegypsd.c
 mbsegypsd_LDFLAGS =
-endif
-if BUILD_MBTRN
-mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
-mbtrnpreprocess_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
-       $(top_builddir)/src/mbaux/libmbaux.la \
-       $(top_builddir)/src/mbaux/libmbxgr.la \
-       ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-       $(MBTRN_LIB) $(MBTNAV_LIB) $(LIBM)
 endif
 
 BUILT_SOURCES = levitus.h
