@@ -159,7 +159,7 @@ int main(int argc, char **argv) {
 	int forward;
 	double xx, yy, zz;
 	double heading_start, dheading, dheadingx, dheadingy;
-	int jj, k;
+	int jj;
 
 	// TODO(schwehr): Remove embedded prototypes.
 	void Polygon_Fill();

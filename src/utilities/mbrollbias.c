@@ -91,7 +91,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 	static int isub[10], l1;
 	int line[10], iet, ieb;
 	int i = 0;
-	int j, k, l, j2;
+	int j, l, j2;
 	double big, testa, b, sum;
 
 	iet = 0; /* initial error flags, one for triagularization*/
@@ -131,7 +131,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 
 			sum = 1.0 / (*(a + i * nstore + j));
 			/*reduce matrix towards triangle */
-			for (k = 0; k < n; k++) {
+			for (int k = 0; k < n; k++) {
 				if (line[k] == 0) {
 					b = (*(a + k * nstore + j)) * sum;
 					for (l = j + 1; l < n; l++) {
@@ -164,7 +164,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 
 	for (j = 0; j < n - 1; j++) { /*transform the vector to match triang. matrix*/
 		b = vec[isub[j]];
-		for (k = 0; k < n; k++) {
+		for (int k = 0; k < n; k++) {
 			if (line[k] > j) { /* skip elements outside of triangle*/
 				vec[k] = vec[k] - (*(a + k * nstore + j)) * b;
 			} /*end if*/
@@ -194,7 +194,7 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 	/*put the solution vector into the proper order*/
 
 	for (i = 0; i < n; i++) {     /* reorder solution */
-		for (k = i; k < n; k++) { /* search for i-th solution element */
+		for (int k = i; k < n; k++) { /* search for i-th solution element */
 			if (line[k] == i) {
 				j = k;
 				break;
@@ -294,7 +294,6 @@ int main(int argc, char **argv) {
 	FILE *outfp;
 
 	/* other variables */
-	int k;
 	int ii, jj, kk;
 	int ib, ix, iy, indx;
 
@@ -658,7 +657,7 @@ int main(int argc, char **argv) {
 	status = mb_mallocd(verbose, __FILE__, __LINE__, xdim * ydim * sizeof(struct bathptr), (void **)&jdata, &error);
 	for (int i = 0; i < xdim; i++)
 		for (int j = 0; j < ydim; j++) {
-			k = i * ydim + j;
+			const int k = i * ydim + j;
 			idata[k].ptr = NULL;
 			jdata[k].ptr = NULL;
 			if (icount[k] > 0) {
@@ -1003,7 +1002,7 @@ int main(int argc, char **argv) {
 	/* deallocate space for data */
 	for (int i = 0; i < xdim; i++)
 		for (int j = 0; j < ydim; j++) {
-			k = i * ydim + j;
+			const int k = i * ydim + j;
 			if (icount[k] > 0) {
 				status = mb_freed(verbose, __FILE__, __LINE__, (void **)&idata[k].ptr, &error);
 			}

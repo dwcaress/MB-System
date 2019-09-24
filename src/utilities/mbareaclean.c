@@ -308,7 +308,7 @@ int main(int argc, char **argv) {
 	double xx, yy;
 	int ix, iy, ib, kgrid;
 	double d1, d2;
-	int i1, i2, n;
+	int i1, i2;
 
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
@@ -376,8 +376,9 @@ int main(int argc, char **argv) {
 			break;
 		case 'M':
 		case 'm':
+		{
 			median_filter = MB_YES;
-			n = sscanf(optarg, "%lf/%d/%d", &d1, &i1, &i2);
+			const int n = sscanf(optarg, "%lf/%d/%d", &d1, &i1, &i2);
 			if (n > 0)
 				median_filter_threshold = d1;
 			if (n > 1)
@@ -388,6 +389,7 @@ int main(int argc, char **argv) {
 			}
 			flag++;
 			break;
+		}
 		case 'N':
 		case 'n':
 			limit_beams = MB_YES;
@@ -405,15 +407,17 @@ int main(int argc, char **argv) {
 			break;
 		case 'P':
 		case 'p':
+		{
 			plane_fit = MB_YES;
 			sscanf(optarg, "%lf", &plane_fit_threshold);
-			n = sscanf(optarg, "%lf/%d/%lf", &d1, &i1, &d2);
+			const int n = sscanf(optarg, "%lf/%d/%lf", &d1, &i1, &d2);
 			if (n > 0)
 				plane_fit_threshold = d1;
 			if (n > 1)
 				plane_fit_nmin = i1;
 			flag++;
 			break;
+		}
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, areabounds);

@@ -327,7 +327,6 @@ int main(int argc, char **argv) {
   int distance_mode;
   int read_data;
   int start, done;
-  int n, p, b;
 
   /* get current default values */
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -491,15 +490,18 @@ int main(int argc, char **argv) {
       break;
     case 'X':
     case 'x':
-      n = sscanf(optarg, "%d/%d", &zap_beams_left, &zap_beams_right);
+    {
+      const int n = sscanf(optarg, "%d/%d", &zap_beams_left, &zap_beams_right);
       if (n == 1)
         zap_beams_right = zap_beams_left;
       zap_beams = MB_YES;
       flag++;
       break;
+    }
     case 'Y':
     case 'y':
-      n = sscanf(optarg, "%lf/%lf/%d", &distance_left, &distance_right, &distance_mode);
+    {
+      const int n = sscanf(optarg, "%lf/%lf/%d", &distance_left, &distance_right, &distance_mode);
       if (n == 1) {
         if (distance_left >= 0.0) {
           flag_distance_left = -distance_left;
@@ -523,6 +525,7 @@ int main(int argc, char **argv) {
       }
       flag++;
       break;
+    }
     case 'Z':
     case 'z':
       check_zero_position = MB_YES;
@@ -1451,8 +1454,8 @@ int main(int argc, char **argv) {
                         }
                         if (verbose >= 1 && slope > slopemax && dd > distancemin * median &&
                             bad[0].flag == MB_YES) {
-                          p = bad[0].ping;
-                          b = bad[0].beam;
+                          const int p = bad[0].ping;
+                          const int b = bad[0].beam;
                           if (verbose >= 2)
                             fprintf(stderr, "\n");
                           fprintf(
@@ -1464,8 +1467,8 @@ int main(int argc, char **argv) {
                         }
                         if (verbose >= 1 && slope > slopemax && dd > distancemin * median &&
                             bad[1].flag == MB_YES) {
-                          p = bad[1].ping;
-                          b = bad[1].beam;
+                          const int p = bad[1].ping;
+                          const int b = bad[1].beam;
                           if (verbose >= 2)
                             fprintf(stderr, "\n");
                           fprintf(

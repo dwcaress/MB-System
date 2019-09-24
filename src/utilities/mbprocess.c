@@ -724,7 +724,7 @@ int main(int argc, char **argv) {
 	int istart, iend, icut;
 	int intstat;
 	int ioff;
-	int k, mm;
+	int mm;
 	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
@@ -5272,7 +5272,7 @@ int main(int argc, char **argv) {
 								for current depth value */
 								depth_offset_use = bheave[i] + draft + lever_heave;
 								zz = bath[i] - depth_offset_use;
-								k = -1;
+								int k = -1;
 								for (int j = 0; j < nsvp - 1; j++) {
 									if ((depth[j] < zz) && (depth[j + 1] >= zz))
 										k = j;

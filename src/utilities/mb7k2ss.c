@@ -360,7 +360,6 @@ int main(int argc, char **argv) {
 	int read_data;
 	int found, done;
 	int shellstatus;
-	int n;
 
 	startline = 1;
 	strcpy(lineroot, "sidescan");
@@ -406,13 +405,15 @@ int main(int argc, char **argv) {
 			break;
 		case 'B':
 		case 'b':
-			n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+		{
+			const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
 			if (n == 0)
 				bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
 			else if (n == 1 && bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
 				bottompickthreshold = 0.5;
 			flag++;
 			break;
+		}
 		case 'C':
 		case 'c':
 			print_comments = MB_YES;

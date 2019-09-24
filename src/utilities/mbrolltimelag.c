@@ -152,7 +152,6 @@ int main(int argc, char **argv) {
 	int nscan;
 	int j0, j1;
 	int shellstatus;
-	int k, l;
 
 	/* set default input */
 	strcpy(swathdata, "datalist.mb-1");
@@ -406,7 +405,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* initialize time lag histogram */
-		for (k = 0; k < nlag; k++) {
+		for (int k = 0; k < nlag; k++) {
 			timelaghistogram[k] = 0;
 		}
 
@@ -441,7 +440,7 @@ int main(int argc, char **argv) {
 				fprintf(fpx, ">\n");
 				if (fpt != NULL)
 					fprintf(fpt, ">\n");
-				for (k = 0; k < nlag; k++) {
+				for (int k = 0; k < nlag; k++) {
 					timelag = lagstart + k * lagstep;
 					sumsloperoll = 0.0;
 					sumslopesq = 0.0;
@@ -452,7 +451,7 @@ int main(int argc, char **argv) {
 						/* interpolate lagged roll value */
 						found = MB_NO;
 						time_d = slope_time_d[j] + timelag;
-						for (l = nr; l < nroll - 1 && found == MB_NO; l++) {
+						for (int l = nr; l < nroll - 1 && found == MB_NO; l++) {
 							if (time_d >= roll_time_d[l] && time_d <= roll_time_d[l + 1]) {
 								nr = l;
 								found = MB_YES;
@@ -493,7 +492,7 @@ int main(int argc, char **argv) {
 				maxr = 0.0;
 				peakr = 0.0;
 				peaktimelag = 0.0;
-				for (k = 0; k < nlag; k++) {
+				for (int k = 0; k < nlag; k++) {
 					timelag = lagstart + k * lagstep;
 					if (timelag >= lagstart && timelag <= lagend) {
 						if (rr[k] > maxr) {
@@ -565,7 +564,7 @@ int main(int argc, char **argv) {
 		peakkmax = 0;
 		peakksum = 0;
 		timelag = 0.0;
-		for (k = 0; k < nlag; k++) {
+		for (int k = 0; k < nlag; k++) {
 			if (timelaghistogram[k] > peakkmax) {
 				peakkmax = timelaghistogram[k];
 				peakk = k;

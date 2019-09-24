@@ -412,7 +412,6 @@ int main(int argc, char **argv) {
 	double time_d_lastping;
 	int read_data;
 	int start, done;
-	int k;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -632,7 +631,7 @@ int main(int argc, char **argv) {
 										beam = beam->next;
 								}
 								if (MB_SUCCESS == status)
-									for (k = 0; k < nbeams; k++) {
+									for (int k = 0; k < nbeams; k++) {
 										if (MB_SUCCESS == status && 1 > sscanf(&buffer[used], "%d %n", &beam_no, &bytes))
 											status = MB_FAILURE;
 										used += bytes;

@@ -235,7 +235,6 @@ int main(int argc, char **argv) {
 
 	int read_data;
 	int inav;
-	int n;
 
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
@@ -576,6 +575,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* extract additional nav info */
+			int n;
 			if (error == MB_ERROR_NO_ERROR) {
 				status = mb_extract_nnav(verbose, mbio_ptr, store_ptr, MB_ASYNCH_SAVE_MAX, &kind, &n, atime_i, atime_d, anavlon,
 				                         anavlat, aspeed, aheading, adraft, aroll, apitch, aheave, &error);

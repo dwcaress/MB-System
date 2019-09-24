@@ -622,7 +622,7 @@ int main(int argc, char **argv) {
 	/* other variables */
 	FILE *dfp = NULL;
 	FILE *rfp = NULL;
-	int k, ii, jj, iii, jjj, kkk, ir, n;
+	int ii, jj, iii, jjj, kkk, ir;
 	int i1, i2, j1, j2, k1, k2;
 	double r;
 	int dmask[9];
@@ -678,7 +678,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'C':
 		case 'c':
-			n = sscanf(optarg, "%d/%d", &clip, &clipmode);
+		{
+			const int n = sscanf(optarg, "%d/%d", &clip, &clipmode);
 			if (n < 1)
 				clipmode = MBGRID_INTERP_NONE;
 			else if (n == 1 && clip > 0)
@@ -691,29 +692,35 @@ int main(int argc, char **argv) {
 				clipmode = MBGRID_INTERP_ALL;
 			flag++;
 			break;
+		}
 		case 'D':
 		case 'd':
-			n = sscanf(optarg, "%d/%d", &xdim, &ydim);
+		{
+			const int n = sscanf(optarg, "%d/%d", &xdim, &ydim);
 			if (n == 2)
 				set_dimensions = MB_YES;
 			flag++;
 			break;
+		}
 		case 'E':
 		case 'e':
+		{
 			if (optarg[strlen(optarg) - 1] == '!') {
 				spacing_priority = MB_YES;
 				optarg[strlen(optarg) - 1] = '\0';
 			}
-			n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+			const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
 			if (n > 1)
 				set_spacing = MB_YES;
 			if (n < 3)
 				strcpy(units, "meters");
 			flag++;
 			break;
+		}
 		case 'F':
 		case 'f':
-			n = sscanf(optarg, "%d/%lf", &grid_mode, &dvalue);
+		{
+			const int n = sscanf(optarg, "%d/%lf", &grid_mode, &dvalue);
       if (n == 2) {
         if (grid_mode == MBGRID_MINIMUM_FILTER) {
           minormax_weighted_mean_threshold = dvalue;
@@ -727,6 +734,7 @@ int main(int argc, char **argv) {
       }
 			flag++;
 			break;
+		}
 		case 'G':
 		case 'g':
 			if (optarg[0] == '=') {
@@ -3497,7 +3505,7 @@ int main(int argc, char **argv) {
 						grid[kgrid] = value[cnt[kgrid] - 1];
 					}
 					sigma[kgrid] = 0.0;
-					for (k = 0; k < cnt[kgrid]; k++)
+					for (int k = 0; k < cnt[kgrid]; k++)
 						sigma[kgrid] += (value[k] - grid[kgrid]) * (value[k] - grid[kgrid]);
 					if (cnt[kgrid] > 1)
 						sigma[kgrid] = sqrt(sigma[kgrid] / (cnt[kgrid] - 1));
