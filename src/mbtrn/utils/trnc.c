@@ -207,11 +207,11 @@ typedef struct app_cfg_s{
 
 /// @typedef enum trnc_action_t trnc_action_t
 /// @brief state machine actions
-typedef enum{AT_NOP=0,AT_CONNECT,AT_WR_REQ,AT_RD_MSG,AT_SHOW_MSG,AT_QUIT}trnc_action_t;
+typedef enum{TRNAT_NOP=0,TRNAT_CONNECT,TRNAT_WR_REQ,TRNAT_RD_MSG,TRNAT_SHOW_MSG,TRNAT_QUIT}trnc_action_t;
 
 /// @typedef enum trnc_state_t trnc_state_t
 /// @brief state machine states
-typedef enum{ST_INIT=0,ST_CONNECTED,ST_REQ_PENDING,ST_SUBSCRIBED, ST_HBEAT_EXPIRED,ST_DONE}trnc_state_t;
+typedef enum{TRNSM_INIT=0,TRNSM_CONNECTED,TRNSM_REQ_PENDING,TRNSM_SUBSCRIBED, TRNSM_HBEAT_EXPIRED,TRNSM_DONE}trnc_state_t;
 
 static void s_show_help();
 
@@ -440,30 +440,30 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
         byte *pread=NULL;
         uint32_t readlen=0;
         
-        trnc_state_t state=ST_INIT;
-        trnc_action_t action=AT_NOP;
+        trnc_state_t state=TRNSM_INIT;
+        trnc_action_t action=TRNAT_NOP;
         
         // state machine entry point
-        while (state != ST_DONE && !g_interrupt) {
+        while (state != TRNSM_DONE && !g_interrupt) {
             
             // check states, assign actions
             switch (state) {
-                case ST_INIT:
+                case TRNSM_INIT:
 //                    memset(&message,0,MBTRN_MAX_MSG_BYTES);
                     memset(&msg_buf,0,MB1_MAX_FRAME_BYTES);
-                    action = AT_CONNECT;
+                    action = TRNAT_CONNECT;
                     break;
-                case ST_CONNECTED:
-                    action=AT_WR_REQ;
+                case TRNSM_CONNECTED:
+                    action=TRNAT_WR_REQ;
                     break;
-                case ST_REQ_PENDING:
-                case ST_SUBSCRIBED:
+                case TRNSM_REQ_PENDING:
+                case TRNSM_SUBSCRIBED:
 //                    memset(&message,0,MBTRN_MAX_MSG_BYTES);
                     memset(&msg_buf,0,MB1_MAX_FRAME_BYTES);
-                    action=AT_RD_MSG;
+                    action=TRNAT_RD_MSG;
                     break;
-                case ST_HBEAT_EXPIRED:
-                    action=AT_WR_REQ;
+                case TRNSM_HBEAT_EXPIRED:
+                    action=TRNAT_WR_REQ;
                     break;
                     
                 default:
@@ -471,18 +471,18 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             }// switch
             
             // action: connect
-            if (action == AT_CONNECT) {
+            if (action == TRNAT_CONNECT) {
                 PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"connecting [%s:%d]\n",cfg->host,cfg->port));
                 if( (test=msock_connect(s))==0 ) {
                     PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"connect OK fd[%d]\n",s->fd));
-                    state=ST_CONNECTED;
+                    state=TRNSM_CONNECTED;
                 }else{
                     PEPRINT((stderr,"connect failed [%"PRId64"]\n",test));
                 }
             }
             
             // action: write request
-            if (action == AT_WR_REQ) {
+            if (action == TRNAT_WR_REQ) {
                 const char *reqstr="REQ\0";
 
                 test=msock_sendto(s,NULL,(byte *)reqstr,4,0);
@@ -492,14 +492,14 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                 if( test>0 ){
                     trn_tx_count++;
                     trn_tx_bytes+=test;
-                    state=ST_REQ_PENDING;
+                    state=TRNSM_REQ_PENDING;
                 }else{
                     PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"sendto failed ret[%"PRId64"] [%d/%s]\n",test,errno,strerror(errno)));
                 }
             }
             
             // action: read response
-            if (action == AT_RD_MSG) {
+            if (action == TRNAT_RD_MSG) {
 //                pread = (byte *)&message;
 //                readlen = MBTRN_MAX_MSG_BYTES;
                 pread = msg_buf;
@@ -524,21 +524,21 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                     if (mb1->sounding->type==MBTRN_MSGTYPE_ACK) {
                         PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received ACK ret[%"PRId64"] [%08X]\n",test,mb1->sounding->type));
                         hbeat_counter=0;
-                        state=ST_SUBSCRIBED;
+                        state=TRNSM_SUBSCRIBED;
                     }else if (mb1->sounding->type==MBTRN_MSGTYPE_MB1) {
                         PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"received MSG ret[%"PRId64"] type[%08X] size[%d] ping[%06d]\n",test,mb1->sounding->type,mb1->sounding->size,mb1->sounding->ping_number));
                         trn_msg_count++;
                         trn_msg_bytes+=test;
                         
-                        action=AT_SHOW_MSG;
+                        action=TRNAT_SHOW_MSG;
                         
-                        if (state!=ST_REQ_PENDING){
-                            state=ST_SUBSCRIBED;
+                        if (state!=TRNSM_REQ_PENDING){
+                            state=TRNSM_SUBSCRIBED;
                         }
                         hbeat_counter++;
                         PMPRINT(MOD_TRNC,MM_DEBUG,(stderr,"hbeat[%d/%d]\n",hbeat_counter,cfg->hbeat));
                         if ( (hbeat_counter!=0) && (hbeat_counter%cfg->hbeat==0)) {
-                            state=ST_HBEAT_EXPIRED;
+                            state=TRNSM_HBEAT_EXPIRED;
                         }
                     }else{
                         // response not recognized
@@ -560,7 +560,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
                             s = msock_socket_new(cfg->host, cfg->port, ST_UDP);
                             msock_set_blocking(s,(cfg->blocking==0?false:true));
                             sleep(5);
-                            state=ST_INIT;
+                            state=TRNSM_INIT;
                             retval=-1;
                             break;
                         default:
@@ -571,7 +571,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             }
             
             // action: show message
-            if (action == AT_SHOW_MSG) {
+            if (action == TRNAT_SHOW_MSG) {
 //                PMPRINT(MOD_TRNC,MM_DEBUG|TRNC_V1|TRNC_V2,(stderr,"\nts[%.3f] ping[%06d] lat[%.4lf] lon[%.4lf]\nsd[%7.2lf] hdg[%6.2lf] nb[%03"PRIu32"]\n",
 //                        psounding->ts,
 //                        psounding->ping_number,
@@ -616,7 +616,7 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             }
             
             // action: quit state machine
-            if (action == AT_QUIT) {
+            if (action == TRNAT_QUIT) {
                 break;
             }
             
@@ -625,16 +625,16 @@ static int s_trnc_state_machine(msock_socket_t *s, app_cfg_t *cfg)
             if(scycles==0){
                 PTRACE();
                 retval=0;
-                state=ST_DONE;
+                state=TRNSM_DONE;
             }
             
             if(g_interrupt){
                 PTRACE();
                 retval=-1;
-                state=ST_DONE;
+                state=TRNSM_DONE;
             }
             
-        }// while !ST_DONE
+        }// while !TRNSM_DONE
     }//else invalid arg
     
     PMPRINT(MOD_TRNC,TRNC_V1,(stderr,"tx count/bytes[%d/%d]\n",trn_tx_count,trn_tx_bytes));
