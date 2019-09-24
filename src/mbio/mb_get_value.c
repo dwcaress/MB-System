@@ -234,7 +234,7 @@ int mb_get_bounds(char *text, double *bounds) {
  *	latitude values in decimal degrees and degrees:minutes:seconds
  *	form. This code has been taken from GMT (gmt_init.c).
  */
-double mb_ddmmss_to_degree(char *text) {
+double mb_ddmmss_to_degree(const char *text) {
 	int colons = 0;
 	int i = 0;  /* Used after for. */
 	for (; text[i]; i++)

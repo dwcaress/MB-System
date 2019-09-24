@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_define.h	4/21/96
-  *
+ *
  *    Copyright (c) 1996-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -538,7 +538,7 @@ int mb_put_binary_float(int, float, void *);
 int mb_put_binary_double(int, double, void *);
 int mb_put_binary_long(int, mb_s_long, void *);
 int mb_get_bounds(char *text, double *bounds);
-double mb_ddmmss_to_degree(char *text);
+double mb_ddmmss_to_degree(const char *text);
 int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error);
 int mb_rollpitch_to_takeoff(int verbose, double pitch, double roll, double *theta, double *phi, int *error);
 int mb_xyz_to_takeoff(int verbose, double x, double y, double z, double *theta, double *phi, int *error);
