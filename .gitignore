@@ -1,3 +1,4 @@
+*.DS_Store
 /aclocal.m4
 /Makefile
 /config.log
