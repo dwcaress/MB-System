@@ -21,6 +21,7 @@
 
 #include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,168 +47,118 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int option_index;
-	int errflg = 0;
-	int c;
-	int mode_set = MB_NO;
-	int mode_help = MB_NO;
-	int mode_prefix = MB_NO;
-	int mode_cflags = MB_NO;
-	int mode_libs = MB_NO;
-	int mode_version = MB_NO;
-	int mode_version_id = MB_NO;
-	int mode_version_major = MB_NO;
-	int mode_version_minor = MB_NO;
-	int mode_version_archive = MB_NO;
-	int mode_levitus = MB_NO;
-	int mode_otps = MB_NO;
+	bool mode_set = false;
+	bool mode_help = false;
+	bool mode_prefix = false;
+	bool mode_cflags = false;
+	bool mode_libs = false;
+	bool mode_version = false;
+	bool mode_version_id = false;
+	bool mode_version_major = false;
+	bool mode_version_minor = false;
+	bool mode_version_archive = false;
+	bool mode_levitus = false;
+	bool mode_otps = false;
 
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
+
+	/* process argument list */
+	{
+		const struct option options[] =
+			{{"verbose", no_argument, NULL, 0},
+	                {"help", no_argument, NULL, 0},
+	                {"prefix", no_argument, NULL, 0},
+	                {"cflags", no_argument, NULL, 0},
+	                {"libs", no_argument, NULL, 0},
+	                {"version", no_argument, NULL, 0},
+	                {"version-id", no_argument, NULL, 0},
+	                {"version-major", no_argument, NULL, 0},
+	                {"version-minor", no_argument, NULL, 0},
+	                {"version-archive", no_argument, NULL, 0},
+	                {"levitus", no_argument, NULL, 0},
+	                {"otps", no_argument, NULL, 0},
+	                {NULL, 0, NULL, 0}};
+
+		bool errflg = false;
+		int c;
+		int option_index;
+		while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
+			switch (c) {
+			/* long options all return c=0 */
+			case 0:
+				if (strcmp("verbose", options[option_index].name) == 0) {
+					verbose++;
+				}
+				else if (strcmp("help", options[option_index].name) == 0) {
+					mode_help = true;
+					mode_set = true;
+				}
+				else if (strcmp("prefix", options[option_index].name) == 0) {
+					mode_prefix = true;
+					mode_set = true;
+				}
+				else if (strcmp("cflags", options[option_index].name) == 0) {
+					mode_cflags = true;
+					mode_set = true;
+				}
+				else if (strcmp("libs", options[option_index].name) == 0) {
+					mode_libs = true;
+					mode_set = true;
+				}
+				else if (strcmp("version", options[option_index].name) == 0) {
+					mode_version = true;
+					mode_set = true;
+				}
+				else if (strcmp("version-id", options[option_index].name) == 0) {
+					mode_version_id = true;
+					mode_set = true;
+				}
+				else if (strcmp("version-major", options[option_index].name) == 0) {
+					mode_version_major = true;
+					mode_set = true;
+				}
+				else if (strcmp("version-minor", options[option_index].name) == 0) {
+					mode_version_minor = true;
+					mode_set = true;
+				}
+				else if (strcmp("version-archive", options[option_index].name) == 0) {
+					mode_version_archive = true;
+					mode_set = true;
+				}
+				else if (strcmp("levitus", options[option_index].name) == 0) {
+					mode_levitus = true;
+					mode_set = true;
+				}
+				else if (strcmp("otps", options[option_index].name) == 0) {
+					mode_otps = true;
+					mode_set = true;
+				}
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
+	}
+
+	/* if no mode specified then just do version */
+	if (!mode_set)
+		mode_version = true;
+
 	mb_path version_string;
 	int version_id;
 	int version_major;
 	int version_minor;
 	int version_archive;
-
-	/* command line option definitions */
-	/* mbpreprocess
-	 * 		--verbose
-	 * 		--help
-	 *
-	 * 		--prefix
-	 * 		--cflags
-	 * 		--libs
-	 *
-	 * 		--version
-	 * 		--version-id
-	 * 		--version-major
-	 * 		--version-minor
-	 * 		--version-archive
-	 *
-	 * 		--levitus
-	 * 		--otps
-	 */
-	static struct option options[] = {{"verbose", no_argument, NULL, 0},
-	                                  {"help", no_argument, NULL, 0},
-	                                  {"prefix", no_argument, NULL, 0},
-	                                  {"cflags", no_argument, NULL, 0},
-	                                  {"libs", no_argument, NULL, 0},
-	                                  {"version", no_argument, NULL, 0},
-	                                  {"version-id", no_argument, NULL, 0},
-	                                  {"version-major", no_argument, NULL, 0},
-	                                  {"version-minor", no_argument, NULL, 0},
-	                                  {"version-archive", no_argument, NULL, 0},
-	                                  {"levitus", no_argument, NULL, 0},
-	                                  {"otps", no_argument, NULL, 0},
-	                                  {NULL, 0, NULL, 0}};
+	int error = MB_ERROR_NO_ERROR;
 
 	int status = mb_version(verbose, version_string, &version_id, &version_major, &version_minor, &version_archive, &error);
 
-	/* process argument list */
-	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
-		switch (c) {
-		/* long options all return c=0 */
-		case 0:
-			/* verbose */
-			if (strcmp("verbose", options[option_index].name) == 0) {
-				verbose++;
-			}
-
-			/* help */
-			else if (strcmp("help", options[option_index].name) == 0) {
-				mode_help = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/*-------------------------------------------------------*/
-
-			/* prefix */
-			else if (strcmp("prefix", options[option_index].name) == 0) {
-				mode_prefix = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/* cflags */
-			else if (strcmp("cflags", options[option_index].name) == 0) {
-				mode_cflags = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/* libs */
-			else if (strcmp("libs", options[option_index].name) == 0) {
-				mode_libs = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/*-------------------------------------------------------
-			 * Various sorts of version statement */
-
-			/* version */
-			else if (strcmp("version", options[option_index].name) == 0) {
-				mode_version = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/* version-id */
-			else if (strcmp("version-id", options[option_index].name) == 0) {
-				mode_version_id = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/* version-major */
-			else if (strcmp("version-major", options[option_index].name) == 0) {
-				mode_version_major = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/* version-minor */
-			else if (strcmp("version-minor", options[option_index].name) == 0) {
-				mode_version_minor = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/* version-archive */
-			else if (strcmp("version-archive", options[option_index].name) == 0) {
-				mode_version_archive = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/*-------------------------------------------------------*/
-
-			/* levitus */
-			else if (strcmp("levitus", options[option_index].name) == 0) {
-				mode_levitus = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/* otps */
-			else if (strcmp("otps", options[option_index].name) == 0) {
-				mode_otps = MB_YES;
-				mode_set = MB_YES;
-			}
-
-			/*-------------------------------------------------------*/
-
-			break;
-		case '?':
-			errflg++;
-		}
-
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	/* if no mode specified then just do version */
-	if (mode_set == MB_NO)
-		mode_version = MB_YES;
-
-	if (verbose == 1 || mode_help == MB_YES) {
+	if (verbose == 1 || mode_help) {
 		fprintf(stderr, "\n# Program %s\n", program_name);
 		fprintf(stderr, "# MB-system Version %s\n", version_string);
 	}
@@ -231,28 +182,24 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2       mode_otps:                  %d\n", mode_otps);
 	}
 
-	/* help */
-	if (mode_help == MB_YES) {
+	if (mode_help) {
 		fprintf(stderr, "\n%s\n", help_message);
 		fprintf(stderr, "\nusage: %s\n", usage_message);
 	}
 
-	/* prefix */
-	if (mode_prefix == MB_YES) {
+	if (mode_prefix) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System install prefix:\n");
 		fprintf(stdout, "%s\n", MBSYSTEM_INSTALL_PREFIX);
 	}
 
-	/* cflags */
-	if (mode_cflags == MB_YES) {
+	if (mode_cflags) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System compile flags:\n");
 		fprintf(stdout, "-I%s/include\n", MBSYSTEM_INSTALL_PREFIX);
 	}
 
-	/* libs */
-	if (mode_libs == MB_YES) {
+	if (mode_libs) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System link flags:\n");
 #ifdef MBSYSTEM_BUNDLED_PROJ
@@ -264,56 +211,48 @@ int main(int argc, char **argv) {
 #endif
 	}
 
-	/* version */
-	if (mode_version == MB_YES) {
+	if (mode_version) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System version:\n");
 		fprintf(stdout, "%s\n", version_string);
 	}
 
-	/* version-id */
-	if (mode_version_id == MB_YES) {
+	if (mode_version_id) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System version id:\n");
 		fprintf(stdout, "%d\n", version_id);
 	}
 
-	/* version-major */
-	if (mode_version_major == MB_YES) {
+	if (mode_version_major) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System major version:\n");
 		fprintf(stdout, "%d\n", version_major);
 	}
 
-	/* version-minor */
-	if (mode_version_minor == MB_YES) {
+	if (mode_version_minor) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System minor version:\n");
 		fprintf(stdout, "%d\n", version_minor);
 	}
 
-	/* version-archive */
-	if (mode_version_archive == MB_YES) {
+	if (mode_version_archive) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# MB-System archive version:\n");
 		fprintf(stdout, "%d\n", version_archive);
 	}
 
-	/* version-archive */
-	if (mode_levitus == MB_YES) {
+	if (mode_levitus) {
 		if (verbose > 0)
 			fprintf(stdout, "# MB-System Levitus database location:\n");
 		fprintf(stdout, "%s\n", levitusfile);
 	}
 
-	/* version-archive */
-	if (mode_otps == MB_YES) {
+	if (mode_otps) {
 		if (verbose > 0)
 			fprintf(stdout, "\n# OTPS tide modeling package location:\n");
 		fprintf(stdout, "%s\n", otps_location);
 	}
 
-	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose, &error);
 
