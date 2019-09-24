@@ -975,7 +975,8 @@ AC_CONFIG_FILES([\
       src/mbnavadjust/Makefile \
       src/otps/Makefile \
       src/mbtrn/Makefile \
-      src/mbtnav/Makefile \
+      src/mbtrnav/Makefile \
+      src/mbtrnutils/Makefile \
       src/mbview/Makefile \
       src/mbgrdviz/Makefile \
       src/mbeditviz/Makefile  \
