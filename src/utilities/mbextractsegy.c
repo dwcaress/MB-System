@@ -21,6 +21,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -243,15 +244,15 @@ int main(int argc, char **argv) {
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 	int flag = 0;
 	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:Z:z:VvHh")) != -1)
 		switch (c) {
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'V':
 		case 'v':
@@ -333,7 +334,7 @@ int main(int argc, char **argv) {
 			flag++;
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* if error flagged then print it and exit */

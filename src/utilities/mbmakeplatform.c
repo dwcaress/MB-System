@@ -22,6 +22,7 @@
 
 #include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -207,7 +208,7 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 int main(int argc, char **argv) {
 	int option_index;
-	int errflg = 0;
+	bool errflg = false;
 	int c;
 
 	/* MBIO status variables */
@@ -1988,7 +1989,7 @@ int main(int argc, char **argv) {
 
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 		if (sensor_mode == SENSOR_MODIFY || sensor_mode == SENSOR_ADD) {

@@ -23,6 +23,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,9 +73,9 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 	int flag = 0;
 
 	/* MBIO status variables */
@@ -620,7 +621,7 @@ int main(int argc, char **argv) {
 		switch (c) {
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'V':
 		case 'v':
@@ -885,7 +886,7 @@ int main(int argc, char **argv) {
 			flag++;
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* set nav and attitude sources */

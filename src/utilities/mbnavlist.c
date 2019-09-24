@@ -24,6 +24,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -109,9 +110,9 @@ int main(int argc, char **argv) {
 	static const char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile "
 	                       "-Kkind -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
 
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 	int flag = 0;
 
 	/* MBIO status variables */
@@ -260,7 +261,7 @@ int main(int argc, char **argv) {
 		switch (c) {
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'V':
 		case 'v':
@@ -362,7 +363,7 @@ int main(int argc, char **argv) {
 			flag++;
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* if error flagged then print it and exit */

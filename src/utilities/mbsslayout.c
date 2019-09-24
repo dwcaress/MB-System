@@ -21,6 +21,7 @@
  */
 
 #include <getopt.h>
+#include <stdbool.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -156,9 +157,9 @@ int mbsslayout_get_flatbottom_table(int verbose, int nangle, double angle_min, d
 
 int main(int argc, char **argv) {
 	int option_index;
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -1047,7 +1048,7 @@ int main(int argc, char **argv) {
 
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* if error flagged then print it and exit */

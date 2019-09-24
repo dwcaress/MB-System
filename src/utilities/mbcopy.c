@@ -1722,9 +1722,9 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  int errflg = 0;
+  bool errflg = false;
   int c;
-  int help = 0;
+  bool help = false;
   int flag = 0;
 
   /* MBIO status variables */
@@ -1914,7 +1914,7 @@ int main(int argc, char **argv) {
     }
     case 'H':
     case 'h':
-      help++;
+      help = true;
       break;
     case 'I':
     case 'i':
@@ -1975,7 +1975,7 @@ int main(int argc, char **argv) {
       verbose++;
       break;
     case '?':
-      errflg++;
+      errflg = true;
     }
 
   /* if error flagged then print it and exit */

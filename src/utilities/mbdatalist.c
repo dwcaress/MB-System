@@ -22,6 +22,7 @@
 
 #include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,9 +44,9 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int option_index;
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 	int flag = 0;
 
 	/* command line option definitions */
@@ -264,7 +265,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'I':
 		case 'i':
@@ -321,7 +322,7 @@ int main(int argc, char **argv) {
 			make_datalistp = MB_YES;
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* set output stream */

@@ -32,6 +32,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -617,9 +618,9 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
+	bool errflg = 0;
 	int c;
-	int help = 0;
+	bool help = 0;
 	int flag = 0;
 
 	/* MBIO status variables */
@@ -822,7 +823,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'I':
 		case 'i':
@@ -883,7 +884,7 @@ int main(int argc, char **argv) {
 			verbose++;
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* if error flagged then print it and exit */
