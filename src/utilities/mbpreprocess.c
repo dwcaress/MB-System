@@ -587,7 +587,7 @@ int main(int argc, char **argv) {
   double *dptr = NULL;
   int index = 0;
   char buffer[16] = "";
-  int ii, n, nn;
+  int ii, nn;
 
   /* get current default values */
   int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -638,7 +638,7 @@ int main(int argc, char **argv) {
 
       /* format */
       else if (strcmp("format", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &format);
+        /* n = */ sscanf(optarg, "%d", &format);
       }
 
       /*-------------------------------------------------------
@@ -646,14 +646,14 @@ int main(int argc, char **argv) {
 
       /* platform-file */
       else if (strcmp("platform-file", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%s", platform_file);
+        const int n = sscanf(optarg, "%s", platform_file);
         if (n == 1)
           use_platform_file = MB_YES;
       }
 
       /* platform-target-sensor */
       else if (strcmp("platform-target-sensor", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &target_sensor);
+        /* n = */ sscanf(optarg, "%d", &target_sensor);
       }
 
       /*-------------------------------------------------------
@@ -685,12 +685,12 @@ int main(int argc, char **argv) {
 
       /* nav-file-format */
       else if (strcmp("nav-file-format", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &nav_file_format);
+        /* n = */ sscanf(optarg, "%d", &nav_file_format);
       }
 
       /* nav-async */
       else if (strcmp("nav-async", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &nav_async);
+        const int n = sscanf(optarg, "%d", &nav_async);
         if (n == 1)
           nav_mode = MBPREPROCESS_MERGE_ASYNC;
         preprocess_pars.recalculate_bathymetry = MB_YES;
@@ -698,7 +698,7 @@ int main(int argc, char **argv) {
 
       /* nav-sensor */
       else if (strcmp("nav-sensor", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &nav_sensor);
+        /* n = */ sscanf(optarg, "%d", &nav_sensor);
         preprocess_pars.recalculate_bathymetry = MB_YES;
       }
 
@@ -715,12 +715,12 @@ int main(int argc, char **argv) {
 
       /* sensordepth-file-format */
       else if (strcmp("sensordepth-file-format", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &sensordepth_file_format);
+        /* n = */ sscanf(optarg, "%d", &sensordepth_file_format);
       }
 
       /* sensordepth-async */
       else if (strcmp("sensordepth-async", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &sensordepth_async);
+        const int n = sscanf(optarg, "%d", &sensordepth_async);
         if (n == 1)
           sensordepth_mode = MBPREPROCESS_MERGE_ASYNC;
         preprocess_pars.recalculate_bathymetry = MB_YES;
@@ -728,7 +728,7 @@ int main(int argc, char **argv) {
 
       /* sensordepth-sensor */
       else if (strcmp("sensordepth-sensor", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &sensordepth_sensor);
+        /* n = */ sscanf(optarg, "%d", &sensordepth_sensor);
         preprocess_pars.recalculate_bathymetry = MB_YES;
       }
 
@@ -745,12 +745,12 @@ int main(int argc, char **argv) {
 
       /* heading-file-format */
       else if (strcmp("heading-file-format", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &heading_file_format);
+        /* n = */ sscanf(optarg, "%d", &heading_file_format);
       }
 
       /* heading-async */
       else if (strcmp("heading-async", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &heading_async);
+        const int n = sscanf(optarg, "%d", &heading_async);
         if (n == 1)
           heading_mode = MBPREPROCESS_MERGE_ASYNC;
         preprocess_pars.recalculate_bathymetry = MB_YES;
@@ -758,7 +758,7 @@ int main(int argc, char **argv) {
 
       /* heading-sensor */
       else if (strcmp("heading-sensor", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &heading_sensor);
+        /* n = */ sscanf(optarg, "%d", &heading_sensor);
         preprocess_pars.recalculate_bathymetry = MB_YES;
       }
 
@@ -774,19 +774,19 @@ int main(int argc, char **argv) {
 
       /* altitude-file-format */
       else if (strcmp("altitude-file-format", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &altitude_file_format);
+        /* n = */ sscanf(optarg, "%d", &altitude_file_format);
       }
 
       /* altitude-async */
       else if (strcmp("altitude-async", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &altitude_async);
+        const int n = sscanf(optarg, "%d", &altitude_async);
         if (n == 1)
           altitude_mode = MBPREPROCESS_MERGE_ASYNC;
       }
 
       /* altitude-sensor */
       else if (strcmp("altitude-sensor", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &altitude_sensor);
+        /* n = */ sscanf(optarg, "%d", &altitude_sensor);
       }
 
       /*-------------------------------------------------------
@@ -802,12 +802,12 @@ int main(int argc, char **argv) {
 
       /* attitude-file-format */
       else if (strcmp("attitude-file-format", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &attitude_file_format);
+        /* n = */ sscanf(optarg, "%d", &attitude_file_format);
       }
 
       /* attitude-async */
       else if (strcmp("attitude-async", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &attitude_async);
+        const int n = sscanf(optarg, "%d", &attitude_async);
         if (n == 1)
           attitude_mode = MBPREPROCESS_MERGE_ASYNC;
         preprocess_pars.recalculate_bathymetry = MB_YES;
@@ -815,7 +815,7 @@ int main(int argc, char **argv) {
 
       /* attitude-sensor */
       else if (strcmp("attitude-sensor", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &attitude_sensor);
+        /* n = */ sscanf(optarg, "%d", &attitude_sensor);
         preprocess_pars.recalculate_bathymetry = MB_YES;
       }
 
@@ -833,12 +833,12 @@ int main(int argc, char **argv) {
 
       /* soundspeed-file-format */
       else if (strcmp("soundspeed-file-format", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &soundspeed_file_format);
+        /* n = */ sscanf(optarg, "%d", &soundspeed_file_format);
       }
 
       /* soundspeed-async */
       else if (strcmp("soundspeed-async", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &soundspeed_async);
+        const int n = sscanf(optarg, "%d", &soundspeed_async);
         if (n == 1)
           soundspeed_mode = MBPREPROCESS_MERGE_ASYNC;
         preprocess_pars.modify_soundspeed = MB_YES;
@@ -847,7 +847,7 @@ int main(int argc, char **argv) {
 
       /* soundspeed-sensor */
       else if (strcmp("soundspeed-sensor", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &soundspeed_sensor);
+        /* n = */ sscanf(optarg, "%d", &soundspeed_sensor);
         preprocess_pars.modify_soundspeed = MB_YES;
         preprocess_pars.recalculate_bathymetry = MB_YES;
       }
@@ -866,12 +866,12 @@ int main(int argc, char **argv) {
 
       /* time-latency-file-format */
       else if (strcmp("time-latency-file-format", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%d", &time_latency_format);
+        /* n = */ sscanf(optarg, "%d", &time_latency_format);
       }
 
       /* time-latency-constant */
       else if (strcmp("time-latency-constant", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &time_latency_constant);
+        const int n = sscanf(optarg, "%lf", &time_latency_constant);
         if (n == 1)
           time_latency_mode = MB_SENSOR_TIME_LATENCY_STATIC;
       }
@@ -930,7 +930,7 @@ int main(int argc, char **argv) {
 
       /* filter */
       else if (strcmp("filter", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &filter_length);
+        /* n = */ sscanf(optarg, "%lf", &filter_length);
       }
 
       /* filter-apply-nav */
@@ -994,14 +994,14 @@ int main(int argc, char **argv) {
 
       /* sounding-amplitude-filter=value */
       else if (strcmp("sounding-amplitude-filter", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &preprocess_pars.sounding_amplitude_threshold);
+        const int n = sscanf(optarg, "%lf", &preprocess_pars.sounding_amplitude_threshold);
         if (n == 1)
           preprocess_pars.sounding_amplitude_filter = MB_YES;
       }
 
       /* sounding-altitude-filter=value */
       else if (strcmp("sounding-altitude-filter", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &preprocess_pars.sounding_target_altitude);
+        const int n = sscanf(optarg, "%lf", &preprocess_pars.sounding_target_altitude);
         if (n == 1)
           preprocess_pars.sounding_altitude_filter = MB_YES;
       }
@@ -1013,7 +1013,7 @@ int main(int argc, char **argv) {
 
       /* head1-offsets=x/y/z/heading/roll/pitch */
       else if (strcmp("head1-offsets", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
+        const int n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
                     &preprocess_pars.head1_offsets_x,
                     &preprocess_pars.head1_offsets_y,
                     &preprocess_pars.head1_offsets_z,
@@ -1027,7 +1027,7 @@ int main(int argc, char **argv) {
 
       /* head2-offsets=x/y/z/heading/roll/pitch */
       else if (strcmp("head2-offsets", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
+        const int n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf/%lf",
                     &preprocess_pars.head2_offsets_x,
                     &preprocess_pars.head2_offsets_y,
                     &preprocess_pars.head2_offsets_z,
@@ -1044,28 +1044,28 @@ int main(int argc, char **argv) {
 
       /* kluge-time-jumps */
       else if (strcmp("kluge-time-jumps", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &kluge_timejumps_threshold);
+        const int n = sscanf(optarg, "%lf", &kluge_timejumps_threshold);
         if (n == 1)
           kluge_timejumps = MB_YES;
       }
 
       /* kluge-ancilliary-time-jumps */
       else if (strcmp("kluge-ancilliary-time-jumps", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &kluge_timejumps_anc_threshold);
+        const int n = sscanf(optarg, "%lf", &kluge_timejumps_anc_threshold);
         if (n == 1)
           kluge_timejumps_ancilliary = MB_YES;
       }
 
       /* kluge-mbaripressure-time-jumps */
       else if (strcmp("kluge-mbaripressure-time-jumps", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &kluge_timejumps_mba_threshold);
+        const int n = sscanf(optarg, "%lf", &kluge_timejumps_mba_threshold);
         if (n == 1)
           kluge_timejumps_mbaripressure = MB_YES;
       }
 
       /* kluge-beam-tweak */
       else if (strcmp("kluge-beam-tweak", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &kluge_beamtweak_factor);
+        const int n = sscanf(optarg, "%lf", &kluge_beamtweak_factor);
         if (n == 1) {
           kluge_beamtweak = MB_YES;
           preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_BEAMTWEAK;
@@ -1078,7 +1078,7 @@ int main(int argc, char **argv) {
 
       /* kluge-soundspeed-tweak */
       else if (strcmp("kluge-soundspeed-tweak", options[option_index].name) == 0) {
-        n = sscanf(optarg, "%lf", &kluge_soundspeedtweak_factor);
+        const int n = sscanf(optarg, "%lf", &kluge_soundspeedtweak_factor);
         if (n == 1) {
           kluge_soundspeedtweak = MB_YES;
           preprocess_pars.kluge_id[preprocess_pars.n_kluge] = MB_PR_KLUGE_SOUNDSPEEDTWEAK;

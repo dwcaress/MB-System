@@ -595,7 +595,6 @@ int main(int argc, char **argv) {
 	int year, month, day, hour, minute;
 	int source, type;
 	double second, id;
-	int n;
 
 	int lonflip;
 	double bounds[4];
@@ -829,7 +828,7 @@ int main(int argc, char **argv) {
 		case 'z':
 			/* multibeam_offsets */
 			if (strncmp("multibeam_offsets=", optarg, 17) == 0) {
-				n = sscanf(optarg, "multibeam_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
+				const int n = sscanf(optarg, "multibeam_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
 				           &mbtransmit_offset_z, &mbtransmit_offset_heading, &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
 				if (n == 6) {
 					multibeam_offset_mode = MB_YES;
@@ -843,7 +842,7 @@ int main(int argc, char **argv) {
 			}
 			/* mbtransmit_offsets */
 			else if (strncmp("mbtransmit_offsets=", optarg, 18) == 0) {
-				n = sscanf(optarg, "mbtransmit_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
+				const int n = sscanf(optarg, "mbtransmit_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
 				           &mbtransmit_offset_z, &mbtransmit_offset_heading, &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
 				if (n == 6) {
 					multibeam_offset_mode = MB_YES;
@@ -851,7 +850,7 @@ int main(int argc, char **argv) {
 			}
 			/* mbreceive_offsets */
 			else if (strncmp("mbreceive_offsets=", optarg, 17) == 0) {
-				n = sscanf(optarg, "mbreceive_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbreceive_offset_x, &mbreceive_offset_y,
+				const int n = sscanf(optarg, "mbreceive_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbreceive_offset_x, &mbreceive_offset_y,
 				           &mbreceive_offset_z, &mbreceive_offset_heading, &mbreceive_offset_roll, &mbreceive_offset_pitch);
 				if (n == 6) {
 					multibeam_offset_mode = MB_YES;
@@ -859,26 +858,26 @@ int main(int argc, char **argv) {
 			}
 			/* position_offsets */
 			else if (strncmp("position_offsets=", optarg, 16) == 0) {
-				n = sscanf(optarg, "position_offsets=%lf/%lf/%lf", &position_offset_x, &position_offset_y, &position_offset_z);
+				const int n = sscanf(optarg, "position_offsets=%lf/%lf/%lf", &position_offset_x, &position_offset_y, &position_offset_z);
 				if (n == 3)
 					position_offset_mode = MB_YES;
 			}
 			/* depth_offsets */
 			else if (strncmp("depth_offsets=", optarg, 13) == 0) {
-				n = sscanf(optarg, "depth_offsets=%lf/%lf/%lf", &depth_offset_x, &depth_offset_y, &depth_offset_z);
+				const int n = sscanf(optarg, "depth_offsets=%lf/%lf/%lf", &depth_offset_x, &depth_offset_y, &depth_offset_z);
 				if (n == 3)
 					depth_offset_mode = MB_YES;
 			}
 			/* heading_offsets */
 			else if (strncmp("heading_offsets=", optarg, 15) == 0) {
-				n = sscanf(optarg, "heading_offsets=%lf/%lf/%lf", &heading_offset_heading, &heading_offset_roll,
+				const int n = sscanf(optarg, "heading_offsets=%lf/%lf/%lf", &heading_offset_heading, &heading_offset_roll,
 				           &heading_offset_pitch);
 				if (n == 3)
 					heading_offset_mode = MB_YES;
 			}
 			/* rollpitch_offsets */
 			else if (strncmp("rollpitch_offsets=", optarg, 17) == 0) {
-				n = sscanf(optarg, "rollpitch_offsets=%lf/%lf/%lf", &rollpitch_offset_heading, &rollpitch_offset_roll,
+				const int n = sscanf(optarg, "rollpitch_offsets=%lf/%lf/%lf", &rollpitch_offset_heading, &rollpitch_offset_roll,
 				           &rollpitch_offset_pitch);
 				if (n == 3)
 					rollpitch_offset_mode = MB_YES;

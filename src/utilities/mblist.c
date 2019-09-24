@@ -954,7 +954,6 @@ int main(int argc, char **argv) {
 	int shellstatus;
 	int read_data;
 	int nbeams;
-	int k, m;
 
 	/* output files */
 	FILE **output;
@@ -3049,7 +3048,7 @@ int main(int argc, char **argv) {
 				sy = 0.0;
 				sxx = 0.0;
 				sxy = 0.0;
-				for (k = 0; k < beams_bath; k++)
+				for (int k = 0; k < beams_bath; k++)
 					if (mb_beam_ok(beamflag[k])) {
 						sx += bathacrosstrack[k];
 						sy += bath[k];
@@ -3127,6 +3126,7 @@ int main(int argc, char **argv) {
 						for (int i = 0; i < n_list; i++) {
 							if (netcdf == MB_YES && lcount > 0)
 								fprintf(output[i], ", ");
+							int k;
 							if (port_next_value == MB_YES) {
 								k = beam_port;
 								port_next_value = MB_NO;
@@ -3798,7 +3798,7 @@ int main(int argc, char **argv) {
 								case 'c': /* Mean backscatter */
 									mback = 0;
 									nback = 0;
-									for (m = 0; m < beams_amp; m++) {
+									for (int m = 0; m < beams_amp; m++) {
 										if (mb_beam_ok(beamflag[m])) {
 											mback += amp[m];
 											nback++;
@@ -3905,7 +3905,8 @@ int main(int argc, char **argv) {
 									printsimplevalue(verbose, output[i], ss_pixels[start_sample[k]], 5, 1, ascii,
 									                 &invert_next_value, &signflip_next_value, &error);
 									if (count > 0) {
-										for (m = 1; m < count && m < beam_samples[k]; m++) {
+										int m = 1;
+										for (; m < count && m < beam_samples[k]; m++) {
 											if (netcdf == MB_YES)
 												fprintf(output[i], ", ");
 											if (ascii == MB_YES)
@@ -4036,6 +4037,7 @@ int main(int argc, char **argv) {
 						for (int i = 0; i < n_list; i++) {
 							if (netcdf == MB_YES && lcount > 0)
 								fprintf(output[i], ", ");
+							int k;
 							if (port_next_value == MB_YES) {
 								k = pixel_port;
 								port_next_value = MB_NO;
@@ -4580,7 +4582,7 @@ int main(int argc, char **argv) {
 								case 'c': /* Mean backscatter */
 									mback = 0;
 									nback = 0;
-									for (m = 0; m < beams_amp; m++) {
+									for (int m = 0; m < beams_amp; m++) {
 										if (mb_beam_ok(beamflag[m])) {
 											mback += amp[m];
 											nback++;
@@ -4675,7 +4677,8 @@ int main(int argc, char **argv) {
 									printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical]], 5, 1, ascii,
 									                 &invert_next_value, &signflip_next_value, &error);
 									if (count > 0) {
-										for (m = 1; m < count && m < beam_samples[beam_vertical]; m++) {
+										int m = 1;
+										for (; m < count && m < beam_samples[beam_vertical]; m++) {
 											if (netcdf == MB_YES)
 												fprintf(output[i], ", ");
 											if (ascii == MB_YES)
