@@ -437,7 +437,7 @@ gsfDataID;
 /* above, does have the timespec structure defined. __APPLE__ will be set when  */
 /* compiled with Apple's gcc on OSX and other third party compilers, so we use it to */
 /* insure the definition below does not conflict. */
- #ifndef __APPLE__
+ #ifdef __APPLE__
 
     struct timespec
     {
