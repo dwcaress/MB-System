@@ -720,7 +720,7 @@ int main(int argc, char **argv) {
 	int ifilter, ndx, ndl;
 	int ia, ib;
 	int ja, jb, jbeg, jend;
-	int ii, jj, n;
+	int ii, jj;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -769,7 +769,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'C':
 		case 'c':
-			n = sscanf(optarg, "%d/%d/%d/%d", &contrast_mode, &contrast_xdim, &contrast_ldim, &contrast_iter);
+		{
+			const int n = sscanf(optarg, "%d/%d/%d/%d", &contrast_mode, &contrast_xdim, &contrast_ldim, &contrast_iter);
 			if (n >= 3) {
 				filters[num_filters].mode = contrast_mode + 7;
 				filters[num_filters].xdim = contrast_xdim;
@@ -784,9 +785,11 @@ int main(int argc, char **argv) {
 				num_filters++;
 			flag++;
 			break;
+		}
 		case 'D':
 		case 'd':
-			n = sscanf(optarg, "%d/%d/%d/%d/%lf", &hipass_mode, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
+		{
+			const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &hipass_mode, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
 			if (n >= 3) {
 				filters[num_filters].mode = hipass_mode;
 				filters[num_filters].xdim = hipass_xdim;
@@ -805,6 +808,7 @@ int main(int argc, char **argv) {
 				num_filters++;
 			flag++;
 			break;
+		}
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
@@ -839,7 +843,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'S':
 		case 's':
-			n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &smooth_mode, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
+		{
+			const int n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &smooth_mode, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
 			           &threshold_hi);
 			if (n >= 3) {
 				filters[num_filters].mode = smooth_mode + 3;
@@ -866,6 +871,7 @@ int main(int argc, char **argv) {
 				num_filters++;
 			flag++;
 			break;
+		}
 		case 'T':
 		case 't':
 			sscanf(optarg, "%lf/%lf", &threshold_lo, &threshold_hi);

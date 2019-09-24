@@ -416,7 +416,7 @@ int main(int argc, char **argv) {
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 
 	double d1, d2;
-	int ix, jy, kgrid, k, n;
+	int ix, jy, kgrid;
 	int kgrid00, kgrid10, kgrid01, kgrid11;
 
 	/* get current default values */
@@ -452,7 +452,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'B':
 		case 'b':
-			n = sscanf(optarg, "%d/%lf/%lf", &beammode, &d1, &d2);
+		{
+			const int n = sscanf(optarg, "%d/%lf/%lf", &beammode, &d1, &d2);
 			if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
 				if (n >= 2)
 					ssbeamwidth = d1;
@@ -461,6 +462,7 @@ int main(int argc, char **argv) {
 			}
 			flag++;
 			break;
+		}
 		case 'C':
 		case 'c':
 			symmetry = MB_YES;
@@ -482,7 +484,7 @@ int main(int argc, char **argv) {
 		{
 			int i;
 			int j;
-			n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
+			int n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
 			if (n == 5) {
 				n = sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
 				ampmin = 0.0;
@@ -1296,7 +1298,7 @@ int main(int argc, char **argv) {
 									ix = (angle + gridampangle) / gridampdx;
 									jy = (amp[i] - gridampmin) / gridampdy;
 									if (ix >= 0 && ix < gridampn_columns && jy >= 0 && jy < gridampn_rows) {
-										k = ix * gridampn_rows + jy;
+										const int k = ix * gridampn_rows + jy;
 										gridamphist[k] += 1.0;
 									}
 								}
@@ -1426,7 +1428,7 @@ int main(int argc, char **argv) {
 									ix = (angle + gridssangle) / gridssdx;
 									jy = (ss[i] - gridssmin) / gridssdy;
 									if (ix >= 0 && ix < gridssn_columns && jy >= 0 && jy < gridssn_rows) {
-										k = ix * gridssn_rows + jy;
+										const int k = ix * gridssn_rows + jy;
 										gridsshist[k] += 1.0;
 									}
 								}
@@ -1463,13 +1465,13 @@ int main(int argc, char **argv) {
 			for (ix = 0; ix < gridampn_columns; ix++) {
 				norm = 0.0;
 				for (jy = 0; jy < gridampn_rows; jy++) {
-					k = ix * gridampn_rows + jy;
+					const int k = ix * gridampn_rows + jy;
 					norm += gridamphist[k];
 				}
 				if (norm > 0.0) {
 					norm *= 0.001;
 					for (jy = 0; jy < gridampn_rows; jy++) {
-						k = ix * gridampn_rows + jy;
+						const int k = ix * gridampn_rows + jy;
 						gridamphist[k] /= norm;
 						ampmax = MAX(ampmax, gridamphist[k]);
 					}
@@ -1504,13 +1506,13 @@ int main(int argc, char **argv) {
 			for (ix = 0; ix < gridssn_columns; ix++) {
 				norm = 0.0;
 				for (jy = 0; jy < gridssn_rows; jy++) {
-					k = ix * gridssn_rows + jy;
+					const int k = ix * gridssn_rows + jy;
 					norm += gridsshist[k];
 				}
 				if (norm > 0.0) {
 					norm *= 0.001;
 					for (jy = 0; jy < gridssn_rows; jy++) {
-						k = ix * gridssn_rows + jy;
+						const int k = ix * gridssn_rows + jy;
 						gridsshist[k] /= norm;
 						ampmax = MAX(ampmax, gridsshist[k]);
 					}

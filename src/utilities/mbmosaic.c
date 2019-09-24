@@ -207,8 +207,6 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                    double dx, double dy, double nodata, int *error) {
 	FILE *fp = NULL;
-	int k;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -244,7 +242,7 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 		fprintf(fp, "nodata_value -99999\n");
 		for (int j = 0; j < ny; j++) {
 			for (int i = 0; i < nx; i++) {
-				k = i * ny + (ny - 1 - j);
+				const int k = i * ny + (ny - 1 - j);
 				if (grid[k] == nodata)
 					fprintf(fp, "-99999 ");
 				else
@@ -1253,7 +1251,7 @@ int main(int argc, char **argv) {
 	int inside;
 	double acrosstrackspacing;
 	double slope;
-	int ii, jj, iii, jjj, kkk, n;
+	int ii, jj, iii, jjj, kkk;
 	int i1, i2, j1, j2;
 	int ir;
 	double r;
@@ -1300,7 +1298,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'C':
 		case 'c':
-			n = sscanf(optarg, "%d/%d/%lf", &clip, &clipmode, &tension);
+		{
+			const int n = sscanf(optarg, "%d/%d/%lf", &clip, &clipmode, &tension);
 			if (n < 1)
 				clipmode = MBMOSAIC_INTERP_NONE;
 			else if (n == 1 && clip > 0)
@@ -1316,26 +1315,31 @@ int main(int argc, char **argv) {
 			}
 			flag++;
 			break;
+		}
 		case 'D':
 		case 'd':
-			n = sscanf(optarg, "%d/%d", &xdim, &ydim);
+		{
+			const int n = sscanf(optarg, "%d/%d", &xdim, &ydim);
 			if (n == 2)
 				set_dimensions = MB_YES;
 			flag++;
 			break;
+		}
 		case 'E':
 		case 'e':
+		{
 			if (optarg[strlen(optarg) - 1] == '!') {
 				spacing_priority = MB_YES;
 				optarg[strlen(optarg) - 1] = '\0';
 			}
-			n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+			const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
 			if (n > 1)
 				set_spacing = MB_YES;
 			if (n < 3)
 				strcpy(units, "meters");
 			flag++;
 			break;
+		}
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%lf/%d", &priority_range, &weight_priorities);
@@ -1427,7 +1431,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'U':
 		case 'u':
-			n = sscanf(optarg, "%lf/%lf/%d", &t1, &t2, &kkk);
+		{
+			const int n = sscanf(optarg, "%lf/%lf/%d", &t1, &t2, &kkk);
 			if (n == 3 && kkk == 1) {
 				priority_heading = t1;
 				priority_heading_factor = t2;
@@ -1442,6 +1447,7 @@ int main(int argc, char **argv) {
 			}
 			flag++;
 			break;
+		}
 		case 'V':
 		case 'v':
 			verbose++;

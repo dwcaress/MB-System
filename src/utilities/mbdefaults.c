@@ -101,8 +101,6 @@ int main(int argc, char **argv) {
 	double speedmin;
 	double timegap;
 
-	int n;
-
 	/* get current default mbio values */
 	status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
@@ -167,23 +165,23 @@ int main(int argc, char **argv) {
 		case 'm':
 			/* default primary colortable and modes */
 			if (optarg[0] == 'P' || optarg[0] == 'p')
-				n = sscanf(&optarg[1], "%d/%d/%d", &primary_colortable, &primary_colortable_mode, &primary_shade_mode);
+				/* n = */ sscanf(&optarg[1], "%d/%d/%d", &primary_colortable, &primary_colortable_mode, &primary_shade_mode);
 
 			/* default slope colortable and mode */
 			else if (optarg[0] == 'G' || optarg[0] == 'g')
-				n = sscanf(&optarg[1], "%d/%d", &slope_colortable, &slope_colortable_mode);
+				/* n = */ sscanf(&optarg[1], "%d/%d", &slope_colortable, &slope_colortable_mode);
 
 			/* default overlay colortable and mode */
 			else if (optarg[0] == 'O' || optarg[0] == 'o')
-				n = sscanf(&optarg[1], "%d/%d", &secondary_colortable, &secondary_colortable_mode);
+				/* n = */ sscanf(&optarg[1], "%d/%d", &secondary_colortable, &secondary_colortable_mode);
 
 			/* default illumination parameters */
 			else if (optarg[0] == 'I' || optarg[0] == 'i')
-				n = sscanf(&optarg[1], "%lf/%lf/%lf", &illuminate_magnitude, &illuminate_elevation, &illuminate_azimuth);
+				/* n = */ sscanf(&optarg[1], "%lf/%lf/%lf", &illuminate_magnitude, &illuminate_elevation, &illuminate_azimuth);
 
 			/* default slope shading magnitude */
 			else if (optarg[0] == 'S' || optarg[0] == 'S')
-				n = sscanf(&optarg[1], "%lf", &slope_magnitude);
+				/* n = */ sscanf(&optarg[1], "%lf", &slope_magnitude);
 
 			flag++;
 			break;

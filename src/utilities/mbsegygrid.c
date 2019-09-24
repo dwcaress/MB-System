@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
 	int iagchalfwindow;
 	int iyc;
 	int jstart, jend;
-	int ii, k, n;
+	int ii;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -350,45 +350,53 @@ int main(int argc, char **argv) {
 			break;
 		case 'A':
 		case 'a':
-			n = sscanf(optarg, "%lf/%lf", &shotscale, &timescale);
+		{
+			const int n = sscanf(optarg, "%lf/%lf", &shotscale, &timescale);
 			if (n == 2)
 				scale2distance = MB_YES;
 			flag++;
 			break;
+		}
 		case 'B':
 		case 'b':
-			n = sscanf(optarg, "%lf/%lf", &agcmaxvalue, &agcwindow);
+		{
+			const int n = sscanf(optarg, "%lf/%lf", &agcmaxvalue, &agcwindow);
 			if (n < 2)
 				agcwindow = 0.0;
 			agcmode = MB_YES;
 			flag++;
 			break;
+		}
 		case 'C':
 		case 'c':
-			n = sscanf(optarg, "%d", &geometrymode);
+		{
+			const int n = sscanf(optarg, "%d", &geometrymode);
 			if (n < 1)
 				geometrymode = MBSEGYGRID_GEOMETRY_VERTICAL;
 			flag++;
 			break;
+		}
 		case 'D':
 		case 'd':
-			n = sscanf(optarg, "%d/%d", &decimatex, &decimatey);
+			/* n = */ sscanf(optarg, "%d/%d", &decimatex, &decimatey);
 			flag++;
 			break;
 		case 'F':
 		case 'f':
-			n = sscanf(optarg, "%d/%lf", &filtermode, &filterwindow);
+			/* n = */ sscanf(optarg, "%d/%lf", &filtermode, &filterwindow);
 			flag++;
 			break;
 		case 'G':
 		case 'g':
-			n = sscanf(optarg, "%d/%lf/%lf/%lf", &gainmode, &gain, &gainwindow, &gaindelay);
+		{
+			const int n = sscanf(optarg, "%d/%lf/%lf/%lf", &gainmode, &gain, &gainwindow, &gaindelay);
 			if (n < 4)
 				gaindelay = 0.0;
 			if (n < 3)
 				gainwindow = 0.0;
 			flag++;
 			break;
+		}
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", segyfile);
@@ -401,7 +409,8 @@ int main(int argc, char **argv) {
 			break;
 		case 'R':
 		case 'r':
-			n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf", &distancebin, &startlon, &endlon, &startlat, &endlat);
+		{
+			const int n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf", &distancebin, &startlon, &endlon, &startlat, &endlat);
 			plotmode = MBSEGYGRID_PLOTBYDISTANCE;
 			if (n < 1) {
 				distancebin = 1.0;
@@ -414,9 +423,11 @@ int main(int argc, char **argv) {
 			}
 			flag++;
 			break;
+		}
 		case 'S':
 		case 's':
-			n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
+		{
+			const int n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
 			if (n < 5) {
 				chanstart = 0;
 				chanend = -1;
@@ -433,16 +444,19 @@ int main(int argc, char **argv) {
             }
 			flag++;
 			break;
+		}
 		case 'T':
 		case 't':
-			n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
+		{
+			const int n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
 			if (n < 2)
 				timedelay = 0.0;
 			flag++;
 			break;
+		}
 		case 'W':
 		case 'w':
-			n = sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
+			/* n = */ sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
 			flag++;
 			break;
 		case '?':
@@ -681,7 +695,7 @@ int main(int argc, char **argv) {
 	if (status == MB_SUCCESS) {
 
 		/* initialize grid and weight arrays */
-		for (k = 0; k < ngridxy; k++) {
+		for (int k = 0; k < ngridxy; k++) {
 			grid[k] = 0.0;
 			gridweight[k] = 0.0;
 		}
@@ -972,7 +986,7 @@ int main(int argc, char **argv) {
 					if (geometrymode == MBSEGYGRID_GEOMETRY_VERTICAL) {
 						for (int i = 0; i < traceheader.nsamps; i++) {
 							iy = (ngridy - 1) - (iys + i / decimatey);
-							k = ix * ngridy + iy;
+							const int k = ix * ngridy + iy;
 							if (iy >= iystart && iy <= iyend) {
 								grid[k] += trace[i];
 								gridweight[k] += 1.0;
@@ -992,7 +1006,7 @@ int main(int argc, char **argv) {
 							/* get the index of the sample location */
 							if (iyc >= iystart && iyc <= iyend) {
 								iy = (ngridy - 1) - iyc;
-								k = ix * ngridy + iy;
+								const int k = ix * ngridy + iy;
 								grid[k] += trace[i];
 								gridweight[k] += 1.0;
 							}
@@ -1009,7 +1023,7 @@ int main(int argc, char **argv) {
 		/* calculate the grid */
 		gridmintot = 0.0;
 		gridmaxtot = 0.0;
-		for (k = 0; k < ngridxy; k++) {
+		for (int k = 0; k < ngridxy; k++) {
 			if (gridweight[k] > 0.0) {
 				grid[k] = grid[k] / gridweight[k];
 				gridmintot = MIN(grid[k], gridmintot);
