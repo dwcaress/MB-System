@@ -22,18 +22,19 @@
 #include <Windows.h>
 #endif
 
+#include <arpa/inet.h>
+#include <errno.h>
+#include <float.h>
+#include <getopt.h>
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <errno.h>
-#include <float.h>
-#include <arpa/inet.h>
+#include <unistd.h>
 
 #include "mb_status.h"
 #include "mb_format.h"
@@ -1235,9 +1236,9 @@ int main
                                                        "\t--no-rlog\n";
   extern char WIN_DECLSPEC *optarg;
   int option_index;
-  int errflg = 0;
+  bool errflg = false;
   int c;
-  int help = 0;
+  bool help = false;
 
   /* MBIO status variables */
   int status;
@@ -1665,7 +1666,7 @@ int main
 
       break;
     case '?':
-      errflg++;
+      errflg = true;
       }
 
   if(reson_hostname==NULL)

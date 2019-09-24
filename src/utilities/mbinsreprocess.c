@@ -33,6 +33,7 @@
 
 #include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -78,9 +79,9 @@ int main(int argc, char **argv) {
 	                                  {"output", required_argument, NULL, 0}, {NULL, 0, NULL, 0}};
 
 	int option_index;
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -197,7 +198,7 @@ int main(int argc, char **argv) {
 
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* if error flagged then print it and exit */

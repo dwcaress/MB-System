@@ -48,6 +48,7 @@
 
 #include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -76,9 +77,9 @@ int main(int argc, char **argv) {
 	static char usage_message[] =
 	    "mbgpstide [-Atideformat -Dinterval -Fformat -Idatalist -M -Ooutput -Roffset -S -Tgeoid -Usource,sensor -V]";
 	int option_index;
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 
 	/* command line option definitions */
 	/* mbdatalist
@@ -292,7 +293,7 @@ int main(int argc, char **argv) {
 		/* short options */
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'V':
 		case 'v':
@@ -341,7 +342,7 @@ int main(int argc, char **argv) {
 			sscanf(optarg, "%d", &gps_source);
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* if error flagged then print it and exit */

@@ -26,6 +26,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -63,8 +64,8 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int help = 0;
+	bool errflg = false;
+	bool help = false;
 
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -314,7 +315,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'I':
 		case 'i':
@@ -380,13 +381,13 @@ int main(int argc, char **argv) {
 		case 'x':
 			sscanf(optarg, "%d", &output_format);
 			if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
-				errflg++;
+				errflg = true;
 				fprintf(stderr, "Invalid output format for inf file");
 			}
 			flag++;
 			break;
 		default:
-			errflg++;
+			errflg = true;
 		}
 	}
 
@@ -773,7 +774,7 @@ int main(int argc, char **argv) {
 					fprintf(output, "\t</file_info>\n");
 					break;
 				default:
-					errflg++;
+					errflg = true;
 				}
 			}
 

@@ -96,9 +96,9 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int option_index;
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 	int flag = 0;
 
 	/* MBIO status variables */
@@ -400,7 +400,7 @@ int main(int argc, char **argv) {
             break;
 
 		case '?':
-			errflg++;
+			errflg = true;
 		}
     }
 

@@ -53,6 +53,7 @@
  * by David Caress.
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -123,9 +124,9 @@ int main(int argc, char **argv) {
                          "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate\n"
                          "\t-Sspike_slope/mode/format -Ttolerance -Wwest/east/south/north \n"
                          "\t-Xbeamsleft/beamsright -Ydistanceleft/distanceright[/mode] -Z\n\t-V -H]\n\n";
-  int errflg = 0;
+  bool errflg = false;
   int c;
-  int help = 0;
+  bool help = false;
   int flag = 0;
 
   /* MBIO status variables */
@@ -362,7 +363,7 @@ int main(int argc, char **argv) {
     switch (c) {
     case 'H':
     case 'h':
-      help++;
+      help = true;
       break;
     case 'V':
     case 'v':
@@ -532,7 +533,7 @@ int main(int argc, char **argv) {
       flag++;
       break;
     case '?':
-      errflg++;
+      errflg = true;
     }
   }
 

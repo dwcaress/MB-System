@@ -22,6 +22,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,12 +63,12 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
+	bool errflg = false;
 	int c;
 	int status;
 	int error = MB_ERROR_NO_ERROR;
 	int verbose = 0;
-	int help = 0;
+	bool help = false;
 	int flag = 0;
 	FILE *fp;
 	char file[MB_PATH_MAXLINE];
@@ -154,7 +155,7 @@ int main(int argc, char **argv) {
 			break;
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'L':
 		case 'l':
@@ -213,7 +214,7 @@ int main(int argc, char **argv) {
 			flag++;
 			break;
 		case '?':
-			errflg++;
+			errflg = true;
 		}
 
 	/* if error flagged then print it and exit */

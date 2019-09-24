@@ -183,6 +183,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1478,9 +1479,9 @@ void read_list(char *list, char *list_2) {
 /* ------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
-	int errflg = 0;
+	bool errflg = false;
 	int c;
-	int help = 0;
+	bool help = false;
 	int flag = 0;
 
 	int error = MB_ERROR_NO_ERROR;
@@ -1497,7 +1498,7 @@ int main(int argc, char **argv) {
 		switch (c) {
 		case 'H':
 		case 'h':
-			help++;
+			help = true;
 			break;
 		case 'I':
 		case 'i':
