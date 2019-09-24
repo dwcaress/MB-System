@@ -6,13 +6,15 @@ if BUILD_GL
 endif
 if BUILD_MBTRN
   XBUILD_SUB_MBTRN = mbtrn
+  XBUILD_SUB_MBTRNBIN = mbtrnutils
 endif
 if BUILD_MBTNAV
-  XBUILD_SUB_MBTNAV = mbtnav
+  XBUILD_SUB_MBTNAV = mbtrnav
+  XBUILD_SUB_MBTRNBIN = mbtrnutils
 endif
 
-SUBDIRS = gsf surf bsio $(XBUILD_SUB_MBTRN) $(XBUILD_SUB_MBTNAV) mbio mbaux \
-	utilities gmt otps macros share man html ps \
+SUBDIRS = gsf surf bsio $(XBUILD_SUB_MBTNAV) $(XBUILD_SUB_MBTRN) mbio mbaux  \
+	utilities $(XBUILD_SUB_MBTRNBIN) gmt otps macros share man html ps \
 	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
 
 CLEANFILES =

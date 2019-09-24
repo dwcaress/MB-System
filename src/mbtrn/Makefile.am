@@ -13,25 +13,23 @@ include_HEADERS = \
 				mframe/src/mlog.h \
                 mframe/src/mlist.h \
                 mframe/src/mstats.h \
-				mconfig.h \
-                r7k-reader.h \
-				r7kc.h
+                utils/mconfig.h \
+                utils/mb1_msg.h \
+                utils/mb71_msg.h \
+                r7kr/r7k-reader.h \
+				r7kr/r7kc.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-# add -DMBTRN_VER="<version>" to override version defined in mbtrn.h
+# configure mframe compilation flags
 BUILD_DATE=`date +%Y/%m/%dT%H:%M:%S%z`
+MFRAME_VERSIONS=-DMFRAME_BUILD="${BUILD_DATE}" -DTRNC_VER=1.0 -DFRAMES7K_VER=1.0 -DSTREAM7K_VER=1.0 -DTBINX_VER=1.0 -DEMU7K_VER=1.0
+MFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST
+MFRAME_FEATURES=-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG
+MFRAME_OPTS=$(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 
-TRNC_VER='-DTRNC_VER=1.0'
-FRAMES7K_VER='-DFRAMES7K_VER=1.0'
-STREAM7K_VER='-DSTREAM7K_VER=1.0'
-TBIN_VER='-DTBIN_VER=1.0'
-EMU7K_VER='-DEMU_VER=1.0'
-TEST_OPTS=-DWITH_TESTS -DWITH_R7KR_TEST
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/mbtrn/mframe/src -DHAVE_CONFIG_H  ${TEST_OPTS} -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE -DMFRAME_BUILD="${BUILD_DATE}" ${FRAMES7K_VER} ${TRNC_VER} ${STREAM7K_VER} ${TBIN_VER} ${EMU7K_VER}
-
-
-    WITH_MEDEBUG_DEBUG     : enable medebug debug macros
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src \
+ -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 
 
 libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0
@@ -49,40 +47,42 @@ libr7kr_la_SOURCES =  mframe/src/mframe.c \
                 mframe/src/mstats.c \
                 mframe/src/mswap.c \
                 mframe/src/mutils.c \
-				mconfig.c \
-                r7k-reader.c \
-                r7kc.c
+				utils/mconfig.c \
+				utils/mb1_msg.c \
+				utils/mb71_msg.c \
+                r7kr/r7k-reader.c \
+                r7kr/r7kc.c
 
 
 libr7kr_la_LIBADD = -lpthread
 
 bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv r7kr_test
 
-stream7k_SOURCES = stream7k.c
+stream7k_SOURCES = utils/stream7k.c
 stream7k_LDADD = libr7kr.la
 
-frames7k_SOURCES = frames7k.c
+frames7k_SOURCES = utils/frames7k.c
 frames7k_LDADD = libr7kr.la
 
-trnc_SOURCES = trnc.c
+trnc_SOURCES = utils/trnc.c
 trnc_LDADD = libr7kr.la
 
-emu7k_SOURCES = emu7k.c
+emu7k_SOURCES = utils/emu7k.c
 emu7k_LDADD = libr7kr.la
 
-tbinx_SOURCES = tbinx.c
+tbinx_SOURCES = utils/tbinx.c
 tbinx_LDADD = libr7kr.la
 
-udps_SOURCES = udps.c
+udps_SOURCES = utils/udps.c
 udps_LDADD = libr7kr.la
 
-udpc_SOURCES = udpc.c
+udpc_SOURCES = utils/udpc.c
 udpc_LDADD = libr7kr.la
 
-mb1conv_SOURCES = mb1conv.c mb1_msg.c mb71_msg.c
+mb1conv_SOURCES = utils/mb1conv.c
 mb1conv_LDADD = libr7kr.la
 
-r7kr_test_SOURCES = r7kr-test.c
+r7kr_test_SOURCES = r7kr/r7kr-test.c
 r7kr_test_LDADD = libr7kr.la
 
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh

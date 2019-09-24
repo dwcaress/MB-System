@@ -4,7 +4,7 @@ if BUILD_MOTIF
 endif
 
 if BUILD_MBTRN
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn -I${top_srcdir}/src/mbtrn/mframe/src
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
   MBTRNLIB = $(top_builddir)/src/mbtrn/libr7kr.la
 endif
 
