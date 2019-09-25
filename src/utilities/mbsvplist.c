@@ -82,7 +82,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -241,17 +240,14 @@ int main(int argc, char **argv) {
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			sscanf(optarg, "%d", &svp_printmode);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
@@ -272,7 +268,6 @@ int main(int argc, char **argv) {
 		case 'r':
 			mb_get_bounds(optarg, ssv_bounds);
 			ssv_bounds_set = MB_YES;
-			flag++;
 			break;
 		case 'S':
 		case 's':

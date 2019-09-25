@@ -137,7 +137,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -402,7 +401,6 @@ int main(int argc, char **argv) {
 					target_kind = MB_DATA_SIDESCAN3;
 				}
 			}
-			flag++;
 			break;
 		case 'B':
 		case 'b':
@@ -412,7 +410,6 @@ int main(int argc, char **argv) {
 				bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
 			else if (n == 1 && bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
 				bottompickthreshold = 0.5;
-			flag++;
 			break;
 		}
 		case 'C':
@@ -426,73 +423,60 @@ int main(int argc, char **argv) {
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d/%s", &startline, lineroot);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			checkroutebearing = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", output_file);
 			output_file_set = MB_YES;
-			flag++;
 			break;
 		case 'Q':
 		case 'q':
 			sscanf(optarg, "%s", timelist_file);
 			timelist_file_set = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			sscanf(optarg, "%s", route_file);
 			route_file_set = MB_YES;
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%d", &smooth);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%s", topogridfile);
 			sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
-			flag++;
 			break;
 		case 'U':
 		case 'u':
 			sscanf(optarg, "%lf", &rangethreshold);
-			flag++;
 			break;
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%lf", &swath_width);
 			if (swath_width > 0.0)
 				swath_width_set = MB_YES;
-			flag++;
 			break;
 		case 'X':
 		case 'x':
 			ssflip = MB_YES;
-			flag++;
 			break;
 		case '?':
 			errflg = true;

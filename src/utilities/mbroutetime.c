@@ -57,7 +57,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -164,28 +163,23 @@ int main(int argc, char **argv) {
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", output_file);
 			output_file_set = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			sscanf(optarg, "%s", route_file);
-			flag++;
 			break;
 		case 'U':
 		case 'u':
 			sscanf(optarg, "%lf", &rangethreshold);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

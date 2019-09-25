@@ -440,7 +440,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -669,13 +668,11 @@ int main(int argc, char **argv) {
 		case 'A':
 		case 'a':
 			sscanf(optarg, "%d", &datatype);
-			flag++;
 			break;
 		case 'B':
 		case 'b':
 			sscanf(optarg, "%lf", &border);
 			setborder = MB_YES;
-			flag++;
 			break;
 		case 'C':
 		case 'c':
@@ -691,7 +688,6 @@ int main(int argc, char **argv) {
 				clipmode = MBGRID_INTERP_GAP;
 			else if (clipmode >= 3)
 				clipmode = MBGRID_INTERP_ALL;
-			flag++;
 			break;
 		}
 		case 'D':
@@ -700,7 +696,6 @@ int main(int argc, char **argv) {
 			const int n = sscanf(optarg, "%d/%d", &xdim, &ydim);
 			if (n == 2)
 				set_dimensions = MB_YES;
-			flag++;
 			break;
 		}
 		case 'E':
@@ -715,7 +710,6 @@ int main(int argc, char **argv) {
 				set_spacing = MB_YES;
 			if (n < 3)
 				strcpy(units, "meters");
-			flag++;
 			break;
 		}
 		case 'F':
@@ -733,7 +727,6 @@ int main(int argc, char **argv) {
           minormax_weighted_mean_threshold = dvalue;
         }
       }
-			flag++;
 			break;
 		}
 		case 'G':
@@ -753,7 +746,6 @@ int main(int argc, char **argv) {
 					gridkind = MBGRID_GMTGRD;
 				}
 			}
-			flag++;
 			break;
 		case 'H':
 		case 'h':
@@ -762,50 +754,41 @@ int main(int argc, char **argv) {
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", filelist);
-			flag++;
 			break;
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%s", projection_pars);
 			projection_pars_f = MB_YES;
-			flag++;
 			break;
 		case 'K':
 		case 'k':
 			sscanf(optarg, "%s", backgroundfile);
 			if ((grdrasterid = atoi(backgroundfile)) <= 0)
 				grdrasterid = -1;
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			more = MB_YES;
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			use_NaN = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", fileroot);
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			sscanf(optarg, "%d", &pings);
-			flag++;
 			break;
 		case 'Q':
 		case 'q':
 			bathy_in_feet = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
@@ -818,17 +801,14 @@ int main(int argc, char **argv) {
 				mb_get_bounds(optarg, gbnd);
 				gbndset = MB_YES;
 			}
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%lf", &speedmin);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%lf", &tension);
-			flag++;
 			break;
 		case 'U':
 		case 'u':
@@ -839,7 +819,6 @@ int main(int argc, char **argv) {
 				timediff = fabs(timediff);
 				first_in_stays = MB_NO;
 			}
-			flag++;
 			break;
 		case 'V':
 		case 'v':
@@ -848,12 +827,10 @@ int main(int argc, char **argv) {
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%lf", &scale);
-			flag++;
 			break;
 		case 'X':
 		case 'x':
 			sscanf(optarg, "%lf", &extend);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

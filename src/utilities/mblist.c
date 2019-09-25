@@ -754,7 +754,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -1014,18 +1013,15 @@ int main(int argc, char **argv) {
 		case 'a':
 			ascii = MB_NO;
 			netcdf_cdl = MB_NO;
-			flag++;
 			break;
 		case 'B':
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'C':
 		case 'c':
 			netcdf = MB_YES;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
@@ -1038,44 +1034,36 @@ int main(int argc, char **argv) {
 				beam_set = MBLIST_SET_ALL;
 			else if (dump_mode == DUMP_MODE_SS)
 				pixel_set = MBLIST_SET_ALL;
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%s", delimiter);
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%s", projection_pars);
 			use_projection = MB_YES;
-			flag++;
 			break;
 		case 'K':
 		case 'k':
 			sscanf(optarg, "%d", &decimate);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
@@ -1090,7 +1078,6 @@ int main(int argc, char **argv) {
 				sscanf(optarg, "%d/%d", &beam_start, &beam_end);
 				beam_set = MBLIST_SET_ON;
 			}
-			flag++;
 			break;
 		case 'N':
 		case 'n':
@@ -1101,7 +1088,6 @@ int main(int argc, char **argv) {
 				sscanf(optarg, "%d/%d", &pixel_start, &pixel_end);
 				pixel_set = MBLIST_SET_ON;
 			}
-			flag++;
 			break;
 		case 'O':
 		case 'o':
@@ -1111,32 +1097,26 @@ int main(int argc, char **argv) {
 					if (list[n_list] == '^')
 						use_projection = MB_YES;
 				}
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			sscanf(optarg, "%d", &pings);
-			flag++;
 			break;
 		case 'Q':
 		case 'q':
 			check_values = MBLIST_CHECK_OFF_RAW;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, bounds);
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%lf", &speedmin);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%lf", &timegap);
-			flag++;
 			break;
 		case 'U':
 		case 'u':
@@ -1147,7 +1127,6 @@ int main(int argc, char **argv) {
 				if (check_values < MBLIST_CHECK_ON || check_values > MBLIST_CHECK_OFF_FLAGNAN)
 					check_values = MBLIST_CHECK_ON;
 			}
-			flag++;
 			break;
 		case 'W':
 		case 'w':
@@ -1167,7 +1146,6 @@ int main(int argc, char **argv) {
 				segment_mode = MBLIST_SEGMENT_MODE_DATALIST;
 			else
 				segment_mode = MBLIST_SEGMENT_MODE_TAG;
-			flag++;
 			break;
 		case '?':
 			errflg = true;

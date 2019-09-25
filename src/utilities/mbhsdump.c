@@ -48,7 +48,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -164,12 +163,10 @@ int main(int argc, char **argv) {
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", file);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
@@ -188,7 +185,6 @@ int main(int argc, char **argv) {
 				mb_data_standby_list = MB_YES;
 			if (kind == MB_DATA_NAV_SOURCE)
 				mb_data_nav_source_list = MB_YES;
-			flag++;
 			break;
 		case '?':
 			errflg = true;

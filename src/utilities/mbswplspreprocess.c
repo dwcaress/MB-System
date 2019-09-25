@@ -180,7 +180,6 @@ static void default_options(options *opts) {
 /*----------------------------------------------------------------------*/
 static int parse_options(int verbose, int argc, char **argv, options *opts, int *error) {
 	int c;
-	int flag = 0;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
@@ -204,7 +203,6 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &(opts->format));
-			flag++;
 			break;
 		case 'G':
 		case 'g':
@@ -217,13 +215,11 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", &opts->read_file[0]);
-			flag++;
 			break;
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%s", &opts->proj4command[0]);
 			opts->projection_set = MB_YES;
-			flag++;
 			break;
 		case 'N':
 		case 'n':
@@ -233,7 +229,6 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		case 'o':
 			sscanf(optarg, "%s", &opts->basename[0]);
 			opts->ofile_set = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':

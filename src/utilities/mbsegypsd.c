@@ -195,7 +195,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -311,33 +310,27 @@ int main(int argc, char **argv) {
 			n = sscanf(optarg, "%lf/%lf", &shotscale, &frequencyscale);
 			if (n == 2)
 				scale2distance = MB_YES;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			n = sscanf(optarg, "%d", &decimatex);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", segyfile);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			logscale = MB_YES;
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			n = sscanf(optarg, "%d", &nfft);
-			flag++;
 			break;
 		case 'G':
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", fileroot);
-			flag++;
 			break;
 		case 'S':
 		case 's':
@@ -353,19 +346,16 @@ int main(int argc, char **argv) {
 			if (n < 1) {
 				tracemode = MBSEGYPSD_USESHOT;
 			}
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
 			if (n < 2)
 				timedelay = 0.0;
-			flag++;
 			break;
 		case 'W':
 		case 'w':
 			n = sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

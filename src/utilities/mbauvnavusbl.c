@@ -87,7 +87,6 @@ int main(int argc, char **argv) {
 		bool errflg = false;
 		int c;
 		bool help = false;
-		int flag = 0;
 	while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
 		switch (c) {
 		case 'H':
@@ -101,37 +100,30 @@ int main(int argc, char **argv) {
 		case 'A':
 		case 'a':
 			useaverage = MB_YES;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &navformat);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", ifile);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", ofile);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			sscanf(optarg, "%d", &usblformat);
-			flag++;
 			break;
 		case 'U':
 		case 'u':
 			sscanf(optarg, "%s", ufile);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

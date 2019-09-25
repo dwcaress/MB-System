@@ -155,7 +155,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -268,40 +267,33 @@ int main(int argc, char **argv) {
 		case 'A':
 		case 'a':
 			ascii = MB_NO;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			sscanf(optarg, "%d", &decimate);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%s", delimiter);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", file);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			for (int j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
 				if (n_list < MAX_OPTIONS)
 					list[n_list] = optarg[j];
-			flag++;
 			break;
 		case 'Z':
 		case 'z':
 			segment = MB_YES;
 			sscanf(optarg, "%s", segment_tag);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

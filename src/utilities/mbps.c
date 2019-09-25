@@ -77,7 +77,6 @@ int main(int argc, char **argv) {
 	int errflg = 0;
 	int c;
 	int help = 0;
-	int flag = 0;
 
 	/*ALBERTO definitions */
 	int gap = 1;
@@ -191,86 +190,70 @@ int main(int argc, char **argv) {
 		case 'A':
 		case 'a':
 			sscanf(optarg, "%lf", &alpha);
-			flag++;
 			break;
 		case 'B':
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			sscanf(optarg, "%c", &viewdir);
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%d", &gap);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", file);
-			flag++;
 			break;
 		case 'K':
 		case 'k':
 			sscanf(optarg, "%lf", &eta);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			sscanf(optarg, "%d", &num_pings_max);
 			if (num_pings_max < 2 || num_pings_max > MBPS_MAXPINGS)
 				num_pings_max = MBPS_MAXPINGS;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			sscanf(optarg, "%d", &pings);
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%lf", &speedmin);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%s", title);
-			flag++;
 			break;
 		case 'X':
 		case 'x':
 			sscanf(optarg, "%lf", &ve);
-			flag++;
 			break;
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%lf", &meters_per_inch);
-			flag++;
 			break;
 		case 'Y':
 		case 'y':
 			display_stats = MB_NO;
-			flag++;
 			break;
 		case 'Z':
 		case 'z':
 			display_scales = MB_NO;
-			flag++;
 			break;
 		case '?':
 			errflg++;

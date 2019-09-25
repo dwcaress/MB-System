@@ -209,7 +209,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -355,7 +354,6 @@ int main(int argc, char **argv) {
 			const int n = sscanf(optarg, "%lf/%lf", &shotscale, &timescale);
 			if (n == 2)
 				scale2distance = MB_YES;
-			flag++;
 			break;
 		}
 		case 'B':
@@ -365,7 +363,6 @@ int main(int argc, char **argv) {
 			if (n < 2)
 				agcwindow = 0.0;
 			agcmode = MB_YES;
-			flag++;
 			break;
 		}
 		case 'C':
@@ -374,18 +371,15 @@ int main(int argc, char **argv) {
 			const int n = sscanf(optarg, "%d", &geometrymode);
 			if (n < 1)
 				geometrymode = MBSEGYGRID_GEOMETRY_VERTICAL;
-			flag++;
 			break;
 		}
 		case 'D':
 		case 'd':
 			/* n = */ sscanf(optarg, "%d/%d", &decimatex, &decimatey);
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			/* n = */ sscanf(optarg, "%d/%lf", &filtermode, &filterwindow);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
@@ -395,18 +389,15 @@ int main(int argc, char **argv) {
 				gaindelay = 0.0;
 			if (n < 3)
 				gainwindow = 0.0;
-			flag++;
 			break;
 		}
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", segyfile);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", fileroot);
-			flag++;
 			break;
 		case 'R':
 		case 'r':
@@ -422,7 +413,6 @@ int main(int argc, char **argv) {
 				endlon = 0.0;
 				endlat = 0.0;
 			}
-			flag++;
 			break;
 		}
 		case 'S':
@@ -443,7 +433,6 @@ int main(int argc, char **argv) {
             else {
                 tracemode_set = MB_YES;
             }
-			flag++;
 			break;
 		}
 		case 'T':
@@ -452,13 +441,11 @@ int main(int argc, char **argv) {
 			const int n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
 			if (n < 2)
 				timedelay = 0.0;
-			flag++;
 			break;
 		}
 		case 'W':
 		case 'w':
 			/* n = */ sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

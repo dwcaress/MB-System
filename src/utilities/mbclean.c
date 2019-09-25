@@ -127,7 +127,6 @@ int main(int argc, char **argv) {
   bool errflg = false;
   int c;
   bool help = false;
-  int flag = 0;
 
   /* MBIO status variables */
   int status;
@@ -373,13 +372,11 @@ int main(int argc, char **argv) {
     case 'a':
       sscanf(optarg, "%lf", &deviation_max);
       check_deviation = MB_YES;
-      flag++;
       break;
     case 'B':
     case 'b':
       sscanf(optarg, "%lf/%lf", &depth_low, &depth_high);
       check_range = MB_YES;
-      flag++;
       break;
     case 'C':
     case 'c':
@@ -390,75 +387,62 @@ int main(int argc, char **argv) {
         slopemax = tan(slopemax);
       else if (slope_form == 2)
         slopemax = tan(DTR * slopemax);
-      flag++;
       break;
     case 'D':
     case 'd':
       sscanf(optarg, "%lf/%lf", &distancemin, &distancemax);
-      flag++;
       break;
     case 'E': // 2010/03/07 DY added the max acrosstrack filter
     case 'e':
       sscanf(optarg, "%lf", &max_acrosstrack);
       zap_long_across = MB_YES;
-      flag++;
       break;
     case 'F':
     case 'f':
       sscanf(optarg, "%d", &format);
-      flag++;
       break;
     case 'G':
     case 'g':
       sscanf(optarg, "%lf/%lf", &fraction_low, &fraction_high);
       check_fraction = MB_YES;
-      flag++;
       break;
     case 'K':
     case 'k':
       sscanf(optarg, "%lf", &range_min);
       check_range_min = MB_YES;
-      flag++;
       break;
     case 'I':
     case 'i':
       sscanf(optarg, "%s", read_file);
-      flag++;
       break;
     case 'L':
     case 'l':
       sscanf(optarg, "%d", &lonflip);
-      flag++;
       break;
     case 'M':
     case 'm':
       sscanf(optarg, "%d", &mode);
-      flag++;
       break;
     case 'N':
     case 'n':
       sscanf(optarg, "%lf", &ping_deviation_tolerance);
       check_ping_deviation = MB_YES;
-      flag++;
       break;
     case 'P':
     case 'p':
       sscanf(optarg, "%lf/%lf", &speed_low, &speed_high);
       check_speed_good = MB_YES;
-      flag++;
       break;
     case 'Q':
     case 'q':
       zap_rails = MB_YES;
       backup_dist = 0.0;
       sscanf(optarg, "%lf", &backup_dist);
-      flag++;
       break;
     case 'R':
     case 'r':
       zap_max_heading_rate = MB_YES;
       sscanf(optarg, "%lf", &max_heading_rate);
-      flag++;
       break;
     case 'S':
     case 's':
@@ -469,25 +453,21 @@ int main(int argc, char **argv) {
         spikemax = tan(DTR * spikemax);
       if (1 == slope_form)
         spikemax = tan(spikemax);
-      flag++;
       break;
     case 'T':
     case 't':
       fix_edit_timestamps = MB_YES;
       sscanf(optarg, "%lf", &tolerance);
-      flag++;
       break;
     case 'U':
     case 'u':
       sscanf(optarg, "%d", &num_good_min);
       check_num_good_min = MB_YES;
-      flag++;
       break;
     case 'W':
     case 'w':
       check_position_bounds = MB_YES;
       sscanf(optarg, "%lf/%lf/%lf/%lf", &west, &east, &south, &north);
-      flag++;
       break;
     case 'X':
     case 'x':
@@ -496,7 +476,6 @@ int main(int argc, char **argv) {
       if (n == 1)
         zap_beams_right = zap_beams_left;
       zap_beams = MB_YES;
-      flag++;
       break;
     }
     case 'Y':
@@ -524,13 +503,11 @@ int main(int argc, char **argv) {
         unflag_distance_right = distance_right;
         unflag_distance = MB_YES;
       }
-      flag++;
       break;
     }
     case 'Z':
     case 'z':
       check_zero_position = MB_YES;
-      flag++;
       break;
     case '?':
       errflg = true;

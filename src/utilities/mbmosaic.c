@@ -1046,7 +1046,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -1290,12 +1289,10 @@ int main(int argc, char **argv) {
 			sscanf(optarg, "%d", &datatype);
 			if (optarg[1] == 'f' || optarg[1] == 'F')
 				usefiltered = MB_YES;
-			flag++;
 			break;
 		case 'B':
 		case 'b':
 			sscanf(optarg, "%lf", &border);
-			flag++;
 			break;
 		case 'C':
 		case 'c':
@@ -1314,7 +1311,6 @@ int main(int argc, char **argv) {
 			if (n < 3) {
 				tension = 0.0;
 			}
-			flag++;
 			break;
 		}
 		case 'D':
@@ -1323,7 +1319,6 @@ int main(int argc, char **argv) {
 			const int n = sscanf(optarg, "%d/%d", &xdim, &ydim);
 			if (n == 2)
 				set_dimensions = MB_YES;
-			flag++;
 			break;
 		}
 		case 'E':
@@ -1338,14 +1333,12 @@ int main(int argc, char **argv) {
 				set_spacing = MB_YES;
 			if (n < 3)
 				strcpy(units, "meters");
-			flag++;
 			break;
 		}
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%lf/%d", &priority_range, &weight_priorities);
 			grid_mode = MBMOSAIC_AVERAGE;
-			flag++;
 			break;
 		case 'G':
 		case 'g':
@@ -1364,7 +1357,6 @@ int main(int argc, char **argv) {
 					gridkind = MBMOSAIC_GMTGRD;
 				}
 			}
-			flag++;
 			break;
 		case 'H':
 		case 'h':
@@ -1373,38 +1365,31 @@ int main(int argc, char **argv) {
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", filelist);
-			flag++;
 			break;
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%s", projection_pars);
 			projection_pars_f = MB_YES;
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			more = MB_YES;
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			use_NaN = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", fileroot);
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			sscanf(optarg, "%d", &pings);
-			flag++;
 			break;
 		case 'R':
 		case 'r':
@@ -1417,18 +1402,15 @@ int main(int argc, char **argv) {
 				mb_get_bounds(optarg, gbnd);
 				gbndset = MB_YES;
 			}
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%lf", &speedmin);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%s", topogridfile);
 			usetopogrid = MB_YES;
-			flag++;
 			break;
 		case 'U':
 		case 'u':
@@ -1446,7 +1428,6 @@ int main(int argc, char **argv) {
 				if ((priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) == 0)
 					priority_mode += MBMOSAIC_PRIORITY_AZIMUTH;
 			}
-			flag++;
 			break;
 		}
 		case 'V':
@@ -1456,12 +1437,10 @@ int main(int argc, char **argv) {
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%lf", &scale);
-			flag++;
 			break;
 		case 'X':
 		case 'x':
 			sscanf(optarg, "%lf", &extend);
-			flag++;
 			break;
 		case 'Y':
 		case 'y':
@@ -1515,7 +1494,6 @@ int main(int argc, char **argv) {
 		case 'Z':
 		case 'z':
 			sscanf(optarg, "%lf", &altitude_default);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

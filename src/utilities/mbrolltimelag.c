@@ -54,7 +54,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -171,45 +170,37 @@ int main(int argc, char **argv) {
 		case 'C':
 		case 'c':
 			sscanf(optarg, "%lf", &rthreshold);
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", swathdata);
-			flag++;
 			break;
 		case 'K':
 		case 'k':
 			sscanf(optarg, "%d", &kind);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			sscanf(optarg, "%d", &npings);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", outroot);
 			outroot_defined = MB_YES;
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%d", &navchannel);
 			if (navchannel > 0)
 				kind = MB_DATA_NONE;
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%d/%lf/%lf", &nlag, &lagstart, &lagend);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

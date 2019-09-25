@@ -621,7 +621,6 @@ int main(int argc, char **argv) {
 	bool errflg = 0;
 	int c;
 	bool help = 0;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -760,13 +759,11 @@ int main(int argc, char **argv) {
 			sscanf(optarg, "%d", &datakind);
 			if (datakind != MBFILTER_SS && datakind != MBFILTER_AMP)
 				datakind = MBFILTER_SS;
-			flag++;
 			break;
 		case 'B':
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'C':
 		case 'c':
@@ -784,7 +781,6 @@ int main(int argc, char **argv) {
 				filters[num_filters].iteration = 1;
 			if (n >= 3)
 				num_filters++;
-			flag++;
 			break;
 		}
 		case 'D':
@@ -807,19 +803,16 @@ int main(int argc, char **argv) {
 				filters[num_filters].hipass_offset = 1000.0;
 			if (n >= 3)
 				num_filters++;
-			flag++;
 			break;
 		}
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'H':
 		case 'h':
@@ -828,19 +821,16 @@ int main(int argc, char **argv) {
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			sscanf(optarg, "%d", &n_buffer_max);
 			if (n_buffer_max > MBFILTER_BUFFER_DEFAULT || n_buffer_max < 10)
 				n_buffer_max = MBFILTER_BUFFER_DEFAULT;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, bounds);
-			flag++;
 			break;
 		case 'S':
 		case 's':
@@ -870,14 +860,12 @@ int main(int argc, char **argv) {
 				filters[num_filters].threshold = MB_NO;
 			if (n >= 3)
 				num_filters++;
-			flag++;
 			break;
 		}
 		case 'T':
 		case 't':
 			sscanf(optarg, "%lf/%lf", &threshold_lo, &threshold_hi);
 			apply_threshold = MB_YES;
-			flag++;
 			break;
 		case 'V':
 		case 'v':

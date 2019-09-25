@@ -434,7 +434,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -779,45 +778,37 @@ int main(int argc, char **argv) {
 		case 'V':
 		case 'v':
 			verbose++;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
 			mbp_format_specified = MB_YES;
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			mbp_ifile_specified = MB_YES;
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			strip_comments = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			mbp_ofile_specified = MB_YES;
 			sscanf(optarg, "%s", mbp_ofile);
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			checkuptodate = MB_NO;
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			printfilestatus = MB_YES;
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			testonly = MB_YES;
-			flag++;
 			break;
 		case '?':
 			errflg = true;

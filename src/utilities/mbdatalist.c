@@ -47,7 +47,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* command line option definitions */
 	/* mbdatalist
@@ -169,50 +168,42 @@ int main(int argc, char **argv) {
 			/* copy files */
 			else if (strcmp("copy", options[option_index].name) == 0) {
 				copyfiles = MB_YES;
-				flag++;
 			}
 
 			/* report datalists */
 			else if (strcmp("report", options[option_index].name) == 0) {
 				copyfiles = MB_YES;
-				flag++;
 			}
 
 			/* format */
 			else if (strcmp("format", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &format);
-				flag++;
 			}
 
 			/* input */
 			else if (strcmp("input", options[option_index].name) == 0) {
 				sscanf(optarg, "%s", read_file);
-				flag++;
 			}
 
 			/* make ancillary files */
 			else if (strcmp("make-ancilliary", options[option_index].name) == 0) {
 				force_update = MB_YES;
 				make_inf = MB_YES;
-				flag++;
 			}
 
 			/* update ancillary files */
 			else if (strcmp("update-ancilliary", options[option_index].name) == 0) {
 				make_inf = MB_YES;
-				flag++;
 			}
 
 			/* look for processed files */
 			else if (strcmp("processed", options[option_index].name) == 0) {
 				look_processed = MB_DATALIST_LOOK_YES;
-				flag++;
 			}
 
 			/* problem report */
 			else if (strcmp("problem", options[option_index].name) == 0) {
 				problem_report = MB_YES;
-				flag++;
 			}
 
 			/* bounds */
@@ -224,25 +215,21 @@ int main(int argc, char **argv) {
 			/* status report */
 			else if (strcmp("status", options[option_index].name) == 0) {
 				status_report = MB_YES;
-				flag++;
 			}
 
 			/* look for raw (unprocessed) files */
 			else if (strcmp("raw", options[option_index].name) == 0) {
 				look_processed = MB_DATALIST_LOOK_NO;
-				flag++;
 			}
 
 			/* removed file locks */
 			else if (strcmp("unlock", options[option_index].name) == 0) {
 				remove_locks = MB_YES;
-				flag++;
 			}
 
 			/* make datalistp file */
 			else if (strcmp("datalistp", options[option_index].name) == 0) {
 				make_datalistp = MB_YES;
-				flag++;
 			}
 
 			break;
@@ -251,17 +238,14 @@ int main(int argc, char **argv) {
 		case 'C':
 		case 'c':
 			copyfiles = MB_YES;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			reportdatalists = MB_YES;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'H':
 		case 'h':
@@ -270,44 +254,36 @@ int main(int argc, char **argv) {
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			force_update = MB_YES;
 			make_inf = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			make_inf = MB_YES;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			look_processed = MB_DATALIST_LOOK_YES;
-			flag++;
 			break;
 		case 'Q':
 		case 'q':
 			problem_report = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, bounds);
 			look_bounds = MB_YES;
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			status_report = MB_YES;
-			flag++;
 			break;
 		case 'U':
 		case 'u':
 			look_processed = MB_DATALIST_LOOK_NO;
-			flag++;
 			break;
 		case 'V':
 		case 'v':

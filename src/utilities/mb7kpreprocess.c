@@ -76,7 +76,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -630,7 +629,6 @@ int main(int argc, char **argv) {
 		case 'A':
 		case 'a':
 			goodnavattitudeonly = MB_NO;
-			flag++;
 			break;
 		case 'B':
 		case 'b':
@@ -670,23 +668,19 @@ int main(int argc, char **argv) {
 			}
 			if (nscan > 0)
 				depth_offset_mode = MB_YES;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%s", platform_file);
 			use_platform_file = MB_YES;
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'K':
 		case 'k':
@@ -725,30 +719,25 @@ int main(int argc, char **argv) {
 				kluge_beampatternsnelltweak = MB_YES;
 				kluge_beampatternsnellfactor = klugevalue;
 			}
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			mode = MB7KPREPROCESS_TIMESTAMPLIST;
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			sscanf(optarg, "%s", rockfile);
 			rockdata = MB_YES;
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			sscanf(optarg, "%s", insfile);
 			insdata = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", ofile);
 			ofile_set = MB_YES;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
@@ -766,7 +755,6 @@ int main(int argc, char **argv) {
 				else
 					sonardepthfilter = MB_NO;
 			}
-			flag++;
 			break;
 		case 'R':
 		case 'r':
@@ -775,7 +763,6 @@ int main(int argc, char **argv) {
 				       &rangeoffset[nrangeoffset]);
 				nrangeoffset++;
 			}
-			flag++;
 			break;
 		case 'S':
 		case 's':
@@ -798,7 +785,6 @@ int main(int argc, char **argv) {
 				else if (type == 5)
 					ss_source = source;
 			}
-			flag++;
 			break;
 		case 'T':
 		case 't':
@@ -817,13 +803,11 @@ int main(int argc, char **argv) {
 				sscanf(optarg, "%lf", &timelagconstant);
 				timelagmode = MB7KPREPROCESS_TIMELAG_CONSTANT;
 			}
-			flag++;
 			break;
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%s", dslfile);
 			dsldata = MB_YES;
-			flag++;
 			break;
 		case 'Z':
 		case 'z':
@@ -883,7 +867,6 @@ int main(int argc, char **argv) {
 				if (n == 3)
 					rollpitch_offset_mode = MB_YES;
 			}
-			flag++;
 			break;
 		case '?':
 			errflg = true;

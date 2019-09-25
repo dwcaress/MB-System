@@ -111,7 +111,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int status;
@@ -228,39 +227,32 @@ int main(int argc, char **argv) {
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", ifile);
-			flag++;
 			break;
 		case 'K':
 		case 'k':
 			sscanf(optarg, "%d", &kluge);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			sscanf(optarg, "%d", &mode);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", sofile);
 			sofile_set = MB_YES;
-			flag++;
 			break;
 		case '?':
 			errflg = true;

@@ -216,7 +216,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -346,32 +345,26 @@ int main(int argc, char **argv) {
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, bounds);
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d/%d", &iformat, &jformat);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", ifile);
-			flag++;
 			break;
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%s", jfile);
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			sscanf(optarg, "%d/%d", &xdim, &ydim);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

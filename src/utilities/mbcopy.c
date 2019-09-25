@@ -1725,7 +1725,6 @@ int main(int argc, char **argv) {
   bool errflg = false;
   int c;
   bool help = false;
-  int flag = 0;
 
   /* MBIO status variables */
   int verbose = 0;
@@ -1883,25 +1882,21 @@ int main(int argc, char **argv) {
       sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &seconds);
       btime_i[5] = (int)floor(seconds);
       btime_i[6] = 1000000 * (seconds - btime_i[5]);
-      flag++;
       break;
     case 'C':
     case 'c':
       sscanf(optarg, "%s", commentfile);
       insertcomments = MB_YES;
-      flag++;
       break;
     case 'D':
     case 'd':
       bathonly = MB_YES;
-      flag++;
       break;
     case 'E':
     case 'e':
       sscanf(optarg, "%d/%d/%d/%d/%d/%lf", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &seconds);
       etime_i[5] = (int)floor(seconds);
       etime_i[6] = 1000000 * (seconds - btime_i[5]);
-      flag++;
       break;
     case 'F':
     case 'f':
@@ -1909,7 +1904,6 @@ int main(int argc, char **argv) {
       const int i = sscanf(optarg, "%d/%d/%d", &iformat, &oformat, &mformat);
       if (i == 1)
         oformat = iformat;
-      flag++;
       break;
     }
     case 'H':
@@ -1919,12 +1913,10 @@ int main(int argc, char **argv) {
     case 'I':
     case 'i':
       sscanf(optarg, "%s", ifile);
-      flag++;
       break;
     case 'L':
     case 'l':
       sscanf(optarg, "%d", &lonflip);
-      flag++;
       break;
     case 'M':
     case 'm':
@@ -1932,7 +1924,6 @@ int main(int argc, char **argv) {
       const int i = sscanf(optarg, "%s", mfile);
       if (i == 1)
         merge = MB_YES;
-      flag++;
       break;
     }
     case 'N':
@@ -1942,33 +1933,27 @@ int main(int argc, char **argv) {
     case 'O':
     case 'o':
       sscanf(optarg, "%s", ofile);
-      flag++;
       break;
     case 'P':
     case 'p':
       sscanf(optarg, "%d", &pings);
-      flag++;
       break;
     case 'Q':
     case 'q':
       sscanf(optarg, "%lf", &sleep_factor);
       use_sleep = MB_YES;
-      flag++;
       break;
     case 'R':
     case 'r':
       mb_get_bounds(optarg, bounds);
-      flag++;
       break;
     case 'S':
     case 's':
       sscanf(optarg, "%lf", &speedmin);
-      flag++;
       break;
     case 'T':
     case 't':
       sscanf(optarg, "%lf", &timegap);
-      flag++;
       break;
     case 'V':
     case 'v':

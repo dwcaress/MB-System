@@ -1482,7 +1482,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	int error = MB_ERROR_NO_ERROR;
 
@@ -1503,7 +1502,6 @@ int main(int argc, char **argv) {
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", datalist);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
@@ -1563,12 +1561,10 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%s", svplist);
-			flag++;
 			break;
 		case 'V':
 		case 'v':
