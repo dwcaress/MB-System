@@ -154,7 +154,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int interp_status = MB_SUCCESS;
@@ -329,32 +328,26 @@ int main(int argc, char **argv) {
 		case 'A':
 		case 'a':
 			ascii = MB_NO;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			sscanf(optarg, "%d", &decimate);
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%s", delimiter);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
@@ -366,7 +359,6 @@ int main(int argc, char **argv) {
 		case 'z':
 			segment = MB_YES;
 			sscanf(optarg, "%s", segment_tag);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

@@ -99,7 +99,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int status;
@@ -325,13 +324,11 @@ int main(int argc, char **argv) {
 			/* input */
 			else if (strcmp("input", options[option_index].name) == 0) {
 				sscanf(optarg, "%s", read_file);
-				flag++;
 			}
 
 			/* format */
 			else if (strcmp("format", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &format);
-				flag++;
 			}
 
 			/* voxel-size */
@@ -345,50 +342,42 @@ int main(int argc, char **argv) {
                         voxel_size_z = d1;
                     }
                 }
-				flag++;
 			}
 
 			/* occupy-threshold */
 			else if (strcmp("occupy-threshold", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &occupy_threshold);
-				flag++;
 			}
 
 			/* count-flagged */
 			else if (strcmp("count-flagged", options[option_index].name) == 0) {
 				count_flagged = MB_YES;
-				flag++;
 			}
 
 			/* flag-empty */
 			else if (strcmp("flag-empty", options[option_index].name) == 0) {
 				empty_mode = MBVC_EMPTY_FLAG;
-				flag++;
 			}
 
 			/* ignore-empty */
 			else if (strcmp("ignore-empty", options[option_index].name) == 0) {
 				empty_mode = MBVC_EMPTY_IGNORE;
-				flag++;
 			}
 
 			/* unflag-occupied files */
 			else if (strcmp("unflag-occupied", options[option_index].name) == 0) {
 				occupied_mode = MBVC_OCCUPIED_UNFLAG;
-				flag++;
 			}
 
 			/* ignore-occupied */
 			else if (strcmp("ignore-occupied", options[option_index].name) == 0) {
 				occupied_mode = MBVC_OCCUPIED_IGNORE;
-				flag++;
 			}
 
 			/* range-minimum  */
 			else if (strcmp("range-minimum", options[option_index].name) == 0) {
 				apply_range_minimum = MB_YES;
 				sscanf(optarg, "%lf", &range_minimum);
-				flag++;
 			}
 
 			/* range-maximum */

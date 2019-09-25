@@ -187,7 +187,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -321,28 +320,23 @@ int main(int argc, char **argv) {
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%s", printformat);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", file);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			sscanf(optarg, "%d", &output_mode);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			sscanf(optarg, "%s", nav_file);
 			nav_merge = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
@@ -365,23 +359,19 @@ int main(int argc, char **argv) {
                 calc_ktime = MB_YES;
 			printfields[nprintfields].index = -1;
 			nprintfields++;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			printheader = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			recalculate_ctd = MB_YES;
 			sscanf(optarg, "%d", &ctd_calibration_id);
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			angles_in_degrees = MB_YES;
-			flag++;
 			break;
 		case '?':
 			errflg = true;

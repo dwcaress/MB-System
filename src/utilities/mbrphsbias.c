@@ -100,7 +100,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int status;
@@ -243,24 +242,20 @@ int main(int argc, char **argv) {
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, areabounds);
 			areaboundsset = MB_YES;
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%lf", &binsize);
 			binsizeset = MB_YES;
-			flag++;
 			break;
 		case '?':
 			errflg = true;

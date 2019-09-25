@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 	int verbose = 0;
 	bool help = false;
-	int flag = 0;
+	bool flag = false;
 	FILE *fp;
 	char file[MB_PATH_MAXLINE];
 	char psdisplay[MB_PATH_MAXLINE];
@@ -128,12 +128,12 @@ int main(int argc, char **argv) {
 		case 'B':
 		case 'b':
 			sscanf(optarg, "%d", &fileiobuffer);
-			flag++;
+			flag = true;
 			break;
 		case 'D':
 		case 'd':
 			sscanf(optarg, "%s", psdisplay);
-			flag++;
+			flag = true;
 			break;
 		case 'F':
 		case 'f':
@@ -146,12 +146,12 @@ int main(int argc, char **argv) {
 				fbtversion = 2;
 			else if (strncmp(argstring, "3", 1) == 0)
 				fbtversion = 3;
-			flag++;
+			flag = true;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", imgdisplay);
-			flag++;
+			flag = true;
 			break;
 		case 'H':
 		case 'h':
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d", &lonflip);
-			flag++;
+			flag = true;
 			break;
 		case 'M':
 		case 'm':
@@ -184,12 +184,12 @@ int main(int argc, char **argv) {
 			else if (optarg[0] == 'S' || optarg[0] == 'S')
 				/* n = */ sscanf(&optarg[1], "%lf", &slope_magnitude);
 
-			flag++;
+			flag = true;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%lf", &timegap);
-			flag++;
+			flag = true;
 			break;
 		case 'U':
 		case 'u':
@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
 				uselockfiles = 1;
 			else if (strncmp(argstring, "0", 1) == 0)
 				uselockfiles = 0;
-			flag++;
+			flag = true;
 			break;
 		case 'V':
 		case 'v':
@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%s", mbproject);
-			flag++;
+			flag = true;
 			break;
 		case '?':
 			errflg = true;

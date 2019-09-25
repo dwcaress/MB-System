@@ -71,7 +71,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -326,7 +325,6 @@ int main(int argc, char **argv) {
 					offset_nav_z = offset_z;
 				}
 			}
-			flag++;
 			break;
 		case 'B':
 		case 'b':
@@ -337,7 +335,6 @@ int main(int argc, char **argv) {
 				offset_sonar_pitch = offset_pitch;
 				offset_sonar_heading = offset_heading;
 			}
-			flag++;
 			break;
 		case 'D':
 		case 'd':
@@ -346,29 +343,24 @@ int main(int argc, char **argv) {
 				sonardepthdata = MB_YES;
 				strcpy(sonardepthfile, buffer);
 			}
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%s", platform_file);
 			use_platform_file = MB_YES;
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%s", proj4command);
 			projection_set = MB_YES;
-			flag++;
 			break;
 		case 'K':
 		case 'k':
@@ -377,17 +369,14 @@ int main(int argc, char **argv) {
 				kluge_force_attitude_compensation = MB_YES;
 			else if (klugemode == 2)
 				kluge_flip_attitude_sign = MB_YES;
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			mode = MBHYSWEEPPREPROCESS_TIMESTAMPLIST;
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			sscanf(optarg, "%d", &navformat);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
@@ -396,13 +385,11 @@ int main(int argc, char **argv) {
 				navdata = MB_YES;
 				strcpy(navfile, buffer);
 			}
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", ofile);
 			ofile_set = MB_YES;
-			flag++;
 			break;
 		case 'T':
 		case 't':
@@ -414,7 +401,6 @@ int main(int argc, char **argv) {
 				sscanf(optarg, "%lf", &timelagconstant);
 				timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT;
 			}
-			flag++;
 			break;
 		case '?':
 			errflg = true;

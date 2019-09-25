@@ -66,7 +66,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 	int pargc = 0;
 	char **pargv = NULL;
 
@@ -115,27 +114,22 @@ int main(int argc, char **argv) {
 		case 'E':
 		case 'e':
 			explicit = MB_YES;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			lookforfiles++;
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			removembnavadjust++;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
@@ -157,7 +151,6 @@ int main(int argc, char **argv) {
 				strcpy(pargv[pargc], optarg);
 				pargc++;
 			}
-			flag++;
 			break;
 		case '?':
 			errflg = true;

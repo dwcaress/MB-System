@@ -190,7 +190,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -352,28 +351,23 @@ int main(int argc, char **argv) {
 		case 'B':
 		case 'b':
 			output_bad = MB_YES;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			std_dev_filter = MB_YES;
 			sscanf(optarg, "%lf/%d", &std_dev_threshold, &std_dev_nmin);
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			output_good = MB_YES;
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
@@ -388,7 +382,6 @@ int main(int argc, char **argv) {
 				mediandensity_filter = MB_YES;
 				mediandensity_filter_nmax = i2;
 			}
-			flag++;
 			break;
 		}
 		case 'N':
@@ -404,7 +397,6 @@ int main(int argc, char **argv) {
 			max_beam = max_beam_no;
 			if (max_beam < min_beam)
 				max_beam = min_beam;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
@@ -416,26 +408,22 @@ int main(int argc, char **argv) {
 				plane_fit_threshold = d1;
 			if (n > 1)
 				plane_fit_nmin = i1;
-			flag++;
 			break;
 		}
 		case 'R':
 		case 'r':
 			mb_get_bounds(optarg, areabounds);
 			areaboundsset = MB_YES;
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%lf", &binsize);
 			binsizeset = MB_YES;
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			use_detect = MB_YES;
 			sscanf(optarg, "%d", &flag_detect);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

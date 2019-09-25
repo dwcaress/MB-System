@@ -87,7 +87,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -405,13 +404,11 @@ int main(int argc, char **argv) {
 		case 'C':
 		case 'c':
 			output_counts = MB_YES;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			sscanf(optarg, "%s", odir);
 			odir_set = MB_YES;
-			flag++;
 			break;
 		case 'E':
 		case 'e':
@@ -438,28 +435,23 @@ int main(int argc, char **argv) {
 			}
 			if (nscan > 0)
 				sonardepthlever = MB_YES;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'K':
 		case 'k':
 			sscanf(optarg, "%d", &klugemode);
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", ofile);
 			ofile_set = MB_YES;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
@@ -489,7 +481,6 @@ int main(int argc, char **argv) {
 			else if (optarg[0] == 'U' || optarg[0] == 'u') {
 				nscan = sscanf(&(optarg[1]), "%d", &depthsensor_mode);
 			}
-			flag++;
 			break;
 		case 'S':
 		case 's':
@@ -502,7 +493,6 @@ int main(int argc, char **argv) {
 				attitude_source = source;
 			else if (type == 4)
 				sonardepth_source = source;
-			flag++;
 			break;
 		case 'T':
 		case 't':
@@ -514,12 +504,10 @@ int main(int argc, char **argv) {
 				sscanf(optarg, "%lf", &timelagconstant);
 				timelagmode = MBKONSBERGPREPROCESS_TIMELAG_CONSTANT;
 			}
-			flag++;
 			break;
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%d", &watercolumnmode);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

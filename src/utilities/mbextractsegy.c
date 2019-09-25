@@ -247,7 +247,6 @@ int main(int argc, char **argv) {
 	bool errflg = false;
 	int c;
 	bool help = false;
-	int flag = 0;
 	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:Z:z:VvHh")) != -1)
 		switch (c) {
 		case 'H':
@@ -262,76 +261,62 @@ int main(int argc, char **argv) {
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%lf/%lf/%lf", &xscale, &yscale, &maxwidth);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d/%s", &startline, lineroot);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			checkroutebearing = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", output_file);
 			output_file_set = MB_YES;
-			flag++;
 			break;
 		case 'Q':
 		case 'q':
 			sscanf(optarg, "%s", timelist_file);
 			timelist_file_set = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			sscanf(optarg, "%s", route_file);
 			route_file_set = MB_YES;
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%d", &sampleformat);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%lf", &timeshift);
-			flag++;
 			break;
 		case 'U':
 		case 'u':
 			sscanf(optarg, "%lf", &rangethreshold);
-			flag++;
 			break;
 		case 'Z':
 		case 'z':
 			sscanf(optarg, "%lf", &zmax);
-			flag++;
 			break;
 		case '?':
 			errflg = true;

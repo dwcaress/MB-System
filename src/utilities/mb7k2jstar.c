@@ -120,7 +120,6 @@ int main(int argc, char **argv) {
 
 	/* process argument list */
 	{
-	int flag = 0;
 	int c;
 	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
 		switch (c) {
@@ -162,7 +161,6 @@ int main(int argc, char **argv) {
 					extract_sbp = MB_YES;
 				}
 			}
-			flag++;
 			break;
 		case 'B':
 		case 'b': {
@@ -171,7 +169,6 @@ int main(int argc, char **argv) {
 				bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
 			else if (n == 1 && bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
 				bottompickthreshold = 0.5;
-			flag++;
 			break;
 		}
 		case 'C':
@@ -181,54 +178,44 @@ int main(int argc, char **argv) {
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'L':
 		case 'l':
 			sscanf(optarg, "%d/%s", &startline, lineroot);
-			flag++;
 			break;
 		case 'M':
 		case 'm':
 			checkroutebearing = MB_YES;
-			flag++;
 			break;
 		case 'O':
 		case 'o':
 			sscanf(optarg, "%s", output_file);
 			output_file_set = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			sscanf(optarg, "%s", route_file);
 			route_file_set = MB_YES;
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%d", &smooth);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%lf", &timeshift);
-			flag++;
 			break;
 		case 'X':
 		case 'x':
 			ssflip = MB_YES;
-			flag++;
 			break;
 		case '?':
 			errflg = true;

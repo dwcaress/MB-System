@@ -437,7 +437,6 @@ int main(int argc, char **argv) {
 		bool errflg = false;
 		int c;
 		bool help = false;
-		int flag = 0;
 
 	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
 		switch (c) {
@@ -448,7 +447,6 @@ int main(int argc, char **argv) {
 				sidescan_on = MB_YES;
 			if (ampkind == MBBACKANGLE_AMP)
 				amplitude_on = MB_YES;
-			flag++;
 			break;
 		case 'B':
 		case 'b':
@@ -460,24 +458,20 @@ int main(int argc, char **argv) {
 				if (n >= 3)
 					ssdepression = d2;
 			}
-			flag++;
 			break;
 		}
 		case 'C':
 		case 'c':
 			symmetry = MB_YES;
 			corr_symmetry = MBP_SSCORR_SYMMETRIC;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			dump = MB_YES;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
@@ -510,7 +504,6 @@ int main(int argc, char **argv) {
 				gridssdx = 2.0 * gridssangle / (gridssn_columns - 1);
 				gridssdy = (gridssmax - gridssmin) / (gridssn_rows - 1);
 			}
-			flag++;
 			break;
 		}
 		case 'H':
@@ -520,33 +513,27 @@ int main(int argc, char **argv) {
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", read_file);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			sscanf(optarg, "%d/%lf", &nangles, &angle_max);
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			sscanf(optarg, "%d", &pings_avg);
-			flag++;
 			break;
 		case 'Q':
 		case 'q':
 			corr_slope = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
 			sscanf(optarg, "%lf", &ref_angle_default);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%s", grid.file);
 			corr_topogrid = MB_YES;
-			flag++;
 			break;
 		case 'V':
 		case 'v':
@@ -555,7 +542,6 @@ int main(int argc, char **argv) {
 		case 'Z':
 		case 'z':
 			sscanf(optarg, "%lf", &altitude_default);
-			flag++;
 			break;
 		case '?':
 			errflg = true;
