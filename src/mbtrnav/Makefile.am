@@ -133,7 +133,8 @@ libqnx_la_SOURCES = \
                 qnx-utils/DataFieldFactory.cc \
                 qnx-utils/LogFile.cc
 
-libqnx_la_LIBADD = -lm -lstdc++
+libqnx_la_LIBADD = libgeolib.la \
+				-lm -lstdc++
 
 libtnav_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -177,7 +178,10 @@ libmframe_la_SOURCES = \
 libmframe_la_LIBADD =
 
 
-libtnav_la_LIBADD = -lnewmat -lqnx -lm -lnetcdf -lrt -lpthread
+libtnav_la_LIBADD = libgeolib.la \
+					libnewmat.la \
+					libqnx.la \
+					-lm -lnetcdf -lrt -lpthread
 
 libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
@@ -185,7 +189,10 @@ libtrnw_la_SOURCES = \
                 trnw/trnw.cpp \
                 trnw/mb1_msg.c
 
-libtrnw_la_LIBADD = -ltnav -lqnx -lnewmat -lm -lpthread
+libtrnw_la_LIBADD = libtnav.la \
+					libqnx.la \
+					libnewmat.la \
+					-lm -lpthread
 
 
 bin_PROGRAMS =   trn-server trncli #  readlog writelog
