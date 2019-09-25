@@ -19,10 +19,9 @@
  *
  * Author:	D. W. Caress
  * Date:	January 22, 1993
- *
- *
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

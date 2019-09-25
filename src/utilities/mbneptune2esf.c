@@ -44,6 +44,7 @@
  * This program is based on a skeleton derived from mbclean.
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

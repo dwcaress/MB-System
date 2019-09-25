@@ -32,6 +32,7 @@
  * Date:	April 15, 1993
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

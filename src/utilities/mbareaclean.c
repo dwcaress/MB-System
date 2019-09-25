@@ -35,14 +35,15 @@
  * Date:	February 27, 2003
  */
 
+#include <getopt.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "mb_define.h"
 #include "mb_format.h"

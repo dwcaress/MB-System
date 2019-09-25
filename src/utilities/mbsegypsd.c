@@ -20,6 +20,7 @@
  * Date:	November 2, 2009
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
