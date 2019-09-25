@@ -1,5 +1,5 @@
 ///
-/// @file trncli-test.c
+/// @file trncli_test.c
 /// @authors k. Headley
 /// @date 12 jun 2019
 
@@ -77,7 +77,7 @@
 /////////////////////////
 // Macros
 /////////////////////////
-#define TRNCLI_TEST_NAME "trncli_test"
+#define TRNCLI_TEST_NAME "trncli-test"
 #ifndef TRNCLI_TEST_BUILD
 /// @def TRNCLI_TEST_BUILD
 /// @brief module build date.
