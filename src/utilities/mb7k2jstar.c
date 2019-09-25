@@ -65,9 +65,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	bool help = false;
-
 	int verbose = 0;
 	int format = 0;
 	int pings;
@@ -121,172 +118,175 @@ int main(int argc, char **argv) {
 
 	/* process argument list */
 	{
-	int c;
-	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
-				extract_sslow = MB_YES;
-			}
-			else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
-				extract_sshigh = MB_YES;
-			}
-			else if (strncmp(optarg, "SBP", 3) == 0 || strncmp(optarg, "sbp", 3) == 0) {
-				extract_sbp = MB_YES;
-			}
-			else if (strncmp(optarg, "ALL", 3) == 0 || strncmp(optarg, "all", 3) == 0) {
-				extract_sshigh = MB_YES;
-				extract_sslow = MB_YES;
-				extract_sbp = MB_YES;
-			}
-			else {
-				sscanf(optarg, "%d", &mode);
-				if (mode == MB7K2JSTAR_SSLOW)
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
 					extract_sslow = MB_YES;
-				else if (mode == MB7K2JSTAR_SSHIGH)
+				}
+				else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
 					extract_sshigh = MB_YES;
-				else if (mode == MB7K2JSTAR_SBP)
+				}
+				else if (strncmp(optarg, "SBP", 3) == 0 || strncmp(optarg, "sbp", 3) == 0) {
 					extract_sbp = MB_YES;
-				else if (mode == MB7K2JSTAR_ALL) {
+				}
+				else if (strncmp(optarg, "ALL", 3) == 0 || strncmp(optarg, "all", 3) == 0) {
 					extract_sshigh = MB_YES;
 					extract_sslow = MB_YES;
 					extract_sbp = MB_YES;
 				}
+				else {
+					sscanf(optarg, "%d", &mode);
+					if (mode == MB7K2JSTAR_SSLOW)
+						extract_sslow = MB_YES;
+					else if (mode == MB7K2JSTAR_SSHIGH)
+						extract_sshigh = MB_YES;
+					else if (mode == MB7K2JSTAR_SBP)
+						extract_sbp = MB_YES;
+					else if (mode == MB7K2JSTAR_ALL) {
+						extract_sshigh = MB_YES;
+						extract_sslow = MB_YES;
+						extract_sbp = MB_YES;
+					}
+				}
+				break;
+			case 'B':
+			case 'b': {
+				const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+				if (n == 0)
+					bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
+				else if (n == 1 && bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
+					bottompickthreshold = 0.5;
+				break;
 			}
-			break;
-		case 'B':
-		case 'b': {
-			const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
-			if (n == 0)
-				bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
-			else if (n == 1 && bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
-				bottompickthreshold = 0.5;
-			break;
+			case 'C':
+			case 'c':
+				print_comments = MB_YES;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d/%s", &startline, lineroot);
+				break;
+			case 'M':
+			case 'm':
+				checkroutebearing = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", output_file);
+				output_file_set = MB_YES;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%s", route_file);
+				route_file_set = MB_YES;
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%d", &smooth);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timeshift);
+				break;
+			case 'X':
+			case 'x':
+				ssflip = MB_YES;
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
-		case 'C':
-		case 'c':
-			print_comments = MB_YES;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'G':
-		case 'g':
-			sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d/%s", &startline, lineroot);
-			break;
-		case 'M':
-		case 'm':
-			checkroutebearing = MB_YES;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", output_file);
-			output_file_set = MB_YES;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%s", route_file);
-			route_file_set = MB_YES;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%d", &smooth);
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timeshift);
-			break;
-		case 'X':
-		case 'x':
-			ssflip = MB_YES;
-			break;
-		case '?':
-			errflg = true;
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
-	}
 
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                %d\n", help);
+			fprintf(stderr, "dbg2       format:              %d\n", format);
+			fprintf(stderr, "dbg2       pings:               %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
+			fprintf(stderr, "dbg2       timeshift:           %f\n", timeshift);
+			fprintf(stderr, "dbg2       bottompickmode:      %d\n", bottompickmode);
+			fprintf(stderr, "dbg2       bottompickthreshold: %f\n", bottompickthreshold);
+			fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
+			fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
+			fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
+			/* fprintf(stderr, "dbg2       file:                %s\n", file); */
+			fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
+			fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
+			fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
+			fprintf(stderr, "dbg2       output_file:         %s\n", output_file);
+			fprintf(stderr, "dbg2       output_file_set:     %d\n", output_file_set);
+			fprintf(stderr, "dbg2       lineroot:            %s\n", lineroot);
+			fprintf(stderr, "dbg2       extract_sbp:         %d\n", extract_sbp);
+			fprintf(stderr, "dbg2       extract_sslow:       %d\n", extract_sslow);
+			fprintf(stderr, "dbg2       extract_sshigh:      %d\n", extract_sshigh);
+			fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                %d\n", help);
-		fprintf(stderr, "dbg2       format:              %d\n", format);
-		fprintf(stderr, "dbg2       pings:               %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
-		fprintf(stderr, "dbg2       timeshift:           %f\n", timeshift);
-		fprintf(stderr, "dbg2       bottompickmode:      %d\n", bottompickmode);
-		fprintf(stderr, "dbg2       bottompickthreshold: %f\n", bottompickthreshold);
-		fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
-		fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
-		fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
-		/* fprintf(stderr, "dbg2       file:                %s\n", file); */
-		fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
-		fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
-		fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
-		fprintf(stderr, "dbg2       output_file:         %s\n", output_file);
-		fprintf(stderr, "dbg2       output_file_set:     %d\n", output_file_set);
-		fprintf(stderr, "dbg2       lineroot:            %s\n", lineroot);
-		fprintf(stderr, "dbg2       extract_sbp:         %d\n", extract_sbp);
-		fprintf(stderr, "dbg2       extract_sslow:       %d\n", extract_sslow);
-		fprintf(stderr, "dbg2       extract_sshigh:      %d\n", extract_sshigh);
-		fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
-	}
-
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	char *message;

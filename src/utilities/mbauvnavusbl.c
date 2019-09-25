@@ -88,81 +88,81 @@ int main(int argc, char **argv) {
 		bool errflg = false;
 		int c;
 		bool help = false;
-	while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			useaverage = MB_YES;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &navformat);
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", ifile);
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", ofile);
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d", &usblformat);
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%s", ufile);
-			break;
-		case '?':
-			errflg = true;
+		while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				useaverage = MB_YES;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &navformat);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", ifile);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", ofile);
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d", &usblformat);
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%s", ufile);
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       help:            %d\n", help);
-		fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
-		fprintf(stderr, "dbg2       input file:      %s\n", ifile);
-		fprintf(stderr, "dbg2       output file:     %s\n", ofile);
-		fprintf(stderr, "dbg2       usbl file:       %s\n", ufile);
-		fprintf(stderr, "dbg2       nav format:      %d\n", navformat);
-		fprintf(stderr, "dbg2       usbl format:     %d\n", usblformat);
-		fprintf(stderr, "dbg2       useaverage:      %d\n", useaverage);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+			fprintf(stderr, "dbg2       help:            %d\n", help);
+			fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
+			fprintf(stderr, "dbg2       input file:      %s\n", ifile);
+			fprintf(stderr, "dbg2       output file:     %s\n", ofile);
+			fprintf(stderr, "dbg2       usbl file:       %s\n", ufile);
+			fprintf(stderr, "dbg2       nav format:      %d\n", navformat);
+			fprintf(stderr, "dbg2       usbl format:     %d\n", usblformat);
+			fprintf(stderr, "dbg2       useaverage:      %d\n", useaverage);
+		}
 
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
-
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	} // end command line arg parsing
 
 	/* count the nav points */
