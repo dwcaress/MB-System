@@ -21,10 +21,10 @@ TEST_OPTS=-DWITH_TESTS -DWITH_R7KR_TEST
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src $(MBTNAV_INC)  -DHAVE_CONFIG_H  ${TEST_OPTS} -DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG -D_GNU_SOURCE -DMFRAME_BUILD="${BUILD_DATE}" ${FRAMES7K_VER} ${TRNC_VER} ${STREAM7K_VER} ${TBIN_VER} ${EMU7K_VER} ${MBTNAV_OPT}
 
 
-bin_PROGRAMS =  mbtrnpreprocess
+bin_PROGRAMS =  mbtrnpp
 
-mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
-mbtrnpreprocess_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
+mbtrnpp_SOURCES = mbtrnpreprocess.c
+mbtrnpp_LDADD =  $(top_builddir)/src/mbio/libmbio.la \
   $(top_builddir)/src/mbaux/libmbaux.la \
   $(top_builddir)/src/mbaux/libmbxgr.la \
   ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
