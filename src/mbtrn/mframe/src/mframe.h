@@ -101,7 +101,12 @@
 #define MFRAME_SHOW_VERSION(app_name,app_version) printf("\n %s build[%s] mframe[v%s] \n\n",app_name, app_version, LIBMFRAME_VERSION)
 
 #if defined(__CYGWIN__)
-#include <Windows.h>
+// Not currently required, but would be for any win native ports
+//cygwin build errors when files that include Windows.h are included before X11 (e.g. Xm.h)
+//Also there are apparent typedef conflicts in Xwm
+//There are also conflicting typedefs for INT64 and BOOL in X11/Xmd.h and basetsd.h, minwindef.h);
+
+//#include <Windows.h>
 #endif
 
 // for OSX clock functions

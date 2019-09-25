@@ -105,10 +105,21 @@ GNU General Public License for more details
 /////////////////////////
 // Module Global Variables
 /////////////////////////
+int g_msocket_debug_level=0;
 
 /////////////////////////
 // Function Definitions
 /////////////////////////
+
+/// @fn void msock_set_debug(msock_socket_t *s, int level)
+/// @brief set module debug level (enable extra module debug output)
+/// @param[in] s socket instance
+/// @param[in] level debug output level >=0
+/// @return none
+void msock_set_debug(int level)
+{
+    g_msocket_debug_level=level;
+}
 
 /// @fn int msock_set_blocking(msock_socket_t * s, _Bool enabled)
 /// @brief configure socket to block or not block.
@@ -326,7 +337,7 @@ void msock_pstats_show(msock_pstats_t *self, bool verbose, uint16_t indent)
         fprintf(stderr,"%*s[err_count    %10u]\n",indent,(indent>0?" ":""), self->err_count);
     }
 }
-// End function mbtrn_reader_show
+// End function msock_pstats_show
 
 /// @fn msock_socket_t * msock_socket_new(const char * host, int port, msock_socket_ctype type)
 /// @brief create new socket instance.
@@ -670,7 +681,9 @@ int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_
         
         if( (retval = recvfrom(s->fd,buf,len,flags,dest_addr,&addrlen))>0){
             // PDPRINT((stderr,"received data connection[%p] dest[%p] ainfo[%p] [%lld]\n",addr,dest_addr,addr->ainfo,retval));
-        }else{
+        }
+        else{
+            if(g_msocket_debug_level>0)
             PDPRINT((stderr,"recvfrom failed [%d %s]\n",errno,strerror(errno)));
         }
     }else{
@@ -696,14 +709,6 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
     
     double start_sec   = mtime_dtime();
     double to_sec      = (double)timeout_msec/1000.0;
-#if defined(__CYGWIN__)
-    
-    static LARGE_INTEGER pfreq={0};
-    if (pfreq.QuadPart==0) {
-        QueryPerformanceCounter(&pfreq);
-    }
-    
-#endif
 
      if ( (NULL!=s) && s->fd>0 && (NULL!=buf) && len>0) {
          

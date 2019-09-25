@@ -709,14 +709,6 @@ int64_t msock_read_tmout(msock_socket_t *s, byte *buf, uint32_t len, uint32_t ti
     
     double start_sec   = mtime_dtime();
     double to_sec      = (double)timeout_msec/1000.0;
-#if defined(__CYGWIN__)
-    
-    static LARGE_INTEGER pfreq={0};
-    if (pfreq.QuadPart==0) {
-        QueryPerformanceCounter(&pfreq);
-    }
-    
-#endif
 
      if ( (NULL!=s) && s->fd>0 && (NULL!=buf) && len>0) {
          
