@@ -35,14 +35,14 @@
 #include "mb_format.h"
 #include "mb_status.h"
 
-#define MBES_ALLOC_NUM 128
-#define MBES_ROUTE_WAYPOINT_NONE 0
-#define MBES_ROUTE_WAYPOINT_SIMPLE 1
-#define MBES_ROUTE_WAYPOINT_TRANSIT 2
-#define MBES_ROUTE_WAYPOINT_STARTLINE 3
-#define MBES_ROUTE_WAYPOINT_ENDLINE 4
-#define MBES_ONLINE_THRESHOLD 15.0
-#define MBES_ONLINE_COUNT 30
+const int MBES_ALLOC_NUM = 128;
+/* #define MBES_ROUTE_WAYPOINT_NONE 0 */
+/* #define MBES_ROUTE_WAYPOINT_SIMPLE 1 */
+const int MBES_ROUTE_WAYPOINT_TRANSIT = 2;
+/* #define MBES_ROUTE_WAYPOINT_STARTLINE 3 */
+const int  MBES_ROUTE_WAYPOINT_ENDLINE = 4;
+/* #define MBES_ONLINE_THRESHOLD 15.0 */
+/* #define MBES_ONLINE_COUNT 30 */
 
 static const char program_name[] = "MBroutetime";
 static const char help_message[] =
@@ -55,10 +55,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
-
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -150,96 +146,98 @@ int main(int argc, char **argv) {
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
 
-	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:I:i:O:o:R:r:U:u:VvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", output_file);
-			output_file_set = MB_YES;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%s", route_file);
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%lf", &rangethreshold);
-			break;
-		case '?':
-			errflg = true;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		/* process argument list */
+		while ((c = getopt(argc, argv, "F:f:I:i:O:o:R:r:U:u:VvHh")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", output_file);
+				output_file_set = MB_YES;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%s", route_file);
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%lf", &rangethreshold);
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+			fprintf(stderr, "dbg2       help:              %d\n", help);
+			fprintf(stderr, "dbg2       format:            %d\n", format);
+			fprintf(stderr, "dbg2       pings:             %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:           %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:         %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:         %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:         %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:         %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:        %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:        %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:        %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:        %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:        %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:        %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:        %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:        %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:        %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:        %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:        %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:        %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:        %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:        %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:          %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
+			fprintf(stderr, "dbg2       read_file:         %s\n", read_file);
+			fprintf(stderr, "dbg2       route_file:        %s\n", route_file);
+			fprintf(stderr, "dbg2       output_file_set:   %d\n", output_file_set);
+			fprintf(stderr, "dbg2       output_file:       %s\n", output_file);
+			fprintf(stderr, "dbg2       rangethreshold:    %f\n", rangethreshold);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       help:              %d\n", help);
-		fprintf(stderr, "dbg2       format:            %d\n", format);
-		fprintf(stderr, "dbg2       pings:             %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:           %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:         %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:         %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:         %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:         %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:        %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:        %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:        %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:        %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:        %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:        %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:        %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:        %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:        %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:        %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:        %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:        %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:        %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:        %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:          %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
-		fprintf(stderr, "dbg2       read_file:         %s\n", read_file);
-		fprintf(stderr, "dbg2       route_file:        %s\n", route_file);
-		fprintf(stderr, "dbg2       output_file_set:   %d\n", output_file_set);
-		fprintf(stderr, "dbg2       output_file:       %s\n", output_file);
-		fprintf(stderr, "dbg2       rangethreshold:    %f\n", rangethreshold);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* read route file */
