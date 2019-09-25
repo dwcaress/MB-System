@@ -101,6 +101,7 @@ AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
 AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
+AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with mbtrn,mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
 AS_ECHO([" "])
@@ -902,6 +903,24 @@ AS_ECHO(["Not building mbtnav tools"])
 fi
 
 dnl--------------------------------------------------------------------
+dnl UTILS Section - optionally build utils
+dnl--------------------------------------------------------------------
+
+dnl Check if the mbsys tools should be built
+AS_ECHO(["Check if the graphical utils should be built"])
+AC_ARG_ENABLE(mbtools, [AS_HELP_STRING([--disable-mbtools], [do not build graphical tools])],
+        [build_mbtools=no], [build_mbtools=yes])
+AM_CONDITIONAL([BUILD_MBUTILS], [test x$build_mbtools = xyes])
+if test "$build_mbtools" = "yes" ; then
+    dnl Building mbsys tools
+    AS_ECHO(["Building graphical tools"])
+    AC_DEFINE(MBUTILS_ENABLED, 1, [Build graphical tools])
+else
+    dnl Not building mbsys tools
+    AS_ECHO(["Not building graphical tools"])
+fi
+
+dnl--------------------------------------------------------------------
 dnl Point Cloud Library Section - optionally build ICP based feature matching
 dnl in mbnavadjust - uses ICP algorithm in Point Cloud Library (PCL)
 dnl--------------------------------------------------------------------
@@ -1067,6 +1086,11 @@ if test "$build_mbtnav" = "yes" ; then
 	AS_ECHO(["Build mbtnav tools: Enabled"])
 else
 	AS_ECHO(["Build mbtnav tools: Disabled"])
+fi
+if test "$build_mbtools" = "yes" ; then
+	AS_ECHO(["Build graphical tools: Enabled"])
+else
+	AS_ECHO(["Build graphical tools: Disabled"])
 fi
 if test "$build_pcltools" = "yes" ; then
     AS_ECHO(["Build PCL tools: Enabled"])
