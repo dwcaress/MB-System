@@ -135,10 +135,6 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
-
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -371,187 +367,191 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:W:w:XxVvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
-				extract_type = MB7K2SS_SSLOW;
-				target_kind = MB_DATA_SIDESCAN2;
-			}
-			else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
-				extract_type = MB7K2SS_SSHIGH;
-				target_kind = MB_DATA_SIDESCAN3;
-			}
-			else {
-				sscanf(optarg, "%d", &mode);
-				if (mode == MB7K2SS_SSLOW) {
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:W:w:XxVvHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
 					extract_type = MB7K2SS_SSLOW;
 					target_kind = MB_DATA_SIDESCAN2;
 				}
-				else if (mode == MB7K2SS_SSHIGH) {
+				else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
 					extract_type = MB7K2SS_SSHIGH;
 					target_kind = MB_DATA_SIDESCAN3;
 				}
+				else {
+					sscanf(optarg, "%d", &mode);
+					if (mode == MB7K2SS_SSLOW) {
+						extract_type = MB7K2SS_SSLOW;
+						target_kind = MB_DATA_SIDESCAN2;
+					}
+					else if (mode == MB7K2SS_SSHIGH) {
+						extract_type = MB7K2SS_SSHIGH;
+						target_kind = MB_DATA_SIDESCAN3;
+					}
+				}
+				break;
+			case 'B':
+			case 'b':
+			{
+				const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+				if (n == 0)
+					bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
+				else if (n == 1 && bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
+					bottompickthreshold = 0.5;
+				break;
 			}
-			break;
-		case 'B':
-		case 'b':
-		{
-			const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
-			if (n == 0)
-				bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
-			else if (n == 1 && bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
-				bottompickthreshold = 0.5;
-			break;
-		}
-		case 'C':
-		case 'c':
-			print_comments = MB_YES;
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%d", &interpbins);
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'G':
-		case 'g':
-			sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d/%s", &startline, lineroot);
-			break;
-		case 'M':
-		case 'm':
-			checkroutebearing = MB_YES;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", output_file);
-			output_file_set = MB_YES;
-			break;
-		case 'Q':
-		case 'q':
-			sscanf(optarg, "%s", timelist_file);
-			timelist_file_set = MB_YES;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%s", route_file);
-			route_file_set = MB_YES;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%d", &smooth);
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%s", topogridfile);
-			sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%lf", &rangethreshold);
-			break;
-		case 'W':
-		case 'w':
-			sscanf(optarg, "%lf", &swath_width);
-			if (swath_width > 0.0)
-				swath_width_set = MB_YES;
-			break;
-		case 'X':
-		case 'x':
-			ssflip = MB_YES;
-			break;
-		case '?':
-			errflg = true;
+			case 'C':
+			case 'c':
+				print_comments = MB_YES;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%d", &interpbins);
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d/%s", &startline, lineroot);
+				break;
+			case 'M':
+			case 'm':
+				checkroutebearing = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", output_file);
+				output_file_set = MB_YES;
+				break;
+			case 'Q':
+			case 'q':
+				sscanf(optarg, "%s", timelist_file);
+				timelist_file_set = MB_YES;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%s", route_file);
+				route_file_set = MB_YES;
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%d", &smooth);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%s", topogridfile);
+				sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%lf", &rangethreshold);
+				break;
+			case 'W':
+			case 'w':
+				sscanf(optarg, "%lf", &swath_width);
+				if (swath_width > 0.0)
+					swath_width_set = MB_YES;
+				break;
+			case 'X':
+			case 'x':
+				ssflip = MB_YES;
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                %d\n", help);
-		fprintf(stderr, "dbg2       format:              %d\n", format);
-		fprintf(stderr, "dbg2       pings:               %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
-		fprintf(stderr, "dbg2       bottompickmode:      %d\n", bottompickmode);
-		fprintf(stderr, "dbg2       bottompickthreshold: %f\n", bottompickthreshold);
-		fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
-		fprintf(stderr, "dbg2       swath_width_set:     %d\n", swath_width_set);
-		fprintf(stderr, "dbg2       swath_width:         %f\n", swath_width);
-		fprintf(stderr, "dbg2       interpbins:          %d\n", interpbins);
-		fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
-		fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
-		fprintf(stderr, "dbg2       sslayoutmode:        %d\n", sslayoutmode);
-		fprintf(stderr, "dbg2       topogridfile:        %s\n", topogridfile);
-		fprintf(stderr, "dbg2       timelist_file_set:   %d\n", timelist_file_set);
-		fprintf(stderr, "dbg2       timelist_file:       %s\n", timelist_file);
-		fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
-		fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
-		fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
-		fprintf(stderr, "dbg2       output_file:         %s\n", output_file);
-		fprintf(stderr, "dbg2       output_file_set:     %d\n", output_file_set);
-		fprintf(stderr, "dbg2       lineroot:            %s\n", lineroot);
-		fprintf(stderr, "dbg2       extract_type:        %d\n", extract_type);
-		fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                %d\n", help);
+			fprintf(stderr, "dbg2       format:              %d\n", format);
+			fprintf(stderr, "dbg2       pings:               %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
+			fprintf(stderr, "dbg2       bottompickmode:      %d\n", bottompickmode);
+			fprintf(stderr, "dbg2       bottompickthreshold: %f\n", bottompickthreshold);
+			fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
+			fprintf(stderr, "dbg2       swath_width_set:     %d\n", swath_width_set);
+			fprintf(stderr, "dbg2       swath_width:         %f\n", swath_width);
+			fprintf(stderr, "dbg2       interpbins:          %d\n", interpbins);
+			fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
+			fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
+			fprintf(stderr, "dbg2       sslayoutmode:        %d\n", sslayoutmode);
+			fprintf(stderr, "dbg2       topogridfile:        %s\n", topogridfile);
+			fprintf(stderr, "dbg2       timelist_file_set:   %d\n", timelist_file_set);
+			fprintf(stderr, "dbg2       timelist_file:       %s\n", timelist_file);
+			fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
+			fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
+			fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
+			fprintf(stderr, "dbg2       output_file:         %s\n", output_file);
+			fprintf(stderr, "dbg2       output_file_set:     %d\n", output_file_set);
+			fprintf(stderr, "dbg2       lineroot:            %s\n", lineroot);
+			fprintf(stderr, "dbg2       extract_type:        %d\n", extract_type);
+			fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(status);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(status);
+		}
 	}
 
 	if (verbose == 1) {

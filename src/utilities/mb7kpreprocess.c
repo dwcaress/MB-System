@@ -74,10 +74,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
-
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -617,436 +613,443 @@ int main(int argc, char **argv) {
 	int ss_source = R7KRECID_7kV2SnippetData;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:C:c:D:d:F:f:G:g:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:S:s:T:t:W:w:Z:z:VvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			goodnavattitudeonly = MB_NO;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d", &fix_time_stamps);
-			break;
-		case 'C':
-		case 'c':
-			nscan = sscanf(optarg, "%lf/%lf", &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
-			if (nscan == 2) {
-				multibeam_offset_mode = MB_YES;
-				mbreceive_offset_roll = mbtransmit_offset_roll;
-				mbreceive_offset_pitch = mbtransmit_offset_pitch;
-			}
-			break;
-		case 'D':
-		case 'd':
-			nscan = sscanf(optarg, "%lf/%lf/%lf/%lf", &depth_offset_x, &depth_offset_y, &depth_offset_z, &sonardepthoffset);
-			if (nscan < 4) {
-				if (nscan == 3) {
-					sonardepthoffset = depth_offset_z;
-					depth_offset_z = depth_offset_y;
-					depth_offset_y = depth_offset_x;
-					depth_offset_x = 0.0;
-				}
-				else if (nscan == 2) {
-					sonardepthoffset = 0.0;
-					depth_offset_z = depth_offset_y;
-					depth_offset_y = depth_offset_x;
-					depth_offset_x = 0.0;
-				}
-				else if (nscan == 1) {
-					sonardepthoffset = 0.0;
-					depth_offset_z = 0.0;
-					depth_offset_y = depth_offset_x;
-					depth_offset_x = 0.0;
-				}
-			}
-			if (nscan > 0)
-				depth_offset_mode = MB_YES;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'G':
-		case 'g':
-			sscanf(optarg, "%s", platform_file);
-			use_platform_file = MB_YES;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'K':
-		case 'k':
-			nscan = sscanf(optarg, "%d/%lf/%lf/%lf", &klugemode, &klugevalue, &klugevalue2, &klugevalue3);
-			if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH) {
-				kluge_useverticaldepth = MB_YES;
-			}
-			if (klugemode == MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES) {
-				kluge_zeroalongtrackangles = MB_YES;
-			}
-			if (klugemode == MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION) {
-				kluge_zeroattitudecorrection = MB_YES;
-			}
-			if (klugemode == MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE) {
-				kluge_kearfottrovnoise = MB_YES;
-			}
-			if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK && nscan >= 2) {
-				kluge_beampatterntweak = MB_YES;
-				kluge_beampatternfactor = klugevalue;
-			}
-			if (klugemode == MB7KPREPROCESS_KLUGE_FIXTIMEJUMP && nscan >= 2) {
-				kluge_fixtimejump = MB_YES;
-				kluge_timejump_interval = klugevalue;
-				if (nscan == 3)
-					kluge_timejump_threshold = klugevalue2;
-				else
-					kluge_timejump_threshold = kluge_timejump_interval / 4.0;
-			}
-			if (klugemode == MB7KPREPROCESS_KLUGE_FIXTIMEJUMPBEAMEDITS) {
-				kluge_fixtimejumpbeamedits = MB_YES;
-			}
-			if (klugemode == MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY) {
-				kluge_donotrecalculatebathy = MB_YES;
-			}
-			if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK && nscan >= 2) {
-				kluge_beampatternsnelltweak = MB_YES;
-				kluge_beampatternsnellfactor = klugevalue;
-			}
-			break;
-		case 'L':
-		case 'l':
-			mode = MB7KPREPROCESS_TIMESTAMPLIST;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%s", rockfile);
-			rockdata = MB_YES;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%s", insfile);
-			insdata = MB_YES;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", ofile);
-			ofile_set = MB_YES;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%s", buffer);
-			if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				sonardepthdata = MB_YES;
-				strcpy(sonardepthfile, buffer);
-			}
-			else if (optarg[0] == 'F' || optarg[0] == 'f') {
-				nscan = sscanf(&(optarg[1]), "%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
-				if (nscan == 1)
-					sonardepthfilterdepth = 20.0;
-				if (nscan >= 1)
-					sonardepthfilter = MB_YES;
-				else
-					sonardepthfilter = MB_NO;
-			}
-			break;
-		case 'R':
-		case 'r':
-			if (nrangeoffset < 3) {
-				sscanf(optarg, "%d/%d/%lf", &rangeoffsetstart[nrangeoffset], &rangeoffsetend[nrangeoffset],
-				       &rangeoffset[nrangeoffset]);
-				nrangeoffset++;
-			}
-			break;
-		case 'S':
-		case 's':
-			if (optarg[0] == 'C')
-				ss_source = R7KRECID_7kCalibratedSnippetData;
-			else if (optarg[0] == 'S')
-				ss_source = R7KRECID_7kV2SnippetData;
-			else if (optarg[0] == 'B')
-				ss_source = R7KRECID_7kBackscatterImageData;
-			else {
-				sscanf(optarg, "%d/%d", &type, &source);
-				if (type == 1)
-					nav_source = source;
-				else if (type == 2)
-					heading_source = source;
-				else if (type == 3)
-					attitude_source = source;
-				else if (type == 4)
-					sonardepth_source = source;
-				else if (type == 5)
-					ss_source = source;
-			}
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%s", buffer);
-			if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				timelagmode = MB7KPREPROCESS_TIMELAG_MODEL;
-				strcpy(timelagfile, buffer);
-			}
-			else if (strncmp(buffer, "USE_TIME_DELAY", 14) == 0) {
-				timedelaymode = MB7KPREPROCESS_TIMEDELAY_ON;
-			}
-			else if (strncmp(buffer, "NO_TIME_DELAY", 13) == 0) {
-				timedelaymode = MB7KPREPROCESS_TIMEDELAY_OFF;
-			}
-			else {
-				sscanf(optarg, "%lf", &timelagconstant);
-				timelagmode = MB7KPREPROCESS_TIMELAG_CONSTANT;
-			}
-			break;
-		case 'W':
-		case 'w':
-			sscanf(optarg, "%s", dslfile);
-			dsldata = MB_YES;
-			break;
-		case 'Z':
-		case 'z':
-			/* multibeam_offsets */
-			if (strncmp("multibeam_offsets=", optarg, 17) == 0) {
-				const int n = sscanf(optarg, "multibeam_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
-				           &mbtransmit_offset_z, &mbtransmit_offset_heading, &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
-				if (n == 6) {
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "AaB:b:C:c:D:d:F:f:G:g:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:S:s:T:t:W:w:Z:z:VvHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				goodnavattitudeonly = MB_NO;
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d", &fix_time_stamps);
+				break;
+			case 'C':
+			case 'c':
+				nscan = sscanf(optarg, "%lf/%lf", &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
+				if (nscan == 2) {
 					multibeam_offset_mode = MB_YES;
-					mbreceive_offset_x = mbtransmit_offset_x;
-					mbreceive_offset_y = mbtransmit_offset_y;
-					mbreceive_offset_z = mbtransmit_offset_z;
-					mbreceive_offset_heading = mbtransmit_offset_heading;
 					mbreceive_offset_roll = mbtransmit_offset_roll;
 					mbreceive_offset_pitch = mbtransmit_offset_pitch;
 				}
-			}
-			/* mbtransmit_offsets */
-			else if (strncmp("mbtransmit_offsets=", optarg, 18) == 0) {
-				const int n = sscanf(optarg, "mbtransmit_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
-				           &mbtransmit_offset_z, &mbtransmit_offset_heading, &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
-				if (n == 6) {
-					multibeam_offset_mode = MB_YES;
+				break;
+			case 'D':
+			case 'd':
+				nscan = sscanf(optarg, "%lf/%lf/%lf/%lf", &depth_offset_x, &depth_offset_y, &depth_offset_z, &sonardepthoffset);
+				if (nscan < 4) {
+					if (nscan == 3) {
+						sonardepthoffset = depth_offset_z;
+						depth_offset_z = depth_offset_y;
+						depth_offset_y = depth_offset_x;
+						depth_offset_x = 0.0;
+					}
+					else if (nscan == 2) {
+						sonardepthoffset = 0.0;
+						depth_offset_z = depth_offset_y;
+						depth_offset_y = depth_offset_x;
+						depth_offset_x = 0.0;
+					}
+					else if (nscan == 1) {
+						sonardepthoffset = 0.0;
+						depth_offset_z = 0.0;
+						depth_offset_y = depth_offset_x;
+						depth_offset_x = 0.0;
+					}
 				}
-			}
-			/* mbreceive_offsets */
-			else if (strncmp("mbreceive_offsets=", optarg, 17) == 0) {
-				const int n = sscanf(optarg, "mbreceive_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbreceive_offset_x, &mbreceive_offset_y,
-				           &mbreceive_offset_z, &mbreceive_offset_heading, &mbreceive_offset_roll, &mbreceive_offset_pitch);
-				if (n == 6) {
-					multibeam_offset_mode = MB_YES;
-				}
-			}
-			/* position_offsets */
-			else if (strncmp("position_offsets=", optarg, 16) == 0) {
-				const int n = sscanf(optarg, "position_offsets=%lf/%lf/%lf", &position_offset_x, &position_offset_y, &position_offset_z);
-				if (n == 3)
-					position_offset_mode = MB_YES;
-			}
-			/* depth_offsets */
-			else if (strncmp("depth_offsets=", optarg, 13) == 0) {
-				const int n = sscanf(optarg, "depth_offsets=%lf/%lf/%lf", &depth_offset_x, &depth_offset_y, &depth_offset_z);
-				if (n == 3)
+				if (nscan > 0)
 					depth_offset_mode = MB_YES;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				sscanf(optarg, "%s", platform_file);
+				use_platform_file = MB_YES;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'K':
+			case 'k':
+				nscan = sscanf(optarg, "%d/%lf/%lf/%lf", &klugemode, &klugevalue, &klugevalue2, &klugevalue3);
+				if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH) {
+					kluge_useverticaldepth = MB_YES;
+				}
+				if (klugemode == MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES) {
+					kluge_zeroalongtrackangles = MB_YES;
+				}
+				if (klugemode == MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION) {
+					kluge_zeroattitudecorrection = MB_YES;
+				}
+				if (klugemode == MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE) {
+					kluge_kearfottrovnoise = MB_YES;
+				}
+				if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNTWEAK && nscan >= 2) {
+					kluge_beampatterntweak = MB_YES;
+					kluge_beampatternfactor = klugevalue;
+				}
+				if (klugemode == MB7KPREPROCESS_KLUGE_FIXTIMEJUMP && nscan >= 2) {
+					kluge_fixtimejump = MB_YES;
+					kluge_timejump_interval = klugevalue;
+					if (nscan == 3)
+						kluge_timejump_threshold = klugevalue2;
+					else
+						kluge_timejump_threshold = kluge_timejump_interval / 4.0;
+				}
+				if (klugemode == MB7KPREPROCESS_KLUGE_FIXTIMEJUMPBEAMEDITS) {
+					kluge_fixtimejumpbeamedits = MB_YES;
+				}
+				if (klugemode == MB7KPREPROCESS_KLUGE_DONOTRECALCULATEBATHY) {
+					kluge_donotrecalculatebathy = MB_YES;
+				}
+				if (klugemode == MB7KPREPROCESS_KLUGE_BEAMPATTERNSNELLTWEAK && nscan >= 2) {
+					kluge_beampatternsnelltweak = MB_YES;
+					kluge_beampatternsnellfactor = klugevalue;
+				}
+				break;
+			case 'L':
+			case 'l':
+				mode = MB7KPREPROCESS_TIMESTAMPLIST;
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%s", rockfile);
+				rockdata = MB_YES;
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%s", insfile);
+				insdata = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", ofile);
+				ofile_set = MB_YES;
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%s", buffer);
+				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					sonardepthdata = MB_YES;
+					strcpy(sonardepthfile, buffer);
+				}
+				else if (optarg[0] == 'F' || optarg[0] == 'f') {
+					nscan = sscanf(&(optarg[1]), "%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
+					if (nscan == 1)
+						sonardepthfilterdepth = 20.0;
+					if (nscan >= 1)
+						sonardepthfilter = MB_YES;
+					else
+						sonardepthfilter = MB_NO;
+				}
+				break;
+			case 'R':
+			case 'r':
+				if (nrangeoffset < 3) {
+					sscanf(optarg, "%d/%d/%lf", &rangeoffsetstart[nrangeoffset], &rangeoffsetend[nrangeoffset],
+					       &rangeoffset[nrangeoffset]);
+					nrangeoffset++;
+				}
+				break;
+			case 'S':
+			case 's':
+				if (optarg[0] == 'C')
+					ss_source = R7KRECID_7kCalibratedSnippetData;
+				else if (optarg[0] == 'S')
+					ss_source = R7KRECID_7kV2SnippetData;
+				else if (optarg[0] == 'B')
+					ss_source = R7KRECID_7kBackscatterImageData;
+				else {
+					sscanf(optarg, "%d/%d", &type, &source);
+					if (type == 1)
+						nav_source = source;
+					else if (type == 2)
+						heading_source = source;
+					else if (type == 3)
+						attitude_source = source;
+					else if (type == 4)
+						sonardepth_source = source;
+					else if (type == 5)
+						ss_source = source;
+				}
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%s", buffer);
+				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					timelagmode = MB7KPREPROCESS_TIMELAG_MODEL;
+					strcpy(timelagfile, buffer);
+				}
+				else if (strncmp(buffer, "USE_TIME_DELAY", 14) == 0) {
+					timedelaymode = MB7KPREPROCESS_TIMEDELAY_ON;
+				}
+				else if (strncmp(buffer, "NO_TIME_DELAY", 13) == 0) {
+					timedelaymode = MB7KPREPROCESS_TIMEDELAY_OFF;
+				}
+				else {
+					sscanf(optarg, "%lf", &timelagconstant);
+					timelagmode = MB7KPREPROCESS_TIMELAG_CONSTANT;
+				}
+				break;
+			case 'W':
+			case 'w':
+				sscanf(optarg, "%s", dslfile);
+				dsldata = MB_YES;
+				break;
+			case 'Z':
+			case 'z':
+				/* multibeam_offsets */
+				if (strncmp("multibeam_offsets=", optarg, 17) == 0) {
+					const int n = sscanf(optarg, "multibeam_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
+					           &mbtransmit_offset_z, &mbtransmit_offset_heading, &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
+					if (n == 6) {
+						multibeam_offset_mode = MB_YES;
+						mbreceive_offset_x = mbtransmit_offset_x;
+						mbreceive_offset_y = mbtransmit_offset_y;
+						mbreceive_offset_z = mbtransmit_offset_z;
+						mbreceive_offset_heading = mbtransmit_offset_heading;
+						mbreceive_offset_roll = mbtransmit_offset_roll;
+						mbreceive_offset_pitch = mbtransmit_offset_pitch;
+					}
+				}
+				/* mbtransmit_offsets */
+				else if (strncmp("mbtransmit_offsets=", optarg, 18) == 0) {
+					const int n = sscanf(optarg, "mbtransmit_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbtransmit_offset_x, &mbtransmit_offset_y,
+					           &mbtransmit_offset_z, &mbtransmit_offset_heading, &mbtransmit_offset_roll, &mbtransmit_offset_pitch);
+					if (n == 6) {
+						multibeam_offset_mode = MB_YES;
+					}
+				}
+				/* mbreceive_offsets */
+				else if (strncmp("mbreceive_offsets=", optarg, 17) == 0) {
+					const int n = sscanf(optarg, "mbreceive_offsets=%lf/%lf/%lf/%lf/%lf/%lf", &mbreceive_offset_x, &mbreceive_offset_y,
+					           &mbreceive_offset_z, &mbreceive_offset_heading, &mbreceive_offset_roll, &mbreceive_offset_pitch);
+					if (n == 6) {
+						multibeam_offset_mode = MB_YES;
+					}
+				}
+				/* position_offsets */
+				else if (strncmp("position_offsets=", optarg, 16) == 0) {
+					const int n = sscanf(optarg, "position_offsets=%lf/%lf/%lf", &position_offset_x, &position_offset_y, &position_offset_z);
+					if (n == 3)
+						position_offset_mode = MB_YES;
+				}
+				/* depth_offsets */
+				else if (strncmp("depth_offsets=", optarg, 13) == 0) {
+					const int n = sscanf(optarg, "depth_offsets=%lf/%lf/%lf", &depth_offset_x, &depth_offset_y, &depth_offset_z);
+					if (n == 3)
+						depth_offset_mode = MB_YES;
+				}
+				/* heading_offsets */
+				else if (strncmp("heading_offsets=", optarg, 15) == 0) {
+					const int n = sscanf(optarg, "heading_offsets=%lf/%lf/%lf", &heading_offset_heading, &heading_offset_roll,
+					           &heading_offset_pitch);
+					if (n == 3)
+						heading_offset_mode = MB_YES;
+				}
+				/* rollpitch_offsets */
+				else if (strncmp("rollpitch_offsets=", optarg, 17) == 0) {
+					const int n = sscanf(optarg, "rollpitch_offsets=%lf/%lf/%lf", &rollpitch_offset_heading, &rollpitch_offset_roll,
+					           &rollpitch_offset_pitch);
+					if (n == 3)
+						rollpitch_offset_mode = MB_YES;
+				}
+				break;
+			case '?':
+				errflg = true;
 			}
-			/* heading_offsets */
-			else if (strncmp("heading_offsets=", optarg, 15) == 0) {
-				const int n = sscanf(optarg, "heading_offsets=%lf/%lf/%lf", &heading_offset_heading, &heading_offset_roll,
-				           &heading_offset_pitch);
-				if (n == 3)
-					heading_offset_mode = MB_YES;
-			}
-			/* rollpitch_offsets */
-			else if (strncmp("rollpitch_offsets=", optarg, 17) == 0) {
-				const int n = sscanf(optarg, "rollpitch_offsets=%lf/%lf/%lf", &rollpitch_offset_heading, &rollpitch_offset_roll,
-				           &rollpitch_offset_pitch);
-				if (n == 3)
-					rollpitch_offset_mode = MB_YES;
-			}
-			break;
-		case '?':
-			errflg = true;
 		}
 
-	/* set nav and attitude sources */
-	if (nav_source == MB_DATA_NAV1) {
-		nav_source = R7KRECID_Position;
-	}
-	else if (nav_source == MB_DATA_NAV2) {
-		nav_source = R7KRECID_Bluefin;
-	}
-	else if (nav_source == MB_DATA_NAV3) {
-		nav_source = R7KRECID_Navigation;
-	}
-	if (attitude_source == MB_DATA_ATTITUDE) {
-		attitude_source = R7KRECID_RollPitchHeave;
-	}
-	else if (attitude_source == MB_DATA_NAV2) {
-		attitude_source = R7KRECID_Bluefin;
-	}
-	if (heading_source == MB_DATA_HEADING) {
-		heading_source = R7KRECID_Heading;
-	}
-	else if (heading_source == MB_DATA_NAV2) {
-		heading_source = R7KRECID_Bluefin;
-	}
-	else if (heading_source == MB_DATA_NAV3) {
-		heading_source = R7KRECID_Navigation;
-	}
-	if (sonardepth_source == MB_DATA_NAV1) {
-		sonardepth_source = R7KRECID_Position;
-	}
-	else if (sonardepth_source == MB_DATA_NAV2) {
-		sonardepth_source = R7KRECID_Bluefin;
-	}
-	else if (sonardepth_source == MB_DATA_NAV3) {
-		sonardepth_source = R7KRECID_Navigation;
-	}
-	else if (sonardepth_source == MB_DATA_HEIGHT) {
-		sonardepth_source = R7KRECID_Depth;
-	}
-
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                %d\n", help);
-		fprintf(stderr, "dbg2       format:              %d\n", format);
-		fprintf(stderr, "dbg2       pings:               %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
-		fprintf(stderr, "dbg2       read_file:           %s\n", read_file);
-		fprintf(stderr, "dbg2       use_platform_file:   %d\n", use_platform_file);
-		fprintf(stderr, "dbg2       platform_file:       %s\n", platform_file);
-		fprintf(stderr, "dbg2       ofile:               %s\n", ofile);
-		fprintf(stderr, "dbg2       ofile_set:           %d\n", ofile_set);
-		fprintf(stderr, "dbg2       ss_source:           %d\n", ss_source);
-		fprintf(stderr, "dbg2       rockfile:            %s\n", rockfile);
-		fprintf(stderr, "dbg2       rockdata:            %d\n", rockdata);
-		fprintf(stderr, "dbg2       dslfile:             %s\n", dslfile);
-		fprintf(stderr, "dbg2       dsldata:             %d\n", dsldata);
-		fprintf(stderr, "dbg2       insfile:             %s\n", insfile);
-		fprintf(stderr, "dbg2       insdata:             %d\n", insdata);
-		fprintf(stderr, "dbg2       mode:                %d\n", mode);
-		fprintf(stderr, "dbg2       fix_time_stamps:     %d\n", fix_time_stamps);
-		fprintf(stderr, "dbg2       goodnavattitudeonly: %d\n", goodnavattitudeonly);
-		fprintf(stderr, "dbg2       timedelaymode:       %d\n", timedelaymode);
-		fprintf(stderr, "dbg2       timelagmode:         %d\n", timelagmode);
-		fprintf(stderr, "dbg2       nav_source:          %d\n", nav_source);
-		fprintf(stderr, "dbg2       attitude_source:     %d\n", attitude_source);
-		fprintf(stderr, "dbg2       heading_source:      %d\n", heading_source);
-		fprintf(stderr, "dbg2       heading_source:      %d\n", heading_source);
-		fprintf(stderr, "dbg2       sonardepth_source:   %d\n", sonardepth_source);
-		fprintf(stderr, "dbg2       ss_source:           %d\n", ss_source);
-		fprintf(stderr, "dbg2       kluge_useverticaldepth:        %d\n", kluge_useverticaldepth);
-		fprintf(stderr, "dbg2       kluge_zeroalongtrackangles:    %d\n", kluge_zeroalongtrackangles);
-		fprintf(stderr, "dbg2       kluge_zeroattitudecorrection:  %d\n", kluge_zeroattitudecorrection);
-		fprintf(stderr, "dbg2       kluge_kearfottrovnoise:        %d\n", kluge_kearfottrovnoise);
-		fprintf(stderr, "dbg2       kluge_beampatterntweak:        %d\n", kluge_beampatterntweak);
-		fprintf(stderr, "dbg2       kluge_beampatternfactor:       %f\n", kluge_beampatternfactor);
-		fprintf(stderr, "dbg2       kluge_fixtimejump:             %d\n", kluge_fixtimejump);
-		fprintf(stderr, "dbg2       kluge_fixtimejumpbeamedits:    %d\n", kluge_fixtimejumpbeamedits);
-		fprintf(stderr, "dbg2       kluge_timejump_interval:       %f\n", kluge_timejump_interval);
-		fprintf(stderr, "dbg2       kluge_timejump_threshold:      %f\n", kluge_timejump_threshold);
-		fprintf(stderr, "dbg2       kluge_donotrecalculatebathy:   %d\n", kluge_donotrecalculatebathy);
-		fprintf(stderr, "dbg2       kluge_beampatternsnelltweak:   %d\n", kluge_beampatternsnelltweak);
-		fprintf(stderr, "dbg2       kluge_beampatternsnellfactor:  %f\n", kluge_beampatternsnellfactor);
-		if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL) {
-			fprintf(stderr, "dbg2       timelagfile:         %s\n", timelagfile);
-			fprintf(stderr, "dbg2       ntimelag:            %d\n", ntimelag);
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
-		else {
-			fprintf(stderr, "dbg2       timelagconstant:     %f\n", timelagconstant);
+
+		/* set nav and attitude sources */
+		if (nav_source == MB_DATA_NAV1) {
+			nav_source = R7KRECID_Position;
 		}
-		fprintf(stderr, "dbg2       timelag:                         %f\n", timelag);
-		fprintf(stderr, "dbg2       sonardepthfilter:                %d\n", sonardepthfilter);
-		fprintf(stderr, "dbg2       sonardepthfilterlength:          %f\n", sonardepthfilterlength);
-		fprintf(stderr, "dbg2       sonardepthfilterdepth:           %f\n", sonardepthfilterdepth);
-		fprintf(stderr, "dbg2       sonardepthfile:                  %s\n", sonardepthfile);
-		fprintf(stderr, "dbg2       sonardepthdata:                  %d\n", sonardepthdata);
-		fprintf(stderr, "dbg2       sonardepthoffset:                %f\n", sonardepthoffset);
-		fprintf(stderr, "dbg2       multibeam_offset_mode:           %d\n", multibeam_offset_mode);
-		fprintf(stderr, "dbg2       mbtransmit_offset_x:             %f\n", mbtransmit_offset_x);
-		fprintf(stderr, "dbg2       mbtransmit_offset_y:             %f\n", mbtransmit_offset_y);
-		fprintf(stderr, "dbg2       mbtransmit_offset_z:             %f\n", mbtransmit_offset_z);
-		fprintf(stderr, "dbg2       mbtransmit_offset_heading:       %f\n", mbtransmit_offset_heading);
-		fprintf(stderr, "dbg2       mbtransmit_offset_roll:          %f\n", mbtransmit_offset_roll);
-		fprintf(stderr, "dbg2       mbtransmit_offset_pitch:         %f\n", mbtransmit_offset_pitch);
-		fprintf(stderr, "dbg2       mbreceive_offset_x:              %f\n", mbreceive_offset_x);
-		fprintf(stderr, "dbg2       mbreceive_offset_y:              %f\n", mbreceive_offset_y);
-		fprintf(stderr, "dbg2       mbreceive_offset_z:              %f\n", mbreceive_offset_z);
-		fprintf(stderr, "dbg2       mbreceive_offset_heading:        %f\n", mbreceive_offset_heading);
-		fprintf(stderr, "dbg2       mbreceive_offset_roll:           %f\n", mbreceive_offset_roll);
-		fprintf(stderr, "dbg2       mbreceive_offset_pitch:          %f\n", mbreceive_offset_pitch);
-		fprintf(stderr, "dbg2       position_offset_mode:            %d\n", position_offset_mode);
-		fprintf(stderr, "dbg2       position_offset_x:               %f\n", position_offset_x);
-		fprintf(stderr, "dbg2       position_offset_y:               %f\n", position_offset_y);
-		fprintf(stderr, "dbg2       position_offset_z:               %f\n", position_offset_z);
-		fprintf(stderr, "dbg2       depth_offset_mode:               %d\n", depth_offset_mode);
-		fprintf(stderr, "dbg2       depth_offset_x:                  %f\n", depth_offset_x);
-		fprintf(stderr, "dbg2       depth_offset_y:                  %f\n", depth_offset_y);
-		fprintf(stderr, "dbg2       depth_offset_z:                  %f\n", depth_offset_z);
-		fprintf(stderr, "dbg2       heading_offset_mode:             %d\n", heading_offset_mode);
-		fprintf(stderr, "dbg2       heading_offset_heading:          %f\n", heading_offset_heading);
-		fprintf(stderr, "dbg2       heading_offset_roll:             %f\n", heading_offset_roll);
-		fprintf(stderr, "dbg2       heading_offset_pitch:            %f\n", heading_offset_pitch);
-		fprintf(stderr, "dbg2       rollpitch_offset_mode:           %d\n", rollpitch_offset_mode);
-		fprintf(stderr, "dbg2       rollpitch_offset_heading:        %f\n", rollpitch_offset_heading);
-		fprintf(stderr, "dbg2       rollpitch_offset_roll:           %f\n", rollpitch_offset_roll);
-		fprintf(stderr, "dbg2       rollpitch_offset_pitch:          %f\n", rollpitch_offset_pitch);
-		for (int i = 0; i < nrangeoffset; i++)
-			fprintf(stderr, "dbg2       rangeoffset[%d]:                 %d %d %f\n", i, rangeoffsetstart[i], rangeoffsetend[i],
-			        rangeoffset[i]);
+		else if (nav_source == MB_DATA_NAV2) {
+			nav_source = R7KRECID_Bluefin;
+		}
+		else if (nav_source == MB_DATA_NAV3) {
+			nav_source = R7KRECID_Navigation;
+		}
+		if (attitude_source == MB_DATA_ATTITUDE) {
+			attitude_source = R7KRECID_RollPitchHeave;
+		}
+		else if (attitude_source == MB_DATA_NAV2) {
+			attitude_source = R7KRECID_Bluefin;
+		}
+		if (heading_source == MB_DATA_HEADING) {
+			heading_source = R7KRECID_Heading;
+		}
+		else if (heading_source == MB_DATA_NAV2) {
+			heading_source = R7KRECID_Bluefin;
+		}
+		else if (heading_source == MB_DATA_NAV3) {
+			heading_source = R7KRECID_Navigation;
+		}
+		if (sonardepth_source == MB_DATA_NAV1) {
+			sonardepth_source = R7KRECID_Position;
+		}
+		else if (sonardepth_source == MB_DATA_NAV2) {
+			sonardepth_source = R7KRECID_Bluefin;
+		}
+		else if (sonardepth_source == MB_DATA_NAV3) {
+			sonardepth_source = R7KRECID_Navigation;
+		}
+		else if (sonardepth_source == MB_DATA_HEIGHT) {
+			sonardepth_source = R7KRECID_Depth;
+		}
+
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+			fprintf(stderr, "dbg2       format:              %d\n", format);
+			fprintf(stderr, "dbg2       pings:               %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
+			fprintf(stderr, "dbg2       read_file:           %s\n", read_file);
+			fprintf(stderr, "dbg2       use_platform_file:   %d\n", use_platform_file);
+			fprintf(stderr, "dbg2       platform_file:       %s\n", platform_file);
+			fprintf(stderr, "dbg2       ofile:               %s\n", ofile);
+			fprintf(stderr, "dbg2       ofile_set:           %d\n", ofile_set);
+			fprintf(stderr, "dbg2       ss_source:           %d\n", ss_source);
+			fprintf(stderr, "dbg2       rockfile:            %s\n", rockfile);
+			fprintf(stderr, "dbg2       rockdata:            %d\n", rockdata);
+			fprintf(stderr, "dbg2       dslfile:             %s\n", dslfile);
+			fprintf(stderr, "dbg2       dsldata:             %d\n", dsldata);
+			fprintf(stderr, "dbg2       insfile:             %s\n", insfile);
+			fprintf(stderr, "dbg2       insdata:             %d\n", insdata);
+			fprintf(stderr, "dbg2       mode:                %d\n", mode);
+			fprintf(stderr, "dbg2       fix_time_stamps:     %d\n", fix_time_stamps);
+			fprintf(stderr, "dbg2       goodnavattitudeonly: %d\n", goodnavattitudeonly);
+			fprintf(stderr, "dbg2       timedelaymode:       %d\n", timedelaymode);
+			fprintf(stderr, "dbg2       timelagmode:         %d\n", timelagmode);
+			fprintf(stderr, "dbg2       nav_source:          %d\n", nav_source);
+			fprintf(stderr, "dbg2       attitude_source:     %d\n", attitude_source);
+			fprintf(stderr, "dbg2       heading_source:      %d\n", heading_source);
+			fprintf(stderr, "dbg2       heading_source:      %d\n", heading_source);
+			fprintf(stderr, "dbg2       sonardepth_source:   %d\n", sonardepth_source);
+			fprintf(stderr, "dbg2       ss_source:           %d\n", ss_source);
+			fprintf(stderr, "dbg2       kluge_useverticaldepth:        %d\n", kluge_useverticaldepth);
+			fprintf(stderr, "dbg2       kluge_zeroalongtrackangles:    %d\n", kluge_zeroalongtrackangles);
+			fprintf(stderr, "dbg2       kluge_zeroattitudecorrection:  %d\n", kluge_zeroattitudecorrection);
+			fprintf(stderr, "dbg2       kluge_kearfottrovnoise:        %d\n", kluge_kearfottrovnoise);
+			fprintf(stderr, "dbg2       kluge_beampatterntweak:        %d\n", kluge_beampatterntweak);
+			fprintf(stderr, "dbg2       kluge_beampatternfactor:       %f\n", kluge_beampatternfactor);
+			fprintf(stderr, "dbg2       kluge_fixtimejump:             %d\n", kluge_fixtimejump);
+			fprintf(stderr, "dbg2       kluge_fixtimejumpbeamedits:    %d\n", kluge_fixtimejumpbeamedits);
+			fprintf(stderr, "dbg2       kluge_timejump_interval:       %f\n", kluge_timejump_interval);
+			fprintf(stderr, "dbg2       kluge_timejump_threshold:      %f\n", kluge_timejump_threshold);
+			fprintf(stderr, "dbg2       kluge_donotrecalculatebathy:   %d\n", kluge_donotrecalculatebathy);
+			fprintf(stderr, "dbg2       kluge_beampatternsnelltweak:   %d\n", kluge_beampatternsnelltweak);
+			fprintf(stderr, "dbg2       kluge_beampatternsnellfactor:  %f\n", kluge_beampatternsnellfactor);
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL) {
+				fprintf(stderr, "dbg2       timelagfile:         %s\n", timelagfile);
+				fprintf(stderr, "dbg2       ntimelag:            %d\n", ntimelag);
+			}
+			else {
+				fprintf(stderr, "dbg2       timelagconstant:     %f\n", timelagconstant);
+			}
+			fprintf(stderr, "dbg2       timelag:                         %f\n", timelag);
+			fprintf(stderr, "dbg2       sonardepthfilter:                %d\n", sonardepthfilter);
+			fprintf(stderr, "dbg2       sonardepthfilterlength:          %f\n", sonardepthfilterlength);
+			fprintf(stderr, "dbg2       sonardepthfilterdepth:           %f\n", sonardepthfilterdepth);
+			fprintf(stderr, "dbg2       sonardepthfile:                  %s\n", sonardepthfile);
+			fprintf(stderr, "dbg2       sonardepthdata:                  %d\n", sonardepthdata);
+			fprintf(stderr, "dbg2       sonardepthoffset:                %f\n", sonardepthoffset);
+			fprintf(stderr, "dbg2       multibeam_offset_mode:           %d\n", multibeam_offset_mode);
+			fprintf(stderr, "dbg2       mbtransmit_offset_x:             %f\n", mbtransmit_offset_x);
+			fprintf(stderr, "dbg2       mbtransmit_offset_y:             %f\n", mbtransmit_offset_y);
+			fprintf(stderr, "dbg2       mbtransmit_offset_z:             %f\n", mbtransmit_offset_z);
+			fprintf(stderr, "dbg2       mbtransmit_offset_heading:       %f\n", mbtransmit_offset_heading);
+			fprintf(stderr, "dbg2       mbtransmit_offset_roll:          %f\n", mbtransmit_offset_roll);
+			fprintf(stderr, "dbg2       mbtransmit_offset_pitch:         %f\n", mbtransmit_offset_pitch);
+			fprintf(stderr, "dbg2       mbreceive_offset_x:              %f\n", mbreceive_offset_x);
+			fprintf(stderr, "dbg2       mbreceive_offset_y:              %f\n", mbreceive_offset_y);
+			fprintf(stderr, "dbg2       mbreceive_offset_z:              %f\n", mbreceive_offset_z);
+			fprintf(stderr, "dbg2       mbreceive_offset_heading:        %f\n", mbreceive_offset_heading);
+			fprintf(stderr, "dbg2       mbreceive_offset_roll:           %f\n", mbreceive_offset_roll);
+			fprintf(stderr, "dbg2       mbreceive_offset_pitch:          %f\n", mbreceive_offset_pitch);
+			fprintf(stderr, "dbg2       position_offset_mode:            %d\n", position_offset_mode);
+			fprintf(stderr, "dbg2       position_offset_x:               %f\n", position_offset_x);
+			fprintf(stderr, "dbg2       position_offset_y:               %f\n", position_offset_y);
+			fprintf(stderr, "dbg2       position_offset_z:               %f\n", position_offset_z);
+			fprintf(stderr, "dbg2       depth_offset_mode:               %d\n", depth_offset_mode);
+			fprintf(stderr, "dbg2       depth_offset_x:                  %f\n", depth_offset_x);
+			fprintf(stderr, "dbg2       depth_offset_y:                  %f\n", depth_offset_y);
+			fprintf(stderr, "dbg2       depth_offset_z:                  %f\n", depth_offset_z);
+			fprintf(stderr, "dbg2       heading_offset_mode:             %d\n", heading_offset_mode);
+			fprintf(stderr, "dbg2       heading_offset_heading:          %f\n", heading_offset_heading);
+			fprintf(stderr, "dbg2       heading_offset_roll:             %f\n", heading_offset_roll);
+			fprintf(stderr, "dbg2       heading_offset_pitch:            %f\n", heading_offset_pitch);
+			fprintf(stderr, "dbg2       rollpitch_offset_mode:           %d\n", rollpitch_offset_mode);
+			fprintf(stderr, "dbg2       rollpitch_offset_heading:        %f\n", rollpitch_offset_heading);
+			fprintf(stderr, "dbg2       rollpitch_offset_roll:           %f\n", rollpitch_offset_roll);
+			fprintf(stderr, "dbg2       rollpitch_offset_pitch:          %f\n", rollpitch_offset_pitch);
+			for (int i = 0; i < nrangeoffset; i++)
+				fprintf(stderr, "dbg2       rangeoffset[%d]:                 %d %d %f\n", i, rangeoffsetstart[i], rangeoffsetend[i],
+				        rangeoffset[i]);
+		}
+
+		fprintf(stderr, "Ancillary data sources:\n");
+		fprintf(stderr, "\tnav_source:          %d\n", nav_source);
+		fprintf(stderr, "\tattitude_source:     %d\n", attitude_source);
+		fprintf(stderr, "\theading_source:      %d\n", heading_source);
+		fprintf(stderr, "\tsonardepth_source:   %d\n", sonardepth_source);
+		fprintf(stderr, "\tss_source:           %d\n", ss_source);
+
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
-	fprintf(stderr, "Ancillary data sources:\n");
-	fprintf(stderr, "\tnav_source:          %d\n", nav_source);
-	fprintf(stderr, "\tattitude_source:     %d\n", attitude_source);
-	fprintf(stderr, "\theading_source:      %d\n", heading_source);
-	fprintf(stderr, "\tsonardepth_source:   %d\n", sonardepth_source);
-	fprintf(stderr, "\tss_source:           %d\n", ss_source);
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
 	/* read navigation and attitude data from AUV log file if specified */
 	if (insdata == MB_YES) {
 		/* count the data points in the auv log file */
