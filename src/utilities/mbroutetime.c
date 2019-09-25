@@ -23,6 +23,7 @@
  * Location:	R/V Thompson, at the dock in Apia, Samoa
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

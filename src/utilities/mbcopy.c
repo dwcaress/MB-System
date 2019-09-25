@@ -23,6 +23,7 @@
  * Date:  February 4, 1993
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -21,6 +21,7 @@
  * Date:	August 14, 2006
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

@@ -22,6 +22,7 @@
  * Author:	D. W. Caress Date:	October 12, 2005
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

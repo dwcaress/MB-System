@@ -22,6 +22,7 @@
  * Date:	January 1, 2012
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

@@ -23,6 +23,7 @@
  * Date:	January 24, 2001
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

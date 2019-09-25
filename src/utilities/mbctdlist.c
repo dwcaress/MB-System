@@ -27,6 +27,7 @@
  * Date:	September 14,  2008
  */
 
+#include <getopt.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
