@@ -198,7 +198,7 @@ libtrnw_la_LIBADD = libtnav.la \
 bin_PROGRAMS =   trn-server trncli #  readlog writelog
 
 
-trncli_SOURCES = trnw/trncli.c trnw/trn_cli.c
+trncli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
 trncli_LDADD = libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
 
 trn_server_SOURCES = utils/trn_server.cpp
