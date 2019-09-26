@@ -233,6 +233,9 @@ typedef enum{
     MBTPP_EV_CLI_ACKN,
     MBTPP_EV_TRN_PUBN,
     MBTPP_EV_LOG_STATN,
+#ifdef WITH_MBTNAV
+    MBTPP_EV_TNAV_PUBN,
+#endif
     MBTPP_EV_COUNT
 }mbtrnpp_stevent_id;
 
@@ -242,6 +245,9 @@ typedef enum{
     MBTPP_STA_CLI_RX_BYTES,
     MBTPP_STA_TRN_TX_BYTES,
     MBTPP_STA_TRN_PUB_BYTES,
+#ifdef WITH_MBTNAV
+    MBTPP_STA_TNAV_PUB_BYTES,
+#endif
     MBTPP_STA_COUNT
 }mbtrnpp_ststatus_id;
 
@@ -257,6 +263,14 @@ typedef enum{
     MBTPP_CH_STATS_XT,
     MBTPP_CH_CYCLE_XT,
     MBTPP_CH_THRUPUT,
+#ifdef WITH_MBTNAV
+    MBTPP_CH_TNAV_UPDATE_XT,
+    MBTPP_CH_TNAV_BIASEST_XT,
+    MBTPP_CH_TNAV_REINIT_XT,
+    MBTPP_CH_TNAV_PUB_XT,
+    MBTPP_CH_TNAV_LOG_XT,
+    MBTPP_CH_TNAV_CYCLE_XT,
+#endif
     MBTPP_CH_COUNT
 }mbtrnpp_stchan_id;
 
@@ -283,6 +297,9 @@ const char *mbtrnpp_stevent_labels[]={ \
     "cli_ack",
     "trn_pub_n",
     "log_stat"
+#ifdef WITH_MBTNAV
+    ,"tnav_pub_n",
+#endif
 };
 const char *mbtrnpp_ststatus_labels[]={ \
     "cli_list_len",
@@ -290,6 +307,9 @@ const char *mbtrnpp_ststatus_labels[]={ \
     "cli_rx_bytes",
     "trn_tx_bytes",
     "trn_pub_bytes"
+#ifdef WITH_MBTNAV
+    ,"tnav_pub_bytes"
+#endif
 };
 
 const char *mbtrnpp_stchan_labels[]={ \
@@ -304,6 +324,14 @@ const char *mbtrnpp_stchan_labels[]={ \
     "stats_xt",
     "cycle_xt",
     "thruput"
+#ifdef WITH_MBTNAV
+    ,"tnav_up_xt",
+    "tnav_best_xt",
+    "tnav_ri_xt",
+    "tnav_pub_xt",
+    "tnav_log_xt",
+    "tnav_cycle_xt"
+#endif
 };
 
 const char **mbtrnpp_stats_labels[MSLABEL_COUNT]={
@@ -1655,7 +1683,7 @@ int main(int argc, char **argv) {
                             if(trn_blog_en){
                                 mlog_write(trn_blog_id,(byte *)output_buffer,mb1_size);
                             }
-/////////////
+
                             // send output to TRN clients
                             int iobytes = 0;
                             int hb_exp=0;
@@ -1681,128 +1709,9 @@ int main(int argc, char **argv) {
                                 MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
                             }
                             
-/////////////////////
-                            
-#if 1
+                            // check for new subscribers, (hbeat) messages
                             mbtrnpp_tnav_update_subs(&trn_peer, trn_osocket, trn_plist, trn_hbtok);
-
-#else
-                            // check trn socket for client messages (connection, heartbeat)
-                            byte cmsg[TRN_MSG_CON_LEN];
-                             int svc=0;
-
-                            PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"checking trn host socket\n"));
-                            bool trn_recv_pending=true;
-                            do{
-                                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
-
-                                iobytes = msock_recvfrom(trn_osocket, trn_peer->addr, cmsg, TRN_MSG_CON_LEN,0);
-
-                                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
-
-                                switch (iobytes) {
-                                    case 0:
-                                        // no bytes returned (socket closed)
-                                        PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"err - recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id));
-                                        mlog_tprintf(trn_mlog_id,"recvfrom ret 0 (socket closed) removing cli[%d]\n",trn_peer->id);
-                                        // remove from list
-                                        if(sscanf(trn_peer->service,"%d",&svc)==1){
-                                            msock_connection_t *peer = (msock_connection_t *)mlist_vlookup(trn_plist, &svc, r7kr_peer_vcmp);
-                                            if (peer!=NULL) {
-                                                mlist_remove(trn_plist,peer);
-                                            }
-                                        }
-                                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXZ]);
-                                        trn_recv_pending=false;
-                                        break;
-                                    case -1:
-                                        // error (usually nothing to read)
-                                        if (errno!=EAGAIN && errno!=EWOULDBLOCK) {
-                                            PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"err - recvfrom cli[%d] ret -1 [%d/%s]\n",trn_peer->id,errno,strerror(errno)));
-                                        }
-                                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXE]);
-                                        trn_recv_pending=false;
-                                        break;
-
-                                    default:
-                                        // bytes received
-                                        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES],iobytes);
-                                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_RXN]);
-
-                                        const char *ctest=NULL;
-                                        uint16_t port=0xFFFF;
-                                        struct sockaddr_in *psin = NULL;
-                                        if (NULL != trn_peer->addr &&
-                                            NULL != trn_peer->addr->ainfo &&
-                                            NULL != trn_peer->addr->ainfo->ai_addr) {
-
-                                            psin = (struct sockaddr_in *)trn_peer->addr->ainfo->ai_addr;
-                                            ctest = inet_ntop(AF_INET, &psin->sin_addr, trn_peer->chost, MSOCK_ADDR_LEN);
-                                            if (NULL!=ctest) {
-
-                                                port = ntohs(psin->sin_port);
-
-                                                svc = port;
-                                                snprintf(trn_peer->service,NI_MAXSERV,"%d",svc);
-
-                                                msock_connection_t *pclient=NULL;
-                                                pclient = (msock_connection_t *)mlist_vlookup(trn_plist,&svc,r7kr_peer_vcmp);
-                                                if (pclient!=NULL) {
-                                                    // PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"updating hbeat id[%d] plist[%p/%d]\n",svc,pp,pp->id));
-                                                    // client exists, update heartbeat tokens
-                                                    // [could make additive, i.e. +=]
-                                                    pclient->heartbeat = trn_hbtok;
-                                                }else{
-                                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"adding to client list id[%d] addr[%p]\n",svc,trn_peer));
-                                                    // client doesn't exist
-                                                    // initialze and add to list
-                                                    trn_peer->id = svc;
-                                                    trn_peer->heartbeat = trn_hbtok;
-                                                    trn_peer->next=NULL;
-                                                    mlist_add(trn_plist, (void *)trn_peer);
-                                                    // save pointer to finish up (send ACK, update hbeat)
-                                                    pclient=trn_peer;
-                                                    // create a new peer for next read
-                                                    trn_peer = msock_connection_new();
-
-                                                    mlog_tprintf(trn_mlog_id,"client connected id[%d] addr[%p]\n",svc,trn_peer);
-                                                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_CONN]);
-                                                }
-
-                                                PMPRINT(MOD_MBTRNPP,MBTRNPP_V2,(stderr,"rx [%d]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service));
-                                                // mlog_tprintf(trn_mlog_id,"rx [%zd]b cli[%d/%s:%s]\n",iobytes, svc, trn_peer->chost, trn_peer->service);
-
-                                                // send ACK to client
-                                                iobytes = msock_sendto(trn_osocket, pclient->addr, (byte *)"ACK", 4, 0 );
-                                                if ( (NULL!=pclient) && ( iobytes > 0) ) {
-
-                                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"tx ACK [%d]b cli[%d/%s:%s]\n", iobytes, svc, pclient->chost, pclient->service));
-                                                    // mlog_tprintf(trn_mlog_id,"tx ACK [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service);
-                                                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_ACKN]);
-                                                    MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_ACK_BYTES],iobytes);
-
-                                                }else{
-                                                    // ACK failed
-                                                    mlog_tprintf(trn_mlog_id,"tx cli[%d] failed pclient[%p] iobytes[%zd] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
-                                                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_ACK]);
-                                                }
-                                            }else{
-                                                mlog_tprintf(trn_mlog_id,"err - inet_ntop failed [%d/%s]\n",errno,strerror(errno));
-                                                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ENTOP]);
-                                            }
-                                        }else{
-                                            // invalid sockaddr
-                                            PMPRINT(MOD_MBTRNPP,MBTRNPP_V2,(stderr,"err - NULL cliaddr(rx) cli[%d]\n",trn_peer->id));
-                                            mlog_tprintf(trn_mlog_id,"err - NULL cliaddr(rx) cli[%d]\n",trn_peer->id);
-                                            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLIADDR_RX]);
-                                        }
-
-                                        break;
-                                }// switch iobytes
-                            }while(trn_recv_pending);
-#endif
-/////////////////////
-
+                            
                             if (trn_pub_delay_msec>0) {
                                 struct timespec delay={0};
                                 struct timespec rem={0};
@@ -3188,30 +3097,58 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1,trn_config_t *cfg)
 {
     int retval=-1;
     
+    
     if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
+        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_CYCLE_XT], mtime_dtime());
         int test=-1;
         
         wmeast_t *mt = NULL;
         wposet_t *pt = NULL;
         trn_update_t trn_state={NULL,NULL,NULL,0},*pstate=&trn_state;
+     
         
         if(NULL!=tnav && NULL!=mb1 && NULL!=cfg){
             // get TRN update
-            if( (test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg))==0){
+            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_UPDATE_XT], mtime_dtime());
+            
+            test=mbtrnpp_trn_update(tnav, mb1, &pt, &mt,cfg);
+            
+            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_UPDATE_XT], mtime_dtime());
+            
+            if( test==0){
                 // get TRN bias estimates
-                if( (test=mbtrnpp_trn_get_bias_estimates(tnav, pt, &pstate->pt_dat, &pstate->mle_dat, &pstate->mse_dat))==0){
+                MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_BIASEST_XT], mtime_dtime());
+                
+                test=mbtrnpp_trn_get_bias_estimates(tnav, pt, &pstate->pt_dat, &pstate->mle_dat, &pstate->mse_dat);
+                
+                MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_BIASEST_XT], mtime_dtime());
+                
+                if( test==0){
                     if(NULL!=pstate->pt_dat &&  NULL!= pstate->mle_dat && NULL!=pstate->mse_dat ){
                         
                         // get number of reinits
+                        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_REINIT_XT], mtime_dtime());
+                        
                         pstate->reinit_count = wtnav_get_num_reinits(tnav);
                         
+                        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_REINIT_XT], mtime_dtime());
+
                         // publish to selected outputs
                         if( (cfg->oflags&TRNW_OSOCKET) != 0){
+                            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_PUB_XT], mtime_dtime());
+
                             mbtrnpp_tnav_pub_osocket(pstate, tnav_osocket);
+
+                            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_PUB_XT], mtime_dtime());
+                            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TNAV_PUBN]);
                         }
                         if( (cfg->oflags&TRNW_OLOG) != 0){
+                            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TNAV_LOG_XT], mtime_dtime());
+                            
                             mbtrnpp_tnav_pub_olog(pstate, trn_mlog_id);
-                        }
+                            
+                            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_LOG_XT], mtime_dtime());
+                       }
                         if( (cfg->oflags&TRNW_ODEBUG) != 0){
                             mbtrnpp_tnav_pub_odebug(pstate);
                         }
@@ -3248,8 +3185,8 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1,trn_config_t *cfg)
             if(NULL!=pstate->mle_dat)
             free(pstate->mle_dat);
         }
+        MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TNAV_CYCLE_XT], mtime_dtime());
     }
-    
     
     return retval;
 }
