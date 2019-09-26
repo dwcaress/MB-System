@@ -673,8 +673,7 @@ int64_t msock_recvfrom(msock_socket_t *s, msock_addr_t *addr, byte *buf, uint32_
     int64_t retval= 0;
     
     if (NULL != s && NULL!=buf && len>0) {
-        
-        struct sockaddr *dest_addr=(addr==NULL?NULL:addr->ainfo->ai_addr);
+        struct sockaddr *dest_addr=(addr==NULL || addr->ainfo==NULL ? NULL:addr->ainfo->ai_addr);
         socklen_t addrlen = (addr==NULL?0:MSOCK_ADDR_LEN);
         
 //        fprintf(stderr,"recvfrom connection[%p] dest_addr[%p] ai_family[%d] addrlen[%d]\n",addr,(addr?addr->ainfo->ai_addr:NULL),(int)(addr?addr->ainfo->ai_family:-1),(int)(addr?addr->ainfo->ai_addrlen:-1));
