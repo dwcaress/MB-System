@@ -374,6 +374,8 @@ int mbtrnpp_init_trn(int verbose,trn_config_t *cfg);
 int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1,trn_config_t *cfg);
 int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, pt_cdata_t **pt_out, pt_cdata_t **mle_out, pt_cdata_t **mse_out);
 int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out,trn_config_t *cfg);
+int mbtrnpp_tnav_publish(byte *output_buffer, int len, msock_socket_t *pub_sock, mlist_t *plist, bool check_hbeat, int *hb_exp);
+
 #endif //WITH_MBTNAV
 
 /*--------------------------------------------------------------------*/
@@ -1652,51 +1654,32 @@ int main(int argc, char **argv) {
                             if(trn_blog_en){
                                 mlog_write(trn_blog_id,(byte *)output_buffer,mb1_size);
                             }
-
+/////////////
                             // send output to TRN clients
+                            int iobytes = 0;
+                            int hb_exp=0;
                             MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
                             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRNTX_XT], mtime_dtime());
-
-                            int iobytes = 0;
-                            int test = -1;
-                            int idx=-1;
-                           msock_connection_t *psub = (msock_connection_t *)mlist_first(trn_plist);
-                            idx=0;
-                            while (psub != NULL) {
-
-                                psub->heartbeat--;
-
-                                iobytes = msock_sendto(trn_osocket, psub->addr, (byte *)output_buffer, mb1_size, 0 );
-
-                                if (  iobytes > 0) {
-                                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_TXN]);
-                                    MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_TX_BYTES],iobytes);
-                                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PUBN]);
-                                    MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_PUB_BYTES],iobytes);
-
-
-                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"tx TRN [%5d]b cli[%d/%s:%s] hb[%d]\n", iobytes, idx, psub->chost, psub->service, psub->heartbeat));
-
-                                }else{
-                                    PEPRINT((stderr,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno)));
-                                    mlog_tprintf(trn_mlog_id,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
-                                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRN_TX]);
-                                }
-
-                                // check heartbeat, remove expired peers
-                                if (NULL!=psub && psub->heartbeat==0) {
-                                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id));
-                                    mlog_tprintf(trn_mlog_id,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id);
-                                    mlist_remove(trn_plist,psub);
-                                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_DISN]);
-                                    MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
-                                }
-                                psub=(msock_connection_t *)mlist_next(trn_plist);
-                                idx++;
-                            }// while psub
-
+                            
+                            if( (iobytes=mbtrnpp_tnav_publish((byte *)output_buffer, mb1_size,trn_osocket, trn_plist,true,&hb_exp))>0){
+                                // update client pub metrics
+                                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_TXN]);
+                                MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_TX_BYTES],iobytes);
+                                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_TRN_PUBN]);
+                                MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_TRN_PUB_BYTES],iobytes);
+                            }else{
+                                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ETRN_TX]);
+                            }
                             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRNTX_XT], mtime_dtime());
-
+                            
+                            if(hb_exp){
+                                // update client disconnect metrics
+                                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_DISN]);
+                                MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
+                            }
+                            
+/////////////////////
+                            
                             // check trn socket for client messages (connection, heartbeat)
                             byte cmsg[TRN_MSG_CON_LEN];
                              int svc=0;
@@ -3124,6 +3107,7 @@ int mbtrnpp_tnav_publish(byte *output_buffer, int len, msock_socket_t *pub_sock,
             psub=(msock_connection_t *)mlist_next(plist);
             idx++;
         }// while psub
+        retval=iobytes;
     }else{
         PEPRINT((stderr,"err - invalid args\n"));
     }
@@ -3139,7 +3123,6 @@ int mbtrnpp_tnav_pub_osocket(trn_update_t *update,
     if(NULL!=update && NULL!=pub_sock){
         retval=0;
         int iobytes=0;
-        int hb_exp=0;
         
         if(NULL!=update && NULL!=pub_sock){
             // serialize data
@@ -3159,6 +3142,7 @@ int mbtrnpp_tnav_pub_osocket(trn_update_t *update,
                 update->reinit_count
             };
             
+            int hb_exp=0;
             //    MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
             //    MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRNTX_XT], mtime_dtime());
             
