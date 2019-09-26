@@ -113,7 +113,7 @@
 #define MBTNAV_HOST_DFL "localhost"
 /// @def MBTNAV_PORT_DFL
 /// @brief default UDP socket port
-#define MBTNAV_PORT_DFL 27000
+#define MBTNAV_PORT_DFL 8000
 /// @def MBTNAV_BLOCK_DFL
 /// @brief default socket blocking
 #define MBTNAV_BLOCK_DFL 1

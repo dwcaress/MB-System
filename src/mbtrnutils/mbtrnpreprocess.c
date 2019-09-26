@@ -375,6 +375,7 @@ int mbtrnpp_trn_process_mb1(wtnav_t *tnav, mb1_t *mb1,trn_config_t *cfg);
 int mbtrnpp_trn_get_bias_estimates(wtnav_t *self, wposet_t *pt, pt_cdata_t **pt_out, pt_cdata_t **mle_out, pt_cdata_t **mse_out);
 int mbtrnpp_trn_update(wtnav_t *self, mb1_t *src, wposet_t **pt_out, wmeast_t **mt_out,trn_config_t *cfg);
 int mbtrnpp_tnav_publish(byte *output_buffer, int len, msock_socket_t *pub_sock, mlist_t *plist, bool check_hbeat, int *hb_exp);
+int mbtrnpp_tnav_update_subs(msock_connection_t **pub_peer, msock_socket_t *pub_sock, mlist_t *plist, int hbtok);
 
 #endif //WITH_MBTNAV
 
@@ -1672,14 +1673,20 @@ int main(int argc, char **argv) {
                             }
                             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRNTX_XT], mtime_dtime());
                             
-                            if(hb_exp){
+                            if(hb_exp>0){
                                 // update client disconnect metrics
+                                for(int i=0;i<hb_exp;i++){
                                 MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_DISN]);
+                                }
                                 MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
                             }
                             
 /////////////////////
                             
+#if 1
+                            mbtrnpp_tnav_update_subs(&trn_peer, trn_osocket, trn_plist, trn_hbtok);
+
+#else
                             // check trn socket for client messages (connection, heartbeat)
                             byte cmsg[TRN_MSG_CON_LEN];
                              int svc=0;
@@ -1793,6 +1800,8 @@ int main(int argc, char **argv) {
                                         break;
                                 }// switch iobytes
                             }while(trn_recv_pending);
+#endif
+/////////////////////
 
                             if (trn_pub_delay_msec>0) {
                                 struct timespec delay={0};
@@ -2744,6 +2753,185 @@ int mbtrnpreprocess_input_close(int verbose, void *mbio_ptr, int *error) {
 	return (status);
 }
 
+// this is used for publishing both MB1 and TRN updates
+// [so is outside WITH_MBTNAV conditional]
+int mbtrnpp_tnav_publish(byte *output_buffer, int len, msock_socket_t *pub_sock, mlist_t *plist, bool check_hbeat, int *hb_exp)
+{
+    int retval=-1;
+    
+    if(NULL!=plist && NULL!=output_buffer && NULL!=pub_sock && len>0 ){
+        // send output to clients
+        int total_bytes=-1;
+        int iobytes = 0;
+        int idx=-1;
+        
+        msock_connection_t *psub = (msock_connection_t *)mlist_first(plist);
+        idx=0;
+        while (NULL!=psub) {
+            
+            iobytes = msock_sendto(pub_sock, psub->addr, (byte *)output_buffer, len, 0 );
+            
+            if (  iobytes > 0) {
+                total_bytes+=iobytes;
+                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"tx PUB [%5d]b cli[%d/%s:%s] hb[%d]\n", iobytes, idx, psub->chost, psub->service, psub->heartbeat));
+                
+            }else{
+                PEPRINT((stderr,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno)));
+                mlog_tprintf(trn_mlog_id,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
+            }
+            
+            // check heartbeat, remove expired peers
+            if(check_hbeat){
+                psub->heartbeat--;
+                if (NULL!=psub && psub->heartbeat==0) {
+                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id));
+                    mlog_tprintf(trn_mlog_id,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id);
+                    mlist_remove(plist,psub);
+                    if(NULL!=hb_exp){
+                        (*hb_exp)+=1;
+                    }
+                }
+            }
+            psub=(msock_connection_t *)mlist_next(plist);
+            idx++;
+            retval+=iobytes;
+        }// while psub
+    }else{
+        PEPRINT((stderr,"err - invalid args\n"));
+    }
+    
+    return retval;
+}
+
+int mbtrnpp_tnav_update_subs(msock_connection_t **ppeer, msock_socket_t *pub_sock, mlist_t *plist, int hbtok)
+{
+    int retval=-1;
+    msock_connection_t *pub_peer = (NULL!=ppeer? (*ppeer) : NULL);
+    
+    if(NULL!=pub_peer && NULL!=pub_sock && NULL!=plist){
+        
+        retval=0;
+        
+        int iobytes = 0;
+        
+        // check trn socket for client messages (connection, heartbeat)
+        byte cmsg[TRN_MSG_CON_LEN];
+        int svc=0;
+        
+        PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"checking pub host socket\n"));
+        bool recv_pending=true;
+        do{
+            
+            MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
+            fprintf(stderr,"%s - pub_sock[%p] pub_peer[%p] ppadr[%p]\n",__FUNCTION__,pub_sock,pub_peer,(pub_peer!=NULL?pub_peer->addr:NULL));
+            iobytes = msock_recvfrom(pub_sock, pub_peer->addr, cmsg, TRN_MSG_CON_LEN,0);
+            
+            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
+            
+            switch (iobytes) {
+                case 0:
+                // no bytes returned (socket closed)
+                PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"err - recvfrom ret 0 (socket closed) removing cli[%d]\n",pub_peer->id));
+                mlog_tprintf(trn_mlog_id,"recvfrom ret 0 (socket closed) removing cli[%d]\n",pub_peer->id);
+                // remove from list
+                if(sscanf(pub_peer->service,"%d",&svc)==1){
+                    msock_connection_t *peer_cmp = (msock_connection_t *)mlist_vlookup(plist, &svc, r7kr_peer_vcmp);
+                    if (peer_cmp!=NULL) {
+                        mlist_remove(plist,peer_cmp);
+                    }
+                }
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXZ]);
+                recv_pending=false;
+                break;
+                case -1:
+                // error (usually nothing to read)
+                if (errno!=EAGAIN && errno!=EWOULDBLOCK) {
+                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"err - recvfrom cli[%d] ret -1 [%d/%s]\n",pub_peer->id,errno,strerror(errno)));
+                }
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXE]);
+                recv_pending=false;
+                break;
+                
+                default:
+                // bytes received
+                MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES],iobytes);
+                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_RXN]);
+                {
+                    const char *ctest=NULL;
+                    uint16_t port=0xFFFF;
+                    struct sockaddr_in *psin = NULL;
+                    if (NULL != pub_peer->addr &&
+                        NULL != pub_peer->addr->ainfo &&
+                        NULL != pub_peer->addr->ainfo->ai_addr) {
+                        
+                        psin = (struct sockaddr_in *)pub_peer->addr->ainfo->ai_addr;
+                        ctest = inet_ntop(AF_INET, &psin->sin_addr, pub_peer->chost, MSOCK_ADDR_LEN);
+                        if (NULL!=ctest) {
+                            
+                            port = ntohs(psin->sin_port);
+                            
+                            svc = port;
+                            snprintf(pub_peer->service,NI_MAXSERV,"%d",svc);
+                            
+                            msock_connection_t *pclient=NULL;
+                            pclient = (msock_connection_t *)mlist_vlookup(plist,&svc,r7kr_peer_vcmp);
+                            if (pclient!=NULL) {
+                                // PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"updating hbeat id[%d] plist[%p/%d]\n",svc,pp,pp->id));
+                                // client exists, update heartbeat tokens
+                                // [could make additive, i.e. +=]
+                                pclient->heartbeat = hbtok;
+                            }else{
+                                PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"adding to client list id[%d] addr[%p]\n",svc,pub_peer));
+                                // client doesn't exist
+                                // initialze and add to list
+                                pub_peer->id = svc;
+                                pub_peer->heartbeat = hbtok;
+                                pub_peer->next=NULL;
+                                mlist_add(plist, (void *)pub_peer);
+                                // save pointer to finish up (send ACK, update hbeat)
+                                pclient=pub_peer;
+                                // create a new peer for next read
+                                pub_peer = msock_connection_new();
+                                *ppeer=pub_peer;
+                                mlog_tprintf(trn_mlog_id,"client connected id[%d] addr[%p]\n",svc,pub_peer);
+                                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_CONN]);
+                            }
+                            
+                            PMPRINT(MOD_MBTRNPP,MBTRNPP_V2,(stderr,"rx [%d]b cli[%d/%s:%s]\n",iobytes, svc, pub_peer->chost, pub_peer->service));
+                            // mlog_tprintf(trn_mlog_id,"rx [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pub_peer->chost, pub_peer->service);
+                            
+                            // send ACK to client
+                            iobytes = msock_sendto(trn_osocket, pclient->addr, (byte *)"ACK", 4, 0 );
+                            if ( (NULL!=pclient) && ( iobytes > 0) ) {
+                                
+                                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"tx ACK [%d]b cli[%d/%s:%s]\n", iobytes, svc, pclient->chost, pclient->service));
+                                // mlog_tprintf(trn_mlog_id,"tx ACK [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service);
+                                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_ACKN]);
+                                MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_ACK_BYTES],iobytes);
+                                
+                            }else{
+                                // ACK failed
+                                mlog_tprintf(trn_mlog_id,"tx cli[%d] failed pclient[%p] iobytes[%zd] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
+                                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_ACK]);
+                            }
+                        }else{
+                            mlog_tprintf(trn_mlog_id,"err - inet_ntop failed [%d/%s]\n",errno,strerror(errno));
+                            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ENTOP]);
+                        }
+                    }else{
+                        // invalid sockaddr
+                        PMPRINT(MOD_MBTRNPP,MBTRNPP_V2,(stderr,"err - NULL cliaddr(rx) cli[%d]\n",pub_peer->id));
+                        mlog_tprintf(trn_mlog_id,"err - NULL cliaddr(rx) cli[%d]\n",pub_peer->id);
+                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLIADDR_RX]);
+                    }
+                }
+                break;
+            }// switch iobytes
+        }while(recv_pending);
+    }
+    return retval;
+}
+
 #ifdef WITH_MBTNAV
 
 int mbtrnpp_init_trn(int verbose,trn_config_t *cfg)
@@ -2939,181 +3127,7 @@ int mbtrnpp_tnav_pub_olog(trn_update_t *update,
     return retval;
 }
 
-int mbtrnpp_tnav_update_subs(msock_connection_t *pub_peer, msock_socket_t *pub_sock, mlist_t *plist, int hbtok)
-{
-    int retval=-1;
-    if(NULL!=pub_peer && NULL!=pub_sock && NULL!=plist){
-        
-        retval=0;
-        
-        int iobytes = 0;
-        int test = -1;
-        int idx=-1;
-        
-        // check trn socket for client messages (connection, heartbeat)
-        byte cmsg[TRN_MSG_CON_LEN];
-        int svc=0;
-        
-        PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"checking pub host socket\n"));
-        bool recv_pending=true;
-        do{
-            //        MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
-            
-            iobytes = msock_recvfrom(pub_sock, pub_peer->addr, cmsg, TRN_MSG_CON_LEN,0);
-            
-            MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
-            
-            switch (iobytes) {
-                case 0:
-                // no bytes returned (socket closed)
-                PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"err - recvfrom ret 0 (socket closed) removing cli[%d]\n",pub_peer->id));
-                mlog_tprintf(trn_mlog_id,"recvfrom ret 0 (socket closed) removing cli[%d]\n",pub_peer->id);
-                // remove from list
-                if(sscanf(pub_peer->service,"%d",&svc)==1){
-                    msock_connection_t *peer_cmp = (msock_connection_t *)mlist_vlookup(plist, &svc, r7kr_peer_vcmp);
-                    if (peer_cmp!=NULL) {
-                        mlist_remove(plist,peer_cmp);
-                    }
-                }
-                //            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXZ]);
-                recv_pending=false;
-                break;
-                case -1:
-                // error (usually nothing to read)
-                if (errno!=EAGAIN && errno!=EWOULDBLOCK) {
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"err - recvfrom cli[%d] ret -1 [%d/%s]\n",pub_peer->id,errno,strerror(errno)));
-                }
-                //            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_RXE]);
-                recv_pending=false;
-                break;
-                
-                default:
-                // bytes received
-                //            MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_RX_BYTES],iobytes);
-                //            MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_RXN]);
-                {
-                    const char *ctest=NULL;
-                    uint16_t port=0xFFFF;
-                    struct sockaddr_in *psin = NULL;
-                    if (NULL != pub_peer->addr &&
-                        NULL != pub_peer->addr->ainfo &&
-                        NULL != pub_peer->addr->ainfo->ai_addr) {
-                        
-                        psin = (struct sockaddr_in *)pub_peer->addr->ainfo->ai_addr;
-                        ctest = inet_ntop(AF_INET, &psin->sin_addr, pub_peer->chost, MSOCK_ADDR_LEN);
-                        if (NULL!=ctest) {
-                            
-                            port = ntohs(psin->sin_port);
-                            
-                            svc = port;
-                            snprintf(pub_peer->service,NI_MAXSERV,"%d",svc);
-                            
-                            msock_connection_t *pclient=NULL;
-                            pclient = (msock_connection_t *)mlist_vlookup(plist,&svc,r7kr_peer_vcmp);
-                            if (pclient!=NULL) {
-                                // PMPRINT(MOD_MBTRNPP,MM_DEBUG,(stderr,"updating hbeat id[%d] plist[%p/%d]\n",svc,pp,pp->id));
-                                // client exists, update heartbeat tokens
-                                // [could make additive, i.e. +=]
-                                pclient->heartbeat = hbtok;
-                            }else{
-                                PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"adding to client list id[%d] addr[%p]\n",svc,pub_peer));
-                                // client doesn't exist
-                                // initialze and add to list
-                                pub_peer->id = svc;
-                                pub_peer->heartbeat = hbtok;
-                                pub_peer->next=NULL;
-                                mlist_add(plist, (void *)pub_peer);
-                                // save pointer to finish up (send ACK, update hbeat)
-                                pclient=pub_peer;
-                                // create a new peer for next read
-                                pub_peer = msock_connection_new();
-                                
-                                mlog_tprintf(trn_mlog_id,"client connected id[%d] addr[%p]\n",svc,pub_peer);
-                                //                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_CONN]);
-                            }
-                            
-                            PMPRINT(MOD_MBTRNPP,MBTRNPP_V2,(stderr,"rx [%d]b cli[%d/%s:%s]\n",iobytes, svc, pub_peer->chost, pub_peer->service));
-                            // mlog_tprintf(trn_mlog_id,"rx [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pub_peer->chost, pub_peer->service);
-                            
-                            // send ACK to client
-                            iobytes = msock_sendto(trn_osocket, pclient->addr, (byte *)"ACK", 4, 0 );
-                            if ( (NULL!=pclient) && ( iobytes > 0) ) {
-                                
-                                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"tx ACK [%d]b cli[%d/%s:%s]\n", iobytes, svc, pclient->chost, pclient->service));
-                                // mlog_tprintf(trn_mlog_id,"tx ACK [%zd]b cli[%d/%s:%s]\n",iobytes, svc, pclient->chost, pclient->service);
-                                //                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CLI_ACKN]);
-                                //                        MST_COUNTER_ADD(app_stats->stats->status[MBTPP_STA_CLI_ACK_BYTES],iobytes);
-                                
-                            }else{
-                                // ACK failed
-                                mlog_tprintf(trn_mlog_id,"tx cli[%d] failed pclient[%p] iobytes[%zd] [%d/%s]\n",svc,pclient,iobytes,errno,strerror(errno));
-                                //                        MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLI_ACK]);
-                            }
-                        }else{
-                            mlog_tprintf(trn_mlog_id,"err - inet_ntop failed [%d/%s]\n",errno,strerror(errno));
-                            //                    MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ENTOP]);
-                        }
-                    }else{
-                        // invalid sockaddr
-                        PMPRINT(MOD_MBTRNPP,MBTRNPP_V2,(stderr,"err - NULL cliaddr(rx) cli[%d]\n",pub_peer->id));
-                        mlog_tprintf(trn_mlog_id,"err - NULL cliaddr(rx) cli[%d]\n",pub_peer->id);
-                        //                MST_COUNTER_INC(app_stats->stats->events[MBTPP_EV_ECLIADDR_RX]);
-                    }
-                }
-                break;
-            }// switch iobytes
-        }while(recv_pending);
-    }
-    return retval;
-}
 
-int mbtrnpp_tnav_publish(byte *output_buffer, int len, msock_socket_t *pub_sock, mlist_t *plist, bool check_hbeat, int *hb_exp)
-{
-    int retval=-1;
-
-    if(NULL!=plist && NULL!=output_buffer && NULL!=pub_sock && len>0 ){
-        // send output to clients
-        int total_bytes=-1;
-        int iobytes = 0;
-        int idx=-1;
-
-        msock_connection_t *psub = (msock_connection_t *)mlist_first(plist);
-        idx=0;
-        while (NULL!=psub) {
-            
-            iobytes = msock_sendto(pub_sock, psub->addr, (byte *)output_buffer, len, 0 );
-            
-            if (  iobytes > 0) {
-                total_bytes+=iobytes;
-                PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"tx PUB [%5d]b cli[%d/%s:%s] hb[%d]\n", iobytes, idx, psub->chost, psub->service, psub->heartbeat));
-                
-            }else{
-                PEPRINT((stderr,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno)));
-                mlog_tprintf(trn_mlog_id,"err - sendto ret[%d] cli[%d] [%d/%s]\n",iobytes,idx,errno,strerror(errno));
-            }
-            
-            // check heartbeat, remove expired peers
-            if(check_hbeat){
-                psub->heartbeat--;
-                if (NULL!=psub && psub->heartbeat==0) {
-                    PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id));
-                    mlog_tprintf(trn_mlog_id,"hbeat=0 cli[%d/%d] - removed\n",idx,psub->id);
-                    mlist_remove(plist,psub);
-                    if(NULL!=hb_exp){
-                        *hb_exp++;
-                    }
-                }
-            }
-            psub=(msock_connection_t *)mlist_next(plist);
-            idx++;
-        }// while psub
-        retval=iobytes;
-    }else{
-        PEPRINT((stderr,"err - invalid args\n"));
-    }
-    
-    return retval;
-}
 
 int mbtrnpp_tnav_pub_osocket(trn_update_t *update,
                               msock_socket_t *pub_sock)
@@ -3163,7 +3177,7 @@ int mbtrnpp_tnav_pub_osocket(trn_update_t *update,
                 //            MST_COUNTER_SET(app_stats->stats->status[MBTPP_STA_CLI_LIST_LEN],mlist_size(trn_plist));
             }
             
-            mbtrnpp_tnav_update_subs(tnav_peer, tnav_osocket, tnav_plist, 0);
+            mbtrnpp_tnav_update_subs(&tnav_peer, tnav_osocket, tnav_plist, 0);
         }
     }
     return retval;
