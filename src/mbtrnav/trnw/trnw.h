@@ -89,6 +89,14 @@ typedef struct wmeast_s wmeast_t;
 struct wcommst_s;
 typedef struct wcommst_s wcommst_t;
 
+typedef enum {
+    TRNW_OSOUT=0x1,
+    TRNW_OSERR=0x2,
+    TRNW_OLOG=0x4,
+    TRNW_ODEBUG=0x8,
+    TRNW_OSOCKET=0x10,
+}trnw_oflags_t;
+
 typedef struct trn_config_s{
     char *trn_host;
     int  trn_port;
@@ -99,6 +107,7 @@ typedef struct trn_config_s{
     int  filter_type;
     int  map_type;
     long int utm_zone;
+    trnw_oflags_t oflags;
 }trn_config_t;
 
 /////////////////////////
@@ -177,7 +186,8 @@ extern "C" {
                              char *map_file,
                              char *cfg_file,
                              char *particles_file,
-                             char *logdir);
+                             char *logdir,
+                             trnw_oflags_t oflags);
     
     void trncfg_destroy(trn_config_t **pself);
     void trncfg_show(trn_config_t *obj, bool verbose, int indent);

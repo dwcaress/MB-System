@@ -180,6 +180,47 @@ typedef struct pt_cdata_s{
     
 }pt_cdata_t;
 
+#define TRNW_PUB_PT  0
+#define TRNW_PUB_MLE 1
+#define TRNW_PUB_MSE 2
+#define TRNW_PUB_SYNC 0x53445400
+#pragma pack(push,1)
+typedef struct trn_estimate_s{
+    // Time (epoch? s)
+    double time;
+    // North
+    double x;
+    // East
+    double y;
+    // Down
+    double z;
+    // Covariance matrix
+    // - symmetric 3x3 matrix
+    // - only (4) elements needed: diagonal and COV(XY) elements
+    // [0] : x : poset.covariance[0]
+    // [1] : y : poset.covariance[2]
+    // [2] : z : poset.covariance[5]
+    // [3] : xy: poset.covariance[1]
+    double cov[4];
+}trn_estimate_t;
+
+typedef struct trn_offset_pub_s{
+    uint32_t sync;
+    trn_estimate_t est[3];
+    int reinit_count;
+}trn_offset_pub_t;
+#pragma pack(pop)
+
+#define TRN_OFFSET_PUB_BYTES (sizeof(trn_offset_pub_t))
+
+typedef struct trn_update_s{
+    pt_cdata_t *pt_dat;
+    pt_cdata_t *mle_dat;
+    pt_cdata_t *mse_dat;
+    int reinit_count;
+    double reinit_tlast;
+}trn_update_t;
+
 typedef struct mt_cdata_s{
     //Measurement time (s)
     double time;

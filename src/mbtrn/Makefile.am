@@ -28,7 +28,7 @@ MFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST
 MFRAME_FEATURES=-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG
 MFRAME_OPTS=$(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 
-AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src \
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrnav/trnw \
  -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 
 
@@ -56,7 +56,7 @@ libr7kr_la_SOURCES =  mframe/src/mframe.c \
 
 libr7kr_la_LIBADD = -lpthread
 
-bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv r7kr_test
+bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv r7kr_test mbtnav-cli
 
 stream7k_SOURCES = utils/stream7k.c
 stream7k_LDADD = libr7kr.la
@@ -84,6 +84,9 @@ mb1conv_LDADD = libr7kr.la
 
 r7kr_test_SOURCES = r7kr/r7kr-test.c
 r7kr_test_LDADD = libr7kr.la
+
+mbtnav_cli_SOURCES = utils/mbtnav_cli.c
+mbtnav_cli_LDADD = libr7kr.la
 
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
 

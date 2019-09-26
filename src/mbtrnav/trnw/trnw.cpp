@@ -1056,7 +1056,8 @@ trn_config_t *trncfg_new(char *host,int port,
                          char *map_file,
                          char *cfg_file,
                          char *particles_file,
-                         char *log_dir)
+                         char *log_dir,
+                         trnw_oflags_t oflags)
 {
     trn_config_t *instance = (trn_config_t *)calloc(1,sizeof(*instance));
     
@@ -1070,6 +1071,7 @@ trn_config_t *trncfg_new(char *host,int port,
         instance->filter_type=filter_type;
         instance->map_type=map_type;
         instance->utm_zone=utm_zone;
+        instance->oflags=oflags;
    }
     return instance;
 }
