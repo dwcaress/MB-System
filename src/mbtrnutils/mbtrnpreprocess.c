@@ -433,16 +433,16 @@ int main(int argc, char **argv) {
                                 "\t--no-blog\n"
 							    "\t--no-mlog\n"
                                 "\t--no-rlog\n"
-                                "\t--trn-en\n"
-                                "\t--trn-utm\n"
-                                "\t--trn-map\n"
-                                "\t--trn-par\n"
-                                "\t--trn-log\n"
-                                "\t--trn-cfg\n"
-                                "\t--trn-mtype\n"
-                                "\t--trn-ftype\n"
-                                "\t--trn-out\n"
-							    "\t--trn-pub\n"
+                                "\t--tnav-en\n"
+                                "\t--tnav-utm\n"
+                                "\t--tnav-map\n"
+                                "\t--tnav-par\n"
+                                "\t--tnav-log\n"
+                                "\t--tnav-cfg\n"
+                                "\t--tnav-mtype\n"
+                                "\t--tnav-ftype\n"
+                                "\t--tnav-out\n"
+							    "\t--tnav-pub\n"
     ;
 	extern char WIN_DECLSPEC *optarg;
 	int option_index;
@@ -494,16 +494,16 @@ int main(int argc, char **argv) {
 	                                  {"swath-width", required_argument, NULL, 0},
 	                                  {"soundings", required_argument, NULL, 0},
 	                                  {"median-filter", required_argument, NULL, 0},
-                                      {"trn-en", no_argument, NULL, 0},
-                                      {"trn-utm", required_argument, NULL, 0},
-                                      {"trn-map", required_argument, NULL, 0},
-                                      {"trn-cfg", required_argument, NULL, 0},
-                                      {"trn-par", required_argument, NULL, 0},
-                                      {"trn-log", required_argument, NULL, 0},
-                                      {"trn-mtype", required_argument, NULL, 0},
-                                      {"trn-ftype", required_argument, NULL, 0},
-								      {"trn-out", required_argument, NULL, 0},
-							          {"trn-pub", required_argument, NULL, 0},
+                                      {"tnav-en", no_argument, NULL, 0},
+                                      {"tnav-utm", required_argument, NULL, 0},
+                                      {"tnav-map", required_argument, NULL, 0},
+                                      {"tnav-cfg", required_argument, NULL, 0},
+                                      {"tnav-par", required_argument, NULL, 0},
+                                      {"tnav-log", required_argument, NULL, 0},
+                                      {"tnav-mtype", required_argument, NULL, 0},
+                                      {"tnav-ftype", required_argument, NULL, 0},
+								      {"tnav-out", required_argument, NULL, 0},
+							          {"tnav-pub", required_argument, NULL, 0},
 	                                  {NULL, 0, NULL, 0}};
 
 	/* MBIO read control parameters */
@@ -770,44 +770,44 @@ int main(int argc, char **argv) {
             }
 #ifdef WITH_MBTNAV
                 /* TRN enable */
-            else if (strcmp("trn-en", options[option_index].name) == 0) {
+            else if (strcmp("tnav-en", options[option_index].name) == 0) {
                 tnav_enable=true;
             }
                 /* TRN UTM zone */
-            else if (strcmp("trn-utm", options[option_index].name) == 0) {
+            else if (strcmp("tnav-utm", options[option_index].name) == 0) {
                 sscanf(optarg,"%ld",&tnav_utm_zone);
             }
                 /* TRN map type */
-            else if (strcmp("trn-mtype", options[option_index].name) == 0) {
+            else if (strcmp("tnav-mtype", options[option_index].name) == 0) {
                 sscanf(optarg,"%d",&tnav_mtype);
             }
                 /* TRN filter type */
-            else if (strcmp("trn-ftype", options[option_index].name) == 0) {
+            else if (strcmp("tnav-ftype", options[option_index].name) == 0) {
                 sscanf(optarg,"%d",&trn_ftype);
             }
                 /* TRN map file */
-            else if (strcmp("trn-map", options[option_index].name) == 0) {
+            else if (strcmp("tnav-map", options[option_index].name) == 0) {
                 if(NULL!=tnav_map_file)free(tnav_map_file);
                 tnav_map_file=strdup(optarg);
             }
                 /* TRN config file */
-            else if (strcmp("trn-cfg", options[option_index].name) == 0) {
+            else if (strcmp("tnav-cfg", options[option_index].name) == 0) {
                 if(NULL!=tnav_cfg_file)free(tnav_cfg_file);
                 tnav_cfg_file=strdup(optarg);
             }
                 /* TRN particles file */
-            else if (strcmp("trn-par", options[option_index].name) == 0) {
+            else if (strcmp("tnav-par", options[option_index].name) == 0) {
                 if(NULL!=tnav_particles_file)free(tnav_particles_file);
                 tnav_particles_file=strdup(optarg);
             }
                 /* TRN log directory */
-            else if (strcmp("trn-log", options[option_index].name) == 0) {
+            else if (strcmp("tnav-log", options[option_index].name) == 0) {
                 if(NULL!=tnav_log_dir)free(tnav_log_dir);
                 tnav_log_dir=strdup(optarg);
                 sscanf(optarg,"%d",&tnav_log_dir);
             }
             /* TRN out */
-            else if (strcmp("trn-pub", options[option_index].name) == 0) {
+            else if (strcmp("tnav-pub", options[option_index].name) == 0) {
                 char *ocopy=strdup(optarg);
                 tnav_ohost=strtok(ocopy,":");
                 if (tnav_ohost==NULL) {
@@ -821,7 +821,7 @@ int main(int argc, char **argv) {
                 // don't free ocopy here
             }
             /* TRN out */
-            else if (strcmp("trn-out", options[option_index].name) == 0) {
+            else if (strcmp("tnav-out", options[option_index].name) == 0) {
                 if(strstr(optarg,"stdout")){
                     tnav_oflags|=TRNW_OSOUT;
                 }
