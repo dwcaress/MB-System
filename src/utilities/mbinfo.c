@@ -65,9 +65,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	bool help = false;
-
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char format_description[MB_DESCRIPTION_LENGTH];
@@ -282,108 +279,111 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "stdin");
 
 	/* process argument list */
+	bool errflg = false;
+	bool help = false;
         {
-	int c;
-	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
-		switch (c) {
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-			btime_i[6] = 0;
-			break;
-		case 'C':
-		case 'c':
-			comments = MB_YES;
-			break;
-		case 'E':
-		case 'e':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-			etime_i[6] = 0;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'G':
-		case 'g':
-			good_nav_only = MB_YES;
-			break;
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			lonflip_set = MB_YES;
-			lonflip_use = lonflip;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d/%d", &mask_nx, &mask_ny);
-			coverage_mask = MB_YES;
-			break;
-		case 'N':
-		case 'n':
-			print_notices = MB_YES;
-			break;
-		case 'O':
-		case 'o':
-			output_usefile = MB_YES;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings_read);
-			if (pings_read < 1)
-				pings_read = 1;
-			if (pings_read > MBINFO_MAXPINGS)
-				pings_read = MBINFO_MAXPINGS;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &speedmin);
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timegap);
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			bathy_in_feet = MB_YES;
-			break;
-		case 'X':
-		case 'x':
-			sscanf(optarg, "%d", &output_format);
-			if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
+		int c;
+		while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
+	        {
+			switch (c) {
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'C':
+			case 'c':
+				comments = MB_YES;
+				break;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				good_nav_only = MB_YES;
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				lonflip_set = MB_YES;
+				lonflip_use = lonflip;
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d/%d", &mask_nx, &mask_ny);
+				coverage_mask = MB_YES;
+				break;
+			case 'N':
+			case 'n':
+				print_notices = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				output_usefile = MB_YES;
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings_read);
+				if (pings_read < 1)
+					pings_read = 1;
+				if (pings_read > MBINFO_MAXPINGS)
+					pings_read = MBINFO_MAXPINGS;
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timegap);
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'W':
+			case 'w':
+				bathy_in_feet = MB_YES;
+				break;
+			case 'X':
+			case 'x':
+				sscanf(optarg, "%d", &output_format);
+				if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
+					errflg = true;
+					fprintf(stderr, "Invalid output format for inf file");
+				}
+				break;
+			default:
 				errflg = true;
-				fprintf(stderr, "Invalid output format for inf file");
 			}
-			break;
-		default:
-			errflg = true;
 		}
 	}
-
+       
 	FILE * const stream = verbose <= 1 ? stdout : stderr;
 
 	/* if error flagged then print it and exit */
 	if (errflg) {
 		fprintf(stream, "usage: %s\n", usage_message);
 		fprintf(stream, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
+		exit(MB_ERROR_BAD_USAGE);
 	}
 
 	if (verbose == 1 || help) {

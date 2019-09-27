@@ -64,7 +64,6 @@
 #define MBLIST_SEGMENT_MODE_SWATHFILE 2
 #define MBLIST_SEGMENT_MODE_DATALIST 3
 
-/* NaN value */
 double NaN;
 
 static const char program_name[] = "MBLIST";
@@ -752,11 +751,6 @@ int mb_get_raw(int verbose, void *mbio_ptr, int *mode, int *ipulse_length, int *
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -999,233 +993,237 @@ int main(int argc, char **argv) {
 	strcpy(output_file, "-");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:J:j:K:k:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) !=
-	       -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			ascii = MB_NO;
-			netcdf_cdl = MB_NO;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-			btime_i[6] = 0;
-			break;
-		case 'C':
-		case 'c':
-			netcdf = MB_YES;
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%d", &dump_mode);
-			if (dump_mode == DUMP_MODE_BATH)
-				beam_set = MBLIST_SET_ALL;
-			else if (dump_mode == DUMP_MODE_TOPO)
-				beam_set = MBLIST_SET_ALL;
-			else if (dump_mode == DUMP_MODE_AMP)
-				beam_set = MBLIST_SET_ALL;
-			else if (dump_mode == DUMP_MODE_SS)
-				pixel_set = MBLIST_SET_ALL;
-			break;
-		case 'E':
-		case 'e':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-			etime_i[6] = 0;
-			break;
-		case 'G':
-		case 'g':
-			sscanf(optarg, "%s", delimiter);
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'J':
-		case 'j':
-			sscanf(optarg, "%s", projection_pars);
-			use_projection = MB_YES;
-			break;
-		case 'K':
-		case 'k':
-			sscanf(optarg, "%d", &decimate);
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			break;
-		case 'M':
-		case 'm':
-			if (optarg[0] == 'a' || optarg[0] == 'A') {
-				beam_set = MBLIST_SET_ALL;
-			}
-			else if (optarg[0] == 'x' || optarg[0] == 'X') {
-				beam_set = MBLIST_SET_EXCLUDE_OUTER;
-				sscanf(optarg, "%*c%d", &beam_exclude_percent);
-			}
-			else {
-				sscanf(optarg, "%d/%d", &beam_start, &beam_end);
-				beam_set = MBLIST_SET_ON;
-			}
-			break;
-		case 'N':
-		case 'n':
-			if (optarg[0] == 'a' || optarg[0] == 'A') {
-				pixel_set = MBLIST_SET_ALL;
-			}
-			else {
-				sscanf(optarg, "%d/%d", &pixel_start, &pixel_end);
-				pixel_set = MBLIST_SET_ON;
-			}
-			break;
-		case 'O':
-		case 'o':
-			for (int j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
-				if (n_list < MAX_OPTIONS) {
-					list[n_list] = optarg[j];
-					if (list[n_list] == '^')
-						use_projection = MB_YES;
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:J:j:K:k:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) !=
+		       -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				ascii = MB_NO;
+				netcdf_cdl = MB_NO;
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'C':
+			case 'c':
+				netcdf = MB_YES;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%d", &dump_mode);
+				if (dump_mode == DUMP_MODE_BATH)
+					beam_set = MBLIST_SET_ALL;
+				else if (dump_mode == DUMP_MODE_TOPO)
+					beam_set = MBLIST_SET_ALL;
+				else if (dump_mode == DUMP_MODE_AMP)
+					beam_set = MBLIST_SET_ALL;
+				else if (dump_mode == DUMP_MODE_SS)
+					pixel_set = MBLIST_SET_ALL;
+				break;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'G':
+			case 'g':
+				sscanf(optarg, "%s", delimiter);
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'J':
+			case 'j':
+				sscanf(optarg, "%s", projection_pars);
+				use_projection = MB_YES;
+				break;
+			case 'K':
+			case 'k':
+				sscanf(optarg, "%d", &decimate);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'M':
+			case 'm':
+				if (optarg[0] == 'a' || optarg[0] == 'A') {
+					beam_set = MBLIST_SET_ALL;
 				}
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings);
-			break;
-		case 'Q':
-		case 'q':
-			check_values = MBLIST_CHECK_OFF_RAW;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &speedmin);
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timegap);
-			break;
-		case 'U':
-		case 'u':
-			if (optarg[0] == 'N')
-				check_nav = MB_YES;
-			else {
-				sscanf(optarg, "%d", &check_values);
-				if (check_values < MBLIST_CHECK_ON || check_values > MBLIST_CHECK_OFF_FLAGNAN)
-					check_values = MBLIST_CHECK_ON;
+				else if (optarg[0] == 'x' || optarg[0] == 'X') {
+					beam_set = MBLIST_SET_EXCLUDE_OUTER;
+					sscanf(optarg, "%*c%d", &beam_exclude_percent);
+				}
+				else {
+					sscanf(optarg, "%d/%d", &beam_start, &beam_end);
+					beam_set = MBLIST_SET_ON;
+				}
+				break;
+			case 'N':
+			case 'n':
+				if (optarg[0] == 'a' || optarg[0] == 'A') {
+					pixel_set = MBLIST_SET_ALL;
+				}
+				else {
+					sscanf(optarg, "%d/%d", &pixel_start, &pixel_end);
+					pixel_set = MBLIST_SET_ON;
+				}
+				break;
+			case 'O':
+			case 'o':
+				for (int j = 0, n_list = 0; j < (int)strlen(optarg); j++, n_list++)
+					if (n_list < MAX_OPTIONS) {
+						list[n_list] = optarg[j];
+						if (list[n_list] == '^')
+							use_projection = MB_YES;
+					}
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings);
+				break;
+			case 'Q':
+			case 'q':
+				check_values = MBLIST_CHECK_OFF_RAW;
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timegap);
+				break;
+			case 'U':
+			case 'u':
+				if (optarg[0] == 'N')
+					check_nav = MB_YES;
+				else {
+					sscanf(optarg, "%d", &check_values);
+					if (check_values < MBLIST_CHECK_ON || check_values > MBLIST_CHECK_OFF_FLAGNAN)
+						check_values = MBLIST_CHECK_ON;
+				}
+				break;
+			case 'W':
+			case 'w':
+				bathy_in_feet = MB_YES;
+				break;
+			case 'X':
+			case 'x':
+				sscanf(optarg, "%s", output_file);
+				break;
+			case 'Z':
+			case 'z':
+				segment = MB_YES;
+				sscanf(optarg, "%s", segment_tag);
+				if (strcmp(segment_tag, "swathfile") == 0)
+					segment_mode = MBLIST_SEGMENT_MODE_SWATHFILE;
+				else if (strcmp(segment_tag, "datalist") == 0)
+					segment_mode = MBLIST_SEGMENT_MODE_DATALIST;
+				else
+					segment_mode = MBLIST_SEGMENT_MODE_TAG;
+				break;
+			case '?':
+				errflg = true;
 			}
-			break;
-		case 'W':
-		case 'w':
-			bathy_in_feet = MB_YES;
-			break;
-		case 'X':
-		case 'x':
-			sscanf(optarg, "%s", output_file);
-			break;
-		case 'Z':
-		case 'z':
-			segment = MB_YES;
-			sscanf(optarg, "%s", segment_tag);
-			if (strcmp(segment_tag, "swathfile") == 0)
-				segment_mode = MBLIST_SEGMENT_MODE_SWATHFILE;
-			else if (strcmp(segment_tag, "datalist") == 0)
-				segment_mode = MBLIST_SEGMENT_MODE_DATALIST;
-			else
-				segment_mode = MBLIST_SEGMENT_MODE_TAG;
-			break;
-		case '?':
-			errflg = true;
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-		fprintf(stderr, "dbg2       help:           %d\n", help);
-		fprintf(stderr, "dbg2       format:         %d\n", format);
-		fprintf(stderr, "dbg2       pings:          %d\n", pings);
-		fprintf(stderr, "dbg2       decimate:       %d\n", decimate);
-		fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-		fprintf(stderr, "dbg2       file:           %s\n", file);
-		fprintf(stderr, "dbg2       output_file:    %s\n", output_file);
-		fprintf(stderr, "dbg2       ascii:          %d\n", ascii);
-		fprintf(stderr, "dbg2       netcdf:         %d\n", netcdf);
-		fprintf(stderr, "dbg2       netcdf_cdl:     %d\n", netcdf_cdl);
-		fprintf(stderr, "dbg2       segment:        %d\n", segment);
-		fprintf(stderr, "dbg2       segment_mode:   %d\n", segment_mode);
-		fprintf(stderr, "dbg2       segment_tag:    %s\n", segment_tag);
-		fprintf(stderr, "dbg2       delimiter:      %s\n", delimiter);
-		fprintf(stderr, "dbg2       beam_set:       %d\n", beam_set);
-		fprintf(stderr, "dbg2       beam_start:     %d\n", beam_start);
-		fprintf(stderr, "dbg2       beam_end:       %d\n", beam_end);
-		fprintf(stderr, "dbg2       beam_exclude_percent: %d\n", beam_exclude_percent);
-		fprintf(stderr, "dbg2       pixel_set:      %d\n", pixel_set);
-		fprintf(stderr, "dbg2       pixel_start:    %d\n", pixel_start);
-		fprintf(stderr, "dbg2       pixel_end:      %d\n", pixel_end);
-		fprintf(stderr, "dbg2       dump_mode:      %d\n", dump_mode);
-		fprintf(stderr, "dbg2       check_values:   %d\n", check_values);
-		fprintf(stderr, "dbg2       check_nav:      %d\n", check_nav);
-		fprintf(stderr, "dbg2       use_projection: %d\n", use_projection);
-		fprintf(stderr, "dbg2       projection_pars:%s\n", projection_pars);
-		fprintf(stderr, "dbg2       n_list:         %d\n", n_list);
-		for (int i = 0; i < n_list; i++)
-			fprintf(stderr, "dbg2         list[%d]:      %c\n", i, list[i]);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+			fprintf(stderr, "dbg2       help:           %d\n", help);
+			fprintf(stderr, "dbg2       format:         %d\n", format);
+			fprintf(stderr, "dbg2       pings:          %d\n", pings);
+			fprintf(stderr, "dbg2       decimate:       %d\n", decimate);
+			fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
+			fprintf(stderr, "dbg2       file:           %s\n", file);
+			fprintf(stderr, "dbg2       output_file:    %s\n", output_file);
+			fprintf(stderr, "dbg2       ascii:          %d\n", ascii);
+			fprintf(stderr, "dbg2       netcdf:         %d\n", netcdf);
+			fprintf(stderr, "dbg2       netcdf_cdl:     %d\n", netcdf_cdl);
+			fprintf(stderr, "dbg2       segment:        %d\n", segment);
+			fprintf(stderr, "dbg2       segment_mode:   %d\n", segment_mode);
+			fprintf(stderr, "dbg2       segment_tag:    %s\n", segment_tag);
+			fprintf(stderr, "dbg2       delimiter:      %s\n", delimiter);
+			fprintf(stderr, "dbg2       beam_set:       %d\n", beam_set);
+			fprintf(stderr, "dbg2       beam_start:     %d\n", beam_start);
+			fprintf(stderr, "dbg2       beam_end:       %d\n", beam_end);
+			fprintf(stderr, "dbg2       beam_exclude_percent: %d\n", beam_exclude_percent);
+			fprintf(stderr, "dbg2       pixel_set:      %d\n", pixel_set);
+			fprintf(stderr, "dbg2       pixel_start:    %d\n", pixel_start);
+			fprintf(stderr, "dbg2       pixel_end:      %d\n", pixel_end);
+			fprintf(stderr, "dbg2       dump_mode:      %d\n", dump_mode);
+			fprintf(stderr, "dbg2       check_values:   %d\n", check_values);
+			fprintf(stderr, "dbg2       check_nav:      %d\n", check_nav);
+			fprintf(stderr, "dbg2       use_projection: %d\n", use_projection);
+			fprintf(stderr, "dbg2       projection_pars:%s\n", projection_pars);
+			fprintf(stderr, "dbg2       n_list:         %d\n", n_list);
+			for (int i = 0; i < n_list; i++)
+				fprintf(stderr, "dbg2         list[%d]:      %c\n", i, list[i]);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */
