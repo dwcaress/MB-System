@@ -64,12 +64,9 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
 	int status;
 	int error = MB_ERROR_NO_ERROR;
 	int verbose = 0;
-	bool help = false;
 	bool flag = false;
 	FILE *fp;
 	char file[MB_PATH_MAXLINE];
@@ -124,165 +121,169 @@ int main(int argc, char **argv) {
 	status = mb_fileiobuffer(verbose, &fileiobuffer);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:F:f:HhI:i:L:l:M:m:T:t:U:u:VvW:w:")) != -1)
-		switch (c) {
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d", &fileiobuffer);
-			flag = true;
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%s", psdisplay);
-			flag = true;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%s", argstring);
-			if (strncmp(argstring, "new", 3) == 0 || strncmp(argstring, "NEW", 3) == 0)
-				fbtversion = 3;
-			else if (strncmp(argstring, "old", 2) == 0 || strncmp(argstring, "OLD", 2) == 0)
-				fbtversion = 2;
-			else if (strncmp(argstring, "2", 1) == 0)
-				fbtversion = 2;
-			else if (strncmp(argstring, "3", 1) == 0)
-				fbtversion = 3;
-			flag = true;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", imgdisplay);
-			flag = true;
-			break;
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			flag = true;
-			break;
-		case 'M':
-		case 'm':
-			/* default primary colortable and modes */
-			if (optarg[0] == 'P' || optarg[0] == 'p')
-				/* n = */ sscanf(&optarg[1], "%d/%d/%d", &primary_colortable, &primary_colortable_mode, &primary_shade_mode);
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "B:b:D:d:F:f:HhI:i:L:l:M:m:T:t:U:u:VvW:w:")) != -1)
+		{
+			switch (c) {
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d", &fileiobuffer);
+				flag = true;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%s", psdisplay);
+				flag = true;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%s", argstring);
+				if (strncmp(argstring, "new", 3) == 0 || strncmp(argstring, "NEW", 3) == 0)
+					fbtversion = 3;
+				else if (strncmp(argstring, "old", 2) == 0 || strncmp(argstring, "OLD", 2) == 0)
+					fbtversion = 2;
+				else if (strncmp(argstring, "2", 1) == 0)
+					fbtversion = 2;
+				else if (strncmp(argstring, "3", 1) == 0)
+					fbtversion = 3;
+				flag = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", imgdisplay);
+				flag = true;
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				flag = true;
+				break;
+			case 'M':
+			case 'm':
+				/* default primary colortable and modes */
+				if (optarg[0] == 'P' || optarg[0] == 'p')
+					/* n = */ sscanf(&optarg[1], "%d/%d/%d", &primary_colortable, &primary_colortable_mode, &primary_shade_mode);
 
-			/* default slope colortable and mode */
-			else if (optarg[0] == 'G' || optarg[0] == 'g')
-				/* n = */ sscanf(&optarg[1], "%d/%d", &slope_colortable, &slope_colortable_mode);
+				/* default slope colortable and mode */
+				else if (optarg[0] == 'G' || optarg[0] == 'g')
+					/* n = */ sscanf(&optarg[1], "%d/%d", &slope_colortable, &slope_colortable_mode);
 
-			/* default overlay colortable and mode */
-			else if (optarg[0] == 'O' || optarg[0] == 'o')
-				/* n = */ sscanf(&optarg[1], "%d/%d", &secondary_colortable, &secondary_colortable_mode);
+				/* default overlay colortable and mode */
+				else if (optarg[0] == 'O' || optarg[0] == 'o')
+					/* n = */ sscanf(&optarg[1], "%d/%d", &secondary_colortable, &secondary_colortable_mode);
 
-			/* default illumination parameters */
-			else if (optarg[0] == 'I' || optarg[0] == 'i')
-				/* n = */ sscanf(&optarg[1], "%lf/%lf/%lf", &illuminate_magnitude, &illuminate_elevation, &illuminate_azimuth);
+				/* default illumination parameters */
+				else if (optarg[0] == 'I' || optarg[0] == 'i')
+					/* n = */ sscanf(&optarg[1], "%lf/%lf/%lf", &illuminate_magnitude, &illuminate_elevation, &illuminate_azimuth);
 
-			/* default slope shading magnitude */
-			else if (optarg[0] == 'S' || optarg[0] == 'S')
-				/* n = */ sscanf(&optarg[1], "%lf", &slope_magnitude);
+				/* default slope shading magnitude */
+				else if (optarg[0] == 'S' || optarg[0] == 'S')
+					/* n = */ sscanf(&optarg[1], "%lf", &slope_magnitude);
 
-			flag = true;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timegap);
-			flag = true;
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%s", argstring);
-			if (strncmp(argstring, "yes", 3) == 0 || strncmp(argstring, "YES", 3) == 0)
-				uselockfiles = 1;
-			else if (strncmp(argstring, "no", 2) == 0 || strncmp(argstring, "NO", 2) == 0)
-				uselockfiles = 0;
-			else if (strncmp(argstring, "1", 1) == 0)
-				uselockfiles = 1;
-			else if (strncmp(argstring, "0", 1) == 0)
-				uselockfiles = 0;
-			flag = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			sscanf(optarg, "%s", mbproject);
-			flag = true;
-			break;
-		case '?':
-			errflg = true;
+				flag = true;
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timegap);
+				flag = true;
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%s", argstring);
+				if (strncmp(argstring, "yes", 3) == 0 || strncmp(argstring, "YES", 3) == 0)
+					uselockfiles = 1;
+				else if (strncmp(argstring, "no", 2) == 0 || strncmp(argstring, "NO", 2) == 0)
+					uselockfiles = 0;
+				else if (strncmp(argstring, "1", 1) == 0)
+					uselockfiles = 1;
+				else if (strncmp(argstring, "0", 1) == 0)
+					uselockfiles = 0;
+				flag = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'W':
+			case 'w':
+				sscanf(optarg, "%s", mbproject);
+				flag = true;
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                       %d\n", help);
-		fprintf(stderr, "dbg2       format:                     %d\n", format);
-		fprintf(stderr, "dbg2       pings:                      %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:                    %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:                  %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:                  %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:                  %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:                  %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:                 %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:                 %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:                 %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:                 %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:                 %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:                 %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:                 %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:                 %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:                 %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:                 %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:                 %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:                 %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:                 %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:                 %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:                   %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:                    %f\n", timegap);
-		fprintf(stderr, "dbg2       psdisplay:                  %s\n", psdisplay);
-		fprintf(stderr, "dbg2       imgdisplay:                 %s\n", imgdisplay);
-		fprintf(stderr, "dbg2       mbproject:                  %s\n", mbproject);
-		fprintf(stderr, "dbg2       fbtversion:                 %d\n", fbtversion);
-		fprintf(stderr, "dbg2       uselockfiles:               %d\n", uselockfiles);
-		fprintf(stderr, "dbg2       fileiobuffer:               %d\n", fileiobuffer);
-		fprintf(stderr, "dbg2       primary_colortable:         %d\n", primary_colortable);
-		fprintf(stderr, "dbg2       primary_colortable_mode:    %d\n", primary_colortable_mode);
-		fprintf(stderr, "dbg2       primary_shade_mode:         %d\n", primary_shade_mode);
-		fprintf(stderr, "dbg2       slope_colortable:           %d\n", slope_colortable);
-		fprintf(stderr, "dbg2       slope_colortable_mode:      %d\n", slope_colortable_mode);
-		fprintf(stderr, "dbg2       secondary_colortable:       %d\n", secondary_colortable);
-		fprintf(stderr, "dbg2       secondary_colortable_mode:  %d\n", secondary_colortable_mode);
-		fprintf(stderr, "dbg2       illuminate_magnitude:       %f\n", illuminate_magnitude);
-		fprintf(stderr, "dbg2       illuminate_elevation:       %f\n", illuminate_elevation);
-		fprintf(stderr, "dbg2       illuminate_azimuth:         %f\n", illuminate_azimuth);
-		fprintf(stderr, "dbg2       slope_magnitude:            %f\n", slope_magnitude);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                       %d\n", help);
+			fprintf(stderr, "dbg2       format:                     %d\n", format);
+			fprintf(stderr, "dbg2       pings:                      %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:                    %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:                  %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:                  %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:                  %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:                  %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:                 %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:                 %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:                 %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:                 %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:                 %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:                 %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:                 %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:                 %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:                 %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:                 %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:                 %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:                 %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:                 %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:                 %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:                   %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:                    %f\n", timegap);
+			fprintf(stderr, "dbg2       psdisplay:                  %s\n", psdisplay);
+			fprintf(stderr, "dbg2       imgdisplay:                 %s\n", imgdisplay);
+			fprintf(stderr, "dbg2       mbproject:                  %s\n", mbproject);
+			fprintf(stderr, "dbg2       fbtversion:                 %d\n", fbtversion);
+			fprintf(stderr, "dbg2       uselockfiles:               %d\n", uselockfiles);
+			fprintf(stderr, "dbg2       fileiobuffer:               %d\n", fileiobuffer);
+			fprintf(stderr, "dbg2       primary_colortable:         %d\n", primary_colortable);
+			fprintf(stderr, "dbg2       primary_colortable_mode:    %d\n", primary_colortable_mode);
+			fprintf(stderr, "dbg2       primary_shade_mode:         %d\n", primary_shade_mode);
+			fprintf(stderr, "dbg2       slope_colortable:           %d\n", slope_colortable);
+			fprintf(stderr, "dbg2       slope_colortable_mode:      %d\n", slope_colortable_mode);
+			fprintf(stderr, "dbg2       secondary_colortable:       %d\n", secondary_colortable);
+			fprintf(stderr, "dbg2       secondary_colortable_mode:  %d\n", secondary_colortable_mode);
+			fprintf(stderr, "dbg2       illuminate_magnitude:       %f\n", illuminate_magnitude);
+			fprintf(stderr, "dbg2       illuminate_elevation:       %f\n", illuminate_elevation);
+			fprintf(stderr, "dbg2       illuminate_azimuth:         %f\n", illuminate_azimuth);
+			fprintf(stderr, "dbg2       slope_magnitude:            %f\n", slope_magnitude);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* write out new ~/.mbio_defaults file if needed */

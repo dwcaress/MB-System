@@ -250,7 +250,6 @@ int output_model(int verbose, FILE *tfp, double beamwidth, double depression, do
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int status = MB_SUCCESS;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -439,135 +438,133 @@ int main(int argc, char **argv) {
 		int c;
 		bool help = false;
 
-	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &ampkind);
-			if (ampkind == MBBACKANGLE_SS)
-				sidescan_on = MB_YES;
-			if (ampkind == MBBACKANGLE_AMP)
-				amplitude_on = MB_YES;
-			break;
-		case 'B':
-		case 'b':
+		while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
 		{
-			const int n = sscanf(optarg, "%d/%lf/%lf", &beammode, &d1, &d2);
-			if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
-				if (n >= 2)
-					ssbeamwidth = d1;
-				if (n >= 3)
-					ssdepression = d2;
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &ampkind);
+				if (ampkind == MBBACKANGLE_SS)
+					sidescan_on = MB_YES;
+				if (ampkind == MBBACKANGLE_AMP)
+					amplitude_on = MB_YES;
+				break;
+			case 'B':
+			case 'b':
+			{
+				const int n = sscanf(optarg, "%d/%lf/%lf", &beammode, &d1, &d2);
+				if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN) {
+					if (n >= 2)
+						ssbeamwidth = d1;
+					if (n >= 3)
+						ssdepression = d2;
+				}
+				break;
 			}
-			break;
+			case 'C':
+			case 'c':
+				symmetry = MB_YES;
+				corr_symmetry = MBP_SSCORR_SYMMETRIC;
+				break;
+			case 'D':
+			case 'd':
+				dump = MB_YES;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+			{
+				int i;
+				int j;
+				int n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
+				if (n == 5) {
+					n = sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
+					ampmin = 0.0;
+					n = 6;
+				}
+				if (mode == MBBACKANGLE_AMP && n == 6) {
+					gridamp = MB_YES;
+					gridampangle = angle;
+					gridampmin = ampmin;
+					gridampmax = ampmax;
+					gridampn_columns = i;
+					gridampn_rows = j;
+					gridampdx = 2.0 * gridampangle / (gridampn_columns - 1);
+					gridampdy = (gridampmax - gridampmin) / (gridampn_rows - 1);
+				}
+				else if (mode == MBBACKANGLE_SS && n == 6) {
+					gridss = MB_YES;
+					gridssangle = angle;
+					gridssmin = ampmin;
+					gridssmax = ampmax;
+					gridssn_columns = i;
+					gridssn_rows = j;
+					gridssdx = 2.0 * gridssangle / (gridssn_columns - 1);
+					gridssdy = (gridssmax - gridssmin) / (gridssn_rows - 1);
+				}
+				break;
+			}
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d/%lf", &nangles, &angle_max);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings_avg);
+				break;
+			case 'Q':
+			case 'q':
+				corr_slope = MB_YES;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%lf", &ref_angle_default);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%s", grid.file);
+				corr_topogrid = MB_YES;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'Z':
+			case 'z':
+				sscanf(optarg, "%lf", &altitude_default);
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
-		case 'C':
-		case 'c':
-			symmetry = MB_YES;
-			corr_symmetry = MBP_SSCORR_SYMMETRIC;
-			break;
-		case 'D':
-		case 'd':
-			dump = MB_YES;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'G':
-		case 'g':
-		{
-			int i;
-			int j;
-			int n = sscanf(optarg, "%d/%lf/%lf/%lf/%d/%d", &mode, &angle, &ampmin, &ampmax, &i, &j);
-			if (n == 5) {
-				n = sscanf(optarg, "%d/%lf/%lf/%d/%d", &mode, &angle, &ampmax, &i, &j);
-				ampmin = 0.0;
-				n = 6;
-			}
-			if (mode == MBBACKANGLE_AMP && n == 6) {
-				gridamp = MB_YES;
-				gridampangle = angle;
-				gridampmin = ampmin;
-				gridampmax = ampmax;
-				gridampn_columns = i;
-				gridampn_rows = j;
-				gridampdx = 2.0 * gridampangle / (gridampn_columns - 1);
-				gridampdy = (gridampmax - gridampmin) / (gridampn_rows - 1);
-			}
-			else if (mode == MBBACKANGLE_SS && n == 6) {
-				gridss = MB_YES;
-				gridssangle = angle;
-				gridssmin = ampmin;
-				gridssmax = ampmax;
-				gridssn_columns = i;
-				gridssn_rows = j;
-				gridssdx = 2.0 * gridssangle / (gridssn_columns - 1);
-				gridssdy = (gridssmax - gridssmin) / (gridssn_rows - 1);
-			}
-			break;
-		}
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d/%lf", &nangles, &angle_max);
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings_avg);
-			break;
-		case 'Q':
-		case 'q':
-			corr_slope = MB_YES;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%lf", &ref_angle_default);
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%s", grid.file);
-			corr_topogrid = MB_YES;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'Z':
-		case 'z':
-			sscanf(optarg, "%lf", &altitude_default);
-			break;
-		case '?':
-			errflg = true;
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
-
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	} // end command line arg parsing
 
 	/* set mode if necessary */

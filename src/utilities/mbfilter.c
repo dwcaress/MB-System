@@ -619,11 +619,6 @@ int mbcopy_any_to_mbldeoih(int verbose, int system, int kind, int *time_i, doubl
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = 0;
-	int c;
-	bool help = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -753,196 +748,200 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:N:n:R:r:S:s:T:t:Vv")) != -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &datakind);
-			if (datakind != MBFILTER_SS && datakind != MBFILTER_AMP)
-				datakind = MBFILTER_SS;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-			btime_i[6] = 0;
-			break;
-		case 'C':
-		case 'c':
+	{
+		bool errflg = 0;
+		int c;
+		bool help = 0;
+		while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:N:n:R:r:S:s:T:t:Vv")) != -1)
 		{
-			const int n = sscanf(optarg, "%d/%d/%d/%d", &contrast_mode, &contrast_xdim, &contrast_ldim, &contrast_iter);
-			if (n >= 3) {
-				filters[num_filters].mode = contrast_mode + 7;
-				filters[num_filters].xdim = contrast_xdim;
-				filters[num_filters].ldim = contrast_ldim;
-				filters[num_filters].threshold = MB_NO;
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &datakind);
+				if (datakind != MBFILTER_SS && datakind != MBFILTER_AMP)
+					datakind = MBFILTER_SS;
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'C':
+			case 'c':
+			{
+				const int n = sscanf(optarg, "%d/%d/%d/%d", &contrast_mode, &contrast_xdim, &contrast_ldim, &contrast_iter);
+				if (n >= 3) {
+					filters[num_filters].mode = contrast_mode + 7;
+					filters[num_filters].xdim = contrast_xdim;
+					filters[num_filters].ldim = contrast_ldim;
+					filters[num_filters].threshold = MB_NO;
+				}
+				if (n >= 4)
+					filters[num_filters].iteration = contrast_iter;
+				else
+					filters[num_filters].iteration = 1;
+				if (n >= 3)
+					num_filters++;
+				break;
 			}
-			if (n >= 4)
-				filters[num_filters].iteration = contrast_iter;
-			else
-				filters[num_filters].iteration = 1;
-			if (n >= 3)
-				num_filters++;
-			break;
-		}
-		case 'D':
-		case 'd':
-		{
-			const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &hipass_mode, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
-			if (n >= 3) {
-				filters[num_filters].mode = hipass_mode;
-				filters[num_filters].xdim = hipass_xdim;
-				filters[num_filters].ldim = hipass_ldim;
-				filters[num_filters].threshold = MB_NO;
+			case 'D':
+			case 'd':
+			{
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf", &hipass_mode, &hipass_xdim, &hipass_ldim, &hipass_iter, &hipass_offset);
+				if (n >= 3) {
+					filters[num_filters].mode = hipass_mode;
+					filters[num_filters].xdim = hipass_xdim;
+					filters[num_filters].ldim = hipass_ldim;
+					filters[num_filters].threshold = MB_NO;
+				}
+				if (n >= 4)
+					filters[num_filters].iteration = hipass_iter;
+				else
+					filters[num_filters].iteration = 1;
+				if (n >= 5)
+					filters[num_filters].hipass_offset = hipass_offset;
+				else
+					filters[num_filters].hipass_offset = 1000.0;
+				if (n >= 3)
+					num_filters++;
+				break;
 			}
-			if (n >= 4)
-				filters[num_filters].iteration = hipass_iter;
-			else
-				filters[num_filters].iteration = 1;
-			if (n >= 5)
-				filters[num_filters].hipass_offset = hipass_offset;
-			else
-				filters[num_filters].hipass_offset = 1000.0;
-			if (n >= 3)
-				num_filters++;
-			break;
-		}
-		case 'E':
-		case 'e':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-			etime_i[6] = 0;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d", &n_buffer_max);
-			if (n_buffer_max > MBFILTER_BUFFER_DEFAULT || n_buffer_max < 10)
-				n_buffer_max = MBFILTER_BUFFER_DEFAULT;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			break;
-		case 'S':
-		case 's':
-		{
-			const int n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &smooth_mode, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
-			           &threshold_hi);
-			if (n >= 3) {
-				filters[num_filters].mode = smooth_mode + 3;
-				filters[num_filters].xdim = smooth_xdim;
-				filters[num_filters].ldim = smooth_ldim;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d", &n_buffer_max);
+				if (n_buffer_max > MBFILTER_BUFFER_DEFAULT || n_buffer_max < 10)
+					n_buffer_max = MBFILTER_BUFFER_DEFAULT;
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'S':
+			case 's':
+			{
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%lf/%lf", &smooth_mode, &smooth_xdim, &smooth_ldim, &smooth_iter, &threshold_lo,
+				           &threshold_hi);
+				if (n >= 3) {
+					filters[num_filters].mode = smooth_mode + 3;
+					filters[num_filters].xdim = smooth_xdim;
+					filters[num_filters].ldim = smooth_ldim;
+				}
+				if (n >= 4)
+					filters[num_filters].iteration = smooth_iter;
+				else
+					filters[num_filters].iteration = 1;
+				if (n >= 6) {
+					filters[num_filters].threshold = MB_YES;
+					filters[num_filters].threshold_lo = threshold_lo;
+					filters[num_filters].threshold_hi = threshold_hi;
+				}
+				else if (apply_threshold == MB_YES) {
+					filters[num_filters].threshold = MB_YES;
+					filters[num_filters].threshold_lo = threshold_lo;
+					filters[num_filters].threshold_hi = threshold_hi;
+				}
+				else
+					filters[num_filters].threshold = MB_NO;
+				if (n >= 3)
+					num_filters++;
+				break;
 			}
-			if (n >= 4)
-				filters[num_filters].iteration = smooth_iter;
-			else
-				filters[num_filters].iteration = 1;
-			if (n >= 6) {
-				filters[num_filters].threshold = MB_YES;
-				filters[num_filters].threshold_lo = threshold_lo;
-				filters[num_filters].threshold_hi = threshold_hi;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf/%lf", &threshold_lo, &threshold_hi);
+				apply_threshold = MB_YES;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case '?':
+				errflg = true;
 			}
-			else if (apply_threshold == MB_YES) {
-				filters[num_filters].threshold = MB_YES;
-				filters[num_filters].threshold_lo = threshold_lo;
-				filters[num_filters].threshold_hi = threshold_hi;
-			}
-			else
-				filters[num_filters].threshold = MB_NO;
-			if (n >= 3)
-				num_filters++;
-			break;
-		}
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf/%lf", &threshold_lo, &threshold_hi);
-			apply_threshold = MB_YES;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case '?':
-			errflg = true;
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	/* set data type if not set properly */
-	if (datakind != MBFILTER_BATH && datakind != MBFILTER_AMP)
-		datakind = MBFILTER_SS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-		fprintf(stderr, "dbg2       help:           %d\n", help);
-		fprintf(stderr, "dbg2       pings:          %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-		fprintf(stderr, "dbg2       data format:    %d\n", format);
-		fprintf(stderr, "dbg2       read_file:      %s\n", read_file);
-		fprintf(stderr, "dbg2       datakind:       %d\n", datakind);
-		fprintf(stderr, "dbg2       n_buffer_max:   %d\n", n_buffer_max);
-		fprintf(stderr, "dbg2       num_filters:    %d\n", num_filters);
-		for (int i = 0; i < num_filters; i++) {
-			fprintf(stderr, "dbg2       filters[%d].mode:          %d\n", i, filters[i].mode);
-			fprintf(stderr, "dbg2       filters[%d].xdim:          %d\n", i, filters[i].xdim);
-			fprintf(stderr, "dbg2       filters[%d].ldim:          %d\n", i, filters[i].ldim);
-			fprintf(stderr, "dbg2       filters[%d].iteration:     %d\n", i, filters[i].iteration);
-			fprintf(stderr, "dbg2       filters[%d].threshold:     %d\n", i, filters[i].threshold);
-			fprintf(stderr, "dbg2       filters[%d].threshold_lo:  %f\n", i, filters[i].threshold_lo);
-			fprintf(stderr, "dbg2       filters[%d].threshold_hi:  %f\n", i, filters[i].threshold_hi);
-			fprintf(stderr, "dbg2       filters[%d].hipass_offset: %f\n", i, filters[i].hipass_offset);
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
-	}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		/* set data type if not set properly */
+		if (datakind != MBFILTER_BATH && datakind != MBFILTER_AMP)
+			datakind = MBFILTER_SS;
+
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+			fprintf(stderr, "dbg2       help:           %d\n", help);
+			fprintf(stderr, "dbg2       pings:          %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
+			fprintf(stderr, "dbg2       data format:    %d\n", format);
+			fprintf(stderr, "dbg2       read_file:      %s\n", read_file);
+			fprintf(stderr, "dbg2       datakind:       %d\n", datakind);
+			fprintf(stderr, "dbg2       n_buffer_max:   %d\n", n_buffer_max);
+			fprintf(stderr, "dbg2       num_filters:    %d\n", num_filters);
+			for (int i = 0; i < num_filters; i++) {
+				fprintf(stderr, "dbg2       filters[%d].mode:          %d\n", i, filters[i].mode);
+				fprintf(stderr, "dbg2       filters[%d].xdim:          %d\n", i, filters[i].xdim);
+				fprintf(stderr, "dbg2       filters[%d].ldim:          %d\n", i, filters[i].ldim);
+				fprintf(stderr, "dbg2       filters[%d].iteration:     %d\n", i, filters[i].iteration);
+				fprintf(stderr, "dbg2       filters[%d].threshold:     %d\n", i, filters[i].threshold);
+				fprintf(stderr, "dbg2       filters[%d].threshold_lo:  %f\n", i, filters[i].threshold_lo);
+				fprintf(stderr, "dbg2       filters[%d].threshold_hi:  %f\n", i, filters[i].threshold_hi);
+				fprintf(stderr, "dbg2       filters[%d].hipass_offset: %f\n", i, filters[i].hipass_offset);
+			}
+		}
+
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */

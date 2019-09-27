@@ -55,12 +55,10 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
 
-	/* MBIO read control parameters */
 	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE] = "";
 	char output_file[MB_PATH_MAXLINE] = "";

@@ -44,9 +44,6 @@ static const char usage_message[] =
 
 int main(int argc, char **argv) {
 	int option_index;
-	bool errflg = false;
-	int c;
-	bool help = false;
 
 	/* command line option definitions */
 	/* mbdatalist
@@ -151,221 +148,195 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt_long(argc, argv, "VvHhCcDdF:f:I:i:NnOoPpQqR:r:SsUuYyZz", options, &option_index)) != -1)
-		switch (c) {
-		/* long options */
-		case 0:
-			/* verbose */
-			if (strcmp("verbose", options[option_index].name) == 0) {
-				verbose++;
-			}
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt_long(argc, argv, "VvHhCcDdF:f:I:i:NnOoPpQqR:r:SsUuYyZz", options, &option_index)) != -1)
+		{
+			switch (c) {
+			/* long options */
+			case 0:
+				if (strcmp("verbose", options[option_index].name) == 0) {
+					verbose++;
+				}
+				else if (strcmp("help", options[option_index].name) == 0) {
+					help = MB_YES;
+				}
+				else if (strcmp("copy", options[option_index].name) == 0) {
+					copyfiles = MB_YES;
+				}
+				else if (strcmp("report", options[option_index].name) == 0) {
+					copyfiles = MB_YES;
+				}
+				else if (strcmp("format", options[option_index].name) == 0) {
+					sscanf(optarg, "%d", &format);
+				}
+				else if (strcmp("input", options[option_index].name) == 0) {
+					sscanf(optarg, "%s", read_file);
+				}
+				else if (strcmp("make-ancilliary", options[option_index].name) == 0) {
+					force_update = MB_YES;
+					make_inf = MB_YES;
+				}
+				else if (strcmp("update-ancilliary", options[option_index].name) == 0) {
+					make_inf = MB_YES;
+				}
+				else if (strcmp("processed", options[option_index].name) == 0) {
+					look_processed = MB_DATALIST_LOOK_YES;
+				}
+				else if (strcmp("problem", options[option_index].name) == 0) {
+					problem_report = MB_YES;
+				}
+				else if (strcmp("bounds", options[option_index].name) == 0) {
+					mb_get_bounds(optarg, bounds);
+					look_bounds = MB_YES;
+				}
+				else if (strcmp("status", options[option_index].name) == 0) {
+					status_report = MB_YES;
+				}
+				else if (strcmp("raw", options[option_index].name) == 0) {
+					look_processed = MB_DATALIST_LOOK_NO;
+				}
+				else if (strcmp("unlock", options[option_index].name) == 0) {
+					remove_locks = MB_YES;
+				}
+				else if (strcmp("datalistp", options[option_index].name) == 0) {
+					make_datalistp = MB_YES;
+				}
 
-			/* help */
-			else if (strcmp("help", options[option_index].name) == 0) {
-				help = MB_YES;
-			}
+				break;
 
-			/* copy files */
-			else if (strcmp("copy", options[option_index].name) == 0) {
+			/* short options (deprecated) */
+			case 'C':
+			case 'c':
 				copyfiles = MB_YES;
-			}
-
-			/* report datalists */
-			else if (strcmp("report", options[option_index].name) == 0) {
-				copyfiles = MB_YES;
-			}
-
-			/* format */
-			else if (strcmp("format", options[option_index].name) == 0) {
+				break;
+			case 'D':
+			case 'd':
+				reportdatalists = MB_YES;
+				break;
+			case 'F':
+			case 'f':
 				sscanf(optarg, "%d", &format);
-			}
-
-			/* input */
-			else if (strcmp("input", options[option_index].name) == 0) {
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
 				sscanf(optarg, "%s", read_file);
-			}
-
-			/* make ancillary files */
-			else if (strcmp("make-ancilliary", options[option_index].name) == 0) {
+				break;
+			case 'N':
+			case 'n':
 				force_update = MB_YES;
 				make_inf = MB_YES;
-			}
-
-			/* update ancillary files */
-			else if (strcmp("update-ancilliary", options[option_index].name) == 0) {
+				break;
+			case 'O':
+			case 'o':
 				make_inf = MB_YES;
-			}
-
-			/* look for processed files */
-			else if (strcmp("processed", options[option_index].name) == 0) {
+				break;
+			case 'P':
+			case 'p':
 				look_processed = MB_DATALIST_LOOK_YES;
-			}
-
-			/* problem report */
-			else if (strcmp("problem", options[option_index].name) == 0) {
+				break;
+			case 'Q':
+			case 'q':
 				problem_report = MB_YES;
-			}
-
-			/* bounds */
-			else if (strcmp("bounds", options[option_index].name) == 0) {
+				break;
+			case 'R':
+			case 'r':
 				mb_get_bounds(optarg, bounds);
 				look_bounds = MB_YES;
-			}
-
-			/* status report */
-			else if (strcmp("status", options[option_index].name) == 0) {
+				break;
+			case 'S':
+			case 's':
 				status_report = MB_YES;
-			}
-
-			/* look for raw (unprocessed) files */
-			else if (strcmp("raw", options[option_index].name) == 0) {
+				break;
+			case 'U':
+			case 'u':
 				look_processed = MB_DATALIST_LOOK_NO;
-			}
-
-			/* removed file locks */
-			else if (strcmp("unlock", options[option_index].name) == 0) {
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'Y':
+			case 'y':
 				remove_locks = MB_YES;
-			}
-
-			/* make datalistp file */
-			else if (strcmp("datalistp", options[option_index].name) == 0) {
+				break;
+			case 'Z':
+			case 'z':
 				make_datalistp = MB_YES;
+				break;
+			case '?':
+				errflg = true;
 			}
-
-			break;
-
-		/* short options (deprecated) */
-		case 'C':
-		case 'c':
-			copyfiles = MB_YES;
-			break;
-		case 'D':
-		case 'd':
-			reportdatalists = MB_YES;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'N':
-		case 'n':
-			force_update = MB_YES;
-			make_inf = MB_YES;
-			break;
-		case 'O':
-		case 'o':
-			make_inf = MB_YES;
-			break;
-		case 'P':
-		case 'p':
-			look_processed = MB_DATALIST_LOOK_YES;
-			break;
-		case 'Q':
-		case 'q':
-			problem_report = MB_YES;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			look_bounds = MB_YES;
-			break;
-		case 'S':
-		case 's':
-			status_report = MB_YES;
-			break;
-		case 'U':
-		case 'u':
-			look_processed = MB_DATALIST_LOOK_NO;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'Y':
-		case 'y':
-			remove_locks = MB_YES;
-			break;
-		case 'Z':
-		case 'z':
-			make_datalistp = MB_YES;
-			break;
-		case '?':
-			errflg = true;
 		}
 
-	/* set output stream */
-	if (verbose <= 1)
-		output = stdout;
-	else
-		output = stderr;
+		if (verbose <= 1)
+			output = stdout;
+		else
+			output = stderr;
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(output, "usage: %s\n", usage_message);
-		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(output, "usage: %s\n", usage_message);
+			fprintf(output, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(output, "\nProgram %s\n", program_name);
-		fprintf(output, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(output, "\nProgram %s\n", program_name);
+			fprintf(output, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(output, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(output, "dbg2  Control Parameters:\n");
-		fprintf(output, "dbg2       verbose:             %d\n", verbose);
-		fprintf(output, "dbg2       help:                %d\n", help);
-		fprintf(output, "dbg2       file:                %s\n", read_file);
-		fprintf(output, "dbg2       format:              %d\n", format);
-		fprintf(output, "dbg2       look_processed:      %d\n", look_processed);
-		fprintf(output, "dbg2       copyfiles:           %d\n", copyfiles);
-		fprintf(output, "dbg2       reportdatalists:     %d\n", reportdatalists);
-		fprintf(output, "dbg2       make_inf:            %d\n", make_inf);
-		fprintf(output, "dbg2       force_update:        %d\n", force_update);
-		fprintf(output, "dbg2       status_report:       %d\n", status_report);
-		fprintf(output, "dbg2       problem_report:      %d\n", problem_report);
-		fprintf(output, "dbg2       make_datalistp:      %d\n", make_datalistp);
-		fprintf(output, "dbg2       remove_locks:        %d\n", remove_locks);
-		fprintf(output, "dbg2       pings:               %d\n", pings);
-		fprintf(output, "dbg2       lonflip:             %d\n", lonflip);
-		fprintf(output, "dbg2       bounds[0]:           %f\n", bounds[0]);
-		fprintf(output, "dbg2       bounds[1]:           %f\n", bounds[1]);
-		fprintf(output, "dbg2       bounds[2]:           %f\n", bounds[2]);
-		fprintf(output, "dbg2       bounds[3]:           %f\n", bounds[3]);
-		fprintf(output, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
-		fprintf(output, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
-		fprintf(output, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
-		fprintf(output, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
-		fprintf(output, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
-		fprintf(output, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
-		fprintf(output, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
-		fprintf(output, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
-		fprintf(output, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
-		fprintf(output, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
-		fprintf(output, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
-		fprintf(output, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
-		fprintf(output, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
-		fprintf(output, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
-		fprintf(output, "dbg2       speedmin:            %f\n", speedmin);
-		fprintf(output, "dbg2       timegap:             %f\n", timegap);
-	}
+		if (verbose >= 2) {
+			fprintf(output, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(output, "dbg2  Control Parameters:\n");
+			fprintf(output, "dbg2       verbose:             %d\n", verbose);
+			fprintf(output, "dbg2       help:                %d\n", help);
+			fprintf(output, "dbg2       file:                %s\n", read_file);
+			fprintf(output, "dbg2       format:              %d\n", format);
+			fprintf(output, "dbg2       look_processed:      %d\n", look_processed);
+			fprintf(output, "dbg2       copyfiles:           %d\n", copyfiles);
+			fprintf(output, "dbg2       reportdatalists:     %d\n", reportdatalists);
+			fprintf(output, "dbg2       make_inf:            %d\n", make_inf);
+			fprintf(output, "dbg2       force_update:        %d\n", force_update);
+			fprintf(output, "dbg2       status_report:       %d\n", status_report);
+			fprintf(output, "dbg2       problem_report:      %d\n", problem_report);
+			fprintf(output, "dbg2       make_datalistp:      %d\n", make_datalistp);
+			fprintf(output, "dbg2       remove_locks:        %d\n", remove_locks);
+			fprintf(output, "dbg2       pings:               %d\n", pings);
+			fprintf(output, "dbg2       lonflip:             %d\n", lonflip);
+			fprintf(output, "dbg2       bounds[0]:           %f\n", bounds[0]);
+			fprintf(output, "dbg2       bounds[1]:           %f\n", bounds[1]);
+			fprintf(output, "dbg2       bounds[2]:           %f\n", bounds[2]);
+			fprintf(output, "dbg2       bounds[3]:           %f\n", bounds[3]);
+			fprintf(output, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
+			fprintf(output, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
+			fprintf(output, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
+			fprintf(output, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
+			fprintf(output, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
+			fprintf(output, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
+			fprintf(output, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
+			fprintf(output, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
+			fprintf(output, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
+			fprintf(output, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
+			fprintf(output, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
+			fprintf(output, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
+			fprintf(output, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
+			fprintf(output, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
+			fprintf(output, "dbg2       speedmin:            %f\n", speedmin);
+			fprintf(output, "dbg2       timegap:             %f\n", timegap);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(output, "\n%s\n", help_message);
-		fprintf(output, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(output, "\n%s\n", help_message);
+			fprintf(output, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* if make_datalistp desired then make it */
