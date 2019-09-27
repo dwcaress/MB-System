@@ -367,6 +367,8 @@ char *tnav_map_file=NULL;
 char *tnav_cfg_file=NULL;
 char *tnav_particles_file=NULL;
 char *tnav_log_dir=NULL;
+unsigned int tnav_mod=0;
+unsigned int tnav_cycles=0;
 wtnav_t *tnav = NULL;
 trnw_oflags_t tnav_oflags=TRN_OUT_DFL;
 msock_socket_t *tnav_osocket = NULL;
@@ -443,6 +445,7 @@ int main(int argc, char **argv) {
                                 "\t--tnav-ftype\n"
                                 "\t--tnav-out\n"
 							    "\t--tnav-pub\n"
+                                "\t--tnav-mod\n"
     ;
 	extern char WIN_DECLSPEC *optarg;
 	int option_index;
@@ -504,6 +507,7 @@ int main(int argc, char **argv) {
                                       {"tnav-ftype", required_argument, NULL, 0},
 								      {"tnav-out", required_argument, NULL, 0},
 							          {"tnav-pub", required_argument, NULL, 0},
+							          {"tnav-mod", required_argument, NULL, 0},
 	                                  {NULL, 0, NULL, 0}};
 
 	/* MBIO read control parameters */
@@ -769,44 +773,44 @@ int main(int argc, char **argv) {
                 sscanf(optarg,"%lf",&trn_status_interval_sec);
             }
 #ifdef WITH_MBTNAV
-                /* TRN enable */
+                /* TNAV enable */
             else if (strcmp("tnav-en", options[option_index].name) == 0) {
                 tnav_enable=true;
             }
-                /* TRN UTM zone */
+                /* TNAV UTM zone */
             else if (strcmp("tnav-utm", options[option_index].name) == 0) {
                 sscanf(optarg,"%ld",&tnav_utm_zone);
             }
-                /* TRN map type */
+                /* TNAV map type */
             else if (strcmp("tnav-mtype", options[option_index].name) == 0) {
                 sscanf(optarg,"%d",&tnav_mtype);
             }
-                /* TRN filter type */
+                /* TNAV filter type */
             else if (strcmp("tnav-ftype", options[option_index].name) == 0) {
                 sscanf(optarg,"%d",&trn_ftype);
             }
-                /* TRN map file */
+                /* TNAV map file */
             else if (strcmp("tnav-map", options[option_index].name) == 0) {
                 if(NULL!=tnav_map_file)free(tnav_map_file);
                 tnav_map_file=strdup(optarg);
             }
-                /* TRN config file */
+                /* TNAV config file */
             else if (strcmp("tnav-cfg", options[option_index].name) == 0) {
                 if(NULL!=tnav_cfg_file)free(tnav_cfg_file);
                 tnav_cfg_file=strdup(optarg);
             }
-                /* TRN particles file */
+                /* TNAV particles file */
             else if (strcmp("tnav-par", options[option_index].name) == 0) {
                 if(NULL!=tnav_particles_file)free(tnav_particles_file);
                 tnav_particles_file=strdup(optarg);
             }
-                /* TRN log directory */
+                /* TNAV log directory */
             else if (strcmp("tnav-log", options[option_index].name) == 0) {
                 if(NULL!=tnav_log_dir)free(tnav_log_dir);
                 tnav_log_dir=strdup(optarg);
                 sscanf(optarg,"%d",&tnav_log_dir);
             }
-            /* TRN out */
+            /* TNAV out */
             else if (strcmp("tnav-pub", options[option_index].name) == 0) {
                 char *ocopy=strdup(optarg);
                 tnav_ohost=strtok(ocopy,":");
@@ -820,7 +824,7 @@ int main(int argc, char **argv) {
                 tnav_oflags|=TRNW_OSOCKET;
                 // don't free ocopy here
             }
-            /* TRN out */
+            /* TNAV out */
             else if (strcmp("tnav-out", options[option_index].name) == 0) {
                 if(strstr(optarg,"stdout")){
                     tnav_oflags|=TRNW_OSOUT;
@@ -852,6 +856,11 @@ int main(int argc, char **argv) {
                 if(strstr(optarg,"nosocket")){
                     tnav_oflags&=~TRNW_OSOCKET;
                 }
+
+            }
+            /* TNAV modulus (decimation, update every nth) */
+            else if (strcmp("tnav-mod", options[option_index].name) == 0) {
+                sscanf(optarg,"%u",&tnav_mod);
             }
 #endif // WITH_MBTNAV
 
@@ -1657,8 +1666,8 @@ int main(int argc, char **argv) {
                         PMPRINT(MOD_MBTRNPP,MBTRNPP_V3,(stderr,"chk[%08X] idx[%zu] mb1sz[%zu]\n",checksum,index,mb1_size));
 #ifdef WITH_MBTNAV
 
-                        // update TRN [TODO: don't send every sounding]
-                        if(tnav_enable){
+                        // update TRN (modulo trn_mod if >0)
+                        if(tnav_enable && (tnav_mod==0 || ( (++tnav_cycles)%tnav_mod)==0) ){
 	                        mb1_t *mb1 = (mb1_t *)output_buffer;
     	                    mbtrnpp_trn_process_mb1(tnav,mb1,tnav_cfg);
                         }
@@ -2732,7 +2741,6 @@ int mbtrnpp_tnav_update_subs(msock_connection_t **ppeer, msock_socket_t *pub_soc
         do{
             
             MST_METRIC_START(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
-            fprintf(stderr,"%s - pub_sock[%p] pub_peer[%p] ppadr[%p]\n",__FUNCTION__,pub_sock,pub_peer,(pub_peer!=NULL?pub_peer->addr:NULL));
             iobytes = msock_recvfrom(pub_sock, pub_peer->addr, cmsg, TRN_MSG_CON_LEN,0);
             
             MST_METRIC_LAP(app_stats->stats->metrics[MBTPP_CH_TRNRX_XT], mtime_dtime());
