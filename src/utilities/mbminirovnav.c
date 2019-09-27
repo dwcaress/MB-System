@@ -66,11 +66,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  int option_index;
-  bool errflg = false;
-  int c;
-  bool help = false;
-
   /* ROV dive time start and end */
   int rov_dive_start_time_set = MB_NO;
   double rov_dive_start_time_d;
@@ -198,7 +193,13 @@ int main(int argc, char **argv) {
     mb_path output_file = "";
 
   /* process argument list */
+  {
+  int option_index;
+  bool errflg = false;
+  int c;
+  bool help = false;
   while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
+  {
     switch (c) {
     /* long options all return c=0 */
     case 0:
@@ -316,13 +317,12 @@ int main(int argc, char **argv) {
       errflg = true;
       break;
     }
-
+  }
   /* if error flagged then print it and exit */
   if (errflg) {
     fprintf(stderr, "usage: %s\n", usage_message);
     fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    error = MB_ERROR_BAD_USAGE;
-    exit(error);
+    exit(MB_ERROR_BAD_USAGE);
   }
 
   if (verbose >= 2) {
@@ -364,9 +364,8 @@ int main(int argc, char **argv) {
 
   /* print starting verbose */
   if (verbose == 1) {
-    time_t right_now;
     char date[32], user[128], *user_ptr, host[128];
-    right_now = time((time_t *)0);
+    const time_t right_now = time((time_t *)0);
     strcpy(date, ctime(&right_now));
     date[strlen(date) - 1] = '\0';
     if ((user_ptr = getenv("USER")) == NULL)
@@ -412,7 +411,7 @@ int main(int argc, char **argv) {
     fprintf(stderr, "\nusage: %s\n", usage_message);
     exit(error);
   }
-
+  }
   /*-------------------------------------------------------------------*/
   /* load input nav data */
 

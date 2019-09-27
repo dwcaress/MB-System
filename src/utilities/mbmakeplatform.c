@@ -207,11 +207,6 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char **argv) {
-	int option_index;
-	bool errflg = false;
-	int c;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -451,11 +446,14 @@ int main(int argc, char **argv) {
 	/* process argument list - for this program all the action
 	    happens in this loop and the order of arguments matters
 	    - the input and output arguments must be given first */
+	{
+	int option_index;
+	bool errflg = false;
+	int c;
 	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1) {
 		switch (c) {
 		/* long options all return c=0 */
 		case 0:
-			/* verbose */
 			if (strcmp("verbose", options[option_index].name) == 0) {
 				verbose++;
 
@@ -464,18 +462,11 @@ int main(int argc, char **argv) {
 					fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
 				}
 			}
-
-			/* help */
 			else if (strcmp("help", options[option_index].name) == 0) {
 				fprintf(stderr, "\n%s\n", help_message);
 				fprintf(stderr, "\nusage: %s\n", usage_message);
 				exit(error);
 			}
-
-			/*-------------------------------------------------------
-			 * Define input platform file to be modified */
-
-			/* input platform file */
 			else if (strcmp("input", options[option_index].name) == 0) {
 				/* set the name of the input platform file */
 				strcpy(input_platform_file, optarg);
@@ -588,11 +579,6 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
-
-			/*-------------------------------------------------------
-			 * Define input swath data from which to extract an initial platform model */
-
-			/* input swath file or datalist */
 			else if (strcmp("swath", options[option_index].name) == 0) {
 				/* set the name of the input platform file */
 				strcpy(input_swath_file, optarg);
@@ -786,75 +772,42 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
-
-			/* input swath format */
 			else if (strcmp("swath-format", options[option_index].name) == 0) {
 				/* set the swath format */
 				sscanf(optarg, "%d", &input_swath_format);
 			}
-
-			/*-------------------------------------------------------
-			 * Define output platform file to be created or modified */
-
-			/* output platform file */
 			else if (strcmp("output", options[option_index].name) == 0) {
 				/* set output platform file */
 				strcpy(output_platform_file, optarg);
 				output_platform_file_defined = MB_YES;
 			}
-
-			/*-------------------------------------------------------
-			 * Set platform type */
-
-			/* platform-type-surface-vessel */
 			else if (strcmp("platform-type-surface-vessel", options[option_index].name) == 0) {
 				platform->type = MB_PLATFORM_SURFACE_VESSEL;
 			}
-
-			/* platform-type-surface-vessel */
 			else if (strcmp("platform-type-tow-body", options[option_index].name) == 0) {
 				platform->type = MB_PLATFORM_TOW_BODY;
 			}
-
-			/* platform-type-surface-vessel */
 			else if (strcmp("platform-type-rov", options[option_index].name) == 0) {
 				platform->type = MB_PLATFORM_ROV;
 			}
-
-			/* platform-type-surface-vessel */
 			else if (strcmp("platform-type-auv", options[option_index].name) == 0) {
 				platform->type = MB_PLATFORM_AUV;
 			}
-
-			/* platform-type-surface-vessel */
 			else if (strcmp("platform-type-aircraft", options[option_index].name) == 0) {
 				platform->type = MB_PLATFORM_AIRCRAFT;
 			}
-
-			/* platform-type-surface-vessel */
 			else if (strcmp("platform-type-satellite", options[option_index].name) == 0) {
 				platform->type = MB_PLATFORM_SATELLITE;
 			}
-
-			/*-------------------------------------------------------
-			 * Set platform name and organization */
-
-			/* platform-name */
 			else if (strcmp("platform-name", options[option_index].name) == 0) {
 				strcpy(platform->name, optarg);
 			}
-
-			/* platform-organization */
 			else if (strcmp("platform-organization", options[option_index].name) == 0) {
 				strcpy(platform->organization, optarg);
 			}
-
-			/* platform-documentation-url */
 			else if (strcmp("platform-documentation-url", options[option_index].name) == 0) {
 				strcpy(platform->documentation_url, optarg);
 			}
-
-			/* platform-start-time */
 			else if (strcmp("platform-start-time", options[option_index].name) == 0) {
 				sscanf(optarg, "%d/%d/%d %d:%d:%lf", &platform->start_time_i[0], &platform->start_time_i[1],
 				       &platform->start_time_i[2], &platform->start_time_i[3], &platform->start_time_i[4], &seconds);
@@ -862,8 +815,6 @@ int main(int argc, char **argv) {
 				platform->start_time_i[6] = (int)(1000000 * (seconds - floor(seconds)));
 				mb_get_time(verbose, platform->start_time_i, &platform->start_time_d);
 			}
-
-			/* platform-end-time */
 			else if (strcmp("platform-end-time", options[option_index].name) == 0) {
 				sscanf(optarg, "%d/%d/%d %d:%d:%lf", &platform->end_time_i[0], &platform->end_time_i[1], &platform->end_time_i[2],
 				       &platform->end_time_i[3], &platform->end_time_i[4], &seconds);
@@ -871,11 +822,6 @@ int main(int argc, char **argv) {
 				platform->end_time_i[6] = (int)(1000000 * (seconds - floor(seconds)));
 				mb_get_time(verbose, platform->end_time_i, &platform->end_time_d);
 			}
-
-			/*-------------------------------------------------------
-			 * Start sensor */
-
-			/* add-sensor-sonar-echosounder */
 			else if (strcmp("add-sensor-sonar-echosounder", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -887,8 +833,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-sonar-multiechosounder */
 			else if (strcmp("add-sensor-sonar-multiechosounder", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -900,8 +844,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-sonar-sidescan */
 			else if (strcmp("add-sensor-sonar-sidescan", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -913,8 +855,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-sonar-interferometry */
 			else if (strcmp("add-sensor-sonar-interferometry", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -926,8 +866,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-sonar-multibeam */
 			else if (strcmp("add-sensor-sonar-multibeam", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -939,8 +877,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-sonar-multibeam-twohead */
 			else if (strcmp("add-sensor-sonar-multibeam-twohead", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -952,8 +888,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-sonar-subbottom */
 			else if (strcmp("add-sensor-sonar-subbottom", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -965,8 +899,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-camera-mono */
 			else if (strcmp("add-sensor-camera-mono", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -978,8 +910,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-camera-stereo */
 			else if (strcmp("add-sensor-camera-stereo", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -991,8 +921,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-camera-video */
 			else if (strcmp("add-sensor-camera-video", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1004,8 +932,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-lidar-scan */
 			else if (strcmp("add-sensor-lidar-scan", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1017,8 +943,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-lidar-swath */
 			else if (strcmp("add-sensor-lidar-swath", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1030,8 +954,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-position */
 			else if (strcmp("add-sensor-position", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1043,8 +965,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-compass */
 			else if (strcmp("add-sensor-compass", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1056,8 +976,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-vru */
 			else if (strcmp("add-sensor-vru", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1069,8 +987,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-imu */
 			else if (strcmp("add-sensor-imu", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1082,8 +998,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-ins */
 			else if (strcmp("add-sensor-ins", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1095,8 +1009,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-ins-with-pressure */
 			else if (strcmp("add-sensor-ins-with-pressure", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1108,8 +1020,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-ctd */
 			else if (strcmp("add-sensor-ctd", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1121,8 +1031,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-pressure */
 			else if (strcmp("add-sensor-pressure", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1134,8 +1042,6 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/* add-sensor-soundspeed */
 			else if (strcmp("add-sensor-soundspeed", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_OFF) {
 					sensor_mode = SENSOR_ADD;
@@ -1147,223 +1053,128 @@ int main(int argc, char **argv) {
 					platform_num_sensors++;
 				}
 			}
-
-			/*-------------------------------------------------------
-			 * Set sensor  model, organization and serialnumber */
-
-			/* sensor-model */
 			else if (strcmp("sensor-model", options[option_index].name) == 0) {
 				strcpy(tmp_sensor.model, optarg);
 			}
-
-			/* sensor-manufacturer */
 			else if (strcmp("sensor-manufacturer", options[option_index].name) == 0) {
 				strcpy(tmp_sensor.manufacturer, optarg);
 			}
-
-			/* sensor-serialnumber */
 			else if (strcmp("sensor-serialnumber", options[option_index].name) == 0) {
 				strcpy(tmp_sensor.serialnumber, optarg);
 			}
-
-			/*-------------------------------------------------------
-			 * Set sensor position, attitude and other data capabilities */
-
-			/* sensor-capability-position */
 			else if (strcmp("sensor-capability-position", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_POSITION;
 			}
-
-			/* sensor-capability-depth */
 			else if (strcmp("sensor-capability-depth", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_DEPTH;
 			}
-
-			/* sensor-capability-altitude */
 			else if (strcmp("sensor-capability-altitude", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_ALTITUDE;
 			}
-
-			/* sensor-capability-velocity */
 			else if (strcmp("sensor-capability-velocity", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_VELOCITY;
 			}
-
-			/* sensor-capability-acceleration */
 			else if (strcmp("sensor-capability-acceleration", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_ACCELERATION;
 			}
-
-			/* sensor-capability-pressure */
 			else if (strcmp("sensor-capability-pressure", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_PRESSURE;
 			}
-
-			/* sensor-capability-rollpitch */
 			else if (strcmp("sensor-capability-rollpitch", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_ROLLPITCH;
 			}
-
-			/* sensor-capability-heading */
 			else if (strcmp("sensor-capability-heading", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_HEADING;
 			}
-
-			/* sensor-capability-magneticfield */
 			else if (strcmp("sensor-capability-magneticfield", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_MAGNETICFIELD;
 			}
-
-			/* sensor-capability-temperature */
 			else if (strcmp("sensor-capability-temperature", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_TEMPERATURE;
 			}
-
-			/* sensor-capability-conductivity */
 			else if (strcmp("sensor-capability-conductivity", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_CONDUCTIVITY;
 			}
-
-			/* sensor-capability-salinity */
 			else if (strcmp("sensor-capability-salinity", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_SALINITY;
 			}
-
-			/* sensor-capability-soundspeed */
 			else if (strcmp("sensor-capability-soundspeed", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_SOUNDSPEED;
 			}
-
-			/* sensor-capability-gravity */
 			else if (strcmp("sensor-capability-gravity", options[option_index].name) == 0) {
 				tmp_sensor.capability1 = tmp_sensor.capability1 | MB_SENSOR_CAPABILITY1_GRAVITY;
 			}
-
-			/*-------------------------------------------------------
-			 * Set sensor sensor mapping capabilities */
-
-			/* sensor-capability-topography-echosounder */
 			else if (strcmp("sensor-capability-topography-echosounder", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_ECHOSOUNDER;
 			}
-
-			/* sensor-capability-topography-interferometry */
 			else if (strcmp("sensor-capability-topography-interferometry", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_INTERFEROMETRY;
 			}
-
-			/* sensor-capability-topography-sass */
 			else if (strcmp("sensor-capability-topography-sass", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_SASS;
 			}
-
-			/* sensor-capability-topography-multibeam */
 			else if (strcmp("sensor-capability-topography-multibeam", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_MULTIBEAM;
 			}
-
-			/* sensor-capability-topography-photogrammetry */
 			else if (strcmp("sensor-capability-topography-photogrammetry", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_PHOTOGRAMMETRY;
 			}
-
-			/* sensor-capability-topography-structurefrommotion */
 			else if (strcmp("sensor-capability-topography-structurefrommotion", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREFROMMOTION;
 			}
-
-			/* sensor-capability-topography-lidar */
 			else if (strcmp("sensor-capability-topography-lidar", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LIDAR;
 			}
-
-			/* sensor-capability-topography-structuredlight */
 			else if (strcmp("sensor-capability-topography-structuredlight", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_STRUCTUREDLIGHT;
 			}
-
-			/* sensor-capability-topography-laserscanner */
 			else if (strcmp("sensor-capability-topography-laserscanner", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_TOPOGRAPHY_LASERSCANNER;
 			}
-
-			/* sensor-capability-backscatter-echosounder */
 			else if (strcmp("sensor-capability-backscatter-echosounder", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_BACKSCATTER_ECHOSOUNDER;
 			}
-
-			/* sensor-capability-backscatter-sidescan */
 			else if (strcmp("sensor-capability-backscatter-sidescan", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_BACKSCATTER_SIDESCAN;
 			}
-
-			/* sensor-capability-backscatter-interferometry */
 			else if (strcmp("sensor-capability-backscatter-interferometry", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_BACKSCATTER_INTERFEROMETRY;
 			}
-
-			/* sensor-capability-backscatter-sass */
 			else if (strcmp("sensor-capability-backscatter-sass", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_BACKSCATTER_SASS;
 			}
-
-			/* sensor-capability-backscatter-multibeam */
 			else if (strcmp("sensor-capability-backscatter-multibeam", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_BACKSCATTER_MULTIBEAM;
 			}
-
-			/* sensor-capability-backscatter-lidar */
 			else if (strcmp("sensor-capability-backscatter-lidar", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_BACKSCATTER_LIDAR;
 			}
-
-			/* sensor-capability-backscatter-structuredlight */
 			else if (strcmp("sensor-capability-backscatter-structuredlight", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_BACKSCATTER_STRUCTUREDLIGHT;
 			}
-
-			/* sensor-capability-backscatter-laserscanner */
 			else if (strcmp("sensor-capability-backscatter-laserscanner", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_BACKSCATTER_LASERSCANNER;
 			}
-
-			/* sensor-capability-photography */
 			else if (strcmp("sensor-capability-photography", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_PHOTOGRAPHY;
 			}
-
-			/* sensor-capability-stereophotography */
 			else if (strcmp("sensor-capability-stereophotography", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_STEREOPHOTOGRAPHY;
 			}
-
-			/* sensor-capability-video */
 			else if (strcmp("sensor-capability-video", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_VIDEO;
 			}
-
-			/* sensor-capability-stereovideo */
 			else if (strcmp("sensor-capability-stereovideo", options[option_index].name) == 0) {
 				tmp_sensor.capability2 = tmp_sensor.capability2 | MB_SENSOR_CAPABILITY2_STEREOVIDEO;
 			}
-
 			/*-------------------------------------------------------
 			 * Set sensor capability bitmasks directly */
-
-			/* sensor-capability1 */
 			else if (strcmp("sensor-capability1", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &tmp_sensor.capability1);
 			}
-
-			/* sensor-capability2 */
 			else if (strcmp("sensor-capability2", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &tmp_sensor.capability2);
 			}
-
-			/*-------------------------------------------------------
-			 * Set sensor offsets */
-
-			/* sensor-offsets */
 			else if (strcmp("sensor-offsets", options[option_index].name) == 0) {
 				sscanf(optarg, "%lf/%lf/%lf/%lf/%lf/%lf", &tmp_offsets[tmp_sensor.num_offsets].position_offset_x,
 				       &tmp_offsets[tmp_sensor.num_offsets].position_offset_y,
@@ -1375,8 +1186,6 @@ int main(int argc, char **argv) {
 				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = MB_YES;
 				tmp_sensor.num_offsets++;
 			}
-
-			/* sensor-offset-positions */
 			else if (strcmp("sensor-offset-positions", options[option_index].name) == 0) {
 				sscanf(optarg, "%lf/%lf/%lf", &tmp_offsets[tmp_sensor.num_offsets].position_offset_x,
 				       &tmp_offsets[tmp_sensor.num_offsets].position_offset_y,
@@ -1385,8 +1194,6 @@ int main(int argc, char **argv) {
 				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = MB_NO;
 				tmp_sensor.num_offsets++;
 			}
-
-			/* sensor-offset-angles */
 			else if (strcmp("sensor-offset-angles", options[option_index].name) == 0) {
 				sscanf(optarg, "%lf/%lf/%lf", &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_heading,
 				       &tmp_offsets[tmp_sensor.num_offsets].attitude_offset_roll,
@@ -1395,17 +1202,10 @@ int main(int argc, char **argv) {
 				tmp_offsets[tmp_sensor.num_offsets].attitude_offset_mode = MB_YES;
 				tmp_sensor.num_offsets++;
 			}
-
-			/*-------------------------------------------------------*/
-			/* Set sensor time latency */
-
-			/* sensor-time-latency */
 			else if (strcmp("sensor-time-latency", options[option_index].name) == 0) {
 				sscanf(optarg, "%lf", &tmp_sensor.time_latency_static);
 				tmp_sensor.time_latency_mode = MB_SENSOR_TIME_LATENCY_STATIC;
 			}
-
-			/* sensor-time-latency-model */
 			else if (strcmp("sensor-time-latency-model", options[option_index].name) == 0) {
 				/* set the name of the input time latency file */
 				strcpy(time_latency_model_file, optarg);
@@ -1452,174 +1252,102 @@ int main(int argc, char **argv) {
 				}
 				fclose(tfp);
 			}
-
-			/*-------------------------------------------------------*/
-			/* Set current sensor to be a data source for the platform */
-
-			/* sensor-source-bathymetry */
 			else if (strcmp("sensor-source-bathymetry", options[option_index].name) == 0) {
 				platform->source_bathymetry = sensor_id;
 			}
-
-			/* sensor-source-bathymetry1 */
 			else if (strcmp("sensor-source-bathymetry1", options[option_index].name) == 0) {
 				platform->source_bathymetry1 = sensor_id;
 			}
-
-			/* sensor-source-bathymetry2 */
 			else if (strcmp("sensor-source-bathymetry2", options[option_index].name) == 0) {
 				platform->source_bathymetry2 = sensor_id;
 			}
-
-			/* sensor-source-bathymetry3 */
 			else if (strcmp("sensor-source-bathymetry3", options[option_index].name) == 0) {
 				platform->source_bathymetry3 = sensor_id;
 			}
-
-			/* sensor-source-backscatter */
 			else if (strcmp("sensor-source-backscatter", options[option_index].name) == 0) {
 				platform->source_backscatter = sensor_id;
 			}
-
-			/* sensor-source-backscatter1 */
 			else if (strcmp("sensor-source-backscatter1", options[option_index].name) == 0) {
 				platform->source_backscatter1 = sensor_id;
 			}
-
-			/* sensor-source-backscatter2 */
 			else if (strcmp("sensor-source-backscatter2", options[option_index].name) == 0) {
 				platform->source_backscatter2 = sensor_id;
 			}
-
-			/* sensor-source-backscatter3 */
 			else if (strcmp("sensor-source-backscatter3", options[option_index].name) == 0) {
 				platform->source_backscatter3 = sensor_id;
 			}
-
-			/* sensor-source-subbottom */
 			else if (strcmp("sensor-source-subbottom", options[option_index].name) == 0) {
 				platform->source_subbottom = sensor_id;
 			}
-
-			/* sensor-source-subbottom1 */
 			else if (strcmp("sensor-source-subbottom1", options[option_index].name) == 0) {
 				platform->source_subbottom1 = sensor_id;
 			}
-
-			/* sensor-source-subbottom2 */
 			else if (strcmp("sensor-source-subbottom2", options[option_index].name) == 0) {
 				platform->source_subbottom2 = sensor_id;
 			}
-
-			/* sensor-source-subbottom3 */
 			else if (strcmp("sensor-source-subbottom3", options[option_index].name) == 0) {
 				platform->source_subbottom3 = sensor_id;
 			}
-
-			/* sensor-source-position */
 			else if (strcmp("sensor-source-position", options[option_index].name) == 0) {
 				platform->source_position = sensor_id;
 			}
-
-			/* sensor-source-position1 */
 			else if (strcmp("sensor-source-position1", options[option_index].name) == 0) {
 				platform->source_position1 = sensor_id;
 			}
-
-			/* sensor-source-position2 */
 			else if (strcmp("sensor-source-position2", options[option_index].name) == 0) {
 				platform->source_position2 = sensor_id;
 			}
-
-			/* sensor-source-position3 */
 			else if (strcmp("sensor-source-position3", options[option_index].name) == 0) {
 				platform->source_position3 = sensor_id;
 			}
-
-			/* sensor-source-depth */
 			else if (strcmp("sensor-source-depth", options[option_index].name) == 0) {
 				platform->source_depth = sensor_id;
 			}
-
-			/* sensor-source-depth1 */
 			else if (strcmp("sensor-source-depth1", options[option_index].name) == 0) {
 				platform->source_depth1 = sensor_id;
 			}
-
-			/* sensor-source-depth2 */
 			else if (strcmp("sensor-source-depth2", options[option_index].name) == 0) {
 				platform->source_depth2 = sensor_id;
 			}
-
-			/* sensor-source-depth3 */
 			else if (strcmp("sensor-source-depth3", options[option_index].name) == 0) {
 				platform->source_depth3 = sensor_id;
 			}
-
-			/* sensor-source-heading */
 			else if (strcmp("sensor-source-heading", options[option_index].name) == 0) {
 				platform->source_heading = sensor_id;
 			}
-
-			/* sensor-source-heading1 */
 			else if (strcmp("sensor-source-heading1", options[option_index].name) == 0) {
 				platform->source_heading1 = sensor_id;
 			}
-
-			/* sensor-source-heading2 */
 			else if (strcmp("sensor-source-heading2", options[option_index].name) == 0) {
 				platform->source_heading2 = sensor_id;
 			}
-
-			/* sensor-source-heading3 */
 			else if (strcmp("sensor-source-heading3", options[option_index].name) == 0) {
 				platform->source_heading3 = sensor_id;
 			}
-
-			/* sensor-source-rollpitch */
 			else if (strcmp("sensor-source-rollpitch", options[option_index].name) == 0) {
 				platform->source_rollpitch = sensor_id;
 			}
-
-			/* sensor-source-rollpitch1 */
 			else if (strcmp("sensor-source-rollpitch1", options[option_index].name) == 0) {
 				platform->source_rollpitch1 = sensor_id;
 			}
-
-			/* sensor-source-rollpitch2 */
 			else if (strcmp("sensor-source-rollpitch2", options[option_index].name) == 0) {
 				platform->source_rollpitch2 = sensor_id;
 			}
-
-			/* sensor-source-rollpitch3 */
 			else if (strcmp("sensor-source-rollpitch3", options[option_index].name) == 0) {
 				platform->source_rollpitch3 = sensor_id;
 			}
-
-			/* sensor-source-heave */
 			else if (strcmp("sensor-source-heave", options[option_index].name) == 0) {
 				platform->source_heave = sensor_id;
 			}
-
-			/* sensor-source-heave1 */
 			else if (strcmp("sensor-source-heave1", options[option_index].name) == 0) {
 				platform->source_heave1 = sensor_id;
 			}
-
-			/* sensor-source-heave2 */
 			else if (strcmp("sensor-source-heave2", options[option_index].name) == 0) {
 				platform->source_heave2 = sensor_id;
 			}
-
-			/* sensor-source-heave3 */
 			else if (strcmp("sensor-source-heave3", options[option_index].name) == 0) {
 				platform->source_heave3 = sensor_id;
 			}
-
-			/*-------------------------------------------------------*/
-			/* End current sensor */
-
-			/* end-sensor */
 			else if (strcmp("end-sensor", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_ADD) {
 					status = mb_platform_add_sensor(verbose, (void *)platform, tmp_sensor.type, tmp_sensor.model,
@@ -1641,242 +1369,171 @@ int main(int argc, char **argv) {
 					sensor_id = -1;
 				}
 			}
-
-			/*-------------------------------------------------------*/
-			/* Modify existing sensor */
-
-			/* modify-sensor */
 			else if (strcmp("modify-sensor", options[option_index].name) == 0) {
 				sscanf(optarg, "%d", &sensor_id);
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-bathymetry */
 			else if (strcmp("modify-sensor-bathymetry", options[option_index].name) == 0) {
 				sensor_id = platform->source_bathymetry;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-bathymetry1 */
 			else if (strcmp("modify-sensor-bathymetry1", options[option_index].name) == 0) {
 				sensor_id = platform->source_bathymetry1;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-bathymetry2 */
 			else if (strcmp("modify-sensor-bathymetry2", options[option_index].name) == 0) {
 				sensor_id = platform->source_bathymetry2;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-bathymetry3 */
 			else if (strcmp("modify-sensor-bathymetry3", options[option_index].name) == 0) {
 				sensor_id = platform->source_bathymetry3;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-backscatter */
 			else if (strcmp("modify-sensor-backscatter", options[option_index].name) == 0) {
 				sensor_id = platform->source_backscatter;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-backscatter1 */
 			else if (strcmp("modify-sensor-backscatter1", options[option_index].name) == 0) {
 				sensor_id = platform->source_backscatter1;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-backscatter2 */
 			else if (strcmp("modify-sensor-backscatter2", options[option_index].name) == 0) {
 				sensor_id = platform->source_backscatter2;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-backscatter3 */
 			else if (strcmp("modify-sensor-backscatter3", options[option_index].name) == 0) {
 				sensor_id = platform->source_backscatter3;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-subbottom */
 			else if (strcmp("modify-sensor-subbottom", options[option_index].name) == 0) {
 				sensor_id = platform->source_subbottom;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-subbottom1 */
 			else if (strcmp("modify-sensor-subbottom1", options[option_index].name) == 0) {
 				sensor_id = platform->source_subbottom1;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-subbottom2 */
 			else if (strcmp("modify-sensor-subbottom2", options[option_index].name) == 0) {
 				sensor_id = platform->source_subbottom2;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-subbottom3 */
 			else if (strcmp("modify-sensor-subbottom3", options[option_index].name) == 0) {
 				sensor_id = platform->source_subbottom3;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-position */
 			else if (strcmp("modify-sensor-position", options[option_index].name) == 0) {
 				sensor_id = platform->source_position;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-position1 */
 			else if (strcmp("modify-sensor-position1", options[option_index].name) == 0) {
 				sensor_id = platform->source_position1;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-position2 */
 			else if (strcmp("modify-sensor-position2", options[option_index].name) == 0) {
 				sensor_id = platform->source_position2;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-position3 */
 			else if (strcmp("modify-sensor-position3", options[option_index].name) == 0) {
 				sensor_id = platform->source_position3;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-depth */
 			else if (strcmp("modify-sensor-depth", options[option_index].name) == 0) {
 				sensor_id = platform->source_depth;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-depth1 */
 			else if (strcmp("modify-sensor-depth1", options[option_index].name) == 0) {
 				sensor_id = platform->source_depth1;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-depth2 */
 			else if (strcmp("modify-sensor-depth2", options[option_index].name) == 0) {
 				sensor_id = platform->source_depth2;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-depth3 */
 			else if (strcmp("modify-sensor-depth3", options[option_index].name) == 0) {
 				sensor_id = platform->source_depth3;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-heading */
 			else if (strcmp("modify-sensor-heading", options[option_index].name) == 0) {
 				sensor_id = platform->source_heading;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-heading1 */
 			else if (strcmp("modify-sensor-heading1", options[option_index].name) == 0) {
 				sensor_id = platform->source_heading1;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-heading2 */
 			else if (strcmp("modify-sensor-heading2", options[option_index].name) == 0) {
 				sensor_id = platform->source_heading2;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-heading3 */
 			else if (strcmp("modify-sensor-heading3", options[option_index].name) == 0) {
 				sensor_id = platform->source_heading3;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-rollpitch */
 			else if (strcmp("modify-sensor-rollpitch", options[option_index].name) == 0) {
 				sensor_id = platform->source_rollpitch;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-rollpitch1 */
 			else if (strcmp("modify-sensor-rollpitch1", options[option_index].name) == 0) {
 				sensor_id = platform->source_rollpitch1;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-rollpitch2 */
 			else if (strcmp("modify-sensor-rollpitch2", options[option_index].name) == 0) {
 				sensor_id = platform->source_rollpitch2;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-rollpitch3 */
 			else if (strcmp("modify-sensor-rollpitch3", options[option_index].name) == 0) {
 				sensor_id = platform->source_rollpitch3;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-heave */
 			else if (strcmp("modify-sensor-heave", options[option_index].name) == 0) {
 				sensor_id = platform->source_heave;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-heave1 */
 			else if (strcmp("modify-sensor-heave1", options[option_index].name) == 0) {
 				sensor_id = platform->source_heave1;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-heave2 */
 			else if (strcmp("modify-sensor-heave2", options[option_index].name) == 0) {
 				sensor_id = platform->source_heave2;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-sensor-heave3 */
 			else if (strcmp("modify-sensor-heave3", options[option_index].name) == 0) {
 				sensor_id = platform->source_heave3;
 				sensor_mode = SENSOR_MODIFY;
 				active_sensor = &platform->sensors[sensor_id];
 			}
-
-			/* modify-offsets */
 			else if (strcmp("modify-offsets", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_MODIFY || sensor_mode == SENSOR_ADD) {
 					nscan = sscanf(optarg, "%d/%lf/%lf/%lf/%lf/%lf/%lf", &ioffset, &d1, &d2, &d3, &d4, &d5, &d6);
@@ -1892,8 +1549,6 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
-
-			/* modify-offset-positions */
 			else if (strcmp("modify-offset-positions", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_MODIFY || sensor_mode == SENSOR_ADD) {
 					nscan = sscanf(optarg, "%d/%lf/%lf/%lf", &ioffset, &d1, &d2, &d3);
@@ -1906,8 +1561,6 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
-
-			/* modify-offset-angles */
 			else if (strcmp("modify-offset-angles", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_MODIFY || sensor_mode == SENSOR_ADD) {
 					nscan = sscanf(optarg, "%d/%lf/%lf/%lf", &ioffset, &d1, &d2, &d3);
@@ -1920,16 +1573,12 @@ int main(int argc, char **argv) {
 					}
 				}
 			}
-
-			/* modify-time-latency */
 			else if (strcmp("modify-time-latency", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_MODIFY || sensor_mode == SENSOR_ADD) {
 					sscanf(optarg, "%lf", &active_sensor->time_latency_static);
 					active_sensor->time_latency_mode = MB_SENSOR_TIME_LATENCY_STATIC;
 				}
 			}
-
-			/* modify-time-latency-model */
 			else if (strcmp("modify-time-latency-model", options[option_index].name) == 0) {
 				if (sensor_mode == SENSOR_MODIFY || sensor_mode == SENSOR_ADD) {
 					/* set the name of the input time latency file */
@@ -1978,10 +1627,6 @@ int main(int argc, char **argv) {
 					fclose(tfp);
 				}
 			}
-
-			/*-------------------------------------------------------*/
-
-			/* end-modify */
 			else if (strcmp("end-modify", options[option_index].name) == 0) {
 				sensor_mode = SENSOR_OFF;
 				sensor_id = -1;
@@ -2000,13 +1645,13 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	/* if error flagged then print it and exit */
 	if (errflg) {
 		fprintf(stderr, "usage: %s\n", usage_message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 		error = MB_ERROR_BAD_USAGE;
 		exit(error);
 	}
+	}  // process argument list
 
 	/* if an output has been specified but there are still not sensors in the
 	 * platform, make a generic null platform with one sensor that is the source

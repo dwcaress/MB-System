@@ -100,7 +100,6 @@ char *GMT_runtime_bindir_win32(char *result) {
 
 int main(int argc, char **argv) {
 	int verbose = 0;
-	bool help = false;
 
 	double longitude = 0.0;
 	double latitude = 0.0;
@@ -109,6 +108,7 @@ int main(int argc, char **argv) {
 	strcpy(ofile, "velocity");
 
 	/* process argument list */
+	bool help = false;
 	{
 		bool errflg = 0;
 		int c;

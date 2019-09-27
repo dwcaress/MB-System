@@ -74,16 +74,7 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	static struct option options[] = {{"verbose", no_argument, NULL, 0},      {"help", no_argument, NULL, 0},
-	                                  {"verbose", no_argument, NULL, 0},      {"input", required_argument, NULL, 0},
-	                                  {"output", required_argument, NULL, 0}, {NULL, 0, NULL, 0}};
-
 	int option_index;
-	bool errflg = false;
-	int c;
-	bool help = false;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -169,68 +160,80 @@ int main(int argc, char **argv) {
 	strcpy(ofile, "stdout");
 
 	/* process argument list */
-	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
-		switch (c) {
-		/* long options all return c=0 */
-		case 0:
-			/* verbose */
-			if (strcmp("verbose", options[option_index].name) == 0) {
-				verbose++;
+	{
+		const struct option options[] =
+		    {{"verbose", no_argument, NULL, 0},
+		     {"help", no_argument, NULL, 0},
+		     {"verbose", no_argument, NULL, 0},
+		     {"input", required_argument, NULL, 0},
+		     {"output", required_argument, NULL, 0},
+		     {NULL, 0, NULL, 0}};
+
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
+		{
+			switch (c) {
+			/* long options all return c=0 */
+			case 0:
+				/* verbose */
+				if (strcmp("verbose", options[option_index].name) == 0) {
+					verbose++;
+				}
+
+				/* help */
+				else if (strcmp("help", options[option_index].name) == 0) {
+					help = MB_YES;
+				}
+
+				/*-------------------------------------------------------
+				 * Define input and output files */
+
+				/* input */
+				else if (strcmp("input", options[option_index].name) == 0) {
+					strcpy(ifile, optarg);
+				}
+
+				/* output */
+				else if (strcmp("output", options[option_index].name) == 0) {
+					strcpy(ofile, optarg);
+				}
+
+				break;
+			case '?':
+				errflg = true;
 			}
-
-			/* help */
-			else if (strcmp("help", options[option_index].name) == 0) {
-				help = MB_YES;
-			}
-
-			/*-------------------------------------------------------
-			 * Define input and output files */
-
-			/* input */
-			else if (strcmp("input", options[option_index].name) == 0) {
-				strcpy(ifile, optarg);
-			}
-
-			/* output */
-			else if (strcmp("output", options[option_index].name) == 0) {
-				strcpy(ofile, optarg);
-			}
-
-			break;
-		case '?':
-			errflg = true;
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Default MB-System Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                       %d\n", help);
-		fprintf(stderr, "dbg2       lonflip:                    %d\n", lonflip);
-		fprintf(stderr, "dbg2  Input and Output Files:\n");
-		fprintf(stderr, "dbg2       ifile:                      %s\n", ifile);
-		fprintf(stderr, "dbg2       ofile:                      %s\n", ofile);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Default MB-System Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:                    %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                       %d\n", help);
+			fprintf(stderr, "dbg2       lonflip:                    %d\n", lonflip);
+			fprintf(stderr, "dbg2  Input and Output Files:\n");
+			fprintf(stderr, "dbg2       ifile:                      %s\n", ifile);
+			fprintf(stderr, "dbg2       ofile:                      %s\n", ofile);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* count the number of records in the  */
