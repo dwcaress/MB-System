@@ -15,7 +15,7 @@ if BUILD_MBTNAV
   XBUILD_SUB_MBTRNBIN = mbtrnutils
 endif
 
-SUBDIRS = gsf surf bsio $(XBUILD_SUB_MBTNAV) $(XBUILD_SUB_MBTRN) mbio mbaux  \
+SUBDIRS = gsf surf bsio $(XBUILD_SUB_MBTRN) $(XBUILD_SUB_MBTNAV) mbio mbaux  \
 	utilities $(XBUILD_SUB_MBTRNBIN) gmt otps macros share man html ps \
 	$(XBUILD_SUB_MOTIF) $(XBUILD_SUB_GL)
 
