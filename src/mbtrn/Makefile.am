@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libr7kr.la
+lib_LTLIBRARIES = libmframe.la libr7kr.la
 
 include_HEADERS = \
 				mframe/src/mframe.h \
@@ -31,12 +31,11 @@ MFRAME_OPTS=$(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src -I${top_srcdir}/src/mbtrnav/trnw \
  -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 
+libmframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
-libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0
-
-libr7kr_la_SOURCES =  mframe/src/mframe.c \
-                mframe/src/mcbuf.c \
-                mframe/src/msocket.c \
+libmframe_la_SOURCES = mframe/src/mframe.c \
+				mframe/src/mcbuf.c \
+				mframe/src/msocket.c \
                 mframe/src/mthread.c \
                 mframe/src/mfile.c \
                 mframe/src/mtime.c\
@@ -46,15 +45,18 @@ libr7kr_la_SOURCES =  mframe/src/mframe.c \
                 mframe/src/mlist.c \
                 mframe/src/mstats.c \
                 mframe/src/mswap.c \
-                mframe/src/mutils.c \
-				utils/mconfig.c \
+                mframe/src/mutils.c
+libmframe_la_LIBADD =
+
+libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+
+libr7kr_la_SOURCES =  utils/mconfig.c \
 				utils/mb1_msg.c \
 				utils/mb71_msg.c \
                 r7kr/r7k-reader.c \
                 r7kr/r7kc.c
 
-
-libr7kr_la_LIBADD = -lpthread
+libr7kr_la_LIBADD = libmframe.la -lpthread
 
 bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv r7kr_test mbtnav-cli
 

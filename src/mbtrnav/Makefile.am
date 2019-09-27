@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la libmframe.la
+lib_LTLIBRARIES = libgeolib.la libnewmat.la libqnx.la libtnav.la libtrnw.la
 
 include_HEADERS =
 
@@ -160,24 +160,6 @@ libtnav_la_SOURCES = \
                 terrain-nav/OctreeNode.cpp \
                 terrain-nav/TRNUtils.cpp
 
-libmframe_la_LDFLAGS =  -no-undefined -version-info 0:0:0
-
-libmframe_la_SOURCES = \
-                mframe/src/mframe.c \
-                mframe/src/mfile.c \
-                mframe/src/msocket.c \
-                mframe/src/mlist.c \
-                mframe/src/mmdebug.c \
-                mframe/src/mutils.c \
-                mframe/src/mthread.c \
-                mframe/src/merror.c \
-                mframe/src/mtime.c \
-                mframe/src/mstats.c \
-                mframe/src/mlog.c
-
-libmframe_la_LIBADD =
-
-
 libtnav_la_LIBADD = libgeolib.la \
 					libnewmat.la \
 					libqnx.la \
@@ -199,7 +181,7 @@ bin_PROGRAMS =   trn-server trn-cli #  readlog writelog
 
 
 trn_cli_SOURCES = trnw/trncli_test.c trnw/trn_cli.c
-trn_cli_LDADD = libmframe.la libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
+trn_cli_LDADD = $(libmframe_LIBS) libtrnw.la libqnx.la libnewmat.la  libtnav.la  libgeolib.la
 
 trn_server_SOURCES = utils/trn_server.cpp
 trn_server_LDADD = libtnav.la libqnx.la libnewmat.la libtnav.la libgeolib.la
