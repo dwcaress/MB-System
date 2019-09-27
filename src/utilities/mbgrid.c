@@ -438,11 +438,6 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message = NULL;
@@ -663,265 +658,268 @@ int main(int argc, char **argv) {
 	pid = getpid();
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) !=
-	       -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &datatype);
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%lf", &border);
-			setborder = MB_YES;
-			break;
-		case 'C':
-		case 'c':
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) !=
+		       -1)
 		{
-			const int n = sscanf(optarg, "%d/%d", &clip, &clipmode);
-			if (n < 1)
-				clipmode = MBGRID_INTERP_NONE;
-			else if (n == 1 && clip > 0)
-				clipmode = MBGRID_INTERP_GAP;
-			else if (n == 1)
-				clipmode = MBGRID_INTERP_NONE;
-			else if (clip > 0 && clipmode < 0)
-				clipmode = MBGRID_INTERP_GAP;
-			else if (clipmode >= 3)
-				clipmode = MBGRID_INTERP_ALL;
-			break;
-		}
-		case 'D':
-		case 'd':
-		{
-			const int n = sscanf(optarg, "%d/%d", &xdim, &ydim);
-			if (n == 2)
-				set_dimensions = MB_YES;
-			break;
-		}
-		case 'E':
-		case 'e':
-		{
-			if (optarg[strlen(optarg) - 1] == '!') {
-				spacing_priority = MB_YES;
-				optarg[strlen(optarg) - 1] = '\0';
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &datatype);
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%lf", &border);
+				setborder = MB_YES;
+				break;
+			case 'C':
+			case 'c':
+			{
+				const int n = sscanf(optarg, "%d/%d", &clip, &clipmode);
+				if (n < 1)
+					clipmode = MBGRID_INTERP_NONE;
+				else if (n == 1 && clip > 0)
+					clipmode = MBGRID_INTERP_GAP;
+				else if (n == 1)
+					clipmode = MBGRID_INTERP_NONE;
+				else if (clip > 0 && clipmode < 0)
+					clipmode = MBGRID_INTERP_GAP;
+				else if (clipmode >= 3)
+					clipmode = MBGRID_INTERP_ALL;
+				break;
 			}
-			const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
-			if (n > 1)
-				set_spacing = MB_YES;
-			if (n < 3)
-				strcpy(units, "meters");
-			break;
-		}
-		case 'F':
-		case 'f':
-		{
-			const int n = sscanf(optarg, "%d/%lf", &grid_mode, &dvalue);
-      if (n == 2) {
-        if (grid_mode == MBGRID_MINIMUM_FILTER) {
-          minormax_weighted_mean_threshold = dvalue;
-          grid_mode = MBGRID_MINIMUM_WEIGHTED_MEAN;
-        } else if (grid_mode == MBGRID_MAXIMUM_FILTER) {
-          minormax_weighted_mean_threshold = dvalue;
-          grid_mode = MBGRID_MAXIMUM_WEIGHTED_MEAN;
-        } else {
-          minormax_weighted_mean_threshold = dvalue;
-        }
-      }
-			break;
-		}
-		case 'G':
-		case 'g':
-			if (optarg[0] == '=') {
-				gridkind = MBGRID_GMTGRD;
-				strcpy(gridkindstring, optarg);
+			case 'D':
+			case 'd':
+			{
+				const int n = sscanf(optarg, "%d/%d", &xdim, &ydim);
+				if (n == 2)
+					set_dimensions = MB_YES;
+				break;
 			}
-			else {
-				sscanf(optarg, "%d", &gridkind);
-				if (gridkind == MBGRID_CDFGRD) {
-					gridkind = MBGRID_GMTGRD;
-					gridkindstring[0] = '\0';
+			case 'E':
+			case 'e':
+			{
+				if (optarg[strlen(optarg) - 1] == '!') {
+					spacing_priority = MB_YES;
+					optarg[strlen(optarg) - 1] = '\0';
 				}
-				else if (gridkind > MBGRID_GMTGRD) {
-					sprintf(gridkindstring, "=%d", (gridkind - 100));
-					gridkind = MBGRID_GMTGRD;
+				const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+				if (n > 1)
+					set_spacing = MB_YES;
+				if (n < 3)
+					strcpy(units, "meters");
+				break;
+			}
+			case 'F':
+			case 'f':
+			{
+				const int n = sscanf(optarg, "%d/%lf", &grid_mode, &dvalue);
+				if (n == 2) {
+				  if (grid_mode == MBGRID_MINIMUM_FILTER) {
+				    minormax_weighted_mean_threshold = dvalue;
+				    grid_mode = MBGRID_MINIMUM_WEIGHTED_MEAN;
+				  } else if (grid_mode == MBGRID_MAXIMUM_FILTER) {
+				    minormax_weighted_mean_threshold = dvalue;
+				    grid_mode = MBGRID_MAXIMUM_WEIGHTED_MEAN;
+				  } else {
+				    minormax_weighted_mean_threshold = dvalue;
+				  }
 				}
+				break;
 			}
-			break;
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", filelist);
-			break;
-		case 'J':
-		case 'j':
-			sscanf(optarg, "%s", projection_pars);
-			projection_pars_f = MB_YES;
-			break;
-		case 'K':
-		case 'k':
-			sscanf(optarg, "%s", backgroundfile);
-			if ((grdrasterid = atoi(backgroundfile)) <= 0)
-				grdrasterid = -1;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			break;
-		case 'M':
-		case 'm':
-			more = MB_YES;
-			break;
-		case 'N':
-		case 'n':
-			use_NaN = MB_YES;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", fileroot);
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings);
-			break;
-		case 'Q':
-		case 'q':
-			bathy_in_feet = MB_YES;
-			break;
-		case 'R':
-		case 'r':
-			if (strchr(optarg, '/') == NULL) {
-				sscanf(optarg, "%lf", &boundsfactor);
-				if (boundsfactor <= 1.0)
-					boundsfactor = 0.0;
+			case 'G':
+			case 'g':
+				if (optarg[0] == '=') {
+					gridkind = MBGRID_GMTGRD;
+					strcpy(gridkindstring, optarg);
+				}
+				else {
+					sscanf(optarg, "%d", &gridkind);
+					if (gridkind == MBGRID_CDFGRD) {
+						gridkind = MBGRID_GMTGRD;
+						gridkindstring[0] = '\0';
+					}
+					else if (gridkind > MBGRID_GMTGRD) {
+						sprintf(gridkindstring, "=%d", (gridkind - 100));
+						gridkind = MBGRID_GMTGRD;
+					}
+				}
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", filelist);
+				break;
+			case 'J':
+			case 'j':
+				sscanf(optarg, "%s", projection_pars);
+				projection_pars_f = MB_YES;
+				break;
+			case 'K':
+			case 'k':
+				sscanf(optarg, "%s", backgroundfile);
+				if ((grdrasterid = atoi(backgroundfile)) <= 0)
+					grdrasterid = -1;
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'M':
+			case 'm':
+				more = MB_YES;
+				break;
+			case 'N':
+			case 'n':
+				use_NaN = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", fileroot);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings);
+				break;
+			case 'Q':
+			case 'q':
+				bathy_in_feet = MB_YES;
+				break;
+			case 'R':
+			case 'r':
+				if (strchr(optarg, '/') == NULL) {
+					sscanf(optarg, "%lf", &boundsfactor);
+					if (boundsfactor <= 1.0)
+						boundsfactor = 0.0;
+				}
+				else {
+					mb_get_bounds(optarg, gbnd);
+					gbndset = MB_YES;
+				}
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &tension);
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%lf", &timediff);
+				timediff = 60 * timediff;
+				check_time = MB_YES;
+				if (timediff < 0.0) {
+					timediff = fabs(timediff);
+					first_in_stays = MB_NO;
+				}
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'W':
+			case 'w':
+				sscanf(optarg, "%lf", &scale);
+				break;
+			case 'X':
+			case 'x':
+				sscanf(optarg, "%lf", &extend);
+				break;
+			case '?':
+				errflg = true;
 			}
-			else {
-				mb_get_bounds(optarg, gbnd);
-				gbndset = MB_YES;
-			}
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &speedmin);
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &tension);
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%lf", &timediff);
-			timediff = 60 * timediff;
-			check_time = MB_YES;
-			if (timediff < 0.0) {
-				timediff = fabs(timediff);
-				first_in_stays = MB_NO;
-			}
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			sscanf(optarg, "%lf", &scale);
-			break;
-		case 'X':
-		case 'x':
-			sscanf(optarg, "%lf", &extend);
-			break;
-		case '?':
-			errflg = true;
 		}
 
-	/* set output stream to stdout or stderr */
-	if (verbose >= 2)
-		outfp = stderr;
-	else
-		outfp = stdout;
+		if (verbose >= 2)
+			outfp = stderr;
+		else
+			outfp = stdout;
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(outfp, "usage: %s\n", usage_message);
-		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(outfp, "usage: %s\n", usage_message);
+			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(outfp, "\nProgram %s\n", program_name);
+			fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(outfp, "dbg2  Control Parameters:\n");
-		fprintf(outfp, "dbg2       verbose:              %d\n", verbose);
-		fprintf(outfp, "dbg2       help:                 %d\n", help);
-		fprintf(outfp, "dbg2       pings:                %d\n", pings);
-		fprintf(outfp, "dbg2       lonflip:              %d\n", lonflip);
-		fprintf(outfp, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
-		fprintf(outfp, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
-		fprintf(outfp, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
-		fprintf(outfp, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
-		fprintf(outfp, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
-		fprintf(outfp, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
-		fprintf(outfp, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
-		fprintf(outfp, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
-		fprintf(outfp, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
-		fprintf(outfp, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
-		fprintf(outfp, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
-		fprintf(outfp, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
-		fprintf(outfp, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
-		fprintf(outfp, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
-		fprintf(outfp, "dbg2       speedmin:             %f\n", speedmin);
-		fprintf(outfp, "dbg2       timegap:              %f\n", timegap);
-		fprintf(outfp, "dbg2       file list:            %s\n", filelist);
-		fprintf(outfp, "dbg2       output file root:     %s\n", fileroot);
-		fprintf(outfp, "dbg2       grid x dimension:     %d\n", xdim);
-		fprintf(outfp, "dbg2       grid y dimension:     %d\n", ydim);
-		fprintf(outfp, "dbg2       grid x spacing:       %f\n", dx);
-		fprintf(outfp, "dbg2       grid y spacing:       %f\n", dy);
-		fprintf(outfp, "dbg2       grid bounds[0]:       %f\n", gbnd[0]);
-		fprintf(outfp, "dbg2       grid bounds[1]:       %f\n", gbnd[1]);
-		fprintf(outfp, "dbg2       grid bounds[2]:       %f\n", gbnd[2]);
-		fprintf(outfp, "dbg2       grid bounds[3]:       %f\n", gbnd[3]);
-		fprintf(outfp, "dbg2       boundsfactor:         %f\n", boundsfactor);
-		fprintf(outfp, "dbg2       clipmode:             %d\n", clipmode);
-		fprintf(outfp, "dbg2       clip:                 %d\n", clip);
-		fprintf(outfp, "dbg2       tension:              %f\n", tension);
-		fprintf(outfp, "dbg2       grdraster background: %d\n", grdrasterid);
-		fprintf(outfp, "dbg2       backgroundfile:       %s\n", backgroundfile);
-		fprintf(outfp, "dbg2       more:                 %d\n", more);
-		fprintf(outfp, "dbg2       use_NaN:              %d\n", use_NaN);
-		fprintf(outfp, "dbg2       grid_mode:            %d\n", grid_mode);
-		fprintf(outfp, "dbg2       data type:            %d\n", datatype);
-		fprintf(outfp, "dbg2       grid format:          %d\n", gridkind);
-		if (gridkind == MBGRID_GMTGRD)
-			fprintf(outfp, "dbg2       gmt grid format id:   %s\n", gridkindstring);
-		fprintf(outfp, "dbg2       scale:                %f\n", scale);
-		fprintf(outfp, "dbg2       timediff:             %f\n", timediff);
-		fprintf(outfp, "dbg2       setborder:            %d\n", setborder);
-		fprintf(outfp, "dbg2       border:               %f\n", border);
-		fprintf(outfp, "dbg2       extend:               %f\n", extend);
-		fprintf(outfp, "dbg2       bathy_in_feet:        %d\n", bathy_in_feet);
-		fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
-		fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
-		fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
-		fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
-		fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
+		if (verbose >= 2) {
+			fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(outfp, "dbg2  Control Parameters:\n");
+			fprintf(outfp, "dbg2       verbose:              %d\n", verbose);
+			fprintf(outfp, "dbg2       help:                 %d\n", help);
+			fprintf(outfp, "dbg2       pings:                %d\n", pings);
+			fprintf(outfp, "dbg2       lonflip:              %d\n", lonflip);
+			fprintf(outfp, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
+			fprintf(outfp, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
+			fprintf(outfp, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
+			fprintf(outfp, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
+			fprintf(outfp, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
+			fprintf(outfp, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
+			fprintf(outfp, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
+			fprintf(outfp, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
+			fprintf(outfp, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
+			fprintf(outfp, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
+			fprintf(outfp, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
+			fprintf(outfp, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
+			fprintf(outfp, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
+			fprintf(outfp, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
+			fprintf(outfp, "dbg2       speedmin:             %f\n", speedmin);
+			fprintf(outfp, "dbg2       timegap:              %f\n", timegap);
+			fprintf(outfp, "dbg2       file list:            %s\n", filelist);
+			fprintf(outfp, "dbg2       output file root:     %s\n", fileroot);
+			fprintf(outfp, "dbg2       grid x dimension:     %d\n", xdim);
+			fprintf(outfp, "dbg2       grid y dimension:     %d\n", ydim);
+			fprintf(outfp, "dbg2       grid x spacing:       %f\n", dx);
+			fprintf(outfp, "dbg2       grid y spacing:       %f\n", dy);
+			fprintf(outfp, "dbg2       grid bounds[0]:       %f\n", gbnd[0]);
+			fprintf(outfp, "dbg2       grid bounds[1]:       %f\n", gbnd[1]);
+			fprintf(outfp, "dbg2       grid bounds[2]:       %f\n", gbnd[2]);
+			fprintf(outfp, "dbg2       grid bounds[3]:       %f\n", gbnd[3]);
+			fprintf(outfp, "dbg2       boundsfactor:         %f\n", boundsfactor);
+			fprintf(outfp, "dbg2       clipmode:             %d\n", clipmode);
+			fprintf(outfp, "dbg2       clip:                 %d\n", clip);
+			fprintf(outfp, "dbg2       tension:              %f\n", tension);
+			fprintf(outfp, "dbg2       grdraster background: %d\n", grdrasterid);
+			fprintf(outfp, "dbg2       backgroundfile:       %s\n", backgroundfile);
+			fprintf(outfp, "dbg2       more:                 %d\n", more);
+			fprintf(outfp, "dbg2       use_NaN:              %d\n", use_NaN);
+			fprintf(outfp, "dbg2       grid_mode:            %d\n", grid_mode);
+			fprintf(outfp, "dbg2       data type:            %d\n", datatype);
+			fprintf(outfp, "dbg2       grid format:          %d\n", gridkind);
+			if (gridkind == MBGRID_GMTGRD)
+				fprintf(outfp, "dbg2       gmt grid format id:   %s\n", gridkindstring);
+			fprintf(outfp, "dbg2       scale:                %f\n", scale);
+			fprintf(outfp, "dbg2       timediff:             %f\n", timediff);
+			fprintf(outfp, "dbg2       setborder:            %d\n", setborder);
+			fprintf(outfp, "dbg2       border:               %f\n", border);
+			fprintf(outfp, "dbg2       extend:               %f\n", extend);
+			fprintf(outfp, "dbg2       bathy_in_feet:        %d\n", bathy_in_feet);
+			fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
+			fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
+			fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
+			fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
+			fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
 
-	}
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(outfp, "\n%s\n", help_message);
-		fprintf(outfp, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(outfp, "\n%s\n", help_message);
+			fprintf(outfp, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* if bounds not set get bounds of input data */

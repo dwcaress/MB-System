@@ -68,47 +68,16 @@
 #include "mbsys_simrad2.h"
 #include "mbsys_simrad3.h"
 
+static const char program_name[] = "mbgpstide";
+static const char help_message[] =
+    "MBgpstide generates tide files from the GPS altitude data in the input files.";
+static const char usage_message[] =
+    "mbgpstide [-Atideformat -Dinterval -Fformat -Idatalist -M -Ooutput -Roffset -S -Tgeoid -Usource,sensor -V]";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	static char program_name[] = "mbgpstide";
-	static char help_message[] =
-	    "MBgpstide generates tide files from the GPS altitude data in the input files.";
-	static char usage_message[] =
-	    "mbgpstide [-Atideformat -Dinterval -Fformat -Idatalist -M -Ooutput -Roffset -S -Tgeoid -Usource,sensor -V]";
 	int option_index;
-	bool errflg = false;
-	int c;
-	bool help = false;
-
-	/* command line option definitions */
-	/* mbdatalist
-	 * 		--verbose				-V
-	 * 		--help					-H
-	 * 		--tideformat=FORMAT		-A
-	 * 		--interval=SECONDS		-D
-	 * 		--format=FORMATID		-F format
-	 * 		--input=FILE			-I inputfile
-	 * 		--setparameters			-M
-	 * 		--output=FILE			-O outputfile
-	 * 		--offset=OFFSET`		-R offset
-	 * 		--skipexisting			-S
-	 * 		--geoid=MODELGRID		-T grdfile
-	 * 		--use=HEIGHTSOURCE 		-U heightsource
-	 */
-	static struct option options[] =   {{"verbose", no_argument, NULL, 0},
-										{"help", no_argument, NULL, 0},
-										{"tideformat", required_argument, NULL, 0},
-										{"interval", required_argument, NULL, 0},
-										{"format", required_argument, NULL, 0},
-										{"input", required_argument, NULL, 0},
-										{"setparameters", no_argument, NULL, 0},
-										{"output", required_argument, NULL, 0},
-										{"offset", required_argument, NULL, 0},
-										{"skipexisting", no_argument, NULL, 0},
-										{"geoid",required_argument , NULL, 0},
-										{"use", required_argument, NULL, 0},
-										{NULL, 0, NULL, 0}};
 
 	/* MBIO status variables */
 	int verbose = 0;
@@ -221,167 +190,161 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt_long(argc, argv, "A:a:D:d:F:f:I:i:MmO:o:R:r:SsT:t:U:u:VvHh", options, &option_index)) != -1)
-		switch (c) {
-		/* long options */
-		case 0:
-			/* verbose */
-			if (strcmp("verbose", options[option_index].name) == 0) {
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+
+		const struct option options[] =
+		    {{"verbose", no_argument, NULL, 0},
+		     {"help", no_argument, NULL, 0},
+		     {"tideformat", required_argument, NULL, 0},
+		     {"interval", required_argument, NULL, 0},
+		     {"format", required_argument, NULL, 0},
+		     {"input", required_argument, NULL, 0},
+		     {"setparameters", no_argument, NULL, 0},
+		     {"output", required_argument, NULL, 0},
+		     {"offset", required_argument, NULL, 0},
+		     {"skipexisting", no_argument, NULL, 0},
+		     {"geoid",required_argument , NULL, 0},
+		     {"use", required_argument, NULL, 0},
+		     {NULL, 0, NULL, 0}};
+		while ((c = getopt_long(argc, argv, "A:a:D:d:F:f:I:i:MmO:o:R:r:SsT:t:U:u:VvHh", options, &option_index)) != -1)
+		{
+			switch (c) {
+			/* long options */
+			case 0:
+				if (strcmp("verbose", options[option_index].name) == 0) {
+					verbose++;
+				}
+				else if (strcmp("help", options[option_index].name) == 0) {
+					help = MB_YES;
+				}
+				else if (strcmp("tideformat", options[option_index].name) == 0) {
+					sscanf(optarg, "%d", &tideformat);
+					if (tideformat != 2)
+						tideformat = 1;
+				}
+				else if (strcmp("interval", options[option_index].name) == 0) {
+					sscanf(optarg, "%lf", &interval);
+				}
+				else if (strcmp("format", options[option_index].name) == 0) {
+					sscanf(optarg, "%d", &format);
+				}
+				else if (strcmp("input", options[option_index].name) == 0) {
+					sscanf(optarg, "%s", read_file);
+				}
+				else if (strcmp("setparameters", options[option_index].name) == 0) {
+					mbprocess_update = MB_YES;
+				}
+				else if (strcmp("output", options[option_index].name) == 0) {
+					sscanf(optarg, "%s", tide_file);
+					file_output = MB_YES;
+				}
+				else if (strcmp("offset", options[option_index].name) == 0) {
+					sscanf(optarg, "%lf", &tide_offset);
+				}
+				else if (strcmp("skipexisting", options[option_index].name) == 0) {
+					skip_existing = MB_YES;
+				}
+				else if (strcmp("geoid", options[option_index].name) == 0) {
+					sscanf(optarg, "%s", geoidgrid);
+					geoid_set = MB_YES;
+				}
+				else if (strcmp("use", options[option_index].name) == 0) {
+					sscanf(optarg, "%d", &gps_source);
+				}
+				break;
+			/* short options */
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
 				verbose++;
-			}
-
-			/* help */
-			else if (strcmp("help", options[option_index].name) == 0) {
-				help = MB_YES;
-			}
-
-			/* tideformat */
-			else if (strcmp("tideformat", options[option_index].name) == 0) {
+				break;
+			case 'A':
+			case 'a':
 				sscanf(optarg, "%d", &tideformat);
-				if (tideformat != 2)
-					tideformat = 1;
-			}
-
-			/* interval */
-			else if (strcmp("interval", options[option_index].name) == 0) {
+				break;
+			case 'D':
+			case 'd':
 				sscanf(optarg, "%lf", &interval);
-			}
-
-			/* format */
-			else if (strcmp("format", options[option_index].name) == 0) {
+				break;
+			case 'F':
+			case 'f':
 				sscanf(optarg, "%d", &format);
-			}
-
-			/* input */
-			else if (strcmp("input", options[option_index].name) == 0) {
+				break;
+			case 'I':
+			case 'i':
 				sscanf(optarg, "%s", read_file);
-			}
-
-			/*  */
-			else if (strcmp("setparameters", options[option_index].name) == 0) {
+				break;
+			case 'M':
+			case 'm':
 				mbprocess_update = MB_YES;
-			}
-
-			/*  */
-			else if (strcmp("output", options[option_index].name) == 0) {
+				break;
+			case 'O':
+			case 'o':
 				sscanf(optarg, "%s", tide_file);
 				file_output = MB_YES;
-			}
-
-			/*  */
-			else if (strcmp("offset", options[option_index].name) == 0) {
+				break;
+			case 'R':
+			case 'r':
 				sscanf(optarg, "%lf", &tide_offset);
-			}
-
-			/*  */
-			else if (strcmp("skipexisting", options[option_index].name) == 0) {
+				break;
+			case 'S':
+			case 's':
 				skip_existing = MB_YES;
-			}
-
-			/*  */
-			else if (strcmp("geoid", options[option_index].name) == 0) {
+				break;
+			case 'T':
+			case 't':
 				sscanf(optarg, "%s", geoidgrid);
 				geoid_set = MB_YES;
-			}
-
-			/*  */
-			else if (strcmp("use", options[option_index].name) == 0) {
+				break;
+			case 'U':
+			case 'u':
 				sscanf(optarg, "%d", &gps_source);
+				break;
+			case '?':
+				errflg = true;
 			}
-			break;
-
-		/* short options */
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &tideformat);
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%lf", &interval);
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'M':
-		case 'm':
-			mbprocess_update = MB_YES;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", tide_file);
-			file_output = MB_YES;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%lf", &tide_offset);
-			break;
-		case 'S':
-		case 's':
-			skip_existing = MB_YES;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%s", geoidgrid);
-			geoid_set = MB_YES;
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%d", &gps_source);
-			break;
-		case '?':
-			errflg = true;
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-	}
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+		}
 
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                 %d\n", help);
-		fprintf(stderr, "dbg2       interval:             %f\n", interval);
-		fprintf(stderr, "dbg2       mbprocess_update:     %d\n", mbprocess_update);
-		fprintf(stderr, "dbg2       skip_existing:        %d\n", skip_existing);
-		fprintf(stderr, "dbg2       tideformat:           %d\n", tideformat);
-		fprintf(stderr, "dbg2       format:               %d\n", format);
-		fprintf(stderr, "dbg2       read_file:            %s\n", read_file);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                 %d\n", help);
+			fprintf(stderr, "dbg2       interval:             %f\n", interval);
+			fprintf(stderr, "dbg2       mbprocess_update:     %d\n", mbprocess_update);
+			fprintf(stderr, "dbg2       skip_existing:        %d\n", skip_existing);
+			fprintf(stderr, "dbg2       tideformat:           %d\n", tideformat);
+			fprintf(stderr, "dbg2       format:               %d\n", format);
+			fprintf(stderr, "dbg2       read_file:            %s\n", read_file);
+		}
 
-	/* if help was all that was desired then exit */
-	if (help) {
-		exit(error);
+		if (help) {
+			exit(error);
+		}
 	}
 
 	/* If a single output file is specified, open and initialise it */
