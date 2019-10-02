@@ -752,10 +752,9 @@ int main(int argc, char **argv) {
 		                         &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
 		                         &grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
 		if (status == MB_FAILURE) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to read grd file: %s\n", grid.file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* rationalize grid bounds and lonflip */
@@ -836,10 +835,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -989,22 +987,20 @@ int main(int argc, char **argv) {
 				strcpy(amptablefile, swathfile);
 				strcat(amptablefile, ".aga");
 				if ((atfp = fopen(amptablefile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nUnable to open output table file %s\n", amptablefile);
 					fprintf(stderr, "Program %s aborted!\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 			}
 			if (sidescan_on == MB_YES) {
 				strcpy(sstablefile, swathfile);
 				strcat(sstablefile, ".sga");
 				if ((stfp = fopen(sstablefile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nUnable to open output table file %s\n", sstablefile);
 					fprintf(stderr, "Program %s aborted!\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 			}
 		}

@@ -169,10 +169,9 @@ int main(int argc, char **argv) {
 	int nnav = 0;
 	FILE *fp = fopen(ifile, "r");
 	if (fp == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", ifile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 	char *result;
 	char buffer[NCHARMAX];
@@ -261,11 +260,9 @@ int main(int argc, char **argv) {
 	/* read in nav points */
 	nnav = 0;
 	if ((fp = fopen(ifile, "r")) == NULL) {
-		status = MB_FAILURE;
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", ifile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 	strncpy(buffer, "\0", sizeof(buffer));
 	int nget = 0;
@@ -326,10 +323,9 @@ int main(int argc, char **argv) {
 	/* count the usbl points */
 	nusbl = 0;
 	if ((fp = fopen(ufile, "r")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open USBL Navigation File <%s> for reading\n", ufile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer)
 		nusbl++;
@@ -353,11 +349,9 @@ int main(int argc, char **argv) {
 	/* read in usbl points */
 	nusbl = 0;
 	if ((fp = fopen(ufile, "r")) == NULL) {
-		status = MB_FAILURE;
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open USBL Navigation File <%s> for reading\n", ufile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 	strncpy(buffer, "\0", sizeof(buffer));
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
@@ -494,11 +488,9 @@ int main(int argc, char **argv) {
 
 	/* open output file */
 	if ((fp = fopen(ofile, "w")) == NULL) {
-		status = MB_FAILURE;
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open Output Navigation File <%s> for writing\n", ofile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* now loop over nav data applying adjustments */

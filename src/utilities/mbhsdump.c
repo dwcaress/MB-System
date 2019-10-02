@@ -259,8 +259,7 @@ int main(int argc, char **argv) {
 		fprintf(output, "\nProgram <%s> requires complete Hydrosweep DS data stream\n", program_name);
 		fprintf(output, "!!Format %d is unacceptable, only formats %d and %d can be used\n", format, MBF_HSATLRAW, MBF_HSLDEOIH);
 		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_FORMAT;
-		exit(error);
+		exit(MB_ERROR_BAD_FORMAT);
 	}
 
 	/* initialize reading the input multibeam file */

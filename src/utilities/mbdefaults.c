@@ -292,8 +292,7 @@ int main(int argc, char **argv) {
 		strcat(file, "/.mbio_defaults");
 		if ((fp = fopen(file, "w")) == NULL) {
 			fprintf(stderr, "Could not open file %s\n", file);
-			error = MB_ERROR_OPEN_FAIL;
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		fprintf(fp, "MBIO Default Control Parameters\n");
 		fprintf(fp, "lonflip:    %d\n", lonflip);

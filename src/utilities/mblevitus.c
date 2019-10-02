@@ -301,20 +301,18 @@ int main(int argc, char **argv) {
 
 	/* check for existence of water velocity profile */
 	if (nvelocity < 1) {
-		error = MB_ERROR_BAD_PARAMETER;
 		fprintf(stderr, "\nNo water velocity profile available for specified location.\n");
 		fprintf(stderr, "This place is probably subaerial!\n");
 		fprintf(stderr, "No output file created.\n");
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_BAD_PARAMETER);
 	}
 
 	FILE *ofp = fopen(ofile, "w");
 	if (ofp == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open output file <%s> for writing\n", ofile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	fprintf(ofp, "# Water velocity profile created by program %s\n", program_name);
