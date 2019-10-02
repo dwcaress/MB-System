@@ -1205,88 +1205,37 @@ int mbtrnpreprocess_input_close
 } /* mbtrnpreprocess_input_close */
 /*--------------------------------------------------------------------*/
 
-int main
-(
-  int argc,
-  char **argv
-)
-{
-  char help_message[] =
+static const char help_message[] =
     "mbtrnpreprocess reads raw multibeam data, applies automated cleaning\n\t"
     "and downsampling, and then passes the bathymetry on to a terrain relative navigation (TRN) process.\n";
-  char usage_message[] =
+static const char usage_message[] =
     "mbtrnpreprocess [\n" "\t--verbose\n" "\t--help\n" "\t--log-directory=path\n"
-                                                       "\t--input=datalist|file|'socket'\n"
-                                                       "\t--output=file|'socket'\n"
-                                                       "\t--swathwidth=value\n"
-                                                       "\t--soundings=value\n"
-                                                       "\t--median-filter=threshold/nx/ny\n"
-                                                       "\t--format=format\n"
-                                                       "\t--platform-file\n"
-                                                       "\t--platform-target-sensor\n"
-                                                       "\t--projection=projection_id\n"
-                                                       "\t--rhost=hostname\n"
-                                                       "\t--thost=hostname\n"
-                                                       "\t--stats=n\n"
-                                                       "\t--hbeat=n\n"
-                                                       "\t--delay=n\n"
-                                                       "\t--decimate=n\n"
-                                                       "\t--no-blog\n"
-                                                       "\t--no-mlog\n"
-                                                       "\t--no-rlog\n";
-  extern char WIN_DECLSPEC *optarg;
-  int option_index;
-  bool errflg = false;
-  int c;
-  bool help = false;
+    "\t--input=datalist|file|'socket'\n"
+    "\t--output=file|'socket'\n"
+    "\t--swathwidth=value\n"
+    "\t--soundings=value\n"
+    "\t--median-filter=threshold/nx/ny\n"
+    "\t--format=format\n"
+    "\t--platform-file\n"
+    "\t--platform-target-sensor\n"
+    "\t--projection=projection_id\n"
+    "\t--rhost=hostname\n"
+    "\t--thost=hostname\n"
+    "\t--stats=n\n"
+    "\t--hbeat=n\n"
+    "\t--delay=n\n"
+    "\t--decimate=n\n"
+    "\t--no-blog\n"
+    "\t--no-mlog\n"
+    "\t--no-rlog\n";
 
-  /* MBIO status variables */
+int main(int argc, char **argv)
+{
+  extern char WIN_DECLSPEC *optarg;
   int status;
   int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
   char *message;
-
-  /* command line option definitions */
-  /* mbtrnpreprocess
-   *     --verbose
-   *     --help
-   *     --input=datalist [or file or socket id]
-   *     --format=format
-   *     --platform-file=file
-   *     --platform-target-sensor
-   *     --log-directory=path
-   *     --output=file [or socket id]
-   *     --projection=projection_id
-   *     --swath-width=value
-   *     --soundings=value
-   *     --median-filter=threshold/nacrosstrack/nalongtrack
-   *
-   *
-   */
-  static struct option options[] =
-      {{"help", no_argument, NULL, 0},
-      {"verbose", required_argument, NULL, 0},
-      {"input", required_argument, NULL, 0},
-      {"rhost", required_argument, NULL, 0},
-      {"thost", required_argument, NULL, 0},
-      {"rcap", required_argument, NULL, 0},
-      {"hbeat", required_argument, NULL, 0},
-      {"delay", required_argument, NULL, 0},
-      {"decimate", required_argument, NULL, 0},
-      {"no-blog", no_argument, NULL, 0},
-      {"no-mlog", no_argument, NULL, 0},
-      {"no-rlog", no_argument, NULL, 0},
-      {"stats", required_argument, NULL, 0},
-      {"format", required_argument, NULL, 0},
-      {"platform-file", required_argument, NULL, 0},
-      {"platform-target-sensor", required_argument, NULL, 0},
-      {"log-directory", required_argument, NULL, 0},
-      {"output", required_argument, NULL, 0},
-      {"projection", required_argument, NULL, 0},
-      {"swath-width", required_argument, NULL, 0},
-      {"soundings", required_argument, NULL, 0},
-      {"median-filter", required_argument, NULL, 0},
-      {NULL, 0, NULL, 0}};
 
   /* MBIO read control parameters */
   int read_datalist = MB_NO;
@@ -1478,267 +1427,259 @@ int main
   g_log_dir=strdup("./");
 
   /* process argument list */
-  while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
-    switch (c)
-      {
-    /* long options all return c=0 */
-    case 0:
-      /* verbose */
-      if (strcmp("verbose", options[option_index].name) == 0)
+  {
+    int option_index;
+    bool errflg = false;
+    bool help = false;
+    const struct option options[] =
+        {{"help", no_argument, NULL, 0},
+        {"verbose", required_argument, NULL, 0},
+        {"input", required_argument, NULL, 0},
+        {"rhost", required_argument, NULL, 0},
+        {"thost", required_argument, NULL, 0},
+        {"rcap", required_argument, NULL, 0},
+        {"hbeat", required_argument, NULL, 0},
+        {"delay", required_argument, NULL, 0},
+        {"decimate", required_argument, NULL, 0},
+        {"no-blog", no_argument, NULL, 0},
+        {"no-mlog", no_argument, NULL, 0},
+        {"no-rlog", no_argument, NULL, 0},
+        {"stats", required_argument, NULL, 0},
+        {"format", required_argument, NULL, 0},
+        {"platform-file", required_argument, NULL, 0},
+        {"platform-target-sensor", required_argument, NULL, 0},
+        {"log-directory", required_argument, NULL, 0},
+        {"output", required_argument, NULL, 0},
+        {"projection", required_argument, NULL, 0},
+        {"swath-width", required_argument, NULL, 0},
+        {"soundings", required_argument, NULL, 0},
+        {"median-filter", required_argument, NULL, 0},
+        {NULL, 0, NULL, 0}};
+    int c;
+    while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1)
+      switch (c)
         {
-        sscanf(optarg, "%d", &verbose);         /*verbose++; */
-        }
-
-      /* help */
-      else if (strcmp("help", options[option_index].name) == 0)
-        {
-        help = MB_YES;
-        }
-
-      /*-------------------------------------------------------
-       * Define input file and format */
-
-      /* input */
-      else if (strcmp("input", options[option_index].name) == 0)
-        {
-        strcpy(input, optarg);
-        if (strstr(input, "socket"))
+      /* long options all return c=0 */
+      case 0:
+        if (strcmp("verbose", options[option_index].name) == 0)
+          {
+          sscanf(optarg, "%d", &verbose);         /*verbose++; */
+          }
+        else if (strcmp("help", options[option_index].name) == 0)
+          {
+          help = MB_YES;
+          }
+        /*-------------------------------------------------------
+         * Define input file and format */
+        else if (strcmp("input", options[option_index].name) == 0)
+          {
+          strcpy(input, optarg);
+          if (strstr(input, "socket"))
+            input_mode=INPUT_MODE_SOCKET;
+          else
+            input_mode=INPUT_MODE_FILE;
+          }
+        else if (strcmp("rhost", options[option_index].name) == 0)
+          {
+          char *ocopy=strdup(optarg);
+          reson_hostname=strtok(ocopy, ":");
+          if (reson_hostname==NULL)
+            reson_hostname=RESON_SIM_HOST;
+          char *ip = strtok(NULL, ":");
+          if (ip!=NULL)
+            sscanf(ip, "%d", &reson_port);
+          strcpy(input, "socket");
           input_mode=INPUT_MODE_SOCKET;
-        else
-          input_mode=INPUT_MODE_FILE;
-        }
-      else if (strcmp("rhost", options[option_index].name) == 0)
-        {
-        char *ocopy=strdup(optarg);
-        reson_hostname=strtok(ocopy, ":");
-        if (reson_hostname==NULL)
-          reson_hostname=RESON_SIM_HOST;
-        char *ip = strtok(NULL, ":");
-        if (ip!=NULL)
-          sscanf(ip, "%d", &reson_port);
-        strcpy(input, "socket");
-        input_mode=INPUT_MODE_SOCKET;
-        /* don't free ocopy here */
-        }
-      else if (strcmp("thost", options[option_index].name) == 0)
-        {
-        char *ocopy=strdup(optarg);
-        trn_ohost=strtok(ocopy, ":");
-        if (trn_ohost==NULL)
-          trn_ohost=RESON_SIM_HOST;
-        char *ip = strtok(NULL, ":");
-        if (ip!=NULL)
-          sscanf(ip, "%d", &trn_oport);
-        strcpy(output, "socket");
-        output_mode = MBTRNPREPROCESS_OUTPUT_TRN;
-        /* don't free ocopy here */
-        }
-      /* TRN reader capacity */
-      else if (strcmp("rcap", options[option_index].name) == 0)
-        {
-        sscanf(optarg, "%u", &reader_capacity);
-        }
-      /* heartbeat (pings) */
-      else if (strcmp("hbeat", options[option_index].name) == 0)
-        {
-        sscanf(optarg, "%d", &trn_hbtok);
-        }
-      /* ping delay */
-      else if (strcmp("delay", options[option_index].name) == 0)
-        {
-        sscanf(optarg, "%lld", &delay_msec);
-        }
-      else if (strcmp("decimate", options[option_index].name) == 0)
-        {
-        sscanf(optarg, "%d", &ping_decimate);
-        }
-      /* disable TRN binary log output */
-      else if (strcmp("no-blog", options[option_index].name) == 0)
-        {
-        trn_blog_en=false;
-        }
-      /* disable TRN message log output */
-      else if (strcmp("no-mlog", options[option_index].name) == 0)
-        {
-        trn_mlog_en=false;
-        }
-      /* disable TRN reader log output */
-      else if (strcmp("no-rlog", options[option_index].name) == 0)
-        {
-        mbr_blog_en=false;
-        }
-      /* status log interval (s) */
-      else if (strcmp("stats", options[option_index].name) == 0)
-        {
-        sscanf(optarg, "%lf", &trn_status_interval_sec);
-        }
-
-      /* format */
-      else if (strcmp("format", options[option_index].name) == 0)
-        {
-        n = sscanf(optarg, "%d", &format);
-        }
-
-      /*-------------------------------------------------------
-       * Set platform file */
-
-      /* platform-file */
-      else if (strcmp("platform-file", options[option_index].name) == 0)
-        {
-        n = sscanf(optarg, "%s", platform_file);
-        if (n == 1)
-          use_platform_file = MB_YES;
-        }
-
-      /* platform-target-sensor */
-      else if (strcmp("platform-target-sensor", options[option_index].name) == 0)
-        {
-        n = sscanf(optarg, "%d", &target_sensor);
-        }
-
-      /*-------------------------------------------------------
-       * Define processing parameters */
-
-      /* output */
-      else if ((strcmp("output", options[option_index].name) == 0))
-        {
-        strcpy(output, optarg);
-        if (strstr(output, "socket") != NULL)
+          /* don't free ocopy here */
+          }
+        else if (strcmp("thost", options[option_index].name) == 0)
+          {
+          char *ocopy=strdup(optarg);
+          trn_ohost=strtok(ocopy, ":");
+          if (trn_ohost==NULL)
+            trn_ohost=RESON_SIM_HOST;
+          char *ip = strtok(NULL, ":");
+          if (ip!=NULL)
+            sscanf(ip, "%d", &trn_oport);
+          strcpy(output, "socket");
           output_mode = MBTRNPREPROCESS_OUTPUT_TRN;
-        else
-          output_mode = MBTRNPREPROCESS_OUTPUT_FILE;
-        fprintf(stderr, "output:%s output_mode:%d\n", output, output_mode);
-        }
-
-      /* log-directory */
-      else if ((strcmp("log-directory", options[option_index].name) == 0))
-        {
-        strcpy(log_directory, optarg);
-        logd_status = stat(log_directory, &logd_stat);
-        if (logd_status != 0)
-          {
-          fprintf(stderr, "\nSpecified log file directory %s does not exist...\n", log_directory);
-          make_logs = MB_NO;
+          /* don't free ocopy here */
           }
-        else if ((logd_stat.st_mode & S_IFMT) != S_IFDIR)
+        else if (strcmp("rcap", options[option_index].name) == 0)
           {
-          fprintf(stderr, "\nSpecified log file directory %s is not a directory...\n",
-            log_directory);
-          make_logs = MB_NO;
+          sscanf(optarg, "%u", &reader_capacity);
           }
-        else
+        else if (strcmp("hbeat", options[option_index].name) == 0)
           {
-          make_logs = MB_YES;
-          free(g_log_dir);
-          g_log_dir=strdup(log_directory);
-          fprintf(stderr, "\nusing log directory %s...\n", g_log_dir);
+          sscanf(optarg, "%d", &trn_hbtok);
           }
-        }
-
-      /* swathwidth */
-      else if ((strcmp("swath-width", options[option_index].name) == 0))
-        {
-        n = sscanf(optarg, "%lf", &swath_width);
-        }
-
-      /* soundings */
-      else if ((strcmp("soundings", options[option_index].name) == 0))
-        {
-        n = sscanf(optarg, "%d", &n_output_soundings);
-        }
-
-      /* median-filter */
-      else if ((strcmp("median-filter", options[option_index].name) == 0))
-        {
-        n = sscanf(optarg,
-          "%lf/%d/%d",
-          &median_filter_threshold,
-          &median_filter_n_across,
-          &median_filter_n_along);
-        if (n == 3)
+        else if (strcmp("delay", options[option_index].name) == 0)
           {
-          median_filter = MB_YES;
-          n_buffer_max = median_filter_n_along;
+          sscanf(optarg, "%lld", &delay_msec);
           }
+        else if (strcmp("decimate", options[option_index].name) == 0)
+          {
+          sscanf(optarg, "%d", &ping_decimate);
+          }
+        else if (strcmp("no-blog", options[option_index].name) == 0)
+          {
+          trn_blog_en=false;
+          }
+        else if (strcmp("no-mlog", options[option_index].name) == 0)
+          {
+          trn_mlog_en=false;
+          }
+        else if (strcmp("no-rlog", options[option_index].name) == 0)
+          {
+          mbr_blog_en=false;
+          }
+        else if (strcmp("stats", options[option_index].name) == 0)
+          {
+          sscanf(optarg, "%lf", &trn_status_interval_sec);
+          }
+        else if (strcmp("format", options[option_index].name) == 0)
+          {
+          n = sscanf(optarg, "%d", &format);
+          }
+        else if (strcmp("platform-file", options[option_index].name) == 0)
+          {
+          n = sscanf(optarg, "%s", platform_file);
+          if (n == 1)
+            use_platform_file = MB_YES;
+          }
+        else if (strcmp("platform-target-sensor", options[option_index].name) == 0)
+          {
+          n = sscanf(optarg, "%d", &target_sensor);
+          }
+        else if ((strcmp("output", options[option_index].name) == 0))
+          {
+          strcpy(output, optarg);
+          if (strstr(output, "socket") != NULL)
+            output_mode = MBTRNPREPROCESS_OUTPUT_TRN;
+          else
+            output_mode = MBTRNPREPROCESS_OUTPUT_FILE;
+          fprintf(stderr, "output:%s output_mode:%d\n", output, output_mode);
+          }
+        else if ((strcmp("log-directory", options[option_index].name) == 0))
+          {
+          strcpy(log_directory, optarg);
+          logd_status = stat(log_directory, &logd_stat);
+          if (logd_status != 0)
+            {
+            fprintf(stderr, "\nSpecified log file directory %s does not exist...\n", log_directory);
+            make_logs = MB_NO;
+            }
+          else if ((logd_stat.st_mode & S_IFMT) != S_IFDIR)
+            {
+            fprintf(stderr, "\nSpecified log file directory %s is not a directory...\n",
+              log_directory);
+            make_logs = MB_NO;
+            }
+          else
+            {
+            make_logs = MB_YES;
+            free(g_log_dir);
+            g_log_dir=strdup(log_directory);
+            fprintf(stderr, "\nusing log directory %s...\n", g_log_dir);
+            }
+          }
+        else if ((strcmp("swath-width", options[option_index].name) == 0))
+          {
+          n = sscanf(optarg, "%lf", &swath_width);
+          }
+        else if ((strcmp("soundings", options[option_index].name) == 0))
+          {
+          n = sscanf(optarg, "%d", &n_output_soundings);
+          }
+        else if ((strcmp("median-filter", options[option_index].name) == 0))
+          {
+          n = sscanf(optarg,
+            "%lf/%d/%d",
+            &median_filter_threshold,
+            &median_filter_n_across,
+            &median_filter_n_along);
+          if (n == 3)
+            {
+            median_filter = MB_YES;
+            n_buffer_max = median_filter_n_along;
+            }
+          }
+
+        break;
+      case '?':
+        errflg = true;
         }
 
-      /*-------------------------------------------------------*/
+    if(reson_hostname==NULL)
+      reson_hostname=strdup(RESON_SIM_HOST);
 
-      break;
-    case '?':
-      errflg = true;
+    if (errflg)
+      {
+      fprintf(stderr, "usage: %s\n", usage_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_USAGE);
       }
 
-  if(reson_hostname==NULL)
-    reson_hostname=strdup(RESON_SIM_HOST);
-  /* if error flagged then print it and exit */
-  if (errflg)
-    {
-    fprintf(stderr, "usage: %s\n", usage_message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    error = MB_ERROR_BAD_USAGE;
-    exit(error);
-    }
+    if ((verbose == 1) || help)
+      {
+      fprintf(stderr, "\nProgram %s\n", program_name);
+      fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+      }
 
-  if ((verbose == 1) || help)
-    {
-    fprintf(stderr, "\nProgram %s\n", program_name);
-    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-    }
+    if (verbose >= 0)
+      {
+      fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+      fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+      fprintf(stderr, "dbg2  Control Parameters:\n");
+      fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+      fprintf(stderr, "dbg2       help:           %d\n", help);
+      fprintf(stderr, "dbg2       pings:          %d\n", pings);
+      fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
+      fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
+      fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
+      fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
+      fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
+      fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
+      fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
+      fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
+      fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
+      fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
+      fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
+      fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
+      fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
+      fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
+      fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
+      fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
+      fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
+      fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
+      fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
+      fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
+      fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
+      fprintf(stderr, "dbg2       input:                    %s\n", input);
+      fprintf(stderr, "dbg2       format:                   %d\n", format);
+      fprintf(stderr, "dbg2       output:                   %s\n", output);
+      fprintf(stderr, "dbg2       swath_width:              %f\n", swath_width);
+      fprintf(stderr, "dbg2       n_output_soundings:       %d\n", n_output_soundings);
+      fprintf(stderr, "dbg2       median_filter:            %d\n", median_filter);
+      fprintf(stderr, "dbg2       median_filter_n_across:   %d\n", median_filter_n_across);
+      fprintf(stderr, "dbg2       median_filter_n_along:    %d\n", median_filter_n_along);
+      fprintf(stderr, "dbg2       median_filter_threshold:  %f\n", median_filter_threshold);
+      fprintf(stderr, "dbg2       n_buffer_max:             %d\n", n_buffer_max);
+      fprintf(stderr, "dbg2       reson_hostname:           %s\n", reson_hostname);
+      fprintf(stderr, "dbg2       reson_port:               %d\n", reson_port);
+      fprintf(stderr, "dbg2       reader_capacity:          %u\n", reader_capacity);
+      fprintf(stderr, "dbg2       trn_ohost:                %s\n", trn_ohost);
+      fprintf(stderr, "dbg2       trn_oport:                %d\n", trn_oport);
+      }
 
-  if (verbose >= 0)
-    {
-    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-    fprintf(stderr, "dbg2  Control Parameters:\n");
-    fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-    fprintf(stderr, "dbg2       help:           %d\n", help);
-    fprintf(stderr, "dbg2       pings:          %d\n", pings);
-    fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
-    fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
-    fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
-    fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
-    fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
-    fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
-    fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
-    fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
-    fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
-    fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
-    fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
-    fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
-    fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
-    fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
-    fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
-    fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
-    fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
-    fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
-    fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
-    fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
-    fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-    fprintf(stderr, "dbg2       input:                    %s\n", input);
-    fprintf(stderr, "dbg2       format:                   %d\n", format);
-    fprintf(stderr, "dbg2       output:                   %s\n", output);
-    fprintf(stderr, "dbg2       swath_width:              %f\n", swath_width);
-    fprintf(stderr, "dbg2       n_output_soundings:       %d\n", n_output_soundings);
-    fprintf(stderr, "dbg2       median_filter:            %d\n", median_filter);
-    fprintf(stderr, "dbg2       median_filter_n_across:   %d\n", median_filter_n_across);
-    fprintf(stderr, "dbg2       median_filter_n_along:    %d\n", median_filter_n_along);
-    fprintf(stderr, "dbg2       median_filter_threshold:  %f\n", median_filter_threshold);
-    fprintf(stderr, "dbg2       n_buffer_max:             %d\n", n_buffer_max);
-    fprintf(stderr, "dbg2       reson_hostname:           %s\n", reson_hostname);
-    fprintf(stderr, "dbg2       reson_port:               %d\n", reson_port);
-    fprintf(stderr, "dbg2       reader_capacity:          %u\n", reader_capacity);
-    fprintf(stderr, "dbg2       trn_ohost:                %s\n", trn_ohost);
-    fprintf(stderr, "dbg2       trn_oport:                %d\n", trn_oport);
-    }
+    if (help)
+      {
+      fprintf(stderr, "\n%s\n", help_message);
+      fprintf(stderr, "\nusage: %s\n", usage_message);
+      exit(error);
+      }
+  }
 
-  /* if help desired then print it and exit */
-  if (help)
-    {
-    fprintf(stderr, "\n%s\n", help_message);
-    fprintf(stderr, "\nusage: %s\n", usage_message);
-    exit(error);
-    }
 #ifdef MBTRN_TIMING
   /* print time message */
   struct timeval stv={0};
