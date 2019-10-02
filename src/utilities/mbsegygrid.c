@@ -207,11 +207,6 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -339,187 +334,188 @@ int main(int argc, char **argv) {
 	MB_MAKE_FNAN(NaN);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:F:f:G:g:I:i:O:o:R:r:S:s:T:t:VvW:w:Hh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-		{
-			const int n = sscanf(optarg, "%lf/%lf", &shotscale, &timescale);
-			if (n == 2)
-				scale2distance = MB_YES;
-			break;
-		}
-		case 'B':
-		case 'b':
-		{
-			const int n = sscanf(optarg, "%lf/%lf", &agcmaxvalue, &agcwindow);
-			if (n < 2)
-				agcwindow = 0.0;
-			agcmode = MB_YES;
-			break;
-		}
-		case 'C':
-		case 'c':
-		{
-			const int n = sscanf(optarg, "%d", &geometrymode);
-			if (n < 1)
-				geometrymode = MBSEGYGRID_GEOMETRY_VERTICAL;
-			break;
-		}
-		case 'D':
-		case 'd':
-			/* n = */ sscanf(optarg, "%d/%d", &decimatex, &decimatey);
-			break;
-		case 'F':
-		case 'f':
-			/* n = */ sscanf(optarg, "%d/%lf", &filtermode, &filterwindow);
-			break;
-		case 'G':
-		case 'g':
-		{
-			const int n = sscanf(optarg, "%d/%lf/%lf/%lf", &gainmode, &gain, &gainwindow, &gaindelay);
-			if (n < 4)
-				gaindelay = 0.0;
-			if (n < 3)
-				gainwindow = 0.0;
-			break;
-		}
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", segyfile);
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", fileroot);
-			break;
-		case 'R':
-		case 'r':
-		{
-			const int n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf", &distancebin, &startlon, &endlon, &startlat, &endlat);
-			plotmode = MBSEGYGRID_PLOTBYDISTANCE;
-			if (n < 1) {
-				distancebin = 1.0;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:F:f:G:g:I:i:O:o:R:r:S:s:T:t:VvW:w:Hh")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+			{
+				const int n = sscanf(optarg, "%lf/%lf", &shotscale, &timescale);
+				if (n == 2)
+					scale2distance = MB_YES;
+				break;
 			}
-			if (n < 25) {
-				startlon = 0.0;
-				startlat = 0.0;
-				endlon = 0.0;
-				endlat = 0.0;
+			case 'B':
+			case 'b':
+			{
+				const int n = sscanf(optarg, "%lf/%lf", &agcmaxvalue, &agcwindow);
+				if (n < 2)
+					agcwindow = 0.0;
+				agcmode = MB_YES;
+				break;
 			}
-			break;
-		}
-		case 'S':
-		case 's':
-		{
-			const int n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
-			if (n < 5) {
-				chanstart = 0;
-				chanend = -1;
+			case 'C':
+			case 'c':
+			{
+				const int n = sscanf(optarg, "%d", &geometrymode);
+				if (n < 1)
+					geometrymode = MBSEGYGRID_GEOMETRY_VERTICAL;
+				break;
 			}
-			if (n < 3) {
-				tracestart = 0;
-				traceend = 0;
+			case 'D':
+			case 'd':
+				/* n = */ sscanf(optarg, "%d/%d", &decimatex, &decimatey);
+				break;
+			case 'F':
+			case 'f':
+				/* n = */ sscanf(optarg, "%d/%lf", &filtermode, &filterwindow);
+				break;
+			case 'G':
+			case 'g':
+			{
+				const int n = sscanf(optarg, "%d/%lf/%lf/%lf", &gainmode, &gain, &gainwindow, &gaindelay);
+				if (n < 4)
+					gaindelay = 0.0;
+				if (n < 3)
+					gainwindow = 0.0;
+				break;
 			}
-			if (n < 1) {
-				tracemode = MBSEGYGRID_USESHOT;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", segyfile);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", fileroot);
+				break;
+			case 'R':
+			case 'r':
+			{
+				const int n = sscanf(optarg, "%lf/%lf/%lf/%lf/%lf", &distancebin, &startlon, &endlon, &startlat, &endlat);
+				plotmode = MBSEGYGRID_PLOTBYDISTANCE;
+				if (n < 1) {
+					distancebin = 1.0;
+				}
+				if (n < 25) {
+					startlon = 0.0;
+					startlat = 0.0;
+					endlon = 0.0;
+					endlat = 0.0;
+				}
+				break;
 			}
-            else {
-                tracemode_set = MB_YES;
-            }
-			break;
-		}
-		case 'T':
-		case 't':
-		{
-			const int n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
-			if (n < 2)
-				timedelay = 0.0;
-			break;
-		}
-		case 'W':
-		case 'w':
-			/* n = */ sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
-			break;
-		case '?':
-			errflg = true;
+			case 'S':
+			case 's':
+			{
+				const int n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
+				if (n < 5) {
+					chanstart = 0;
+					chanend = -1;
+				}
+				if (n < 3) {
+					tracestart = 0;
+					traceend = 0;
+				}
+				if (n < 1) {
+					tracemode = MBSEGYGRID_USESHOT;
+				}
+				else {
+					tracemode_set = MB_YES;
+				}
+				break;
+			}
+			case 'T':
+			case 't':
+			{
+				const int n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
+				if (n < 2)
+					timedelay = 0.0;
+				break;
+			}
+			case 'W':
+			case 'w':
+				/* n = */ sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (verbose >= 2)
+			outfp = stderr;
+		else
+			outfp = stdout;
+
+		if (errflg) {
+			fprintf(outfp, "usage: %s\n", usage_message);
+			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* set output stream to stdout or stderr */
-	if (verbose >= 2)
-		outfp = stderr;
-	else
-		outfp = stdout;
+		if (verbose == 1 || help) {
+			fprintf(outfp, "\nProgram %s\n", program_name);
+			fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(outfp, "usage: %s\n", usage_message);
-		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose >= 2) {
+			fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(outfp, "dbg2  Control Parameters:\n");
+			fprintf(outfp, "dbg2       verbose:        %d\n", verbose);
+			fprintf(outfp, "dbg2       help:           %d\n", help);
+			fprintf(outfp, "dbg2       segyfile:       %s\n", segyfile);
+			fprintf(outfp, "dbg2       fileroot:       %s\n", fileroot);
+			fprintf(outfp, "dbg2       decimatex:      %d\n", decimatex);
+			fprintf(outfp, "dbg2       decimatey:      %d\n", decimatey);
+			fprintf(outfp, "dbg2       plotmode:       %d\n", plotmode);
+			fprintf(outfp, "dbg2       distancebin:    %f\n", distancebin);
+			fprintf(outfp, "dbg2       startlon:       %f\n", startlon);
+			fprintf(outfp, "dbg2       startlat:       %f\n", startlat);
+			fprintf(outfp, "dbg2       endlon:         %f\n", endlon);
+			fprintf(outfp, "dbg2       endlat:         %f\n", endlat);
+			fprintf(outfp, "dbg2       tracemode:      %d\n", tracemode);
+			fprintf(outfp, "dbg2       tracestart:     %d\n", tracestart);
+			fprintf(outfp, "dbg2       traceend:       %d\n", traceend);
+			fprintf(outfp, "dbg2       chanstart:      %d\n", chanstart);
+			fprintf(outfp, "dbg2       chanend:        %d\n", chanend);
+			fprintf(outfp, "dbg2       timesweep:      %f\n", timesweep);
+			fprintf(outfp, "dbg2       timedelay:      %f\n", timedelay);
+			fprintf(outfp, "dbg2       ngridx:         %d\n", ngridx);
+			fprintf(outfp, "dbg2       ngridy:         %d\n", ngridy);
+			fprintf(outfp, "dbg2       ngridxy:        %d\n", ngridxy);
+			fprintf(outfp, "dbg2       windowmode:     %d\n", windowmode);
+			fprintf(outfp, "dbg2       windowstart:    %f\n", windowstart);
+			fprintf(outfp, "dbg2       windowend:      %f\n", windowend);
+			fprintf(outfp, "dbg2       agcmode:        %d\n", agcmode);
+			fprintf(outfp, "dbg2       agcmaxvalue:    %f\n", agcmaxvalue);
+			fprintf(outfp, "dbg2       agcwindow:      %f\n", agcwindow);
+			fprintf(outfp, "dbg2       gainmode:       %d\n", gainmode);
+			fprintf(outfp, "dbg2       gain:           %f\n", gain);
+			fprintf(outfp, "dbg2       gainwindow:     %f\n", gainwindow);
+			fprintf(outfp, "dbg2       gaindelay:      %f\n", gaindelay);
+			fprintf(outfp, "dbg2       filtermode:     %d\n", filtermode);
+			fprintf(outfp, "dbg2       filterwindow:   %f\n", filterwindow);
+			fprintf(outfp, "dbg2       geometrymode:   %d\n", geometrymode);
+			fprintf(outfp, "dbg2       scale2distance: %d\n", scale2distance);
+			fprintf(outfp, "dbg2       shotscale:      %f\n", shotscale);
+			fprintf(outfp, "dbg2       timescale:      %f\n", timescale);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(outfp, "dbg2  Control Parameters:\n");
-		fprintf(outfp, "dbg2       verbose:        %d\n", verbose);
-		fprintf(outfp, "dbg2       help:           %d\n", help);
-		fprintf(outfp, "dbg2       segyfile:       %s\n", segyfile);
-		fprintf(outfp, "dbg2       fileroot:       %s\n", fileroot);
-		fprintf(outfp, "dbg2       decimatex:      %d\n", decimatex);
-		fprintf(outfp, "dbg2       decimatey:      %d\n", decimatey);
-		fprintf(outfp, "dbg2       plotmode:       %d\n", plotmode);
-		fprintf(outfp, "dbg2       distancebin:    %f\n", distancebin);
-		fprintf(outfp, "dbg2       startlon:       %f\n", startlon);
-		fprintf(outfp, "dbg2       startlat:       %f\n", startlat);
-		fprintf(outfp, "dbg2       endlon:         %f\n", endlon);
-		fprintf(outfp, "dbg2       endlat:         %f\n", endlat);
-		fprintf(outfp, "dbg2       tracemode:      %d\n", tracemode);
-		fprintf(outfp, "dbg2       tracestart:     %d\n", tracestart);
-		fprintf(outfp, "dbg2       traceend:       %d\n", traceend);
-		fprintf(outfp, "dbg2       chanstart:      %d\n", chanstart);
-		fprintf(outfp, "dbg2       chanend:        %d\n", chanend);
-		fprintf(outfp, "dbg2       timesweep:      %f\n", timesweep);
-		fprintf(outfp, "dbg2       timedelay:      %f\n", timedelay);
-		fprintf(outfp, "dbg2       ngridx:         %d\n", ngridx);
-		fprintf(outfp, "dbg2       ngridy:         %d\n", ngridy);
-		fprintf(outfp, "dbg2       ngridxy:        %d\n", ngridxy);
-		fprintf(outfp, "dbg2       windowmode:     %d\n", windowmode);
-		fprintf(outfp, "dbg2       windowstart:    %f\n", windowstart);
-		fprintf(outfp, "dbg2       windowend:      %f\n", windowend);
-		fprintf(outfp, "dbg2       agcmode:        %d\n", agcmode);
-		fprintf(outfp, "dbg2       agcmaxvalue:    %f\n", agcmaxvalue);
-		fprintf(outfp, "dbg2       agcwindow:      %f\n", agcwindow);
-		fprintf(outfp, "dbg2       gainmode:       %d\n", gainmode);
-		fprintf(outfp, "dbg2       gain:           %f\n", gain);
-		fprintf(outfp, "dbg2       gainwindow:     %f\n", gainwindow);
-		fprintf(outfp, "dbg2       gaindelay:      %f\n", gaindelay);
-		fprintf(outfp, "dbg2       filtermode:     %d\n", filtermode);
-		fprintf(outfp, "dbg2       filterwindow:   %f\n", filterwindow);
-		fprintf(outfp, "dbg2       geometrymode:   %d\n", geometrymode);
-		fprintf(outfp, "dbg2       scale2distance: %d\n", scale2distance);
-		fprintf(outfp, "dbg2       shotscale:      %f\n", shotscale);
-		fprintf(outfp, "dbg2       timescale:      %f\n", timescale);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(outfp, "\n%s\n", help_message);
-		fprintf(outfp, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(outfp, "\n%s\n", help_message);
+			fprintf(outfp, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get segy limits if required */

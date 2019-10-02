@@ -88,8 +88,8 @@ struct mbprocess_grid_struct {
 	float *data;
 };
 
-char program_name[] = "mbprocess";
-char help_message[] =
+static const char program_name[] = "mbprocess";
+static const char help_message[] =
     "mbprocess is a tool for processing swath sonar bathymetry data.\n"
     "This program performs a number of functions, including:\n"
     "  - merging navigation\n"
@@ -428,14 +428,10 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
 	return (status);
 }
 /*--------------------------------------------------------------------*/
+static const char usage_message[] =
+    "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
 int main(int argc, char **argv) {
-	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
-
-	bool errflg = false;
-	int c;
-	bool help = false;
-
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -770,66 +766,68 @@ int main(int argc, char **argv) {
 	memset(&esf, 0, sizeof(struct mb_esf_struct));
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			mbp_format_specified = MB_YES;
-			break;
-		case 'I':
-		case 'i':
-			mbp_ifile_specified = MB_YES;
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'N':
-		case 'n':
-			strip_comments = MB_YES;
-			break;
-		case 'O':
-		case 'o':
-			mbp_ofile_specified = MB_YES;
-			sscanf(optarg, "%s", mbp_ofile);
-			break;
-		case 'P':
-		case 'p':
-			checkuptodate = MB_NO;
-			break;
-		case 'S':
-		case 's':
-			printfilestatus = MB_YES;
-			break;
-		case 'T':
-		case 't':
-			testonly = MB_YES;
-			break;
-		case '?':
-			errflg = true;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				mbp_format_specified = MB_YES;
+				break;
+			case 'I':
+			case 'i':
+				mbp_ifile_specified = MB_YES;
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'N':
+			case 'n':
+				strip_comments = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				mbp_ofile_specified = MB_YES;
+				sscanf(optarg, "%s", mbp_ofile);
+				break;
+			case 'P':
+			case 'p':
+				checkuptodate = MB_NO;
+				break;
+			case 'S':
+			case 's':
+				printfilestatus = MB_YES;
+				break;
+			case 'T':
+			case 't':
+				testonly = MB_YES;
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* try datalist.mb-1 as input */
@@ -846,8 +844,7 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "The input file may be specified with the -I option.\n");
 		fprintf(stderr, "The default input file is \"datalist.mb-1\".\n");
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_OPEN_FAIL;
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* get format if required */
@@ -883,7 +880,6 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 		fprintf(stderr, "\ndbg2  MB-System Control Parameters:\n");
 		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       help:            %d\n", help);
 		fprintf(stderr, "dbg2       read_file:       %s\n", read_file);
 		fprintf(stderr, "dbg2       format:          %d\n", format);
 		fprintf(stderr, "dbg2       pings:           %d\n", pings);
