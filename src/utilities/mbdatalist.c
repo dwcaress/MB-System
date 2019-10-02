@@ -346,10 +346,9 @@ int main(int argc, char **argv) {
 		sprintf(file, "%sp.mb-1", fileroot);
 
 		if ((fp = fopen(file, "w")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open output file %s\n", file);
 			fprintf(stderr, "Program %s aborted!\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		fprintf(fp, "$PROCESSED\n%s %d\n", read_file, format);
 		fclose(fp);
@@ -448,10 +447,9 @@ int main(int argc, char **argv) {
 	/* else parse datalist */
 	else {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS) {
 			nfile++;

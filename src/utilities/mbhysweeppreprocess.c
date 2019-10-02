@@ -502,10 +502,9 @@ int main(int argc, char **argv) {
 	if (navdata == MB_YES) {
 		/* count the data points in the nav file */
 		if ((tfp = fopen(navfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open nav data file <%s> for reading\n", navfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* count the data records
@@ -539,10 +538,9 @@ int main(int argc, char **argv) {
 
 		/* if no nav data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from nav file <%s>\n", navfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the nav file */
@@ -591,10 +589,9 @@ int main(int argc, char **argv) {
 	if (sonardepthdata == MB_YES) {
 		/* count the data points in the sonardepth file */
 		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* count the data records then rewind the file to the start of the binary data */
@@ -620,10 +617,9 @@ int main(int argc, char **argv) {
 
 		/* if no sonardepth data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from sonardepth file <%s>\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the separate file */
@@ -656,10 +652,9 @@ int main(int argc, char **argv) {
 		/* count the data points in the timelag file */
 		ntimelag = 0;
 		if ((tfp = fopen(timelagfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open time lag model File <%s> for reading\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 			if (buffer[0] != '#')
@@ -681,10 +676,9 @@ int main(int argc, char **argv) {
 
 		/* if no time lag data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from time lag model file <%s>\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the timelag file */
@@ -703,10 +697,9 @@ int main(int argc, char **argv) {
 	if (use_platform_file == MB_YES) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
 		if (status == MB_FAILURE) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
 	else if (offset_sonar_mode == MB_YES || offset_mru_mode == MB_YES || offset_nav_mode == MB_YES) {
@@ -778,10 +771,9 @@ int main(int argc, char **argv) {
 
 		/* deal with error */
 		if (status == MB_FAILURE) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to initialize platform offset structure\n");
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
 
@@ -829,10 +821,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -948,10 +939,9 @@ int main(int argc, char **argv) {
 
 				/* deal with error */
 				if (status == MB_FAILURE) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to initialize platform offset structure\n");
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 			}
 
@@ -1453,10 +1443,9 @@ int main(int argc, char **argv) {
 		/* open file list */
 		if (read_datalist == MB_YES) {
 			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-				error = MB_ERROR_OPEN_FAIL;
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
+				exit(MB_ERROR_OPEN_FAIL);
 			}
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = MB_YES;

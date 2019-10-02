@@ -957,8 +957,7 @@ int main(int argc, char **argv) {
 	if (gbnd[0] >= gbnd[1] || gbnd[2] >= gbnd[3]) {
 		fprintf(outfp, "\nGrid bounds not properly specified:\n\t%f %f %f %f\n", gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_PARAMETER;
-		exit(error);
+		exit(MB_ERROR_BAD_PARAMETER);
 	}
 
 	/* footprint option only for bathymetry */
@@ -1010,9 +1009,8 @@ int main(int argc, char **argv) {
 		if (proj_status != MB_SUCCESS) {
 			fprintf(outfp, "\nOutput projection %s not found in database\n", projection_id);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
 		/* tranlate lon lat bounds from UTM if required */
@@ -1240,8 +1238,7 @@ int main(int argc, char **argv) {
 	if (gridkind == MBGRID_ARCASCII && fabs(dx - dy) > MBGRID_TINY) {
 		fprintf(outfp, "\nArc Ascii grid output (-G4) requires square cells, but grid intervals dx:%f dy:%f differ...\n", dx, dy);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_PARAMETER;
-		exit(error);
+		exit(MB_ERROR_BAD_PARAMETER);
 	}
 
 	/* get data input bounds in lon lat */
@@ -1539,7 +1536,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nMBIO Error allocating background data array:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_MEMORY_FAIL);
 		}
 		memset((char *)bxdata, 0, nbackground_alloc * sizeof(float));
 		memset((char *)bydata, 0, nbackground_alloc * sizeof(float));
@@ -1551,7 +1548,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_MEMORY_FAIL);
 		}
 		memset((char *)bdata, 0, 3 * nbackground_alloc * sizeof(float));
 #endif
@@ -1566,9 +1563,8 @@ int main(int argc, char **argv) {
 			if (fork_status != 0) {
 				fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n", plot_cmd,
 				        program_name);
-				error = MB_ERROR_BAD_PARAMETER;
 				mb_memory_clear(verbose, &error);
-				exit(error);
+				exit(MB_ERROR_BAD_PARAMETER);
 			}
 		}
 
@@ -1590,9 +1586,8 @@ int main(int argc, char **argv) {
 				if (fork_status != 0) {
 					fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n",
 					        plot_cmd, program_name);
-					error = MB_ERROR_BAD_PARAMETER;
 					mb_memory_clear(verbose, &error);
-					exit(error);
+					exit(MB_ERROR_BAD_PARAMETER);
 				}
 			}
 		}
@@ -1608,7 +1603,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
 		/* resample extracted grid to have similar resolution as working grid */
@@ -1625,7 +1620,7 @@ int main(int argc, char **argv) {
 			        program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
 		/* extract points with preprocessing if that will help */
@@ -1671,7 +1666,7 @@ int main(int argc, char **argv) {
 						fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
 						        __FILE__);
 						mb_memory_clear(verbose, &error);
-						exit(error);
+						exit(MB_ERROR_MEMORY_FAIL);
 					}
 				}
 				bxdata[nbackground] = (float)(tlon - bdata_origin_x);
@@ -1688,7 +1683,7 @@ int main(int argc, char **argv) {
 						fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
 						        __FILE__);
 						mb_memory_clear(verbose, &error);
-						exit(error);
+						exit(MB_ERROR_MEMORY_FAIL);
 					}
 				}
 				bdata[nbackground * 3] = (float)(tlon - bdata_origin_x);
@@ -1706,7 +1701,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
 		/* delete any temporary files */
@@ -1718,7 +1713,7 @@ int main(int argc, char **argv) {
 			        program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 	}
 
@@ -1796,7 +1791,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
 		       MB_SUCCESS) {

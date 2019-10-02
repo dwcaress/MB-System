@@ -2235,10 +2235,9 @@ int main(int argc, char **argv) {
   if (insertcomments == MB_YES) {
     /* open file */
     if ((fp = fopen(commentfile, "r")) == NULL) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to Open Comment File <%s> for reading\n", commentfile);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
 
     /* read and output comment lines */

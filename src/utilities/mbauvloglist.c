@@ -446,10 +446,9 @@ int main(int argc, char **argv) {
 		nav_num = 0;
 		const int nchar = MB_PATH_MAXLINE - 1;
 		if ((fp = fopen(nav_file, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", nav_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((result = fgets(buffer, nchar, fp)) == buffer)
 			nav_num++;
@@ -480,10 +479,9 @@ int main(int argc, char **argv) {
 		/* read the data points in the nav file */
 		nav_num = 0;
 		if ((fp = fopen(nav_file, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to Open navigation File <%s> for reading\n", nav_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((result = fgets(buffer, nchar, fp)) == buffer) {
 			const int nget = sscanf(

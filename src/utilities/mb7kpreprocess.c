@@ -1054,10 +1054,9 @@ int main(int argc, char **argv) {
 	if (insdata == MB_YES) {
 		/* count the data points in the auv log file */
 		if ((tfp = fopen(insfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open ins data file <%s> for reading\n", insfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/*
@@ -1160,10 +1159,9 @@ int main(int argc, char **argv) {
 
 		/* if no ins data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from MBARI AUV navigation file <%s>\n", insfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the auv log file */
@@ -1244,10 +1242,9 @@ int main(int argc, char **argv) {
 	if (rockdata == MB_YES) {
 		/* count the data points in the rock file */
 		if ((tfp = fopen(rockfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open rock data file <%s> for reading\n", rockfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		/* count the data records */
 		nrock = 0;
@@ -1282,10 +1279,9 @@ int main(int argc, char **argv) {
 		}
 		/* if no rock data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from rock file <%s>\n", rockfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the rock file */
@@ -1327,10 +1323,9 @@ int main(int argc, char **argv) {
 	if (dsldata == MB_YES) {
 		/* count the data points in the dsl file */
 		if ((tfp = fopen(dslfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open dsl data file <%s> for reading\n", dslfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		/* count the data records */
 		ndsl = 0;
@@ -1365,10 +1360,9 @@ int main(int argc, char **argv) {
 		}
 		/* if no dsl data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from dsl file <%s>\n", dslfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the dsl file */
@@ -1430,10 +1424,9 @@ int main(int argc, char **argv) {
 	if (sonardepthdata == MB_YES) {
 		/* count the data points in the auv log file */
 		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		/*
 		 * read the ascii header to determine how to parse the binary
@@ -1486,10 +1479,9 @@ int main(int argc, char **argv) {
 		}
 		/* if no sonardepth data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from MBARI AUV sonardepth file <%s>\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the auv log file */
@@ -1525,10 +1517,9 @@ int main(int argc, char **argv) {
 		/* count the data points in the timelag file */
 		ntimelag = 0;
 		if ((tfp = fopen(timelagfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open time lag model File <%s> for reading\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 			if (buffer[0] != '#')
@@ -1549,10 +1540,9 @@ int main(int argc, char **argv) {
 		}
 		/* if no time lag data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from time lag model file <%s>\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the timelag file */
@@ -1596,10 +1586,9 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Platform model with %d sensors read from platform file %s\n", platform->num_sensors, platform_file);
 		}
 		else {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
 	else if (depth_offset_mode == MB_YES || multibeam_offset_mode == MB_YES) {
@@ -1687,10 +1676,9 @@ int main(int argc, char **argv) {
 
 		/* deal with error */
 		if (status == MB_FAILURE) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to initialize platform offset structure\n");
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
 	/* get format if required */
@@ -1704,10 +1692,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -2926,10 +2913,9 @@ int main(int argc, char **argv) {
 
 					/* deal with error */
 					if (status == MB_FAILURE) {
-						error = MB_ERROR_OPEN_FAIL;
 						fprintf(stderr, "\nUnable to initialize platform offset structure\n");
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
+						exit(MB_ERROR_OPEN_FAIL);
 					}
 				}
 			}
@@ -3000,10 +2986,9 @@ int main(int argc, char **argv) {
 					/* open file for timedelay values */
 					sprintf(timedelayfile, "%s_timedelay.txt", read_file);
 					if ((tfp = fopen(timedelayfile, "w")) == NULL) {
-						error = MB_ERROR_OPEN_FAIL;
 						fprintf(stderr, "\nUnable to open time delay file <%s> for writing\n", timedelayfile);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
+						exit(MB_ERROR_OPEN_FAIL);
 					}
 				}
 				if (verbose > 0)
@@ -4215,10 +4200,9 @@ int main(int argc, char **argv) {
 		/* open file list */
 		if (read_datalist == MB_YES) {
 			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-				error = MB_ERROR_OPEN_FAIL;
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
+				exit(MB_ERROR_OPEN_FAIL);
 			}
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = MB_YES;
@@ -4278,10 +4262,9 @@ int main(int argc, char **argv) {
 				/* initialize ctd output file */
 				sprintf(ctdfile, "%s_ctd.txt", fileroot);
 				if ((tfp = fopen(ctdfile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to open ctd data file <%s> for writing\n", ctdfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				/*
 				 * initialize asynchronous heading output
@@ -4289,10 +4272,9 @@ int main(int argc, char **argv) {
 				 */
 				sprintf(athfile, "%s.ath", ofile);
 				if ((athfp = fopen(athfile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", athfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				/*
 				 * initialize asynchronous sonardepth output
@@ -4300,10 +4282,9 @@ int main(int argc, char **argv) {
 				 */
 				sprintf(atsfile, "%s.ats", ofile);
 				if ((atsfp = fopen(atsfile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to open asynchronous sonardepth data file <%s> for writing\n", atsfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				/*
 				 * initialize asynchronous attitude output
@@ -4311,10 +4292,9 @@ int main(int argc, char **argv) {
 				 */
 				sprintf(atafile, "%s.ata", ofile);
 				if ((atafp = fopen(atafile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", atafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				/*
 				 * initialize synchronous attitude output
@@ -4322,10 +4302,9 @@ int main(int argc, char **argv) {
 				 */
 				sprintf(stafile, "%s.sta", ofile);
 				if ((stafp = fopen(stafile, "w")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", stafile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 			}
 			/* get pointers to data storage */
