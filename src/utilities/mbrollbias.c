@@ -75,7 +75,6 @@ static const char usage_message[] =
 
 /*--------------------------------------------------------------------*/
 void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, int itriag) {
-
 	/* subroutine gauss, by william menke */
 	/* july 1978 (modified feb 1983, nov 85) */
 
@@ -214,11 +213,6 @@ void gauss(double *a, double *vec, int n, int nstore, double test, int *ierror, 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -333,104 +327,105 @@ int main(int argc, char **argv) {
 	ydim = 5;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhL:l:R:r:F:f:I:i:J:j:D:d:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d/%d", &iformat, &jformat);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", ifile);
-			break;
-		case 'J':
-		case 'j':
-			sscanf(optarg, "%s", jfile);
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%d/%d", &xdim, &ydim);
-			break;
-		case '?':
-			errflg = true;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "VvHhL:l:R:r:F:f:I:i:J:j:D:d:")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d/%d", &iformat, &jformat);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", ifile);
+				break;
+			case 'J':
+			case 'j':
+				sscanf(optarg, "%s", jfile);
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%d/%d", &xdim, &ydim);
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (verbose <= 1)
+			outfp = stdout;
+		else
+			outfp = stderr;
+
+		if (errflg) {
+			fprintf(outfp, "usage: %s\n", usage_message);
+			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* set output stream */
-	if (verbose <= 1)
-		outfp = stdout;
-	else
-		outfp = stderr;
+		if (verbose == 1 || help) {
+			fprintf(outfp, "\nProgram %s\n", program_name);
+			fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(outfp, "usage: %s\n", usage_message);
-		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose >= 2) {
+			fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(outfp, "dbg2  Control Parameters:\n");
+			fprintf(outfp, "dbg2       verbose:          %d\n", verbose);
+			fprintf(outfp, "dbg2       help:             %d\n", help);
+			fprintf(outfp, "dbg2       pings:            %d\n", pings);
+			fprintf(outfp, "dbg2       lonflip:          %d\n", lonflip);
+			fprintf(outfp, "dbg2       btime_i[0]:       %d\n", btime_i[0]);
+			fprintf(outfp, "dbg2       btime_i[1]:       %d\n", btime_i[1]);
+			fprintf(outfp, "dbg2       btime_i[2]:       %d\n", btime_i[2]);
+			fprintf(outfp, "dbg2       btime_i[3]:       %d\n", btime_i[3]);
+			fprintf(outfp, "dbg2       btime_i[4]:       %d\n", btime_i[4]);
+			fprintf(outfp, "dbg2       btime_i[5]:       %d\n", btime_i[5]);
+			fprintf(outfp, "dbg2       btime_i[6]:       %d\n", btime_i[6]);
+			fprintf(outfp, "dbg2       etime_i[0]:       %d\n", etime_i[0]);
+			fprintf(outfp, "dbg2       etime_i[1]:       %d\n", etime_i[1]);
+			fprintf(outfp, "dbg2       etime_i[2]:       %d\n", etime_i[2]);
+			fprintf(outfp, "dbg2       etime_i[3]:       %d\n", etime_i[3]);
+			fprintf(outfp, "dbg2       etime_i[4]:       %d\n", etime_i[4]);
+			fprintf(outfp, "dbg2       etime_i[5]:       %d\n", etime_i[5]);
+			fprintf(outfp, "dbg2       etime_i[6]:       %d\n", etime_i[6]);
+			fprintf(outfp, "dbg2       speedmin:         %f\n", speedmin);
+			fprintf(outfp, "dbg2       timegap:          %f\n", timegap);
+			fprintf(outfp, "dbg2       input file 1:     %s\n", ifile);
+			fprintf(outfp, "dbg2       input file 2:     %s\n", jfile);
+			fprintf(outfp, "dbg2       file 1 format:    %d\n", iformat);
+			fprintf(outfp, "dbg2       file 2 format:    %d\n", jformat);
+			fprintf(outfp, "dbg2       grid x dimension: %d\n", xdim);
+			fprintf(outfp, "dbg2       grid y dimension: %d\n", ydim);
+			fprintf(outfp, "dbg2       grid bounds[0]:   %f\n", bounds[0]);
+			fprintf(outfp, "dbg2       grid bounds[1]:   %f\n", bounds[1]);
+			fprintf(outfp, "dbg2       grid bounds[2]:   %f\n", bounds[2]);
+			fprintf(outfp, "dbg2       grid bounds[3]:   %f\n", bounds[3]);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(outfp, "dbg2  Control Parameters:\n");
-		fprintf(outfp, "dbg2       verbose:          %d\n", verbose);
-		fprintf(outfp, "dbg2       help:             %d\n", help);
-		fprintf(outfp, "dbg2       pings:            %d\n", pings);
-		fprintf(outfp, "dbg2       lonflip:          %d\n", lonflip);
-		fprintf(outfp, "dbg2       btime_i[0]:       %d\n", btime_i[0]);
-		fprintf(outfp, "dbg2       btime_i[1]:       %d\n", btime_i[1]);
-		fprintf(outfp, "dbg2       btime_i[2]:       %d\n", btime_i[2]);
-		fprintf(outfp, "dbg2       btime_i[3]:       %d\n", btime_i[3]);
-		fprintf(outfp, "dbg2       btime_i[4]:       %d\n", btime_i[4]);
-		fprintf(outfp, "dbg2       btime_i[5]:       %d\n", btime_i[5]);
-		fprintf(outfp, "dbg2       btime_i[6]:       %d\n", btime_i[6]);
-		fprintf(outfp, "dbg2       etime_i[0]:       %d\n", etime_i[0]);
-		fprintf(outfp, "dbg2       etime_i[1]:       %d\n", etime_i[1]);
-		fprintf(outfp, "dbg2       etime_i[2]:       %d\n", etime_i[2]);
-		fprintf(outfp, "dbg2       etime_i[3]:       %d\n", etime_i[3]);
-		fprintf(outfp, "dbg2       etime_i[4]:       %d\n", etime_i[4]);
-		fprintf(outfp, "dbg2       etime_i[5]:       %d\n", etime_i[5]);
-		fprintf(outfp, "dbg2       etime_i[6]:       %d\n", etime_i[6]);
-		fprintf(outfp, "dbg2       speedmin:         %f\n", speedmin);
-		fprintf(outfp, "dbg2       timegap:          %f\n", timegap);
-		fprintf(outfp, "dbg2       input file 1:     %s\n", ifile);
-		fprintf(outfp, "dbg2       input file 2:     %s\n", jfile);
-		fprintf(outfp, "dbg2       file 1 format:    %d\n", iformat);
-		fprintf(outfp, "dbg2       file 2 format:    %d\n", jformat);
-		fprintf(outfp, "dbg2       grid x dimension: %d\n", xdim);
-		fprintf(outfp, "dbg2       grid y dimension: %d\n", ydim);
-		fprintf(outfp, "dbg2       grid bounds[0]:   %f\n", bounds[0]);
-		fprintf(outfp, "dbg2       grid bounds[1]:   %f\n", bounds[1]);
-		fprintf(outfp, "dbg2       grid bounds[2]:   %f\n", bounds[2]);
-		fprintf(outfp, "dbg2       grid bounds[3]:   %f\n", bounds[3]);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(outfp, "\n%s\n", help_message);
-		fprintf(outfp, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(outfp, "\n%s\n", help_message);
+			fprintf(outfp, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */

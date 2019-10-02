@@ -64,9 +64,6 @@ static const char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -N 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
 	int pargc = 0;
 	char **pargv = NULL;
 
@@ -102,79 +99,82 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhEeF:f:I:i:LlNnP:p:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'E':
-		case 'e':
-			explicit = MB_YES;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			break;
-		case 'L':
-		case 'l':
-			lookforfiles++;
-			break;
-		case 'N':
-		case 'n':
-			removembnavadjust++;
-			break;
-		case 'P':
-		case 'p':
-			if (strlen(optarg) > 1) {
-				/* Replace first '=' before ':' with ':'  */
-				for (i = 0; i < strlen(optarg); i++) {
-					if (optarg[i] == ':') {
-						break;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "VvHhEeF:f:I:i:LlNnP:p:")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'E':
+			case 'e':
+				explicit = MB_YES;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				lookforfiles++;
+				break;
+			case 'N':
+			case 'n':
+				removembnavadjust++;
+				break;
+			case 'P':
+			case 'p':
+				if (strlen(optarg) > 1) {
+					/* Replace first '=' before ':' with ':'  */
+					for (i = 0; i < strlen(optarg); i++) {
+						if (optarg[i] == ':') {
+							break;
+						}
+						else if (optarg[i] == '=') {
+							optarg[i] = ':';
+							break;
+						}
 					}
-					else if (optarg[i] == '=') {
-						optarg[i] = ':';
-						break;
-					}
-				}
 
-				/* store the parameter argument */
-				pargv = (char **)realloc(pargv, (pargc + 1) * sizeof(char *));
-				pargv[pargc] = (char *)malloc(strlen(optarg) + 1);
-				strcpy(pargv[pargc], optarg);
-				pargc++;
+					/* store the parameter argument */
+					pargv = (char **)realloc(pargv, (pargc + 1) * sizeof(char *));
+					pargv[pargc] = (char *)malloc(strlen(optarg) + 1);
+					strcpy(pargv[pargc], optarg);
+					pargc++;
+				}
+				break;
+			case '?':
+				errflg = true;
 			}
-			break;
-		case '?':
-			errflg = true;
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-System Version %s\n", MB_VERSION);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		/* if help desired then print it and exit */
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */
@@ -914,7 +914,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
 			fprintf(stderr, "\ndbg2  MB-System Control Parameters:\n");
 			fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-			fprintf(stderr, "dbg2       help:            %d\n", help);
 			fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
 		}
 

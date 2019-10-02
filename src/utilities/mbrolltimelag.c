@@ -52,11 +52,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	bool errflg = false;
-	int c;
-	bool help = false;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 
@@ -158,90 +153,92 @@ int main(int argc, char **argv) {
 	strcpy(swathdata, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhC:c:F:f:I:i:K:k:O:o:N:n:S:s:T:t:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help = true;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'C':
-		case 'c':
-			sscanf(optarg, "%lf", &rthreshold);
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", swathdata);
-			break;
-		case 'K':
-		case 'k':
-			sscanf(optarg, "%d", &kind);
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d", &npings);
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", outroot);
-			outroot_defined = MB_YES;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%d", &navchannel);
-			if (navchannel > 0)
-				kind = MB_DATA_NONE;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%d/%lf/%lf", &nlag, &lagstart, &lagend);
-			break;
-		case '?':
-			errflg = true;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "VvHhC:c:F:f:I:i:K:k:O:o:N:n:S:s:T:t:")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'C':
+			case 'c':
+				sscanf(optarg, "%lf", &rthreshold);
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", swathdata);
+				break;
+			case 'K':
+			case 'k':
+				sscanf(optarg, "%d", &kind);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d", &npings);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", outroot);
+				outroot_defined = MB_YES;
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%d", &navchannel);
+				if (navchannel > 0)
+					kind = MB_DATA_NONE;
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%d/%lf/%lf", &nlag, &lagstart, &lagend);
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+			fprintf(stderr, "dbg2       help:            %d\n", help);
+			fprintf(stderr, "dbg2       format:          %d\n", format);
+			fprintf(stderr, "dbg2       rthreshold:      %f\n", rthreshold);
+			fprintf(stderr, "dbg2       swathdata:       %s\n", swathdata);
+			fprintf(stderr, "dbg2       npings:          %d\n", npings);
+			fprintf(stderr, "dbg2       nlag:            %d\n", nlag);
+			fprintf(stderr, "dbg2       lagstart:        %f\n", lagstart);
+			fprintf(stderr, "dbg2       lagend:          %f\n", lagend);
+			fprintf(stderr, "dbg2       navchannel:      %d\n", navchannel);
+			fprintf(stderr, "dbg2       kind:            %d\n", kind);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       help:            %d\n", help);
-		fprintf(stderr, "dbg2       format:          %d\n", format);
-		fprintf(stderr, "dbg2       rthreshold:      %f\n", rthreshold);
-		fprintf(stderr, "dbg2       swathdata:       %s\n", swathdata);
-		fprintf(stderr, "dbg2       npings:          %d\n", npings);
-		fprintf(stderr, "dbg2       nlag:            %d\n", nlag);
-		fprintf(stderr, "dbg2       lagstart:        %f\n", lagstart);
-		fprintf(stderr, "dbg2       lagend:          %f\n", lagend);
-		fprintf(stderr, "dbg2       navchannel:      %d\n", navchannel);
-		fprintf(stderr, "dbg2       kind:            %d\n", kind);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */
