@@ -294,47 +294,42 @@ int main(int argc, char **argv) {
 	if (read_datalist == MB_YES) {
 		sprintf(xcorfiletot, "%s_xcorr.txt", outroot);
 		if ((fpt = fopen(xcorfiletot, "w")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfiletot);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
 
 	/* open time lag estimate file */
 	sprintf(estimatefile, "%s_timelagest.txt", outroot);
 	if ((fpe = fopen(estimatefile, "w")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to open estimate output: %s\n", estimatefile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* open time lag histogram file */
 	sprintf(histfile, "%s_timelaghist.txt", outroot);
 	if ((fph = fopen(histfile, "w")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to open histogram output: %s\n", histfile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* open time lag model file */
 	sprintf(modelfile, "%s_timelagmodel.txt", outroot);
 	if ((fpm = fopen(modelfile, "w")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to open time lag model output: %s\n", modelfile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, swathdata, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", swathdata);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -379,19 +374,17 @@ int main(int argc, char **argv) {
 		/* open time lag histogram file */
 		sprintf(fhistfile, "%s_timelaghist.txt", swathfile);
 		if ((fpf = fopen(fhistfile, "w")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open histogram output: %s\n", fhistfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* open cross correlation file */
 		sprintf(xcorfile, "%s_xcorr.txt", swathfile);
 		if ((fpx = fopen(xcorfile, "w")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* initialize time lag histogram */

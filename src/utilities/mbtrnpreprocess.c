@@ -1700,10 +1700,9 @@ int main(int argc, char **argv)
     status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
     if (status == MB_FAILURE)
       {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
       }
 
     /* get sensor structures */
@@ -1808,10 +1807,9 @@ int main(int argc, char **argv)
     {
     if ((status =mb_datalist_open(verbose, &datalist, input, look_processed, &error)) != MB_SUCCESS)
       {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open data list file: %s\n", input);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
       }
     if ((status =
       mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight,

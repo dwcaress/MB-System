@@ -303,18 +303,14 @@ int main(int argc, char **argv) {
 
 	/* Check that there are valid waypoints in memory */
 	if (nroutepoint < 1) {
-		error = MB_ERROR_EOF;
-		status = MB_FAILURE;
 		fprintf(stderr, "\nNo line start or line end waypoints read from route file: <%s>\n", route_file);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_EOF);
 	}
 	else if (nroutepoint < 2) {
-		error = MB_ERROR_EOF;
-		status = MB_FAILURE;
 		fprintf(stderr, "\nOnly one line start or line end waypoint read from route file: <%s>\n", route_file);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_EOF);
 	}
 
 	/* set starting values */
@@ -339,10 +335,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
