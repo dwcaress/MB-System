@@ -474,10 +474,9 @@ int main(int argc, char **argv) {
 				/* read the pre-existing platform file */
 				status = mb_platform_read(verbose, input_platform_file, (void **)&platform, &error);
 				if (status == MB_FAILURE) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to read the pre-existing platform file: %s\n", input_platform_file);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				platform_num_sensors = platform->num_sensors;
 
@@ -590,10 +589,9 @@ int main(int argc, char **argv) {
 				/* open datalist or single swath file */
 				if (input_swath_format < 0) {
 					if ((status = mb_datalist_open(verbose, &datalist, input_swath_file, look_processed, &error)) != MB_SUCCESS) {
-						error = MB_ERROR_OPEN_FAIL;
 						fprintf(stderr, "\nUnable to open data list file: %s\n", input_swath_file);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
+						exit(MB_ERROR_OPEN_FAIL);
 					}
 					if ((status = mb_datalist_read(verbose, datalist, swath_file, dfile, &input_swath_format, &file_weight,
 					                               &error)) == MB_SUCCESS)
@@ -1214,10 +1212,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the time latency file */
 				tmp_sensor.num_time_latency = 0;
 				if ((tfp = fopen(time_latency_model_file, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to open time latency model file <%s> for reading\n", time_latency_model_file);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 					if (buffer[0] != '#')
@@ -1588,10 +1585,9 @@ int main(int argc, char **argv) {
 					/* count the data points in the time latency file */
 					active_sensor->num_time_latency = 0;
 					if ((tfp = fopen(time_latency_model_file, "r")) == NULL) {
-						error = MB_ERROR_OPEN_FAIL;
 						fprintf(stderr, "\nUnable to open time latency model file <%s> for reading\n", time_latency_model_file);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-						exit(error);
+						exit(MB_ERROR_OPEN_FAIL);
 					}
 					while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 						if (buffer[0] != '#')
@@ -1648,8 +1644,7 @@ int main(int argc, char **argv) {
 	if (errflg) {
 		fprintf(stderr, "usage: %s\n", usage_message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
+		exit(MB_ERROR_BAD_USAGE);
 	}
 	}  // process argument list
 

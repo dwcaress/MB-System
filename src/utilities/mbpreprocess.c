@@ -1138,10 +1138,9 @@ int main(int argc, char **argv) {
   if (use_platform_file == MB_YES) {
     status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
     if (status == MB_FAILURE) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
 
     /* reset data sources according to commands */
@@ -1186,16 +1185,14 @@ int main(int argc, char **argv) {
                          &time_latency_time_d, &time_latency_time_latency, &error);
 
     if (status == MB_FAILURE) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse time latency file: %s\n", time_latency_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (time_latency_num < 1) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nNo time latency values read from: %s\n", time_latency_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (verbose > 0)
       fprintf(stderr, "%d time_latency records loaded from file %s\n", time_latency_num, time_latency_file);
@@ -1207,16 +1204,14 @@ int main(int argc, char **argv) {
                    &nav_speed, &error);
 
     if (status == MB_FAILURE) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse nav file: %s\n", nav_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (n_nav < 1) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nNo nav values read from: %s\n", nav_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (verbose > 0)
       fprintf(stderr, "%d navigation records loaded from file %s\n", n_nav, nav_file);
@@ -1226,16 +1221,14 @@ int main(int argc, char **argv) {
                            &sensordepth_time_d, &sensordepth_sensordepth, &error);
 
     if (status == MB_FAILURE) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse sensoredepth file: %s\n", sensordepth_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (n_sensordepth < 1) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nNo soundspeed values read from: %s\n", sensordepth_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (verbose > 0)
       fprintf(stderr, "%d sensordepth records loaded from file %s\n", n_sensordepth, sensordepth_file);
@@ -1245,16 +1238,14 @@ int main(int argc, char **argv) {
                        &heading_heading, &error);
 
     if (status == MB_FAILURE) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse heading file: %s\n", heading_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (n_heading < 1) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nNo heading values read from: %s\n", heading_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (verbose > 0)
       fprintf(stderr, "%d heading records loaded from file %s\n", n_heading, heading_file);
@@ -1264,16 +1255,14 @@ int main(int argc, char **argv) {
                         &altitude_altitude, &error);
 
     if (status == MB_FAILURE) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse altitude file: %s\n", altitude_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (n_altitude < 1) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nNo altitude values read from: %s\n", altitude_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (verbose > 0)
       fprintf(stderr, "%d altitude records loaded from file %s\n", n_altitude, altitude_file);
@@ -1283,16 +1272,14 @@ int main(int argc, char **argv) {
                         &attitude_roll, &attitude_pitch, &attitude_heave, &error);
 
     if (status == MB_FAILURE) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse attitude file: %s\n", attitude_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (n_attitude < 1) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nNo attitude values read from: %s\n", attitude_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (verbose > 0)
       fprintf(stderr, "%d attitude records loaded from file %s\n", n_attitude, attitude_file);
@@ -1302,16 +1289,14 @@ int main(int argc, char **argv) {
                         &soundspeed_soundspeed, &error);
 
     if (status == MB_FAILURE) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open and parse soundspeed file: %s\n", soundspeed_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (n_soundspeed < 1) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nNo soundspeed values read from: %s\n", soundspeed_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     else if (verbose > 0)
       fprintf(stderr, "%d soundspeed records loaded from file %s\n", n_soundspeed, soundspeed_file);
@@ -1332,10 +1317,9 @@ int main(int argc, char **argv) {
   /* open file list */
   if (read_datalist == MB_YES) {
     if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
       read_data = MB_YES;
@@ -2311,10 +2295,9 @@ int main(int argc, char **argv) {
           if (verbose > 0)
             fprintf(stderr, "Outputting sensor %d offset %d in fnv file:%s\n", isensor, ioffset, fnvfile);
           if ((platform->sensors[isensor].offsets[ioffset].ofp = fopen(fnvfile, "wb")) == NULL) {
-            error = MB_ERROR_OPEN_FAIL;
             fprintf(stderr, "\nUnable to open sensor fnv data file <%s> for writing\n", fnvfile);
             fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-            exit(error);
+            exit(MB_ERROR_OPEN_FAIL);
           }
         }
       }
@@ -2324,10 +2307,9 @@ int main(int argc, char **argv) {
   /* open file list */
   if (read_datalist == MB_YES) {
     if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
       read_data = MB_YES;
@@ -2512,10 +2494,9 @@ int main(int argc, char **argv) {
       /* open synchronous attitude file */
       sprintf(afile, "%s.bsa", ofile);
       if ((afp = fopen(afile, "wb")) == NULL) {
-        error = MB_ERROR_OPEN_FAIL;
         fprintf(stderr, "\nUnable to open synchronous attitude data file <%s> for writing\n", afile);
         fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-        exit(error);
+        exit(MB_ERROR_OPEN_FAIL);
       }
 
       /* zero file count records */
@@ -3026,10 +3007,9 @@ int main(int argc, char **argv) {
           if (iend > istart) {
             sprintf(afile, "%s.bah", ofile);
             if ((afp = fopen(afile, "wb")) == NULL) {
-              error = MB_ERROR_OPEN_FAIL;
               fprintf(stderr, "\nUnable to open asynchronous heading data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-              exit(error);
+              exit(MB_ERROR_OPEN_FAIL);
             }
             if (verbose > 0)
               fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n", ofile, istart, iend, n_heading);
@@ -3064,10 +3044,9 @@ int main(int argc, char **argv) {
           if (iend > istart) {
             sprintf(afile, "%s.bas", ofile);
             if ((afp = fopen(afile, "wb")) == NULL) {
-              error = MB_ERROR_OPEN_FAIL;
               fprintf(stderr, "\nUnable to open asynchronous sensordepth data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-              exit(error);
+              exit(MB_ERROR_OPEN_FAIL);
             }
             if (verbose > 0)
               fprintf(stderr, "Generating bas file for %s using samples %d:%d out of %d\n", ofile, istart, iend,
@@ -3103,10 +3082,9 @@ int main(int argc, char **argv) {
           if (iend > istart) {
             sprintf(afile, "%s.baa", ofile);
             if ((afp = fopen(afile, "wb")) == NULL) {
-              error = MB_ERROR_OPEN_FAIL;
               fprintf(stderr, "\nUnable to open asynchronous attitude data file <%s> for writing\n", afile);
               fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-              exit(error);
+              exit(MB_ERROR_OPEN_FAIL);
             }
             if (verbose > 0)
               fprintf(stderr, "Generating baa file for %s using samples %d:%d out of %d\n", ofile, istart, iend,

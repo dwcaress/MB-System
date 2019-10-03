@@ -1623,8 +1623,7 @@ int main(int argc, char **argv) {
 	if (gbnd[0] >= gbnd[1] || gbnd[2] >= gbnd[3]) {
 		fprintf(outfp, "\nGrid bounds not properly specified:\n\t%f %f %f %f\n", gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_PARAMETER;
-		exit(error);
+		exit(MB_ERROR_BAD_PARAMETER);
 	}
 
 	/* use bathymetry/amplitude beams for types other than sidescan */
@@ -1976,7 +1975,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to Open Angle Weights File <%s> for reading\n", pfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		n_priority_angle = 0;
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
@@ -2007,7 +2006,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to Open Angle Weights File <%s> for reading\n", pfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		n_priority_angle = 0;
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
@@ -2233,11 +2232,10 @@ int main(int argc, char **argv) {
 		/* read in data */
 		ndata = 0;
 		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
 		       MB_SUCCESS) {
@@ -2751,7 +2749,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
 		       MB_SUCCESS) {
@@ -3332,7 +3330,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_MEMORY_FAIL);
 		}
 		memset((char *)sgrid, 0, gxdim * gydim * sizeof(float));
 

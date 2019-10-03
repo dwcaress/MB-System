@@ -427,10 +427,9 @@ int main(int argc, char **argv) {
 	if (read_datalist == MB_YES) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -658,9 +657,8 @@ int main(int argc, char **argv) {
 							if (proj_status != MB_SUCCESS) {
 								fprintf(stderr, "\nOutput projection %s not found in database\n", projection_id);
 								fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-								error = MB_ERROR_BAD_PARAMETER;
 								mb_memory_clear(verbose, &error);
-								exit(error);
+								exit(MB_ERROR_BAD_PARAMETER);
 							}
 						}
 
