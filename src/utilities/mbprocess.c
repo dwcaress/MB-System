@@ -858,10 +858,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, mbp_ifile, mbp_dfile, &mbp_format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -1608,10 +1607,9 @@ int main(int argc, char **argv) {
 				                         &grid.nxy, &grid.n_columns, &grid.n_rows, &grid.min, &grid.max, &grid.xmin, &grid.xmax, &grid.ymin,
 				                         &grid.ymax, &grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
 				if (status == MB_FAILURE) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to read topography grid file: %s\n", grid.file);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 
 				/* rationalize grid bounds and lonflip */
@@ -1636,10 +1634,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the svp file */
 				nsvp = 0;
 				if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", process.mbp_svpfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer)
 					if (buffer[0] != '#')
@@ -1666,19 +1663,17 @@ int main(int argc, char **argv) {
 
 				/* if no svp data then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from SVP file <%s>\n", process.mbp_svpfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the svp file */
 				nsvp = 0;
 				if ((tfp = fopen(process.mbp_svpfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Velocity Profile File <%s> for reading\n", process.mbp_svpfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
 					if (buffer[0] != '#') {
@@ -1776,10 +1771,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the nav file */
 				nnav = 0;
 				if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", process.mbp_navfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer)
 					nnav++;
@@ -1811,19 +1805,17 @@ int main(int argc, char **argv) {
 
 				/* if no nav data then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from navigation file <%s>\n", process.mbp_navfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the nav file */
 				nnav = 0;
 				if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open navigation File <%s> for reading\n", process.mbp_navfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer) {
 					nav_ok = MB_NO;
@@ -2187,10 +2179,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the adjusted nav file */
 				nanav = 0;
 				if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Adjusted Navigation File <%s> for reading\n", process.mbp_navadjfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer)
 					if (buffer[0] != '#')
@@ -2219,19 +2210,17 @@ int main(int argc, char **argv) {
 
 				/* if no adjusted nav data then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from adjusted navigation file <%s>\n", process.mbp_navadjfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the nav file */
 				nanav = 0;
 				if ((tfp = fopen(process.mbp_navadjfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open navigation File <%s> for reading\n", process.mbp_navadjfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer) {
 					nav_ok = MB_NO;
@@ -2326,10 +2315,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the attitude file */
 				nattitude = 0;
 				if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Attitude File <%s> for reading\n", process.mbp_attitudefile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer)
 					nattitude++;
@@ -2354,19 +2342,17 @@ int main(int argc, char **argv) {
 
 				/* if no attitude data then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from attitude file <%s>\n", process.mbp_attitudefile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the attitude file */
 				nattitude = 0;
 				if ((tfp = fopen(process.mbp_attitudefile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Attitude File <%s> for reading\n", process.mbp_attitudefile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer) {
 					attitude_ok = MB_NO;
@@ -2485,10 +2471,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the sonardepth file */
 				nsonardepth = 0;
 				if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Sonardepth File <%s> for reading\n", process.mbp_sonardepthfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer)
 					nsonardepth++;
@@ -2512,19 +2497,17 @@ int main(int argc, char **argv) {
 
 				/* if no sonardepth data then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from sonardepth file <%s>\n", process.mbp_sonardepthfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the sonardepth file */
 				nsonardepth = 0;
 				if ((tfp = fopen(process.mbp_sonardepthfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Sonardepth File <%s> for reading\n", process.mbp_sonardepthfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer) {
 					sonardepth_ok = MB_NO;
@@ -2642,10 +2625,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the tide file */
 				ntide = 0;
 				if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Tide File <%s> for reading\n", process.mbp_tidefile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer)
 					ntide++;
@@ -2668,19 +2650,17 @@ int main(int argc, char **argv) {
 
 				/* if no tide data then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from tide file <%s>\n", process.mbp_tidefile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the tide file */
 				ntide = 0;
 				if ((tfp = fopen(process.mbp_tidefile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Tide File <%s> for reading\n", process.mbp_tidefile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer) {
 					tide_ok = MB_NO;
@@ -2813,10 +2793,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the static file */
 				nstatic = 0;
 				if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Static File <%s> for reading\n", process.mbp_staticfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer)
 					nstatic++;
@@ -2839,19 +2818,17 @@ int main(int argc, char **argv) {
 
 				/* if no static data then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from static file <%s>\n", process.mbp_staticfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the static file */
 				nstatic = 0;
 				if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Static File <%s> for reading\n", process.mbp_staticfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer) {
 					static_ok = MB_NO;
@@ -2900,10 +2877,9 @@ int main(int argc, char **argv) {
 				/* count the data points in the static file */
 				nstatic = 0;
 				if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Static File <%s> for reading\n", process.mbp_staticfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer)
 					nstatic++;
@@ -2926,19 +2902,17 @@ int main(int argc, char **argv) {
 
 				/* if no static data then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from static file <%s>\n", process.mbp_staticfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the static file */
 				nstatic = 0;
 				if ((tfp = fopen(process.mbp_staticfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Static File <%s> for reading\n", process.mbp_staticfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, nchar, tfp)) == buffer) {
 					static_ok = MB_NO;
@@ -2986,10 +2960,9 @@ int main(int argc, char **argv) {
 				nampcorrtable = 0;
 				nampcorrangle = 0;
 				if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Amplitude Correction File <%s> for reading\n", process.mbp_ampcorrfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
 					if (strncmp(buffer, "# table:", 8) == 0)
@@ -3036,19 +3009,17 @@ int main(int argc, char **argv) {
 
 				/* if no amplitude correction file then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from amplitude correction file <%s>\n", process.mbp_ampcorrfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the amplitude correction file */
 				nampcorrtable = 0;
 				if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Amplitude Correction File <%s> for reading\n", process.mbp_ampcorrfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
 					/* deal with amplitude correction tables */
@@ -3113,10 +3084,9 @@ int main(int argc, char **argv) {
 				nsscorrtable = 0;
 				nsscorrangle = 0;
 				if ((tfp = fopen(process.mbp_sscorrfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Sidescan Correction File <%s> for reading\n", process.mbp_sscorrfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
 					if (strncmp(buffer, "# table:", 8) == 0)
@@ -3163,19 +3133,17 @@ int main(int argc, char **argv) {
 
 				/* if no sidescan correction file then quit */
 				else {
-					error = MB_ERROR_BAD_DATA;
 					fprintf(stderr, "\nUnable to read data from sidescan correction file <%s>\n", process.mbp_sscorrfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_BAD_DATA);
 				}
 
 				/* read the data points in the sidescan correction file */
 				nsscorrtable = 0;
 				if ((tfp = fopen(process.mbp_sscorrfile, "r")) == NULL) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to Open Sidescan Correction File <%s> for reading\n", process.mbp_sscorrfile);
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 				while ((result = fgets(buffer, MBP_FILENAMESIZE, tfp)) == buffer) {
 					/* deal with sidescan correction tables */

@@ -436,8 +436,7 @@ int main(int argc, char **argv) {
 	if (bounds[0] >= bounds[1] || bounds[2] >= bounds[3] || bounds[2] <= -90.0 || bounds[3] >= 90.0) {
 		fprintf(outfp, "\nGrid bounds not properly specified:\n\t%f %f %f %f\n", bounds[0], bounds[1], bounds[2], bounds[3]);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_PARAMETER;
-		exit(error);
+		exit(MB_ERROR_BAD_PARAMETER);
 	}
 
 	/* calculate grid properties and other values */
