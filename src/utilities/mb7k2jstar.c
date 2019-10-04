@@ -289,36 +289,11 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	char *message;
-
-	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
-	char current_output_file[MB_PATH_MAXLINE];
-	int new_output_file = MB_YES;
-	void *datalist;
-	double file_weight;
-	double btime_d;
-	double etime_d;
-	char dfile[MB_PATH_MAXLINE];
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
-
 	/* MBIO read values */
-	void *imbio_ptr = NULL;
-	struct mb_io_struct *imb_io_ptr = NULL;
-	void *istore_ptr = NULL;
-	struct mbsys_reson7k_struct *istore = NULL;
 	void *ombio_ptr = NULL;
 	struct mb_io_struct *omb_io_ptr = NULL;
 	void *ostore_ptr = NULL;
 	struct mbsys_jstar_struct *ostore = NULL;
-	int kind;
-	int time_i[7];
-	int time_j[5];
-	double time_d;
-	double navlon;
-	double navlat;
 	double speed;
 	double heading;
 	double distance;
@@ -431,7 +406,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* new output file obviously needed */
-	new_output_file = MB_YES;
+	bool new_output_file = true;
 
 	/* if specified read route file */
 	if (route_file_set == MB_YES) {
@@ -476,6 +451,7 @@ int main(int argc, char **argv) {
 					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -516,11 +492,13 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
 
 	/* open file list */
 	char file[MB_PATH_MAXLINE] = "";
+	void *datalist = NULL;
+	double file_weight;
+	char dfile[MB_PATH_MAXLINE];
 	if (read_datalist == MB_YES) {
 		int look_processed = MB_DATALIST_LOOK_YES;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
@@ -539,12 +517,21 @@ int main(int argc, char **argv) {
 		read_data = MB_YES;
 	}
 
+	char current_output_file[MB_PATH_MAXLINE];
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_RESON7KR) {
 
 		/* initialize reading the swath file */
+		double btime_d;
+		double etime_d;
+		int beams_bath;
+		int beams_amp;
+		int pixels_ss;
+		void *imbio_ptr = NULL;
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -553,9 +540,9 @@ int main(int argc, char **argv) {
 		}
 
 		/* get pointers to data storage */
-		imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-		istore_ptr = imb_io_ptr->store_data;
-		istore = (struct mbsys_reson7k_struct *)istore_ptr;
+		struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+		void *istore_ptr = imb_io_ptr->store_data;
+		struct mbsys_reson7k_struct *istore = (struct mbsys_reson7k_struct *)istore_ptr;
 
 		if (error == MB_ERROR_NO_ERROR) {
 			beamflag = NULL;
@@ -602,6 +589,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -612,11 +600,11 @@ int main(int argc, char **argv) {
 		if (error == MB_ERROR_NO_ERROR) {
 			if (output_file_set == MB_YES && ombio_ptr == NULL) {
 				/* set flag to open new output file */
-				new_output_file = MB_YES;
+				new_output_file = true;
 			}
 
 			else if (output_file_set == MB_NO && route_file_set == MB_NO) {
-				new_output_file = MB_YES;
+				new_output_file = true;
 				format_status = mb_get_format(verbose, file, output_file, &format_guess, &error);
 				if (format_status != MB_SUCCESS || format_guess != format) {
 					strcpy(output_file, file);
@@ -658,6 +646,11 @@ int main(int argc, char **argv) {
 			error = MB_ERROR_NO_ERROR;
 
 			/* read next data record */
+			int kind;
+			int time_i[7];
+			double time_d;
+			double navlon;
+			double navlat;
 			status &= mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
@@ -685,7 +678,7 @@ int main(int argc, char **argv) {
 				if (range < rangethreshold && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
 					/* fprintf(stderr,"New output by range to routepoint: %f\n",range); */
 					/* if needed set flag to open new output file */
-					if (new_output_file == MB_NO) {
+					if (!new_output_file) {
 						/* increment line number */
 						linenumber++;
 
@@ -709,7 +702,7 @@ int main(int argc, char **argv) {
 						}
 
 						/* set to open new output file */
-						new_output_file = MB_YES;
+						new_output_file = true;
 					}
 
 					/* increment active waypoint */
@@ -752,7 +745,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* if needed open new output file */
-			if (status == MB_SUCCESS && new_output_file == MB_YES &&
+			if (status == MB_SUCCESS && new_output_file &&
 			    ((extract_sbp == MB_YES && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) ||
 			     (extract_sslow == MB_YES && kind == MB_DATA_SIDESCAN2) ||
 			     (extract_sshigh == MB_YES && kind == MB_DATA_SIDESCAN3))) {
@@ -783,6 +776,7 @@ int main(int argc, char **argv) {
 				nwritesshi = 0;
 				if ((status &= mb_write_init(verbose, output_file, MBF_EDGJSTAR, &ombio_ptr, &obeams_bath, &obeams_amp,
 				                            &opixels_ss, &error)) != MB_SUCCESS) {
+					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
 					fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", file);
@@ -799,10 +793,11 @@ int main(int argc, char **argv) {
 				ostore = (struct mbsys_jstar_struct *)ostore_ptr;
 
 				/* reset new_output_file */
-				new_output_file = MB_NO;
+				new_output_file = false;
 			}
 
 			/* apply time shift if needed */
+			int time_j[5];
 			if (status == MB_SUCCESS && timeshift != 0.0 &&
 			    (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3)) {
 				time_d += timeshift;
