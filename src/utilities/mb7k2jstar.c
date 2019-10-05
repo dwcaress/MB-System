@@ -86,10 +86,10 @@ int main(int argc, char **argv) {
 	char lineroot[MB_PATH_MAXLINE];
 	strcpy(lineroot, "jstar");
 
-	int extract_sslow = MB_NO;
-	int extract_sshigh = MB_NO;
-	int extract_sbp = MB_NO;
-	int print_comments = MB_NO;
+	bool extract_sslow = false;
+	bool extract_sshigh = false;
+	bool extract_sbp = false;
+	bool print_comments = false;
 
 	int mode;
 
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 	double bottompickthreshold = 0.4;
 
 	/* sidescan gain mode */
-	int ssflip = MB_NO;
+	bool ssflip = false;
 	int gainmode = MB7K2JSTAR_SSGAIN_OFF;
 	double gainfactor = 1.0;
 
@@ -135,31 +135,31 @@ int main(int argc, char **argv) {
 			case 'A':
 			case 'a':
 				if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
-					extract_sslow = MB_YES;
+					extract_sslow = true;
 				}
 				else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
-					extract_sshigh = MB_YES;
+					extract_sshigh = true;
 				}
 				else if (strncmp(optarg, "SBP", 3) == 0 || strncmp(optarg, "sbp", 3) == 0) {
-					extract_sbp = MB_YES;
+					extract_sbp = true;
 				}
 				else if (strncmp(optarg, "ALL", 3) == 0 || strncmp(optarg, "all", 3) == 0) {
-					extract_sshigh = MB_YES;
-					extract_sslow = MB_YES;
-					extract_sbp = MB_YES;
+					extract_sshigh = true;
+					extract_sslow = true;
+					extract_sbp = true;
 				}
 				else {
 					sscanf(optarg, "%d", &mode);
 					if (mode == MB7K2JSTAR_SSLOW)
-						extract_sslow = MB_YES;
+						extract_sslow = true;
 					else if (mode == MB7K2JSTAR_SSHIGH)
-						extract_sshigh = MB_YES;
+						extract_sshigh = true;
 					else if (mode == MB7K2JSTAR_SBP)
-						extract_sbp = MB_YES;
+						extract_sbp = true;
 					else if (mode == MB7K2JSTAR_ALL) {
-						extract_sshigh = MB_YES;
-						extract_sslow = MB_YES;
-						extract_sbp = MB_YES;
+						extract_sshigh = true;
+						extract_sslow = true;
+						extract_sbp = true;
 					}
 				}
 				break;
@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
 			}
 			case 'C':
 			case 'c':
-				print_comments = MB_YES;
+				print_comments = true;
 				break;
 			case 'F':
 			case 'f':
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'X':
 			case 'x':
-				ssflip = MB_YES;
+				ssflip = true;
 				break;
 			case '?':
 				errflg = true;
@@ -269,7 +269,6 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
 			fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
 			fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
-			/* fprintf(stderr, "dbg2       file:                %s\n", file); */
 			fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
 			fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
 			fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
@@ -294,11 +293,6 @@ int main(int argc, char **argv) {
 	struct mb_io_struct *omb_io_ptr = NULL;
 	void *ostore_ptr = NULL;
 	struct mbsys_jstar_struct *ostore = NULL;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
 	double roll;
 	double pitch;
 	double heave;
@@ -381,21 +375,21 @@ int main(int argc, char **argv) {
 	int read_data;
 
 	/* set output types if needed */
-	if (extract_sbp == MB_NO && extract_sslow == MB_NO && extract_sshigh == MB_NO) {
-		extract_sbp = MB_YES;
-		extract_sslow = MB_YES;
-		extract_sshigh = MB_YES;
+	if (!extract_sbp && !extract_sslow && !extract_sshigh) {
+		extract_sbp = true;
+		extract_sslow = true;
+		extract_sshigh = true;
 	}
 
 	/* output output types */
 	fprintf(stdout, "\nData records to extract:\n");
-	if (extract_sbp == MB_YES)
+	if (extract_sbp)
 		fprintf(stdout, "     Subbottom\n");
-	if (extract_sslow == MB_YES)
+	if (extract_sslow)
 		fprintf(stdout, "     Low Sidescan\n");
-	if (extract_sshigh == MB_YES)
+	if (extract_sshigh)
 		fprintf(stdout, "     High Sidescan\n");
-	if (ssflip == MB_YES)
+	if (ssflip)
 		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
 
 	/* set starting line number and output file if route read */
@@ -425,6 +419,7 @@ int main(int argc, char **argv) {
 				}
 			}
 			else {
+				double heading;
 				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
@@ -612,19 +607,19 @@ int main(int argc, char **argv) {
 				if (output_file[strlen(output_file) - 1] == 'p') {
 					output_file[strlen(output_file) - 1] = '\0';
 				}
-				if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES) {
+				if (extract_sbp && extract_sslow && extract_sshigh) {
 					strcat(output_file, ".jsf");
 					format_output = MBF_EDGJSTAR;
 				}
-				else if (extract_sslow == MB_YES) {
+				else if (extract_sslow) {
 					strcat(output_file, ".mb132");
 					format_output = MBF_EDGJSTAR;
 				}
-				else if (extract_sshigh == MB_YES) {
+				else if (extract_sshigh) {
 					strcat(output_file, ".mb133");
 					format_output = MBF_EDGJSTR2;
 				}
-				else if (extract_sbp == MB_YES) {
+				else if (extract_sbp) {
 					strcat(output_file, ".jsf");
 					format_output = MBF_EDGJSTAR;
 				}
@@ -651,13 +646,14 @@ int main(int argc, char **argv) {
 			double time_d;
 			double navlon;
 			double navlat;
+			double speed;
+			double distance;
+			double altitude;
+			double sonardepth;
+			double heading;
 			status &= mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
-			/*fprintf(stderr,"kind:%d %s \n\ttime_i:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %f    time_i:%4.4d/%2.2d/%2.2d
-			%2.2d:%2.2d:%2.2d.%6.6d  %f\n",
-			kind,notice_msg[kind],time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],time_d,
-			istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],istore->time_d);*/
 
 			/* reset nonfatal errors */
 			if (kind == MB_DATA_DATA && error < 0) {
@@ -666,17 +662,12 @@ int main(int argc, char **argv) {
 			}
 
 			/* check survey data position against waypoints */
-			/* fprintf(stderr,"status:%d error:%d kind:%d route_file_set:%d nroutepoint:%d navlon:%f navlat:%f\n",
-			status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
 			if (status == MB_SUCCESS && kind == MB_DATA_DATA && route_file_set == MB_YES && nroutepoint > 1 && navlon != 0.0 &&
 			    navlat != 0.0) {
 				dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 				dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 				range = sqrt(dx * dx + dy * dy);
-				/* fprintf(stderr,"activewaypoint:%d range:%f lon:%f %f lat:%f %f dx:%f dy:%f\n",
-				activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint], dx, dy);*/
 				if (range < rangethreshold && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
-					/* fprintf(stderr,"New output by range to routepoint: %f\n",range); */
 					/* if needed set flag to open new output file */
 					if (!new_output_file) {
 						/* increment line number */
@@ -684,19 +675,19 @@ int main(int argc, char **argv) {
 
 						/* set output file name */
 						sprintf(output_file, "%s_%4.4d", lineroot, linenumber);
-						if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES) {
+						if (extract_sbp && extract_sslow && extract_sshigh) {
 							strcat(output_file, ".jsf");
 							format_output = MBF_EDGJSTAR;
 						}
-						else if (extract_sslow == MB_YES) {
+						else if (extract_sslow) {
 							strcat(output_file, ".mb132");
 							format_output = MBF_EDGJSTAR;
 						}
-						else if (extract_sshigh == MB_YES) {
+						else if (extract_sshigh) {
 							strcat(output_file, ".mb133");
 							format_output = MBF_EDGJSTR2;
 						}
-						else if (extract_sbp == MB_YES) {
+						else if (extract_sbp) {
 							strcat(output_file, ".jsf");
 							format_output = MBF_EDGJSTAR;
 						}
@@ -735,7 +726,6 @@ int main(int argc, char **argv) {
 				if (found == MB_YES) {
 					ttime_min_use = ttime_min;
 				}
-				/*fprintf(stderr,"found:%d beam_min:%d ttime_min_use:%f\n", found, beam_min, ttime_min_use);*/
 			}
 
 			/* nonfatal errors do not matter */
@@ -746,9 +736,9 @@ int main(int argc, char **argv) {
 
 			/* if needed open new output file */
 			if (status == MB_SUCCESS && new_output_file &&
-			    ((extract_sbp == MB_YES && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) ||
-			     (extract_sslow == MB_YES && kind == MB_DATA_SIDESCAN2) ||
-			     (extract_sshigh == MB_YES && kind == MB_DATA_SIDESCAN3))) {
+			    ((extract_sbp && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) ||
+			     (extract_sslow && kind == MB_DATA_SIDESCAN2) ||
+			     (extract_sshigh && kind == MB_DATA_SIDESCAN3))) {
 
 				/* close any old output file unless a single file has been specified */
 				if (ombio_ptr != NULL) {
@@ -803,17 +793,11 @@ int main(int argc, char **argv) {
 				time_d += timeshift;
 				mb_get_date(verbose, time_d, time_i);
 				mb_get_jtime(verbose, time_i, time_j);
-				/*fprintf(stderr,"Applying time shift: %f  %f\n",timeshift, time_d);*/
 			}
 
 			/* get some more values */
 			if (status == MB_SUCCESS && (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_DATA ||
 			                             kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3)) {
-				/*for (i=MAX(0,imb_io_ptr->nfix-5);i<imb_io_ptr->nfix;i++)
-				fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
-				i, imb_io_ptr->fix_time_d[i],
-				imb_io_ptr->fix_lon[i],
-				imb_io_ptr->fix_lat[i]);*/
 				mb_get_jtime(verbose, istore->time_i, time_j);
 				speed = 0.0;
 				mb_hedint_interp(verbose, imbio_ptr, time_d, &heading, &error);
@@ -834,47 +818,36 @@ int main(int argc, char **argv) {
 					oktowrite++;
 				else
 					oktowrite = 0;
-				/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n",
-				routeheading[activewaypoint-1],heading,headingdiff,oktowrite);*/
 			}
 			else
 				oktowrite = MBES_ONLINE_COUNT;
-			/* if (status == MB_SUCCESS)
-			fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n",
-			activewaypoint,linenumber,range, navlon,
-			routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 
 			/* handle multibeam data */
 			if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
-				/*fprintf(stderr,"MB_DATA_DATA: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreaddata++;
 			}
 
 			/* handle file header data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_HEADER) {
-				/*fprintf(stderr,"MB_DATA_HEADER: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadheader++;
 			}
 
 			/* handle bluefin ctd data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_SSV) {
-				/*fprintf(stderr,"MB_DATA_SSV: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadssv++;
 			}
 
 			/* handle bluefin nav data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) {
-				/*fprintf(stderr,"MB_DATA_NAV1: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadnav1++;
 			}
 
 			/* handle subbottom data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
-				/*fprintf(stderr,"MB_DATA_SUBBOTTOM_SUBBOTTOM: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadsbp++;
 
 				/* output data if desired */
-				if (extract_sbp == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
+				if (extract_sbp && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
 					/* set overall parameters */
 					ostore->kind = kind;
 					ostore->subsystem = 0;
@@ -1134,18 +1107,17 @@ int main(int argc, char **argv) {
 
 			/* handle low frequency sidescan data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2) {
-				/*fprintf(stderr,"MB_DATA_SIDESCAN2: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadsslo++;
 
 				/* output data if desired */
-				if (extract_sslow == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
+				if (extract_sslow && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
 					/* set overall parameters */
 					ostore->kind = MB_DATA_DATA;
 					ostore->subsystem = 20;
 
 					/*----------------------------------------------------------------*/
 					/* copy low frequency port sidescan to jstar storage */
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssstbd);
 					else
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssport);
@@ -1159,7 +1131,7 @@ int main(int argc, char **argv) {
 					channel->message.type = 80;
 					channel->message.command = 0;
 					channel->message.subsystem = 20;
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel->message.channel = 1;
 					else
 						channel->message.channel = 0;
@@ -1314,10 +1286,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] /= n;
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
@@ -1328,10 +1298,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] = (unsigned int)(sqrt(value) / n);
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else {
@@ -1392,16 +1360,12 @@ int main(int argc, char **argv) {
 					if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR) {
 						channelpick = (int)(((double)channel->sonarAltitude) / 0.00075 / ((double)channel->sampleInterval));
 						channelpick = MAX(channelpick, 1);
-						/*fprintf(stderr,"altitude:%d sampleInterval:%d
-						 * channelpick:%d\n",channel->sonarAltitude,channel->sampleInterval,channelpick);*/
 						for (int i = 0; i < channelpick; i++) {
 							channel->trace[i] = (unsigned short)(gainfactor * channel->trace[i]);
 						}
 						for (int i = channelpick; i < channel->samples; i++) {
 							factor = gainfactor * (((double)(i * i)) / ((double)(channelpick * channelpick)));
-							/*fprintf(stderr,"sample %d: factor:%f value: %d",i,factor,channel->trace[i]);*/
 							channel->trace[i] = (unsigned short)(factor * channel->trace[i]);
-							/*fprintf(stderr," %d\n",channel->trace[i]);*/
 						}
 					}
 
@@ -1421,7 +1385,7 @@ int main(int argc, char **argv) {
 
 					/*----------------------------------------------------------------*/
 					/* copy low frequency starboard sidescan to jstar storage */
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssport);
 					else
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssstbd);
@@ -1435,7 +1399,7 @@ int main(int argc, char **argv) {
 					channel->message.type = 80;
 					channel->message.command = 0;
 					channel->message.subsystem = 20;
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel->message.channel = 0;
 					else
 						channel->message.channel = 1;
@@ -1590,10 +1554,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] /= n;
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
@@ -1604,10 +1566,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] = (unsigned int)(sqrt(value) / n);
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else {
@@ -1667,14 +1627,10 @@ int main(int argc, char **argv) {
 					/* apply gain if specified */
 					if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR) {
 						channelpick = (int)(((double)channel->sonarAltitude) / 0.00075 / ((double)channel->sampleInterval));
-						/*fprintf(stderr,"altitude:%d sampleInterval:%d
-						 * channelpick:%d\n",channel->sonarAltitude,channel->sampleInterval,channelpick);*/
 						channelpick = MAX(channelpick, 1);
 						for (int i = channelpick; i < channel->samples; i++) {
 							factor = gainfactor * (((double)(i * i)) / ((double)(channelpick * channelpick)));
-							/*fprintf(stderr,"sample %d: factor:%f value: %d",i,factor,channel->trace[i]);*/
 							channel->trace[i] = (unsigned short)(factor * channel->trace[i]);
-							/*fprintf(stderr," %d\n",channel->trace[i]);*/
 						}
 					}
 
@@ -1700,18 +1656,17 @@ int main(int argc, char **argv) {
 
 			/* handle high frequency sidescan data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3) {
-				/*fprintf(stderr,"MB_DATA_SIDESCAN3: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadsshi++;
 
 				/* output data if desired */
-				if (extract_sshigh == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
+				if (extract_sshigh && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
 					/* set overall parameters */
 					ostore->kind = MB_DATA_SIDESCAN2;
 					ostore->subsystem = 21;
 
 					/*----------------------------------------------------------------*/
 					/* copy high frequency port sidescan to jstar storage */
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssstbd);
 					else
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssport);
@@ -1877,10 +1832,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] /= n;
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
@@ -1891,10 +1844,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] = (unsigned int)(sqrt(value) / n);
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else {
@@ -1967,7 +1918,7 @@ int main(int argc, char **argv) {
 
 					/*----------------------------------------------------------------*/
 					/* copy high frequency starboard sidescan to jstar storage */
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssport);
 					else
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssstbd);
@@ -2133,10 +2084,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] /= n;
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
@@ -2147,10 +2096,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] = (unsigned int)(sqrt(value) / n);
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else {
@@ -2227,14 +2174,13 @@ int main(int argc, char **argv) {
 				}
 			}
 
-			/* handle unknown data */
 			else if (status == MB_SUCCESS) {
-				/*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
+				fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);
 			}
 
 			/* handle read error */
 			else {
-				/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
+				fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);
 			}
 
 			if (verbose >= 2) {
@@ -2244,7 +2190,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg2       status:         %d\n", status);
 			}
 
-			if (print_comments == MB_YES && kind == MB_DATA_COMMENT) {
+			if (print_comments && kind == MB_DATA_COMMENT) {
 				if (icomment == 0) {
 					fprintf(stderr, "\nComments:\n");
 					icomment++;
