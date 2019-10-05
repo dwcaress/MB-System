@@ -26,7 +26,9 @@
  * Date:	November 11, 2005
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,12 +52,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 
@@ -152,104 +148,97 @@ int main(int argc, char **argv) {
 	int nscan;
 	int j0, j1;
 	int shellstatus;
-	int j, k, l;
 
 	/* set default input */
 	strcpy(swathdata, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhC:c:F:f:I:i:K:k:O:o:N:n:S:s:T:t:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'C':
-		case 'c':
-			sscanf(optarg, "%lf", &rthreshold);
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", swathdata);
-			flag++;
-			break;
-		case 'K':
-		case 'k':
-			sscanf(optarg, "%d", &kind);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d", &npings);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", outroot);
-			outroot_defined = MB_YES;
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%d", &navchannel);
-			if (navchannel > 0)
-				kind = MB_DATA_NONE;
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%d/%lf/%lf", &nlag, &lagstart, &lagend);
-			flag++;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "VvHhC:c:F:f:I:i:K:k:O:o:N:n:S:s:T:t:")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'C':
+			case 'c':
+				sscanf(optarg, "%lf", &rthreshold);
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", swathdata);
+				break;
+			case 'K':
+			case 'k':
+				sscanf(optarg, "%d", &kind);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d", &npings);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", outroot);
+				outroot_defined = MB_YES;
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%d", &navchannel);
+				if (navchannel > 0)
+					kind = MB_DATA_NONE;
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%d/%lf/%lf", &nlag, &lagstart, &lagend);
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+			fprintf(stderr, "dbg2       help:            %d\n", help);
+			fprintf(stderr, "dbg2       format:          %d\n", format);
+			fprintf(stderr, "dbg2       rthreshold:      %f\n", rthreshold);
+			fprintf(stderr, "dbg2       swathdata:       %s\n", swathdata);
+			fprintf(stderr, "dbg2       npings:          %d\n", npings);
+			fprintf(stderr, "dbg2       nlag:            %d\n", nlag);
+			fprintf(stderr, "dbg2       lagstart:        %f\n", lagstart);
+			fprintf(stderr, "dbg2       lagend:          %f\n", lagend);
+			fprintf(stderr, "dbg2       navchannel:      %d\n", navchannel);
+			fprintf(stderr, "dbg2       kind:            %d\n", kind);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       help:            %d\n", help);
-		fprintf(stderr, "dbg2       format:          %d\n", format);
-		fprintf(stderr, "dbg2       rthreshold:      %f\n", rthreshold);
-		fprintf(stderr, "dbg2       swathdata:       %s\n", swathdata);
-		fprintf(stderr, "dbg2       npings:          %d\n", npings);
-		fprintf(stderr, "dbg2       nlag:            %d\n", nlag);
-		fprintf(stderr, "dbg2       lagstart:        %f\n", lagstart);
-		fprintf(stderr, "dbg2       lagend:          %f\n", lagend);
-		fprintf(stderr, "dbg2       navchannel:      %d\n", navchannel);
-		fprintf(stderr, "dbg2       kind:            %d\n", kind);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */
@@ -305,47 +294,42 @@ int main(int argc, char **argv) {
 	if (read_datalist == MB_YES) {
 		sprintf(xcorfiletot, "%s_xcorr.txt", outroot);
 		if ((fpt = fopen(xcorfiletot, "w")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfiletot);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
 
 	/* open time lag estimate file */
 	sprintf(estimatefile, "%s_timelagest.txt", outroot);
 	if ((fpe = fopen(estimatefile, "w")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to open estimate output: %s\n", estimatefile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* open time lag histogram file */
 	sprintf(histfile, "%s_timelaghist.txt", outroot);
 	if ((fph = fopen(histfile, "w")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to open histogram output: %s\n", histfile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* open time lag model file */
 	sprintf(modelfile, "%s_timelagmodel.txt", outroot);
 	if ((fpm = fopen(modelfile, "w")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to open time lag model output: %s\n", modelfile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, swathdata, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", swathdata);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -390,23 +374,21 @@ int main(int argc, char **argv) {
 		/* open time lag histogram file */
 		sprintf(fhistfile, "%s_timelaghist.txt", swathfile);
 		if ((fpf = fopen(fhistfile, "w")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open histogram output: %s\n", fhistfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* open cross correlation file */
 		sprintf(xcorfile, "%s_xcorr.txt", swathfile);
 		if ((fpx = fopen(xcorfile, "w")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* initialize time lag histogram */
-		for (k = 0; k < nlag; k++) {
+		for (int k = 0; k < nlag; k++) {
 			timelaghistogram[k] = 0;
 		}
 
@@ -418,7 +400,7 @@ int main(int argc, char **argv) {
 
 			/* get mean slope in this chunk */
 			slopemean = 0.0;
-			for (j = j0; j <= j1; j++) {
+			for (int j = j0; j <= j1; j++) {
 				slopemean += slope_slope[j];
 			}
 			slopemean /= npings;
@@ -426,7 +408,7 @@ int main(int argc, char **argv) {
 			/* get mean roll in this chunk */
 			rollmean = 0.0;
 			nrollmean = 0;
-			for (j = 0; j < nroll; j++) {
+			for (int j = 0; j < nroll; j++) {
 				if ((roll_time_d[j] >= slope_time_d[j0] + lagstart) && (roll_time_d[j] <= slope_time_d[j1] + lagend)) {
 					rollmean += roll_roll[j];
 					nrollmean++;
@@ -441,18 +423,18 @@ int main(int argc, char **argv) {
 				fprintf(fpx, ">\n");
 				if (fpt != NULL)
 					fprintf(fpt, ">\n");
-				for (k = 0; k < nlag; k++) {
+				for (int k = 0; k < nlag; k++) {
 					timelag = lagstart + k * lagstep;
 					sumsloperoll = 0.0;
 					sumslopesq = 0.0;
 					sumrollsq = 0.0;
 					nr = 0;
 
-					for (j = j0; j <= j1; j++) {
+					for (int j = j0; j <= j1; j++) {
 						/* interpolate lagged roll value */
 						found = MB_NO;
 						time_d = slope_time_d[j] + timelag;
-						for (l = nr; l < nroll - 1 && found == MB_NO; l++) {
+						for (int l = nr; l < nroll - 1 && found == MB_NO; l++) {
 							if (time_d >= roll_time_d[l] && time_d <= roll_time_d[l + 1]) {
 								nr = l;
 								found = MB_YES;
@@ -493,7 +475,7 @@ int main(int argc, char **argv) {
 				maxr = 0.0;
 				peakr = 0.0;
 				peaktimelag = 0.0;
-				for (k = 0; k < nlag; k++) {
+				for (int k = 0; k < nlag; k++) {
 					timelag = lagstart + k * lagstep;
 					if (timelag >= lagstart && timelag <= lagend) {
 						if (rr[k] > maxr) {
@@ -565,7 +547,7 @@ int main(int argc, char **argv) {
 		peakkmax = 0;
 		peakksum = 0;
 		timelag = 0.0;
-		for (k = 0; k < nlag; k++) {
+		for (int k = 0; k < nlag; k++) {
 			if (timelaghistogram[k] > peakkmax) {
 				peakkmax = timelaghistogram[k];
 				peakk = k;

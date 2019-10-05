@@ -77,7 +77,6 @@ int main(int argc, char **argv) {
 	int errflg = 0;
 	int c;
 	int help = 0;
-	int flag = 0;
 
 	/*ALBERTO definitions */
 	int gap = 1;
@@ -159,8 +158,9 @@ int main(int argc, char **argv) {
 	int forward;
 	double xx, yy, zz;
 	double heading_start, dheading, dheadingx, dheadingy;
-	int j, jj, k;
+	int jj;
 
+	// TODO(schwehr): Remove embedded prototypes.
 	void Polygon_Fill();
 	void Good_Polygon();
 
@@ -190,86 +190,70 @@ int main(int argc, char **argv) {
 		case 'A':
 		case 'a':
 			sscanf(optarg, "%lf", &alpha);
-			flag++;
 			break;
 		case 'B':
 		case 'b':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
 			btime_i[6] = 0;
-			flag++;
 			break;
 		case 'D':
 		case 'd':
 			sscanf(optarg, "%c", &viewdir);
-			flag++;
 			break;
 		case 'E':
 		case 'e':
 			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
 			etime_i[6] = 0;
-			flag++;
 			break;
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &format);
-			flag++;
 			break;
 		case 'G':
 		case 'g':
 			sscanf(optarg, "%d", &gap);
-			flag++;
 			break;
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", file);
-			flag++;
 			break;
 		case 'K':
 		case 'k':
 			sscanf(optarg, "%lf", &eta);
-			flag++;
 			break;
 		case 'N':
 		case 'n':
 			sscanf(optarg, "%d", &num_pings_max);
 			if (num_pings_max < 2 || num_pings_max > MBPS_MAXPINGS)
 				num_pings_max = MBPS_MAXPINGS;
-			flag++;
 			break;
 		case 'P':
 		case 'p':
 			sscanf(optarg, "%d", &pings);
-			flag++;
 			break;
 		case 'S':
 		case 's':
 			sscanf(optarg, "%lf", &speedmin);
-			flag++;
 			break;
 		case 'T':
 		case 't':
 			sscanf(optarg, "%s", title);
-			flag++;
 			break;
 		case 'X':
 		case 'x':
 			sscanf(optarg, "%lf", &ve);
-			flag++;
 			break;
 		case 'W':
 		case 'w':
 			sscanf(optarg, "%lf", &meters_per_inch);
-			flag++;
 			break;
 		case 'Y':
 		case 'y':
 			display_stats = MB_NO;
-			flag++;
 			break;
 		case 'Z':
 		case 'z':
 			display_scales = MB_NO;
-			flag++;
 			break;
 		case '?':
 			errflg++;
@@ -482,7 +466,7 @@ int main(int argc, char **argv) {
 				distot += distance * 1000.0; /* distance in meters */
 
 				/* loop over the beams */
-				for (j = 0; j < beams_bath; j++) {
+				for (int j = 0; j < beams_bath; j++) {
 					if (j >= data[nread].beams_bath) {
 						data[nread].beamflag[j] = MB_FLAG_NULL;
 						data[nread].xp[j] = BAD;
@@ -584,7 +568,7 @@ int main(int argc, char **argv) {
 		beamflag = data[i].beamflag;
 		xp = data[i].xp;
 		yp = data[i].yp;
-		for (j = 0; j < data[i].beams_bath; j++) {
+		for (int j = 0; j < data[i].beams_bath; j++) {
 			if (mb_beam_ok(beamflag[j])) {
 				yp[j] -= mean_yp;
 				xp[j] -= mean_xp;
@@ -656,7 +640,7 @@ int main(int argc, char **argv) {
 		else
 			forward = MB_NO;
 	}
-	for (j = 0; j < beams_bath - 1; j++) {
+	for (int j = 0; j < beams_bath - 1; j++) {
 		for (int i = 0; i < nread - 1; i++) {
 			if (forward == MB_YES)
 				jj = j;

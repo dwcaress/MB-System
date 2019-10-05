@@ -20,7 +20,9 @@
  *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -63,9 +65,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int help = 0;
-
 	int verbose = 0;
 	int format = 0;
 	int pings;
@@ -87,10 +86,10 @@ int main(int argc, char **argv) {
 	char lineroot[MB_PATH_MAXLINE];
 	strcpy(lineroot, "jstar");
 
-	int extract_sslow = MB_NO;
-	int extract_sshigh = MB_NO;
-	int extract_sbp = MB_NO;
-	int print_comments = MB_NO;
+	bool extract_sslow = false;
+	bool extract_sshigh = false;
+	bool extract_sbp = false;
+	bool print_comments = false;
 
 	int mode;
 
@@ -99,17 +98,17 @@ int main(int argc, char **argv) {
 	double bottompickthreshold = 0.4;
 
 	/* sidescan gain mode */
-	int ssflip = MB_NO;
+	bool ssflip = false;
 	int gainmode = MB7K2JSTAR_SSGAIN_OFF;
 	double gainfactor = 1.0;
 
-	int checkroutebearing = MB_NO;
+	bool checkroutebearing = false;
 
 	char output_file[MB_PATH_MAXLINE+12] = "";
-	int output_file_set = MB_NO;
+	bool output_file_set = false;
 
 	char route_file[MB_PATH_MAXLINE];
-	int route_file_set = MB_NO;
+	bool route_file_set = false;
 
 	int smooth = 0;
 
@@ -119,222 +118,181 @@ int main(int argc, char **argv) {
 
 	/* process argument list */
 	{
-	int flag = 0;
-	int c;
-	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
-				extract_sslow = MB_YES;
-			}
-			else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
-				extract_sshigh = MB_YES;
-			}
-			else if (strncmp(optarg, "SBP", 3) == 0 || strncmp(optarg, "sbp", 3) == 0) {
-				extract_sbp = MB_YES;
-			}
-			else if (strncmp(optarg, "ALL", 3) == 0 || strncmp(optarg, "all", 3) == 0) {
-				extract_sshigh = MB_YES;
-				extract_sslow = MB_YES;
-				extract_sbp = MB_YES;
-			}
-			else {
-				sscanf(optarg, "%d", &mode);
-				if (mode == MB7K2JSTAR_SSLOW)
-					extract_sslow = MB_YES;
-				else if (mode == MB7K2JSTAR_SSHIGH)
-					extract_sshigh = MB_YES;
-				else if (mode == MB7K2JSTAR_SBP)
-					extract_sbp = MB_YES;
-				else if (mode == MB7K2JSTAR_ALL) {
-					extract_sshigh = MB_YES;
-					extract_sslow = MB_YES;
-					extract_sbp = MB_YES;
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:XxVvHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
+					extract_sslow = true;
 				}
+				else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
+					extract_sshigh = true;
+				}
+				else if (strncmp(optarg, "SBP", 3) == 0 || strncmp(optarg, "sbp", 3) == 0) {
+					extract_sbp = true;
+				}
+				else if (strncmp(optarg, "ALL", 3) == 0 || strncmp(optarg, "all", 3) == 0) {
+					extract_sshigh = true;
+					extract_sslow = true;
+					extract_sbp = true;
+				}
+				else {
+					sscanf(optarg, "%d", &mode);
+					if (mode == MB7K2JSTAR_SSLOW)
+						extract_sslow = true;
+					else if (mode == MB7K2JSTAR_SSHIGH)
+						extract_sshigh = true;
+					else if (mode == MB7K2JSTAR_SBP)
+						extract_sbp = true;
+					else if (mode == MB7K2JSTAR_ALL) {
+						extract_sshigh = true;
+						extract_sslow = true;
+						extract_sbp = true;
+					}
+				}
+				break;
+			case 'B':
+			case 'b': {
+				const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+				if (n == 0)
+					bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
+				else if (n == 1 && bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
+					bottompickthreshold = 0.5;
+				break;
 			}
-			flag++;
-			break;
-		case 'B':
-		case 'b': {
-			const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
-			if (n == 0)
-				bottompickmode = MB7K2JSTAR_BOTTOMPICK_ALTITUDE;
-			else if (n == 1 && bottompickmode == MB7K2JSTAR_BOTTOMPICK_ARRIVAL)
-				bottompickthreshold = 0.5;
-			flag++;
-			break;
+			case 'C':
+			case 'c':
+				print_comments = true;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d/%s", &startline, lineroot);
+				break;
+			case 'M':
+			case 'm':
+				checkroutebearing = true;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", output_file);
+				output_file_set = true;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%s", route_file);
+				route_file_set = true;
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%d", &smooth);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timeshift);
+				break;
+			case 'X':
+			case 'x':
+				ssflip = true;
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
-		case 'C':
-		case 'c':
-			print_comments = MB_YES;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d/%s", &startline, lineroot);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			checkroutebearing = MB_YES;
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", output_file);
-			output_file_set = MB_YES;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%s", route_file);
-			route_file_set = MB_YES;
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%d", &smooth);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timeshift);
-			flag++;
-			break;
-		case 'X':
-		case 'x':
-			ssflip = MB_YES;
-			flag++;
-			break;
-		case '?':
-			errflg++;
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
+
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                %d\n", help);
+			fprintf(stderr, "dbg2       format:              %d\n", format);
+			fprintf(stderr, "dbg2       pings:               %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
+			fprintf(stderr, "dbg2       timeshift:           %f\n", timeshift);
+			fprintf(stderr, "dbg2       bottompickmode:      %d\n", bottompickmode);
+			fprintf(stderr, "dbg2       bottompickthreshold: %f\n", bottompickthreshold);
+			fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
+			fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
+			fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
+			fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
+			fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
+			fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
+			fprintf(stderr, "dbg2       output_file:         %s\n", output_file);
+			fprintf(stderr, "dbg2       output_file_set:     %d\n", output_file_set);
+			fprintf(stderr, "dbg2       lineroot:            %s\n", lineroot);
+			fprintf(stderr, "dbg2       extract_sbp:         %d\n", extract_sbp);
+			fprintf(stderr, "dbg2       extract_sslow:       %d\n", extract_sslow);
+			fprintf(stderr, "dbg2       extract_sshigh:      %d\n", extract_sshigh);
+			fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
+		}
+
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
 		}
 	}
-
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                %d\n", help);
-		fprintf(stderr, "dbg2       format:              %d\n", format);
-		fprintf(stderr, "dbg2       pings:               %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
-		fprintf(stderr, "dbg2       timeshift:           %f\n", timeshift);
-		fprintf(stderr, "dbg2       bottompickmode:      %d\n", bottompickmode);
-		fprintf(stderr, "dbg2       bottompickthreshold: %f\n", bottompickthreshold);
-		fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
-		fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
-		fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
-		/* fprintf(stderr, "dbg2       file:                %s\n", file); */
-		fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
-		fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
-		fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
-		fprintf(stderr, "dbg2       output_file:         %s\n", output_file);
-		fprintf(stderr, "dbg2       output_file_set:     %d\n", output_file_set);
-		fprintf(stderr, "dbg2       lineroot:            %s\n", lineroot);
-		fprintf(stderr, "dbg2       extract_sbp:         %d\n", extract_sbp);
-		fprintf(stderr, "dbg2       extract_sslow:       %d\n", extract_sslow);
-		fprintf(stderr, "dbg2       extract_sshigh:      %d\n", extract_sshigh);
-		fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
-	}
-
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
-
-	char *message;
-
-	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
-	char current_output_file[MB_PATH_MAXLINE];
-	int new_output_file = MB_YES;
-	void *datalist;
-	double file_weight;
-	double btime_d;
-	double etime_d;
-	char dfile[MB_PATH_MAXLINE];
-	int beams_bath;
-	int beams_amp;
-	int pixels_ss;
 
 	/* MBIO read values */
-	void *imbio_ptr = NULL;
-	struct mb_io_struct *imb_io_ptr = NULL;
-	void *istore_ptr = NULL;
-	struct mbsys_reson7k_struct *istore = NULL;
 	void *ombio_ptr = NULL;
 	struct mb_io_struct *omb_io_ptr = NULL;
 	void *ostore_ptr = NULL;
 	struct mbsys_jstar_struct *ostore = NULL;
-	int kind;
-	int time_i[7];
-	int time_j[5];
-	double time_d;
-	double navlon;
-	double navlat;
-	double speed;
-	double heading;
-	double distance;
-	double altitude;
-	double sonardepth;
 	double roll;
 	double pitch;
 	double heave;
@@ -400,7 +358,6 @@ int main(int argc, char **argv) {
 	int format_status, format_guess;
 	int format_output = MBF_EDGJSTAR;
 	int shortspersample;
-	int trace_size;
 	char *data;
 	unsigned short *datashort;
 	double value, threshold;
@@ -414,69 +371,65 @@ int main(int argc, char **argv) {
 	double dx, dy;
 	FILE *fp = NULL;
 
-	int read_data;
-
 	/* set output types if needed */
-	if (extract_sbp == MB_NO && extract_sslow == MB_NO && extract_sshigh == MB_NO) {
-		extract_sbp = MB_YES;
-		extract_sslow = MB_YES;
-		extract_sshigh = MB_YES;
+	if (!extract_sbp && !extract_sslow && !extract_sshigh) {
+		extract_sbp = true;
+		extract_sslow = true;
+		extract_sshigh = true;
 	}
 
 	/* output output types */
 	fprintf(stdout, "\nData records to extract:\n");
-	if (extract_sbp == MB_YES)
+	if (extract_sbp)
 		fprintf(stdout, "     Subbottom\n");
-	if (extract_sslow == MB_YES)
+	if (extract_sslow)
 		fprintf(stdout, "     Low Sidescan\n");
-	if (extract_sshigh == MB_YES)
+	if (extract_sshigh)
 		fprintf(stdout, "     High Sidescan\n");
-	if (ssflip == MB_YES)
+	if (ssflip)
 		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
 
 	/* set starting line number and output file if route read */
 	int linenumber = 0;
-	if (route_file_set == MB_YES) {
+	if (route_file_set) {
 		linenumber = startline;
 		sprintf(output_file, "%s_%4.4d.mb132", lineroot, linenumber);
 	}
 
 	/* new output file obviously needed */
-	new_output_file = MB_YES;
+	bool new_output_file = true;
 
 	/* if specified read route file */
-	if (route_file_set == MB_YES) {
+	if (route_file_set) {
 		/* open the input file */
 		if ((fp = fopen(route_file, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 			exit(MB_FAILURE);
 		}
-		int rawroutefile = MB_NO;
+		bool rawroutefile = false;
 		int nroutepointalloc = 0;
 		char *result;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
-					rawroutefile = MB_NO;
+					rawroutefile = false;
 				}
 			}
 			else {
+				double heading;
 				const int nget = sscanf(comment, "%lf %lf %lf %d %lf", &lon, &lat, &topo, &waypoint, &heading);
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
-						rawroutefile = MB_NO;
+						rawroutefile = false;
 					}
 				}
-				int point_ok;
-				if ((rawroutefile == MB_YES && nget >= 2) ||
-				    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
-					point_ok = MB_YES;
-				else
-					point_ok = MB_NO;
+				const bool point_ok =
+					(rawroutefile && nget >= 2) ||
+					(!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE);
 
 				/* if good data check for need to allocate more space */
-				if (point_ok == MB_YES && nroutepoint + 1 > nroutepointalloc) {
+				if (point_ok && nroutepoint + 1 > nroutepointalloc) {
 					nroutepointalloc += MBES_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
@@ -487,6 +440,7 @@ int main(int argc, char **argv) {
 					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -495,7 +449,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* add good point to route */
-				if (point_ok == MB_YES && nroutepointalloc > nroutepoint + 1) {
+				if (point_ok && nroutepointalloc > nroutepoint + 1) {
 					routelon[nroutepoint] = lon;
 					routelat[nroutepoint] = lat;
 					routeheading[nroutepoint] = heading;
@@ -527,36 +481,47 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
 
 	/* open file list */
 	char file[MB_PATH_MAXLINE] = "";
-	if (read_datalist == MB_YES) {
+	void *datalist = NULL;
+	double file_weight;
+	char dfile[MB_PATH_MAXLINE];
+	bool read_data;
+	if (read_datalist) {
 		int look_processed = MB_DATALIST_LOOK_YES;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
+	char current_output_file[MB_PATH_MAXLINE];
+
 	/* loop over all files to be read */
-	while (read_data == MB_YES && format == MBF_RESON7KR) {
+	while (read_data && format == MBF_RESON7KR) {
 
 		/* initialize reading the swath file */
+		double btime_d;
+		double etime_d;
+		int beams_bath;
+		int beams_amp;
+		int pixels_ss;
+		void *imbio_ptr = NULL;
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -565,9 +530,9 @@ int main(int argc, char **argv) {
 		}
 
 		/* get pointers to data storage */
-		imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
-		istore_ptr = imb_io_ptr->store_data;
-		istore = (struct mbsys_reson7k_struct *)istore_ptr;
+		struct mb_io_struct *imb_io_ptr = (struct mb_io_struct *)imbio_ptr;
+		void *istore_ptr = imb_io_ptr->store_data;
+		struct mbsys_reson7k_struct *istore = (struct mbsys_reson7k_struct *)istore_ptr;
 
 		if (error == MB_ERROR_NO_ERROR) {
 			beamflag = NULL;
@@ -614,6 +579,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -622,13 +588,13 @@ int main(int argc, char **argv) {
 
 		/* set up output file name if needed */
 		if (error == MB_ERROR_NO_ERROR) {
-			if (output_file_set == MB_YES && ombio_ptr == NULL) {
+			if (output_file_set && ombio_ptr == NULL) {
 				/* set flag to open new output file */
-				new_output_file = MB_YES;
+				new_output_file = true;
 			}
 
-			else if (output_file_set == MB_NO && route_file_set == MB_NO) {
-				new_output_file = MB_YES;
+			else if (!output_file_set && !route_file_set) {
+				new_output_file = true;
 				format_status = mb_get_format(verbose, file, output_file, &format_guess, &error);
 				if (format_status != MB_SUCCESS || format_guess != format) {
 					strcpy(output_file, file);
@@ -636,19 +602,19 @@ int main(int argc, char **argv) {
 				if (output_file[strlen(output_file) - 1] == 'p') {
 					output_file[strlen(output_file) - 1] = '\0';
 				}
-				if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES) {
+				if (extract_sbp && extract_sslow && extract_sshigh) {
 					strcat(output_file, ".jsf");
 					format_output = MBF_EDGJSTAR;
 				}
-				else if (extract_sslow == MB_YES) {
+				else if (extract_sslow) {
 					strcat(output_file, ".mb132");
 					format_output = MBF_EDGJSTAR;
 				}
-				else if (extract_sshigh == MB_YES) {
+				else if (extract_sshigh) {
 					strcat(output_file, ".mb133");
 					format_output = MBF_EDGJSTR2;
 				}
-				else if (extract_sbp == MB_YES) {
+				else if (extract_sbp) {
 					strcat(output_file, ".jsf");
 					format_output = MBF_EDGJSTAR;
 				}
@@ -670,13 +636,19 @@ int main(int argc, char **argv) {
 			error = MB_ERROR_NO_ERROR;
 
 			/* read next data record */
+			int kind;
+			int time_i[7];
+			double time_d;
+			double navlon;
+			double navlat;
+			double speed;
+			double distance;
+			double altitude;
+			double sonardepth;
+			double heading;
 			status &= mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
-			/*fprintf(stderr,"kind:%d %s \n\ttime_i:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %f    time_i:%4.4d/%2.2d/%2.2d
-			%2.2d:%2.2d:%2.2d.%6.6d  %f\n",
-			kind,notice_msg[kind],time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],time_d,
-			istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->time_i[4],istore->time_i[5],istore->time_i[6],istore->time_d);*/
 
 			/* reset nonfatal errors */
 			if (kind == MB_DATA_DATA && error < 0) {
@@ -685,43 +657,38 @@ int main(int argc, char **argv) {
 			}
 
 			/* check survey data position against waypoints */
-			/* fprintf(stderr,"status:%d error:%d kind:%d route_file_set:%d nroutepoint:%d navlon:%f navlat:%f\n",
-			status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
-			if (status == MB_SUCCESS && kind == MB_DATA_DATA && route_file_set == MB_YES && nroutepoint > 1 && navlon != 0.0 &&
+			if (status == MB_SUCCESS && kind == MB_DATA_DATA && route_file_set && nroutepoint > 1 && navlon != 0.0 &&
 			    navlat != 0.0) {
 				dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 				dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 				range = sqrt(dx * dx + dy * dy);
-				/* fprintf(stderr,"activewaypoint:%d range:%f lon:%f %f lat:%f %f dx:%f dy:%f\n",
-				activewaypoint, range, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint], dx, dy);*/
 				if (range < rangethreshold && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
-					/* fprintf(stderr,"New output by range to routepoint: %f\n",range); */
 					/* if needed set flag to open new output file */
-					if (new_output_file == MB_NO) {
+					if (!new_output_file) {
 						/* increment line number */
 						linenumber++;
 
 						/* set output file name */
 						sprintf(output_file, "%s_%4.4d", lineroot, linenumber);
-						if (extract_sbp == MB_YES && extract_sslow == MB_YES && extract_sshigh == MB_YES) {
+						if (extract_sbp && extract_sslow && extract_sshigh) {
 							strcat(output_file, ".jsf");
 							format_output = MBF_EDGJSTAR;
 						}
-						else if (extract_sslow == MB_YES) {
+						else if (extract_sslow) {
 							strcat(output_file, ".mb132");
 							format_output = MBF_EDGJSTAR;
 						}
-						else if (extract_sshigh == MB_YES) {
+						else if (extract_sshigh) {
 							strcat(output_file, ".mb133");
 							format_output = MBF_EDGJSTR2;
 						}
-						else if (extract_sbp == MB_YES) {
+						else if (extract_sbp) {
 							strcat(output_file, ".jsf");
 							format_output = MBF_EDGJSTAR;
 						}
 
 						/* set to open new output file */
-						new_output_file = MB_YES;
+						new_output_file = true;
 					}
 
 					/* increment active waypoint */
@@ -741,20 +708,19 @@ int main(int argc, char **argv) {
 
 				/* get bottom arrival time, if possible */
 				ttime_min = 0.0;
-				int found = MB_NO;
+				bool found = false;
 				for (int i = 0; i < beams_bath; i++) {
 					if (mb_beam_ok(beamflag[i])) {
-						if (found == MB_NO || ttimes[i] < ttime_min) {
+						if (!found || ttimes[i] < ttime_min) {
 							ttime_min = ttimes[i];
 							/* beam_min = i; */
-							found = MB_YES;
+							found = false;
 						}
 					}
 				}
-				if (found == MB_YES) {
+				if (found) {
 					ttime_min_use = ttime_min;
 				}
-				/*fprintf(stderr,"found:%d beam_min:%d ttime_min_use:%f\n", found, beam_min, ttime_min_use);*/
 			}
 
 			/* nonfatal errors do not matter */
@@ -764,10 +730,10 @@ int main(int argc, char **argv) {
 			}
 
 			/* if needed open new output file */
-			if (status == MB_SUCCESS && new_output_file == MB_YES &&
-			    ((extract_sbp == MB_YES && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) ||
-			     (extract_sslow == MB_YES && kind == MB_DATA_SIDESCAN2) ||
-			     (extract_sshigh == MB_YES && kind == MB_DATA_SIDESCAN3))) {
+			if (status == MB_SUCCESS && new_output_file &&
+			    ((extract_sbp && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) ||
+			     (extract_sslow && kind == MB_DATA_SIDESCAN2) ||
+			     (extract_sshigh && kind == MB_DATA_SIDESCAN3))) {
 
 				/* close any old output file unless a single file has been specified */
 				if (ombio_ptr != NULL) {
@@ -795,6 +761,7 @@ int main(int argc, char **argv) {
 				nwritesshi = 0;
 				if ((status &= mb_write_init(verbose, output_file, MBF_EDGJSTAR, &ombio_ptr, &obeams_bath, &obeams_amp,
 				                            &opixels_ss, &error)) != MB_SUCCESS) {
+					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
 					fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", file);
@@ -811,26 +778,21 @@ int main(int argc, char **argv) {
 				ostore = (struct mbsys_jstar_struct *)ostore_ptr;
 
 				/* reset new_output_file */
-				new_output_file = MB_NO;
+				new_output_file = false;
 			}
 
 			/* apply time shift if needed */
+			int time_j[5];
 			if (status == MB_SUCCESS && timeshift != 0.0 &&
 			    (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3)) {
 				time_d += timeshift;
 				mb_get_date(verbose, time_d, time_i);
 				mb_get_jtime(verbose, time_i, time_j);
-				/*fprintf(stderr,"Applying time shift: %f  %f\n",timeshift, time_d);*/
 			}
 
 			/* get some more values */
 			if (status == MB_SUCCESS && (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_DATA ||
 			                             kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3)) {
-				/*for (i=MAX(0,imb_io_ptr->nfix-5);i<imb_io_ptr->nfix;i++)
-				fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
-				i, imb_io_ptr->fix_time_d[i],
-				imb_io_ptr->fix_lon[i],
-				imb_io_ptr->fix_lat[i]);*/
 				mb_get_jtime(verbose, istore->time_i, time_j);
 				speed = 0.0;
 				mb_hedint_interp(verbose, imbio_ptr, time_d, &heading, &error);
@@ -843,7 +805,7 @@ int main(int argc, char **argv) {
 			/* if following a route check that the vehicle has come on line
 			        (within MBES_ONLINE_THRESHOLD degrees)
 			        before writing any data */
-			if (checkroutebearing == MB_YES && nroutepoint > 1 && activewaypoint > 0) {
+			if (checkroutebearing && nroutepoint > 1 && activewaypoint > 0) {
 				headingdiff = fabs(routeheading[activewaypoint - 1] - heading);
 				if (headingdiff > 180.0)
 					headingdiff = 360.0 - headingdiff;
@@ -851,47 +813,36 @@ int main(int argc, char **argv) {
 					oktowrite++;
 				else
 					oktowrite = 0;
-				/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n",
-				routeheading[activewaypoint-1],heading,headingdiff,oktowrite);*/
 			}
 			else
 				oktowrite = MBES_ONLINE_COUNT;
-			/* if (status == MB_SUCCESS)
-			fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n",
-			activewaypoint,linenumber,range, navlon,
-			routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 
 			/* handle multibeam data */
 			if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
-				/*fprintf(stderr,"MB_DATA_DATA: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreaddata++;
 			}
 
 			/* handle file header data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_HEADER) {
-				/*fprintf(stderr,"MB_DATA_HEADER: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadheader++;
 			}
 
 			/* handle bluefin ctd data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_SSV) {
-				/*fprintf(stderr,"MB_DATA_SSV: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadssv++;
 			}
 
 			/* handle bluefin nav data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) {
-				/*fprintf(stderr,"MB_DATA_NAV1: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadnav1++;
 			}
 
 			/* handle subbottom data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) {
-				/*fprintf(stderr,"MB_DATA_SUBBOTTOM_SUBBOTTOM: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadsbp++;
 
 				/* output data if desired */
-				if (extract_sbp == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
+				if (extract_sbp && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
 					/* set overall parameters */
 					ostore->kind = kind;
 					ostore->subsystem = 0;
@@ -1067,7 +1018,7 @@ int main(int argc, char **argv) {
 						shortspersample = 2;
 					else
 						shortspersample = 1;
-					trace_size = shortspersample * channel->samples * sizeof(short);
+					unsigned int trace_size = shortspersample * channel->samples * sizeof(short);
 					channel->message.size = shortspersample * channel->samples * sizeof(short);
 					if (channel->trace_alloc < trace_size) {
 						if ((status = mb_reallocd(verbose, __FILE__, __LINE__, trace_size, (void **)&(channel->trace), &error)) ==
@@ -1079,7 +1030,7 @@ int main(int argc, char **argv) {
 					/* copy the trace */
 					if (status == MB_SUCCESS) {
 						data = (char *)channel->trace;
-						for (int i = 0; i < trace_size; i++)
+						for (unsigned int i = 0; i < trace_size; i++)
 							data[i] = s7kchannel->data[i];
 					}
 
@@ -1151,18 +1102,17 @@ int main(int argc, char **argv) {
 
 			/* handle low frequency sidescan data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2) {
-				/*fprintf(stderr,"MB_DATA_SIDESCAN2: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadsslo++;
 
 				/* output data if desired */
-				if (extract_sslow == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
+				if (extract_sslow && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
 					/* set overall parameters */
 					ostore->kind = MB_DATA_DATA;
 					ostore->subsystem = 20;
 
 					/*----------------------------------------------------------------*/
 					/* copy low frequency port sidescan to jstar storage */
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssstbd);
 					else
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssport);
@@ -1176,7 +1126,7 @@ int main(int argc, char **argv) {
 					channel->message.type = 80;
 					channel->message.command = 0;
 					channel->message.subsystem = 20;
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel->message.channel = 1;
 					else
 						channel->message.channel = 0;
@@ -1312,7 +1262,7 @@ int main(int argc, char **argv) {
 						shortspersample = 2;
 					else
 						shortspersample = 1;
-					trace_size = shortspersample * channel->samples * sizeof(short);
+					unsigned int trace_size = shortspersample * channel->samples * sizeof(short);
 					channel->message.size = shortspersample * channel->samples * sizeof(short);
 					if (channel->trace_alloc < trace_size) {
 						if ((status = mb_reallocd(verbose, __FILE__, __LINE__, trace_size, (void **)&(channel->trace), &error)) ==
@@ -1331,10 +1281,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] /= n;
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
@@ -1345,15 +1293,13 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] = (unsigned int)(sqrt(value) / n);
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else {
 							data = (char *)channel->trace;
-							for (int i = 0; i < trace_size; i++) {
+							for (unsigned int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -1409,16 +1355,12 @@ int main(int argc, char **argv) {
 					if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR) {
 						channelpick = (int)(((double)channel->sonarAltitude) / 0.00075 / ((double)channel->sampleInterval));
 						channelpick = MAX(channelpick, 1);
-						/*fprintf(stderr,"altitude:%d sampleInterval:%d
-						 * channelpick:%d\n",channel->sonarAltitude,channel->sampleInterval,channelpick);*/
 						for (int i = 0; i < channelpick; i++) {
 							channel->trace[i] = (unsigned short)(gainfactor * channel->trace[i]);
 						}
 						for (int i = channelpick; i < channel->samples; i++) {
 							factor = gainfactor * (((double)(i * i)) / ((double)(channelpick * channelpick)));
-							/*fprintf(stderr,"sample %d: factor:%f value: %d",i,factor,channel->trace[i]);*/
 							channel->trace[i] = (unsigned short)(factor * channel->trace[i]);
-							/*fprintf(stderr," %d\n",channel->trace[i]);*/
 						}
 					}
 
@@ -1438,7 +1380,7 @@ int main(int argc, char **argv) {
 
 					/*----------------------------------------------------------------*/
 					/* copy low frequency starboard sidescan to jstar storage */
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssport);
 					else
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssstbd);
@@ -1452,7 +1394,7 @@ int main(int argc, char **argv) {
 					channel->message.type = 80;
 					channel->message.command = 0;
 					channel->message.subsystem = 20;
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel->message.channel = 0;
 					else
 						channel->message.channel = 1;
@@ -1607,10 +1549,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] /= n;
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
@@ -1621,15 +1561,13 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] = (unsigned int)(sqrt(value) / n);
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else {
 							data = (char *)channel->trace;
-							for (int i = 0; i < trace_size; i++) {
+							for (unsigned int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -1684,14 +1622,10 @@ int main(int argc, char **argv) {
 					/* apply gain if specified */
 					if (gainmode == MB7K2JSTAR_SSGAIN_TVG_1OVERR) {
 						channelpick = (int)(((double)channel->sonarAltitude) / 0.00075 / ((double)channel->sampleInterval));
-						/*fprintf(stderr,"altitude:%d sampleInterval:%d
-						 * channelpick:%d\n",channel->sonarAltitude,channel->sampleInterval,channelpick);*/
 						channelpick = MAX(channelpick, 1);
 						for (int i = channelpick; i < channel->samples; i++) {
 							factor = gainfactor * (((double)(i * i)) / ((double)(channelpick * channelpick)));
-							/*fprintf(stderr,"sample %d: factor:%f value: %d",i,factor,channel->trace[i]);*/
 							channel->trace[i] = (unsigned short)(factor * channel->trace[i]);
-							/*fprintf(stderr," %d\n",channel->trace[i]);*/
 						}
 					}
 
@@ -1717,18 +1651,17 @@ int main(int argc, char **argv) {
 
 			/* handle high frequency sidescan data */
 			else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3) {
-				/*fprintf(stderr,"MB_DATA_SIDESCAN3: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nreadsshi++;
 
 				/* output data if desired */
-				if (extract_sshigh == MB_YES && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
+				if (extract_sshigh && nreadnav1 > 0 && oktowrite >= MBES_ONLINE_COUNT) {
 					/* set overall parameters */
 					ostore->kind = MB_DATA_SIDESCAN2;
 					ostore->subsystem = 21;
 
 					/*----------------------------------------------------------------*/
 					/* copy high frequency port sidescan to jstar storage */
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssstbd);
 					else
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssport);
@@ -1875,7 +1808,7 @@ int main(int argc, char **argv) {
 						shortspersample = 2;
 					else
 						shortspersample = 1;
-					trace_size = shortspersample * channel->samples * sizeof(short);
+					unsigned int trace_size = shortspersample * channel->samples * sizeof(short);
 					channel->message.size = shortspersample * channel->samples * sizeof(short);
 					if (channel->trace_alloc < trace_size) {
 						if ((status = mb_reallocd(verbose, __FILE__, __LINE__, trace_size, (void **)&(channel->trace), &error)) ==
@@ -1894,10 +1827,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] /= n;
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
@@ -1908,15 +1839,13 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] = (unsigned int)(sqrt(value) / n);
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else {
 							data = (char *)channel->trace;
-							for (int i = 0; i < trace_size; i++) {
+							for (unsigned int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -1984,7 +1913,7 @@ int main(int argc, char **argv) {
 
 					/*----------------------------------------------------------------*/
 					/* copy high frequency starboard sidescan to jstar storage */
-					if (ssflip == MB_YES)
+					if (ssflip)
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssport);
 					else
 						channel = (struct mbsys_jstar_channel_struct *)&(ostore->ssstbd);
@@ -2150,10 +2079,8 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i - smooth, 0); j < MIN(i + smooth, channel->samples - 1); j++) {
 									channel->trace[i] += datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] /= n;
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else if (smooth < 0 && channel->dataFormat == 0) {
@@ -2164,15 +2091,13 @@ int main(int argc, char **argv) {
 								for (int j = MAX(i + smooth, 0); j < MIN(i - smooth, channel->samples - 1); j++) {
 									value += datashort[j] * datashort[j];
 									n++;
-									/*fprintf(stderr,"i:%d j:%d raw:%d tot:%d\n",i,j,datashort[j],channel->trace[i]);*/
 								}
 								channel->trace[i] = (unsigned int)(sqrt(value) / n);
-								/*fprintf(stderr,"Final data[%d] n:%d : %d\n", i, n, channel->trace[i]);*/
 							}
 						}
 						else {
 							data = (char *)channel->trace;
-							for (int i = 0; i < trace_size; i++) {
+							for (unsigned int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -2244,14 +2169,13 @@ int main(int argc, char **argv) {
 				}
 			}
 
-			/* handle unknown data */
 			else if (status == MB_SUCCESS) {
-				/*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
+				fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);
 			}
 
 			/* handle read error */
 			else {
-				/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
+				fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);
 			}
 
 			if (verbose >= 2) {
@@ -2261,7 +2185,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "dbg2       status:         %d\n", status);
 			}
 
-			if (print_comments == MB_YES && kind == MB_DATA_COMMENT) {
+			if (print_comments && kind == MB_DATA_COMMENT) {
 				if (icomment == 0) {
 					fprintf(stderr, "\nComments:\n");
 					icomment++;
@@ -2289,19 +2213,19 @@ int main(int argc, char **argv) {
 		nreadsshitot += nreadsshi;
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close output file if still open */
@@ -2330,7 +2254,7 @@ int main(int argc, char **argv) {
 	fprintf(stdout, "     High Sidescan: %d\n", nwritesshitot);
 
 	/* deallocate route arrays */
-	if (route_file_set == MB_YES) {
+	if (route_file_set) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);

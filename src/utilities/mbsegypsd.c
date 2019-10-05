@@ -20,7 +20,9 @@
  * Date:	November 2, 2009
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -191,12 +193,6 @@ int get_segy_limits(int verbose, char *segyfile, int *tracemode, int *tracestart
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -286,7 +282,7 @@ int main(int argc, char **argv) {
 	double dtimesave = 0.0;
 	int plot_status;
 	int kstart, kend;
-	int i, j, k, n;
+	int i, k, n;
 
 	/* set file to null */
 	segyfile[0] = '\0';
@@ -295,134 +291,126 @@ int main(int argc, char **argv) {
 	MB_MAKE_FNAN(NaN);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:D:d:I:i:LlN:n:O:o:PpS:s:T:t:VvW:w:Hh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			n = sscanf(optarg, "%lf/%lf", &shotscale, &frequencyscale);
-			if (n == 2)
-				scale2distance = MB_YES;
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			n = sscanf(optarg, "%d", &decimatex);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", segyfile);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			logscale = MB_YES;
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			n = sscanf(optarg, "%d", &nfft);
-			flag++;
-			break;
-		case 'G':
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", fileroot);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
-			if (n < 5) {
-				chanstart = 0;
-				chanend = -1;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "A:a:D:d:I:i:LlN:n:O:o:PpS:s:T:t:VvW:w:Hh")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				n = sscanf(optarg, "%lf/%lf", &shotscale, &frequencyscale);
+				if (n == 2)
+					scale2distance = MB_YES;
+				break;
+			case 'D':
+			case 'd':
+				n = sscanf(optarg, "%d", &decimatex);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", segyfile);
+				break;
+			case 'L':
+			case 'l':
+				logscale = MB_YES;
+				break;
+			case 'N':
+			case 'n':
+				n = sscanf(optarg, "%d", &nfft);
+				break;
+			case 'G':
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", fileroot);
+				break;
+			case 'S':
+			case 's':
+				n = sscanf(optarg, "%d/%d/%d/%d/%d", &tracemode, &tracestart, &traceend, &chanstart, &chanend);
+				if (n < 5) {
+					chanstart = 0;
+					chanend = -1;
+				}
+				if (n < 3) {
+					tracestart = 0;
+					traceend = 0;
+				}
+				if (n < 1) {
+					tracemode = MBSEGYPSD_USESHOT;
+				}
+				break;
+			case 'T':
+			case 't':
+				n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
+				if (n < 2)
+					timedelay = 0.0;
+				break;
+			case 'W':
+			case 'w':
+				n = sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
+				break;
+			case '?':
+				errflg = true;
 			}
-			if (n < 3) {
-				tracestart = 0;
-				traceend = 0;
-			}
-			if (n < 1) {
-				tracemode = MBSEGYPSD_USESHOT;
-			}
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			n = sscanf(optarg, "%lf/%lf", &timesweep, &timedelay);
-			if (n < 2)
-				timedelay = 0.0;
-			flag++;
-			break;
-		case 'W':
-		case 'w':
-			n = sscanf(optarg, "%d/%lf/%lf", &windowmode, &windowstart, &windowend);
-			flag++;
-			break;
-		case '?':
-			errflg++;
+
+		if (verbose >= 2)
+			outfp = stderr;
+		else
+			outfp = stdout;
+
+		if (errflg) {
+			fprintf(outfp, "usage: %s\n", usage_message);
+			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* set output stream to stdout or stderr */
-	if (verbose >= 2)
-		outfp = stderr;
-	else
-		outfp = stdout;
+		if (verbose == 1 || help) {
+			fprintf(outfp, "\nProgram %s\n", program_name);
+			fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(outfp, "usage: %s\n", usage_message);
-		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose >= 2) {
+			fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(outfp, "dbg2  Control Parameters:\n");
+			fprintf(outfp, "dbg2       verbose:        %d\n", verbose);
+			fprintf(outfp, "dbg2       help:           %d\n", help);
+			fprintf(outfp, "dbg2       segyfile:       %s\n", segyfile);
+			fprintf(outfp, "dbg2       fileroot:       %s\n", fileroot);
+			fprintf(outfp, "dbg2       nfft:           %d\n", nfft);
+			fprintf(outfp, "dbg2       decimatex:      %d\n", decimatex);
+			fprintf(outfp, "dbg2       tracemode:      %d\n", tracemode);
+			fprintf(outfp, "dbg2       tracestart:     %d\n", tracestart);
+			fprintf(outfp, "dbg2       traceend:       %d\n", traceend);
+			fprintf(outfp, "dbg2       chanstart:      %d\n", chanstart);
+			fprintf(outfp, "dbg2       chanend:        %d\n", chanend);
+			fprintf(outfp, "dbg2       timesweep:      %f\n", timesweep);
+			fprintf(outfp, "dbg2       timedelay:      %f\n", timedelay);
+			fprintf(outfp, "dbg2       ngridx:         %d\n", ngridx);
+			fprintf(outfp, "dbg2       ngridy:         %d\n", ngridy);
+			fprintf(outfp, "dbg2       ngridxy:        %d\n", ngridxy);
+			fprintf(outfp, "dbg2       windowmode:     %d\n", windowmode);
+			fprintf(outfp, "dbg2       windowstart:    %f\n", windowstart);
+			fprintf(outfp, "dbg2       windowend:      %f\n", windowend);
+			fprintf(outfp, "dbg2       scale2distance: %d\n", scale2distance);
+			fprintf(outfp, "dbg2       shotscale:      %f\n", shotscale);
+			fprintf(outfp, "dbg2       frequencyscale: %f\n", frequencyscale);
+			fprintf(outfp, "dbg2       logscale:       %d\n", logscale);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(outfp, "dbg2  Control Parameters:\n");
-		fprintf(outfp, "dbg2       verbose:        %d\n", verbose);
-		fprintf(outfp, "dbg2       help:           %d\n", help);
-		fprintf(outfp, "dbg2       segyfile:       %s\n", segyfile);
-		fprintf(outfp, "dbg2       fileroot:       %s\n", fileroot);
-		fprintf(outfp, "dbg2       nfft:           %d\n", nfft);
-		fprintf(outfp, "dbg2       decimatex:      %d\n", decimatex);
-		fprintf(outfp, "dbg2       tracemode:      %d\n", tracemode);
-		fprintf(outfp, "dbg2       tracestart:     %d\n", tracestart);
-		fprintf(outfp, "dbg2       traceend:       %d\n", traceend);
-		fprintf(outfp, "dbg2       chanstart:      %d\n", chanstart);
-		fprintf(outfp, "dbg2       chanend:        %d\n", chanend);
-		fprintf(outfp, "dbg2       timesweep:      %f\n", timesweep);
-		fprintf(outfp, "dbg2       timedelay:      %f\n", timedelay);
-		fprintf(outfp, "dbg2       ngridx:         %d\n", ngridx);
-		fprintf(outfp, "dbg2       ngridy:         %d\n", ngridy);
-		fprintf(outfp, "dbg2       ngridxy:        %d\n", ngridxy);
-		fprintf(outfp, "dbg2       windowmode:     %d\n", windowmode);
-		fprintf(outfp, "dbg2       windowstart:    %f\n", windowstart);
-		fprintf(outfp, "dbg2       windowend:      %f\n", windowend);
-		fprintf(outfp, "dbg2       scale2distance: %d\n", scale2distance);
-		fprintf(outfp, "dbg2       shotscale:      %f\n", shotscale);
-		fprintf(outfp, "dbg2       frequencyscale: %f\n", frequencyscale);
-		fprintf(outfp, "dbg2       logscale:       %d\n", logscale);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(outfp, "\n%s\n", help_message);
-		fprintf(outfp, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(outfp, "\n%s\n", help_message);
+			fprintf(outfp, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get segy limits if required */
@@ -670,7 +658,7 @@ int main(int argc, char **argv) {
 					nsection = (itend - itstart + 1) / nfft;
 					if (((itend - itstart + 1) % nfft) > 0)
 						nsection++;
-					for (j = 0; j < nsection; j++) {
+					for (int j = 0; j < nsection; j++) {
 						/* initialize normalization factors */
 						normraw = 0.0;
 						normtaper = 0.0;

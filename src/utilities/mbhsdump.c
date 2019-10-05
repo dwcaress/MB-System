@@ -22,7 +22,9 @@
  *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,13 +45,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	/* parsing variables */
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char format_description[MB_DESCRIPTION_LENGTH];
@@ -150,112 +145,112 @@ int main(int argc, char **argv) {
 	strcpy(file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:O:o:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", file);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%d", &kind);
-			if (kind == MB_DATA_DATA)
-				mb_data_data_list = MB_YES;
-			if (kind == MB_DATA_COMMENT)
-				mb_data_comment_list = MB_YES;
-			if (kind == MB_DATA_CALIBRATE)
-				mb_data_calibrate_list = MB_YES;
-			if (kind == MB_DATA_MEAN_VELOCITY)
-				mb_data_mean_velocity_list = MB_YES;
-			if (kind == MB_DATA_VELOCITY_PROFILE)
-				mb_data_velocity_profile_list = MB_YES;
-			if (kind == MB_DATA_STANDBY)
-				mb_data_standby_list = MB_YES;
-			if (kind == MB_DATA_NAV_SOURCE)
-				mb_data_nav_source_list = MB_YES;
-			flag++;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "VvHhF:f:I:i:O:o:")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", file);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%d", &kind);
+				if (kind == MB_DATA_DATA)
+					mb_data_data_list = MB_YES;
+				if (kind == MB_DATA_COMMENT)
+					mb_data_comment_list = MB_YES;
+				if (kind == MB_DATA_CALIBRATE)
+					mb_data_calibrate_list = MB_YES;
+				if (kind == MB_DATA_MEAN_VELOCITY)
+					mb_data_mean_velocity_list = MB_YES;
+				if (kind == MB_DATA_VELOCITY_PROFILE)
+					mb_data_velocity_profile_list = MB_YES;
+				if (kind == MB_DATA_STANDBY)
+					mb_data_standby_list = MB_YES;
+				if (kind == MB_DATA_NAV_SOURCE)
+					mb_data_nav_source_list = MB_YES;
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	/* set output stream */
-	if (verbose <= 1)
-		output = stdout;
-	else
-		output = stderr;
+		if (verbose <= 1)
+			output = stdout;
+		else
+			output = stderr;
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(output, "usage: %s\n", usage_message);
-		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(output, "usage: %s\n", usage_message);
+			fprintf(output, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(output, "\nProgram %s\n", program_name);
-		fprintf(output, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(output, "\nProgram %s\n", program_name);
+			fprintf(output, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(output, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(output, "dbg2  Control Parameters:\n");
-		fprintf(output, "dbg2       verbose:         %d\n", verbose);
-		fprintf(output, "dbg2       help:            %d\n", help);
-		fprintf(output, "dbg2       format:          %d\n", format);
-		fprintf(output, "dbg2       pings:           %d\n", pings);
-		fprintf(output, "dbg2       lonflip:         %d\n", lonflip);
-		fprintf(output, "dbg2       bounds[0]:       %f\n", bounds[0]);
-		fprintf(output, "dbg2       bounds[1]:       %f\n", bounds[1]);
-		fprintf(output, "dbg2       bounds[2]:       %f\n", bounds[2]);
-		fprintf(output, "dbg2       bounds[3]:       %f\n", bounds[3]);
-		fprintf(output, "dbg2       btime_i[0]:      %d\n", btime_i[0]);
-		fprintf(output, "dbg2       btime_i[1]:      %d\n", btime_i[1]);
-		fprintf(output, "dbg2       btime_i[2]:      %d\n", btime_i[2]);
-		fprintf(output, "dbg2       btime_i[3]:      %d\n", btime_i[3]);
-		fprintf(output, "dbg2       btime_i[4]:      %d\n", btime_i[4]);
-		fprintf(output, "dbg2       btime_i[5]:      %d\n", btime_i[5]);
-		fprintf(output, "dbg2       btime_i[6]:      %d\n", btime_i[6]);
-		fprintf(output, "dbg2       etime_i[0]:      %d\n", etime_i[0]);
-		fprintf(output, "dbg2       etime_i[1]:      %d\n", etime_i[1]);
-		fprintf(output, "dbg2       etime_i[2]:      %d\n", etime_i[2]);
-		fprintf(output, "dbg2       etime_i[3]:      %d\n", etime_i[3]);
-		fprintf(output, "dbg2       etime_i[4]:      %d\n", etime_i[4]);
-		fprintf(output, "dbg2       etime_i[5]:      %d\n", etime_i[5]);
-		fprintf(output, "dbg2       etime_i[6]:      %d\n", etime_i[6]);
-		fprintf(output, "dbg2       speedmin:        %f\n", speedmin);
-		fprintf(output, "dbg2       timegap:         %f\n", timegap);
-		fprintf(output, "dbg2       input file:      %s\n", file);
-		fprintf(output, "dbg2       mb_data_data_list:             %d\n", mb_data_data_list);
-		fprintf(output, "dbg2       mb_data_comment_list:          %d\n", mb_data_comment_list);
-		fprintf(output, "dbg2       mb_data_calibrate_list:        %d\n", mb_data_calibrate_list);
-		fprintf(output, "dbg2       mb_data_mean_velocity_list:    %d\n", mb_data_mean_velocity_list);
-		fprintf(output, "dbg2       mb_data_velocity_profile_list: %d\n", mb_data_velocity_profile_list);
-		fprintf(output, "dbg2       mb_data_standby_list:          %d\n", mb_data_standby_list);
-		fprintf(output, "dbg2       mb_data_nav_source_list:       %d\n", mb_data_nav_source_list);
-	}
+		if (verbose >= 2) {
+			fprintf(output, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(output, "dbg2  Control Parameters:\n");
+			fprintf(output, "dbg2       verbose:         %d\n", verbose);
+			fprintf(output, "dbg2       help:            %d\n", help);
+			fprintf(output, "dbg2       format:          %d\n", format);
+			fprintf(output, "dbg2       pings:           %d\n", pings);
+			fprintf(output, "dbg2       lonflip:         %d\n", lonflip);
+			fprintf(output, "dbg2       bounds[0]:       %f\n", bounds[0]);
+			fprintf(output, "dbg2       bounds[1]:       %f\n", bounds[1]);
+			fprintf(output, "dbg2       bounds[2]:       %f\n", bounds[2]);
+			fprintf(output, "dbg2       bounds[3]:       %f\n", bounds[3]);
+			fprintf(output, "dbg2       btime_i[0]:      %d\n", btime_i[0]);
+			fprintf(output, "dbg2       btime_i[1]:      %d\n", btime_i[1]);
+			fprintf(output, "dbg2       btime_i[2]:      %d\n", btime_i[2]);
+			fprintf(output, "dbg2       btime_i[3]:      %d\n", btime_i[3]);
+			fprintf(output, "dbg2       btime_i[4]:      %d\n", btime_i[4]);
+			fprintf(output, "dbg2       btime_i[5]:      %d\n", btime_i[5]);
+			fprintf(output, "dbg2       btime_i[6]:      %d\n", btime_i[6]);
+			fprintf(output, "dbg2       etime_i[0]:      %d\n", etime_i[0]);
+			fprintf(output, "dbg2       etime_i[1]:      %d\n", etime_i[1]);
+			fprintf(output, "dbg2       etime_i[2]:      %d\n", etime_i[2]);
+			fprintf(output, "dbg2       etime_i[3]:      %d\n", etime_i[3]);
+			fprintf(output, "dbg2       etime_i[4]:      %d\n", etime_i[4]);
+			fprintf(output, "dbg2       etime_i[5]:      %d\n", etime_i[5]);
+			fprintf(output, "dbg2       etime_i[6]:      %d\n", etime_i[6]);
+			fprintf(output, "dbg2       speedmin:        %f\n", speedmin);
+			fprintf(output, "dbg2       timegap:         %f\n", timegap);
+			fprintf(output, "dbg2       input file:      %s\n", file);
+			fprintf(output, "dbg2       mb_data_data_list:             %d\n", mb_data_data_list);
+			fprintf(output, "dbg2       mb_data_comment_list:          %d\n", mb_data_comment_list);
+			fprintf(output, "dbg2       mb_data_calibrate_list:        %d\n", mb_data_calibrate_list);
+			fprintf(output, "dbg2       mb_data_mean_velocity_list:    %d\n", mb_data_mean_velocity_list);
+			fprintf(output, "dbg2       mb_data_velocity_profile_list: %d\n", mb_data_velocity_profile_list);
+			fprintf(output, "dbg2       mb_data_standby_list:          %d\n", mb_data_standby_list);
+			fprintf(output, "dbg2       mb_data_nav_source_list:       %d\n", mb_data_nav_source_list);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(output, "\n%s\n", help_message);
-		fprintf(output, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(output, "\n%s\n", help_message);
+			fprintf(output, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* if bad format specified then print it and exit */
@@ -264,8 +259,7 @@ int main(int argc, char **argv) {
 		fprintf(output, "\nProgram <%s> requires complete Hydrosweep DS data stream\n", program_name);
 		fprintf(output, "!!Format %d is unacceptable, only formats %d and %d can be used\n", format, MBF_HSATLRAW, MBF_HSLDEOIH);
 		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_FORMAT;
-		exit(error);
+		exit(MB_ERROR_BAD_FORMAT);
 	}
 
 	/* initialize reading the input multibeam file */

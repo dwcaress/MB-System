@@ -21,7 +21,9 @@
  * Date:	August 14, 2006
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -183,11 +185,6 @@ void calibration_MAUV1_2017(struct ctd_calibration_struct *calibration_ptr)
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -307,53 +304,53 @@ int main(int argc, char **argv) {
 	strcpy(printformat, "default");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%s", printformat);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", file);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d", &output_mode);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%s", nav_file);
-			nav_merge = MB_YES;
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			nscan = sscanf(optarg, "%s", printfields[nprintfields].name);
-			if (strlen(printformat) > 0 && strcmp(printformat, "default") != 0) {
-				printfields[nprintfields].formatset = MB_YES;
-				strcpy(printfields[nprintfields].format, printformat);
-			}
-			else {
-				printfields[nprintfields].formatset = MB_NO;
-				strcpy(printfields[nprintfields].format, "");
-			}
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "F:f:I:i:L:l:M:m:N:n:O:o:PpR:r:SsVvWwHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%s", printformat);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d", &output_mode);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%s", nav_file);
+				nav_merge = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				nscan = sscanf(optarg, "%s", printfields[nprintfields].name);
+				if (strlen(printformat) > 0 && strcmp(printformat, "default") != 0) {
+					printfields[nprintfields].formatset = MB_YES;
+					strcpy(printfields[nprintfields].format, printformat);
+				}
+				else {
+					printfields[nprintfields].formatset = MB_NO;
+					strcpy(printfields[nprintfields].format, "");
+				}
             if (strcmp(printfields[nprintfields].name, "calcPotentialTemperature") == 0)
                 calc_potentialtemp = MB_YES;
             if (strcmp(printfields[nprintfields].name, "calcSoundspeed") == 0)
@@ -362,90 +359,85 @@ int main(int argc, char **argv) {
                 calc_density = MB_YES;
             if (strcmp(printfields[nprintfields].name, "calcKTime") == 0)
                 calc_ktime = MB_YES;
-			printfields[nprintfields].index = -1;
-			nprintfields++;
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			printheader = MB_YES;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			recalculate_ctd = MB_YES;
-			sscanf(optarg, "%d", &ctd_calibration_id);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			angles_in_degrees = MB_YES;
-			flag++;
-			break;
-		case '?':
-			errflg++;
+				printfields[nprintfields].index = -1;
+				nprintfields++;
+				break;
+			case 'P':
+			case 'p':
+				printheader = MB_YES;
+				break;
+			case 'R':
+			case 'r':
+				recalculate_ctd = MB_YES;
+				sscanf(optarg, "%d", &ctd_calibration_id);
+				break;
+			case 'S':
+			case 's':
+				angles_in_degrees = MB_YES;
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                 %d\n", help);
-		fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
-		fprintf(stderr, "dbg2       file:                 %s\n", file);
-		fprintf(stderr, "dbg2       nav_file:             %s\n", nav_file);
-		fprintf(stderr, "dbg2       output_mode:          %d\n", output_mode);
-		fprintf(stderr, "dbg2       printheader:          %d\n", printheader);
-		fprintf(stderr, "dbg2       angles_in_degrees:    %d\n", angles_in_degrees);
-		fprintf(stderr, "dbg2       calc_potentialtemp:   %d\n", calc_potentialtemp);
-		fprintf(stderr, "dbg2       recalculate_ctd:      %d\n", recalculate_ctd);
-		fprintf(stderr, "dbg2       ctd_calibration_id:   %d\n", ctd_calibration_id);
-		fprintf(stderr, "dbg2       calc_ktime:           %d\n", calc_ktime);
-		fprintf(stderr, "dbg2       nprintfields:         %d\n", nprintfields);
-		for (int i = 0; i < nprintfields; i++)
-			fprintf(stderr, "dbg2         printfields[%d]:      %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
-			        printfields[i].format);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                 %d\n", help);
+			fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
+			fprintf(stderr, "dbg2       file:                 %s\n", file);
+			fprintf(stderr, "dbg2       nav_file:             %s\n", nav_file);
+			fprintf(stderr, "dbg2       output_mode:          %d\n", output_mode);
+			fprintf(stderr, "dbg2       printheader:          %d\n", printheader);
+			fprintf(stderr, "dbg2       angles_in_degrees:    %d\n", angles_in_degrees);
+			fprintf(stderr, "dbg2       calc_potentialtemp:   %d\n", calc_potentialtemp);
+			fprintf(stderr, "dbg2       recalculate_ctd:      %d\n", recalculate_ctd);
+			fprintf(stderr, "dbg2       ctd_calibration_id:   %d\n", ctd_calibration_id);
+			fprintf(stderr, "dbg2       calc_ktime:           %d\n", calc_ktime);
+			fprintf(stderr, "dbg2       nprintfields:         %d\n", nprintfields);
+			for (int i = 0; i < nprintfields; i++)
+				fprintf(stderr, "dbg2         printfields[%d]:      %s %d %s\n", i, printfields[i].name, printfields[i].formatset,
+				        printfields[i].format);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* if nav merging to be done get nav */
@@ -454,10 +446,9 @@ int main(int argc, char **argv) {
 		nav_num = 0;
 		const int nchar = MB_PATH_MAXLINE - 1;
 		if ((fp = fopen(nav_file, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", nav_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((result = fgets(buffer, nchar, fp)) == buffer)
 			nav_num++;
@@ -488,10 +479,9 @@ int main(int argc, char **argv) {
 		/* read the data points in the nav file */
 		nav_num = 0;
 		if ((fp = fopen(nav_file, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to Open navigation File <%s> for reading\n", nav_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((result = fgets(buffer, nchar, fp)) == buffer) {
 			const int nget = sscanf(

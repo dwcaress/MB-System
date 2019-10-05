@@ -56,6 +56,7 @@
  * Date:	Feb 28, 2013
  */
 
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -179,9 +180,6 @@ static void default_options(options *opts) {
 } /* default_options */
 /*----------------------------------------------------------------------*/
 static int parse_options(int verbose, int argc, char **argv, options *opts, int *error) {
-	int c;
-	int flag = 0;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -191,6 +189,7 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		fprintf(stderr, "dbg2       options:    %p\n", (void *)opts);
 	}
 
+	int c;
 	while ((c = getopt(argc, argv, "AaBbF:f:GgHhI:i:J:j:NnO:o:RrSsVv")) != -1) {
 		switch (c) {
 		case 'A':
@@ -204,7 +203,6 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		case 'F':
 		case 'f':
 			sscanf(optarg, "%d", &(opts->format));
-			flag++;
 			break;
 		case 'G':
 		case 'g':
@@ -217,13 +215,11 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		case 'I':
 		case 'i':
 			sscanf(optarg, "%s", &opts->read_file[0]);
-			flag++;
 			break;
 		case 'J':
 		case 'j':
 			sscanf(optarg, "%s", &opts->proj4command[0]);
 			opts->projection_set = MB_YES;
-			flag++;
 			break;
 		case 'N':
 		case 'n':
@@ -233,7 +229,6 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		case 'o':
 			sscanf(optarg, "%s", &opts->basename[0]);
 			opts->ofile_set = MB_YES;
-			flag++;
 			break;
 		case 'R':
 		case 'r':
@@ -252,17 +247,15 @@ static int parse_options(int verbose, int argc, char **argv, options *opts, int 
 		} /* switch */
 	}
 
-	const int status = MB_SUCCESS;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  function <%s> completed\n", __func__);
 		fprintf(stderr, "dbg2  Return values:\n");
 		fprintf(stderr, "dbg2        error:     %d\n", *error);
 		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:     %d\n", status);
+		fprintf(stderr, "dbg2       status:     %d\n", MB_SUCCESS);
 	}
 
-	return (status);
+	return (MB_SUCCESS);
 } /* parse_options */
 /*---------------------------------------------------------------*/
 static int print_mbdefaults(int verbose, options *opts, mbdefaults *dflts, int *error) {
@@ -1130,10 +1123,8 @@ static int print_counts(int verbose, counts *recs, int *error) {
 
 /*----------------------------------------------------------------------*/
 int main(int argc, char **argv) {
-	/* MBIO status variables */
 	int error = MB_ERROR_NO_ERROR;
 
-	/* MBIO read control parameters */
 	int read_datalist = MB_NO;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -1168,8 +1159,7 @@ int main(int argc, char **argv) {
 	if (opts.errflg) {
 		fprintf(stderr, "usage: %s\n", usage_message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
+		exit(MB_ERROR_BAD_USAGE);
 	}
 
 	if (opts.verbose >= 1) {

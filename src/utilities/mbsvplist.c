@@ -31,7 +31,9 @@
  * Date:	January 3,  2001
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -78,12 +80,6 @@ static const char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -Mmode 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -218,140 +214,138 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "CcDdF:f:I:i:M:m:N:n:OoPpR:r:SsTtZzVvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'D':
-		case 'd':
-			svp_printmode = MBSVPLIST_PRINTMODE_ALL;
-			break;
-		case 'C':
-		case 'c':
-			output_counts = MB_YES;
-			ssv_output = MB_NO;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d", &svp_printmode);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d", &min_num_pairs);
-			break;
-		case 'O':
-		case 'o':
-			svp_file_output = MB_YES;
-			ssv_output = MB_NO;
-			break;
-		case 'P':
-		case 'p':
-			svp_file_output = MB_YES;
-			svp_setprocess = MB_YES;
-			ssv_output = MB_NO;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, ssv_bounds);
-			ssv_bounds_set = MB_YES;
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			ssv_output = MB_YES;
-			svp_file_output = MB_NO;
-			svp_setprocess = MB_NO;
-			break;
-		case 'T':
-		case 't':
-			output_as_table = MB_YES;
-			ssv_output = MB_NO;
-			break;
-		case 'Z':
-		case 'z':
-			svp_force_zero = MB_YES;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "CcDdF:f:I:i:M:m:N:n:OoPpR:r:SsTtZzVvHh")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'D':
+			case 'd':
+				svp_printmode = MBSVPLIST_PRINTMODE_ALL;
+				break;
+			case 'C':
+			case 'c':
+				output_counts = MB_YES;
+				ssv_output = MB_NO;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d", &svp_printmode);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d", &min_num_pairs);
+				break;
+			case 'O':
+			case 'o':
+				svp_file_output = MB_YES;
+				ssv_output = MB_NO;
+				break;
+			case 'P':
+			case 'p':
+				svp_file_output = MB_YES;
+				svp_setprocess = MB_YES;
+				ssv_output = MB_NO;
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, ssv_bounds);
+				ssv_bounds_set = MB_YES;
+				break;
+			case 'S':
+			case 's':
+				ssv_output = MB_YES;
+				svp_file_output = MB_NO;
+				svp_setprocess = MB_NO;
+				break;
+			case 'T':
+			case 't':
+				output_as_table = MB_YES;
+				ssv_output = MB_NO;
+				break;
+			case 'Z':
+			case 'z':
+				svp_force_zero = MB_YES;
+				break;
+			case '?':
+				errflg = true;
+			}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
+			fprintf(stderr, "dbg2       help:              %d\n", help);
+			fprintf(stderr, "dbg2       format:            %d\n", format);
+			fprintf(stderr, "dbg2       pings:             %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:           %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:         %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:         %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:         %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:         %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:        %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:        %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:        %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:        %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:        %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:        %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:        %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:        %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:        %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:        %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:        %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:        %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:        %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:        %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:          %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
+			fprintf(stderr, "dbg2       file:              %s\n", file);
+			fprintf(stderr, "dbg2       svp_printmode:     %d\n", svp_printmode);
+			fprintf(stderr, "dbg2       svp_file_output:   %d\n", svp_file_output);
+			fprintf(stderr, "dbg2       svp_setprocess:    %d\n", svp_setprocess);
+			fprintf(stderr, "dbg2       svp_force_zero:    %d\n", svp_force_zero);
+			fprintf(stderr, "dbg2       ssv_output:        %d\n", ssv_output);
+			fprintf(stderr, "dbg2       ssv_bounds_set:    %d\n", ssv_bounds_set);
+			fprintf(stderr, "dbg2       ssv_bounds[0]:     %f\n", ssv_bounds[0]);
+			fprintf(stderr, "dbg2       ssv_bounds[1]:     %f\n", ssv_bounds[1]);
+			fprintf(stderr, "dbg2       ssv_bounds[2]:     %f\n", ssv_bounds[2]);
+			fprintf(stderr, "dbg2       ssv_bounds[3]:     %f\n", ssv_bounds[3]);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:           %d\n", verbose);
-		fprintf(stderr, "dbg2       help:              %d\n", help);
-		fprintf(stderr, "dbg2       format:            %d\n", format);
-		fprintf(stderr, "dbg2       pings:             %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:           %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:         %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:         %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:         %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:         %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:        %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:        %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:        %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:        %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:        %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:        %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:        %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:        %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:        %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:        %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:        %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:        %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:        %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:        %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:          %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:           %f\n", timegap);
-		fprintf(stderr, "dbg2       file:              %s\n", file);
-		fprintf(stderr, "dbg2       svp_printmode:     %d\n", svp_printmode);
-		fprintf(stderr, "dbg2       svp_file_output:   %d\n", svp_file_output);
-		fprintf(stderr, "dbg2       svp_setprocess:    %d\n", svp_setprocess);
-		fprintf(stderr, "dbg2       svp_force_zero:    %d\n", svp_force_zero);
-		fprintf(stderr, "dbg2       ssv_output:        %d\n", ssv_output);
-		fprintf(stderr, "dbg2       ssv_bounds_set:    %d\n", ssv_bounds_set);
-		fprintf(stderr, "dbg2       ssv_bounds[0]:     %f\n", ssv_bounds[0]);
-		fprintf(stderr, "dbg2       ssv_bounds[1]:     %f\n", ssv_bounds[1]);
-		fprintf(stderr, "dbg2       ssv_bounds[2]:     %f\n", ssv_bounds[2]);
-		fprintf(stderr, "dbg2       ssv_bounds[3]:     %f\n", ssv_bounds[3]);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */
@@ -365,10 +359,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;

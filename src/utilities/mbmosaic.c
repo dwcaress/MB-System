@@ -24,7 +24,9 @@
  * Date:	February 10, 1997
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -140,8 +142,6 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 	FILE *fp = NULL;
 	time_t right_now;
 	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char *ctime();
-	char *getenv();
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
@@ -209,8 +209,6 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                    double dx, double dy, double nodata, int *error) {
 	FILE *fp = NULL;
-	int j, k;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -244,9 +242,9 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 		fprintf(fp, "yllcorner %.10g\n", ymin);
 		fprintf(fp, "cellsize %.10g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
-		for (j = 0; j < ny; j++) {
+		for (int j = 0; j < ny; j++) {
 			for (int i = 0; i < nx; i++) {
-				k = i * ny + (ny - 1 - j);
+				const int k = i * ny + (ny - 1 - j);
 				if (grid[k] == nodata)
 					fprintf(fp, "-99999 ");
 				else
@@ -447,7 +445,6 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
                                 char *beamflag, double *gangles, double *priorities, int *error) {
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
-	int j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -489,7 +486,7 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 
 				/* priority set using the priority-angle table */
 				else {
-					for (j = 0; j < n_priority_angle - 1; j++) {
+					for (int j = 0; j < n_priority_angle - 1; j++) {
 						if (gangles[i] >= priority_angle_angle[j] && gangles[i] < priority_angle_angle[j + 1]) {
 							priorities[i] *=
 							    (priority_angle_priority[j] + (priority_angle_priority[j + 1] - priority_angle_priority[j]) *
@@ -577,8 +574,6 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
                             int *error) {
 	int found_pre, found_post;
 	int i0, i1;
-	int j;
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -596,7 +591,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 			/* find previous good beam */
 			found_pre = MB_NO;
 			if (i > 0) {
-				for (j = i - 1; j >= 0 && found_pre == MB_NO; j--) {
+				for (int j = i - 1; j >= 0 && found_pre == MB_NO; j--) {
 					if (mb_beam_ok(beamflag[j])) {
 						found_pre = MB_YES;
 						i0 = j;
@@ -607,7 +602,7 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 			/* find post good beam */
 			found_post = MB_NO;
 			if (i < beams_bath - 1) {
-				for (j = i + 1; j < beams_bath && found_post == MB_NO; j++) {
+				for (int j = i + 1; j < beams_bath && found_post == MB_NO; j++) {
 					if (mb_beam_ok(beamflag[j])) {
 						found_post = MB_YES;
 						i1 = j;
@@ -664,7 +659,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
                                 double *table_range, int *error) {
 	double dangle, angle0, angle1, factor;
 	int found, foundnext;
-	int j, jj, jstart, jnext;
+	int jj, jstart, jnext;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -694,7 +689,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 
 		/* estimate the table values for this angle from the bathymetry */
 		found = MB_NO;
-		for (j = jstart; j < beams_bath - 1 && found == MB_NO; j++) {
+		for (int j = jstart; j < beams_bath - 1 && found == MB_NO; j++) {
 			/* check if this beam is valid */
 			if (mb_beam_ok(beamflag[j])) {
 				/* look for the next valid beam */
@@ -849,7 +844,7 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
                           double *table_altitude, double *table_range, int pixels_ss, double *ss, double *ssacrosstrack,
                           double *gangles, int *error) {
 	int found;
-	int j, jstart;
+	int jstart;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -872,7 +867,7 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
 		/* get angles only for valid sidescan */
 		if (ss[i] > MB_SIDESCAN_NULL) {
 			found = MB_NO;
-			for (j = jstart; j < nangle - 1 && found == MB_NO; j++) {
+			for (int j = jstart; j < nangle - 1 && found == MB_NO; j++) {
 				if (ssacrosstrack[i] < table_xtrack[j]) {
 					gangles[i] = table_angle[j];
 					found = MB_YES;
@@ -921,7 +916,6 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
                               double *gangles, double *priorities, int *error) {
 	double azi_starboard, azi_port, weight_starboard, weight_port;
 	double heading_difference, weight_heading;
-	int j;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -963,7 +957,7 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 
 				/* priority set using the priority-angle table */
 				else {
-					for (j = 0; j < n_priority_angle - 1; j++) {
+					for (int j = 0; j < n_priority_angle - 1; j++) {
 						if (gangles[i] >= priority_angle_angle[j] && gangles[i] < priority_angle_angle[j + 1]) {
 							priorities[i] *=
 							    (priority_angle_priority[j] + (priority_angle_priority[j + 1] - priority_angle_priority[j]) *
@@ -1050,12 +1044,6 @@ int mbmosaic_get_sspriorities(int verbose, int priority_mode, int n_priority_ang
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message = NULL;
@@ -1259,7 +1247,7 @@ int main(int argc, char **argv) {
 	int inside;
 	double acrosstrackspacing;
 	double slope;
-	int j, ii, jj, iii, jjj, kkk, n;
+	int ii, jj, iii, jjj, kkk;
 	int i1, i2, j1, j2;
 	int ir;
 	double r;
@@ -1289,327 +1277,317 @@ int main(int argc, char **argv) {
 	gydim = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:")) !=
-	       -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &datatype);
-			if (optarg[1] == 'f' || optarg[1] == 'F')
-				usefiltered = MB_YES;
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%lf", &border);
-			flag++;
-			break;
-		case 'C':
-		case 'c':
-			n = sscanf(optarg, "%d/%d/%lf", &clip, &clipmode, &tension);
-			if (n < 1)
-				clipmode = MBMOSAIC_INTERP_NONE;
-			else if (n == 1 && clip > 0)
-				clipmode = MBMOSAIC_INTERP_GAP;
-			else if (n == 1)
-				clipmode = MBMOSAIC_INTERP_NONE;
-			else if (clip > 0 && clipmode < 0)
-				clipmode = MBMOSAIC_INTERP_GAP;
-			else if (clipmode >= 3)
-				clipmode = MBMOSAIC_INTERP_ALL;
-			if (n < 3) {
-				tension = 0.0;
-			}
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			n = sscanf(optarg, "%d/%d", &xdim, &ydim);
-			if (n == 2)
-				set_dimensions = MB_YES;
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			if (optarg[strlen(optarg) - 1] == '!') {
-				spacing_priority = MB_YES;
-				optarg[strlen(optarg) - 1] = '\0';
-			}
-			n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
-			if (n > 1)
-				set_spacing = MB_YES;
-			if (n < 3)
-				strcpy(units, "meters");
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%lf/%d", &priority_range, &weight_priorities);
-			grid_mode = MBMOSAIC_AVERAGE;
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			if (optarg[0] == '=') {
-				gridkind = MBMOSAIC_GMTGRD;
-				strcpy(gridkindstring, optarg);
-			}
-			else {
-				sscanf(optarg, "%d", &gridkind);
-				if (gridkind == MBMOSAIC_CDFGRD) {
-					gridkind = MBMOSAIC_GMTGRD;
-					gridkindstring[0] = '\0';
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:")) !=
+		       -1)
+		{
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &datatype);
+				if (optarg[1] == 'f' || optarg[1] == 'F')
+					usefiltered = MB_YES;
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%lf", &border);
+				break;
+			case 'C':
+			case 'c':
+			{
+				const int n = sscanf(optarg, "%d/%d/%lf", &clip, &clipmode, &tension);
+				if (n < 1)
+					clipmode = MBMOSAIC_INTERP_NONE;
+				else if (n == 1 && clip > 0)
+					clipmode = MBMOSAIC_INTERP_GAP;
+				else if (n == 1)
+					clipmode = MBMOSAIC_INTERP_NONE;
+				else if (clip > 0 && clipmode < 0)
+					clipmode = MBMOSAIC_INTERP_GAP;
+				else if (clipmode >= 3)
+					clipmode = MBMOSAIC_INTERP_ALL;
+				if (n < 3) {
+					tension = 0.0;
 				}
-				else if (gridkind > MBMOSAIC_GMTGRD) {
-					sprintf(gridkindstring, "=%d", (gridkind - 100));
-					gridkind = MBMOSAIC_GMTGRD;
+				break;
+			}
+			case 'D':
+			case 'd':
+			{
+				const int n = sscanf(optarg, "%d/%d", &xdim, &ydim);
+				if (n == 2)
+					set_dimensions = MB_YES;
+				break;
+			}
+			case 'E':
+			case 'e':
+			{
+				if (optarg[strlen(optarg) - 1] == '!') {
+					spacing_priority = MB_YES;
+					optarg[strlen(optarg) - 1] = '\0';
 				}
+				const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+				if (n > 1)
+					set_spacing = MB_YES;
+				if (n < 3)
+					strcpy(units, "meters");
+				break;
 			}
-			flag++;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", filelist);
-			flag++;
-			break;
-		case 'J':
-		case 'j':
-			sscanf(optarg, "%s", projection_pars);
-			projection_pars_f = MB_YES;
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			more = MB_YES;
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			use_NaN = MB_YES;
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", fileroot);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings);
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			if (strchr(optarg, '/') == NULL) {
-				sscanf(optarg, "%lf", &boundsfactor);
-				if (boundsfactor <= 1.0)
-					boundsfactor = 0.0;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%lf/%d", &priority_range, &weight_priorities);
+				grid_mode = MBMOSAIC_AVERAGE;
+				break;
+			case 'G':
+			case 'g':
+				if (optarg[0] == '=') {
+					gridkind = MBMOSAIC_GMTGRD;
+					strcpy(gridkindstring, optarg);
+				}
+				else {
+					sscanf(optarg, "%d", &gridkind);
+					if (gridkind == MBMOSAIC_CDFGRD) {
+						gridkind = MBMOSAIC_GMTGRD;
+						gridkindstring[0] = '\0';
+					}
+					else if (gridkind > MBMOSAIC_GMTGRD) {
+						sprintf(gridkindstring, "=%d", (gridkind - 100));
+						gridkind = MBMOSAIC_GMTGRD;
+					}
+				}
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", filelist);
+				break;
+			case 'J':
+			case 'j':
+				sscanf(optarg, "%s", projection_pars);
+				projection_pars_f = MB_YES;
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'M':
+			case 'm':
+				more = MB_YES;
+				break;
+			case 'N':
+			case 'n':
+				use_NaN = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", fileroot);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings);
+				break;
+			case 'R':
+			case 'r':
+				if (strchr(optarg, '/') == NULL) {
+					sscanf(optarg, "%lf", &boundsfactor);
+					if (boundsfactor <= 1.0)
+						boundsfactor = 0.0;
+				}
+				else {
+					mb_get_bounds(optarg, gbnd);
+					gbndset = MB_YES;
+				}
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%s", topogridfile);
+				usetopogrid = MB_YES;
+				break;
+			case 'U':
+			case 'u':
+			{
+				const int n = sscanf(optarg, "%lf/%lf/%d", &t1, &t2, &kkk);
+				if (n == 3 && kkk == 1) {
+					priority_heading = t1;
+					priority_heading_factor = t2;
+					if ((priority_mode & MBMOSAIC_PRIORITY_HEADING) == 0)
+						priority_mode += MBMOSAIC_PRIORITY_HEADING;
+				}
+				else if (n >= 2) {
+					priority_azimuth = t1;
+					priority_azimuth_factor = t2;
+					if ((priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) == 0)
+						priority_mode += MBMOSAIC_PRIORITY_AZIMUTH;
+				}
+				break;
 			}
-			else {
-				mb_get_bounds(optarg, gbnd);
-				gbndset = MB_YES;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'W':
+			case 'w':
+				sscanf(optarg, "%lf", &scale);
+				break;
+			case 'X':
+			case 'x':
+				sscanf(optarg, "%lf", &extend);
+				break;
+			case 'Y':
+			case 'y':
+				sscanf(optarg, "%d", &priority_source);
+				if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESUP) {
+					n_priority_angle = n_priority_angle_60degreesup;
+					priority_angle_angle = priority_angle_60degreesup_angle;
+					priority_angle_priority = priority_angle_60degreesup_priority;
+				}
+				else if (priority_source == MBMOSAIC_PRIORITYTABLE_67DEGREESUP) {
+					n_priority_angle = n_priority_angle_67degreesup;
+					priority_angle_angle = priority_angle_67degreesup_angle;
+					priority_angle_priority = priority_angle_67degreesup_priority;
+				}
+				else if (priority_source == MBMOSAIC_PRIORITYTABLE_75DEGREESUP) {
+					n_priority_angle = n_priority_angle_75degreesup;
+					priority_angle_angle = priority_angle_75degreesup_angle;
+					priority_angle_priority = priority_angle_75degreesup_priority;
+				}
+				else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESUP) {
+					n_priority_angle = n_priority_angle_85degreesup;
+					priority_angle_angle = priority_angle_85degreesup_angle;
+					priority_angle_priority = priority_angle_85degreesup_priority;
+				}
+				else if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESDN) {
+					n_priority_angle = n_priority_angle_60degreesdn;
+					priority_angle_angle = priority_angle_60degreesdn_angle;
+					priority_angle_priority = priority_angle_60degreesdn_priority;
+				}
+				else if (priority_source == MBMOSAIC_PRIORITYTABLE_67DEGREESDN) {
+					n_priority_angle = n_priority_angle_67degreesdn;
+					priority_angle_angle = priority_angle_67degreesdn_angle;
+					priority_angle_priority = priority_angle_67degreesdn_priority;
+				}
+				else if (priority_source == MBMOSAIC_PRIORITYTABLE_75DEGREESDN) {
+					n_priority_angle = n_priority_angle_75degreesdn;
+					priority_angle_angle = priority_angle_75degreesdn_angle;
+					priority_angle_priority = priority_angle_75degreesdn_priority;
+				}
+				else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESDN) {
+					n_priority_angle = n_priority_angle_85degreesdn;
+					priority_angle_angle = priority_angle_85degreesdn_angle;
+					priority_angle_priority = priority_angle_85degreesdn_priority;
+				}
+				else {
+					sscanf(optarg, "%s", pfile);
+				}
+				if ((priority_mode & MBMOSAIC_PRIORITY_ANGLE) == 0)
+					priority_mode += MBMOSAIC_PRIORITY_ANGLE;
+				break;
+			case 'Z':
+			case 'z':
+				sscanf(optarg, "%lf", &altitude_default);
+				break;
+			case '?':
+				errflg = true;
 			}
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &speedmin);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%s", topogridfile);
-			usetopogrid = MB_YES;
-			flag++;
-			break;
-		case 'U':
-		case 'u':
-			n = sscanf(optarg, "%lf/%lf/%d", &t1, &t2, &kkk);
-			if (n == 3 && kkk == 1) {
-				priority_heading = t1;
-				priority_heading_factor = t2;
-				if ((priority_mode & MBMOSAIC_PRIORITY_HEADING) == 0)
-					priority_mode += MBMOSAIC_PRIORITY_HEADING;
-			}
-			else if (n >= 2) {
-				priority_azimuth = t1;
-				priority_azimuth_factor = t2;
-				if ((priority_mode & MBMOSAIC_PRIORITY_AZIMUTH) == 0)
-					priority_mode += MBMOSAIC_PRIORITY_AZIMUTH;
-			}
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			sscanf(optarg, "%lf", &scale);
-			flag++;
-			break;
-		case 'X':
-		case 'x':
-			sscanf(optarg, "%lf", &extend);
-			flag++;
-			break;
-		case 'Y':
-		case 'y':
-			sscanf(optarg, "%d", &priority_source);
-			if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESUP) {
-				n_priority_angle = n_priority_angle_60degreesup;
-				priority_angle_angle = priority_angle_60degreesup_angle;
-				priority_angle_priority = priority_angle_60degreesup_priority;
-			}
-			else if (priority_source == MBMOSAIC_PRIORITYTABLE_67DEGREESUP) {
-				n_priority_angle = n_priority_angle_67degreesup;
-				priority_angle_angle = priority_angle_67degreesup_angle;
-				priority_angle_priority = priority_angle_67degreesup_priority;
-			}
-			else if (priority_source == MBMOSAIC_PRIORITYTABLE_75DEGREESUP) {
-				n_priority_angle = n_priority_angle_75degreesup;
-				priority_angle_angle = priority_angle_75degreesup_angle;
-				priority_angle_priority = priority_angle_75degreesup_priority;
-			}
-			else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESUP) {
-				n_priority_angle = n_priority_angle_85degreesup;
-				priority_angle_angle = priority_angle_85degreesup_angle;
-				priority_angle_priority = priority_angle_85degreesup_priority;
-			}
-			else if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESDN) {
-				n_priority_angle = n_priority_angle_60degreesdn;
-				priority_angle_angle = priority_angle_60degreesdn_angle;
-				priority_angle_priority = priority_angle_60degreesdn_priority;
-			}
-			else if (priority_source == MBMOSAIC_PRIORITYTABLE_67DEGREESDN) {
-				n_priority_angle = n_priority_angle_67degreesdn;
-				priority_angle_angle = priority_angle_67degreesdn_angle;
-				priority_angle_priority = priority_angle_67degreesdn_priority;
-			}
-			else if (priority_source == MBMOSAIC_PRIORITYTABLE_75DEGREESDN) {
-				n_priority_angle = n_priority_angle_75degreesdn;
-				priority_angle_angle = priority_angle_75degreesdn_angle;
-				priority_angle_priority = priority_angle_75degreesdn_priority;
-			}
-			else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESDN) {
-				n_priority_angle = n_priority_angle_85degreesdn;
-				priority_angle_angle = priority_angle_85degreesdn_angle;
-				priority_angle_priority = priority_angle_85degreesdn_priority;
-			}
-			else {
-				sscanf(optarg, "%s", pfile);
-			}
-			if ((priority_mode & MBMOSAIC_PRIORITY_ANGLE) == 0)
-				priority_mode += MBMOSAIC_PRIORITY_ANGLE;
-			break;
-		case 'Z':
-		case 'z':
-			sscanf(optarg, "%lf", &altitude_default);
-			flag++;
-			break;
-		case '?':
-			errflg++;
 		}
 
-	/* set output stream to stdout or stderr */
-	if (verbose >= 2)
-		outfp = stderr;
-	else
-		outfp = stdout;
+		if (verbose >= 2)
+			outfp = stderr;
+		else
+			outfp = stdout;
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(outfp, "usage: %s\n", usage_message);
-		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(outfp, "usage: %s\n", usage_message);
+			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(outfp, "\nProgram %s\n", program_name);
+			fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(outfp, "dbg2  Control Parameters:\n");
-		fprintf(outfp, "dbg2       verbose:              %d\n", verbose);
-		fprintf(outfp, "dbg2       help:                 %d\n", help);
-		fprintf(outfp, "dbg2       pings:                %d\n", pings);
-		fprintf(outfp, "dbg2       lonflip:              %d\n", lonflip);
-		fprintf(outfp, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
-		fprintf(outfp, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
-		fprintf(outfp, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
-		fprintf(outfp, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
-		fprintf(outfp, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
-		fprintf(outfp, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
-		fprintf(outfp, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
-		fprintf(outfp, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
-		fprintf(outfp, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
-		fprintf(outfp, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
-		fprintf(outfp, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
-		fprintf(outfp, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
-		fprintf(outfp, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
-		fprintf(outfp, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
-		fprintf(outfp, "dbg2       speedmin:             %f\n", speedmin);
-		fprintf(outfp, "dbg2       timegap:              %f\n", timegap);
-		fprintf(outfp, "dbg2       file list:            %s\n", ifile);
-		fprintf(outfp, "dbg2       output file root:     %s\n", fileroot);
-		fprintf(outfp, "dbg2       grid x dimension:     %d\n", xdim);
-		fprintf(outfp, "dbg2       grid y dimension:     %d\n", ydim);
-		fprintf(outfp, "dbg2       grid x spacing:       %f\n", dx);
-		fprintf(outfp, "dbg2       grid y spacing:       %f\n", dy);
-		fprintf(outfp, "dbg2       grid bounds[0]:       %f\n", gbnd[0]);
-		fprintf(outfp, "dbg2       grid bounds[1]:       %f\n", gbnd[1]);
-		fprintf(outfp, "dbg2       grid bounds[2]:       %f\n", gbnd[2]);
-		fprintf(outfp, "dbg2       grid bounds[3]:       %f\n", gbnd[3]);
-		fprintf(outfp, "dbg2       boundsfactor:         %f\n", boundsfactor);
-		fprintf(outfp, "dbg2       clipmode:             %d\n", clipmode);
-		fprintf(outfp, "dbg2       clip:                 %d\n", clip);
-		fprintf(outfp, "dbg2       tension:              %f\n", tension);
-		fprintf(outfp, "dbg2       more:                 %d\n", more);
-		fprintf(outfp, "dbg2       use_NaN:              %d\n", use_NaN);
-		fprintf(outfp, "dbg2       data type:            %d\n", datatype);
-		fprintf(outfp, "dbg2       usefiltered:          %d\n", usefiltered);
-		fprintf(outfp, "dbg2       grid format:          %d\n", gridkind);
-		if (gridkind == MBMOSAIC_GMTGRD)
-			fprintf(outfp, "dbg2       gmt grid format id:   %s\n", gridkindstring);
-		fprintf(outfp, "dbg2       scale:                %f\n", scale);
-		fprintf(outfp, "dbg2       border:               %f\n", border);
-		fprintf(outfp, "dbg2       extend:               %f\n", extend);
-		fprintf(outfp, "dbg2       tension:              %f\n", tension);
-		fprintf(outfp, "dbg2       grid_mode:            %d\n", grid_mode);
-		fprintf(outfp, "dbg2       priority_mode:        %d\n", priority_mode);
-		fprintf(outfp, "dbg2       priority_range:       %f\n", priority_range);
-		fprintf(outfp, "dbg2       weight_priorities:    %d\n", weight_priorities);
-		fprintf(outfp, "dbg2       priority_source:      %d\n", priority_source);
-		fprintf(outfp, "dbg2       pfile:                %s\n", pfile);
-		fprintf(outfp, "dbg2       priority_azimuth:     %f\n", priority_azimuth);
-		fprintf(outfp, "dbg2       priority_azimuth_fac: %f\n", priority_azimuth_factor);
-		fprintf(outfp, "dbg2       altitude_default:     %f\n", altitude_default);
-		fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
-		fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
-		fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
-		fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
-		fprintf(stderr, "dbg2      usetopogrid:          %d\n", usetopogrid);
-		fprintf(stderr, "dbg2      topogridfile:         %s\n", topogridfile);
-	}
+		if (verbose >= 2) {
+			fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(outfp, "dbg2  Control Parameters:\n");
+			fprintf(outfp, "dbg2       verbose:              %d\n", verbose);
+			fprintf(outfp, "dbg2       help:                 %d\n", help);
+			fprintf(outfp, "dbg2       pings:                %d\n", pings);
+			fprintf(outfp, "dbg2       lonflip:              %d\n", lonflip);
+			fprintf(outfp, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
+			fprintf(outfp, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
+			fprintf(outfp, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
+			fprintf(outfp, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
+			fprintf(outfp, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
+			fprintf(outfp, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
+			fprintf(outfp, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
+			fprintf(outfp, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
+			fprintf(outfp, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
+			fprintf(outfp, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
+			fprintf(outfp, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
+			fprintf(outfp, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
+			fprintf(outfp, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
+			fprintf(outfp, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
+			fprintf(outfp, "dbg2       speedmin:             %f\n", speedmin);
+			fprintf(outfp, "dbg2       timegap:              %f\n", timegap);
+			fprintf(outfp, "dbg2       file list:            %s\n", ifile);
+			fprintf(outfp, "dbg2       output file root:     %s\n", fileroot);
+			fprintf(outfp, "dbg2       grid x dimension:     %d\n", xdim);
+			fprintf(outfp, "dbg2       grid y dimension:     %d\n", ydim);
+			fprintf(outfp, "dbg2       grid x spacing:       %f\n", dx);
+			fprintf(outfp, "dbg2       grid y spacing:       %f\n", dy);
+			fprintf(outfp, "dbg2       grid bounds[0]:       %f\n", gbnd[0]);
+			fprintf(outfp, "dbg2       grid bounds[1]:       %f\n", gbnd[1]);
+			fprintf(outfp, "dbg2       grid bounds[2]:       %f\n", gbnd[2]);
+			fprintf(outfp, "dbg2       grid bounds[3]:       %f\n", gbnd[3]);
+			fprintf(outfp, "dbg2       boundsfactor:         %f\n", boundsfactor);
+			fprintf(outfp, "dbg2       clipmode:             %d\n", clipmode);
+			fprintf(outfp, "dbg2       clip:                 %d\n", clip);
+			fprintf(outfp, "dbg2       tension:              %f\n", tension);
+			fprintf(outfp, "dbg2       more:                 %d\n", more);
+			fprintf(outfp, "dbg2       use_NaN:              %d\n", use_NaN);
+			fprintf(outfp, "dbg2       data type:            %d\n", datatype);
+			fprintf(outfp, "dbg2       usefiltered:          %d\n", usefiltered);
+			fprintf(outfp, "dbg2       grid format:          %d\n", gridkind);
+			if (gridkind == MBMOSAIC_GMTGRD)
+				fprintf(outfp, "dbg2       gmt grid format id:   %s\n", gridkindstring);
+			fprintf(outfp, "dbg2       scale:                %f\n", scale);
+			fprintf(outfp, "dbg2       border:               %f\n", border);
+			fprintf(outfp, "dbg2       extend:               %f\n", extend);
+			fprintf(outfp, "dbg2       tension:              %f\n", tension);
+			fprintf(outfp, "dbg2       grid_mode:            %d\n", grid_mode);
+			fprintf(outfp, "dbg2       priority_mode:        %d\n", priority_mode);
+			fprintf(outfp, "dbg2       priority_range:       %f\n", priority_range);
+			fprintf(outfp, "dbg2       weight_priorities:    %d\n", weight_priorities);
+			fprintf(outfp, "dbg2       priority_source:      %d\n", priority_source);
+			fprintf(outfp, "dbg2       pfile:                %s\n", pfile);
+			fprintf(outfp, "dbg2       priority_azimuth:     %f\n", priority_azimuth);
+			fprintf(outfp, "dbg2       priority_azimuth_fac: %f\n", priority_azimuth_factor);
+			fprintf(outfp, "dbg2       altitude_default:     %f\n", altitude_default);
+			fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
+			fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
+			fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
+			fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
+			fprintf(stderr, "dbg2      usetopogrid:          %d\n", usetopogrid);
+			fprintf(stderr, "dbg2      topogridfile:         %s\n", topogridfile);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(outfp, "\n%s\n", help_message);
-		fprintf(outfp, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(outfp, "\n%s\n", help_message);
+			fprintf(outfp, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* if bounds not set get bounds of input data */
@@ -1645,8 +1623,7 @@ int main(int argc, char **argv) {
 	if (gbnd[0] >= gbnd[1] || gbnd[2] >= gbnd[3]) {
 		fprintf(outfp, "\nGrid bounds not properly specified:\n\t%f %f %f %f\n", gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_PARAMETER;
-		exit(error);
+		exit(MB_ERROR_BAD_PARAMETER);
 	}
 
 	/* use bathymetry/amplitude beams for types other than sidescan */
@@ -1998,7 +1975,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to Open Angle Weights File <%s> for reading\n", pfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		n_priority_angle = 0;
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
@@ -2029,7 +2006,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "\nUnable to Open Angle Weights File <%s> for reading\n", pfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		n_priority_angle = 0;
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer) {
@@ -2232,7 +2209,7 @@ int main(int argc, char **argv) {
 
 	/* initialize arrays */
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			grid[kgrid] = 0.0;
 			norm[kgrid] = 0.0;
@@ -2255,11 +2232,10 @@ int main(int argc, char **argv) {
 		/* read in data */
 		ndata = 0;
 		if ((status = mb_datalist_open(verbose, &datalist, filelist, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
 		       MB_SUCCESS) {
@@ -2452,7 +2428,7 @@ int main(int argc, char **argv) {
 										mbmosaic_get_footprint(verbose, MBMOSAIC_FOOTPRINT_REAL, beamwidth_xtrack,
 										                       beamwidth_ltrack, (bath[ib] - sonardepth), bathacrosstrack[ib],
 										                       bathalongtrack[ib], 0.0, &footprints[ib], &error);
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											xx = navlon + headingy * mtodeglon * footprints[ib].x[j] +
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
@@ -2483,7 +2459,7 @@ int main(int argc, char **argv) {
 										if (mb_beam_ok(beamflag[ib])) {
 											mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
 											                &error);
-											for (j = 0; j < 4; j++) {
+											for (int j = 0; j < 4; j++) {
 												mb_proj_forward(verbose, pjptr, footprints[ib].x[j], footprints[ib].y[j],
 												                &footprints[ib].x[j], &footprints[ib].y[j], &error);
 											}
@@ -2494,7 +2470,7 @@ int main(int argc, char **argv) {
 								for (ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib])) {
 										/* get position in grid */
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
@@ -2502,7 +2478,7 @@ int main(int argc, char **argv) {
 										iy1 = iyy[0];
 										ix2 = ixx[0];
 										iy2 = iyy[0];
-										for (j = 1; j < 4; j++) {
+										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
@@ -2601,7 +2577,7 @@ int main(int argc, char **argv) {
 										mbmosaic_get_footprint(verbose, footprint_mode, beamwidth_xtrack, beamwidth_ltrack,
 										                       altitude, ssacrosstrack[ib], ssalongtrack[ib], acrosstrackspacing,
 										                       &footprints[ib], &error);
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											xx = navlon + headingy * mtodeglon * footprints[ib].x[j] +
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
@@ -2669,7 +2645,7 @@ int main(int argc, char **argv) {
 									for (ib = 0; ib < pixels_ss; ib++)
 										if (ss[ib] > MB_SIDESCAN_NULL) {
 											mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
-											for (j = 0; j < 4; j++) {
+											for (int j = 0; j < 4; j++) {
 												mb_proj_forward(verbose, pjptr, footprints[ib].x[j], footprints[ib].y[j],
 												                &footprints[ib].x[j], &footprints[ib].y[j], &error);
 											}
@@ -2680,7 +2656,7 @@ int main(int argc, char **argv) {
 								for (ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL) {
 										/* get position in grid */
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
@@ -2688,7 +2664,7 @@ int main(int argc, char **argv) {
 										iy1 = iyy[0];
 										ix2 = ixx[0];
 										iy2 = iyy[0];
-										for (j = 1; j < 4; j++) {
+										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
@@ -2759,7 +2735,7 @@ int main(int argc, char **argv) {
 	if (grid_mode == MBMOSAIC_AVERAGE) {
 		/* initialize arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
 				cnt[kgrid] = 0;
@@ -2773,7 +2749,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
 		       MB_SUCCESS) {
@@ -2963,7 +2939,7 @@ int main(int argc, char **argv) {
 										mbmosaic_get_footprint(verbose, MBMOSAIC_FOOTPRINT_REAL, beamwidth_xtrack,
 										                       beamwidth_ltrack, (bath[ib] - sonardepth), bathacrosstrack[ib],
 										                       bathalongtrack[ib], 0.0, &footprints[ib], &error);
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											xx = navlon + headingy * mtodeglon * footprints[ib].x[j] +
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
@@ -2994,7 +2970,7 @@ int main(int argc, char **argv) {
 										if (mb_beam_ok(beamflag[ib])) {
 											mb_proj_forward(verbose, pjptr, bathlon[ib], bathlat[ib], &bathlon[ib], &bathlat[ib],
 											                &error);
-											for (j = 0; j < 4; j++) {
+											for (int j = 0; j < 4; j++) {
 												mb_proj_forward(verbose, pjptr, footprints[ib].x[j], footprints[ib].y[j],
 												                &footprints[ib].x[j], &footprints[ib].y[j], &error);
 											}
@@ -3005,7 +2981,7 @@ int main(int argc, char **argv) {
 								for (ib = 0; ib < beams_amp; ib++)
 									if (mb_beam_ok(beamflag[ib])) {
 										/* get position in grid */
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
@@ -3013,7 +2989,7 @@ int main(int argc, char **argv) {
 										iy1 = iyy[0];
 										ix2 = ixx[0];
 										iy2 = iyy[0];
-										for (j = 1; j < 4; j++) {
+										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
@@ -3122,7 +3098,7 @@ int main(int argc, char **argv) {
 										mbmosaic_get_footprint(verbose, footprint_mode, beamwidth_xtrack, beamwidth_ltrack,
 										                       altitude, ssacrosstrack[ib], ssalongtrack[ib], acrosstrackspacing,
 										                       &footprints[ib], &error);
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											xx = navlon + headingy * mtodeglon * footprints[ib].x[j] +
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
@@ -3184,7 +3160,7 @@ int main(int argc, char **argv) {
 									for (ib = 0; ib < pixels_ss; ib++)
 										if (ss[ib] > MB_SIDESCAN_NULL) {
 											mb_proj_forward(verbose, pjptr, sslon[ib], sslat[ib], &sslon[ib], &sslat[ib], &error);
-											for (j = 0; j < 4; j++) {
+											for (int j = 0; j < 4; j++) {
 												mb_proj_forward(verbose, pjptr, footprints[ib].x[j], footprints[ib].y[j],
 												                &footprints[ib].x[j], &footprints[ib].y[j], &error);
 											}
@@ -3195,7 +3171,7 @@ int main(int argc, char **argv) {
 								for (ib = 0; ib < pixels_ss; ib++)
 									if (ss[ib] > MB_SIDESCAN_NULL) {
 										/* get position in grid */
-										for (j = 0; j < 4; j++) {
+										for (int j = 0; j < 4; j++) {
 											ixx[j] = (footprints[ib].x[j] - wbnd[0] + 0.5 * dx) / dx;
 											iyy[j] = (footprints[ib].y[j] - wbnd[2] + 0.5 * dy) / dy;
 										}
@@ -3203,7 +3179,7 @@ int main(int argc, char **argv) {
 										iy1 = iyy[0];
 										ix2 = ixx[0];
 										iy2 = iyy[0];
-										for (j = 1; j < 4; j++) {
+										for (int j = 1; j < 4; j++) {
 											ix1 = MIN(ix1, ixx[j]);
 											iy1 = MIN(iy1, iyy[j]);
 											ix2 = MAX(ix2, ixx[j]);
@@ -3301,7 +3277,7 @@ int main(int argc, char **argv) {
 	/* deal with single best mode */
 	if (grid_mode == MBMOSAIC_SINGLE_BEST) {
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
 					nbinset++;
@@ -3313,7 +3289,7 @@ int main(int argc, char **argv) {
 	}
 	else if (grid_mode == MBMOSAIC_AVERAGE) {
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
 					nbinset++;
@@ -3333,7 +3309,7 @@ int main(int argc, char **argv) {
 		if (border > 0.0)
 			ndata = 2 * gxdim + 2 * gydim - 2;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue)
 					ndata++;
@@ -3354,7 +3330,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nMBIO Error allocating interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_MEMORY_FAIL);
 		}
 		memset((char *)sgrid, 0, gxdim * gydim * sizeof(float));
 
@@ -3363,7 +3339,7 @@ int main(int argc, char **argv) {
 		symin = gbnd[2] - offy * dy;
 		ndata = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue) {
 					sdata[ndata++] = (float)(sxmin + dx * i - bdata_origin_x);
@@ -3374,7 +3350,7 @@ int main(int argc, char **argv) {
 		/* if desired set border */
 		if (border > 0.0) {
 			for (int i = 0; i < gxdim; i++) {
-				j = 0;
+				int j = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] == clipvalue) {
 					sdata[ndata++] = (float)(sxmin + dx * i - bdata_origin_x);
@@ -3389,7 +3365,7 @@ int main(int argc, char **argv) {
 					sdata[ndata++] = (float)border;
 				}
 			}
-			for (j = 1; j < gydim - 1; j++) {
+			for (int j = 1; j < gydim - 1; j++) {
 				int i = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] == clipvalue) {
@@ -3432,7 +3408,7 @@ int main(int argc, char **argv) {
 		zflag = 5.0e34;
 		if (clipmode == MBMOSAIC_INTERP_GAP) {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3512,7 +3488,7 @@ int main(int argc, char **argv) {
 					}
 				}
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3530,7 +3506,7 @@ int main(int argc, char **argv) {
 		    filling by proximity */
 		else if (clipmode == MBMOSAIC_INTERP_NEAR) {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3579,7 +3555,7 @@ int main(int argc, char **argv) {
 					}
 				}
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3597,7 +3573,7 @@ int main(int argc, char **argv) {
 		    filling all empty bins */
 		else {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -3613,7 +3589,7 @@ int main(int argc, char **argv) {
 
 		/* deallocate the interpolation arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				kint = i + j * gxdim;
 				if (num[kgrid] == MB_YES) {
@@ -3633,7 +3609,7 @@ int main(int argc, char **argv) {
 	zmin = zclip;
 	zmax = zclip;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
 			if (zmin == zclip && grid[kgrid] < zclip)
@@ -3653,7 +3629,7 @@ int main(int argc, char **argv) {
 	/* get min max of data distribution */
 	nmax = 0;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
 			if (cnt[kgrid] > nmax)
@@ -3664,7 +3640,7 @@ int main(int argc, char **argv) {
 	smin = 0.0;
 	smax = 0.0;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			;
 			if (smin == 0.0 && cnt[kgrid] > 1)
@@ -3729,7 +3705,7 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\nOutputting results...\n");
 	for (int i = 0; i < xdim; i++)
-		for (j = 0; j < ydim; j++) {
+		for (int j = 0; j < ydim; j++) {
 			kgrid = (i + offx) * gydim + (j + offy);
 			kout = i * ydim + j;
 			output[kout] = (float)grid[kgrid];
@@ -3775,7 +3751,7 @@ int main(int argc, char **argv) {
 	/* write second output file */
 	if (more == MB_YES) {
 		for (int i = 0; i < xdim; i++)
-			for (j = 0; j < ydim; j++) {
+			for (int j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;
 				output[kout] = (float)cnt[kgrid];
@@ -3821,7 +3797,7 @@ int main(int argc, char **argv) {
 
 		/* write third output file */
 		for (int i = 0; i < xdim; i++)
-			for (j = 0; j < ydim; j++) {
+			for (int j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;
 				output[kout] = (float)sigma[kgrid];

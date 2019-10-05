@@ -35,13 +35,15 @@
  * Date:	February 27, 2003
  */
 
+#include <getopt.h>
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "mb_define.h"
 #include "mb_format.h"
@@ -186,11 +188,6 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct
 
 /*--------------------------------------------------------------------*/
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -308,7 +305,7 @@ int main(int argc, char **argv) {
 	double xx, yy;
 	int ix, iy, ib, kgrid;
 	double d1, d2;
-	int i1, i2, n;
+	int i1, i2;
 
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
@@ -338,188 +335,185 @@ int main(int argc, char **argv) {
 	timegap = 1000000000.0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhBbGgD:d:F:f:I:i:M:m:N:n:P:p:S:sT:t::R:r:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'B':
-		case 'b':
-			output_bad = MB_YES;
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			std_dev_filter = MB_YES;
-			sscanf(optarg, "%lf/%d", &std_dev_threshold, &std_dev_nmin);
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			output_good = MB_YES;
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			median_filter = MB_YES;
-			n = sscanf(optarg, "%lf/%d/%d", &d1, &i1, &i2);
-			if (n > 0)
-				median_filter_threshold = d1;
-			if (n > 1)
-				median_filter_nmin = i1;
-			if (n > 2) {
-				mediandensity_filter = MB_YES;
-				mediandensity_filter_nmax = i2;
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "VvHhBbGgD:d:F:f:I:i:M:m:N:n:P:p:S:sT:t::R:r:")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'B':
+			case 'b':
+				output_bad = MB_YES;
+				break;
+			case 'D':
+			case 'd':
+				std_dev_filter = MB_YES;
+				sscanf(optarg, "%lf/%d", &std_dev_threshold, &std_dev_nmin);
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				output_good = MB_YES;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'M':
+			case 'm':
+			{
+				median_filter = MB_YES;
+				const int n = sscanf(optarg, "%lf/%d/%d", &d1, &i1, &i2);
+				if (n > 0)
+					median_filter_threshold = d1;
+				if (n > 1)
+					median_filter_nmin = i1;
+				if (n > 2) {
+					mediandensity_filter = MB_YES;
+					mediandensity_filter_nmax = i2;
+				}
+				break;
 			}
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			limit_beams = MB_YES;
-			sscanf(optarg, "%d/%d", &min_beam, &max_beam_no);
-			if (optarg[0] == '-') {
-				min_beam = -min_beam;
-				beam_in = MB_NO;
+			case 'N':
+			case 'n':
+				limit_beams = MB_YES;
+				sscanf(optarg, "%d/%d", &min_beam, &max_beam_no);
+				if (optarg[0] == '-') {
+					min_beam = -min_beam;
+					beam_in = MB_NO;
+				}
+				if (max_beam_no < 0)
+					max_beam_no = -max_beam_no;
+				max_beam = max_beam_no;
+				if (max_beam < min_beam)
+					max_beam = min_beam;
+				break;
+			case 'P':
+			case 'p':
+			{
+				plane_fit = MB_YES;
+				sscanf(optarg, "%lf", &plane_fit_threshold);
+				const int n = sscanf(optarg, "%lf/%d/%lf", &d1, &i1, &d2);
+				if (n > 0)
+					plane_fit_threshold = d1;
+				if (n > 1)
+					plane_fit_nmin = i1;
+				break;
 			}
-			if (max_beam_no < 0)
-				max_beam_no = -max_beam_no;
-			max_beam = max_beam_no;
-			if (max_beam < min_beam)
-				max_beam = min_beam;
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			plane_fit = MB_YES;
-			sscanf(optarg, "%lf", &plane_fit_threshold);
-			n = sscanf(optarg, "%lf/%d/%lf", &d1, &i1, &d2);
-			if (n > 0)
-				plane_fit_threshold = d1;
-			if (n > 1)
-				plane_fit_nmin = i1;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, areabounds);
-			areaboundsset = MB_YES;
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &binsize);
-			binsizeset = MB_YES;
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			use_detect = MB_YES;
-			sscanf(optarg, "%d", &flag_detect);
-			flag++;
-			break;
-		case '?':
-			errflg++;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, areabounds);
+				areaboundsset = MB_YES;
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &binsize);
+				binsizeset = MB_YES;
+				break;
+			case 'T':
+			case 't':
+				use_detect = MB_YES;
+				sscanf(optarg, "%d", &flag_detect);
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	/* turn on median filter if nothing specified */
-	if (median_filter == MB_NO && plane_fit == MB_NO && std_dev_filter == MB_NO)
-		median_filter = MB_YES;
+		/* turn on median filter if nothing specified */
+		if (median_filter == MB_NO && plane_fit == MB_NO && std_dev_filter == MB_NO)
+			median_filter = MB_YES;
 
-	/* turn on output bad if nothing specified */
-	if (output_bad == MB_NO && output_good == MB_NO)
-		output_bad = MB_YES;
+		/* turn on output bad if nothing specified */
+		if (output_bad == MB_NO && output_good == MB_NO)
+			output_bad = MB_YES;
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
-		fprintf(stderr, "dbg2       help:           %d\n", help);
-		fprintf(stderr, "dbg2       pings:          %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
-		fprintf(stderr, "dbg2       data format:    %d\n", format);
-		fprintf(stderr, "dbg2       input file:     %s\n", read_file);
-		fprintf(stderr, "dbg2       median_filter:             %d\n", median_filter);
-		fprintf(stderr, "dbg2       median_filter_threshold:   %f\n", median_filter_threshold);
-		fprintf(stderr, "dbg2       median_filter_nmin:        %d\n", median_filter_nmin);
-		fprintf(stderr, "dbg2       mediandensity_filter:      %d\n", mediandensity_filter);
-		fprintf(stderr, "dbg2       mediandensity_filter_nmax: %d\n", mediandensity_filter_nmax);
-		fprintf(stderr, "dbg2       plane_fit:                 %d\n", plane_fit);
-		fprintf(stderr, "dbg2       plane_fit_threshold:       %f\n", plane_fit_threshold);
-		fprintf(stderr, "dbg2       plane_fit_nmin:            %d\n", plane_fit_nmin);
-		fprintf(stderr, "dbg2       std_dev_filter:            %d\n", std_dev_filter);
-		fprintf(stderr, "dbg2       std_dev_threshold:         %f\n", std_dev_threshold);
-		fprintf(stderr, "dbg2       std_dev_nmin:              %d\n", std_dev_nmin);
-		fprintf(stderr, "dbg2       use_detect:                %d\n", use_detect);
-		fprintf(stderr, "dbg2       flag_detect:               %d\n", flag_detect);
-		fprintf(stderr, "dbg2       limit_beams:               %d\n", limit_beams);
-		fprintf(stderr, "dbg2       beam_in:                   %d\n", beam_in);
-		fprintf(stderr, "dbg2       min_beam:                  %d\n", min_beam);
-		fprintf(stderr, "dbg2       max_beam_no                %d\n", max_beam_no);
-		fprintf(stderr, "dbg2       output_good:    %d\n", output_good);
-		fprintf(stderr, "dbg2       output_bad:     %d\n", output_bad);
-		fprintf(stderr, "dbg2       areaboundsset:  %d\n", areaboundsset);
-		fprintf(stderr, "dbg2       areabounds[0]:  %f\n", areabounds[0]);
-		fprintf(stderr, "dbg2       areabounds[1]:  %f\n", areabounds[1]);
-		fprintf(stderr, "dbg2       areabounds[2]:  %f\n", areabounds[2]);
-		fprintf(stderr, "dbg2       areabounds[3]:  %f\n", areabounds[3]);
-		fprintf(stderr, "dbg2       binsizeset:     %d\n", binsizeset);
-		fprintf(stderr, "dbg2       binsize:        %f\n", binsize);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:        %d\n", verbose);
+			fprintf(stderr, "dbg2       help:           %d\n", help);
+			fprintf(stderr, "dbg2       pings:          %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:        %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:      %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:      %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:      %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:      %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:     %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:     %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:     %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:     %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:     %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:     %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:     %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:     %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:     %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:     %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:     %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:     %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:     %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:     %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:       %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:        %f\n", timegap);
+			fprintf(stderr, "dbg2       data format:    %d\n", format);
+			fprintf(stderr, "dbg2       input file:     %s\n", read_file);
+			fprintf(stderr, "dbg2       median_filter:             %d\n", median_filter);
+			fprintf(stderr, "dbg2       median_filter_threshold:   %f\n", median_filter_threshold);
+			fprintf(stderr, "dbg2       median_filter_nmin:        %d\n", median_filter_nmin);
+			fprintf(stderr, "dbg2       mediandensity_filter:      %d\n", mediandensity_filter);
+			fprintf(stderr, "dbg2       mediandensity_filter_nmax: %d\n", mediandensity_filter_nmax);
+			fprintf(stderr, "dbg2       plane_fit:                 %d\n", plane_fit);
+			fprintf(stderr, "dbg2       plane_fit_threshold:       %f\n", plane_fit_threshold);
+			fprintf(stderr, "dbg2       plane_fit_nmin:            %d\n", plane_fit_nmin);
+			fprintf(stderr, "dbg2       std_dev_filter:            %d\n", std_dev_filter);
+			fprintf(stderr, "dbg2       std_dev_threshold:         %f\n", std_dev_threshold);
+			fprintf(stderr, "dbg2       std_dev_nmin:              %d\n", std_dev_nmin);
+			fprintf(stderr, "dbg2       use_detect:                %d\n", use_detect);
+			fprintf(stderr, "dbg2       flag_detect:               %d\n", flag_detect);
+			fprintf(stderr, "dbg2       limit_beams:               %d\n", limit_beams);
+			fprintf(stderr, "dbg2       beam_in:                   %d\n", beam_in);
+			fprintf(stderr, "dbg2       min_beam:                  %d\n", min_beam);
+			fprintf(stderr, "dbg2       max_beam_no                %d\n", max_beam_no);
+			fprintf(stderr, "dbg2       output_good:    %d\n", output_good);
+			fprintf(stderr, "dbg2       output_bad:     %d\n", output_bad);
+			fprintf(stderr, "dbg2       areaboundsset:  %d\n", areaboundsset);
+			fprintf(stderr, "dbg2       areabounds[0]:  %f\n", areabounds[0]);
+			fprintf(stderr, "dbg2       areabounds[1]:  %f\n", areabounds[1]);
+			fprintf(stderr, "dbg2       areabounds[2]:  %f\n", areabounds[2]);
+			fprintf(stderr, "dbg2       areabounds[3]:  %f\n", areabounds[3]);
+			fprintf(stderr, "dbg2       binsizeset:     %d\n", binsizeset);
+			fprintf(stderr, "dbg2       binsize:        %f\n", binsize);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* if bounds not set get bounds of input data */

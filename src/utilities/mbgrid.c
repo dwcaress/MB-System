@@ -34,7 +34,9 @@
  * Date:	February 22, 1993
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -123,11 +125,9 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 /* approximate complementary error function from numerical recipies */
 double erfcc(double x) {
-	double t, z, ans;
-
-	z = fabs(x);
-	t = 1.0 / (1.0 + 0.5 * z);
-	ans =
+	const double z = fabs(x);
+	const double t = 1.0 / (1.0 + 0.5 * z);
+	const double ans =
 	    t *
 	    exp(-z * z - 1.26551223 +
 	        t * (1.00002368 +
@@ -141,11 +141,9 @@ double erfcc(double x) {
 /*--------------------------------------------------------------------*/
 /* approximate error function altered from numerical recipies */
 double mbgrid_erf(double x) {
-	double t, z, erfc_d, erf_d;
-
-	z = fabs(x);
-	t = 1.0 / (1.0 + 0.5 * z);
-	erfc_d =
+	const double z = fabs(x);
+	const double t = 1.0 / (1.0 + 0.5 * z);
+	double erfc_d =
 	    t *
 	    exp(-z * z - 1.26551223 +
 	        t * (1.00002368 +
@@ -154,7 +152,7 @@ double mbgrid_erf(double x) {
 	                       t * (-0.18628806 +
 	                            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
 	erfc_d = x >= 0.0 ? erfc_d : 2.0 - erfc_d;
-	erf_d = 1.0 - erfc_d;
+	const double erf_d = 1.0 - erfc_d;
 	return erf_d;
 }
 
@@ -164,12 +162,6 @@ double mbgrid_erf(double x) {
  */
 int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                 double dx, double dy, int *error) {
-	FILE *fp = NULL;
-	time_t right_now;
-	char date[32], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char *ctime();
-	char *getenv();
-
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -189,23 +181,27 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
 	int status = MB_SUCCESS;
 
 	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
+	FILE *fp = fopen(outfile, "w");
+	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 	}
-
 	/* output grid */
 	else {
 		fprintf(fp, "grid created by program MBGRID\n");
-		right_now = time((time_t *)0);
+		const time_t right_now = time((time_t *)0);
+		char date[32];
 		strcpy(date, ctime(&right_now));
 		date[strlen(date) - 1] = '\0';
-		if ((user_ptr = getenv("USER")) == NULL)
+		char *user_ptr = getenv("USER");
+		if (user_ptr == NULL)
 			user_ptr = getenv("LOGNAME");
+		char user[MB_PATH_MAXLINE];
 		if (user_ptr != NULL)
 			strcpy(user, user_ptr);
 		else
 			strcpy(user, "unknown");
+		char host[MB_PATH_MAXLINE];
 		/* i = */ gethostname(host, MB_PATH_MAXLINE);
 		fprintf(fp, "program run by %s on %s at %s\n", user, host, date);
 		fprintf(fp, "%d %d\n%f %f %f %f\n", nx, ny, xmin, xmax, ymin, ymax);
@@ -235,10 +231,6 @@ int write_ascii(int verbose, char *outfile, float *grid, int nx, int ny, double 
  */
 int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                    double dx, double dy, double nodata, int *error) {
-	int status = MB_SUCCESS;
-	FILE *fp = NULL;
-	int j, k;
-
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -256,8 +248,11 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 		fprintf(outfp, "dbg2       nodata:     %f\n", nodata);
 	}
 
+	int status = MB_SUCCESS;
+
 	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
+	FILE *fp = fopen(outfile, "w");
+	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 	}
@@ -270,9 +265,9 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
 		fprintf(fp, "yllcorner %.10g\n", ymin - 0.5 * dy);
 		fprintf(fp, "cellsize %.10g\n", dx);
 		fprintf(fp, "nodata_value -99999\n");
-		for (j = 0; j < ny; j++) {
+		for (int j = 0; j < ny; j++) {
 			for (int i = 0; i < nx; i++) {
-				k = i * ny + (ny - 1 - j);
+				const int k = i * ny + (ny - 1 - j);
 				if (grid[k] == nodata)
 					fprintf(fp, "-99999 ");
 				else
@@ -300,8 +295,6 @@ int write_arcascii(int verbose, char *outfile, float *grid, int nx, int ny, doub
  */
 int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double xmin, double xmax, double ymin, double ymax,
                  double dx, double dy, int *error) {
-	FILE *fp = NULL;
-
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -321,7 +314,8 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
 	int status = MB_SUCCESS;
 
 	/* open the file */
-	if ((fp = fopen(outfile, "w")) == NULL) {
+	FILE *fp = fopen(outfile, "w");
+	if (fp == NULL) {
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 	}
@@ -357,9 +351,6 @@ int write_oldgrd(int verbose, char *outfile, float *grid, int nx, int ny, double
  */
 int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double pcy, double dx, double dy, double *px, double *py,
                   double *weight, int *use, int *error) {
-	double fa, fb;
-	double xe, ye, ang, ratio;
-
 	if (verbose >= 2) {
 		fprintf(outfp, "\ndbg2  Function <%s> called\n", __func__);
 		fprintf(outfp, "dbg2  Input arguments:\n");
@@ -403,8 +394,8 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 	    DWC 11/18/99 */
 
 	/* get integrated weight */
-	fa = foot_a;
-	fb = foot_b;
+	const double fa = foot_a;
+	const double fb = foot_b;
 	/*	*weight = 0.25 * ( erfcc((pcx - dx) / fa) - erfcc((pcx + dx) / fa))
 	 * ( erfcc((pcy - dy) / fb) - erfcc((pcy + dy) / fb));*/
 	*weight = 0.25 * (mbgrid_erf((pcx + dx) / fa) - mbgrid_erf((pcx - dx) / fa)) *
@@ -418,10 +409,10 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 	else {
 		*use = MBGRID_USE_NO;
 		for (int i = 0; i < 4; i++) {
-			ang = RTD * atan2(py[i], px[i]);
-			xe = foot_a * cos(DTR * ang);
-			ye = foot_b * sin(DTR * ang);
-			ratio = sqrt((px[i] * px[i] + py[i] * py[i]) / (xe * xe + ye * ye));
+			const double ang = RTD * atan2(py[i], px[i]);
+			const double xe = foot_a * cos(DTR * ang);
+			const double ye = foot_b * sin(DTR * ang);
+			const double ratio = sqrt((px[i] * px[i] + py[i] * py[i]) / (xe * xe + ye * ye));
 			if (ratio <= 1.0)
 				*use = MBGRID_USE_YES;
 			else if (ratio <= 2.0)
@@ -447,12 +438,6 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double pcx, double 
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message = NULL;
@@ -516,7 +501,7 @@ int main(int argc, char **argv) {
 	int check_time = MB_NO;
 	int first_in_stays = MB_YES;
 	double timediff = 300.0;
-  double minormax_weighted_mean_threshold = 1.0;
+	double minormax_weighted_mean_threshold = 1.0;
 	int rformat;
 	int pstatus;
 	char path[MB_PATH_MAXLINE];
@@ -633,7 +618,7 @@ int main(int argc, char **argv) {
 	/* other variables */
 	FILE *dfp = NULL;
 	FILE *rfp = NULL;
-	int j, k, ii, jj, iii, jjj, kkk, ir, n;
+	int ii, jj, iii, jjj, kkk, ir;
 	int i1, i2, j1, j2, k1, k2;
 	double r;
 	int dmask[9];
@@ -646,13 +631,10 @@ int main(int argc, char **argv) {
 	double foot_dtheta, foot_dphi;
 	double foot_hwidth, foot_hlength;
 	int foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy;
-	double dzdx, dzdy, sbath;
+	double sbath;
 	double xx0, yy0, bdx, bdy, xx1, xx2, yy1, yy2;
 	double prx[5], pry[5];
 	int use_weight;
-	int fork_status;
-	char *bufptr;
-	size_t freadsize;
 	double dvalue;
 
 	/* get current default values */
@@ -676,279 +658,268 @@ int main(int argc, char **argv) {
 	pid = getpid();
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) !=
-	       -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &datatype);
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%lf", &border);
-			setborder = MB_YES;
-			flag++;
-			break;
-		case 'C':
-		case 'c':
-			n = sscanf(optarg, "%d/%d", &clip, &clipmode);
-			if (n < 1)
-				clipmode = MBGRID_INTERP_NONE;
-			else if (n == 1 && clip > 0)
-				clipmode = MBGRID_INTERP_GAP;
-			else if (n == 1)
-				clipmode = MBGRID_INTERP_NONE;
-			else if (clip > 0 && clipmode < 0)
-				clipmode = MBGRID_INTERP_GAP;
-			else if (clipmode >= 3)
-				clipmode = MBGRID_INTERP_ALL;
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			n = sscanf(optarg, "%d/%d", &xdim, &ydim);
-			if (n == 2)
-				set_dimensions = MB_YES;
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			if (optarg[strlen(optarg) - 1] == '!') {
-				spacing_priority = MB_YES;
-				optarg[strlen(optarg) - 1] = '\0';
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) !=
+		       -1)
+		{
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &datatype);
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%lf", &border);
+				setborder = MB_YES;
+				break;
+			case 'C':
+			case 'c':
+			{
+				const int n = sscanf(optarg, "%d/%d", &clip, &clipmode);
+				if (n < 1)
+					clipmode = MBGRID_INTERP_NONE;
+				else if (n == 1 && clip > 0)
+					clipmode = MBGRID_INTERP_GAP;
+				else if (n == 1)
+					clipmode = MBGRID_INTERP_NONE;
+				else if (clip > 0 && clipmode < 0)
+					clipmode = MBGRID_INTERP_GAP;
+				else if (clipmode >= 3)
+					clipmode = MBGRID_INTERP_ALL;
+				break;
 			}
-			n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
-			if (n > 1)
-				set_spacing = MB_YES;
-			if (n < 3)
-				strcpy(units, "meters");
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			n = sscanf(optarg, "%d/%lf", &grid_mode, &dvalue);
-      if (n == 2) {
-        if (grid_mode == MBGRID_MINIMUM_FILTER) {
-          minormax_weighted_mean_threshold = dvalue;
-          grid_mode = MBGRID_MINIMUM_WEIGHTED_MEAN;
-        } else if (grid_mode == MBGRID_MAXIMUM_FILTER) {
-          minormax_weighted_mean_threshold = dvalue;
-          grid_mode = MBGRID_MAXIMUM_WEIGHTED_MEAN;
-        } else {
-          minormax_weighted_mean_threshold = dvalue;
-        }
-      }
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			if (optarg[0] == '=') {
-				gridkind = MBGRID_GMTGRD;
-				strcpy(gridkindstring, optarg);
+			case 'D':
+			case 'd':
+			{
+				const int n = sscanf(optarg, "%d/%d", &xdim, &ydim);
+				if (n == 2)
+					set_dimensions = MB_YES;
+				break;
 			}
-			else {
-				sscanf(optarg, "%d", &gridkind);
-				if (gridkind == MBGRID_CDFGRD) {
-					gridkind = MBGRID_GMTGRD;
-					gridkindstring[0] = '\0';
+			case 'E':
+			case 'e':
+			{
+				if (optarg[strlen(optarg) - 1] == '!') {
+					spacing_priority = MB_YES;
+					optarg[strlen(optarg) - 1] = '\0';
 				}
-				else if (gridkind > MBGRID_GMTGRD) {
-					sprintf(gridkindstring, "=%d", (gridkind - 100));
-					gridkind = MBGRID_GMTGRD;
+				const int n = sscanf(optarg, "%lf/%lf/%s", &dx_set, &dy_set, units);
+				if (n > 1)
+					set_spacing = MB_YES;
+				if (n < 3)
+					strcpy(units, "meters");
+				break;
+			}
+			case 'F':
+			case 'f':
+			{
+				const int n = sscanf(optarg, "%d/%lf", &grid_mode, &dvalue);
+				if (n == 2) {
+				  if (grid_mode == MBGRID_MINIMUM_FILTER) {
+				    minormax_weighted_mean_threshold = dvalue;
+				    grid_mode = MBGRID_MINIMUM_WEIGHTED_MEAN;
+				  } else if (grid_mode == MBGRID_MAXIMUM_FILTER) {
+				    minormax_weighted_mean_threshold = dvalue;
+				    grid_mode = MBGRID_MAXIMUM_WEIGHTED_MEAN;
+				  } else {
+				    minormax_weighted_mean_threshold = dvalue;
+				  }
 				}
+				break;
 			}
-			flag++;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", filelist);
-			flag++;
-			break;
-		case 'J':
-		case 'j':
-			sscanf(optarg, "%s", projection_pars);
-			projection_pars_f = MB_YES;
-			flag++;
-			break;
-		case 'K':
-		case 'k':
-			sscanf(optarg, "%s", backgroundfile);
-			if ((grdrasterid = atoi(backgroundfile)) <= 0)
-				grdrasterid = -1;
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			more = MB_YES;
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			use_NaN = MB_YES;
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", fileroot);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings);
-			flag++;
-			break;
-		case 'Q':
-		case 'q':
-			bathy_in_feet = MB_YES;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			if (strchr(optarg, '/') == NULL) {
-				sscanf(optarg, "%lf", &boundsfactor);
-				if (boundsfactor <= 1.0)
-					boundsfactor = 0.0;
+			case 'G':
+			case 'g':
+				if (optarg[0] == '=') {
+					gridkind = MBGRID_GMTGRD;
+					strcpy(gridkindstring, optarg);
+				}
+				else {
+					sscanf(optarg, "%d", &gridkind);
+					if (gridkind == MBGRID_CDFGRD) {
+						gridkind = MBGRID_GMTGRD;
+						gridkindstring[0] = '\0';
+					}
+					else if (gridkind > MBGRID_GMTGRD) {
+						sprintf(gridkindstring, "=%d", (gridkind - 100));
+						gridkind = MBGRID_GMTGRD;
+					}
+				}
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", filelist);
+				break;
+			case 'J':
+			case 'j':
+				sscanf(optarg, "%s", projection_pars);
+				projection_pars_f = MB_YES;
+				break;
+			case 'K':
+			case 'k':
+				sscanf(optarg, "%s", backgroundfile);
+				if ((grdrasterid = atoi(backgroundfile)) <= 0)
+					grdrasterid = -1;
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'M':
+			case 'm':
+				more = MB_YES;
+				break;
+			case 'N':
+			case 'n':
+				use_NaN = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", fileroot);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings);
+				break;
+			case 'Q':
+			case 'q':
+				bathy_in_feet = MB_YES;
+				break;
+			case 'R':
+			case 'r':
+				if (strchr(optarg, '/') == NULL) {
+					sscanf(optarg, "%lf", &boundsfactor);
+					if (boundsfactor <= 1.0)
+						boundsfactor = 0.0;
+				}
+				else {
+					mb_get_bounds(optarg, gbnd);
+					gbndset = MB_YES;
+				}
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &tension);
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%lf", &timediff);
+				timediff = 60 * timediff;
+				check_time = MB_YES;
+				if (timediff < 0.0) {
+					timediff = fabs(timediff);
+					first_in_stays = MB_NO;
+				}
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'W':
+			case 'w':
+				sscanf(optarg, "%lf", &scale);
+				break;
+			case 'X':
+			case 'x':
+				sscanf(optarg, "%lf", &extend);
+				break;
+			case '?':
+				errflg = true;
 			}
-			else {
-				mb_get_bounds(optarg, gbnd);
-				gbndset = MB_YES;
-			}
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &speedmin);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &tension);
-			flag++;
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%lf", &timediff);
-			timediff = 60 * timediff;
-			check_time = MB_YES;
-			if (timediff < 0.0) {
-				timediff = fabs(timediff);
-				first_in_stays = MB_NO;
-			}
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			sscanf(optarg, "%lf", &scale);
-			flag++;
-			break;
-		case 'X':
-		case 'x':
-			sscanf(optarg, "%lf", &extend);
-			flag++;
-			break;
-		case '?':
-			errflg++;
 		}
 
-	/* set output stream to stdout or stderr */
-	if (verbose >= 2)
-		outfp = stderr;
-	else
-		outfp = stdout;
+		if (verbose >= 2)
+			outfp = stderr;
+		else
+			outfp = stdout;
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(outfp, "usage: %s\n", usage_message);
-		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(outfp, "usage: %s\n", usage_message);
+			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(outfp, "\nProgram %s\n", program_name);
+			fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(outfp, "dbg2  Control Parameters:\n");
-		fprintf(outfp, "dbg2       verbose:              %d\n", verbose);
-		fprintf(outfp, "dbg2       help:                 %d\n", help);
-		fprintf(outfp, "dbg2       pings:                %d\n", pings);
-		fprintf(outfp, "dbg2       lonflip:              %d\n", lonflip);
-		fprintf(outfp, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
-		fprintf(outfp, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
-		fprintf(outfp, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
-		fprintf(outfp, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
-		fprintf(outfp, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
-		fprintf(outfp, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
-		fprintf(outfp, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
-		fprintf(outfp, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
-		fprintf(outfp, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
-		fprintf(outfp, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
-		fprintf(outfp, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
-		fprintf(outfp, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
-		fprintf(outfp, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
-		fprintf(outfp, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
-		fprintf(outfp, "dbg2       speedmin:             %f\n", speedmin);
-		fprintf(outfp, "dbg2       timegap:              %f\n", timegap);
-		fprintf(outfp, "dbg2       file list:            %s\n", filelist);
-		fprintf(outfp, "dbg2       output file root:     %s\n", fileroot);
-		fprintf(outfp, "dbg2       grid x dimension:     %d\n", xdim);
-		fprintf(outfp, "dbg2       grid y dimension:     %d\n", ydim);
-		fprintf(outfp, "dbg2       grid x spacing:       %f\n", dx);
-		fprintf(outfp, "dbg2       grid y spacing:       %f\n", dy);
-		fprintf(outfp, "dbg2       grid bounds[0]:       %f\n", gbnd[0]);
-		fprintf(outfp, "dbg2       grid bounds[1]:       %f\n", gbnd[1]);
-		fprintf(outfp, "dbg2       grid bounds[2]:       %f\n", gbnd[2]);
-		fprintf(outfp, "dbg2       grid bounds[3]:       %f\n", gbnd[3]);
-		fprintf(outfp, "dbg2       boundsfactor:         %f\n", boundsfactor);
-		fprintf(outfp, "dbg2       clipmode:             %d\n", clipmode);
-		fprintf(outfp, "dbg2       clip:                 %d\n", clip);
-		fprintf(outfp, "dbg2       tension:              %f\n", tension);
-		fprintf(outfp, "dbg2       grdraster background: %d\n", grdrasterid);
-		fprintf(outfp, "dbg2       backgroundfile:       %s\n", backgroundfile);
-		fprintf(outfp, "dbg2       more:                 %d\n", more);
-		fprintf(outfp, "dbg2       use_NaN:              %d\n", use_NaN);
-		fprintf(outfp, "dbg2       grid_mode:            %d\n", grid_mode);
-		fprintf(outfp, "dbg2       data type:            %d\n", datatype);
-		fprintf(outfp, "dbg2       grid format:          %d\n", gridkind);
-		if (gridkind == MBGRID_GMTGRD)
-			fprintf(outfp, "dbg2       gmt grid format id:   %s\n", gridkindstring);
-		fprintf(outfp, "dbg2       scale:                %f\n", scale);
-		fprintf(outfp, "dbg2       timediff:             %f\n", timediff);
-		fprintf(outfp, "dbg2       setborder:            %d\n", setborder);
-		fprintf(outfp, "dbg2       border:               %f\n", border);
-		fprintf(outfp, "dbg2       extend:               %f\n", extend);
-		fprintf(outfp, "dbg2       bathy_in_feet:        %d\n", bathy_in_feet);
-		fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
-		fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
-		fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
-		fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
-		fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
+		if (verbose >= 2) {
+			fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(outfp, "dbg2  Control Parameters:\n");
+			fprintf(outfp, "dbg2       verbose:              %d\n", verbose);
+			fprintf(outfp, "dbg2       help:                 %d\n", help);
+			fprintf(outfp, "dbg2       pings:                %d\n", pings);
+			fprintf(outfp, "dbg2       lonflip:              %d\n", lonflip);
+			fprintf(outfp, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
+			fprintf(outfp, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
+			fprintf(outfp, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
+			fprintf(outfp, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
+			fprintf(outfp, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
+			fprintf(outfp, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
+			fprintf(outfp, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
+			fprintf(outfp, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
+			fprintf(outfp, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
+			fprintf(outfp, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
+			fprintf(outfp, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
+			fprintf(outfp, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
+			fprintf(outfp, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
+			fprintf(outfp, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
+			fprintf(outfp, "dbg2       speedmin:             %f\n", speedmin);
+			fprintf(outfp, "dbg2       timegap:              %f\n", timegap);
+			fprintf(outfp, "dbg2       file list:            %s\n", filelist);
+			fprintf(outfp, "dbg2       output file root:     %s\n", fileroot);
+			fprintf(outfp, "dbg2       grid x dimension:     %d\n", xdim);
+			fprintf(outfp, "dbg2       grid y dimension:     %d\n", ydim);
+			fprintf(outfp, "dbg2       grid x spacing:       %f\n", dx);
+			fprintf(outfp, "dbg2       grid y spacing:       %f\n", dy);
+			fprintf(outfp, "dbg2       grid bounds[0]:       %f\n", gbnd[0]);
+			fprintf(outfp, "dbg2       grid bounds[1]:       %f\n", gbnd[1]);
+			fprintf(outfp, "dbg2       grid bounds[2]:       %f\n", gbnd[2]);
+			fprintf(outfp, "dbg2       grid bounds[3]:       %f\n", gbnd[3]);
+			fprintf(outfp, "dbg2       boundsfactor:         %f\n", boundsfactor);
+			fprintf(outfp, "dbg2       clipmode:             %d\n", clipmode);
+			fprintf(outfp, "dbg2       clip:                 %d\n", clip);
+			fprintf(outfp, "dbg2       tension:              %f\n", tension);
+			fprintf(outfp, "dbg2       grdraster background: %d\n", grdrasterid);
+			fprintf(outfp, "dbg2       backgroundfile:       %s\n", backgroundfile);
+			fprintf(outfp, "dbg2       more:                 %d\n", more);
+			fprintf(outfp, "dbg2       use_NaN:              %d\n", use_NaN);
+			fprintf(outfp, "dbg2       grid_mode:            %d\n", grid_mode);
+			fprintf(outfp, "dbg2       data type:            %d\n", datatype);
+			fprintf(outfp, "dbg2       grid format:          %d\n", gridkind);
+			if (gridkind == MBGRID_GMTGRD)
+				fprintf(outfp, "dbg2       gmt grid format id:   %s\n", gridkindstring);
+			fprintf(outfp, "dbg2       scale:                %f\n", scale);
+			fprintf(outfp, "dbg2       timediff:             %f\n", timediff);
+			fprintf(outfp, "dbg2       setborder:            %d\n", setborder);
+			fprintf(outfp, "dbg2       border:               %f\n", border);
+			fprintf(outfp, "dbg2       extend:               %f\n", extend);
+			fprintf(outfp, "dbg2       bathy_in_feet:        %d\n", bathy_in_feet);
+			fprintf(outfp, "dbg2       projection_pars:      %s\n", projection_pars);
+			fprintf(outfp, "dbg2       proj flag 1:          %d\n", projection_pars_f);
+			fprintf(outfp, "dbg2       projection_id:        %s\n", projection_id);
+			fprintf(outfp, "dbg2       utm_zone:             %d\n", utm_zone);
+			fprintf(outfp, "dbg2       minormax_weighted_mean_threshold: %f\n", minormax_weighted_mean_threshold);
 
-	}
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(outfp, "\n%s\n", help_message);
-		fprintf(outfp, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(outfp, "\n%s\n", help_message);
+			fprintf(outfp, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* if bounds not set get bounds of input data */
@@ -986,8 +957,7 @@ int main(int argc, char **argv) {
 	if (gbnd[0] >= gbnd[1] || gbnd[2] >= gbnd[3]) {
 		fprintf(outfp, "\nGrid bounds not properly specified:\n\t%f %f %f %f\n", gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_PARAMETER;
-		exit(error);
+		exit(MB_ERROR_BAD_PARAMETER);
 	}
 
 	/* footprint option only for bathymetry */
@@ -1039,9 +1009,8 @@ int main(int argc, char **argv) {
 		if (proj_status != MB_SUCCESS) {
 			fprintf(outfp, "\nOutput projection %s not found in database\n", projection_id);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
 		/* tranlate lon lat bounds from UTM if required */
@@ -1269,8 +1238,7 @@ int main(int argc, char **argv) {
 	if (gridkind == MBGRID_ARCASCII && fabs(dx - dy) > MBGRID_TINY) {
 		fprintf(outfp, "\nArc Ascii grid output (-G4) requires square cells, but grid intervals dx:%f dy:%f differ...\n", dx, dy);
 		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_PARAMETER;
-		exit(error);
+		exit(MB_ERROR_BAD_PARAMETER);
 	}
 
 	/* get data input bounds in lon lat */
@@ -1568,7 +1536,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nMBIO Error allocating background data array:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_MEMORY_FAIL);
 		}
 		memset((char *)bxdata, 0, nbackground_alloc * sizeof(float));
 		memset((char *)bydata, 0, nbackground_alloc * sizeof(float));
@@ -1580,7 +1548,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nMBIO Error allocating background interpolation work arrays:\n%s\n", message);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_MEMORY_FAIL);
 		}
 		memset((char *)bdata, 0, 3 * nbackground_alloc * sizeof(float));
 #endif
@@ -1591,13 +1559,12 @@ int main(int argc, char **argv) {
 			sprintf(plot_cmd, "grdraster %d -R%f/%f/%f/%f -G%s", grdrasterid, bounds[0], bounds[1], bounds[2], bounds[3],
 			        backgroundfile);
 			fprintf(stderr, "Executing: %s\n", plot_cmd);
-			fork_status = system(plot_cmd);
+			const int fork_status = system(plot_cmd);
 			if (fork_status != 0) {
 				fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n", plot_cmd,
 				        program_name);
-				error = MB_ERROR_BAD_PARAMETER;
 				mb_memory_clear(verbose, &error);
-				exit(error);
+				exit(MB_ERROR_BAD_PARAMETER);
 			}
 		}
 
@@ -1606,7 +1573,7 @@ int main(int argc, char **argv) {
 		strcpy(backgroundfileuse, backgroundfile);
 		if ((rfp = popen(plot_cmd, "r")) != NULL) {
 			/* parse the grdinfo results */
-			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
+			char *bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
 			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
 			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
 			bufptr = fgets(plot_stdout, MB_COMMENT_MAXLINE, rfp);
@@ -1615,13 +1582,12 @@ int main(int argc, char **argv) {
 				sprintf(backgroundfileuse, "tmpgrdsampleT%d.grd", pid);
 				sprintf(plot_cmd, "grdsample %s -G%s -T", backgroundfile, backgroundfileuse);
 				fprintf(stderr, "Executing: %s\n", plot_cmd);
-				fork_status = system(plot_cmd);
+				const int fork_status = system(plot_cmd);
 				if (fork_status != 0) {
 					fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n",
 					        plot_cmd, program_name);
-					error = MB_ERROR_BAD_PARAMETER;
 					mb_memory_clear(verbose, &error);
-					exit(error);
+					exit(MB_ERROR_BAD_PARAMETER);
 				}
 			}
 		}
@@ -1637,7 +1603,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
 		/* resample extracted grid to have similar resolution as working grid */
@@ -1648,13 +1614,13 @@ int main(int argc, char **argv) {
 			sprintf(plot_cmd, "gmt grdsample %s -Gtmpgrdsample%d.grd -R%.12f/%.12f/%.12f/%.12f -I%.12f/%.12f", backgroundfileuse,
 			        pid, bounds[0], bounds[1], bounds[2], bounds[3], dx, dy);
 		fprintf(stderr, "Executing: %s\n", plot_cmd);
-		fork_status = system(plot_cmd);
+		int fork_status = system(plot_cmd);
 		if (fork_status != 0) {
 			fprintf(outfp, "\nExecution of command:\n\t%s\nby system() call failed....\nProgram <%s> Terminated\n", plot_cmd,
 			        program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
 		/* extract points with preprocessing if that will help */
@@ -1671,7 +1637,7 @@ int main(int argc, char **argv) {
 			/* loop over reading */
 			nbackground = 0;
 			while (fread(&tlon, sizeof(double), 1, rfp) == 1) {
-				freadsize = fread(&tlat, sizeof(double), 1, rfp);
+				size_t freadsize = fread(&tlat, sizeof(double), 1, rfp);
 				freadsize = fread(&tvalue, sizeof(double), 1, rfp);
 				if (lonflip == -1 && tlon > 0.0)
 					tlon -= 360.0;
@@ -1700,7 +1666,7 @@ int main(int argc, char **argv) {
 						fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
 						        __FILE__);
 						mb_memory_clear(verbose, &error);
-						exit(error);
+						exit(MB_ERROR_MEMORY_FAIL);
 					}
 				}
 				bxdata[nbackground] = (float)(tlon - bdata_origin_x);
@@ -1717,7 +1683,7 @@ int main(int argc, char **argv) {
 						fprintf(outfp, "\nProgram <%s> Terminated at line %d in source file %s\n", program_name, __LINE__,
 						        __FILE__);
 						mb_memory_clear(verbose, &error);
-						exit(error);
+						exit(MB_ERROR_MEMORY_FAIL);
 					}
 				}
 				bdata[nbackground * 3] = (float)(tlon - bdata_origin_x);
@@ -1735,7 +1701,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 
 		/* delete any temporary files */
@@ -1747,7 +1713,7 @@ int main(int argc, char **argv) {
 			        program_name);
 			error = MB_ERROR_BAD_PARAMETER;
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_BAD_PARAMETER);
 		}
 	}
 
@@ -1811,7 +1777,7 @@ int main(int argc, char **argv) {
 
 		/* initialize arrays */
 		for (int i = 0; i < sxdim; i++)
-			for (j = 0; j < sydim; j++) {
+			for (int j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 				gridsmall[kgrid] = 0.0;
 				cnt[kgrid] = 0;
@@ -1825,7 +1791,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nUnable to open data list file: %s\n", filelist);
 			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
 			mb_memory_clear(verbose, &error);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((status = mb_datalist_read2(verbose, datalist, &pstatus, path, ppath, dpath, &format, &file_weight, &error)) ==
 		       MB_SUCCESS) {
@@ -1998,7 +1964,7 @@ int main(int argc, char **argv) {
 			fprintf(outfp, "\nMaking low resolution slope grid...\n");
 		ndata = 8;
 		for (int i = 0; i < sxdim; i++)
-			for (j = 0; j < sydim; j++) {
+			for (int j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 				if (cnt[kgrid] > 0) {
 					gridsmall[kgrid] = gridsmall[kgrid] / ((double)cnt[kgrid]);
@@ -2032,7 +1998,7 @@ int main(int argc, char **argv) {
 		/* simultaneously find the depth values nearest to the grid corners and edge midpoints */
 		ndata = 0;
 		for (int i = 0; i < sxdim; i++)
-			for (j = 0; j < sydim; j++) {
+			for (int j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 				if (cnt[kgrid] > 0) {
 					sxdata[ndata] = (float)(wbnd[0] + sdx * i - bdata_origin_x);
@@ -2074,7 +2040,7 @@ int main(int argc, char **argv) {
 		/* simultaneously find the depth values nearest to the grid corners and edge midpoints */
 		ndata = 0;
 		for (int i = 0; i < sxdim; i++)
-			for (j = 0; j < sydim; j++) {
+			for (int j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 				if (cnt[kgrid] > 0) {
 					sdata[ndata++] = (float)(wbnd[0] + sdx * i - bdata_origin_x);
@@ -2101,7 +2067,7 @@ int main(int argc, char **argv) {
 
 		zflag = 5.0e34;
 		for (int i = 0; i < sxdim; i++)
-			for (j = 0; j < sydim; j++) {
+			for (int j = 0; j < sydim; j++) {
 				kgrid = i * sydim + j;
 #ifdef USESURFACE
 				kint = i + (sydim - j - 1) * sxdim;
@@ -2172,7 +2138,7 @@ int main(int argc, char **argv) {
 
 		/* initialize arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
 				norm[kgrid] = 0.0;
@@ -2347,6 +2313,8 @@ int main(int argc, char **argv) {
 										isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy) / sdy;
 										isx = MIN(MAX(isx, 0), sxdim - 1);
 										isy = MIN(MAX(isy, 0), sydim - 1);
+										double dzdx;
+										double dzdy;
 										if (isx == 0) {
 											k1 = isx * sydim + isy;
 											k2 = (isx + 1) * sydim + isy;
@@ -2590,7 +2558,7 @@ int main(int argc, char **argv) {
 		nbinspline = 0;
 		nbinbackground = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (num[kgrid] > 0) {
 					grid[kgrid] = grid[kgrid] / norm[kgrid];
@@ -2620,7 +2588,7 @@ int main(int argc, char **argv) {
 
 		/* initialize arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
 				norm[kgrid] = 0.0;
@@ -3015,7 +2983,7 @@ int main(int argc, char **argv) {
 		nbinspline = 0;
 		nbinbackground = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (num[kgrid] > 0) {
 					grid[kgrid] = grid[kgrid] / norm[kgrid];
@@ -3053,7 +3021,7 @@ int main(int argc, char **argv) {
 
 		/* initialize arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
 				sigma[kgrid] = 0.0;
@@ -3494,7 +3462,7 @@ int main(int argc, char **argv) {
 		nbinspline = 0;
 		nbinbackground = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
 					value = data[kgrid];
@@ -3509,7 +3477,7 @@ int main(int argc, char **argv) {
 						grid[kgrid] = value[cnt[kgrid] - 1];
 					}
 					sigma[kgrid] = 0.0;
-					for (k = 0; k < cnt[kgrid]; k++)
+					for (int k = 0; k < cnt[kgrid]; k++)
 						sigma[kgrid] += (value[k] - grid[kgrid]) * (value[k] - grid[kgrid]);
 					if (cnt[kgrid] > 1)
 						sigma[kgrid] = sqrt(sigma[kgrid] / (cnt[kgrid] - 1));
@@ -3527,7 +3495,7 @@ int main(int argc, char **argv) {
 
 		/* now deallocate space for the data */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0)
 					free(data[kgrid]);
@@ -3557,7 +3525,7 @@ int main(int argc, char **argv) {
 
 		/* initialize arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
 				norm[kgrid] = 0.0;
@@ -4084,7 +4052,7 @@ int main(int argc, char **argv) {
 		nbinspline = 0;
 		nbinbackground = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
 					grid[kgrid] = grid[kgrid] / norm[kgrid];
@@ -4130,7 +4098,7 @@ int main(int argc, char **argv) {
 
 		/* initialize arrays */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				grid[kgrid] = 0.0;
 				norm[kgrid] = 0.0;
@@ -4490,7 +4458,7 @@ int main(int argc, char **argv) {
 
 		/* reinitialize cnt array */
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				cnt[kgrid] = 0;
 			}
@@ -4886,7 +4854,7 @@ int main(int argc, char **argv) {
 		nbinspline = 0;
 		nbinbackground = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (cnt[kgrid] > 0) {
 					grid[kgrid] = grid[kgrid] / norm[kgrid];
@@ -4917,7 +4885,7 @@ int main(int argc, char **argv) {
 		else
 			ndata = 8;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue)
 					ndata++;
@@ -4948,7 +4916,7 @@ int main(int argc, char **argv) {
 		/* simultaneously find the depth values nearest to the grid corners and edge midpoints */
 		ndata = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue) {
 					sxdata[ndata] = (float)(wbnd[0] + dx * i - bdata_origin_x);
@@ -4978,7 +4946,7 @@ int main(int argc, char **argv) {
 					ndata++;
 				}
 			}
-			for (j = 1; j < gydim - 1; j++) {
+			for (int j = 1; j < gydim - 1; j++) {
 				i = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue) {
@@ -5030,7 +4998,7 @@ int main(int argc, char **argv) {
 		/* simultaneously find the depth values nearest to the grid corners and edge midpoints */
 		ndata = 0;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 				if (grid[kgrid] < clipvalue) {
 					sdata[ndata++] = (float)(wbnd[0] + dx * i - bdata_origin_x);
@@ -5042,7 +5010,7 @@ int main(int argc, char **argv) {
 		/* if desired set border */
 		if (setborder == MB_YES) {
 			for (int i = 0; i < gxdim; i++) {
-				j = 0;
+				int j = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue) {
 					sdata[ndata++] = (float)(wbnd[0] + dx * i - bdata_origin_x);
@@ -5057,7 +5025,7 @@ int main(int argc, char **argv) {
 					sdata[ndata++] = (float)border;
 				}
 			}
-			for (j = 1; j < gydim - 1; j++) {
+			for (int j = 1; j < gydim - 1; j++) {
 				int i = 0;
 				kgrid = i * gydim + j;
 				if (grid[kgrid] >= clipvalue) {
@@ -5105,7 +5073,7 @@ int main(int argc, char **argv) {
 		zflag = 5.0e34;
 		if (clipmode == MBGRID_INTERP_GAP) {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -5185,7 +5153,7 @@ int main(int argc, char **argv) {
 					}
 				}
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -5203,7 +5171,7 @@ int main(int argc, char **argv) {
 		    filling by proximity */
 		else if (clipmode == MBGRID_INTERP_NEAR) {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -5252,7 +5220,7 @@ int main(int argc, char **argv) {
 					}
 				}
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -5270,7 +5238,7 @@ int main(int argc, char **argv) {
 		    filling all empty bins */
 		else {
 			for (int i = 0; i < gxdim; i++)
-				for (j = 0; j < gydim; j++) {
+				for (int j = 0; j < gydim; j++) {
 					kgrid = i * gydim + j;
 #ifdef USESURFACE
 					kint = i + (gydim - j - 1) * gxdim;
@@ -5356,7 +5324,7 @@ int main(int argc, char **argv) {
 		    - interpolate only to fill a data gap */
 		zflag = 5.0e34;
 		for (int i = 0; i < gxdim; i++)
-			for (j = 0; j < gydim; j++) {
+			for (int j = 0; j < gydim; j++) {
 				kgrid = i * gydim + j;
 #ifdef USESURFACE
 				kint = i + (gydim - j - 1) * gxdim;
@@ -5387,7 +5355,7 @@ int main(int argc, char **argv) {
 	zmin = zclip;
 	zmax = zclip;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			if (zmin == zclip && grid[kgrid] < zclip)
 				zmin = grid[kgrid];
@@ -5406,7 +5374,7 @@ int main(int argc, char **argv) {
 	/* get min max of data distribution */
 	nmax = 0;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			if (cnt[kgrid] > nmax)
 				nmax = cnt[kgrid];
@@ -5416,7 +5384,7 @@ int main(int argc, char **argv) {
 	smin = 0.0;
 	smax = 0.0;
 	for (int i = 0; i < gxdim; i++)
-		for (j = 0; j < gydim; j++) {
+		for (int j = 0; j < gydim; j++) {
 			kgrid = i * gydim + j;
 			if (smin == 0.0 && cnt[kgrid] > 0)
 				smin = sigma[kgrid];
@@ -5441,7 +5409,7 @@ int main(int argc, char **argv) {
 	if (verbose > 0)
 		fprintf(outfp, "\nOutputting results...\n");
 	for (int i = 0; i < xdim; i++)
-		for (j = 0; j < ydim; j++) {
+		for (int j = 0; j < ydim; j++) {
 			kgrid = (i + offx) * gydim + (j + offy);
 			kout = i * ydim + j;
 			output[kout] = (float)grid[kgrid];
@@ -5489,7 +5457,7 @@ int main(int argc, char **argv) {
 	/* write second output file */
 	if (more == MB_YES) {
 		for (int i = 0; i < xdim; i++)
-			for (j = 0; j < ydim; j++) {
+			for (int j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;
 				output[kout] = (float)cnt[kgrid];
@@ -5535,7 +5503,7 @@ int main(int argc, char **argv) {
 
 		/* write third output file */
 		for (int i = 0; i < xdim; i++)
-			for (j = 0; j < ydim; j++) {
+			for (int j = 0; j < ydim; j++) {
 				kgrid = (i + offx) * gydim + (j + offy);
 				kout = i * ydim + j;
 				output[kout] = (float)sigma[kgrid];
@@ -5588,7 +5556,7 @@ int main(int argc, char **argv) {
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&sigma, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&firsttime, &error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&output, &error);
-  mb_freed(verbose, __FILE__, __LINE__, (void **)&minormax, &error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&minormax, &error);
 
 	/* deallocate projection */
 	if (use_projection == MB_YES)

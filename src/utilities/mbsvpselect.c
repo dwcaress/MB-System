@@ -182,7 +182,9 @@
  *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1478,11 +1480,6 @@ void read_list(char *list, char *list_2) {
 /* ------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	int error = MB_ERROR_NO_ERROR;
 
 	char datalist[BUFSIZ];
@@ -1493,123 +1490,123 @@ int main(int argc, char **argv) {
 
 	my_strcpy(datalist, "datalist.mb-1");
 	my_strcpy(svplist, "svplist.mb-1");
-	while ((c = getopt(argc, argv, "HhI:i:S:s:P:p:VvNn")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", datalist);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			zero_test += 1;
-			break;
-		case 'P':
-		case 'p':
-			n = sscanf(optarg, "%d/%d/%d", &n1, &n2, &n3);
-			n_p2 = n;
-			/* printf("\nthis is n %d \n", n); */
-			if ((n1 != 0) && (n1 != 1) && (n1 != 2) && (n1 != 3)) {
-				puts("Only four options are available: 0 for nearest position, 1 for nearest in time, 2 for both, 3 for nearest "
-				     "in time within range");
-				puts("The default is svp_nearest in position");
-				puts("If option 2 is chosen without specifying time period, 10 hours is the default value");
-				puts("If option 3 is chosen without specifying range, 10000 meters is the default value");
-				puts("If option 3 is chosen two options are available : nearest in time and nearest in month");
-				pause_screen();
-				exit(0);
-			}
-			else {
-				if (n == 0)
-					p_flag = 0;
-				if (n == 1) {
-					p_flag = n1;
-					if (p_flag == 2) {
-						p_3_time = 10;
-						n2 = p_3_time;
-					}
-					if (p_flag == 3) {
-						p_4_range = 10000;
-						n2 = p_4_range;
-					}
-				}
-				if (n == 2) {
-					p_flag = n1;
-					if ((p_flag == 0) || (p_flag == 1))
-						puts("The options -P0 for nearest in position or -P1 for nearest in time do not need further arguments");
 
-					if (p_flag == 2)
-						p_3_time = n2;
-					if (p_flag == 3)
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "HhI:i:S:s:P:p:VvNn")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", datalist);
+				break;
+			case 'N':
+			case 'n':
+				zero_test += 1;
+				break;
+			case 'P':
+			case 'p':
+				n = sscanf(optarg, "%d/%d/%d", &n1, &n2, &n3);
+				n_p2 = n;
+				/* printf("\nthis is n %d \n", n); */
+				if ((n1 != 0) && (n1 != 1) && (n1 != 2) && (n1 != 3)) {
+					puts("Only four options are available: 0 for nearest position, 1 for nearest in time, 2 for both, 3 for nearest "
+					     "in time within range");
+					puts("The default is svp_nearest in position");
+					puts("If option 2 is chosen without specifying time period, 10 hours is the default value");
+					puts("If option 3 is chosen without specifying range, 10000 meters is the default value");
+					puts("If option 3 is chosen two options are available : nearest in time and nearest in month");
+					pause_screen();
+					exit(0);
+				}
+				else {
+					if (n == 0)
+						p_flag = 0;
+					if (n == 1) {
+						p_flag = n1;
+						if (p_flag == 2) {
+							p_3_time = 10;
+							n2 = p_3_time;
+						}
+						if (p_flag == 3) {
+							p_4_range = 10000;
+							n2 = p_4_range;
+						}
+					}
+					if (n == 2) {
+						p_flag = n1;
+						if ((p_flag == 0) || (p_flag == 1))
+							puts("The options -P0 for nearest in position or -P1 for nearest in time do not need further arguments");
+
+						if (p_flag == 2)
+							p_3_time = n2;
+						if (p_flag == 3)
+							p_4_range = n2;
+					}
+					if (n == 3) {
+						p_flag = n1;
 						p_4_range = n2;
-				}
-				if (n == 3) {
-					p_flag = n1;
-					p_4_range = n2;
-					p_4_flage = n3;
-					if ((p_flag == 0) || (p_flag == 1))
-						puts("The options -P0 for nearest in position or -P1 for nearest in time do not need further arguments");
+						p_4_flage = n3;
+						if ((p_flag == 0) || (p_flag == 1))
+							puts("The options -P0 for nearest in position or -P1 for nearest in time do not need further arguments");
 
-					if ((p_4_flage != 0) && (p_4_flage != 1)) {
-						puts("If option 3 is chosen two options are available : nearest in time with -P3/0 and nearest in month "
-						     "with -P3/1");
-						pause_screen();
-						exit(0);
+						if ((p_4_flage != 0) && (p_4_flage != 1)) {
+							puts("If option 3 is chosen two options are available : nearest in time with -P3/0 and nearest in month "
+							     "with -P3/1");
+							pause_screen();
+							exit(0);
+						}
 					}
 				}
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%s", svplist);
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			default:
+				break;
 			}
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%s", svplist);
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		default:
-			break;
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
+			fprintf(stderr, "dbg2       help:       %d\n", help);
+			fprintf(stderr, "dbg2       datalist:   %s\n", datalist);
+			fprintf(stderr, "dbg2       svplist:    %s\n", svplist);
+			fprintf(stderr, "dbg2       p_flag:     %d\n", p_flag);
+			fprintf(stderr, "dbg2       p_3_time:   %d\n", p_3_time);
+			fprintf(stderr, "dbg2       p_4_range:  %d\n", p_4_range);
+			fprintf(stderr, "dbg2       p_4_flage:  %d\n", p_4_flage);
+			fprintf(stderr, "dbg2       zero_test:  %d\n", zero_test);
+		}
 
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:    %d\n", verbose);
-		fprintf(stderr, "dbg2       help:       %d\n", help);
-		fprintf(stderr, "dbg2       datalist:   %s\n", datalist);
-		fprintf(stderr, "dbg2       svplist:    %s\n", svplist);
-		fprintf(stderr, "dbg2       p_flag:     %d\n", p_flag);
-		fprintf(stderr, "dbg2       p_3_time:   %d\n", p_3_time);
-		fprintf(stderr, "dbg2       p_4_range:  %d\n", p_4_range);
-		fprintf(stderr, "dbg2       p_4_flage:  %d\n", p_4_flage);
-		fprintf(stderr, "dbg2       zero_test:  %d\n", zero_test);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* do the work */

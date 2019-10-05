@@ -1,7 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvnavusbl.c	11/21/2004
  *
- *
  *    Copyright (c) 2004-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -24,7 +23,9 @@
  * Date:	November 21, 2004
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,33 +52,132 @@ static const char usage_message[] =
     "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
-	int error = MB_ERROR_NO_ERROR;
-	char *message;
+	int status;
+
+	/* get current default values - only interested in lonflip */
+	int lonflip;
+	{
+		int format;
+		int pings;
+		double bounds[4];
+		int btime_i[7];
+		int etime_i[7];
+		double speedmin;
+		double timegap;
+		status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i,
+                                     etime_i, &speedmin, &timegap);
+	}
 
 	/* Files and formats */
 	char ifile[MB_PATH_MAXLINE];
 	char ofile[MB_PATH_MAXLINE];
 	char ufile[MB_PATH_MAXLINE];
+	/* set default input and output */
+	strcpy(ifile, "stdin");
+	strcpy(ofile, "stdout");
+	strcpy(ufile, "\0");
 	int navformat = 9;
 	int usblformat = 165;
-	FILE *fp;
 
-	/* MBIO default parameters - only use lonflip */
-	int format;
-	int pings;
-	int lonflip;
-	double bounds[4];
-	int btime_i[7];
-	int etime_i[7];
-	double speedmin;
-	double timegap;
+	int useaverage = MB_NO;
+	int error = MB_ERROR_NO_ERROR;
+
+	/* process argument list */
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				useaverage = MB_YES;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &navformat);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", ifile);
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", ofile);
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d", &usblformat);
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%s", ufile);
+				break;
+			case '?':
+				errflg = true;
+			}
+		}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
+
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+			fprintf(stderr, "dbg2       help:            %d\n", help);
+			fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
+			fprintf(stderr, "dbg2       input file:      %s\n", ifile);
+			fprintf(stderr, "dbg2       output file:     %s\n", ofile);
+			fprintf(stderr, "dbg2       usbl file:       %s\n", ufile);
+			fprintf(stderr, "dbg2       nav format:      %d\n", navformat);
+			fprintf(stderr, "dbg2       usbl format:     %d\n", usblformat);
+			fprintf(stderr, "dbg2       useaverage:      %d\n", useaverage);
+		}
+
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
+	} // end command line arg parsing
+
+	/* count the nav points */
+	int nnav = 0;
+	FILE *fp = fopen(ifile, "r");
+	if (fp == NULL) {
+		fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", ifile);
+		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+		exit(MB_ERROR_OPEN_FAIL);
+	}
+	char *result;
+	char buffer[NCHARMAX];
+	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer)
+		nnav++;
+	fclose(fp);
 
 	/* read and write values */
 	int time_i[7];
@@ -87,9 +187,7 @@ int main(int argc, char **argv) {
 	double sonardepth;
 
 	/* navigation handling variables */
-	int useaverage = MB_NO;
 	double tieinterval = 600.0;
-	int nnav;
 	double *ntime = NULL;
 	double *nlon = NULL;
 	double *nlat = NULL;
@@ -122,8 +220,6 @@ int main(int argc, char **argv) {
 	int nstime_i[7], nftime_i[7];
 	int ustime_i[7], uftime_i[7];
 
-	char buffer[NCHARMAX];
-	char *result;
 	int year;
 	int jday;
 	double timetag;
@@ -131,111 +227,6 @@ int main(int argc, char **argv) {
 	double rov_altitude, rov_roll, rov_pitch;
 	int position_flag, heading_flag, altitude_flag, attitude_flag, pressure_flag;
 	double sec;
-	int j;
-
-	/* get current default values - only interested in lonflip */
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* set default input and output */
-	strcpy(ifile, "stdin");
-	strcpy(ofile, "stdout");
-	strcpy(ufile, "\0");
-
-	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhAaF:f:L:l:I:i:O:o:M:m:U:u:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			useaverage = MB_YES;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &navformat);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", ifile);
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", ofile);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d", &usblformat);
-			flag++;
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%s", ufile);
-			flag++;
-			break;
-		case '?':
-			errflg++;
-		}
-
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       help:            %d\n", help);
-		fprintf(stderr, "dbg2       lonflip:         %d\n", lonflip);
-		fprintf(stderr, "dbg2       input file:      %s\n", ifile);
-		fprintf(stderr, "dbg2       output file:     %s\n", ofile);
-		fprintf(stderr, "dbg2       usbl file:       %s\n", ufile);
-		fprintf(stderr, "dbg2       nav format:      %d\n", navformat);
-		fprintf(stderr, "dbg2       usbl format:     %d\n", usblformat);
-		fprintf(stderr, "dbg2       useaverage:      %d\n", useaverage);
-	}
-
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
-	}
-
-	/* count the nav points */
-	nnav = 0;
-	if ((fp = fopen(ifile, "r")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", ifile);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
-	}
-	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer)
-		nnav++;
-	fclose(fp);
 
 	/* allocate space for the nav points */
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&ntime, &error);
@@ -258,6 +249,7 @@ int main(int argc, char **argv) {
 	status &= mb_mallocd(verbose, __FILE__, __LINE__, nnav * sizeof(double), (void **)&tsonardepth, &error);
 
 	/* if error initializing memory then quit */
+	char *message;
 	if (error != MB_ERROR_NO_ERROR) {
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
@@ -268,11 +260,9 @@ int main(int argc, char **argv) {
 	/* read in nav points */
 	nnav = 0;
 	if ((fp = fopen(ifile, "r")) == NULL) {
-		status = MB_FAILURE;
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open Navigation File <%s> for reading\n", ifile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 	strncpy(buffer, "\0", sizeof(buffer));
 	int nget = 0;
@@ -333,10 +323,9 @@ int main(int argc, char **argv) {
 	/* count the usbl points */
 	nusbl = 0;
 	if ((fp = fopen(ufile, "r")) == NULL) {
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open USBL Navigation File <%s> for reading\n", ufile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer)
 		nusbl++;
@@ -360,11 +349,9 @@ int main(int argc, char **argv) {
 	/* read in usbl points */
 	nusbl = 0;
 	if ((fp = fopen(ufile, "r")) == NULL) {
-		status = MB_FAILURE;
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open USBL Navigation File <%s> for reading\n", ufile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 	strncpy(buffer, "\0", sizeof(buffer));
 	while ((result = fgets(buffer, NCHARMAX, fp)) == buffer) {
@@ -464,6 +451,7 @@ int main(int argc, char **argv) {
 
 			/* interpolate navigation from usbl navigation */
 			/* int intstat; */
+			int j;
 			/* intstat = */ mb_linear_interp(verbose, utime - 1, ulon - 1, nusbl, ttime[ntie], &navlon, &j, &error);
 			/* intstat = */ mb_linear_interp(verbose, utime - 1, ulat - 1, nusbl, ttime[ntie], &navlat, &j, &error);
 			/* intstat = */ mb_linear_interp(verbose, utime - 1, uheading - 1, nusbl, ttime[ntie], &heading, &j, &error);
@@ -500,11 +488,9 @@ int main(int argc, char **argv) {
 
 	/* open output file */
 	if ((fp = fopen(ofile, "w")) == NULL) {
-		status = MB_FAILURE;
-		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr, "\nUnable to Open Output Navigation File <%s> for writing\n", ofile);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		exit(error);
+		exit(MB_ERROR_OPEN_FAIL);
 	}
 
 	/* now loop over nav data applying adjustments */
@@ -512,6 +498,7 @@ int main(int argc, char **argv) {
 		/* interpolate adjustment */
 		if (useaverage == MB_NO) {
 			/* get adjustment by interpolation */
+			int j;
 			/* intstat = */ mb_linear_interp(verbose, ttime - 1, tlon - 1, ntie, ntime[i], &navlon, &j, &error);
 			/* intstat = */ mb_linear_interp(verbose, ttime - 1, tlat - 1, ntie, ntime[i], &navlat, &j, &error);
 

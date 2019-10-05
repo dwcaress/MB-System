@@ -22,7 +22,9 @@
  * Date:	January 1, 2012
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,12 +69,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -285,228 +281,216 @@ int main(int argc, char **argv) {
 	int type;
 	double offset_roll, offset_pitch, offset_heading;
 	double offset_x, offset_y, offset_z, offset_t;
-	// double	lever_x, lever_y, lever_z;
-	int j;
 
-	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
 
 	/* set default input to datalist.mb-1 */
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:G:g:I:i:J:j:K:k:LlM:m:N:n:O:o:T:t:VvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			nscan = sscanf(optarg, "%d/%lf/%lf/%lf/%lf", &type, &offset_x, &offset_y, &offset_z, &offset_t);
-			if (nscan >= 4) {
-				if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR) {
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:G:g:I:i:J:j:K:k:LlM:m:N:n:O:o:T:t:VvHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				nscan = sscanf(optarg, "%d/%lf/%lf/%lf/%lf", &type, &offset_x, &offset_y, &offset_z, &offset_t);
+				if (nscan >= 4) {
+					if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_SONAR) {
+						offset_sonar_mode = MB_YES;
+						offset_sonar_x = offset_x;
+						offset_sonar_y = offset_y;
+						offset_sonar_z = offset_z;
+					}
+					else if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU) {
+						offset_mru_mode = MB_YES;
+						offset_mru_x = offset_x;
+						offset_mru_y = offset_y;
+						offset_mru_z = offset_z;
+					}
+					else if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION) {
+						offset_nav_mode = MB_YES;
+						offset_nav_x = offset_x;
+						offset_nav_y = offset_y;
+						offset_nav_z = offset_z;
+					}
+				}
+				break;
+			case 'B':
+			case 'b':
+				nscan = sscanf(optarg, "%lf/%lf/%lf", &offset_roll, &offset_pitch, &offset_heading);
+				if (nscan == 3) {
 					offset_sonar_mode = MB_YES;
-					offset_sonar_x = offset_x;
-					offset_sonar_y = offset_y;
-					offset_sonar_z = offset_z;
+					offset_sonar_roll = offset_roll;
+					offset_sonar_pitch = offset_pitch;
+					offset_sonar_heading = offset_heading;
 				}
-				else if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_MRU) {
-					offset_mru_mode = MB_YES;
-					offset_mru_x = offset_x;
-					offset_mru_y = offset_y;
-					offset_mru_z = offset_z;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%s", buffer);
+				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					sonardepthdata = MB_YES;
+					strcpy(sonardepthfile, buffer);
 				}
-				else if (type == MBHYSWEEPPREPROCESS_SONAR_OFFSET_NAVIGATION) {
-					offset_nav_mode = MB_YES;
-					offset_nav_x = offset_x;
-					offset_nav_y = offset_y;
-					offset_nav_z = offset_z;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				sscanf(optarg, "%s", platform_file);
+				use_platform_file = MB_YES;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'J':
+			case 'j':
+				sscanf(optarg, "%s", proj4command);
+				projection_set = MB_YES;
+				break;
+			case 'K':
+			case 'k':
+				sscanf(optarg, "%d", &klugemode);
+				if (klugemode == 1)
+					kluge_force_attitude_compensation = MB_YES;
+				else if (klugemode == 2)
+					kluge_flip_attitude_sign = MB_YES;
+				break;
+			case 'L':
+			case 'l':
+				mode = MBHYSWEEPPREPROCESS_TIMESTAMPLIST;
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d", &navformat);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%s", buffer);
+				if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					navdata = MB_YES;
+					strcpy(navfile, buffer);
 				}
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", ofile);
+				ofile_set = MB_YES;
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%s", timelagfile);
+				if ((fstat = stat(timelagfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
+					timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_MODEL;
+				}
+				else {
+					sscanf(optarg, "%lf", &timelagconstant);
+					timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT;
+				}
+				break;
+			case '?':
+				errflg = true;
 			}
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			nscan = sscanf(optarg, "%lf/%lf/%lf", &offset_roll, &offset_pitch, &offset_heading);
-			if (nscan == 3) {
-				offset_sonar_mode = MB_YES;
-				offset_sonar_roll = offset_roll;
-				offset_sonar_pitch = offset_pitch;
-				offset_sonar_heading = offset_heading;
-			}
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%s", buffer);
-			if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				sonardepthdata = MB_YES;
-				strcpy(sonardepthfile, buffer);
-			}
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			sscanf(optarg, "%s", platform_file);
-			use_platform_file = MB_YES;
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'J':
-		case 'j':
-			sscanf(optarg, "%s", proj4command);
-			projection_set = MB_YES;
-			flag++;
-			break;
-		case 'K':
-		case 'k':
-			sscanf(optarg, "%d", &klugemode);
-			if (klugemode == 1)
-				kluge_force_attitude_compensation = MB_YES;
-			else if (klugemode == 2)
-				kluge_flip_attitude_sign = MB_YES;
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			mode = MBHYSWEEPPREPROCESS_TIMESTAMPLIST;
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d", &navformat);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%s", buffer);
-			if ((fstat = stat(buffer, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				navdata = MB_YES;
-				strcpy(navfile, buffer);
-			}
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", ofile);
-			ofile_set = MB_YES;
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%s", timelagfile);
-			if ((fstat = stat(timelagfile, &file_status)) == 0 && (file_status.st_mode & S_IFMT) != S_IFDIR) {
-				timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_MODEL;
+		}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
+
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                  %d\n", help);
+			fprintf(stderr, "dbg2       format:                %d\n", format);
+			fprintf(stderr, "dbg2       pings:                 %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:               %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:             %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:             %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:             %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:             %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:            %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:            %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:            %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:            %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:            %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:            %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:            %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:            %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:            %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:            %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:            %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:            %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:            %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:            %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:              %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:               %f\n", timegap);
+			fprintf(stderr, "dbg2       read_file:             %s\n", read_file);
+			fprintf(stderr, "dbg2       use_platform_file:     %d\n", use_platform_file);
+			fprintf(stderr, "dbg2       platform_file:         %s\n", platform_file);
+			fprintf(stderr, "dbg2       ofile:                 %s\n", ofile);
+			fprintf(stderr, "dbg2       ofile_set:             %d\n", ofile_set);
+			fprintf(stderr, "dbg2       projection_set:        %d\n", projection_set);
+			fprintf(stderr, "dbg2       proj4command:          %s\n", proj4command);
+			fprintf(stderr, "dbg2       navfile:               %s\n", navfile);
+			fprintf(stderr, "dbg2       navdata:               %d\n", navdata);
+			fprintf(stderr, "dbg2       sonardepthfile:        %s\n", sonardepthfile);
+			fprintf(stderr, "dbg2       sonardepthdata:        %d\n", sonardepthdata);
+			fprintf(stderr, "dbg2       timelagmode:           %d\n", timelagmode);
+			if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL) {
+				fprintf(stderr, "dbg2       timelagfile:           %s\n", timelagfile);
+				fprintf(stderr, "dbg2       ntimelag:              %d\n", ntimelag);
+				for (int i = 0; i < ntimelag; i++)
+					fprintf(stderr, "dbg2       timelag[%d]:           %f   %f\n", i, timelag_time_d[i], timelag_model[i]);
 			}
 			else {
-				sscanf(optarg, "%lf", &timelagconstant);
-				timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT;
+				fprintf(stderr, "dbg2       timelag:               %f\n", timelag);
 			}
-			flag++;
-			break;
-		case '?':
-			errflg++;
+			fprintf(stderr, "dbg2       offset_sonar_mode:     %d\n", offset_sonar_mode);
+			fprintf(stderr, "dbg2       offset_sonar_roll:     %f\n", offset_sonar_roll);
+			fprintf(stderr, "dbg2       offset_sonar_pitch:    %f\n", offset_sonar_pitch);
+			fprintf(stderr, "dbg2       offset_sonar_heading:  %f\n", offset_sonar_heading);
+			fprintf(stderr, "dbg2       offset_sonar_x:        %f\n", offset_sonar_x);
+			fprintf(stderr, "dbg2       offset_sonar_y:        %f\n", offset_sonar_y);
+			fprintf(stderr, "dbg2       offset_sonar_z:        %f\n", offset_sonar_z);
+			fprintf(stderr, "dbg2       offset_mru_mode:       %d\n", offset_sonar_mode);
+			fprintf(stderr, "dbg2       offset_mru_x:          %f\n", offset_mru_x);
+			fprintf(stderr, "dbg2       offset_mru_y:          %f\n", offset_mru_y);
+			fprintf(stderr, "dbg2       offset_mru_z:          %f\n", offset_mru_z);
+			fprintf(stderr, "dbg2       offset_nav_mode:       %d\n", offset_sonar_mode);
+			fprintf(stderr, "dbg2       offset_nav_x:          %f\n", offset_nav_x);
+			fprintf(stderr, "dbg2       offset_nav_y:          %f\n", offset_nav_y);
+			fprintf(stderr, "dbg2       offset_nav_z:          %f\n", offset_nav_z);
 		}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:               %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                  %d\n", help);
-		fprintf(stderr, "dbg2       format:                %d\n", format);
-		fprintf(stderr, "dbg2       pings:                 %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:               %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:             %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:             %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:             %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:             %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:            %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:            %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:            %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:            %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:            %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:            %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:            %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:            %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:            %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:            %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:            %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:            %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:            %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:            %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:              %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:               %f\n", timegap);
-		fprintf(stderr, "dbg2       read_file:             %s\n", read_file);
-		fprintf(stderr, "dbg2       use_platform_file:     %d\n", use_platform_file);
-		fprintf(stderr, "dbg2       platform_file:         %s\n", platform_file);
-		fprintf(stderr, "dbg2       ofile:                 %s\n", ofile);
-		fprintf(stderr, "dbg2       ofile_set:             %d\n", ofile_set);
-		fprintf(stderr, "dbg2       projection_set:        %d\n", projection_set);
-		fprintf(stderr, "dbg2       proj4command:          %s\n", proj4command);
-		fprintf(stderr, "dbg2       navfile:               %s\n", navfile);
-		fprintf(stderr, "dbg2       navdata:               %d\n", navdata);
-		fprintf(stderr, "dbg2       sonardepthfile:        %s\n", sonardepthfile);
-		fprintf(stderr, "dbg2       sonardepthdata:        %d\n", sonardepthdata);
-		fprintf(stderr, "dbg2       timelagmode:           %d\n", timelagmode);
-		if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL) {
-			fprintf(stderr, "dbg2       timelagfile:           %s\n", timelagfile);
-			fprintf(stderr, "dbg2       ntimelag:              %d\n", ntimelag);
-			for (int i = 0; i < ntimelag; i++)
-				fprintf(stderr, "dbg2       timelag[%d]:           %f   %f\n", i, timelag_time_d[i], timelag_model[i]);
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(error);
 		}
-		else {
-			fprintf(stderr, "dbg2       timelag:               %f\n", timelag);
-		}
-		fprintf(stderr, "dbg2       offset_sonar_mode:     %d\n", offset_sonar_mode);
-		fprintf(stderr, "dbg2       offset_sonar_roll:     %f\n", offset_sonar_roll);
-		fprintf(stderr, "dbg2       offset_sonar_pitch:    %f\n", offset_sonar_pitch);
-		fprintf(stderr, "dbg2       offset_sonar_heading:  %f\n", offset_sonar_heading);
-		fprintf(stderr, "dbg2       offset_sonar_x:        %f\n", offset_sonar_x);
-		fprintf(stderr, "dbg2       offset_sonar_y:        %f\n", offset_sonar_y);
-		fprintf(stderr, "dbg2       offset_sonar_z:        %f\n", offset_sonar_z);
-		fprintf(stderr, "dbg2       offset_mru_mode:       %d\n", offset_sonar_mode);
-		fprintf(stderr, "dbg2       offset_mru_x:          %f\n", offset_mru_x);
-		fprintf(stderr, "dbg2       offset_mru_y:          %f\n", offset_mru_y);
-		fprintf(stderr, "dbg2       offset_mru_z:          %f\n", offset_mru_z);
-		fprintf(stderr, "dbg2       offset_nav_mode:       %d\n", offset_sonar_mode);
-		fprintf(stderr, "dbg2       offset_nav_x:          %f\n", offset_nav_x);
-		fprintf(stderr, "dbg2       offset_nav_y:          %f\n", offset_nav_y);
-		fprintf(stderr, "dbg2       offset_nav_z:          %f\n", offset_nav_z);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(error);
 	}
 
 	/* set projection for nav data */
@@ -518,10 +502,9 @@ int main(int argc, char **argv) {
 	if (navdata == MB_YES) {
 		/* count the data points in the nav file */
 		if ((tfp = fopen(navfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open nav data file <%s> for reading\n", navfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* count the data records
@@ -555,10 +538,9 @@ int main(int argc, char **argv) {
 
 		/* if no nav data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from nav file <%s>\n", navfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the nav file */
@@ -607,10 +589,9 @@ int main(int argc, char **argv) {
 	if (sonardepthdata == MB_YES) {
 		/* count the data points in the sonardepth file */
 		if ((tfp = fopen(sonardepthfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open sonardepth data file <%s> for reading\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 
 		/* count the data records then rewind the file to the start of the binary data */
@@ -636,10 +617,9 @@ int main(int argc, char **argv) {
 
 		/* if no sonardepth data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from sonardepth file <%s>\n", sonardepthfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the separate file */
@@ -672,10 +652,9 @@ int main(int argc, char **argv) {
 		/* count the data points in the timelag file */
 		ntimelag = 0;
 		if ((tfp = fopen(timelagfile, "r")) == NULL) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open time lag model File <%s> for reading\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		while ((result = fgets(buffer, MB_PATH_MAXLINE, tfp)) == buffer)
 			if (buffer[0] != '#')
@@ -697,10 +676,9 @@ int main(int argc, char **argv) {
 
 		/* if no time lag data then quit */
 		else {
-			error = MB_ERROR_BAD_DATA;
 			fprintf(stderr, "\nUnable to read data from time lag model file <%s>\n", timelagfile);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_BAD_DATA);
 		}
 
 		/* read the data points in the timelag file */
@@ -719,10 +697,9 @@ int main(int argc, char **argv) {
 	if (use_platform_file == MB_YES) {
 		status = mb_platform_read(verbose, platform_file, (void **)&platform, &error);
 		if (status == MB_FAILURE) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open and parse platform file: %s\n", platform_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
 	else if (offset_sonar_mode == MB_YES || offset_mru_mode == MB_YES || offset_nav_mode == MB_YES) {
@@ -794,10 +771,9 @@ int main(int argc, char **argv) {
 
 		/* deal with error */
 		if (status == MB_FAILURE) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to initialize platform offset structure\n");
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 	}
 
@@ -845,10 +821,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -964,10 +939,9 @@ int main(int argc, char **argv) {
 
 				/* deal with error */
 				if (status == MB_FAILURE) {
-					error = MB_ERROR_OPEN_FAIL;
 					fprintf(stderr, "\nUnable to initialize platform offset structure\n");
 					fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-					exit(error);
+					exit(MB_ERROR_OPEN_FAIL);
 				}
 			}
 
@@ -1244,11 +1218,11 @@ int main(int argc, char **argv) {
 	/* apply time lag to all relevant data
 	    timelag value calculated either from model imported from file (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL)
 	        or by a constant offset (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) */
+	int j = 0;
 	if (timelagmode != MBHYSWEEPPREPROCESS_TIMELAG_OFF) {
 		/* correct time of navigation, heading, attitude, sonardepth, altitude
 		    read from asynchronous records in files */
 		fprintf(stderr, "Applying timelag to %d nav data\n", ndat_nav);
-		j = 0;
 		for (int i = 0; i < ndat_nav; i++) {
 			/* get timelag value */
 			timelag = 0.0;
@@ -1469,10 +1443,9 @@ int main(int argc, char **argv) {
 		/* open file list */
 		if (read_datalist == MB_YES) {
 			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-				error = MB_ERROR_OPEN_FAIL;
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-				exit(error);
+				exit(MB_ERROR_OPEN_FAIL);
 			}
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = MB_YES;

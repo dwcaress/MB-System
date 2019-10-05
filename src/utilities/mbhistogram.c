@@ -20,12 +20,11 @@
  *
  * Author:	D. W. Caress
  * Date:	December 28, 1994
- *
- *
- *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,12 +101,6 @@ double qsnorm(double p) {
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
 	char *message;
@@ -189,7 +182,6 @@ int main(int argc, char **argv) {
 	int nrec, nvalue;
 	int nrectot = 0;
 	int nvaluetot = 0;
-	int j;
 
 	/* get current default values */
 	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -198,163 +190,153 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:GgHhI:i:L:l:M:m:N:n:P:p:R:r:S:s:T:t:Vv")) != -1)
-		switch (c) {
-		case 'A':
-		case 'a':
-			sscanf(optarg, "%d", &mode);
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%lf/%lf", &value_min, &value_max);
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
-			etime_i[6] = 0;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			gaussian = MB_YES;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d", &lonflip);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf(optarg, "%d", &nintervals);
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			sscanf(optarg, "%d", &nbins);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%d", &pings);
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &speedmin);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &timegap);
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case '?':
-			errflg++;
+	{
+		bool errflg = false;
+		bool help = false;
+		int c;
+		while ((c = getopt(argc, argv, "A:a:B:b:D:d:E:e:F:f:GgHhI:i:L:l:M:m:N:n:P:p:R:r:S:s:T:t:Vv")) != -1)
+		{
+			switch (c) {
+			case 'A':
+			case 'a':
+				sscanf(optarg, "%d", &mode);
+				break;
+			case 'B':
+			case 'b':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &btime_i[0], &btime_i[1], &btime_i[2], &btime_i[3], &btime_i[4], &btime_i[5]);
+				btime_i[6] = 0;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%lf/%lf", &value_min, &value_max);
+				break;
+			case 'E':
+			case 'e':
+				sscanf(optarg, "%d/%d/%d/%d/%d/%d", &etime_i[0], &etime_i[1], &etime_i[2], &etime_i[3], &etime_i[4], &etime_i[5]);
+				etime_i[6] = 0;
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				gaussian = MB_YES;
+				break;
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d", &lonflip);
+				break;
+			case 'M':
+			case 'm':
+				sscanf(optarg, "%d", &nintervals);
+				break;
+			case 'N':
+			case 'n':
+				sscanf(optarg, "%d", &nbins);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%d", &pings);
+				break;
+			case 'R':
+			case 'r':
+				mb_get_bounds(optarg, bounds);
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &speedmin);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &timegap);
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case '?':
+				errflg = true;
+			}
 		}
 
-	/* set output stream */
-	if (verbose <= 1)
-		output = stdout;
-	else
-		output = stderr;
+		if (verbose <= 1)
+			output = stdout;
+		else
+			output = stderr;
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(output, "usage: %s\n", usage_message);
-		fprintf(output, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(output, "usage: %s\n", usage_message);
+			fprintf(output, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(output, "\nProgram %s\n", program_name);
-		fprintf(output, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(output, "\nProgram %s\n", program_name);
+			fprintf(output, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	/* get format if required */
-	if (format == 0)
-		mb_get_format(verbose, read_file, NULL, &format, &error);
+		/* get format if required */
+		if (format == 0)
+			mb_get_format(verbose, read_file, NULL, &format, &error);
 
-	/* figure out histogram dimensions */
-	if (nintervals > 0 && nbins <= 0)
-		nbins = 50 * nintervals;
-	if (nbins <= 0)
-		nbins = 16;
+		/* figure out histogram dimensions */
+		if (nintervals > 0 && nbins <= 0)
+			nbins = 50 * nintervals;
+		if (nbins <= 0)
+			nbins = 16;
 
-	if (verbose >= 2) {
-		fprintf(output, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(output, "dbg2  Control Parameters:\n");
-		fprintf(output, "dbg2       verbose:    %d\n", verbose);
-		fprintf(output, "dbg2       help:       %d\n", help);
-		fprintf(output, "dbg2       format:     %d\n", format);
-		fprintf(output, "dbg2       pings:      %d\n", pings);
-		fprintf(output, "dbg2       lonflip:    %d\n", lonflip);
-		fprintf(output, "dbg2       bounds[0]:  %f\n", bounds[0]);
-		fprintf(output, "dbg2       bounds[1]:  %f\n", bounds[1]);
-		fprintf(output, "dbg2       bounds[2]:  %f\n", bounds[2]);
-		fprintf(output, "dbg2       bounds[3]:  %f\n", bounds[3]);
-		fprintf(output, "dbg2       btime_i[0]: %d\n", btime_i[0]);
-		fprintf(output, "dbg2       btime_i[1]: %d\n", btime_i[1]);
-		fprintf(output, "dbg2       btime_i[2]: %d\n", btime_i[2]);
-		fprintf(output, "dbg2       btime_i[3]: %d\n", btime_i[3]);
-		fprintf(output, "dbg2       btime_i[4]: %d\n", btime_i[4]);
-		fprintf(output, "dbg2       btime_i[5]: %d\n", btime_i[5]);
-		fprintf(output, "dbg2       btime_i[6]: %d\n", btime_i[6]);
-		fprintf(output, "dbg2       etime_i[0]: %d\n", etime_i[0]);
-		fprintf(output, "dbg2       etime_i[1]: %d\n", etime_i[1]);
-		fprintf(output, "dbg2       etime_i[2]: %d\n", etime_i[2]);
-		fprintf(output, "dbg2       etime_i[3]: %d\n", etime_i[3]);
-		fprintf(output, "dbg2       etime_i[4]: %d\n", etime_i[4]);
-		fprintf(output, "dbg2       etime_i[5]: %d\n", etime_i[5]);
-		fprintf(output, "dbg2       etime_i[6]: %d\n", etime_i[6]);
-		fprintf(output, "dbg2       speedmin:   %f\n", speedmin);
-		fprintf(output, "dbg2       timegap:    %f\n", timegap);
-		fprintf(output, "dbg2       file:       %s\n", read_file);
-		fprintf(output, "dbg2       mode:       %d\n", mode);
-		fprintf(output, "dbg2       gaussian:   %d\n", gaussian);
-		fprintf(output, "dbg2       nbins:      %d\n", nbins);
-		fprintf(output, "dbg2       nintervals: %d\n", nintervals);
-		fprintf(output, "dbg2       value_min:  %f\n", value_min);
-		fprintf(output, "dbg2       value_max:  %f\n", value_max);
-	}
+		if (verbose >= 2) {
+			fprintf(output, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(output, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(output, "dbg2  Control Parameters:\n");
+			fprintf(output, "dbg2       verbose:    %d\n", verbose);
+			fprintf(output, "dbg2       help:       %d\n", help);
+			fprintf(output, "dbg2       format:     %d\n", format);
+			fprintf(output, "dbg2       pings:      %d\n", pings);
+			fprintf(output, "dbg2       lonflip:    %d\n", lonflip);
+			fprintf(output, "dbg2       bounds[0]:  %f\n", bounds[0]);
+			fprintf(output, "dbg2       bounds[1]:  %f\n", bounds[1]);
+			fprintf(output, "dbg2       bounds[2]:  %f\n", bounds[2]);
+			fprintf(output, "dbg2       bounds[3]:  %f\n", bounds[3]);
+			fprintf(output, "dbg2       btime_i[0]: %d\n", btime_i[0]);
+			fprintf(output, "dbg2       btime_i[1]: %d\n", btime_i[1]);
+			fprintf(output, "dbg2       btime_i[2]: %d\n", btime_i[2]);
+			fprintf(output, "dbg2       btime_i[3]: %d\n", btime_i[3]);
+			fprintf(output, "dbg2       btime_i[4]: %d\n", btime_i[4]);
+			fprintf(output, "dbg2       btime_i[5]: %d\n", btime_i[5]);
+			fprintf(output, "dbg2       btime_i[6]: %d\n", btime_i[6]);
+			fprintf(output, "dbg2       etime_i[0]: %d\n", etime_i[0]);
+			fprintf(output, "dbg2       etime_i[1]: %d\n", etime_i[1]);
+			fprintf(output, "dbg2       etime_i[2]: %d\n", etime_i[2]);
+			fprintf(output, "dbg2       etime_i[3]: %d\n", etime_i[3]);
+			fprintf(output, "dbg2       etime_i[4]: %d\n", etime_i[4]);
+			fprintf(output, "dbg2       etime_i[5]: %d\n", etime_i[5]);
+			fprintf(output, "dbg2       etime_i[6]: %d\n", etime_i[6]);
+			fprintf(output, "dbg2       speedmin:   %f\n", speedmin);
+			fprintf(output, "dbg2       timegap:    %f\n", timegap);
+			fprintf(output, "dbg2       file:       %s\n", read_file);
+			fprintf(output, "dbg2       mode:       %d\n", mode);
+			fprintf(output, "dbg2       gaussian:   %d\n", gaussian);
+			fprintf(output, "dbg2       nbins:      %d\n", nbins);
+			fprintf(output, "dbg2       nintervals: %d\n", nintervals);
+			fprintf(output, "dbg2       value_min:  %f\n", value_min);
+			fprintf(output, "dbg2       value_max:  %f\n", value_max);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(output, "\n%s\n", help_message);
-		fprintf(output, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(output, "\n%s\n", help_message);
+			fprintf(output, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* allocate memory for histogram arrays */
@@ -400,10 +382,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -488,7 +469,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < beams_bath; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							nvalue++;
-							j = (bath[i] - value_bin_min) / dvalue_bin;
+							const int j = (bath[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
 							if (data_first == MB_YES) {
@@ -508,7 +489,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < beams_amp; i++) {
 						if (mb_beam_ok(beamflag[i])) {
 							nvalue++;
-							j = (amp[i] - value_bin_min) / dvalue_bin;
+							const int j = (amp[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
 							if (data_first == MB_YES) {
@@ -528,7 +509,7 @@ int main(int argc, char **argv) {
 					for (int i = 0; i < pixels_ss; i++) {
 						if (ss[i] > MB_SIDESCAN_NULL) {
 							nvalue++;
-							j = (ss[i] - value_bin_min) / dvalue_bin;
+							const int j = (ss[i] - value_bin_min) / dvalue_bin;
 							if (j >= 0 && j < nbins)
 								histogram[j]++;
 							if (data_first == MB_YES) {
@@ -604,7 +585,7 @@ int main(int argc, char **argv) {
 		intervals[0] = MAX(data_min, value_min);
 		intervals[nintervals - 1] = MIN(data_max, value_max);
 		ibin = 0;
-		for (j = 1; j < nintervals - 1; j++) {
+		for (int j = 1; j < nintervals - 1; j++) {
 			target = target_min + j * dinterval;
 			while (histogram[ibin] < target && ibin < nbins - 1)
 				ibin++;
@@ -630,7 +611,7 @@ int main(int argc, char **argv) {
 		intervals[0] = value_bin_min;
 		total = 0.0;
 		ibin = -1;
-		for (j = 1; j < nintervals; j++) {
+		for (int j = 1; j < nintervals; j++) {
 			target = j * dinterval;
 			while (total < target && ibin < nbins - 1) {
 				ibin++;

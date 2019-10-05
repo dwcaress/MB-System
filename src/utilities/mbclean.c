@@ -53,6 +53,8 @@
  * by David Caress.
  */
 
+#include <getopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -110,25 +112,21 @@ struct bad_struct {
 int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
 
 
+static const char program_name[] = "mbclean";
+static const char help_message[] =
+    "Mbclean identifies and flags artifacts in swath sonar bathymetry data.\n"
+    "Several algorithms are available for identifying artifacts;\n"
+    "multiple algorithms can be applied in a single pass.\n";
+static const char usage_message[] =
+    "mbclean [-Amax -Blow/high -Cslope/unit -Dmin/max\n"
+    "\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min\n"
+    "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate\n"
+    "\t-Sspike_slope/mode/format -Ttolerance -Wwest/east/south/north \n"
+    "\t-Xbeamsleft/beamsright -Ydistanceleft/distanceright[/mode] -Z\n\t-V -H]\n\n";
+
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-  static const char program_name[] = "mbclean";
-  static const char help_message[] =
-            "Mbclean identifies and flags artifacts in swath sonar bathymetry data.\n"
-            "Several algorithms are available for identifying artifacts;\n"
-            "multiple algorithms can be applied in a single pass.\n";
-  static const char usage_message[] = "mbclean [-Amax -Blow/high -Cslope/unit -Dmin/max\n"
-                         "\t-Fformat -Gfraction_low/fraction_high -Iinfile -Krange_min\n"
-                         "\t-Llonflip -Mmode Ntolerance -Ooutfile -Pmin_speed/max_speed -Q -Rmaxheadingrate\n"
-                         "\t-Sspike_slope/mode/format -Ttolerance -Wwest/east/south/north \n"
-                         "\t-Xbeamsleft/beamsright -Ydistanceleft/distanceright[/mode] -Z\n\t-V -H]\n\n";
-  int errflg = 0;
-  int c;
-  int help = 0;
-  int flag = 0;
-
-  /* MBIO status variables */
   int status;
   int verbose = 0;
   int error = MB_ERROR_NO_ERROR;
@@ -327,7 +325,6 @@ int main(int argc, char **argv) {
   int distance_mode;
   int read_data;
   int start, done;
-  int n, p, b;
 
   /* get current default values */
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -358,280 +355,264 @@ int main(int argc, char **argv) {
   strcpy(read_file, "datalist.mb-1");
 
   /* process argument list */
-  while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:K:k:L:l:I:i:M:m:N:n:Q:q:P:p:R:r:S:s:T:t:U:u:W:w:X:x:Y:y:Zz")) !=
-         -1) {
-    switch (c) {
-    case 'H':
-    case 'h':
-      help++;
-      break;
-    case 'V':
-    case 'v':
-      verbose++;
-      break;
-    case 'A':
-    case 'a':
-      sscanf(optarg, "%lf", &deviation_max);
-      check_deviation = MB_YES;
-      flag++;
-      break;
-    case 'B':
-    case 'b':
-      sscanf(optarg, "%lf/%lf", &depth_low, &depth_high);
-      check_range = MB_YES;
-      flag++;
-      break;
-    case 'C':
-    case 'c':
-      slope_form = 0;
-      sscanf(optarg, "%lf/%d", &slopemax, &slope_form);
-      check_slope = MB_YES;
-      if (slope_form == 1)
-        slopemax = tan(slopemax);
-      else if (slope_form == 2)
-        slopemax = tan(DTR * slopemax);
-      flag++;
-      break;
-    case 'D':
-    case 'd':
-      sscanf(optarg, "%lf/%lf", &distancemin, &distancemax);
-      flag++;
-      break;
-    case 'E': // 2010/03/07 DY added the max acrosstrack filter
-    case 'e':
-      sscanf(optarg, "%lf", &max_acrosstrack);
-      zap_long_across = MB_YES;
-      flag++;
-      break;
-    case 'F':
-    case 'f':
-      sscanf(optarg, "%d", &format);
-      flag++;
-      break;
-    case 'G':
-    case 'g':
-      sscanf(optarg, "%lf/%lf", &fraction_low, &fraction_high);
-      check_fraction = MB_YES;
-      flag++;
-      break;
-    case 'K':
-    case 'k':
-      sscanf(optarg, "%lf", &range_min);
-      check_range_min = MB_YES;
-      flag++;
-      break;
-    case 'I':
-    case 'i':
-      sscanf(optarg, "%s", read_file);
-      flag++;
-      break;
-    case 'L':
-    case 'l':
-      sscanf(optarg, "%d", &lonflip);
-      flag++;
-      break;
-    case 'M':
-    case 'm':
-      sscanf(optarg, "%d", &mode);
-      flag++;
-      break;
-    case 'N':
-    case 'n':
-      sscanf(optarg, "%lf", &ping_deviation_tolerance);
-      check_ping_deviation = MB_YES;
-      flag++;
-      break;
-    case 'P':
-    case 'p':
-      sscanf(optarg, "%lf/%lf", &speed_low, &speed_high);
-      check_speed_good = MB_YES;
-      flag++;
-      break;
-    case 'Q':
-    case 'q':
-      zap_rails = MB_YES;
-      backup_dist = 0.0;
-      sscanf(optarg, "%lf", &backup_dist);
-      flag++;
-      break;
-    case 'R':
-    case 'r':
-      zap_max_heading_rate = MB_YES;
-      sscanf(optarg, "%lf", &max_heading_rate);
-      flag++;
-      break;
-    case 'S':
-    case 's':
-      slope_form = 0;
-      sscanf(optarg, "%lf/%d/%d", &spikemax, &spike_mode, &slope_form);
-      check_spike = MB_YES;
-      if (2 == slope_form)
-        spikemax = tan(DTR * spikemax);
-      if (1 == slope_form)
-        spikemax = tan(spikemax);
-      flag++;
-      break;
-    case 'T':
-    case 't':
-      fix_edit_timestamps = MB_YES;
-      sscanf(optarg, "%lf", &tolerance);
-      flag++;
-      break;
-    case 'U':
-    case 'u':
-      sscanf(optarg, "%d", &num_good_min);
-      check_num_good_min = MB_YES;
-      flag++;
-      break;
-    case 'W':
-    case 'w':
-      check_position_bounds = MB_YES;
-      sscanf(optarg, "%lf/%lf/%lf/%lf", &west, &east, &south, &north);
-      flag++;
-      break;
-    case 'X':
-    case 'x':
-      n = sscanf(optarg, "%d/%d", &zap_beams_left, &zap_beams_right);
-      if (n == 1)
-        zap_beams_right = zap_beams_left;
-      zap_beams = MB_YES;
-      flag++;
-      break;
-    case 'Y':
-    case 'y':
-      n = sscanf(optarg, "%lf/%lf/%d", &distance_left, &distance_right, &distance_mode);
-      if (n == 1) {
-        if (distance_left >= 0.0) {
-          flag_distance_left = -distance_left;
-          flag_distance_right = distance_left;
+  {
+    bool errflg = false;
+    int c;
+    bool help = false;
+    while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:K:k:L:l:I:i:M:m:N:n:Q:q:P:p:R:r:S:s:T:t:U:u:W:w:X:x:Y:y:Zz")) !=
+           -1) {
+      switch (c) {
+      case 'H':
+      case 'h':
+        help = true;
+        break;
+      case 'V':
+      case 'v':
+        verbose++;
+        break;
+      case 'A':
+      case 'a':
+        sscanf(optarg, "%lf", &deviation_max);
+        check_deviation = MB_YES;
+        break;
+      case 'B':
+      case 'b':
+        sscanf(optarg, "%lf/%lf", &depth_low, &depth_high);
+        check_range = MB_YES;
+        break;
+      case 'C':
+      case 'c':
+        slope_form = 0;
+        sscanf(optarg, "%lf/%d", &slopemax, &slope_form);
+        check_slope = MB_YES;
+        if (slope_form == 1)
+          slopemax = tan(slopemax);
+        else if (slope_form == 2)
+          slopemax = tan(DTR * slopemax);
+        break;
+      case 'D':
+      case 'd':
+        sscanf(optarg, "%lf/%lf", &distancemin, &distancemax);
+        break;
+      case 'E': // 2010/03/07 DY added the max acrosstrack filter
+      case 'e':
+        sscanf(optarg, "%lf", &max_acrosstrack);
+        zap_long_across = MB_YES;
+        break;
+      case 'F':
+      case 'f':
+        sscanf(optarg, "%d", &format);
+        break;
+      case 'G':
+      case 'g':
+        sscanf(optarg, "%lf/%lf", &fraction_low, &fraction_high);
+        check_fraction = MB_YES;
+        break;
+      case 'K':
+      case 'k':
+        sscanf(optarg, "%lf", &range_min);
+        check_range_min = MB_YES;
+        break;
+      case 'I':
+      case 'i':
+        sscanf(optarg, "%s", read_file);
+        break;
+      case 'L':
+      case 'l':
+        sscanf(optarg, "%d", &lonflip);
+        break;
+      case 'M':
+      case 'm':
+        sscanf(optarg, "%d", &mode);
+        break;
+      case 'N':
+      case 'n':
+        sscanf(optarg, "%lf", &ping_deviation_tolerance);
+        check_ping_deviation = MB_YES;
+        break;
+      case 'P':
+      case 'p':
+        sscanf(optarg, "%lf/%lf", &speed_low, &speed_high);
+        check_speed_good = MB_YES;
+        break;
+      case 'Q':
+      case 'q':
+        zap_rails = MB_YES;
+        backup_dist = 0.0;
+        sscanf(optarg, "%lf", &backup_dist);
+        break;
+      case 'R':
+      case 'r':
+        zap_max_heading_rate = MB_YES;
+        sscanf(optarg, "%lf", &max_heading_rate);
+        break;
+      case 'S':
+      case 's':
+        slope_form = 0;
+        sscanf(optarg, "%lf/%d/%d", &spikemax, &spike_mode, &slope_form);
+        check_spike = MB_YES;
+        if (2 == slope_form)
+          spikemax = tan(DTR * spikemax);
+        if (1 == slope_form)
+          spikemax = tan(spikemax);
+        break;
+      case 'T':
+      case 't':
+        fix_edit_timestamps = MB_YES;
+        sscanf(optarg, "%lf", &tolerance);
+        break;
+      case 'U':
+      case 'u':
+        sscanf(optarg, "%d", &num_good_min);
+        check_num_good_min = MB_YES;
+        break;
+      case 'W':
+      case 'w':
+        check_position_bounds = MB_YES;
+        sscanf(optarg, "%lf/%lf/%lf/%lf", &west, &east, &south, &north);
+        break;
+      case 'X':
+      case 'x':
+      {
+        const int n = sscanf(optarg, "%d/%d", &zap_beams_left, &zap_beams_right);
+        if (n == 1)
+          zap_beams_right = zap_beams_left;
+        zap_beams = MB_YES;
+        break;
+      }
+      case 'Y':
+      case 'y':
+      {
+        const int n = sscanf(optarg, "%lf/%lf/%d", &distance_left, &distance_right, &distance_mode);
+        if (n == 1) {
+          if (distance_left >= 0.0) {
+            flag_distance_left = -distance_left;
+            flag_distance_right = distance_left;
+          }
+          else {
+            flag_distance_left = distance_left;
+            flag_distance_right = -distance_left;
+          }
+          flag_distance = MB_YES;
         }
-        else {
+        else if (n == 2 || (n == 3 && distance_mode != MBCLEAN_DISTANCE_MODE_UNFLAG)) {
           flag_distance_left = distance_left;
-          flag_distance_right = -distance_left;
+          flag_distance_right = distance_right;
+          flag_distance = MB_YES;
         }
-        flag_distance = MB_YES;
+        else if (n == 3) {
+          unflag_distance_left = distance_left;
+          unflag_distance_right = distance_right;
+          unflag_distance = MB_YES;
+        }
+        break;
       }
-      else if (n == 2 || (n == 3 && distance_mode != MBCLEAN_DISTANCE_MODE_UNFLAG)) {
-        flag_distance_left = distance_left;
-        flag_distance_right = distance_right;
-        flag_distance = MB_YES;
+      case 'Z':
+      case 'z':
+        check_zero_position = MB_YES;
+        break;
+      case '?':
+        errflg = true;
       }
-      else if (n == 3) {
-        unflag_distance_left = distance_left;
-        unflag_distance_right = distance_right;
-        unflag_distance = MB_YES;
-      }
-      flag++;
-      break;
-    case 'Z':
-    case 'z':
-      check_zero_position = MB_YES;
-      flag++;
-      break;
-    case '?':
-      errflg++;
     }
-  }
 
-  /* if error flagged then print it and exit */
-  if (errflg) {
-    fprintf(stderr, "usage: %s\n", usage_message);
-    fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-    error = MB_ERROR_BAD_USAGE;
-    exit(error);
-  }
+    if (errflg) {
+      fprintf(stderr, "usage: %s\n", usage_message);
+      fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+      exit(MB_ERROR_BAD_USAGE);
+    }
 
-  /* turn on slope checking if nothing else is to be used */
-  if (check_slope == MB_NO && zap_beams == MB_NO && flag_distance == MB_NO && unflag_distance == MB_NO && zap_rails == MB_NO &&
-      check_spike == MB_NO && check_range == MB_NO && check_fraction == MB_NO && check_speed_good == MB_NO &&
-      check_deviation == MB_NO && check_num_good_min == MB_NO && check_position_bounds == MB_NO &&
-      check_zero_position == MB_NO && fix_edit_timestamps == MB_NO
-        && zap_max_heading_rate == MB_NO)
-    check_slope = MB_YES;
+    /* turn on slope checking if nothing else is to be used */
+    if (check_slope == MB_NO && zap_beams == MB_NO && flag_distance == MB_NO && unflag_distance == MB_NO && zap_rails == MB_NO &&
+        check_spike == MB_NO && check_range == MB_NO && check_fraction == MB_NO && check_speed_good == MB_NO &&
+        check_deviation == MB_NO && check_num_good_min == MB_NO && check_position_bounds == MB_NO &&
+        check_zero_position == MB_NO && fix_edit_timestamps == MB_NO
+          && zap_max_heading_rate == MB_NO)
+      check_slope = MB_YES;
 
-  if (verbose == 1 || help) {
-    fprintf(stderr, "\nProgram %s\n", program_name);
-    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-  }
+    if (verbose == 1 || help) {
+      fprintf(stderr, "\nProgram %s\n", program_name);
+      fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+    }
 
-  if (verbose >= 2) {
-    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-    fprintf(stderr, "dbg2  Control Parameters:\n");
-    fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-    fprintf(stderr, "dbg2       help:                 %d\n", help);
-    fprintf(stderr, "dbg2       pings:                %d\n", pings);
-    fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
-    fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
-    fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
-    fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
-    fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
-    fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
-    fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
-    fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
-    fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
-    fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
-    fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
-    fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
-    fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
-    fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
-    fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
-    fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
-    fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
-    fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
-    fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
-    fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
-    fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
-    fprintf(stderr, "dbg2       data format:          %d\n", format);
-    fprintf(stderr, "dbg2       input file:           %s\n", read_file);
-    fprintf(stderr, "dbg2       mode:                 %d\n", mode);
-    fprintf(stderr, "dbg2       zap_beams:            %d\n", zap_beams);
-    fprintf(stderr, "dbg2       zap_beams_left:       %d\n", zap_beams_left);
-    fprintf(stderr, "dbg2       zap_beams_right:      %d\n", zap_beams_right);
-    fprintf(stderr, "dbg2       flag_distance:        %d\n", flag_distance);
-    fprintf(stderr, "dbg2       flag_distance_left:   %f\n", flag_distance_left);
-    fprintf(stderr, "dbg2       flag_distance_right:  %f\n", flag_distance_right);
-    fprintf(stderr, "dbg2       unflag_distance:      %d\n", unflag_distance);
-    fprintf(stderr, "dbg2       unflag_distance_left: %f\n", unflag_distance_left);
-    fprintf(stderr, "dbg2       unflag_distance_right:%f\n", unflag_distance_right);
-    fprintf(stderr, "dbg2       zap_rails:            %d\n", zap_rails);
-    fprintf(stderr, "dbg2       backup_dist:          %f\n", backup_dist);
-    fprintf(stderr, "dbg2       zap_max_heading_rate: %d\n", zap_max_heading_rate);
-    fprintf(stderr, "dbg2       max_heading_rate:     %f\n", max_heading_rate);
-    fprintf(stderr, "dbg2       check_slope:          %d\n", check_slope);
-    fprintf(stderr, "dbg2       maximum slope:        %f\n", slopemax);
-    fprintf(stderr, "dbg2       check_spike:          %d\n", check_spike);
-    fprintf(stderr, "dbg2       maximum spike:        %f\n", spikemax);
-    fprintf(stderr, "dbg2       spike mode:           %d\n", spike_mode);
-    fprintf(stderr, "dbg2       minimum dist:         %f\n", distancemin);
-    fprintf(stderr, "dbg2       minimum dist:         %f\n", distancemax);
-    fprintf(stderr, "dbg2       check_range:          %d\n", check_range);
-    fprintf(stderr, "dbg2       depth_low:            %f\n", depth_low);
-    fprintf(stderr, "dbg2       depth_high:           %f\n", depth_high);
-    fprintf(stderr, "dbg2       check_fraction:       %d\n", check_fraction);
-    fprintf(stderr, "dbg2       fraction_low:         %f\n", fraction_low);
-    fprintf(stderr, "dbg2       fraction_high:        %f\n", fraction_high);
-    fprintf(stderr, "dbg2       check_deviation:      %d\n", check_deviation);
-    fprintf(stderr, "dbg2       check_num_good_min:   %d\n", check_num_good_min);
-    fprintf(stderr, "dbg2       num_good_min:         %d\n", num_good_min);
-    fprintf(stderr, "dbg2       zap_long_across:      %d\n", zap_long_across);
-    fprintf(stderr, "dbg2       max_acrosstrack:      %f\n", max_acrosstrack);
-    fprintf(stderr, "dbg2       fix_edit_timestamps:  %d\n", fix_edit_timestamps);
-    fprintf(stderr, "dbg2       tolerance:            %f\n", tolerance);
-    fprintf(stderr, "dbg2       check_speed_good:     %d\n", check_speed_good);
-    fprintf(stderr, "dbg2       speed_low:            %f\n", speed_low);
-    fprintf(stderr, "dbg2       speed_high:           %f\n", speed_high);
-    fprintf(stderr, "dbg2       check_position_bounds:%d\n", check_position_bounds);
-    fprintf(stderr, "dbg2       check_zero_position:  %d\n", check_zero_position);
-    fprintf(stderr, "dbg2       check_ping_deviation: %d\n", check_ping_deviation);
-    fprintf(stderr, "dbg2       ping_deviation_tolerance:  %f\n", ping_deviation_tolerance);
-  }
+    if (verbose >= 2) {
+      fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+      fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+      fprintf(stderr, "dbg2  Control Parameters:\n");
+      fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+      fprintf(stderr, "dbg2       help:                 %d\n", help);
+      fprintf(stderr, "dbg2       pings:                %d\n", pings);
+      fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
+      fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
+      fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
+      fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
+      fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
+      fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
+      fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
+      fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
+      fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
+      fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
+      fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
+      fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
+      fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
+      fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
+      fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
+      fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
+      fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
+      fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
+      fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
+      fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
+      fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
+      fprintf(stderr, "dbg2       data format:          %d\n", format);
+      fprintf(stderr, "dbg2       input file:           %s\n", read_file);
+      fprintf(stderr, "dbg2       mode:                 %d\n", mode);
+      fprintf(stderr, "dbg2       zap_beams:            %d\n", zap_beams);
+      fprintf(stderr, "dbg2       zap_beams_left:       %d\n", zap_beams_left);
+      fprintf(stderr, "dbg2       zap_beams_right:      %d\n", zap_beams_right);
+      fprintf(stderr, "dbg2       flag_distance:        %d\n", flag_distance);
+      fprintf(stderr, "dbg2       flag_distance_left:   %f\n", flag_distance_left);
+      fprintf(stderr, "dbg2       flag_distance_right:  %f\n", flag_distance_right);
+      fprintf(stderr, "dbg2       unflag_distance:      %d\n", unflag_distance);
+      fprintf(stderr, "dbg2       unflag_distance_left: %f\n", unflag_distance_left);
+      fprintf(stderr, "dbg2       unflag_distance_right:%f\n", unflag_distance_right);
+      fprintf(stderr, "dbg2       zap_rails:            %d\n", zap_rails);
+      fprintf(stderr, "dbg2       backup_dist:          %f\n", backup_dist);
+      fprintf(stderr, "dbg2       zap_max_heading_rate: %d\n", zap_max_heading_rate);
+      fprintf(stderr, "dbg2       max_heading_rate:     %f\n", max_heading_rate);
+      fprintf(stderr, "dbg2       check_slope:          %d\n", check_slope);
+      fprintf(stderr, "dbg2       maximum slope:        %f\n", slopemax);
+      fprintf(stderr, "dbg2       check_spike:          %d\n", check_spike);
+      fprintf(stderr, "dbg2       maximum spike:        %f\n", spikemax);
+      fprintf(stderr, "dbg2       spike mode:           %d\n", spike_mode);
+      fprintf(stderr, "dbg2       minimum dist:         %f\n", distancemin);
+      fprintf(stderr, "dbg2       minimum dist:         %f\n", distancemax);
+      fprintf(stderr, "dbg2       check_range:          %d\n", check_range);
+      fprintf(stderr, "dbg2       depth_low:            %f\n", depth_low);
+      fprintf(stderr, "dbg2       depth_high:           %f\n", depth_high);
+      fprintf(stderr, "dbg2       check_fraction:       %d\n", check_fraction);
+      fprintf(stderr, "dbg2       fraction_low:         %f\n", fraction_low);
+      fprintf(stderr, "dbg2       fraction_high:        %f\n", fraction_high);
+      fprintf(stderr, "dbg2       check_deviation:      %d\n", check_deviation);
+      fprintf(stderr, "dbg2       check_num_good_min:   %d\n", check_num_good_min);
+      fprintf(stderr, "dbg2       num_good_min:         %d\n", num_good_min);
+      fprintf(stderr, "dbg2       zap_long_across:      %d\n", zap_long_across);
+      fprintf(stderr, "dbg2       max_acrosstrack:      %f\n", max_acrosstrack);
+      fprintf(stderr, "dbg2       fix_edit_timestamps:  %d\n", fix_edit_timestamps);
+      fprintf(stderr, "dbg2       tolerance:            %f\n", tolerance);
+      fprintf(stderr, "dbg2       check_speed_good:     %d\n", check_speed_good);
+      fprintf(stderr, "dbg2       speed_low:            %f\n", speed_low);
+      fprintf(stderr, "dbg2       speed_high:           %f\n", speed_high);
+      fprintf(stderr, "dbg2       check_position_bounds:%d\n", check_position_bounds);
+      fprintf(stderr, "dbg2       check_zero_position:  %d\n", check_zero_position);
+      fprintf(stderr, "dbg2       check_ping_deviation: %d\n", check_ping_deviation);
+      fprintf(stderr, "dbg2       ping_deviation_tolerance:  %f\n", ping_deviation_tolerance);
+    }
 
-  /* if help desired then print it and exit */
-  if (help) {
-    fprintf(stderr, "\n%s\n", help_message);
-    fprintf(stderr, "\nusage: %s\n", usage_message);
-    exit(error);
+    if (help) {
+      fprintf(stderr, "\n%s\n", help_message);
+      fprintf(stderr, "\nusage: %s\n", usage_message);
+      exit(error);
+    }
   }
 
   /* get format if required */
@@ -645,10 +626,9 @@ int main(int argc, char **argv) {
   /* open file list */
   if (read_datalist == MB_YES) {
     if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-      error = MB_ERROR_OPEN_FAIL;
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-      exit(error);
+      exit(MB_ERROR_OPEN_FAIL);
     }
     if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
       read_data = MB_YES;
@@ -1451,8 +1431,8 @@ int main(int argc, char **argv) {
                         }
                         if (verbose >= 1 && slope > slopemax && dd > distancemin * median &&
                             bad[0].flag == MB_YES) {
-                          p = bad[0].ping;
-                          b = bad[0].beam;
+                          const int p = bad[0].ping;
+                          const int b = bad[0].beam;
                           if (verbose >= 2)
                             fprintf(stderr, "\n");
                           fprintf(
@@ -1464,8 +1444,8 @@ int main(int argc, char **argv) {
                         }
                         if (verbose >= 1 && slope > slopemax && dd > distancemin * median &&
                             bad[1].flag == MB_YES) {
-                          p = bad[1].ping;
-                          b = bad[1].beam;
+                          const int p = bad[1].ping;
+                          const int b = bad[1].beam;
                           if (verbose >= 2)
                             fprintf(stderr, "\n");
                           fprintf(

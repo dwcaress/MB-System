@@ -89,11 +89,11 @@
  *              R/V Western Flyer.
  *              Note: as I was writing this code the Flyer was refloated
  *              and successfully backed off the reef.
- *
- *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -111,87 +111,66 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int status;
 	int verbose = 0;
-	int help = 0;
-	int flag = 0;
-	int error = MB_ERROR_NO_ERROR;
-	FILE *outfp;
 
-	/* control parameters */
-	double absorption;  /* absorption (dB/km) */
-	double frequency;   /* frequency (kHz) */
-	double temperature; /* temperature (deg C) */
-	double salinity;    /* salinity (per mil) */
-	double soundspeed;  /* speed of sound (m/sec) */
-	double depth;       /* depth (m) */
-	double pressure;       /* depth (m) */
-	double ph;          /* pH */
-	double density;     /* kg/m3 */
-
-	/* set defaults */
-	frequency = 200.0;
-	temperature = 10.0;
-	salinity = 35.0;
-	soundspeed = 0.0;
-	depth = 0.0;
-	ph = 8.0;
+	double frequency = 200.0;   /* frequency (kHz) */
+	double temperature = 10.0; /* temperature (deg C) */
+	double salinity = 35.0;    /* salinity (per mil) */
+	double soundspeed = 0.0;  /* speed of sound (m/sec) */
+	double depth = 0.0;       /* depth (m) */
+	double ph = 8.0;          /* pH */
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhC:c:D:d:F:f:P:p:S:s:T:t:")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'C':
-		case 'c':
-			sscanf(optarg, "%lf", &soundspeed);
-			flag++;
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%lf", &depth);
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%lf", &frequency);
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf(optarg, "%lf", &ph);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%lf", &salinity);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%lf", &temperature);
-			flag++;
-			break;
-		case '?':
-			errflg++;
-		}
+	bool help = false;
+	{
+		bool errflg = false;
+		int c;
+		while ((c = getopt(argc, argv, "VvHhC:c:D:d:F:f:P:p:S:s:T:t:")) != -1)
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'C':
+			case 'c':
+				sscanf(optarg, "%lf", &soundspeed);
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%lf", &depth);
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%lf", &frequency);
+				break;
+			case 'P':
+			case 'p':
+				sscanf(optarg, "%lf", &ph);
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%lf", &salinity);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%lf", &temperature);
+				break;
+			case '?':
+				errflg = true;
+			}
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 	}
 
 	/* set output stream */
+	FILE *outfp;
 	if (verbose <= 1)
 		outfp = stdout;
 	else
@@ -220,14 +199,17 @@ int main(int argc, char **argv) {
 	if (help) {
 		fprintf(outfp, "\n%s\n", help_message);
 		fprintf(outfp, "\nusage: %s\n", usage_message);
-		exit(error);
+		exit(MB_ERROR_NO_ERROR);
 	}
 
 	/* call function to calculate absorption */
-	status = mb_absorption(verbose, frequency, temperature, salinity, depth, ph, soundspeed, &absorption, &error);
-	pressure = 1.006 * depth;
-	status = mb_seabird_density(verbose, salinity, temperature, pressure, &density, &error);
+	double absorption;  /* absorption (dB/km) */
+	double density;     /* kg/m3 */
 
+	int error = MB_ERROR_NO_ERROR;
+	int status = mb_absorption(verbose, frequency, temperature, salinity, depth, ph, soundspeed, &absorption, &error);
+	const double pressure = 1.006 * depth;  /* depth (m) */
+	status &= mb_seabird_density(verbose, salinity, temperature, pressure, &density, &error);
 
 	if (verbose > 0) {
 		fprintf(outfp, "\nProgram <%s>\n", program_name);

@@ -23,7 +23,9 @@
  *
  */
 
+#include <getopt.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,10 +68,6 @@
 #define MB7K2SS_NUM_ANGLES 171
 #define MB7K2SS_ANGLE_MAX 85.0
 
-int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
-                                 double altitude, double pitch, double *table_angle, double *table_xtrack, double *table_ltrack,
-                                 double *table_altitude, double *table_range, int *error);
-
 static const char program_name[] = "mb7k2ss";
 static const char help_message[] =
     "mb7k2ss extracts sidescan sonar data from Reson 7k format data, \nbins and lays the sidescan onto the "
@@ -79,26 +77,71 @@ static const char usage_message[] =
     "-Ttopogridfile -X -H -V]";
 
 /*--------------------------------------------------------------------*/
+int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
+                                 double altitude, double pitch, double *table_angle, double *table_xtrack, double *table_ltrack,
+                                 double *table_altitude, double *table_range, int *error) {
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> called\n", __func__);
+		fprintf(stderr, "dbg2  Input arguments:\n");
+		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
+		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
+		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
+		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
+		fprintf(stderr, "dbg2       navlon:          %f\n", navlon);
+		fprintf(stderr, "dbg2       navlat:          %f\n", navlat);
+		fprintf(stderr, "dbg2       pitch:           %f\n", pitch);
+	}
+
+	/* loop over all of the angles */
+	const double dangle = (angle_max - angle_min) / (nangle - 1);
+	const double alpha = pitch;
+	const double zz = altitude;
+	for (int i = 0; i < nangle; i++) {
+		/* get angles in takeoff coordinates */
+		table_angle[i] = angle_min + dangle * i;
+		double beta = 90.0 - table_angle[i];
+		double theta;
+		double phi;
+		mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
+
+		/* calculate range required to achieve desired altitude */
+		const double rr = zz / cos(DTR * theta);
+
+		/* get the position */
+		const double xx = rr * sin(DTR * theta);
+		table_xtrack[i] = xx * cos(DTR * phi);
+		table_ltrack[i] = xx * sin(DTR * phi);
+		table_altitude[i] = zz;
+		table_range[i] = rr;
+	}
+
+	if (verbose >= 2) {
+		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
+		fprintf(stderr, "dbg2  Return values:\n");
+		fprintf(stderr, "dbg2       Lookup tables:\n");
+		for (int i = 0; i < nangle; i++)
+			fprintf(stderr, "dbg2         %d %f %f %f %f %f\n", i, table_angle[i], table_xtrack[i], table_ltrack[i],
+			        table_altitude[i], table_range[i]);
+		fprintf(stderr, "dbg2       error:           %d\n", *error);
+		fprintf(stderr, "dbg2  Return status:\n");
+		fprintf(stderr, "dbg2       status:          %d\n", MB_SUCCESS);
+	}
+
+	return (MB_SUCCESS);
+}
+
+/*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
 	/* MBIO status variables */
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
-	char *message;
 
-	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
-	mb_path read_file;
+	int read_datalist = MB_NO;  // TODO(schwehr): Probable bug with this var.
 	mb_path output_file;
 	mb_path current_output_file;
-	int new_output_file = MB_YES;
-	int output_file_set = MB_NO;
-	void *datalist;
+	bool new_output_file = true;
+	bool output_file_set = false;
 	int look_processed = MB_DATALIST_LOOK_YES;
 	double file_weight;
 	int format = 0;
@@ -117,8 +160,234 @@ int main(int argc, char **argv) {
 	int beams_amp;
 	int pixels_ss;
 
-	/* topography parameters */
+	int startline = 1;
+	mb_path lineroot = "sidescan";
+
+	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
+
+	/* set default input to datalist.mb-1 */
+	mb_path read_file = "datalist.mb-1";
+
+	int mode;
+
+	/* extract modes */
+	int extract_type = MB7K2SS_SSLOW;
+	int target_kind = MB_DATA_SIDESCAN2;
+	int print_comments = MB_NO;
+
+	/* bottompick mode */
+	int bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
+	double bottompickthreshold = 0.4;
+
+	/* sidescan interpolation scale */
+	int interpbins = 0;
+
+	/* sidescan gain mode */
+	int gainmode = MB7K2SS_SSGAIN_OFF;
+	double gainfactor = 1.0;
+
+	int checkroutebearing = MB_NO;
+	mb_path timelist_file;
+	int timelist_file_set = MB_NO;
+	mb_path route_file;
+	int route_file_set = MB_NO;
+	int smooth = 0;
 	mb_path topogridfile;
+	int sslayoutmode = MB7K2SS_SS_FLAT_BOTTOM;
+	double rangethreshold = 50.0;
+	int swath_width_set = MB_NO;
+	double swath_width = -1.0;
+	int ssflip = MB_NO;
+
+	/* process argument list */
+	{
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:W:w:XxVvHh")) != -1)
+		{
+			switch (c) {
+			case 'H':
+			case 'h':
+				help = true;
+				break;
+			case 'V':
+			case 'v':
+				verbose++;
+				break;
+			case 'A':
+			case 'a':
+				if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
+					extract_type = MB7K2SS_SSLOW;
+					target_kind = MB_DATA_SIDESCAN2;
+				}
+				else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
+					extract_type = MB7K2SS_SSHIGH;
+					target_kind = MB_DATA_SIDESCAN3;
+				}
+				else {
+					sscanf(optarg, "%d", &mode);
+					if (mode == MB7K2SS_SSLOW) {
+						extract_type = MB7K2SS_SSLOW;
+						target_kind = MB_DATA_SIDESCAN2;
+					}
+					else if (mode == MB7K2SS_SSHIGH) {
+						extract_type = MB7K2SS_SSHIGH;
+						target_kind = MB_DATA_SIDESCAN3;
+					}
+				}
+				break;
+			case 'B':
+			case 'b':
+			{
+				const int n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
+				if (n == 0)
+					bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
+				else if (n == 1 && bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
+					bottompickthreshold = 0.5;
+				break;
+			}
+			case 'C':
+			case 'c':
+				print_comments = MB_YES;
+				break;
+			case 'D':
+			case 'd':
+				sscanf(optarg, "%d", &interpbins);
+				break;
+			case 'F':
+			case 'f':
+				sscanf(optarg, "%d", &format);
+				break;
+			case 'G':
+			case 'g':
+				sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
+				break;
+			case 'I':
+			case 'i':
+				sscanf(optarg, "%s", read_file);
+				break;
+			case 'L':
+			case 'l':
+				sscanf(optarg, "%d/%s", &startline, lineroot);
+				break;
+			case 'M':
+			case 'm':
+				checkroutebearing = MB_YES;
+				break;
+			case 'O':
+			case 'o':
+				sscanf(optarg, "%s", output_file);
+				output_file_set = true;
+				break;
+			case 'Q':
+			case 'q':
+				sscanf(optarg, "%s", timelist_file);
+				timelist_file_set = MB_YES;
+				break;
+			case 'R':
+			case 'r':
+				sscanf(optarg, "%s", route_file);
+				route_file_set = MB_YES;
+				break;
+			case 'S':
+			case 's':
+				sscanf(optarg, "%d", &smooth);
+				break;
+			case 'T':
+			case 't':
+				sscanf(optarg, "%s", topogridfile);
+				sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
+				break;
+			case 'U':
+			case 'u':
+				sscanf(optarg, "%lf", &rangethreshold);
+				break;
+			case 'W':
+			case 'w':
+				sscanf(optarg, "%lf", &swath_width);
+				if (swath_width > 0.0)
+					swath_width_set = MB_YES;
+				break;
+			case 'X':
+			case 'x':
+				ssflip = MB_YES;
+				break;
+			case '?':
+				errflg = true;
+			}
+		}
+
+		if (errflg) {
+			fprintf(stderr, "usage: %s\n", usage_message);
+			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
+
+		if (verbose == 1 || help) {
+			fprintf(stderr, "\nProgram %s\n", program_name);
+			fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
+		}
+
+		if (verbose >= 2) {
+			fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(stderr, "dbg2  Control Parameters:\n");
+			fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
+			fprintf(stderr, "dbg2       help:                %d\n", help);
+			fprintf(stderr, "dbg2       format:              %d\n", format);
+			fprintf(stderr, "dbg2       pings:               %d\n", pings);
+			fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
+			fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
+			fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
+			fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
+			fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
+			fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
+			fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
+			fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
+			fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
+			fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
+			fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
+			fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
+			fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
+			fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
+			fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
+			fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
+			fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
+			fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
+			fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
+			fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
+			fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
+			fprintf(stderr, "dbg2       bottompickmode:      %d\n", bottompickmode);
+			fprintf(stderr, "dbg2       bottompickthreshold: %f\n", bottompickthreshold);
+			fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
+			fprintf(stderr, "dbg2       swath_width_set:     %d\n", swath_width_set);
+			fprintf(stderr, "dbg2       swath_width:         %f\n", swath_width);
+			fprintf(stderr, "dbg2       interpbins:          %d\n", interpbins);
+			fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
+			fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
+			fprintf(stderr, "dbg2       sslayoutmode:        %d\n", sslayoutmode);
+			fprintf(stderr, "dbg2       topogridfile:        %s\n", topogridfile);
+			fprintf(stderr, "dbg2       timelist_file_set:   %d\n", timelist_file_set);
+			fprintf(stderr, "dbg2       timelist_file:       %s\n", timelist_file);
+			fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
+			fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
+			fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
+			fprintf(stderr, "dbg2       output_file:         %s\n", output_file);
+			fprintf(stderr, "dbg2       output_file_set:     %d\n", output_file_set);
+			fprintf(stderr, "dbg2       lineroot:            %s\n", lineroot);
+			fprintf(stderr, "dbg2       extract_type:        %d\n", extract_type);
+			fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
+		}
+
+		if (help) {
+			fprintf(stderr, "\n%s\n", help_message);
+			fprintf(stderr, "\nusage: %s\n", usage_message);
+			exit(status);
+		}
+	}
+
+	/* topography parameters */
 	void *topogrid_ptr = NULL;
 
 	/* MBIO read values */
@@ -193,42 +462,15 @@ int main(int argc, char **argv) {
 	double ossacrosstrack[MB7K2SS_SSDIMENSION];
 	double ossalongtrack[MB7K2SS_SSDIMENSION];
 	int ossbincount[MB7K2SS_SSDIMENSION];
-	int swath_width_set = MB_NO;
-	double swath_width = -1.0;
 	double pixel_width;
 
-	/* extract modes */
-	int extract_type = MB7K2SS_SSLOW;
-	int target_kind = MB_DATA_SIDESCAN2;
-	int print_comments = MB_NO;
-
-	/* bottompick mode */
-	int bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
-	double bottompickthreshold = 0.4;
-
 	/* sidescan layout mode */
-	int sslayoutmode = MB7K2SS_SS_FLAT_BOTTOM;
 	double ss_altitude;
 
-	/* sidescan gain mode */
-	int gainmode = MB7K2SS_SSGAIN_OFF;
-	double gainfactor = 1.0;
-	int ssflip = MB_NO;
-
-	/* sidescan interpolation scale */
-	int interpbins = 0;
-
 	/* route and auto-line data */
-	mb_path timelist_file;
-	int timelist_file_set = MB_NO;
 	int ntimepoint = 0;
-	int ntimepointalloc = 0;
 	double *routetime_d = NULL;
-	mb_path route_file;
-	int route_file_set = MB_NO;
-	int checkroutebearing = MB_NO;
 	int rawroutefile = MB_NO;
-	mb_path lineroot;
 	int nroutepoint = 0;
 	int nroutepointalloc = 0;
 	double lon;
@@ -240,10 +482,8 @@ int main(int argc, char **argv) {
 	double *routeheading = NULL;
 	int *routewaypoint = NULL;
 	double range;
-	double rangethreshold = 50.0;
 	double rangelast;
 	int activewaypoint = 0;
-	int startline = 1;
 	int linenumber;
 
 	/* bottom layout parameters */
@@ -258,12 +498,6 @@ int main(int argc, char **argv) {
 
 	/* counting variables */
 	int nreaddata = 0;
-	int nreadheader = 0;
-	int nreadssv = 0;
-	int nreadnav1 = 0;
-	int nreadsbp = 0;
-	int nreadsslo = 0;
-	int nreadsshi = 0;
 	int nwritesslo = 0;
 	int nwritesshi = 0;
 	int nreaddatatot = 0;
@@ -281,7 +515,6 @@ int main(int argc, char **argv) {
 	char scriptfile[MB_PATH_MAXLINE];
 	char command[MB_PATH_MAXLINE];
 
-	int mode;
 	int format_status, format_guess;
 	int format_output = MBF_MBLDEOIH;
 	unsigned short *datashort;
@@ -292,17 +525,10 @@ int main(int argc, char **argv) {
 	double ttime;
 	double ttime_min;
 	double ttime_min_use;
-	double nadir_depth;
 	int istart;
-	int ttime_min_ok = MB_NO;
-	int beam_min;
-	int smooth = 0;
 	double weight;
 	double factor;
 	double mtodeglon, mtodeglat;
-	double lastlon;
-	double lastlat;
-	double lastheading;
 	double headingdiff;
 	int linechange;
 	int oktowrite;
@@ -315,218 +541,11 @@ int main(int argc, char **argv) {
 	int point_ok;
 	int previous, jj, interpable;
 	double dss, dssl, fraction;
-	int intstat, itime;
-	int jport, jstbd;
+	int itime;
+	int jport;
 
 	int read_data;
 	int found, done;
-	int shellstatus;
-	int j, n;
-
-	startline = 1;
-	strcpy(lineroot, "sidescan");
-
-	int status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
-
-	/* set default input to datalist.mb-1 */
-	strcpy(read_file, "datalist.mb-1");
-
-	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:W:w:XxVvHh")) != -1)
-		switch (c) {
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'A':
-		case 'a':
-			if (strncmp(optarg, "SSLOW", 5) == 0 || strncmp(optarg, "sslow", 5) == 0) {
-				extract_type = MB7K2SS_SSLOW;
-				target_kind = MB_DATA_SIDESCAN2;
-			}
-			else if (strncmp(optarg, "SSHIGH", 6) == 0 || strncmp(optarg, "sshigh", 6) == 0) {
-				extract_type = MB7K2SS_SSHIGH;
-				target_kind = MB_DATA_SIDESCAN3;
-			}
-			else {
-				sscanf(optarg, "%d", &mode);
-				if (mode == MB7K2SS_SSLOW) {
-					extract_type = MB7K2SS_SSLOW;
-					target_kind = MB_DATA_SIDESCAN2;
-				}
-				else if (mode == MB7K2SS_SSHIGH) {
-					extract_type = MB7K2SS_SSHIGH;
-					target_kind = MB_DATA_SIDESCAN3;
-				}
-			}
-			flag++;
-			break;
-		case 'B':
-		case 'b':
-			n = sscanf(optarg, "%d/%lf", &bottompickmode, &bottompickthreshold);
-			if (n == 0)
-				bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
-			else if (n == 1 && bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
-				bottompickthreshold = 0.5;
-			flag++;
-			break;
-		case 'C':
-		case 'c':
-			print_comments = MB_YES;
-			break;
-		case 'D':
-		case 'd':
-			sscanf(optarg, "%d", &interpbins);
-			break;
-		case 'F':
-		case 'f':
-			sscanf(optarg, "%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			sscanf(optarg, "%d/%lf", &gainmode, &gainfactor);
-			flag++;
-			break;
-		case 'I':
-		case 'i':
-			sscanf(optarg, "%s", read_file);
-			flag++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf(optarg, "%d/%s", &startline, lineroot);
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			checkroutebearing = MB_YES;
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			sscanf(optarg, "%s", output_file);
-			output_file_set = MB_YES;
-			flag++;
-			break;
-		case 'Q':
-		case 'q':
-			sscanf(optarg, "%s", timelist_file);
-			timelist_file_set = MB_YES;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			sscanf(optarg, "%s", route_file);
-			route_file_set = MB_YES;
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf(optarg, "%d", &smooth);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf(optarg, "%s", topogridfile);
-			sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
-			flag++;
-			break;
-		case 'U':
-		case 'u':
-			sscanf(optarg, "%lf", &rangethreshold);
-			flag++;
-			break;
-		case 'W':
-		case 'w':
-			sscanf(optarg, "%lf", &swath_width);
-			if (swath_width > 0.0)
-				swath_width_set = MB_YES;
-			flag++;
-			break;
-		case 'X':
-		case 'x':
-			ssflip = MB_YES;
-			flag++;
-			break;
-		case '?':
-			errflg++;
-		}
-
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(stderr, "usage: %s\n", usage_message);
-		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
-
-	if (verbose == 1 || help) {
-		fprintf(stderr, "\nProgram %s\n", program_name);
-		fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-	}
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(stderr, "dbg2  Control Parameters:\n");
-		fprintf(stderr, "dbg2       verbose:             %d\n", verbose);
-		fprintf(stderr, "dbg2       help:                %d\n", help);
-		fprintf(stderr, "dbg2       format:              %d\n", format);
-		fprintf(stderr, "dbg2       pings:               %d\n", pings);
-		fprintf(stderr, "dbg2       lonflip:             %d\n", lonflip);
-		fprintf(stderr, "dbg2       bounds[0]:           %f\n", bounds[0]);
-		fprintf(stderr, "dbg2       bounds[1]:           %f\n", bounds[1]);
-		fprintf(stderr, "dbg2       bounds[2]:           %f\n", bounds[2]);
-		fprintf(stderr, "dbg2       bounds[3]:           %f\n", bounds[3]);
-		fprintf(stderr, "dbg2       btime_i[0]:          %d\n", btime_i[0]);
-		fprintf(stderr, "dbg2       btime_i[1]:          %d\n", btime_i[1]);
-		fprintf(stderr, "dbg2       btime_i[2]:          %d\n", btime_i[2]);
-		fprintf(stderr, "dbg2       btime_i[3]:          %d\n", btime_i[3]);
-		fprintf(stderr, "dbg2       btime_i[4]:          %d\n", btime_i[4]);
-		fprintf(stderr, "dbg2       btime_i[5]:          %d\n", btime_i[5]);
-		fprintf(stderr, "dbg2       btime_i[6]:          %d\n", btime_i[6]);
-		fprintf(stderr, "dbg2       etime_i[0]:          %d\n", etime_i[0]);
-		fprintf(stderr, "dbg2       etime_i[1]:          %d\n", etime_i[1]);
-		fprintf(stderr, "dbg2       etime_i[2]:          %d\n", etime_i[2]);
-		fprintf(stderr, "dbg2       etime_i[3]:          %d\n", etime_i[3]);
-		fprintf(stderr, "dbg2       etime_i[4]:          %d\n", etime_i[4]);
-		fprintf(stderr, "dbg2       etime_i[5]:          %d\n", etime_i[5]);
-		fprintf(stderr, "dbg2       etime_i[6]:          %d\n", etime_i[6]);
-		fprintf(stderr, "dbg2       speedmin:            %f\n", speedmin);
-		fprintf(stderr, "dbg2       timegap:             %f\n", timegap);
-		fprintf(stderr, "dbg2       bottompickmode:      %d\n", bottompickmode);
-		fprintf(stderr, "dbg2       bottompickthreshold: %f\n", bottompickthreshold);
-		fprintf(stderr, "dbg2       smooth:              %d\n", smooth);
-		fprintf(stderr, "dbg2       swath_width_set:     %d\n", swath_width_set);
-		fprintf(stderr, "dbg2       swath_width:         %f\n", swath_width);
-		fprintf(stderr, "dbg2       interpbins:          %d\n", interpbins);
-		fprintf(stderr, "dbg2       gainmode:            %d\n", gainmode);
-		fprintf(stderr, "dbg2       gainfactor:          %f\n", gainfactor);
-		fprintf(stderr, "dbg2       sslayoutmode:        %d\n", sslayoutmode);
-		fprintf(stderr, "dbg2       topogridfile:        %s\n", topogridfile);
-		fprintf(stderr, "dbg2       timelist_file_set:   %d\n", timelist_file_set);
-		fprintf(stderr, "dbg2       timelist_file:       %s\n", timelist_file);
-		fprintf(stderr, "dbg2       route_file_set:      %d\n", route_file_set);
-		fprintf(stderr, "dbg2       route_file:          %s\n", route_file);
-		fprintf(stderr, "dbg2       checkroutebearing:   %d\n", checkroutebearing);
-		fprintf(stderr, "dbg2       output_file:         %s\n", output_file);
-		fprintf(stderr, "dbg2       output_file_set:     %d\n", output_file_set);
-		fprintf(stderr, "dbg2       lineroot:            %s\n", lineroot);
-		fprintf(stderr, "dbg2       extract_type:        %d\n", extract_type);
-		fprintf(stderr, "dbg2       print_comments:      %d\n", print_comments);
-	}
-
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(stderr, "\n%s\n", help_message);
-		fprintf(stderr, "\nusage: %s\n", usage_message);
-		exit(status);
-	}
 
 	if (verbose == 1) {
 		fprintf(stderr, "\nProgram <%s>\n", program_name);
@@ -568,7 +587,7 @@ int main(int argc, char **argv) {
 		if (route_file_set == MB_YES)
 			fprintf(stderr, "     route_file:          %s\n", route_file);
 		fprintf(stderr, "     checkroutebearing:   %d\n", checkroutebearing);
-		if (output_file_set == MB_YES)
+		if (output_file_set)
 			fprintf(stderr, "     output_file:         %s\n", output_file);
 		fprintf(stderr, "     lineroot:            %s\n", lineroot);
 		fprintf(stderr, "     extract_type:        %d\n", extract_type);
@@ -594,7 +613,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* new output file obviously needed */
-	new_output_file = MB_YES;
+	new_output_file = true;
 
 	/* if specified read route time list file */
 	if (timelist_file_set == MB_YES) {
@@ -606,6 +625,7 @@ int main(int argc, char **argv) {
 			exit(status);
 		}
 		rawroutefile = MB_NO;
+		int ntimepointalloc = 0;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] != '#') {
 				int i;
@@ -616,15 +636,16 @@ int main(int argc, char **argv) {
 					ntimepointalloc += MB7K2SS_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routelon, &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routelat, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routeheading,
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routeheading,
 					                     &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(int), (void **)&routewaypoint, &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, ntimepointalloc * sizeof(double), (void **)&routetime_d, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -696,13 +717,14 @@ int main(int argc, char **argv) {
 					nroutepointalloc += MB7K2SS_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelat, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading,
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routeheading,
 					                     &error);
-					status =
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(int), (void **)&routewaypoint, &error);
 					if (status != MB_SUCCESS) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -744,6 +766,7 @@ int main(int argc, char **argv) {
 		status = mb_topogrid_init(verbose, topogridfile, &lonflip, &topogrid_ptr, &error);
 	}
 	if (error != MB_ERROR_NO_ERROR) {
+		char *message;
 		mb_error(verbose, error, &message);
 		fprintf(stderr, "\nMBIO Error loading topography grid: %s\n%s\n", topogridfile, message);
 		fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -755,7 +778,7 @@ int main(int argc, char **argv) {
 	if ((route_file_set == MB_YES && nroutepoint > 1) || (timelist_file_set == MB_YES && ntimepoint > 1)) {
 		sprintf(scriptfile, "%s_ssswathplot.cmd", lineroot);
 	}
-	else if (output_file_set == MB_NO || read_datalist == MB_YES) {
+	else if (!output_file_set || read_datalist == MB_YES) {
 		sprintf(scriptfile, "%s_ssswathplot.cmd", read_file);
 	}
 	else {
@@ -776,13 +799,13 @@ int main(int argc, char **argv) {
 	if (format < 0)
 		read_datalist = MB_YES;
 
+	void *datalist;
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -805,6 +828,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -863,6 +887,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -875,7 +900,7 @@ int main(int argc, char **argv) {
 			error = MB_ERROR_NO_ERROR;
 
 			/* read next data record */
-			status = mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
+			status &= mb_get_all(verbose, imbio_ptr, &istore_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 			                    &distance, &altitude, &sonardepth, &beams_bath, &beams_amp, &pixels_ss, beamflag, bath, amp,
 			                    bathacrosstrack, bathalongtrack, ss, ssacrosstrack, ssalongtrack, comment, &error);
 
@@ -894,19 +919,20 @@ int main(int argc, char **argv) {
 				if (ndat + 1 >= ndat_alloc) {
 					ndat_alloc += MB7K2SS_ALLOC_CHUNK;
 					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_time_d, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_lon, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_lat, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_speed, &error);
-					status =
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_lon, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_lat, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_speed, &error);
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_sonardepth, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_heading, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_draft, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_roll, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_pitch, &error);
-					status = mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_heave, &error);
-					status =
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_heading, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_draft, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_roll, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_pitch, &error);
+					status &= mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_heave, &error);
+					status &=
 					    mb_reallocd(verbose, __FILE__, __LINE__, ndat_alloc * sizeof(double), (void **)&dat_altitude, &error);
 					if (error != MB_ERROR_NO_ERROR) {
+						char *message;
 						mb_error(verbose, error, &message);
 						fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 						fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -964,10 +990,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -986,6 +1011,7 @@ int main(int argc, char **argv) {
 		/* initialize reading the swath file */
 		if ((status = mb_read_init(verbose, file, format, pings, lonflip, bounds, btime_i, etime_i, speedmin, timegap, &imbio_ptr,
 		                           &btime_d, &etime_d, &beams_bath, &beams_amp, &pixels_ss, &error)) != MB_SUCCESS) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error returned from function <mb_read_init>:\n%s\n", message);
 			fprintf(stderr, "\nMultibeam File <%s> not initialized for reading\n", file);
@@ -1044,6 +1070,7 @@ int main(int argc, char **argv) {
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR) {
+			char *message;
 			mb_error(verbose, error, &message);
 			fprintf(stderr, "\nMBIO Error allocating data arrays:\n%s\n", message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1052,13 +1079,13 @@ int main(int argc, char **argv) {
 
 		/* set up output file name if needed */
 		if (error == MB_ERROR_NO_ERROR) {
-			if (output_file_set == MB_YES && ombio_ptr == NULL) {
+			if (output_file_set && ombio_ptr == NULL) {
 				/* set flag to open new output file */
-				new_output_file = MB_YES;
+				new_output_file = true;
 			}
 
-			else if (output_file_set == MB_NO && route_file_set == MB_NO && timelist_file_set == MB_NO) {
-				new_output_file = MB_YES;
+			else if (!output_file_set && route_file_set == MB_NO && timelist_file_set == MB_NO) {
+				new_output_file = true;
 				format_status = mb_get_format(verbose, file, output_file, &format_guess, &error);
 				if (format_status != MB_SUCCESS || format_guess != format) {
 					strcpy(output_file, file);
@@ -1079,13 +1106,13 @@ int main(int argc, char **argv) {
 
 		/* read and print data */
 		nreaddata = 0;
-		nreadheader = 0;
-		nreadssv = 0;
-		nreadnav1 = 0;
-		nreadsbp = 0;
-		nreadsslo = 0;
-		nreadsshi = 0;
-		ttime_min_ok = MB_NO;
+		int nreadheader = 0;
+		int nreadssv = 0;
+		int nreadnav1 = 0;
+		int nreadsbp = 0;
+		int nreadsslo = 0;
+		int nreadsshi = 0;
+		int ttime_min_ok = MB_NO;
 
 		while (error <= MB_ERROR_NO_ERROR) {
 			/* reset error */
@@ -1109,28 +1136,29 @@ int main(int argc, char **argv) {
 			/* get nav and attitude */
 			if (status == MB_SUCCESS &&
 			    (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM || kind == MB_DATA_SIDESCAN2 || kind == MB_DATA_SIDESCAN3)) {
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_lon - 1, ndat, time_d, &navlon, &itime, &error);
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_lat - 1, ndat, time_d, &navlat, &itime, &error);
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_speed - 1, ndat, time_d, &speed, &itime, &error);
-				intstat =
-				    mb_linear_interp(verbose, dat_time_d - 1, dat_sonardepth - 1, ndat, time_d, &sonardepth, &itime, &error);
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_heading - 1, ndat, time_d, &heading, &itime, &error);
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_draft - 1, ndat, time_d, &draft, &itime, &error);
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_roll - 1, ndat, time_d, &roll, &itime, &error);
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_pitch - 1, ndat, time_d, &pitch, &itime, &error);
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_heave - 1, ndat, time_d, &heave, &itime, &error);
-				intstat = mb_linear_interp(verbose, dat_time_d - 1, dat_altitude - 1, ndat, time_d, &altitude, &itime, &error);
+				// int intstat;
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_lon - 1, ndat, time_d, &navlon, &itime, &error);
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_lat - 1, ndat, time_d, &navlat, &itime, &error);
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_speed - 1, ndat, time_d, &speed, &itime, &error);
+				// intstat =
+				mb_linear_interp(verbose, dat_time_d - 1, dat_sonardepth - 1, ndat, time_d, &sonardepth, &itime, &error);
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_heading - 1, ndat, time_d, &heading, &itime, &error);
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_draft - 1, ndat, time_d, &draft, &itime, &error);
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_roll - 1, ndat, time_d, &roll, &itime, &error);
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_pitch - 1, ndat, time_d, &pitch, &itime, &error);
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_heave - 1, ndat, time_d, &heave, &itime, &error);
+				/* intstat = */ mb_linear_interp(verbose, dat_time_d - 1, dat_altitude - 1, ndat, time_d, &altitude, &itime, &error);
 			}
 
 			/* save last nav and heading */
-			if (status == MB_SUCCESS && kind == target_kind) {
-				if (navlon != 0.0)
-					lastlon = navlon;
-				if (navlat != 0.0)
-					lastlat = navlat;
-				if (heading != 0.0)
-					lastheading = heading;
-			}
+			/* if (status == MB_SUCCESS && kind == target_kind) { */
+			/* 	if (navlon != 0.0) */
+			/* 		lastlon = navlon; */
+			/* 	if (navlat != 0.0) */
+			/* 		lastlat = navlat; */
+			/* 	if (heading != 0.0) */
+			/* 		lastheading = heading; */
+			/* } */
 
 			/* check survey data position against time list or waypoints */
 			if (status == MB_SUCCESS && kind == target_kind && navlon != 0.0 && navlat != 0.0) {
@@ -1181,7 +1209,7 @@ int main(int argc, char **argv) {
 					format_output = MBF_MBLDEOIH;
 
 					/* set to open new output file */
-					new_output_file = MB_YES;
+					new_output_file = true;
 
 					/* increment active waypoint */
 					activewaypoint++;
@@ -1213,8 +1241,8 @@ int main(int argc, char **argv) {
 					if (mb_beam_ok(beamflag[i])) {
 						if (found == MB_NO || ttimes[i] < ttime_min) {
 							ttime_min = ttimes[i];
-							nadir_depth = bath[i];
-							beam_min = i;
+							/* nadir_depth = bath[i]; */
+							/* beam_min = i; */
 							found = MB_YES;
 						}
 					}
@@ -1232,7 +1260,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* if needed open new output file */
-			if (status == MB_SUCCESS && new_output_file == MB_YES &&
+			if (status == MB_SUCCESS && new_output_file &&
 			    (((extract_type == MB7K2SS_SSLOW && kind == MB_DATA_SIDESCAN2) ||
 			      (extract_type == MB7K2SS_SSHIGH && kind == MB_DATA_SIDESCAN3)))) {
 
@@ -1262,8 +1290,9 @@ int main(int argc, char **argv) {
 				/* open the new file */
 				nwritesslo = 0;
 				nwritesshi = 0;
-				if ((status = mb_write_init(verbose, output_file, MBF_MBLDEOIH, &ombio_ptr, &obeams_bath, &obeams_amp,
+				if ((status &= mb_write_init(verbose, output_file, MBF_MBLDEOIH, &ombio_ptr, &obeams_bath, &obeams_amp,
 				                            &opixels_ss, &error)) != MB_SUCCESS) {
+					char *message;
 					mb_error(verbose, error, &message);
 					fprintf(stderr, "\nMBIO Error returned from function <mb_write_init>:\n%s\n", message);
 					fprintf(stderr, "\nMultibeam File <%s> not initialized for writing\n", output_file);
@@ -1280,7 +1309,7 @@ int main(int argc, char **argv) {
 				ostore = (struct mbsys_ldeoih_struct *)ostore_ptr;
 
 				/* reset new_output_file */
-				new_output_file = MB_NO;
+				new_output_file = false;
 			}
 
 			/* if following a route check that the vehicle has come on line
@@ -1452,7 +1481,7 @@ int main(int argc, char **argv) {
 
 					/* initialize the output sidescan */
 
-					for (j = 0; j < opixels_ss; j++) {
+					for (int j = 0; j < opixels_ss; j++) {
 						oss[j] = 0.0;
 						ossacrosstrack[j] = pixel_width * (double)(j - (opixels_ss / 2));
 						ossalongtrack[j] = 0.0;
@@ -1472,7 +1501,7 @@ int main(int argc, char **argv) {
 
 					/* bin port trace */
 					datashort = (unsigned short *)sschannelport->data;
-					istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
+					// istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 					istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
 					for (int i = istart; i < ssheaderport->samples; i++) {
@@ -1513,7 +1542,7 @@ int main(int argc, char **argv) {
 
 							/* bin the value and position */
 							if (found == MB_YES) {
-								j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+								const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
 								if (j >= 0 && j < opixels_ss) {
 									oss[j] += value / weight;
 									ossbincount[j]++;
@@ -1542,7 +1571,7 @@ int main(int argc, char **argv) {
 
 					/* bin stbd trace */
 					datashort = (unsigned short *)sschannelstbd->data;
-					istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
+					// istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 					istart = rangemin / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderstbd->weightingFactor));
 					for (int i = istart; i < ssheaderstbd->samples; i++) {
@@ -1583,7 +1612,7 @@ int main(int argc, char **argv) {
 
 							/* bin the value and position */
 							if (found == MB_YES) {
-								j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+								const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
 								if (j >= 0 && j < opixels_ss) {
 									oss[j] += value / weight;
 									ossbincount[j]++;
@@ -1597,14 +1626,14 @@ int main(int argc, char **argv) {
 
 					/* calculate the output sidescan */
 					jport = -1;
-					jstbd = -1;
-					for (j = 0; j < opixels_ss; j++) {
+					// int jstbd = -1;
+					for (int j = 0; j < opixels_ss; j++) {
 						if (ossbincount[j] > 0) {
 							oss[j] /= (double)ossbincount[j];
 							ossalongtrack[j] /= (double)ossbincount[j];
 							if (jport < 0)
 								jport = j;
-							jstbd = j;
+							// jstbd = j;
 						}
 						else
 							oss[j] = MB_SIDESCAN_NULL;
@@ -1618,7 +1647,7 @@ int main(int argc, char **argv) {
 
 					/* interpolate gaps in the output sidescan */
 					previous = opixels_ss;
-					for (j = 0; j < opixels_ss; j++) {
+					for (int j = 0; j < opixels_ss; j++) {
 						if (ossbincount[j] > 0) {
 							interpable = j - previous - 1;
 							if (interpable > 0 && interpable <= interpbins) {
@@ -1642,7 +1671,7 @@ int main(int argc, char **argv) {
 					mb_insert_nav(verbose, ombio_ptr, (void *)ostore, time_i, time_d, navlon, navlat, speed, heading, draft, roll,
 					              pitch, heave, &error);
 					status = mb_insert_altitude(verbose, ombio_ptr, (void *)ostore, sonardepth, ss_altitude, &error);
-					status = mb_insert(verbose, ombio_ptr, (void *)ostore, MB_DATA_DATA, time_i, time_d, navlon, navlat, speed,
+					status &= mb_insert(verbose, ombio_ptr, (void *)ostore, MB_DATA_DATA, time_i, time_d, navlon, navlat, speed,
 					                   heading, beams_bath, beams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack,
 					                   bathalongtrack, oss, ossacrosstrack, ossalongtrack, comment, &error);
 
@@ -1762,7 +1791,7 @@ int main(int argc, char **argv) {
 					pixel_width = swath_width / (opixels_ss - 1);
 
 					/* initialize the output sidescan */
-					for (j = 0; j < opixels_ss; j++) {
+					for (int j = 0; j < opixels_ss; j++) {
 						oss[j] = 0.0;
 						ossacrosstrack[j] = pixel_width * (double)(j - (opixels_ss / 2));
 						ossalongtrack[j] = 0.0;
@@ -1781,7 +1810,7 @@ int main(int argc, char **argv) {
 
 					/* bin port trace */
 					datashort = (unsigned short *)sschannelport->data;
-					istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
+					// istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 					istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 					weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
 					for (int i = istart; i < ssheaderport->samples; i++) {
@@ -1822,7 +1851,7 @@ int main(int argc, char **argv) {
 
 							/* bin the value and position */
 							if (found == MB_YES) {
-								j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+								const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
 								if (j >= 0 && j < opixels_ss) {
 									oss[j] += value / weight;
 									ossbincount[j]++;
@@ -1884,7 +1913,7 @@ int main(int argc, char **argv) {
 
 							/* bin the value and position */
 							if (found == MB_YES) {
-								j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+								const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
 								if (j >= 0 && j < opixels_ss) {
 									oss[j] += value / weight;
 									ossbincount[j]++;
@@ -1895,7 +1924,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* calculate the output sidescan */
-					for (j = 0; j < opixels_ss; j++) {
+					for (int j = 0; j < opixels_ss; j++) {
 						if (ossbincount[j] > 0) {
 							oss[j] /= (double)ossbincount[j];
 							ossalongtrack[j] /= (double)ossbincount[j];
@@ -1906,7 +1935,7 @@ int main(int argc, char **argv) {
 
 					/* interpolate gaps in the output sidescan */
 					previous = opixels_ss;
-					for (j = 0; j < opixels_ss; j++) {
+					for (int j = 0; j < opixels_ss; j++) {
 						if (ossbincount[j] > 0) {
 							interpable = j - previous - 1;
 							if (interpable > 0 && interpable <= interpbins) {
@@ -1926,7 +1955,7 @@ int main(int argc, char **argv) {
 					mb_insert_nav(verbose, ombio_ptr, (void *)ostore, time_i, time_d, navlon, navlat, speed, heading, draft, roll,
 					              pitch, heave, &error);
 					status = mb_insert_altitude(verbose, ombio_ptr, (void *)ostore, sonardepth, ss_altitude, &error);
-					status = mb_insert(verbose, ombio_ptr, (void *)ostore, MB_DATA_DATA, time_i, time_d, navlon, navlat, speed,
+					status &= mb_insert(verbose, ombio_ptr, (void *)ostore, MB_DATA_DATA, time_i, time_d, navlon, navlat, speed,
 					                   heading, beams_bath, beams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack,
 					                   bathalongtrack, oss, ossacrosstrack, ossalongtrack, comment, &error);
 
@@ -1963,7 +1992,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* close the swath file */
-		status = mb_close(verbose, &imbio_ptr, &error);
+		status &= mb_close(verbose, &imbio_ptr, &error);
 
 		/* output counts */
 		fprintf(stdout, "\nData records read from: %s\n", file);
@@ -2024,7 +2053,7 @@ int main(int argc, char **argv) {
 	/* close plotting script file */
 	fclose(sfp);
 	sprintf(command, "chmod +x %s", scriptfile);
-	shellstatus = system(command);
+	/* int shellstatus = */ system(command);
 
 	/* output counts */
 	fprintf(stdout, "\nTotal data records read:\n");
@@ -2042,18 +2071,18 @@ int main(int argc, char **argv) {
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES) {
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
+		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
 	}
 
 	/* deallocate topography grid array if necessary */
 	if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
-		status = mb_topogrid_deall(verbose, &topogrid_ptr, &error);
+		status &= mb_topogrid_deall(verbose, &topogrid_ptr, &error);
 
 	/* check memory */
 	if (verbose >= 4)
-		status = mb_memory_list(verbose, &error);
+		status &= mb_memory_list(verbose, &error);
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
@@ -2062,62 +2091,5 @@ int main(int argc, char **argv) {
 	}
 
 	exit(error);
-}
-/*--------------------------------------------------------------------*/
-int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, double navlon, double navlat,
-                                 double altitude, double pitch, double *table_angle, double *table_xtrack, double *table_ltrack,
-                                 double *table_altitude, double *table_range, int *error) {
-	double dangle;
-	double rr, xx, zz;
-	double alpha, beta, theta, phi;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> called\n", __func__);
-		fprintf(stderr, "dbg2  Input arguments:\n");
-		fprintf(stderr, "dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr, "dbg2       nangle:          %d\n", nangle);
-		fprintf(stderr, "dbg2       angle_min:       %f\n", angle_min);
-		fprintf(stderr, "dbg2       angle_max:       %f\n", angle_max);
-		fprintf(stderr, "dbg2       navlon:          %f\n", navlon);
-		fprintf(stderr, "dbg2       navlat:          %f\n", navlat);
-		fprintf(stderr, "dbg2       pitch:           %f\n", pitch);
-	}
-
-	/* loop over all of the angles */
-	dangle = (angle_max - angle_min) / (nangle - 1);
-	alpha = pitch;
-	zz = altitude;
-	for (int i = 0; i < nangle; i++) {
-		/* get angles in takeoff coordinates */
-		table_angle[i] = angle_min + dangle * i;
-		beta = 90.0 - table_angle[i];
-		mb_rollpitch_to_takeoff(verbose, alpha, beta, &theta, &phi, error);
-
-		/* calculate range required to achieve desired altitude */
-		rr = zz / cos(DTR * theta);
-
-		/* get the position */
-		xx = rr * sin(DTR * theta);
-		table_xtrack[i] = xx * cos(DTR * phi);
-		table_ltrack[i] = xx * sin(DTR * phi);
-		table_altitude[i] = zz;
-		table_range[i] = rr;
-	}
-
-	const int status = MB_SUCCESS;
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  MB7K2SS function <%s> completed\n", __func__);
-		fprintf(stderr, "dbg2  Return values:\n");
-		fprintf(stderr, "dbg2       Lookup tables:\n");
-		for (int i = 0; i < nangle; i++)
-			fprintf(stderr, "dbg2         %d %f %f %f %f %f\n", i, table_angle[i], table_xtrack[i], table_ltrack[i],
-			        table_altitude[i], table_range[i]);
-		fprintf(stderr, "dbg2       error:           %d\n", *error);
-		fprintf(stderr, "dbg2  Return status:\n");
-		fprintf(stderr, "dbg2       status:          %d\n", status);
-	}
-
-	return (status);
 }
 /*--------------------------------------------------------------------*/

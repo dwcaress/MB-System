@@ -95,13 +95,6 @@ static const char usage_message[] =
 /*--------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-	int option_index;
-	int errflg = 0;
-	int c;
-	int help = 0;
-	int flag = 0;
-
-	/* MBIO status variables */
 	int status;
 	int verbose = 0;
 	int error = MB_ERROR_NO_ERROR;
@@ -278,7 +271,6 @@ int main(int argc, char **argv) {
     double sensorx, sensory, sensorz;
     int first, done;
     int ix, iy, iz, kk;
-    int j;
 
 	/* get current default values */
 	status = mb_defaults(verbose, &format, &defaultpings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -309,163 +301,130 @@ int main(int argc, char **argv) {
 	strcpy(read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1) {
-		switch (c) {
-		/* long options */
-		case 0:
-			/* verbose */
-			if (strcmp("verbose", options[option_index].name) == 0) {
-				verbose++;
+	{
+		int option_index;
+		bool errflg = false;
+		int c;
+		bool help = false;
+		while ((c = getopt_long(argc, argv, "", options, &option_index)) != -1) {
+			switch (c) {
+			/* long options */
+			case 0:
+				if (strcmp("verbose", options[option_index].name) == 0) {
+					verbose++;
+				}
+				else if (strcmp("help", options[option_index].name) == 0) {
+					help = MB_YES;
+				}
+				else if (strcmp("input", options[option_index].name) == 0) {
+					sscanf(optarg, "%s", read_file);
+				}
+				else if (strcmp("format", options[option_index].name) == 0) {
+					sscanf(optarg, "%d", &format);
+				}
+				else if (strcmp("voxel-size", options[option_index].name) == 0) {
+					nscan = sscanf(optarg, "%lf/%lf", &d1, &d2);
+					if (nscan > 0) {
+						voxel_size_xy = d1;
+						if (nscan > 1) {
+							voxel_size_z = d2;
+						} else {
+							voxel_size_z = d1;
+						}
+					}
+				}
+				else if (strcmp("occupy-threshold", options[option_index].name) == 0) {
+					sscanf(optarg, "%d", &occupy_threshold);
+				}
+				else if (strcmp("count-flagged", options[option_index].name) == 0) {
+					count_flagged = MB_YES;
+				}
+				else if (strcmp("flag-empty", options[option_index].name) == 0) {
+					empty_mode = MBVC_EMPTY_FLAG;
+				}
+				else if (strcmp("ignore-empty", options[option_index].name) == 0) {
+					empty_mode = MBVC_EMPTY_IGNORE;
+				}
+				else if (strcmp("unflag-occupied", options[option_index].name) == 0) {
+					occupied_mode = MBVC_OCCUPIED_UNFLAG;
+				}
+				else if (strcmp("ignore-occupied", options[option_index].name) == 0) {
+					occupied_mode = MBVC_OCCUPIED_IGNORE;
+				}
+				else if (strcmp("range-minimum", options[option_index].name) == 0) {
+					apply_range_minimum = MB_YES;
+					sscanf(optarg, "%lf", &range_minimum);
+				}
+				else if (strcmp("range-maximum", options[option_index].name) == 0) {
+					apply_range_maximum = MB_YES;
+					sscanf(optarg, "%lf", &range_maximum);
+				}
+
+				break;
+
+			case '?':
+				errflg = true;
 			}
-
-			/* help */
-			else if (strcmp("help", options[option_index].name) == 0) {
-				help = MB_YES;
-			}
-
-			/* input */
-			else if (strcmp("input", options[option_index].name) == 0) {
-				sscanf(optarg, "%s", read_file);
-				flag++;
-			}
-
-			/* format */
-			else if (strcmp("format", options[option_index].name) == 0) {
-				sscanf(optarg, "%d", &format);
-				flag++;
-			}
-
-			/* voxel-size */
-			else if (strcmp("voxel-size", options[option_index].name) == 0) {
-				nscan = sscanf(optarg, "%lf/%lf", &d1, &d2);
-                if (nscan > 0) {
-                    voxel_size_xy = d1;
-                    if (nscan > 1) {
-                        voxel_size_z = d2;
-                    } else {
-                        voxel_size_z = d1;
-                    }
-                }
-				flag++;
-			}
-
-			/* occupy-threshold */
-			else if (strcmp("occupy-threshold", options[option_index].name) == 0) {
-				sscanf(optarg, "%d", &occupy_threshold);
-				flag++;
-			}
-
-			/* count-flagged */
-			else if (strcmp("count-flagged", options[option_index].name) == 0) {
-				count_flagged = MB_YES;
-				flag++;
-			}
-
-			/* flag-empty */
-			else if (strcmp("flag-empty", options[option_index].name) == 0) {
-				empty_mode = MBVC_EMPTY_FLAG;
-				flag++;
-			}
-
-			/* ignore-empty */
-			else if (strcmp("ignore-empty", options[option_index].name) == 0) {
-				empty_mode = MBVC_EMPTY_IGNORE;
-				flag++;
-			}
-
-			/* unflag-occupied files */
-			else if (strcmp("unflag-occupied", options[option_index].name) == 0) {
-				occupied_mode = MBVC_OCCUPIED_UNFLAG;
-				flag++;
-			}
-
-			/* ignore-occupied */
-			else if (strcmp("ignore-occupied", options[option_index].name) == 0) {
-				occupied_mode = MBVC_OCCUPIED_IGNORE;
-				flag++;
-			}
-
-			/* range-minimum  */
-			else if (strcmp("range-minimum", options[option_index].name) == 0) {
-				apply_range_minimum = MB_YES;
-				sscanf(optarg, "%lf", &range_minimum);
-				flag++;
-			}
-
-			/* range-maximum */
-			else if (strcmp("range-maximum", options[option_index].name) == 0) {
-				apply_range_maximum = MB_YES;
-				sscanf(optarg, "%lf", &range_maximum);
-			}
-
-            break;
-
-		case '?':
-			errflg++;
 		}
-    }
 
-	/* set outfp stream */
-	if (verbose <= 1)
-		outfp = stdout;
-	else
-		outfp = stderr;
+		if (verbose <= 1)
+			outfp = stdout;
+		else
+			outfp = stderr;
 
-	/* if error flagged then print it and exit */
-	if (errflg) {
-		fprintf(outfp, "usage: %s\n", usage_message);
-		fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
-		error = MB_ERROR_BAD_USAGE;
-		exit(error);
-	}
+		if (errflg) {
+			fprintf(outfp, "usage: %s\n", usage_message);
+			fprintf(outfp, "\nProgram <%s> Terminated\n", program_name);
+			exit(MB_ERROR_BAD_USAGE);
+		}
 
-	if (verbose == 1 || help) {
-		fprintf(outfp, "\nProgram %s\n", program_name);
-		fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
-	}
+		if (verbose == 1 || help) {
+			fprintf(outfp, "\nProgram %s\n", program_name);
+			fprintf(outfp, "MB-system Version %s\n", MB_VERSION);
+		}
 
-	if (verbose >= 2) {
-		fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
-		fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
-		fprintf(outfp, "dbg2  Control Parameters:\n");
-		fprintf(outfp, "dbg2       verbose:               %d\n", verbose);
-		fprintf(outfp, "dbg2       help:                  %d\n", help);
-		fprintf(outfp, "dbg2       defaultpings:          %d\n", defaultpings);
-		fprintf(outfp, "dbg2       lonflip:               %d\n", lonflip);
-		fprintf(outfp, "dbg2       btime_i[0]:            %d\n", btime_i[0]);
-		fprintf(outfp, "dbg2       btime_i[1]:            %d\n", btime_i[1]);
-		fprintf(outfp, "dbg2       btime_i[2]:            %d\n", btime_i[2]);
-		fprintf(outfp, "dbg2       btime_i[3]:            %d\n", btime_i[3]);
-		fprintf(outfp, "dbg2       btime_i[4]:            %d\n", btime_i[4]);
-		fprintf(outfp, "dbg2       btime_i[5]:            %d\n", btime_i[5]);
-		fprintf(outfp, "dbg2       btime_i[6]:            %d\n", btime_i[6]);
-		fprintf(outfp, "dbg2       etime_i[0]:            %d\n", etime_i[0]);
-		fprintf(outfp, "dbg2       etime_i[1]:            %d\n", etime_i[1]);
-		fprintf(outfp, "dbg2       etime_i[2]:            %d\n", etime_i[2]);
-		fprintf(outfp, "dbg2       etime_i[3]:            %d\n", etime_i[3]);
-		fprintf(outfp, "dbg2       etime_i[4]:            %d\n", etime_i[4]);
-		fprintf(outfp, "dbg2       etime_i[5]:            %d\n", etime_i[5]);
-		fprintf(outfp, "dbg2       etime_i[6]:            %d\n", etime_i[6]);
-		fprintf(outfp, "dbg2       speedmin:              %f\n", speedmin);
-		fprintf(outfp, "dbg2       timegap:               %f\n", timegap);
-		fprintf(outfp, "dbg2       file:                  %s\n", read_file);
-		fprintf(outfp, "dbg2       format:                %d\n", format);
-		fprintf(outfp, "dbg2       voxel_size_xy:         %f\n", voxel_size_xy);
-		fprintf(outfp, "dbg2       voxel_size_z:          %f\n", voxel_size_z);
-		fprintf(outfp, "dbg2       occupy_threshold:      %d\n", occupy_threshold);
-		fprintf(outfp, "dbg2       empty_mode:            %d\n", empty_mode);
-		fprintf(outfp, "dbg2       occupied_mode:         %d\n", occupied_mode);
-		fprintf(outfp, "dbg2       apply_range_minimum:   %d\n", apply_range_minimum);
-		fprintf(outfp, "dbg2       range_minimum:         %f\n", range_minimum);
-		fprintf(outfp, "dbg2       apply_range_maximum:   %d\n", apply_range_maximum);
-		fprintf(outfp, "dbg2       range_maximum:         %f\n", range_maximum);
-	}
+		if (verbose >= 2) {
+			fprintf(outfp, "\ndbg2  Program <%s>\n", program_name);
+			fprintf(outfp, "dbg2  MB-system Version %s\n", MB_VERSION);
+			fprintf(outfp, "dbg2  Control Parameters:\n");
+			fprintf(outfp, "dbg2       verbose:               %d\n", verbose);
+			fprintf(outfp, "dbg2       help:                  %d\n", help);
+			fprintf(outfp, "dbg2       defaultpings:          %d\n", defaultpings);
+			fprintf(outfp, "dbg2       lonflip:               %d\n", lonflip);
+			fprintf(outfp, "dbg2       btime_i[0]:            %d\n", btime_i[0]);
+			fprintf(outfp, "dbg2       btime_i[1]:            %d\n", btime_i[1]);
+			fprintf(outfp, "dbg2       btime_i[2]:            %d\n", btime_i[2]);
+			fprintf(outfp, "dbg2       btime_i[3]:            %d\n", btime_i[3]);
+			fprintf(outfp, "dbg2       btime_i[4]:            %d\n", btime_i[4]);
+			fprintf(outfp, "dbg2       btime_i[5]:            %d\n", btime_i[5]);
+			fprintf(outfp, "dbg2       btime_i[6]:            %d\n", btime_i[6]);
+			fprintf(outfp, "dbg2       etime_i[0]:            %d\n", etime_i[0]);
+			fprintf(outfp, "dbg2       etime_i[1]:            %d\n", etime_i[1]);
+			fprintf(outfp, "dbg2       etime_i[2]:            %d\n", etime_i[2]);
+			fprintf(outfp, "dbg2       etime_i[3]:            %d\n", etime_i[3]);
+			fprintf(outfp, "dbg2       etime_i[4]:            %d\n", etime_i[4]);
+			fprintf(outfp, "dbg2       etime_i[5]:            %d\n", etime_i[5]);
+			fprintf(outfp, "dbg2       etime_i[6]:            %d\n", etime_i[6]);
+			fprintf(outfp, "dbg2       speedmin:              %f\n", speedmin);
+			fprintf(outfp, "dbg2       timegap:               %f\n", timegap);
+			fprintf(outfp, "dbg2       file:                  %s\n", read_file);
+			fprintf(outfp, "dbg2       format:                %d\n", format);
+			fprintf(outfp, "dbg2       voxel_size_xy:         %f\n", voxel_size_xy);
+			fprintf(outfp, "dbg2       voxel_size_z:          %f\n", voxel_size_z);
+			fprintf(outfp, "dbg2       occupy_threshold:      %d\n", occupy_threshold);
+			fprintf(outfp, "dbg2       empty_mode:            %d\n", empty_mode);
+			fprintf(outfp, "dbg2       occupied_mode:         %d\n", occupied_mode);
+			fprintf(outfp, "dbg2       apply_range_minimum:   %d\n", apply_range_minimum);
+			fprintf(outfp, "dbg2       range_minimum:         %f\n", range_minimum);
+			fprintf(outfp, "dbg2       apply_range_maximum:   %d\n", apply_range_maximum);
+			fprintf(outfp, "dbg2       range_maximum:         %f\n", range_maximum);
+		}
 
-	/* if help desired then print it and exit */
-	if (help) {
-		fprintf(outfp, "\n%s\n", help_message);
-		fprintf(outfp, "\nusage: %s\n", usage_message);
-		exit(error);
+		if (help) {
+			fprintf(outfp, "\n%s\n", help_message);
+			fprintf(outfp, "\nusage: %s\n", usage_message);
+			exit(error);
+		}
 	}
 
 	/* get format if required */
@@ -479,10 +438,9 @@ int main(int argc, char **argv) {
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
-			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(error);
+			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 			read_data = MB_YES;
@@ -784,7 +742,7 @@ int main(int argc, char **argv) {
                     sensorx = (navlon - mb_info.lon_start) / mtodeglon;
                     sensory = (navlat - mb_info.lat_start) / mtodeglat;
                     sensorz = -sensordepth;
-					for (j = 0; j < beams_bath; j++) {
+					for (int j = 0; j < beams_bath; j++) {
                         pings[n_pings].beamflag[j] = beamflag[j];
                         pings[n_pings].beamflagorg[j] = beamflag[j];
                         if (!mb_beam_check_flag_null(beamflag[j])) {
@@ -824,7 +782,7 @@ int main(int argc, char **argv) {
 					}
 					if (verbose >= 2) {
 						fprintf(stderr, "\ndbg2  beam locations (ping:beam xxx.xxx yyy.yyy zzz.zzz)\n");
-						for (j = 0; j < pings[n_pings].beams_bath; j++) {
+						for (int j = 0; j < pings[n_pings].beams_bath; j++) {
 								fprintf(stderr, "dbg2    %d:%3.3d %10.3f %10.3f %10.3f\n",
                                         n_pings, j, pings[n_pings].bathx[j],
                                         pings[n_pings].bathy[j], pings[n_pings].bathz[j]);
@@ -841,7 +799,7 @@ int main(int argc, char **argv) {
 					}
 
 					/* update counters */
-					for (j = 0; j < pings[n_pings].beams_bath; j++) {
+					for (int j = 0; j < pings[n_pings].beams_bath; j++) {
 						if (mb_beam_ok(pings[n_pings].beamflag[j]))
                              n_beamflag_good++;
                         else if (pings[n_pings].beamflag[j] == MB_FLAG_NULL)
@@ -855,7 +813,7 @@ int main(int argc, char **argv) {
 					                      pings[n_pings].beamflag, &error);
 
 					/* update counters */
-					for (j = 0; j < pings[n_pings].beams_bath; j++) {
+					for (int j = 0; j < pings[n_pings].beams_bath; j++) {
 						if (pings[n_pings].beamflag[j] != pings[n_pings].beamflagorg[j]) {
 							if (mb_beam_ok(pings[n_pings].beamflag[j]))
 								n_esf_unflag++;
@@ -934,7 +892,7 @@ int main(int argc, char **argv) {
 
             /* count the soundings in each voxel */
             for (int i = 0; i < n_pings; i++) {
-                for (j=0; j< pings[i].beams_bath; j++) {
+                for (int j = 0; j< pings[i].beams_bath; j++) {
                     if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                         ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
                         iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
@@ -962,7 +920,7 @@ int main(int argc, char **argv) {
             /* apply density filter to the soundings  */
             if (occupied_mode == MBVC_OCCUPIED_UNFLAG || empty_mode == MBVC_EMPTY_FLAG) {
                 for (int i = 0; i < n_pings; i++) {
-                    for (j=0; j< pings[i].beams_bath; j++) {
+                    for (int j = 0; j < pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                             ix = (pings[i].bathx[j] - x_min) / voxel_size_xy;
                             iy = (pings[i].bathy[j] - y_min) / voxel_size_xy;
@@ -996,7 +954,7 @@ int main(int argc, char **argv) {
             /* apply range filter to the soundings */
             if (apply_range_minimum == MB_YES || apply_range_maximum == MB_YES) {
                 for (int i = 0; i < n_pings; i++) {
-                    for (j=0; j< pings[i].beams_bath; j++) {
+                    for (int j = 0; j< pings[i].beams_bath; j++) {
                         if (!mb_beam_check_flag_null(pings[i].beamflag[j])) {
                             if (apply_range_minimum == MB_YES
                                 && mb_beam_ok(pings[i].beamflag[j])
