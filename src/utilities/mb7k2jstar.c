@@ -102,13 +102,13 @@ int main(int argc, char **argv) {
 	int gainmode = MB7K2JSTAR_SSGAIN_OFF;
 	double gainfactor = 1.0;
 
-	int checkroutebearing = MB_NO;
+	bool checkroutebearing = false;
 
 	char output_file[MB_PATH_MAXLINE+12] = "";
-	int output_file_set = MB_NO;
+	bool output_file_set = false;
 
 	char route_file[MB_PATH_MAXLINE];
-	int route_file_set = MB_NO;
+	bool route_file_set = false;
 
 	int smooth = 0;
 
@@ -194,17 +194,17 @@ int main(int argc, char **argv) {
 				break;
 			case 'M':
 			case 'm':
-				checkroutebearing = MB_YES;
+				checkroutebearing = true;
 				break;
 			case 'O':
 			case 'o':
 				sscanf(optarg, "%s", output_file);
-				output_file_set = MB_YES;
+				output_file_set = true;
 				break;
 			case 'R':
 			case 'r':
 				sscanf(optarg, "%s", route_file);
-				route_file_set = MB_YES;
+				route_file_set = true;
 				break;
 			case 'S':
 			case 's':
@@ -358,7 +358,6 @@ int main(int argc, char **argv) {
 	int format_status, format_guess;
 	int format_output = MBF_EDGJSTAR;
 	int shortspersample;
-	int trace_size;
 	char *data;
 	unsigned short *datashort;
 	double value, threshold;
@@ -371,8 +370,6 @@ int main(int argc, char **argv) {
 	int oktowrite;
 	double dx, dy;
 	FILE *fp = NULL;
-
-	int read_data;
 
 	/* set output types if needed */
 	if (!extract_sbp && !extract_sslow && !extract_sshigh) {
@@ -394,7 +391,7 @@ int main(int argc, char **argv) {
 
 	/* set starting line number and output file if route read */
 	int linenumber = 0;
-	if (route_file_set == MB_YES) {
+	if (route_file_set) {
 		linenumber = startline;
 		sprintf(output_file, "%s_%4.4d.mb132", lineroot, linenumber);
 	}
@@ -403,19 +400,19 @@ int main(int argc, char **argv) {
 	bool new_output_file = true;
 
 	/* if specified read route file */
-	if (route_file_set == MB_YES) {
+	if (route_file_set) {
 		/* open the input file */
 		if ((fp = fopen(route_file, "r")) == NULL) {
 			fprintf(stderr, "\nUnable to open route file <%s> for reading\n", route_file);
 			exit(MB_FAILURE);
 		}
-		int rawroutefile = MB_NO;
+		bool rawroutefile = false;
 		int nroutepointalloc = 0;
 		char *result;
 		while ((result = fgets(comment, MB_PATH_MAXLINE, fp)) == comment) {
 			if (comment[0] == '#') {
 				if (strncmp(comment, "## Route File Version", 21) == 0) {
-					rawroutefile = MB_NO;
+					rawroutefile = false;
 				}
 			}
 			else {
@@ -424,18 +421,15 @@ int main(int argc, char **argv) {
 				if (comment[0] == '#') {
 					fprintf(stderr, "buffer:%s", comment);
 					if (strncmp(comment, "## Route File Version", 21) == 0) {
-						rawroutefile = MB_NO;
+						rawroutefile = false;
 					}
 				}
-				int point_ok;
-				if ((rawroutefile == MB_YES && nget >= 2) ||
-				    (rawroutefile == MB_NO && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE))
-					point_ok = MB_YES;
-				else
-					point_ok = MB_NO;
+				const bool point_ok =
+					(rawroutefile && nget >= 2) ||
+					(!rawroutefile && nget >= 3 && waypoint > MBES_ROUTE_WAYPOINT_NONE);
 
 				/* if good data check for need to allocate more space */
-				if (point_ok == MB_YES && nroutepoint + 1 > nroutepointalloc) {
+				if (point_ok && nroutepoint + 1 > nroutepointalloc) {
 					nroutepointalloc += MBES_ALLOC_NUM;
 					status =
 					    mb_reallocd(verbose, __FILE__, __LINE__, nroutepointalloc * sizeof(double), (void **)&routelon, &error);
@@ -455,7 +449,7 @@ int main(int argc, char **argv) {
 				}
 
 				/* add good point to route */
-				if (point_ok == MB_YES && nroutepointalloc > nroutepoint + 1) {
+				if (point_ok && nroutepointalloc > nroutepoint + 1) {
 					routelon[nroutepoint] = lon;
 					routelat[nroutepoint] = lat;
 					routeheading[nroutepoint] = heading;
@@ -494,7 +488,8 @@ int main(int argc, char **argv) {
 	void *datalist = NULL;
 	double file_weight;
 	char dfile[MB_PATH_MAXLINE];
-	if (read_datalist == MB_YES) {
+	bool read_data;
+	if (read_datalist) {
 		int look_processed = MB_DATALIST_LOOK_YES;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
@@ -502,20 +497,20 @@ int main(int argc, char **argv) {
 			exit(MB_ERROR_OPEN_FAIL);
 		}
 		if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-			read_data = MB_YES;
+			read_data = true;
 		else
-			read_data = MB_NO;
+			read_data = false;
 	}
 	/* else copy single filename to be read */
 	else {
 		strcpy(file, read_file);
-		read_data = MB_YES;
+		read_data = true;
 	}
 
 	char current_output_file[MB_PATH_MAXLINE];
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES && format == MBF_RESON7KR) {
+	while (read_data && format == MBF_RESON7KR) {
 
 		/* initialize reading the swath file */
 		double btime_d;
@@ -593,12 +588,12 @@ int main(int argc, char **argv) {
 
 		/* set up output file name if needed */
 		if (error == MB_ERROR_NO_ERROR) {
-			if (output_file_set == MB_YES && ombio_ptr == NULL) {
+			if (output_file_set && ombio_ptr == NULL) {
 				/* set flag to open new output file */
 				new_output_file = true;
 			}
 
-			else if (output_file_set == MB_NO && route_file_set == MB_NO) {
+			else if (!output_file_set && !route_file_set) {
 				new_output_file = true;
 				format_status = mb_get_format(verbose, file, output_file, &format_guess, &error);
 				if (format_status != MB_SUCCESS || format_guess != format) {
@@ -662,7 +657,7 @@ int main(int argc, char **argv) {
 			}
 
 			/* check survey data position against waypoints */
-			if (status == MB_SUCCESS && kind == MB_DATA_DATA && route_file_set == MB_YES && nroutepoint > 1 && navlon != 0.0 &&
+			if (status == MB_SUCCESS && kind == MB_DATA_DATA && route_file_set && nroutepoint > 1 && navlon != 0.0 &&
 			    navlat != 0.0) {
 				dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 				dy = (navlat - routelat[activewaypoint]) / mtodeglat;
@@ -713,17 +708,17 @@ int main(int argc, char **argv) {
 
 				/* get bottom arrival time, if possible */
 				ttime_min = 0.0;
-				int found = MB_NO;
+				bool found = false;
 				for (int i = 0; i < beams_bath; i++) {
 					if (mb_beam_ok(beamflag[i])) {
-						if (found == MB_NO || ttimes[i] < ttime_min) {
+						if (!found || ttimes[i] < ttime_min) {
 							ttime_min = ttimes[i];
 							/* beam_min = i; */
-							found = MB_YES;
+							found = false;
 						}
 					}
 				}
-				if (found == MB_YES) {
+				if (found) {
 					ttime_min_use = ttime_min;
 				}
 			}
@@ -810,7 +805,7 @@ int main(int argc, char **argv) {
 			/* if following a route check that the vehicle has come on line
 			        (within MBES_ONLINE_THRESHOLD degrees)
 			        before writing any data */
-			if (checkroutebearing == MB_YES && nroutepoint > 1 && activewaypoint > 0) {
+			if (checkroutebearing && nroutepoint > 1 && activewaypoint > 0) {
 				headingdiff = fabs(routeheading[activewaypoint - 1] - heading);
 				if (headingdiff > 180.0)
 					headingdiff = 360.0 - headingdiff;
@@ -1023,7 +1018,7 @@ int main(int argc, char **argv) {
 						shortspersample = 2;
 					else
 						shortspersample = 1;
-					trace_size = shortspersample * channel->samples * sizeof(short);
+					unsigned int trace_size = shortspersample * channel->samples * sizeof(short);
 					channel->message.size = shortspersample * channel->samples * sizeof(short);
 					if (channel->trace_alloc < trace_size) {
 						if ((status = mb_reallocd(verbose, __FILE__, __LINE__, trace_size, (void **)&(channel->trace), &error)) ==
@@ -1035,7 +1030,7 @@ int main(int argc, char **argv) {
 					/* copy the trace */
 					if (status == MB_SUCCESS) {
 						data = (char *)channel->trace;
-						for (int i = 0; i < trace_size; i++)
+						for (unsigned int i = 0; i < trace_size; i++)
 							data[i] = s7kchannel->data[i];
 					}
 
@@ -1267,7 +1262,7 @@ int main(int argc, char **argv) {
 						shortspersample = 2;
 					else
 						shortspersample = 1;
-					trace_size = shortspersample * channel->samples * sizeof(short);
+					unsigned int trace_size = shortspersample * channel->samples * sizeof(short);
 					channel->message.size = shortspersample * channel->samples * sizeof(short);
 					if (channel->trace_alloc < trace_size) {
 						if ((status = mb_reallocd(verbose, __FILE__, __LINE__, trace_size, (void **)&(channel->trace), &error)) ==
@@ -1304,7 +1299,7 @@ int main(int argc, char **argv) {
 						}
 						else {
 							data = (char *)channel->trace;
-							for (int i = 0; i < trace_size; i++) {
+							for (unsigned int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -1572,7 +1567,7 @@ int main(int argc, char **argv) {
 						}
 						else {
 							data = (char *)channel->trace;
-							for (int i = 0; i < trace_size; i++) {
+							for (unsigned int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -1813,7 +1808,7 @@ int main(int argc, char **argv) {
 						shortspersample = 2;
 					else
 						shortspersample = 1;
-					trace_size = shortspersample * channel->samples * sizeof(short);
+					unsigned int trace_size = shortspersample * channel->samples * sizeof(short);
 					channel->message.size = shortspersample * channel->samples * sizeof(short);
 					if (channel->trace_alloc < trace_size) {
 						if ((status = mb_reallocd(verbose, __FILE__, __LINE__, trace_size, (void **)&(channel->trace), &error)) ==
@@ -1850,7 +1845,7 @@ int main(int argc, char **argv) {
 						}
 						else {
 							data = (char *)channel->trace;
-							for (int i = 0; i < trace_size; i++) {
+							for (unsigned int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -2102,7 +2097,7 @@ int main(int argc, char **argv) {
 						}
 						else {
 							data = (char *)channel->trace;
-							for (int i = 0; i < trace_size; i++) {
+							for (unsigned int i = 0; i < trace_size; i++) {
 								data[i] = s7kchannel->data[i];
 							}
 						}
@@ -2218,19 +2213,19 @@ int main(int argc, char **argv) {
 		nreadsshitot += nreadsshi;
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
-				read_data = MB_YES;
+				read_data = true;
 			else
-				read_data = MB_NO;
+				read_data = false;
 		}
 		else {
-			read_data = MB_NO;
+			read_data = false;
 		}
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close output file if still open */
@@ -2259,7 +2254,7 @@ int main(int argc, char **argv) {
 	fprintf(stdout, "     High Sidescan: %d\n", nwritesshitot);
 
 	/* deallocate route arrays */
-	if (route_file_set == MB_YES) {
+	if (route_file_set) {
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
 		status &= mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
