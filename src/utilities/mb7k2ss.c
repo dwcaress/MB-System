@@ -799,6 +799,7 @@ int main(int argc, char **argv) {
 	if (format < 0)
 		read_datalist = MB_YES;
 
+	void *datalist;
 	/* open file list */
 	if (read_datalist == MB_YES) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
