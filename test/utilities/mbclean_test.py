@@ -40,9 +40,7 @@ class MbCleanTest(unittest.TestCase):
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
     self.assertIn('identifies and flags artifacts', output)
     self.assertIn('-Sspike_slope', output)
-    self.assertIn('dbg2', output)
     self.assertIn('lonflip', output)
-    self.assertIn('check_zero_position:', output)
 
   # TODO(schwehr): Add tests of actual usage.
 
