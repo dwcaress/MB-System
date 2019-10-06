@@ -635,10 +635,6 @@ int main(int argc, char **argv) {
 			if (buffer[0] != '#') {
 				/* read the time and sonardepth pair */
 				if (sscanf(buffer, "%lf %lf", &(sonardepth_time_d[nsonardepth]), &(sonardepth_sonardepth[nsonardepth])) == 2) {
-					/*fprintf(stderr,"SONARDEPTH DATA: %f %f\n",
-					sonardepth_time_d[nsonardepth],
-					sonardepth_sonardepth[nsonardepth]);*/
-					// sonardepth_sonardepth[nsonardepth] += sonardepthoffset;
 					nsonardepth++;
 				}
 			}
@@ -968,7 +964,6 @@ int main(int argc, char **argv) {
 
 			/* handle read error */
 			else {
-				/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
 			}
 
 			/* set attitude data source from active sensors set in the start datagram */
@@ -2329,30 +2324,9 @@ int main(int argc, char **argv) {
 					/* apply sonardepth/heave mode - if on a submerged platform usually
 					 * don't use heave - if on a surface platform usually don't use
 					 * a variable sonar depth */
-					// if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_HEAVE_ONLY)
-					//	{
-					//	sonardepth = 0.0;
-					//	}
-					// else if (depthsensor_mode == MBKONSBERGPREPROCESS_ZMODE_USE_SENSORDEPTH_ONLY)
-					//	{
-					//	heave = 0.0;
-					//	}
 
-					/* Disable this section - Kongsberg SIS logs sensordepth values
-					 * already compensated for lever arms
-					 * 30 Jun 2016 DWC */
-
-					/* apply specified offset between depth sensor and sonar */
-					// fprintf(stderr,"time_d:%.3f png_xducer_depth:%.3f  sonardepth:%f   ",
-					// time_d,ping->png_xducer_depth,sonardepth);
-					// sonardepth += sonardepthoffset
-					//			+ depthsensoroffx * sin(DTR * roll)
-					//			+ depthsensoroffy * sin(DTR * pitch)
-					//			+ depthsensoroffz * cos(DTR * pitch);
-					// fprintf(stderr," sonardepth:%f     offset:%f x:%f y:%f z:%f  rph: %f %f %f   diff:%f\n",
-					// sonardepth,sonardepthoffset,depthsensoroffx,depthsensoroffy,depthsensoroffz,roll,pitch,heave,
-					//(sonardepthoffset + depthsensoroffx * sin(DTR * roll) + depthsensoroffy * sin(DTR * pitch) + depthsensoroffz
-					//* cos(DTR * pitch)));
+					// Disable apply specified offset between depth sensor and sonar
+					// Kongsberg SIS logs sensordepth values already compensated for lever arms.
 
 					/* insert navigation */
 					if (navlon < -180.0)
@@ -2473,28 +2447,6 @@ int main(int argc, char **argv) {
 						 * into the ping->png_xducer_depth value and the average heave at the sector transmit time and the beam
 						 * receive time */
 						ping->png_bheave[i] = 0.5 * (receive_heave + transmit_heave) - heave;
-						/* fprintf(stderr,"AAA png_count:%d beam:%d heave_ping:%f i:%d transmit_heave:%f receive_heave:%f
-						bheave:%f\n", ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
-
-						/* also add in lever arm due to the offset between the motion sensor and
-						 * the sonar */
-						/* status = mb_lever(verbose,
-						            rx_y,
-						            rx_x,
-						            rx_z,
-						            position_off_y,
-						            position_off_x,
-						            position_off_z,
-						            rollpitch_off_y,
-						            rollpitch_off_x,
-						            rollpitch_off_z,
-						            receive_pitch,
-						            receive_roll,
-						            &lever_x,
-						            &lever_y,
-						            &lever_z,
-						            &error); */
-						/* fprintf(stderr,"Lever: roll:%f pitch:%f  lever: %f %f %f\n",roll,pitch,lever_x,lever_y,lever_z); */
 
 						/* calculate beam angles for raytracing using Jon Beaudoin's code based on:
 						    Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -2548,12 +2500,6 @@ int main(int argc, char **argv) {
 						ping->png_azimuth[i] = 90.0 + beamAzimuth;
 						if (ping->png_azimuth[i] < 0.0)
 							ping->png_azimuth[i] += 360.0;
-						// fprintf(stderr,"mb_beaudoin result: i:%d tx steer:%f rph: %f %f %f  rx steer:%f rph: %f %f %f  beam: %f
-						// %f\n",  i,tx_steer,tx_orientation.roll,tx_orientation.pitch,tx_orientation.heading,
-						// i,rx_steer,rx_orientation.roll,rx_orientation.pitch,rx_orientation.heading,
-						// beamDepression,beamAzimuth);
-						/* fprintf(stderr,"i:%d %f %f     %f %f\n",
-						i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
 
 						/* calculate beamflag */
 						detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];
@@ -2563,13 +2509,9 @@ int main(int argc, char **argv) {
 						}
 						else if ((detection_mask & 128) == 128 && (detection_mask & 112) != 0) {
 							ping->png_beamflag[i] = MB_FLAG_NULL;
-							/* fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
-							i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
 						}
 						else if ((detection_mask & 128) == 128) {
 							ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-							/*fprintf(stderr,"beam i:%d detection_mask:%d %d quality:%u beamflag:%u\n",
-							i,ping->png_raw_rxdetection[i],detection_mask,(mb_u_char)ping->png_raw_rxquality[i],(mb_u_char)ping->png_beamflag[i]);*/
 						}
 						else if (ping->png_clean[i] != 0) {
 							ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
@@ -2596,12 +2538,10 @@ int main(int argc, char **argv) {
 
 				/* handle unknown data */
 				else if (status == MB_SUCCESS) {
-					/*fprintf(stderr,"DATA TYPE OTHER THAN SURVEY: status:%d error:%d kind:%d\n",status,error,kind);*/
 				}
 
 				/* handle read error */
 				else {
-					/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
 				}
 
 				if (verbose >= 2) {

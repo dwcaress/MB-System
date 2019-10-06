@@ -702,8 +702,6 @@ int main(int argc, char **argv) {
 					range = sqrt(dx * dx + dy * dy);
 					if (time_d >= routetime_d[activewaypoint] && activewaypoint < ntimepoint) {
 						linechange = MB_YES;
-						/* fprintf(stderr,"LINECHANGE 1!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
-						dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 					}
 				}
 
@@ -716,8 +714,6 @@ int main(int argc, char **argv) {
 						rangeok = MB_YES;
 					if (rangeok == MB_YES && (activewaypoint == 0 || range > rangelast) && activewaypoint < nroutepoint - 1) {
 						linechange = MB_YES;
-						/* fprintf(stderr,"LINECHANGE 2!! dx:%f dy:%f range:%f %f
-						 * activewaypoint:%d\n",dx,dy,range,rangethreshold,activewaypoint); */
 					}
 				}
 
@@ -757,7 +753,6 @@ int main(int argc, char **argv) {
 						nplot = nwrite / nshotmax;
 						if (nwrite % nshotmax > 0)
 							nplot++;
-						// fprintf(stderr,"nwrite:%d nshotmax:%d nplot:%d\n",nwrite,nshotmax,nplot);
 						/* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
 						  then make section plots using only the sweep needed for each section alone */
 						delay = seafloordepthmin / 750.0;
@@ -826,12 +821,6 @@ int main(int argc, char **argv) {
 							fprintf(stderr, "%s", command);
 							fprintf(sfp, "%s", command);
 
-							// sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -trim -quality 75
-							// %s_%4.4d_%2.2d_sectionplot.jpg\n\n", 		lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
-							//sprintf(command, "gmt psconvert %s_%4.4d_%2.2d_sectionplot.ps -Tj -A -E300 -P\n\n", lineroot,
-							//        linenumber, i + 1);
-							//fprintf(stderr, "%s", command);
-							//fprintf(sfp, "%s", command);
 							fflush(sfp);
 						}
 					}
@@ -935,17 +924,11 @@ int main(int argc, char **argv) {
 						oktowrite++;
 					else
 						oktowrite = 0;
-					/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n",
-					routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 				}
 				else if (activewaypoint > 0)
 					oktowrite = MBES_ONLINE_COUNT;
 				else if (nroutepoint == 0 && ntimepoint == 0)
 					oktowrite = MBES_ONLINE_COUNT;
-				/*if (status == MB_SUCCESS)
-				fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n",
-				activewaypoint,linenumber,range, navlon,
-				routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 
 				/* open output segy file if needed */
 				if (fp == NULL && oktowrite > 0) {
@@ -1132,7 +1115,6 @@ int main(int argc, char **argv) {
 								error = MB_ERROR_WRITE_FAIL;
 							}
 						}
-						// fprintf(stderr,"J\n");
 
 						/* insert segy header data into output buffer */
 						index = 0;
@@ -1366,8 +1348,6 @@ int main(int argc, char **argv) {
 				nplot = nwrite / nshotmax;
 				if (nwrite % nshotmax > 0)
 					nplot++;
-				/*fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f linetracelength:%f\n", seafloordepthmin,
-				 * seafloordepthmax,linetracelength);*/
 
 				/* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
 				  then make section plots using only the sweep needed for each section alone */

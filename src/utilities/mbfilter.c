@@ -371,13 +371,8 @@ int smooth_median(int verbose, double original, int apply_threshold, double thre
 	if (apply_threshold == MB_YES) {
 		const double ratio = original / (*smooth);
 		if (ratio < threshold_hi && ratio > threshold_lo) {
-			/*fprintf(stderr,"IGNORE MEDIAN FILTER: ratio:%f threshold:%f %f original:%f smooth:%f\n",
-			ratio, threshold_lo, threshold_hi, original, *smooth);*/
 			*smooth = original;
 		}
-		/*else
-		fprintf(stderr,"** APPLY MEDIAN FILTER: ratio:%f threshold:%f %f original:%f smooth:%f\n",
-		ratio, threshold_lo, threshold_hi, original, *smooth);*/
 	}
 
 	const int status = MB_SUCCESS;
@@ -469,8 +464,6 @@ int contrast_edge(int verbose, int n, double *val, double *grad, double *result,
 		*result = edge * (1.0 + contrast) / (1.0 - contrast);
 	else
 		*result = edge * (1.0 - contrast) / (1.0 + contrast);
-	/*fprintf(stderr, "val: %f %f  edge:%f contrast:%f\n",
-	val[0], *result, edge, contrast);*/
 
 	const int status = MB_SUCCESS;
 
@@ -1385,8 +1378,6 @@ int main(int argc, char **argv) {
 			if (verbose >= 1) {
 				fprintf(stderr, "%d survey records being processed\n\n", (jend - jbeg + 1));
 			}
-			/*fprintf(stderr, "done:%d jbeg:%d jend:%d ndata:%d nhold_ping:%d nhold:%d\n",
-			done, jbeg, jend, ndata, nhold_ping, nhold);*/
 
 			/* loop over all filters */
 			for (ifilter = 0; ifilter < num_filters; ifilter++) {
@@ -1560,16 +1551,12 @@ int main(int argc, char **argv) {
 					}
 
 					/* write the data */
-					/*fprintf(stderr,"calling mb_write_ping datakind:%d verbose:%d nwrite:%d\n",datakind,verbose,nwrite);*/
 					status = mb_write_ping(verbose, ombio_ptr, omb_io_ptr->store_data, &error);
 					if (status == MB_SUCCESS) {
 						nunload++;
 						nwrite++;
 						nwritetot++;
 					}
-					/*verbose = 1;
-					fprintf(stderr,"nunload:%d nwrite:%d verbose:%d error:%d pointers: %d %d\n",
-					nunload,nwrite,verbose,error,ombio_ptr,omb_io_ptr->store_data);*/
 				}
 
 			/* save processed data in buffer */

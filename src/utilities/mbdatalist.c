@@ -501,7 +501,6 @@ int main(int argc, char **argv) {
 
 			/* or list the datalists parsed through the recursive datalist structure */
 			else if (reportdatalists == MB_YES) {
-				// fprintf(stderr,"dfile:%s dfilelast:%s file:%s\n",dfile,dfilelast,file);
 				if (strcmp(dfile, dfilelast) != 0)
 					status = mb_datalist_recursion(verbose, datalist, MB_YES, &recursion, &error);
 				strcpy(dfilelast, dfile);
