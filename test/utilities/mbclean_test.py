@@ -31,7 +31,6 @@ class MbCleanTest(unittest.TestCase):
   def testHelp(self):
     cmd = [self.cmd, '-h']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Version', output)
     self.assertIn('identifies and flags artifacts', output)
     self.assertIn('-Sspike_slope', output)
     self.assertIn('', output)
@@ -39,7 +38,6 @@ class MbCleanTest(unittest.TestCase):
   def testHelpVerbose2(self):
     cmd = [self.cmd, '-h', '-V', '-V']
     output = subprocess.check_output(cmd, stderr=subprocess.STDOUT).decode()
-    self.assertIn('Version', output)
     self.assertIn('identifies and flags artifacts', output)
     self.assertIn('-Sspike_slope', output)
     self.assertIn('dbg2', output)
