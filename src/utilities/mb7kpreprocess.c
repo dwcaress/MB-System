@@ -7245,7 +7245,7 @@ int main(int argc, char **argv) {
 						bluefin = &(istore->bluefin);
 						header = &(bluefin->header);
 						type_save = istore->type;
-						const kind_save = istore->kind;
+						const int kind_save = istore->kind;
 						istore->kind = MB_DATA_NAV2;
 						istore->type = R7KRECID_Bluefin;
 						bluefin->number_frames = MIN(25, nins - ins_output_index + 1);

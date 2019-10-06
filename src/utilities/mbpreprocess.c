@@ -406,7 +406,7 @@ int main(int argc, char **argv) {
   int n_wt_att1 = 0;
   int n_wt_att2 = 0;
   int n_wt_att3 = 0;
-    int n_wt_files = 0;
+  int n_wt_files = 0;
 
   int shellstatus;
   mb_path command = "";
@@ -508,6 +508,7 @@ int main(int argc, char **argv) {
                                       {"time-latency-apply-all", no_argument, NULL, 0},
                                       {"time-latency-apply-nav", no_argument, NULL, 0},
                                       {"filter", required_argument, NULL, 0},
+                                      {"filter-apply-nav", no_argument, NULL, 0},
                                       {"filter-apply-sensordepth", no_argument, NULL, 0},
                                       {"filter-apply-heading", no_argument, NULL, 0},
                                       {"filter-apply-attitude", no_argument, NULL, 0},
@@ -879,7 +880,6 @@ int main(int argc, char **argv) {
           preprocess_pars.recalculate_bathymetry = MB_YES;
                   kluge_fix_wissl_timestamps = MB_YES;
         }
-
         break;
       case '?':
         errflg = true;
@@ -1221,7 +1221,7 @@ int main(int argc, char **argv) {
                            &sensordepth_time_d, &sensordepth_sensordepth, &error);
 
     if (status == MB_FAILURE) {
-      fprintf(stderr, "\nUnable to open and parse sensoredepth file: %s\n", sensordepth_file);
+      fprintf(stderr, "\nUnable to open and parse sensordepth file: %s\n", sensordepth_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
       exit(MB_ERROR_OPEN_FAIL);
     }

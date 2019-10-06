@@ -36,7 +36,7 @@
 #include "mb_status.h"
 #include "mbsys_3ddwissl.h"
 
-/*#define MBF_3DWISSLR_DEBUG 1 */
+//#define MBF_3DWISSLR_DEBUG 1
 
 /*--------------------------------------------------------------------*/
 int mbr_info_3dwisslr
@@ -841,11 +841,12 @@ int mbr_3dwisslr_index_data
     fprintf(stderr, "\nOriginal Index Table:\n");
     for (int i=0; i<mb_io_ptr->num_indextable; i++)
       fprintf(stderr,
-        "%4.4d %4.4d %15.4f %3d %5ld %lu\n",
+        "%4.4d %4.4d %15.4f %3d %3d %5ld %lu\n",
         i,
         mb_io_ptr->indextable[i].total_index_org,
         mb_io_ptr->indextable[i].time_d_org,
         mb_io_ptr->indextable[i].kind,
+        mb_io_ptr->indextable[i].subsensor,
         mb_io_ptr->indextable[i].offset,
         mb_io_ptr->indextable[i].size);
 
@@ -859,12 +860,13 @@ int mbr_3dwisslr_index_data
     fprintf(stderr, "\nSorted Index Table:\n");
     for (int i=0; i<mb_io_ptr->num_indextable; i++)
       fprintf(stderr,
-        "%4.4d %4.4d %4.4d %15.4f %3d %5ld %lu\n",
+        "%4.4d %4.4d %4.4d %15.4f %3d %3d %5ld %lu\n",
         i,
         mb_io_ptr->indextable[i].total_index_sorted,
         mb_io_ptr->indextable[i].total_index_org,
         mb_io_ptr->indextable[i].time_d_org,
         mb_io_ptr->indextable[i].kind,
+        mb_io_ptr->indextable[i].subsensor,
         mb_io_ptr->indextable[i].offset,
         mb_io_ptr->indextable[i].size);
 

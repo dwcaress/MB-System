@@ -1,4 +1,4 @@
-.TH mbnavadjustmerge 1 "17 September 2019" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjustmerge 1 "30 September 2019" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjustmerge\fP \- Tool to modify MBnavadjust projects,
 including merging projects, adding global ties, setting tie modes, exporting
@@ -103,6 +103,10 @@ Version 5.0
 --triangulate-scale=scale
 .br
 --triangulate-section=file:section
+.br
+--unset-short-section-ties=min_length
+.br
+--skip-short-section-crossings=min_length
 .br
 --verbose
 .br
@@ -408,6 +412,15 @@ width or height (whichever is longer) of the region covered by the section.
 .B \--triangulate-section=file:section
 This command causes \fBmbnavadjustmerge\fP to pre-generate the triangular mesh
 for the specified section.
+.TP
+.B \--unset-short-section-ties=min_length
+This option unsets (deletes) all ties for which one or both data sections have a
+navigation track length less than \fImin_length\fP.
+.TP
+.B \--skip-short-section-crossings=min_length
+This option sets all crossings for which one or both data sections have a
+navigation track length less than \fImin_length\fP to "skipped" mode. Any ties
+associated with these crossings are deleted.
 .TP
 .B \--verbose
 This option increases the verbosity of \fBMBnavadjustmerge\fP, which

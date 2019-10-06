@@ -1087,7 +1087,6 @@ int mbsys_3ddwissl_sensorhead
       ( store->record_id == MBSYS_3DDWISSL_RECORD_PROHEADB) )
       *sensorhead = 0;
     }
-
   const int status = MB_SUCCESS;
 
   if (verbose >= 2)

@@ -185,7 +185,7 @@ struct mbna_section {
   double snav_time_d[MBNA_SNAV_NUM];
   double snav_lon[MBNA_SNAV_NUM];
   double snav_lat[MBNA_SNAV_NUM];
-    double snav_sensordepth[MBNA_SNAV_NUM];
+  double snav_sensordepth[MBNA_SNAV_NUM];
   double snav_lon_offset[MBNA_SNAV_NUM];
   double snav_lat_offset[MBNA_SNAV_NUM];
   double snav_z_offset[MBNA_SNAV_NUM];

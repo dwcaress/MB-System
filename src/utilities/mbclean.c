@@ -48,13 +48,11 @@
  *
  * Acknowledgments:
  * This program is based to a large extent on the program mbcleanx
- * by Alberto Malinverno (formerly at L-DEO, now at Schlumberger),
- * which was in turn based on the original program mbclean (v. 1.0)
- * by David Caress.
+ * by Alberto Malinverno (formerly at L-DEO, then at Schlumberger,
+ * then back at L-DEO), which was in turn based on the original
+ * program mbclean (v. 1.0) by David Caress.
  */
 
-#include <getopt.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -72,8 +70,10 @@
 
 #define MBCLEAN_FLAG_ONE 1
 #define MBCLEAN_FLAG_BOTH 2
-#define MBCLEAN_DISTANCE_MODE_FLAG 1
-#define MBCLEAN_DISTANCE_MODE_UNFLAG 2
+#define MBCLEAN_Y_MODE_DISTANCE_FLAG 1
+#define MBCLEAN_Y_MODE_DISTANCE_UNFLAG 2
+#define MBCLEAN_Y_MODE_ANGLE_FLAG 3
+#define MBCLEAN_Y_MODE_ANGLE_UNFLAG 4
 
 /* MBIO buffer size default */
 #define MBCLEAN_BUFFER_DEFAULT 500
@@ -110,7 +110,6 @@ struct bad_struct {
 
 /* edit output function */
 int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
-
 
 static const char program_name[] = "mbclean";
 static const char help_message[] =
@@ -197,6 +196,8 @@ int main(int argc, char **argv) {
   int nouterbeamstot = 0;
   int nouterdistancetot = 0;
   int ninnerdistancetot = 0;
+  int nouterangletot = 0;
+  int ninnerangletot = 0;
   int nrailtot = 0;
   int nlong_acrosstot = 0; // 2010/03/07 DY
   int nmintot = 0;
@@ -219,6 +220,8 @@ int main(int argc, char **argv) {
   int nouterbeams = 0;
   int nouterdistance = 0;
   int ninnerdistance = 0;
+  int nouterangle = 0;
+  int ninnerangle = 0;
   int nrail = 0;
   int nlong_across = 0;         // 2010/03/07 DY
   int nmax_heading_rate = 0;    // 2010/04/27 DY
@@ -251,6 +254,12 @@ int main(int argc, char **argv) {
   int unflag_distance = MB_NO;
   double unflag_distance_right = 0.0;
   double unflag_distance_left = 0.0;
+  int flag_angle = MB_NO;
+  double flag_angle_right = 0.0;
+  double flag_angle_left = 0.0;
+  int unflag_angle = MB_NO;
+  double unflag_angle_right = 0.0;
+  double unflag_angle_left = 0.0;
   int zap_rails = MB_NO;
   int zap_long_across = MB_NO;      // 2010/03/07 DY
   int zap_max_heading_rate = MB_NO; // 2010/04/27 DY
@@ -322,9 +331,12 @@ int main(int argc, char **argv) {
   int sensorhead_status = MB_SUCCESS;
   int sensorhead_error = MB_ERROR_NO_ERROR;
   double distance_left, distance_right;
-  int distance_mode;
   int read_data;
   int start, done;
+  double left;
+  double right;
+  int optiony_mode;
+  int n, p, b;
 
   /* get current default values */
   status = mb_defaults(verbose, &format, &pings, &lonflip, bounds, btime_i, etime_i, &speedmin, &timegap);
@@ -483,27 +495,44 @@ int main(int argc, char **argv) {
       case 'Y':
       case 'y':
       {
-        const int n = sscanf(optarg, "%lf/%lf/%d", &distance_left, &distance_right, &distance_mode);
+        const int n = sscanf(optarg, "%lf/%lf/%d", &left, &right, &optiony_mode);
         if (n == 1) {
           if (distance_left >= 0.0) {
-            flag_distance_left = -distance_left;
-            flag_distance_right = distance_left;
+            flag_distance_left = -left;
+            flag_distance_right = left;
           }
           else {
-            flag_distance_left = distance_left;
-            flag_distance_right = -distance_left;
+            flag_distance_left = left;
+            flag_distance_right = -left;
           }
           flag_distance = MB_YES;
         }
-        else if (n == 2 || (n == 3 && distance_mode != MBCLEAN_DISTANCE_MODE_UNFLAG)) {
-          flag_distance_left = distance_left;
-          flag_distance_right = distance_right;
+        else if (n == 2) {
+          flag_distance_left = left;
+          flag_distance_right = right;
           flag_distance = MB_YES;
         }
         else if (n == 3) {
-          unflag_distance_left = distance_left;
-          unflag_distance_right = distance_right;
-          unflag_distance = MB_YES;
+          if (optiony_mode == MBCLEAN_Y_MODE_DISTANCE_FLAG) {
+            flag_distance_left = left;
+            flag_distance_right = right;
+            flag_distance = MB_YES;
+          }
+          else if (optiony_mode == MBCLEAN_Y_MODE_DISTANCE_UNFLAG) {
+            unflag_distance_left = left;
+            unflag_distance_right = right;
+            unflag_distance = MB_YES;
+          }
+          else if (optiony_mode == MBCLEAN_Y_MODE_ANGLE_FLAG) {
+            flag_angle_left = left;
+            flag_angle_right = right;
+            flag_angle = MB_YES;
+          }
+          else if (optiony_mode == MBCLEAN_Y_MODE_ANGLE_UNFLAG) {
+            unflag_angle_left = left;
+            unflag_angle_right = right;
+            unflag_angle = MB_YES;
+          }
         }
         break;
       }
@@ -512,7 +541,7 @@ int main(int argc, char **argv) {
         check_zero_position = MB_YES;
         break;
       case '?':
-        errflg = true;
+        errflg++;
       }
     }
 
@@ -522,97 +551,101 @@ int main(int argc, char **argv) {
       exit(MB_ERROR_BAD_USAGE);
     }
 
-    /* turn on slope checking if nothing else is to be used */
-    if (check_slope == MB_NO && zap_beams == MB_NO && flag_distance == MB_NO && unflag_distance == MB_NO && zap_rails == MB_NO &&
-        check_spike == MB_NO && check_range == MB_NO && check_fraction == MB_NO && check_speed_good == MB_NO &&
-        check_deviation == MB_NO && check_num_good_min == MB_NO && check_position_bounds == MB_NO &&
-        check_zero_position == MB_NO && fix_edit_timestamps == MB_NO
-          && zap_max_heading_rate == MB_NO)
-      check_slope = MB_YES;
-
-    if (verbose == 1 || help) {
-      fprintf(stderr, "\nProgram %s\n", program_name);
-      fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
-    }
-
-    if (verbose >= 2) {
-      fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
-      fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
-      fprintf(stderr, "dbg2  Control Parameters:\n");
-      fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
-      fprintf(stderr, "dbg2       help:                 %d\n", help);
-      fprintf(stderr, "dbg2       pings:                %d\n", pings);
-      fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
-      fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
-      fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
-      fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
-      fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
-      fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
-      fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
-      fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
-      fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
-      fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
-      fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
-      fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
-      fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
-      fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
-      fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
-      fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
-      fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
-      fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
-      fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
-      fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
-      fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
-      fprintf(stderr, "dbg2       data format:          %d\n", format);
-      fprintf(stderr, "dbg2       input file:           %s\n", read_file);
-      fprintf(stderr, "dbg2       mode:                 %d\n", mode);
-      fprintf(stderr, "dbg2       zap_beams:            %d\n", zap_beams);
-      fprintf(stderr, "dbg2       zap_beams_left:       %d\n", zap_beams_left);
-      fprintf(stderr, "dbg2       zap_beams_right:      %d\n", zap_beams_right);
-      fprintf(stderr, "dbg2       flag_distance:        %d\n", flag_distance);
-      fprintf(stderr, "dbg2       flag_distance_left:   %f\n", flag_distance_left);
-      fprintf(stderr, "dbg2       flag_distance_right:  %f\n", flag_distance_right);
-      fprintf(stderr, "dbg2       unflag_distance:      %d\n", unflag_distance);
-      fprintf(stderr, "dbg2       unflag_distance_left: %f\n", unflag_distance_left);
-      fprintf(stderr, "dbg2       unflag_distance_right:%f\n", unflag_distance_right);
-      fprintf(stderr, "dbg2       zap_rails:            %d\n", zap_rails);
-      fprintf(stderr, "dbg2       backup_dist:          %f\n", backup_dist);
-      fprintf(stderr, "dbg2       zap_max_heading_rate: %d\n", zap_max_heading_rate);
-      fprintf(stderr, "dbg2       max_heading_rate:     %f\n", max_heading_rate);
-      fprintf(stderr, "dbg2       check_slope:          %d\n", check_slope);
-      fprintf(stderr, "dbg2       maximum slope:        %f\n", slopemax);
-      fprintf(stderr, "dbg2       check_spike:          %d\n", check_spike);
-      fprintf(stderr, "dbg2       maximum spike:        %f\n", spikemax);
-      fprintf(stderr, "dbg2       spike mode:           %d\n", spike_mode);
-      fprintf(stderr, "dbg2       minimum dist:         %f\n", distancemin);
-      fprintf(stderr, "dbg2       minimum dist:         %f\n", distancemax);
-      fprintf(stderr, "dbg2       check_range:          %d\n", check_range);
-      fprintf(stderr, "dbg2       depth_low:            %f\n", depth_low);
-      fprintf(stderr, "dbg2       depth_high:           %f\n", depth_high);
-      fprintf(stderr, "dbg2       check_fraction:       %d\n", check_fraction);
-      fprintf(stderr, "dbg2       fraction_low:         %f\n", fraction_low);
-      fprintf(stderr, "dbg2       fraction_high:        %f\n", fraction_high);
-      fprintf(stderr, "dbg2       check_deviation:      %d\n", check_deviation);
-      fprintf(stderr, "dbg2       check_num_good_min:   %d\n", check_num_good_min);
-      fprintf(stderr, "dbg2       num_good_min:         %d\n", num_good_min);
-      fprintf(stderr, "dbg2       zap_long_across:      %d\n", zap_long_across);
-      fprintf(stderr, "dbg2       max_acrosstrack:      %f\n", max_acrosstrack);
-      fprintf(stderr, "dbg2       fix_edit_timestamps:  %d\n", fix_edit_timestamps);
-      fprintf(stderr, "dbg2       tolerance:            %f\n", tolerance);
-      fprintf(stderr, "dbg2       check_speed_good:     %d\n", check_speed_good);
-      fprintf(stderr, "dbg2       speed_low:            %f\n", speed_low);
-      fprintf(stderr, "dbg2       speed_high:           %f\n", speed_high);
-      fprintf(stderr, "dbg2       check_position_bounds:%d\n", check_position_bounds);
-      fprintf(stderr, "dbg2       check_zero_position:  %d\n", check_zero_position);
-      fprintf(stderr, "dbg2       check_ping_deviation: %d\n", check_ping_deviation);
-      fprintf(stderr, "dbg2       ping_deviation_tolerance:  %f\n", ping_deviation_tolerance);
-    }
-
     if (help) {
       fprintf(stderr, "\n%s\n", help_message);
       fprintf(stderr, "\nusage: %s\n", usage_message);
-      exit(error);
+      exit(MB_ERROR_NO_ERROR);
     }
+  }
+
+  /* turn on slope checking if nothing else is to be used */
+  if (check_slope == MB_NO && zap_beams == MB_NO && flag_distance == MB_NO && unflag_distance == MB_NO && zap_rails == MB_NO &&
+      check_spike == MB_NO && check_range == MB_NO && check_fraction == MB_NO && check_speed_good == MB_NO &&
+      check_deviation == MB_NO && check_num_good_min == MB_NO && check_position_bounds == MB_NO &&
+      check_zero_position == MB_NO && fix_edit_timestamps == MB_NO
+        && zap_max_heading_rate == MB_NO)
+    check_slope = MB_YES;
+
+  if (verbose >= 2) {
+    fprintf(stderr, "\ndbg2  Program <%s>\n", program_name);
+    fprintf(stderr, "dbg2  MB-system Version %s\n", MB_VERSION);
+    fprintf(stderr, "dbg2  Control Parameters:\n");
+    fprintf(stderr, "dbg2       verbose:              %d\n", verbose);
+    fprintf(stderr, "dbg2       pings:                %d\n", pings);
+    fprintf(stderr, "dbg2       lonflip:              %d\n", lonflip);
+    fprintf(stderr, "dbg2       bounds[0]:            %f\n", bounds[0]);
+    fprintf(stderr, "dbg2       bounds[1]:            %f\n", bounds[1]);
+    fprintf(stderr, "dbg2       bounds[2]:            %f\n", bounds[2]);
+    fprintf(stderr, "dbg2       bounds[3]:            %f\n", bounds[3]);
+    fprintf(stderr, "dbg2       btime_i[0]:           %d\n", btime_i[0]);
+    fprintf(stderr, "dbg2       btime_i[1]:           %d\n", btime_i[1]);
+    fprintf(stderr, "dbg2       btime_i[2]:           %d\n", btime_i[2]);
+    fprintf(stderr, "dbg2       btime_i[3]:           %d\n", btime_i[3]);
+    fprintf(stderr, "dbg2       btime_i[4]:           %d\n", btime_i[4]);
+    fprintf(stderr, "dbg2       btime_i[5]:           %d\n", btime_i[5]);
+    fprintf(stderr, "dbg2       btime_i[6]:           %d\n", btime_i[6]);
+    fprintf(stderr, "dbg2       etime_i[0]:           %d\n", etime_i[0]);
+    fprintf(stderr, "dbg2       etime_i[1]:           %d\n", etime_i[1]);
+    fprintf(stderr, "dbg2       etime_i[2]:           %d\n", etime_i[2]);
+    fprintf(stderr, "dbg2       etime_i[3]:           %d\n", etime_i[3]);
+    fprintf(stderr, "dbg2       etime_i[4]:           %d\n", etime_i[4]);
+    fprintf(stderr, "dbg2       etime_i[5]:           %d\n", etime_i[5]);
+    fprintf(stderr, "dbg2       etime_i[6]:           %d\n", etime_i[6]);
+    fprintf(stderr, "dbg2       speedmin:             %f\n", speedmin);
+    fprintf(stderr, "dbg2       timegap:              %f\n", timegap);
+    fprintf(stderr, "dbg2       data format:          %d\n", format);
+    fprintf(stderr, "dbg2       input file:           %s\n", read_file);
+    fprintf(stderr, "dbg2       mode:                 %d\n", mode);
+    fprintf(stderr, "dbg2       zap_beams:            %d\n", zap_beams);
+    fprintf(stderr, "dbg2       zap_beams_left:       %d\n", zap_beams_left);
+    fprintf(stderr, "dbg2       zap_beams_right:      %d\n", zap_beams_right);
+    fprintf(stderr, "dbg2       flag_distance:        %d\n", flag_distance);
+    fprintf(stderr, "dbg2       flag_distance_left:   %f\n", flag_distance_left);
+    fprintf(stderr, "dbg2       flag_distance_right:  %f\n", flag_distance_right);
+    fprintf(stderr, "dbg2       unflag_distance:      %d\n", unflag_distance);
+    fprintf(stderr, "dbg2       unflag_distance_left: %f\n", unflag_distance_left);
+    fprintf(stderr, "dbg2       unflag_distance_right:%f\n", unflag_distance_right);
+    fprintf(stderr, "dbg2       flag_angle:           %d\n", flag_angle);
+    fprintf(stderr, "dbg2       flag_angle_left:      %f\n", flag_angle_left);
+    fprintf(stderr, "dbg2       flag_angle_right:     %f\n", flag_angle_right);
+    fprintf(stderr, "dbg2       unflag_angle:         %d\n", unflag_angle);
+    fprintf(stderr, "dbg2       unflag_angle_left:    %f\n", unflag_angle_left);
+    fprintf(stderr, "dbg2       unflag_angle_right:   %f\n", unflag_angle_right);
+    fprintf(stderr, "dbg2       zap_rails:            %d\n", zap_rails);
+    fprintf(stderr, "dbg2       backup_dist:          %f\n", backup_dist);
+    fprintf(stderr, "dbg2       zap_max_heading_rate: %d\n", zap_max_heading_rate);
+    fprintf(stderr, "dbg2       max_heading_rate:     %f\n", max_heading_rate);
+    fprintf(stderr, "dbg2       check_slope:          %d\n", check_slope);
+    fprintf(stderr, "dbg2       maximum slope:        %f\n", slopemax);
+    fprintf(stderr, "dbg2       check_spike:          %d\n", check_spike);
+    fprintf(stderr, "dbg2       maximum spike:        %f\n", spikemax);
+    fprintf(stderr, "dbg2       spike mode:           %d\n", spike_mode);
+    fprintf(stderr, "dbg2       minimum dist:         %f\n", distancemin);
+    fprintf(stderr, "dbg2       minimum dist:         %f\n", distancemax);
+    fprintf(stderr, "dbg2       check_range:          %d\n", check_range);
+    fprintf(stderr, "dbg2       depth_low:            %f\n", depth_low);
+    fprintf(stderr, "dbg2       depth_high:           %f\n", depth_high);
+    fprintf(stderr, "dbg2       check_fraction:       %d\n", check_fraction);
+    fprintf(stderr, "dbg2       fraction_low:         %f\n", fraction_low);
+    fprintf(stderr, "dbg2       fraction_high:        %f\n", fraction_high);
+    fprintf(stderr, "dbg2       check_deviation:      %d\n", check_deviation);
+    fprintf(stderr, "dbg2       check_num_good_min:   %d\n", check_num_good_min);
+    fprintf(stderr, "dbg2       num_good_min:         %d\n", num_good_min);
+    fprintf(stderr, "dbg2       zap_long_across:      %d\n", zap_long_across);
+    fprintf(stderr, "dbg2       max_acrosstrack:      %f\n", max_acrosstrack);
+    fprintf(stderr, "dbg2       fix_edit_timestamps:  %d\n", fix_edit_timestamps);
+    fprintf(stderr, "dbg2       tolerance:            %f\n", tolerance);
+    fprintf(stderr, "dbg2       check_speed_good:     %d\n", check_speed_good);
+    fprintf(stderr, "dbg2       speed_low:            %f\n", speed_low);
+    fprintf(stderr, "dbg2       speed_high:           %f\n", speed_high);
+    fprintf(stderr, "dbg2       check_position_bounds:%d\n", check_position_bounds);
+    fprintf(stderr, "dbg2       check_zero_position:  %d\n", check_zero_position);
+    fprintf(stderr, "dbg2       check_ping_deviation: %d\n", check_ping_deviation);
+    fprintf(stderr, "dbg2       ping_deviation_tolerance:  %f\n", ping_deviation_tolerance);
+  }
+  else if (verbose == 1) {
+    fprintf(stderr, "\nProgram %s\n", program_name);
+    fprintf(stderr, "MB-system Version %s\n", MB_VERSION);
   }
 
   /* get format if required */
@@ -1020,6 +1053,74 @@ int main(int argc, char **argv) {
                 nflag++;
                 mb_ess_save(verbose, &esf, ping[irec].time_d,
                             i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_UNFLAG, &error);
+              }
+            }
+          }
+
+          /* flag outer beams by acrosstrack angle if requested */
+          if (flag_angle == MB_YES) {;
+            for (int i = 0; i < ping[irec].beams_bath; i++) {
+              double xx;
+              double yy;
+              double zz;
+              double theta;
+              double phi;
+              double pitch;
+              double roll;
+              if (mb_beam_ok(ping[irec].beamflag[i])) {
+                xx = ping[irec].bathacrosstrack[i];
+                yy = ping[irec].bathalongtrack[i];
+                zz = ping[irec].bath[i] - sonardepth;
+                mb_xyz_to_takeoff(verbose, xx, yy, zz, &theta, &phi, &error);
+                mb_takeoff_to_rollpitch(verbose, theta, phi, &pitch, &roll, &error);
+                roll = 90.0 - roll;
+                if (roll <= flag_angle_left || roll >= flag_angle_right) {
+                  find_bad = MB_YES;
+                  if (verbose >= 1)
+                    fprintf(stderr, "a: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n", ping[irec].time_i[0],
+                            ping[irec].time_i[1], ping[irec].time_i[2], ping[irec].time_i[3],
+                            ping[irec].time_i[4], ping[irec].time_i[5], ping[irec].time_i[6], i,
+                            ping[irec].bath[i]);
+                  ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+                  nouterangle++;
+                  nflag++;
+                  mb_ess_save(verbose, &esf, ping[irec].time_d,
+                              i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_FILTER, &error);
+                }
+              }
+            }
+          }
+
+          /* unflag inner beams by acrosstrack angle if requested */
+          if (unflag_angle == MB_YES) {
+            for (int i = 0; i < ping[irec].beams_bath; i++) {
+              double xx;
+              double yy;
+              double zz;
+              double theta;
+              double phi;
+              double pitch;
+              double roll;
+              if (ping[irec].beamflag[i] != MB_FLAG_NULL && !mb_beam_ok(ping[irec].beamflag[i])) {
+                xx = ping[irec].bathacrosstrack[i];
+                yy = ping[irec].bathalongtrack[i];
+                zz = ping[irec].bath[i] - sonardepth;
+                mb_xyz_to_takeoff(verbose, xx, yy, zz, &theta, &phi, &error);
+                mb_takeoff_to_rollpitch(verbose, theta, phi, &pitch, &roll, &error);
+                roll = 90.0 - roll;
+                if (roll >= unflag_angle_left && roll <= unflag_angle_right) {
+                  find_bad = MB_YES;
+                  if (verbose >= 1)
+                    fprintf(stderr, "a: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n", ping[irec].time_i[0],
+                            ping[irec].time_i[1], ping[irec].time_i[2], ping[irec].time_i[3],
+                            ping[irec].time_i[4], ping[irec].time_i[5], ping[irec].time_i[6], i,
+                            ping[irec].bath[i]);
+                  ping[irec].beamflag[i] = MB_FLAG_NONE;
+                  ninnerangle++;
+                  nflag++;
+                  mb_ess_save(verbose, &esf, ping[irec].time_d,
+                              i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, MBP_EDIT_UNFLAG, &error);
+                }
               }
             }
           }
@@ -1571,16 +1672,21 @@ int main(int argc, char **argv) {
           for (int irec = 0; irec < k; irec++) {
             for (int i = 0; i < ping[irec].beams_bath; i++) {
               if (ping[irec].beamflag[i] != ping[irec].beamflagorg[i]) {
-                if (mb_beam_ok(ping[irec].beamflag[i]))
+                if (mb_beam_ok(ping[irec].beamflag[i])) {
                   action = MBP_EDIT_UNFLAG;
-                else if (mb_beam_check_flag_filter2(ping[irec].beamflag[i]))
+                }
+                else if (mb_beam_check_flag_filter2(ping[irec].beamflag[i])) {
                   action = MBP_EDIT_FILTER;
-                else if (mb_beam_check_flag_filter(ping[irec].beamflag[i]))
+                }
+                else if (mb_beam_check_flag_filter(ping[irec].beamflag[i])) {
                   action = MBP_EDIT_FILTER;
-                else if (ping[irec].beamflag[i] != MB_FLAG_NULL)
+                }
+                else if (ping[irec].beamflag[i] != MB_FLAG_NULL) {
                   action = MBP_EDIT_FLAG;
-                else
+                }
+                else {
                   action = MBP_EDIT_ZERO;
+                }
                 mb_esf_save(verbose, &esf, ping[irec].time_d,
                             i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, action, &error);
               }
@@ -1596,6 +1702,7 @@ int main(int argc, char **argv) {
             for (int i = 0; i < 7; i++)
               ping[j].time_i[i] = ping[j + 1].time_i[i];
             ping[j].time_d = ping[j + 1].time_d;
+            ping[j].multiplicity = ping[j + 1].multiplicity;
             ping[j].navlon = ping[j + 1].navlon;
             ping[j].navlat = ping[j + 1].navlat;
             ping[j].speed = ping[j + 1].speed;
@@ -1664,6 +1771,8 @@ int main(int argc, char **argv) {
       nouterbeamstot += nouterbeams;
       nouterdistancetot += nouterdistance;
       ninnerdistancetot += ninnerdistance;
+      nouterangletot += nouterangle;
+      ninnerangletot += ninnerangle;
       nrailtot += nrail;
       nlong_acrosstot += nlong_across;
       nmax_heading_ratetot += nmax_heading_rate;
@@ -1685,6 +1794,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%d beams zapped by beam number\n", nouterbeams);
         fprintf(stderr, "%d beams zapped by distance\n", nouterdistance);
         fprintf(stderr, "%d beams unzapped by distance\n", ninnerdistance);
+        fprintf(stderr, "%d beams zapped by angle\n", nouterangle);
+        fprintf(stderr, "%d beams unzapped by angle\n", ninnerangle);
         fprintf(stderr, "%d beams zapped for too few good beams in ping\n", nmin);
         fprintf(stderr, "%d beams out of acceptable depth range\n", ndepthrange);
         fprintf(stderr, "%d beams less than minimum range\n", nminrange);
@@ -1731,6 +1842,8 @@ int main(int argc, char **argv) {
     fprintf(stderr, "%d total beams zapped by beam number\n", nouterbeamstot);
     fprintf(stderr, "%d total beams zapped by distance\n", nouterdistancetot);
     fprintf(stderr, "%d total beams unzapped by distance\n", ninnerdistancetot);
+    fprintf(stderr, "%d total beams zapped by angle\n", nouterangletot);
+    fprintf(stderr, "%d total beams unzapped by angle\n", ninnerangletot);
     fprintf(stderr, "%d total beams zapped for too few good beams in ping\n", nmintot);
     fprintf(stderr, "%d total beams out of acceptable depth range\n", ndepthrangetot);
     fprintf(stderr, "%d total beams less than minimum range\n", nminrangetot);
