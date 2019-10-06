@@ -5614,12 +5614,14 @@ int mbnavadjust_autopick(int do_vertical) {
   /* local variables */
   int status = MB_SUCCESS;
   struct mbna_crossing *crossing;
+  struct mbna_file *file1, *file2;
+  struct mbna_section *section1, *section2;
   struct mbna_tie *tie;
   double dlon, dlat, overlap_scale;
   int process;
   int nprocess;
-    int isnav1_focus, isnav2_focus;
-    double lon_focus, lat_focus;
+  int isnav1_focus, isnav2_focus;
+  double lon_focus, lat_focus;
   int i, j, k;
 
   /* print input debug statements */
@@ -5628,7 +5630,9 @@ int mbnavadjust_autopick(int do_vertical) {
     fprintf(stderr, "dbg2       do_vertical: %d\n", do_vertical);
   }
 
-  /* make sure that all sections referenced in crossings have up-to-date contours made */
+  // loop over all crossings, autopick those that are in the current view,
+  // unanalyzed, have sufficient overlap, and for which both sections are
+  // sufficiently long (track length >= 0.25 * project->section_length)
   if (project.open == MB_YES && project.num_crossings > 0) {
     /* set message dialog on */
     sprintf(message, "Autopicking offsets...");
@@ -5644,7 +5648,7 @@ int mbnavadjust_autopick(int do_vertical) {
       /* get structure */
       crossing = &(project.crossings[i]);
 
-      /* check if processing should proceed */
+      // check crossing is in current view and has sufficient overlap
       process = MB_NO;
       if (crossing->status == MBNA_CROSSING_STATUS_NONE && crossing->overlap >= MBNA_MEDIOCREOVERLAP_THRESHOLD) {
         if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS) {
@@ -5773,10 +5777,22 @@ int mbnavadjust_autopick(int do_vertical) {
         else
           process = MB_YES;
       }
-      /* fprintf(stderr,"AUTOPICK crossing:%d do_vertical:%d process:%d\n",i,do_vertical,process); */
+
+      // check if section track lengths are long enough */
+      if (process == MB_YES) {
+        file1 = &project.files[crossing->file_id_1];
+        section1 = &file1->sections[crossing->section_1];
+        file2 = &project.files[crossing->file_id_2];
+        section2 = &file2->sections[crossing->section_2];
+        if (section1->distance < 0.25 * project.section_length
+            || section2->distance < 0.25 * project.section_length) {
+          process = MB_NO;
+        }
+      }
 
       /* load the crossing */
       if (process == MB_YES) {
+        /* fprintf(stderr,"AUTOPICK crossing:%d do_vertical:%d process:%d\n",i,do_vertical,process); */
         mbna_current_crossing = i;
         mbna_file_id_1 = crossing->file_id_1;
         mbna_section_1 = crossing->section_1;

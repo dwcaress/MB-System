@@ -2998,10 +2998,17 @@ int mbnavadjust_section_load(int verbose, struct mbna_project *project,
       if (status == MB_FAILURE) {
         status = MB_SUCCESS;
         *error = MB_ERROR_NO_ERROR;
+        fprintf(stderr, "Creating triangles for %4.4d:%2.2d\n", file_id, section_id);
         status = mb_triangulate(verbose, swath, error);
+        fprintf(stderr, " - Write triangles for %4.4d:%2.2d - %d pts %d triangles\n",
+                  file_id, section_id, swath->npts, swath->ntri);
         if (status == MB_SUCCESS) {
           status = mbnavadjust_write_triangles(verbose, project, file_id, section_id, swath, error);
         }
+      }
+      else {
+        fprintf(stderr, "Read triangles for %4.4d:%2.2d - %d pts %d triangles\n",
+                  file_id, section_id, swath->npts, swath->ntri);
       }
     }
   }

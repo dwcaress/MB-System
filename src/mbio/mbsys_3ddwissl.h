@@ -375,14 +375,14 @@
  * front of the glass on each optical head. Here are the distance offsets of
  * those points to the sensor reference point:
  *
- *   Head A (aft mounted, pointed to port):
+ *   Head A (aft mounted, pointed to starboard):
  *     dx (acrosstrack): -0.48126 inches = -0.012224004 m
  *     dy (alongtrack):  -4.73551 inches = -0.120281954 m
  *     dz (vertical:     -2.44115 inches = -0.062005210 m
  *     droll (in xz plane, + to starboard): +22.08 degrees
  *     dpitch (in yz plane, + forward): -4.68
  *
- *   Head B (forward mounted, pointed to starboard):
+ *   Head B (forward mounted, pointed to port):
  *     dx (acrosstrack): +0.48126 inches = +0.012224004 m
  *     dy (alongtrack):  +4.73551 inches = +0.120281954 m
  *     dz (vertical:     -2.44115 inches = -0.062005210 m

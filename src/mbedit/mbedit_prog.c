@@ -4921,8 +4921,8 @@ int mbedit_plot_beam(int iping, int jbeam) {
 				beam_color = GREEN;
 			else {
 				beam_color = RED;
-fprintf(stderr, "Beam:%d flag:%u priority:%d detect:%d\n",
-jbeam,ping[iping].beamflag[jbeam],ping[iping].priority[jbeam],ping[iping].detect[jbeam]);
+//fprintf(stderr, "Beam:%d flag:%u priority:%d detect:%d\n",
+//jbeam,ping[iping].beamflag[jbeam],ping[iping].priority[jbeam],ping[iping].detect[jbeam]);
       }
 		}
 		else if (show_mode == MBEDIT_SHOW_DETECT) {

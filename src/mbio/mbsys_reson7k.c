@@ -5390,6 +5390,20 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                                                   &(rx_align.heading), &(rx_align.roll), &(rx_align.pitch), error);
         }
 
+        // deal with reverse mounted tx array
+        double tx_steer_sign = 1.0;
+        if (tx_align.heading > 90.0 && tx_align.heading < 270.0) {
+            tx_align.heading -= 180.0;
+            tx_steer_sign = -1.0;
+        }
+
+        // deal with reverse mounted rx array
+        double rx_steer_sign = 1.0;
+        if (rx_align.heading > 90.0 && rx_align.heading < 270.0) {
+            rx_align.heading -= 180.0;
+            rx_steer_sign = -1.0;
+        }
+
         /* loop over detections as available - the 7k format has used several
            different records over the years, so there are several different
            cases that must be handled */
@@ -5404,45 +5418,45 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
             bathymetry->range[i] = v2rawdetection->detection_point[j] / v2rawdetection->sampling_rate;
             bathymetry->quality[i] = v2rawdetection->quality[j];
 
-            /* get roll at bottom return time for this beam */
-                        if (pars->n_attitude > 0) {
-                            interp_status =
-                                mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
-                                 time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
-                        }
-                        else {
-                            beamroll = roll;
-                        }
+              /* get roll at bottom return time for this beam */
+              if (pars->n_attitude > 0) {
+                  interp_status =
+                      mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_roll - 1, pars->n_attitude,
+                       time_d + bathymetry->range[i], &beamroll, &jattitude, &interp_error);
+              }
+              else {
+                  beamroll = roll;
+              }
 
-            /* get pitch at bottom return time for this beam */
-                        if (pars->n_attitude > 0) {
-                            interp_status =
-                                mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
-                                 time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
-                        }
-                        else {
-                            beampitch = pitch;
-                        }
+              /* get pitch at bottom return time for this beam */
+              if (pars->n_attitude > 0) {
+                  interp_status =
+                      mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude,
+                       time_d + bathymetry->range[i], &beampitch, &jattitude, &interp_error);
+              }
+              else {
+                  beampitch = pitch;
+              }
 
-            /* get heading at bottom return time for this beam */
-                        if (pars->n_heading > 0) {
-                            interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
-                                                     pars->n_heading, time_d + bathymetry->range[i], &beamheading,
-                                                     &jheading, &interp_error);
-                        }
-                        else {
-                            beamheading = heading;
-                        }
+              /* get heading at bottom return time for this beam */
+              if (pars->n_heading > 0) {
+                  interp_status = mb_linear_interp_heading(verbose, pars->heading_time_d - 1, pars->heading_heading - 1,
+                                           pars->n_heading, time_d + bathymetry->range[i], &beamheading,
+                                           &jheading, &interp_error);
+              }
+              else {
+                  beamheading = heading;
+              }
 
-            /* get heave at bottom return time for this beam */
-                        if (pars->n_attitude > 0) {
-                            interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
-                                                         pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
-                                                         &jattitude, &interp_error);
-                        }
-                        else {
-                            beamheave = heave;
-                        }
+              /* get heave at bottom return time for this beam */
+              if (pars->n_attitude > 0) {
+                  interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_heave - 1,
+                                               pars->n_attitude, time_d + bathymetry->range[i], &beamheave,
+                                               &jattitude, &interp_error);
+              }
+              else {
+                  beamheave = heave;
+              }
 
             /* calculate beam angles for raytracing using Jon Beaudoin's code based on:
                 Beaudoin, J., Hughes Clarke, J., and Bartlett, J. Application of
@@ -5458,26 +5472,14 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                 3) flip the sign of the beam steering angle from that array
                     (reverse TX means flip sign of TX steer, reverse RX
                     means flip sign of RX steer) */
-            tx_steer = RTD * v2rawdetection->tx_angle;
+            tx_steer = tx_steer_sign * RTD * v2rawdetection->tx_angle;
             tx_orientation.roll = roll;
             tx_orientation.pitch = pitch;
             tx_orientation.heading = heading;
-                        /*if (tx_align.heading > 90.0 && tx_align.heading < 270.0) {
-                            tx_align.heading -= 180.0;
-                            tx_align.roll *= -1.0;
-                            tx_align.pitch *= -1.0;
-                            tx_steer *= -1.0;
-                        }*/
-            rx_steer = -RTD * v2rawdetection->rx_angle[j];
+            rx_steer = -rx_steer_sign * RTD * v2rawdetection->rx_angle[j];
             rx_orientation.roll = beamroll;
             rx_orientation.pitch = beampitch;
             rx_orientation.heading = beamheading;
-                        /*if (rx_align.heading > 90.0 && rx_align.heading < 270.0) {
-                            rx_align.heading -= 180.0;
-                            rx_align.roll *= -1.0;
-                            rx_align.pitch *= -1.0;
-                            rx_steer *= -1.0;
-                        }*/
             reference_heading = heading;
 
             status = mb_beaudoin(verbose, tx_align, tx_orientation, tx_steer, rx_align, rx_orientation, rx_steer,
@@ -5574,11 +5576,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                 3) flip the sign of the beam steering angle from that array
                     (reverse TX means flip sign of TX steer, reverse RX
                     means flip sign of RX steer) */
-            tx_steer = RTD * v2detection->angle_y[j];
+            tx_steer = tx_steer_sign * RTD * v2detection->angle_y[j];
             tx_orientation.roll = roll;
             tx_orientation.pitch = pitch;
             tx_orientation.heading = heading;
-            rx_steer = -RTD * v2detection->angle_x[j];
+            rx_steer = -rx_steer_sign * RTD * v2detection->angle_x[j];
             rx_orientation.roll = beamroll;
             rx_orientation.pitch = beampitch;
             rx_orientation.heading = beamheading;
@@ -5674,11 +5676,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                 3) flip the sign of the beam steering angle from that array
                     (reverse TX means flip sign of TX steer, reverse RX
                     means flip sign of RX steer) */
-            tx_steer = RTD * v2detection->angle_y[i];
+            tx_steer = tx_steer_sign * RTD * v2detection->angle_y[i];
             tx_orientation.roll = roll;
             tx_orientation.pitch = pitch;
             tx_orientation.heading = heading;
-            rx_steer = -RTD * v2detection->angle_x[i];
+            rx_steer = -rx_steer_sign * RTD * v2detection->angle_x[i];
             rx_orientation.roll = beamroll;
             rx_orientation.pitch = beampitch;
             rx_orientation.heading = beamheading;
@@ -5775,11 +5777,11 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
                   3) flip the sign of the beam steering angle from that array
                       (reverse TX means flip sign of TX steer, reverse RX
                       means flip sign of RX steer) */
-              tx_steer = RTD * beamgeometry->angle_alongtrack[i];
+              tx_steer = tx_steer_sign * RTD * beamgeometry->angle_alongtrack[i];
               tx_orientation.roll = roll;
               tx_orientation.pitch = pitch;
               tx_orientation.heading = heading;
-              rx_steer = -RTD * beamgeometry->angle_acrosstrack[i];
+              rx_steer = -rx_steer_sign * RTD * beamgeometry->angle_acrosstrack[i];
               rx_orientation.roll = beamroll;
               rx_orientation.pitch = beampitch;
               rx_orientation.heading = beamheading;
