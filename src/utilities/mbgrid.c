@@ -135,7 +135,6 @@ double erfcc(double x) {
 	                  t * (0.09678418 +
 	                       t * (-0.18628806 +
 	                            t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
-	/* fprintf(outfp, "x:%f ans:%f\n", x, ans); */
 	return x >= 0.0 ? ans : 2.0 - ans;
 }
 /*--------------------------------------------------------------------*/
@@ -1136,13 +1135,6 @@ int main(int argc, char **argv) {
 			else
 				strcpy(units, "unknown");
 		}
-
-		/* fprintf(outfp," Projected coordinates on: proj_status:%d  projection:%s\n",
-		proj_status, projection_id);
-		fprintf(outfp," Lon Lat Bounds: %f %f %f %f\n",
-		obnd[0], obnd[1], obnd[2], obnd[3]);
-		fprintf(outfp," XY Bounds: %f %f %f %f\n",
-		gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 	}
 
 	/* deal with no projection */
@@ -1914,8 +1906,6 @@ int main(int argc, char **argv) {
 									/* get position in grid */
 									ix = (bathlon[ib] - wbnd[0] + dx) / sdx;
 									iy = (bathlat[ib] - wbnd[2] + dy) / sdy;
-									/*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n",
-									ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 
 									/* process if in region of interest */
 									if (ix >= 0 && ix < sxdim && iy >= 0 && iy < sydim) {
@@ -2057,11 +2047,6 @@ int main(int argc, char **argv) {
 		ddx = (float)sdx;
 		ddy = (float)sdy;
 		fprintf(outfp, "\nDoing Zgrid spline interpolation with %d data points...\n", ndata);
-		/*for (i=0;i<ndata/3;i++)
-		{
-		if (sdata[3*i+2]>2000.0)
-		fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
-		}*/
 		mb_zgrid2(sgrid, &sxdim, &sydim, &xmin, &ymin, &ddx, &ddy, sdata, &ndata, work1, work2, work3, &cay, &sclip);
 #endif
 
@@ -2076,14 +2061,7 @@ int main(int argc, char **argv) {
 #endif
 				if (cnt[kgrid] == 0) {
 					gridsmall[kgrid] = sgrid[kint];
-					/*fprintf(stderr,"YES i:%d j:%d kgrid:%d kint:%d sgrid:%f gridsmall:%f\n",
-					i,j,kgrid,kint,sgrid[kint],gridsmall[kgrid]);*/
 				}
-				/*		else
-				            {
-				fprintf(stderr,"NO  i:%d j:%d kgrid:%d kint:%d sgrid:%f gridsmall:%f\n",
-				i,j,kgrid,kint,sgrid[kint],gridsmall[kgrid]);
-				            }*/
 			}
 
 /* deallocate the interpolation arrays */
@@ -2098,41 +2076,6 @@ int main(int argc, char **argv) {
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&work3, &error);
 #endif
 		mb_freed(verbose, __FILE__, __LINE__, (void **)&sgrid, &error);
-
-		/*for (i=0;i<sxdim;i++)
-		    for (j=0;j<sydim;j++)
-		        {
-		        kgrid = i * sydim + j;
-		        kout = i*sydim + j;
-		        output[kout] = (float) gridsmall[kgrid];
-		        if (gridsmall[kgrid] >= clipvalue)
-		            output[kout] = outclipvalue;
-		        }
-		zclip = clipvalue;
-		zmin = zclip;
-		zmax = zclip;
-		for (i=0;i<sxdim;i++)
-		    for (j=0;j<sydim;j++)
-		        {
-		        kgrid = i * sydim + j;
-		        if (zmin == zclip
-		            && gridsmall[kgrid] < zclip)
-		            zmin = gridsmall[kgrid];
-		        if (zmax == zclip
-		            && gridsmall[kgrid] < zclip)
-		            zmax = gridsmall[kgrid];
-		        if (gridsmall[kgrid] < zmin && gridsmall[kgrid] < zclip)
-		            zmin = gridsmall[kgrid];
-		        if (gridsmall[kgrid] > zmax && gridsmall[kgrid] < zclip)
-		            zmax = gridsmall[kgrid];
-		        }
-		strcpy(ofile,fileroot);
-		strcat(ofile,"_lorez.grd");
-		status = write_cdfgrd(verbose,ofile,output,sxdim,sydim,
-		    wbnd[0],wbnd[1],wbnd[2],wbnd[3],
-		    zmin,zmax,sdx,sdy,
-		    xlabel,ylabel,zlabel,title,projection_id,
-		    argc,argv,&error);*/
 
 		/* do second pass footprint gridding using slope estimates from first pass interpolated grid */
 
@@ -2288,8 +2231,6 @@ int main(int argc, char **argv) {
 									/* get position in grid */
 									ix = (bathlon[ib] - wbnd[0] + 0.5 * dx) / dx;
 									iy = (bathlat[ib] - wbnd[2] + 0.5 * dy) / dy;
-									/*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n",
-									ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 
 									/* deal with point data without footprint */
 									if (topo_type != MB_TOPOGRAPHY_TYPE_MULTIBEAM) {
@@ -2422,10 +2363,6 @@ int main(int argc, char **argv) {
 												foot_hwidth = (bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) -
 												              foot_lateral;
 												foot_hlength = foot_range * tan(DTR * foot_dphi);
-												/* fprintf(outfp, "bath:%f sonardepth:%f dx:%f dy:%f lateral:%f range:%f theta:%f
-												dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n", bath[ib],sonardepth,foot_dx, foot_dy,
-												foot_lateral, foot_range,
-												foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
 
 												/* get range of bins around footprint to examine */
 												if (use_projection == MB_YES) {
@@ -2442,14 +2379,10 @@ int main(int argc, char **argv) {
 												}
 												foot_dix = 2 * MAX(foot_wix, foot_lix);
 												foot_diy = 2 * MAX(foot_wiy, foot_liy);
-												/*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
-												fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d
-												foot_diy:%d\n", foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
 												ix1 = MAX(ix - foot_dix, 0);
 												ix2 = MIN(ix + foot_dix, gxdim - 1);
 												iy1 = MAX(iy - foot_diy, 0);
 												iy2 = MIN(iy + foot_diy, gydim - 1);
-												/*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
 
 												/* loop over neighborhood of bins */
 												for (ii = ix1; ii <= ix2; ii++)
@@ -2461,9 +2394,6 @@ int main(int argc, char **argv) {
 
 														/* get depth or topo value at this point using slope estimate */
 														sbath = topofactor * bath[ib] + dzdx * xx + dzdy * yy;
-														/*fprintf(stderr,"ib:%d ii:%d jj:%d bath:%f %f   diff:%f   xx:%f yy:%f
-														dzdx:%f dzdy:%f\n", ib,ii,jj,topofactor * bath[ib],sbath,topofactor *
-														bath[ib]-sbath,xx,yy,dzdx,dzdy);*/
 
 														/* get center and corners of bin in meters from sounding center */
 														if (use_projection == MB_YES) {
@@ -2482,9 +2412,6 @@ int main(int argc, char **argv) {
 														xx2 = xx0 + bdx;
 														yy1 = yy0 - bdy;
 														yy2 = yy0 + bdy;
-														/*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy,
-														xx, yy); fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n", xx0, yy0,
-														xx1, yy1, xx2, yy2);*/
 
 														/* rotate center and corners of bin to footprint coordinates */
 														prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
@@ -2570,10 +2497,6 @@ int main(int argc, char **argv) {
 					grid[kgrid] = clipvalue;
 					sigma[kgrid] = 0.0;
 				}
-				/* fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
-				i,j,kgrid,
-				grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
-				num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 			}
 
 		/***** end of weighted footprint slope gridding *****/
@@ -2738,8 +2661,6 @@ int main(int argc, char **argv) {
 									/* get position in grid */
 									ix = (bathlon[ib] - wbnd[0] + 0.5 * dx) / dx;
 									iy = (bathlat[ib] - wbnd[2] + 0.5 * dy) / dy;
-									/*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n",
-									ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 
 									/* check if within allowed time */
 									if (check_time == MB_YES) {
@@ -2832,10 +2753,6 @@ int main(int argc, char **argv) {
 												foot_hwidth = (bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) -
 												              foot_lateral;
 												foot_hlength = foot_range * tan(DTR * foot_dphi);
-												/* fprintf(outfp, "bath:%f sonardepth:%f dx:%f dy:%f lateral:%f range:%f theta:%f
-												dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n", bath[ib],sonardepth,foot_dx, foot_dy,
-												foot_lateral, foot_range,
-												foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
 
 												/* get range of bins around footprint to examine */
 												if (use_projection == MB_YES) {
@@ -2852,14 +2769,10 @@ int main(int argc, char **argv) {
 												}
 												foot_dix = 2 * MAX(foot_wix, foot_lix);
 												foot_diy = 2 * MAX(foot_wiy, foot_liy);
-												/*fprintf(outfp, "foot_hwidth:%f foot_hlength:%f\n", foot_hwidth, foot_hlength);
-												fprintf(outfp, "foot_wix:%d foot_wiy:%d  foot_lix:%d foot_liy:%d    foot_dix:%d
-												foot_diy:%d\n", foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
 												ix1 = MAX(ix - foot_dix, 0);
 												ix2 = MIN(ix + foot_dix, gxdim - 1);
 												iy1 = MAX(iy - foot_diy, 0);
 												iy2 = MIN(iy + foot_diy, gydim - 1);
-												/*fprintf(outfp, "ix1:%d ix2:%d iy1:%d iy2:%d\n", ix1, ix2, iy1, iy2);*/
 
 												/* loop over neighborhood of bins */
 												for (ii = ix1; ii <= ix2; ii++)
@@ -2871,8 +2784,6 @@ int main(int argc, char **argv) {
 
 														/* get depth or topo value at this point */
 														sbath = topofactor * bath[ib];
-														/*fprintf(stderr,"ib:%d ii:%d jj:%d bath:%f %f   diff:%f   xx:%f yy:%f\n",
-														ib,ii,jj,topofactor * bath[ib],sbath,topofactor * bath[ib]-sbath,xx,yy);*/
 
 														/* get center and corners of bin in meters from sounding center */
 														if (use_projection == MB_YES) {
@@ -2891,9 +2802,6 @@ int main(int argc, char **argv) {
 														xx2 = xx0 + bdx;
 														yy1 = yy0 - bdy;
 														yy2 = yy0 + bdy;
-														/*fprintf(outfp, "ii:%d jj:%d ix:%d iy:%d xx:%f yy:%f\n", ii, jj, ix, iy,
-														xx, yy); fprintf(outfp, "p0: %f %f   p1: %f %f   p2: %f %f\n", xx0, yy0,
-														xx1, yy1, xx2, yy2);*/
 
 														/* rotate center and corners of bin to footprint coordinates */
 														prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
@@ -2995,10 +2903,6 @@ int main(int argc, char **argv) {
 					grid[kgrid] = clipvalue;
 					sigma[kgrid] = 0.0;
 				}
-				/* fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
-				i,j,kgrid,
-				grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
-				num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 			}
 
 		/***** end of weighted footprint gridding *****/
@@ -3487,10 +3391,6 @@ int main(int argc, char **argv) {
 				}
 				else
 					grid[kgrid] = clipvalue;
-				/*			fprintf(outfp,"%d %d %d  %f %f %d %f %f\n",
-				                i,j,kgrid,
-				                wbnd[0] + i*dx, wbnd[2] + j*dy,
-				                cnt[kgrid],grid[kgrid],sigma[kgrid]);*/
 			}
 
 		/* now deallocate space for the data */
@@ -4064,10 +3964,6 @@ int main(int argc, char **argv) {
 					grid[kgrid] = clipvalue;
 					sigma[kgrid] = 0.0;
 				}
-				/*fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
-				    i,j,kgrid,
-				    grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
-				    num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 			}
 
 		/***** end of weighted mean gridding *****/
@@ -4866,10 +4762,6 @@ int main(int argc, char **argv) {
 					grid[kgrid] = clipvalue;
 					sigma[kgrid] = 0.0;
 				}
-				/*fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
-				    i,j,kgrid,
-				    grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
-				    num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 			}
 
 		/***** end of weighted mean gridding *****/

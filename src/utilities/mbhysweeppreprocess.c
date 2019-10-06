@@ -1160,13 +1160,11 @@ int main(int argc, char **argv) {
 
 			/* handle unknown data */
 			else if (status == MB_SUCCESS) {
-				/*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
 				nrec_other++;
 			}
 
 			/* handle read error */
 			else {
-				/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
 			}
 
 			if (verbose >= 2) {
@@ -2123,12 +2121,10 @@ int main(int argc, char **argv) {
 
 				/* handle unknown data */
 				else if (status == MB_SUCCESS) {
-					/*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
 				}
 
 				/* handle read error */
 				else {
-					/*fprintf(stderr,"READ FAILURE: status:%d error:%d kind:%d\n",status,error,kind);*/
 				}
 
 				if (verbose >= 2) {

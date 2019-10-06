@@ -375,8 +375,6 @@ int main(int argc, char **argv) {
 		for (ifield = 0; ifield < nfields; ifield++) {
 			if (fields[ifield].type == TYPE_DOUBLE) {
 				mb_get_binary_double(MB_YES, &buffer[fields[ifield].index], &dvalue);
-				// fprintf(stderr,"irecord:%d ifield:%d TYPE_DOUBLE name:%s dvalue:%f\n",
-				//	irecord, ifield, fields[ifield].name, dvalue);
 				dvalue *= fields[ifield].scale;
 				if ((strcmp(fields[ifield].name, "mHeadK") == 0 || strcmp(fields[ifield].name, "mYawK") == 0) &&
 				    angles_in_degrees == MB_YES && dvalue < 0.0)
@@ -420,8 +418,6 @@ int main(int argc, char **argv) {
 			}
 			else if (fields[ifield].type == TYPE_INTEGER) {
 				mb_get_binary_int(MB_YES, &buffer[fields[ifield].index], &ivalue);
-				// fprintf(stderr,"irecord:%d ifield:%d TYPE_INTEGER name:%s ivalue:%d\n",
-				//	irecord, ifield, fields[ifield].name, ivalue);
 				if (strcmp(fields[ifield].name, "mCyclesK") == 0)
 					mCyclesK[irecord] = ivalue;
 				if (strcmp(fields[ifield].name, "mModeK") == 0)
@@ -431,8 +427,6 @@ int main(int argc, char **argv) {
 			}
 			else if (fields[ifield].type == TYPE_TIMETAG) {
 				mb_get_binary_double(MB_YES, &buffer[fields[ifield].index], &dvalue);
-				// fprintf(stderr,"irecord:%d ifield:%d TYPE_TIMETAG name:%s dvalue:%f\n",
-				//	irecord, ifield, fields[ifield].name, dvalue);
 				if (strcmp(fields[ifield].name, "time") == 0)
 					time[irecord] = dvalue;
 			}
@@ -444,9 +438,6 @@ int main(int argc, char **argv) {
 			}
 		}
 
-		//		fprintf(stderr,"%7d %16.6f %14.9f %14.9f %10.3f %10.3f %7d %7d\n",
-		//				irecord, time[irecord], mLonK[irecord], mLatK[irecord],
-		//				mDepthK[irecord], mHeadK[irecord], mModeK[irecord], mMonK[irecord]);
 		/* increment record */
 		irecord++;
 	}

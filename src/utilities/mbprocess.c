@@ -148,10 +148,6 @@ int check_ss_for_bath(int verbose, int nbath, char *beamflag, double *bath, doub
 			while (ibath < ilast - 1 && (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]) ||
 			                             (mb_beam_ok(beamflag[ibath + 1]) && ssacrosstrack[iss] > bathacrosstrack[ibath + 1])))
 				ibath++;
-			/*fprintf(stderr,"iss:%d ibath:%d %f %f  %f %f  ss: %f %f\n",
-			iss,ibath,bath[ibath],bath[ibath+1],
-			bathacrosstrack[ibath],bathacrosstrack[ibath+1],
-			ss[iss],ssacrosstrack[iss]);*/
 
 			/* now zero sidescan if not surrounded by good bathy */
 			if (!mb_beam_ok(beamflag[ibath]) || !mb_beam_ok(beamflag[ibath + 1]))
@@ -377,8 +373,6 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 }
 /*--------------------------------------------------------------------*/
 int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int action, int *error) {
-	//	int time_i[7];
-
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -388,11 +382,6 @@ int mbprocess_save_edit(int verbose, FILE *esffp, double time_d, int beam, int a
 		fprintf(stderr, "dbg2       beam:            %d\n", beam);
 		fprintf(stderr, "dbg2       action:          %d\n", action);
 	}
-	// mb_get_date(verbose,time_d,time_i);
-	// fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d action:%d\n",
-	// time_d,time_i[0],time_i[1],time_i[2],
-	// time_i[3],time_i[4],time_i[5],time_i[6],
-	// beam,action);
 
 	int status = MB_SUCCESS;
 
@@ -4618,8 +4607,6 @@ int main(int argc, char **argv) {
 				              then insert the corrected timestamps
 				              into processed data */
 				if (process.mbp_kluge005 == MB_YES && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA && nnav > 0) {
-					/*fprintf(stderr,"time_d:%f ntime[%d]:%f kluge005:%d\n",
-					time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 					time_d = ntime[idata - 1];
 					mb_get_date(verbose, time_d, time_i);
 				}
@@ -4800,8 +4787,6 @@ int main(int argc, char **argv) {
 					mb_lever(verbose, process.mbp_sonar_offsetx, process.mbp_sonar_offsety, process.mbp_sonar_offsetz,
 					         (double)0.0, (double)0.0, (double)0.0, process.mbp_vru_offsetx, process.mbp_vru_offsety,
 					         process.mbp_vru_offsetz, alpha, beta, &lever_x, &lever_y, &lever_heave, &error);
-					/*fprintf(stderr, "alpha:%f beta:%f lever:%f\n",
-					alpha, beta, lever_heave);*/
 				}
 
 				/*--------------------------------------------
@@ -4963,17 +4948,12 @@ int main(int argc, char **argv) {
 
 					/* apply kluge006 - resets draft without changing bathymetry */
 					if (process.mbp_kluge006 == MB_YES && kind == MB_DATA_DATA) {
-						/*fprintf(stderr,"RESET Draft: %f %f %f\n",draft_org,draft,sonardepth);*/
 						draft_org = draft;
 					}
 
 					/* if svp specified recalculate bathymetry
 					    by raytracing  */
 					if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE) {
-						/* fprintf(stderr,"\nPING: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f \n",
-						time_i[0], time_i[1], time_i[2],
-						time_i[3], time_i[4], time_i[5], time_i[6],
-						time_d); */
 						/* loop over the beams */
 						for (int i = 0; i < nbeams; i++) {
 							if (ttimes[i] > 0.0) {
@@ -5042,8 +5022,6 @@ int main(int argc, char **argv) {
 										        time_i[2], time_i[3], time_i[4], time_i[5], time_i[6]);
 									}
 								}
-								/* fprintf(stderr,"draft_org:%f draft:%f depth_offset_use:%f static_shift:%f\n",
-								draft_org,draft,depth_offset_use,static_shift);*/
 
 								/* raytrace */
 								status = mb_rt(verbose, rt_svp, (depth_offset_use - static_shift), angles[i], 0.5 * ttimes[i],
@@ -5052,21 +5030,6 @@ int main(int argc, char **argv) {
 
 								/* apply static shift if any */
 								zz += static_shift;
-
-								/* fprintf(stderr,"PING:%4d %2d %2d %2d:%2d:%2d.%6d BEAM:%d depth_offset_use:%f draft:%f bheave:%f
-								lever_heave:%f angle:%f tt:%f mode:%d ssv:%f null:%f xx:%f zz:%f tt:%f\n", time_i[0], time_i[1],
-								time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],i,
-								depth_offset_use,draft,bheave[i],lever_heave,angles[i], 0.5*ttimes[i],process.mbp_angle_mode, ssv,
-								angles_null[i], xx,zz,ttime); */
-								/* fprintf(stderr, "%d %d : heave:%f draft:%f %f depth_offset:%f static:%f zz:%f\n",
-								idata, i, bheave[i], draft, draft_org, depth_offset_use, static_shift, zz);*/
-								/* fprintf(stderr,"COMPARE %d X:%f %f Y:%f %f Z:%f %f     %.3f %.3f %.3f\n",
-								i,bathacrosstrack[i],xx*cos(DTR*angles_forward[i]),
-								bathalongtrack[i],xx*sin(DTR*angles_forward[i]),
-								bath[i],zz,
-								bathacrosstrack[i]-xx*cos(DTR*angles_forward[i]),
-								bathalongtrack[i]-xx*sin(DTR*angles_forward[i]),
-								bath[i]-zz); */
 
 								/* get alongtrack and acrosstrack distances
 								    and depth */
@@ -5185,15 +5148,12 @@ int main(int argc, char **argv) {
 					         process.mbp_lever_mode == MBP_LEVER_ON || process.mbp_navadj_mode == MBP_NAVADJ_LLZ) {
 						/* get draft change */
 						depth_offset_change = draft - draft_org + lever_heave;
-						// fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  tide:%f depth_offset_change:%f\n",
-						// time_d, draft, draft_org, lever_heave, tideval, depth_offset_change);
 
 						/* loop over the beams */
 						for (int i = 0; i < nbath; i++) {
 							if (beamflag[i] != MB_FLAG_NULL) {
 								/* apply transducer depth change to depths */
 								bath[i] += depth_offset_change;
-								/* fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
 
 								/* output some debug values */
 								if (verbose >= 5)
@@ -5211,9 +5171,6 @@ int main(int argc, char **argv) {
 								}
 							}
 						}
-						/*fprintf(stderr, "time:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d draft:%f depth_offset_change:%f\n",
-						time_i[0], time_i[1], time_i[2], time_i[3],
-						time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					}
 
 					/*--------------------------------------------
@@ -5508,12 +5465,6 @@ int main(int argc, char **argv) {
 						status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
 						                       process.mbp_ampcorr_angle, &reference_amp_stbd, &error);
 						reference_amp = 0.5 * (reference_amp_port + reference_amp_stbd);
-						/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-						itable, ampcorrtableuse.time_d,
-						ampcorrtableuse.nangle);
-						for (i=0;i<ampcorrtableuse.nangle;i++)
-						fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
-						i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
 
 						/* get seafloor slopes */
 						for (int i = 0; i < namp; i++) {
@@ -5544,13 +5495,10 @@ int main(int argc, char **argv) {
 										angle += RTD * atan(slope);
 									status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle,
 									                       ampcorrtableuse.amplitude, angle, &correction, &error);
-									/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f",
-									j, i, slope, angle, correction, reference_amp, amp[i]);*/
 									if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
 										amp[i] = amp[i] - correction + reference_amp;
 									else
 										amp[i] = amp[i] / correction * reference_amp;
-									/*fprintf(stderr, " amp: %f\n", amp[i]);*/
 								}
 							}
 						}
@@ -5568,13 +5516,6 @@ int main(int argc, char **argv) {
 						status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
 						                       process.mbp_sscorr_angle, &reference_amp_stbd, &error);
 						reference_amp = 0.5 * (reference_amp_port + reference_amp_stbd);
-
-						/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-						itable, sscorrtableuse.time_d,
-						sscorrtableuse.nangle);
-						for (i=0;i<sscorrtableuse.nangle;i++)
-						fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
-						i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]);*/
 
 						/* get seafloor slopes */
 						for (int i = 0; i < nss; i++) {
@@ -5601,22 +5542,15 @@ int main(int argc, char **argv) {
 								if (bathy > 0.0) {
 									altitude_use = bathy - sonardepth;
 									angle = RTD * atan(ssacrosstrack[i] / altitude_use);
-									/*fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f sonardepth:%f bathy:%f altitude_use:%f
-									angle:%f\n", time_d, i, ssacrosstrack[i], altitude, sonardepth, bathy, altitude_use, angle);*/
 									if (process.mbp_sscorr_slope != MBP_SSCORR_IGNORESLOPE) {
-										/*fprintf(stderr,"SLOPECALC: time_d:%f i:%d angle:%f ",time_d,i,angle);*/
 										angle += RTD * atan(slope);
-										/*fprintf(stderr,"slope:%f slopeangle:%f angle:%f\n",slope,RTD * atan(slope),angle);*/
 									}
 									status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle,
 									                       sscorrtableuse.amplitude, angle, &correction, &error);
-									/*fprintf(stderr, "ping:%d pixel:%d altitude_use:%f slope:%f angle:%f corr:%f reference:%f ss:
-									   %f", idata, i, altitude_use, slope, angle, correction, reference_amp, ss[i]);*/
 									if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 										ss[i] = ss[i] - correction + reference_amp;
 									else
 										ss[i] = ss[i] / correction * reference_amp;
-									/*fprintf(stderr, " ss: %f\n", ss[i]);*/
 								}
 							}
 						}
@@ -5647,12 +5581,6 @@ int main(int argc, char **argv) {
 						status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle, ampcorrtableuse.amplitude,
 						                       process.mbp_ampcorr_angle, &reference_amp_stbd, &error);
 						reference_amp = 0.5 * (reference_amp_port + reference_amp_stbd);
-						/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-						itable, ampcorrtableuse.time_d,
-						ampcorrtableuse.nangle);
-						for (i=0;i<ampcorrtableuse.nangle;i++)
-						fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
-						i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
 
 						/* get seafloor slopes */
 						for (int i = 0; i < namp; i++) {
@@ -5707,12 +5635,6 @@ int main(int argc, char **argv) {
 									if (bathacrosstrack[i] < 0.0)
 										angle = -angle;
 
-									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
-									i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan(bathacrosstrack[i] /
-									(sonardepth + grid.data[kgrid]))); fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
-									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
-									r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 								}
 								else {
 									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)
@@ -5726,13 +5648,10 @@ int main(int argc, char **argv) {
 								/* apply correction */
 								status = get_anglecorr(verbose, ampcorrtableuse.nangle, ampcorrtableuse.angle,
 								                       ampcorrtableuse.amplitude, angle, &correction, &error);
-								/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f",
-								j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 								if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
 									amp[i] = amp[i] - correction + reference_amp;
 								else
 									amp[i] = amp[i] / correction * reference_amp;
-								/*fprintf(stderr, " amp: %f\n", amp[i]);*/
 							}
 						}
 					}
@@ -5749,13 +5668,6 @@ int main(int argc, char **argv) {
 						status = get_anglecorr(verbose, sscorrtableuse.nangle, sscorrtableuse.angle, sscorrtableuse.amplitude,
 						                       process.mbp_sscorr_angle, &reference_amp_stbd, &error);
 						reference_amp = 0.5 * (reference_amp_port + reference_amp_stbd);
-
-						/* fprintf(stderr, "itable:%d time:%f nangle:%d\n",
-						itable, sscorrtableuse.time_d,
-						sscorrtableuse.nangle);
-						for (i=0;i<sscorrtableuse.nangle;i++)
-						fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
-						i,sscorrtableuse.angle[i],sscorrtableuse.amplitude[i],sscorrtableuse.sigma[i]); */
 
 						/* get seafloor slopes */
 						for (int i = 0; i < nss; i++) {
@@ -5809,14 +5721,6 @@ int main(int argc, char **argv) {
 									angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] * v[2]);
 									if (ssacrosstrack[i] < 0.0)
 										angle = -angle;
-
-									/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
-									              i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,
-                                RTD * atan(ssacrosstrack[i] / (sonardepth + grid.data[kgrid])));
-                  fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
-									               ix,grid.n_columns,jy,grid.n_rows,grid.data[kgrid]);
-									fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
-									               r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle); */
 								}
 								else {
 									if (ix >= 0 && ix < grid.n_columns && jy >= 0 && jy < grid.n_rows && grid.data[kgrid] > grid.nodatavalue)

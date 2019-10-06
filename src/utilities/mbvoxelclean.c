@@ -908,11 +908,8 @@ int main(int argc, char **argv) {
             /* apply threshold to generate binary mask of occupied voxels */
             for (kk=0; kk < n_voxel; kk++) {
                 if (voxel_count[kk] >= occupy_threshold) {
-//fprintf(stderr, "voxel_count[%d]: %d threshold: %d : 1 *********\n", kk, voxel_count[kk], occupy_threshold);
                     voxel_count[kk] = MB_YES;
                 } else {
-//if (voxel_count[kk] > 0)
-//fprintf(stderr, "voxel_count[%d]: %d threshold: %d : 0\n", kk, voxel_count[kk], occupy_threshold);
                     voxel_count[kk] = MB_NO;
                 }
             }

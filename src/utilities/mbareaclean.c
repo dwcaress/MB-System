@@ -965,14 +965,10 @@ int main(int argc, char **argv) {
 										sndg->sndg_edit = MB_NO;
 								}
 							}
-							/* fprintf(stderr,"beam: %d  edit: %d\n", ib, sndg->sndg_edit);*/
 							files[nfile - 1].nsndg++;
 							nsndg++;
 							gsndg[kgrid][gsndgnum[kgrid]] = files[nfile - 1].sndg_countstart + files[nfile - 1].nsndg - 1;
 							gsndgnum[kgrid]++;
-							/*fprintf(stderr,"NEW sounding:%d:%d file:%d time_d:%f depth:%f\n",
-							nsndg-1,gsndg[kgrid][gsndgnum[kgrid]-1],sndg->sndg_file,
-							files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 						}
 					}
 				}
@@ -1052,8 +1048,6 @@ int main(int argc, char **argv) {
 						bindepths[binnum] = sndg->sndg_depth;
 						binnum++;
 					}
-					/*fprintf(stderr,"ix:%d iy:%d kgrid:%d soundingid:%d beamflag:%d   binnum:%d\n",
-					ix,iy,kgrid,gsndg[kgrid][i],sndg->sndg_beamflag,binnum);*/
 				}
 
 				/* apply median filter only if there are enough soundings */
@@ -1071,9 +1065,6 @@ int main(int argc, char **argv) {
 						median_depth_high = bindepths[binnum / 2 + mediandensity_filter_nmax / 2];
 					else
 						median_depth_high = bindepths[binnum - 1];
-					/* if (binnum>0)
-					fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d median:%f\n",
-					ix,iy,kgrid,xx,yy,binnum,median_depth);*/
 
 					/* process the soundings */
 					for (int i = 0; i < gsndgnum[kgrid]; i++) {
@@ -1085,11 +1076,6 @@ int main(int argc, char **argv) {
 						if (mediandensity_filter == MB_YES &&
 						    (sndg->sndg_depth > median_depth_high || sndg->sndg_depth < median_depth_low))
 							flagsounding = MB_YES;
-						/*fprintf(stderr,"sounding:%d file:%d time_d:%f depth:%f median:%f altitude:%f threshold:%f",
-						gsndg[kgrid][i],sndg->sndg_file,
-						files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth,median_depth,
-						files[sndg->sndg_file].ping_altitude[sndg->sndg_ping],
-						threshold);*/
 						flag_sounding(verbose, flagsounding, output_bad, output_good, sndg, &error);
 					}
 				}

@@ -850,18 +850,13 @@ int main(int argc, char **argv) {
 							igainend = igainstart + gainwindow / sampleinterval;
 							igainend = MIN(traceheader.nsamps - 1, igainend);
 						}
-						/*fprintf(stderr,"gainmode:%d btime:%f stime:%f igainstart:%d igainend:%d\n",
-						gainmode,btime,stime,igainstart,igainend);*/
 						for (int i = 0; i <= igainstart; i++) {
 							trace[i] = 0.0;
 						}
 						for (int i = igainstart; i <= igainend; i++) {
 							gtime = (i - igainstart) * sampleinterval;
 							factor = 1.0 + gain * gtime;
-							/*fprintf(stderr,"i:%d iy:%d factor:%f trace[%d]: %f",
-							i,iy,factor,i,trace[i]);*/
 							trace[i] = trace[i] * factor;
-							/*fprintf(stderr," %f\n",trace[i]);*/
 						}
 						for (int i = igainend + 1; i <= traceheader.nsamps; i++) {
 							trace[i] = 0.0;
@@ -883,8 +878,6 @@ int main(int argc, char **argv) {
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							trace[i] *= factor;
 						}
-						/*fprintf(stderr,"igainstart:%d igainend:%d tmax:%f factor:%f\n",
-						igainstart,igainend,tmax,factor);*/
 					}
 
 					/* apply filtering if desired */
@@ -905,8 +898,6 @@ int main(int argc, char **argv) {
 							cos_arg = (0.5 * M_PI * (j - nfilter / 2)) / (0.5 * nfilter);
 							filtertrace[j] = cos(cos_arg);
 							filtersum += filtertrace[j];
-							/*fprintf(stderr,"FILTER: j:%d nfilter:%d cos_arg:%f cos:%f filtertrace:%f
-							 * sum:%f\n",j,nfilter,cos_arg,cos(cos_arg),filtertrace[j],filtersum);*/
 						}
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							worktrace[i] = 0.0;
@@ -917,10 +908,8 @@ int main(int argc, char **argv) {
 								ii = i - nfilter / 2 + j;
 								worktrace[i] += filtertrace[j] * trace[ii];
 								filtersum += filtertrace[j];
-								/* fprintf(stderr,"      i:%d j:%d ii:%d trace:%f sum:%f\n",i,j,ii,worktrace[i],filtersum); */
 							}
 							worktrace[i] /= filtersum;
-							/* fprintf(stderr,"i:%d jstart:%d jend:%d trace: %f %f\n",i,jstart,jend,trace[i], worktrace[i]);*/
 						}
 						for (int i = 0; i <= traceheader.nsamps; i++) {
 							trace[i] = worktrace[i];

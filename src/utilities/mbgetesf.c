@@ -405,7 +405,6 @@ int main(int argc, char **argv) {
 		status = mb_get_all(verbose, imbio_ptr, &store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading, &distance,
 		                    &altitude, &sonardepth, &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
 		                    ssacrosstrack, ssalongtrack, comment, &error);
-		// fprintf(stderr,"\nMBGETESF READ status:%d: error:%d kind:%d\n",status,error,kind);
 
 		/* increment counter */
 		if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
@@ -451,10 +450,6 @@ int main(int argc, char **argv) {
 
 		/* deal with data without errors */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA) {
-			// fprintf(stderr,"MBGETESF PING %d: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beams:%d\n",
-			//						idata,time_d,time_i[0],time_i[1],time_i[2],
-			//						time_i[3],time_i[4],time_i[5],time_i[6],
-			//						nbath);
 			/* fix a problem with EM300/EM3000 data in HDCS format */
 			if (format == 151 && kluge == 1) {
 				for (int i = 0; i < nbath - 1; i++)
@@ -464,10 +459,6 @@ int main(int argc, char **argv) {
 
 			/* count and write the flags */
 			for (int i = 0; i < nbath; i++) {
-				// fprintf(stderr,"MBGETESF: time: %f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d beam:%d flag:%d   bath:%.3f\n",
-				// time_d,time_i[0],time_i[1],time_i[2],
-				// time_i[3],time_i[4],time_i[5],time_i[6],
-				// i,beamflag[i],bath[i]);
 				if (mb_beam_ok(beamflag[i])) {
 					beam_ok++;
 					if (mode == MBGETESF_ALL

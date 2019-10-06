@@ -1607,7 +1607,6 @@ int mbcopy_reson8k_to_gsf(int verbose, void *imbio_ptr, void *ombio_ptr, int *er
           if (phi > 360.0)
             phi -= 360.0;
           mb_ping->beam_angle_forward[i] = phi;
-          /*fprintf(stderr,"MBCOPY: i:%d angles: %f %f\n",i,mb_ping->beam_angle[i],mb_ping->beam_angle_forward[i]);*/
         }
         else {
           mb_ping->depth[i] = 0.0;
