@@ -2141,7 +2141,6 @@ int main(int argc, char **argv) {
   /* attitude */
   if (n_attitude > 0 && n_attitude_alloc >= n_attitude) {
     /* apply time latency correction called for in the platform file */
-    // fprintf(stderr,"Attitude first sample before: %f %f %f\n", attitude_time_d[0], attitude_roll[0], attitude_pitch[0]);
     if (sensor_rollpitch != NULL && sensor_rollpitch->time_latency_mode != MB_SENSOR_TIME_LATENCY_NONE) {
       if (verbose > 0) {
         if (sensor_rollpitch->time_latency_mode == MB_SENSOR_TIME_LATENCY_STATIC)
@@ -2175,7 +2174,6 @@ int main(int argc, char **argv) {
                             time_latency_num, time_latency_time_d, time_latency_time_latency, &error);
     }
 
-    // fprintf(stderr,"Attitude first sample after: %f %f %f\n", attitude_time_d[0], attitude_roll[0], attitude_pitch[0]);
   }
 
   /*-------------------------------------------------------------------*/
@@ -2230,10 +2228,6 @@ int main(int argc, char **argv) {
   }
 
   /*-------------------------------------------------------------------*/
-
-  // for (int i = 0;i<n_nav;i++)
-  // fprintf(stderr,"NAV %d %f %f %f\n",i,nav_time_d[i],nav_navlon[i],nav_navlat[i]);
-  // fprintf(stderr," \n");
 
   /* Do second pass through the data reading everything,
       correcting survey data, and outputting everything */
@@ -2837,7 +2831,6 @@ int main(int argc, char **argv) {
         }
 
         /* write some data */
-//fprintf(stderr," B  kind:%d status:%d error:%d\n",kind,status,error);
         if (error == MB_ERROR_NO_ERROR) {
           status = mb_put_all(verbose, ombio_ptr, istore_ptr, MB_NO, kind, time_i, time_d, navlon, navlat, speed, heading,
                     obeams_bath, obeams_amp, opixels_ss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,
@@ -2860,7 +2853,6 @@ int main(int argc, char **argv) {
             mb_put_binary_float(MB_YES, (float)pitch, &buffer[index]);
             index += 4;
             fwrite(buffer, (size_t)index, 1, afp);
-            // fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", time_d, roll, pitch);
           }
 
           /* count records */
@@ -3020,7 +3012,6 @@ int main(int argc, char **argv) {
               mb_put_binary_float(MB_YES, (float)heading_heading[i], &buffer[index]);
               index += 4;
               fwrite(buffer, (size_t)index, 1, afp);
-              // fprintf(afp, "%0.6f\t%7.3f\n", heading_time_d[i], heading_heading[i]);
             }
             fclose(afp);
           }
@@ -3058,7 +3049,6 @@ int main(int argc, char **argv) {
               mb_put_binary_float(MB_YES, (float)sensordepth_sensordepth[i], &buffer[index]);
               index += 4;
               fwrite(buffer, (size_t)index, 1, afp);
-              // fprintf(afp, "%0.6f\t%7.3f\n", sensordepth_time_d[i], sensordepth_sensordepth[i]);
             }
             fclose(afp);
           }
@@ -3098,7 +3088,6 @@ int main(int argc, char **argv) {
               mb_put_binary_float(MB_YES, (float)attitude_pitch[i], &buffer[index]);
               index += 4;
               fwrite(buffer, (size_t)index, 1, afp);
-              // fprintf(afp, "%0.6f\t%0.3f\t%0.3f\n", attitude_time_d[i], attitude_roll[i], attitude_pitch[i]);
             }
             fclose(afp);
           }

@@ -2188,8 +2188,6 @@ int main(int argc, char **argv) {
 				/* check waypoint time list */
 				if (line_mode == MBSSLAYOUT_LINE_TIME && time_d >= routetime_d[activewaypoint] && activewaypoint < ntimepoint) {
 					new_output_file = MB_YES;
-					/* fprintf(stderr,"LINECHANGE BY TIME!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
-					dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 					activewaypoint++;
 					line_number = activewaypoint;
 				}
@@ -2199,13 +2197,9 @@ int main(int argc, char **argv) {
 					dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 					dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 					range = sqrt(dx * dx + dy * dy);
-					/* fprintf(stderr,"CHECK WAYPOINT: activewaypoint:%d range:%f
-					 * line_range_threshold:%f\n",activewaypoint,range,line_range_threshold); */
 					if (range < line_range_threshold && (activewaypoint == 0 || range > rangelast) &&
 					    activewaypoint < nroutepoint - 1) {
 						new_output_file = MB_YES;
-						/* fprintf(stderr,"LINECHANGE BY WAYPOINT!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
-						dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 						activewaypoint++;
 						line_number = activewaypoint;
 					}
@@ -2449,10 +2443,6 @@ int main(int argc, char **argv) {
 					                          ss_altitude, sensordepth, pitch, table_angle, table_xtrack, table_ltrack,
 					                          table_altitude, table_range, &error);
 				}
-				/* fprintf(stderr,"altitude:%f sensordepth:%f pitch:%f\n",ss_altitude,sensordepth,pitch);
-				for (i=0;i<nangle;i++)
-				fprintf(stderr,"%d %f %f %f %f
-				%f\n",i,table_angle[i],table_xtrack[i],table_ltrack[i],table_altitude[i],table_range[i]);*/
 				/* set some values */
 				ostore->depth_scale = 0;
 				ostore->distance_scale = 0;
@@ -2492,7 +2482,6 @@ int main(int argc, char **argv) {
 						kstart = kangle;
 					}
 				}
-				/* fprintf(stderr,"port minimum range:%f kstart:%d\n",rangemin,kstart);*/
 
 				/* bin port trace */
 				istart = rangemin / (soundspeed * sample_interval);
@@ -2533,8 +2522,6 @@ int main(int argc, char **argv) {
 								ossbincount[j]++;
 								ossalongtrack[j] += ltrack;
 							}
-							/* fprintf(stderr,"port:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
-							i,rr,xtrack,ltrack,kangle); */
 						}
 					}
 				}
@@ -2548,11 +2535,6 @@ int main(int argc, char **argv) {
 						kstart = kangle;
 					}
 				}
-				/* fprintf(stderr,"stbd minimum range:%f kstart:%d\n",rr,kstart); */
-				/* fprintf(stderr,"kstart:%d angle:%f range:%f xtrack:%f ltrack:%f\n",
-				kstart,
-				angle_min + kstart * (angle_max - angle_min) / (nangle - 1),
-				table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 
 				/* bin stbd trace */
 				istart = rangemin / (soundspeed * sample_interval);
@@ -2593,8 +2575,6 @@ int main(int argc, char **argv) {
 								ossbincount[j]++;
 								ossalongtrack[j] += ltrack;
 							}
-							/* fprintf(stderr,"stbd:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
-							i,rr,xtrack,ltrack,kangle); */
 						}
 					}
 				}
@@ -2613,12 +2593,6 @@ int main(int argc, char **argv) {
 					else
 						oss[j] = MB_SIDESCAN_NULL;
 				}
-				/* fprintf(stderr,"SS bounds: %d %d      %f %f   %f\n",jport,jstbd,(jport - opixels_ss/2)*pixel_width,(jstbd -
-				opixels_ss/2)*pixel_width, (jport - opixels_ss/2)*pixel_width - (jstbd - opixels_ss/2)*pixel_width);*/
-				/*for (j=0;j<opixels_ss;j++)
-				{
-				fprintf(stderr,"AAA j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalongtrack[j],oss[j]);
-				}*/
 
 				/* interpolate gaps in the output sidescan */
 				previous = opixels_ss;

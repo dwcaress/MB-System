@@ -708,10 +708,6 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 					angle1 = RTD * atan(bathacrosstrack[jnext] / (bath[jnext] - sonardepth));
 
 				/* deal with angle to port of swath edge */
-				/* fprintf(stderr,"i:%d angle:%f angle0:%f j:%d jnext:%d foundnext:%d ",
-				i,table_angle[i],angle0,j,jnext,foundnext);
-				if (foundnext == MB_YES)
-				fprintf(stderr," angle1:%f ",angle1); */
 				if (table_angle[i] <= angle0) {
 					table_altitude[i] = bath[j] - sonardepth;
 					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
@@ -720,8 +716,6 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 					                      table_ltrack[i] * table_ltrack[i]);
 					found = MB_YES;
 					jstart = j;
-					/* fprintf(stderr," A table: %f %f %f %f %f\n",
-					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]); */
 				}
 
 				/* deal with angle to starboard of swath edge */
@@ -733,8 +727,6 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 					                      table_ltrack[i] * table_ltrack[i]);
 					found = MB_YES;
 					jstart = j;
-					/* fprintf(stderr," B table: %f %f %f %f %f\n",
-					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
 				}
 
 				/* deal with angle to starboard of swath edge */
@@ -748,8 +740,6 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 						found = MB_YES;
 					}
 					jstart = j;
-					/* fprintf(stderr," B table: %f %f %f %f %f\n",
-					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
 				}
 
 				/* deal with angle between the two valid beams */
@@ -762,14 +752,9 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 					                      table_ltrack[i] * table_ltrack[i]);
 					found = MB_YES;
 					jstart = j;
-					/* fprintf(stderr," C factor:%f x:%f %f %f table: %f %f %f %f %f\n",
-					factor,bathacrosstrack[j],table_xtrack[i],bathacrosstrack[jnext],
-					table_angle[i],table_altitude[i],table_xtrack[i],table_ltrack[i],table_range[i]);*/
 				}
 
 				/* else skip */
-				/* else
-				fprintf(stderr," SKIP\n");*/
 			}
 		}
 
@@ -875,8 +860,6 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
 				else if (ssacrosstrack[i] >= table_xtrack[j] && ssacrosstrack[i] <= table_xtrack[j + 1]) {
 					gangles[i] = table_angle[j] + (table_angle[j + 1] - table_angle[j]) * (ssacrosstrack[i] - table_xtrack[j]) /
 					                                  (table_xtrack[j + 1] - table_xtrack[j]);
-					/*fprintf(stderr,"i:%d j:%d %d angles: %f %f %f  x: %f %f %f\n",
-					i,j,j+1,table_angle[j],gangles[i],table_angle[j+1],table_xtrack[j],ssacrosstrack[i],table_xtrack[j+1]);*/
 					found = MB_YES;
 					jstart = j;
 				}
@@ -2570,8 +2553,6 @@ int main(int argc, char **argv) {
 										            headingx * mtodeglon * ssalongtrack[ib];
 										sslat[ib] = navlat - headingx * mtodeglat * ssacrosstrack[ib] +
 										            headingy * mtodeglat * ssalongtrack[ib];
-										/*fprintf(stderr,"ib:%d ss:%f  x:%f l:%f  lon:%f lat:%f fprnt:",
-										ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 
 										/* get footprints */
 										mbmosaic_get_footprint(verbose, footprint_mode, beamwidth_xtrack, beamwidth_ltrack,
@@ -2582,11 +2563,9 @@ int main(int argc, char **argv) {
 											     headingx * mtodeglon * footprints[ib].y[j];
 											yy = navlat - headingx * mtodeglat * footprints[ib].x[j] +
 											     headingy * mtodeglat * footprints[ib].y[j];
-											/*fprintf(stderr," %f %f",footprints[ib].x[j],footprints[ib].y[j]);*/
 											footprints[ib].x[j] = xx;
 											footprints[ib].y[j] = yy;
 										}
-										/*fprintf(stderr,"\n");*/
 									}
 								}
 
@@ -3205,11 +3184,8 @@ int main(int argc, char **argv) {
 												yy = dy * jj + wbnd[2];
 												inside = mb_pr_point_in_quad(verbose, xx, yy, footprints[ib].x, footprints[ib].y,
 												                             &error);
-												/* fprintf(stderr,"priorities[%d]:%f maxpriority[%d]:%f range:%f",
-												ib,priorities[ib],kgrid,maxpriority[kgrid],priority_range); */
 												if (inside == MB_YES && priorities[ib] > 0.0 &&
 												    priorities[ib] >= maxpriority[kgrid] - priority_range) {
-													/*fprintf(stderr," - USE DATA!"); */
 													xx = wbnd[0] + ii * dx - sslon[ib];
 													yy = wbnd[2] + jj * dy - sslat[ib];
 													norm_weight = file_weight * exp(-(xx * xx + yy * yy) * gaussian_factor);
@@ -3221,10 +3197,7 @@ int main(int argc, char **argv) {
 													norm[kgrid] += norm_weight;
 													sigma[kgrid] += norm_weight * ss[ib] * ss[ib];
 													cnt[kgrid]++;
-													/*fprintf(stderr," kgrid:%d norm_weight:%g grid:%g norm:%g cnt:%d",
-													kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 												}
-												/* fprintf(stderr,"\n"); */
 											}
 										ndata++;
 										ndatafile++;

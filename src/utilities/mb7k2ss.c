@@ -1575,32 +1575,22 @@ int main(int argc, char **argv) {
 									ossbincount[j]++;
 									ossalongtrack[j] += ltrack;
 								}
-								/* fprintf(stderr,"stbd:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
-								i,rr,xtrack,ltrack,kangle); */
 							}
 						}
 					}
 
 					/* calculate the output sidescan */
 					jport = -1;
-					// int jstbd = -1;
 					for (int j = 0; j < opixels_ss; j++) {
 						if (ossbincount[j] > 0) {
 							oss[j] /= (double)ossbincount[j];
 							ossalongtrack[j] /= (double)ossbincount[j];
 							if (jport < 0)
 								jport = j;
-							// jstbd = j;
 						}
 						else
 							oss[j] = MB_SIDESCAN_NULL;
 					}
-					/* fprintf(stderr,"SS bounds: %d %d      %f %f   %f\n",jport,jstbd,(jport - opixels_ss/2)*pixel_width,(jstbd -
-					opixels_ss/2)*pixel_width, (jport - opixels_ss/2)*pixel_width - (jstbd - opixels_ss/2)*pixel_width);*/
-					/*for (j=0;j<opixels_ss;j++)
-					{
-					fprintf(stderr,"AAA j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalongtrack[j],oss[j]);
-					}*/
 
 					/* interpolate gaps in the output sidescan */
 					previous = opixels_ss;
@@ -1619,10 +1609,6 @@ int main(int argc, char **argv) {
 							previous = j;
 						}
 					}
-					/*for (j=0;j<opixels_ss;j++)
-					{
-					fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalongtrack[j],oss[j]);
-					}*/
 
 					/* insert data */
 					mb_insert_nav(verbose, ombio_ptr, (void *)ostore, time_i, time_d, navlon, navlat, speed, heading, draft, roll,

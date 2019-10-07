@@ -1836,8 +1836,6 @@ int main(int argc, char **argv)
       {
       gettimeofday(&timeofday, &timezone);
       now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-/*fprintf(stderr,"CHECKING AT TOP OF LOOP: logfp:%p log_file_open_time_d:%.6ff now_time_d:%.6f\n",
-   logfp, log_file_open_time_d, now_time_d); */
       if ((logfp == NULL) ||
         ((now_time_d - log_file_open_time_d) > MBTRNPREPROCESS_LOGFILE_TIMELENGTH) )
         {
@@ -2098,8 +2096,6 @@ int main(int argc, char **argv)
         {
         gettimeofday(&timeofday, &timezone);
         now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-/*fprintf(stderr,"CHECKING AT MIDDLE OF LOOP: logfp:%p log_file_open_time_d:%.6f now_time_d:%.6f\n",
-   logfp, log_file_open_time_d, now_time_d); */
         if ((logfp == NULL) ||
           ((now_time_d - log_file_open_time_d) > MBTRNPREPROCESS_LOGFILE_TIMELENGTH) )
           {
@@ -2171,7 +2167,6 @@ int main(int argc, char **argv)
       error = MB_ERROR_NO_ERROR;
 
       MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBGETALL_XT], mtime_dtime());
-//fprintf(stderr, "%s:%d:%s \n", __FILE__, __LINE__, __FUNCTION__);
       status =
         mb_get_all(verbose,
                     imbio_ptr,
@@ -2199,10 +2194,6 @@ int main(int argc, char **argv)
                     ping[idataread].ssalongtrack,
                     comment,
                     &error);
-//fprintf(stderr, "%s:%d:%s \n", __FILE__, __LINE__, __FUNCTION__);
-
-      /*PMPRINT(MOD_MBTRNPP,MBTRNPP_V4,(stderr,"mb_get_all - status[%d] kind[%d]
-         err[%d]\n",status, kind, error)); */
       MBTR_SW_LAP(app_stats->stats->measurements[MBTPP_CH_MBGETALL_XT], mtime_dtime());
       MBTR_SW_START(app_stats->stats->measurements[MBTPP_CH_MBPING_XT], mtime_dtime());
 
@@ -2253,11 +2244,6 @@ int main(int argc, char **argv)
           for (int i = 0; i < n_buffer_max; i++)
             if (ping[i].count == n_ping_process)
               i_ping_process = i;
-/*fprintf(stdout, "\nProcess some data: ndata:%d counts: ", ndata);
-   for (int i = 0; i < n_buffer_max; i++) {
-      fprintf(stdout,"%d ", ping[i].count);
-   }
-   fprintf(stdout," : process %d\n", i_ping_process);*/
 
           /* apply swath width */
           threshold_tangent = tan(DTR * 0.5 * swath_width);
@@ -2313,8 +2299,6 @@ int main(int argc, char **argv)
                     sizeof(double),
                     (void *)mb_double_compare);
                   median = median_filter_soundings[n_median_filter_soundings / 2];
-/*fprintf(stdout, "Beam %3d of %d:%d bath:%.3f n:%3d:%3d median:%.3f ", j, beam_start, beam_end,
-   ping[i_ping_process].bath[j], n_median_filter_soundings, median_filter_n_min, median);*/
 
                   /* apply median filter - also flag soundings that don't have
                      enough neighbors to filter */
@@ -2324,10 +2308,7 @@ int main(int argc, char **argv)
                     {
                     ping[i_ping_process].beamflag_filter[j] = MB_FLAG_FLAG +MB_FLAG_FILTER;
                     n_soundings_flagged++;
-
-/*fprintf(stdout, "**filtered**"); */
                     }
-/*fprintf(stdout, "\n"); */
                   }
                 if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j]))
                   n_output++;
@@ -2340,18 +2321,8 @@ int main(int argc, char **argv)
               }
             }
 
-/*fprintf(stderr, "Mbtrnpreprocess: Ping read: %7d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d
-   %2.2d:%2.2d\n", */
-/*ping_number,
-   ping[i_ping_process].time_i[0], ping[i_ping_process].time_i[1], ping[i_ping_process].time_i[2],
-   ping[i_ping_process].time_i[3], ping[i_ping_process].time_i[4], ping[i_ping_process].time_i[5],
-   ping[i_ping_process].time_i[6],
-   ping[i_ping_process].beams_bath, n_output);*/
-
           /* decimate output records */
           n_ping_count++;
-//fprintf(stderr,"Decimation calculation: ping_decimate:%d n_ping_count:%d output?:%d\n",
-//ping_decimate, n_ping_count, (n_ping_count % ping_decimate == 0));
           if (n_ping_count % ping_decimate == 0)
             {
             n_ping_count = 0;
@@ -2488,14 +2459,6 @@ int main(int argc, char **argv)
                 {
                 MBTR_COUNTER_INC(app_stats->stats->events[MBTPP_EV_CYCLES]);
 
-/*                            struct timeval stv={0};
-                              gettimeofday(&stv,NULL);
-                              double stime = (double)stv.tv_sec+((double)stv.tv_usec/1000000.0);
-                              double ptime=ping[i_ping_process].time_d;*/
-/*                            fprintf(stderr,"mbtx : ptime[%.3lf] stime[%.3lf]
-   (s-p)[%+6.3lf]**\n",ptime,stime,(stime-ptime)); */
-/*                            fprintf(stderr,"mbtx : (s-p)[%+6.3lf]**\n",(stime-ptime)); */
-
                 /* log current TRN message */
                 if(trn_blog_en)
                   mlog_write(trn_blog_id, (byte *)output_buffer, mb1_size);
@@ -2507,7 +2470,7 @@ int main(int argc, char **argv)
 
                 int iobytes = 0;
                 int test = -1;
-                int idx=-1;
+                int idx = -1;
                 msock_connection_t *psub = (msock_connection_t *)mlist_first(trn_plist);
                 idx=0;
                 while (psub != NULL) {
@@ -2758,7 +2721,6 @@ int main(int argc, char **argv)
               else if (output_mode == MBTRNPREPROCESS_OUTPUT_FILE)
                 {
                 fwrite(output_buffer, mb1_size, 1, ofp);
-/*fprintf(stderr, "WRITE SIZE: %zu %zu %zu\n", mb1_size, index, index - mb1_size); */
                 }
               }
             }
@@ -2959,8 +2921,6 @@ int main(int argc, char **argv)
   /* close log file */
   gettimeofday(&timeofday, &timezone);
   now_time_d = timeofday.tv_sec + 0.000001 * timeofday.tv_usec;
-/*fprintf(stderr,"CHECKING AT BOTTOM OF LOOP: logfp:%p log_file_open_time_d:%.6f now_time_d:%.6f\n",
-   logfp, log_file_open_time_d, now_time_d); */
   if (logfp != NULL)
     {
     status = mbtrnpreprocess_logstatistics(verbose,

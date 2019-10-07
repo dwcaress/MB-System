@@ -685,7 +685,6 @@ int main(int argc, char **argv) {
 							fftw_in[i][1] = 0.0;
 						}
 						soundpressurelevel = 20.0 * log10(normraw / nfft);
-						/*fprintf(stderr,"Sound Pressure Level: %f dB re 1 uPa\n",soundpressurelevel);*/
 
 						/* execute the fft */
 						fftw_execute(plan);
@@ -705,28 +704,18 @@ int main(int argc, char **argv) {
 						/* calculate psd from result of transform */
 						spsd[0] += fftw_out[0][0] * fftw_out[0][0] + fftw_out[0][1] * fftw_out[0][1];
 						wpsd[0] += 1.0;
-						/* fprintf(stderr,"FFT result: i:%d  %f %f  %f\n",
-						0,fftw_out[0][0],fftw_out[0][1],fftw_out[0][0] * fftw_out[0][0] + fftw_out[0][1] * fftw_out[0][1]);*/
 						for (i = 1; i < nfft / 2; i++) {
 							spsd[i] += 2.0 * (fftw_out[i][0] * fftw_out[i][0] + fftw_out[i][1] * fftw_out[i][1]);
 							wpsd[i] += 1.0;
-							/* fprintf(stderr,"FFT result: i:%d  %f %f  %f\n",
-							i,fftw_out[i][0],fftw_out[i][1],2.0 * fftw_out[i][0] * fftw_out[i][0] + fftw_out[i][1] *
-							fftw_out[i][1]);*/
 						}
 						if (nfft % 2 == 0) {
 							spsd[i] +=
 							    fftw_out[nfft / 2][0] * fftw_out[nfft / 2][0] + fftw_out[nfft / 2][1] * fftw_out[nfft / 2][1];
 							wpsd[i] += 1.0;
-							/* fprintf(stderr,"FFT result: i:%d  %f %f  %f\n",
-							nfft/2,fftw_out[nfft/2][0],fftw_out[nfft/2][1],fftw_out[nfft/2][0] * fftw_out[nfft/2][0] +
-							fftw_out[nfft/2][1] * fftw_out[nfft/2][1]); */
 						}
 					}
 
 					/* output psd for this trace to the grid */
-					/*fprintf(stderr,"N:%d Normalization: %f %f %f    ratios: %f %f     %f %f\n",
-					nfft,normraw,normtaper,normfft,normraw/normfft,normfft/normraw,normtaper/normfft,normfft/normtaper);*/
 					for (iy = 0; iy < ngridy; iy++) {
 						k = (ngridy - 1 - iy) * ngridx + ix;
 						if (wpsd[iy] > 0.0) {
@@ -736,8 +725,6 @@ int main(int argc, char **argv) {
 								grid[k] = 20.0 * log10(spsd[iy] / wpsd[iy]);
 							spsdtot[iy] += grid[k];
 							wpsdtot[iy] += 1.0;
-							/*fprintf(stderr,"ix:%d iy:%d k:%d spsd:%f wpsd:%f     f:%f p:%f\n",
-							ix,iy,k,spsd[iy],wpsd[iy],ymax * iy / ngridy,grid[k]);*/
 							gridmintot = MIN(grid[k], gridmintot);
 							gridmaxtot = MAX(grid[k], gridmaxtot);
 						}

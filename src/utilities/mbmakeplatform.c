@@ -632,15 +632,10 @@ int main(int argc, char **argv) {
 					store_ptr = (void *)mb_io_ptr->store_data;
 
 					/* read data */
-					// fprintf(stderr,"Look for platform data in file? error:%d input_swath_platform_defined:%d\n",
-					// error,input_swath_platform_defined);
 					while (error <= MB_ERROR_NO_ERROR && input_swath_platform_defined == MB_NO) {
 						status = mb_read_ping(verbose, mbio_ptr, store_ptr, &kind, &error);
 
 						/* if platform_source kind then extract platform definition */
-						// fprintf(stderr,"error:%d kind:%d platform_source:%d YES/NO:%d\n",
-						// error,kind,platform_source,
-						//(error <= MB_ERROR_NO_ERROR && kind == platform_source && platform_source != MB_DATA_NONE));
 						if (error <= MB_ERROR_NO_ERROR && kind == platform_source && platform_source != MB_DATA_NONE) {
 							/* extract platform */
 							status = mb_extract_platform(verbose, mbio_ptr, store_ptr, &kind, (void **)&platform, &error);

@@ -378,11 +378,6 @@ int main(int argc, char **argv) {
 
 		/* read a trace */
 		status = mb_segy_read_trace(verbose, mbsegyioptr, &traceheader, &trace, &error);
-		/*fprintf(stderr,"file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d\n",
-		    file,nread,traceheader.shot_num,
-		    traceheader.year,traceheader.day_of_yr,
-		    traceheader.hour,traceheader.min,traceheader.sec,traceheader.mils,
-		    traceheader.nsamps,traceheader.si_micros);*/
 
 		/* get needed values */
 		if (status == MB_SUCCESS) {

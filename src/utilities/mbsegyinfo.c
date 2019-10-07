@@ -220,11 +220,6 @@ int main(int argc, char **argv) {
 		struct mb_segytraceheader_struct traceheader;
 		float *trace;
 		status = mb_segy_read_trace(verbose, mbsegyioptr, &traceheader, &trace, &error);
-		/*fprintf(stderr,"read_file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d\n",
-		    read_file,nread,traceheader.shot_num,
-		    traceheader.year,traceheader.day_of_yr,
-		    traceheader.hour,traceheader.min,traceheader.sec,traceheader.mils,
-		    traceheader.nsamps,traceheader.si_micros);*/
 
 		/* deal with success */
 		if (status == MB_SUCCESS) {
@@ -242,24 +237,6 @@ int main(int argc, char **argv) {
 			double time_d;
 			mb_get_time(verbose, time_i, &time_d);
 			double factor;
-			/* if (traceheader.elev_scalar < 0) */
-			/* 	factor = 1.0 / ((float)(-traceheader.elev_scalar)); */
-			/* else */
-			/* 	factor = (float)traceheader.elev_scalar; */
-			/* if (traceheader.grp_elev != 0) */
-			/* 	sonardepth = -factor * traceheader.grp_elev; */
-			/* else if (traceheader.src_elev != 0) */
-			/* 	sonardepth = -factor * traceheader.src_elev; */
-			/* else if (traceheader.src_depth != 0) */
-			/* 	sonardepth = factor * traceheader.src_depth; */
-			/* else */
-			/* 	sonardepth = 0.0; */
-			/* if (traceheader.src_wbd != 0) */
-			/* 	waterdepth = -traceheader.grp_elev; */
-			/* else if (traceheader.grp_wbd != 0) */
-			/* 	waterdepth = -traceheader.src_elev; */
-			/* else */
-			/* 	waterdepth = 0; */
 			if (traceheader.coord_scalar < 0)
 				factor = 1.0 / ((float)(-traceheader.coord_scalar)) / 3600.0;
 			else
