@@ -109,3 +109,4 @@ lib
 *.trs
 *~
 src/mbtrn/mb1conv
+src/mbtrnutils/mbtrnpp

@@ -89,7 +89,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = mbeditviz$(EXEEXT)
-@BUILD_MBTRN_TRUE@am__append_1 = -I${top_srcdir}/src/mbtrn
 subdir = src/mbeditviz
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -116,7 +115,7 @@ mbeditviz_DEPENDENCIES = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbxgr.la \
 	${top_builddir}/src/mbview/libmbview.la $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) $(MBTRNLIB) \
 	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -360,11 +359,13 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+@BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
-	-I${top_srcdir}/src/mbview ${libgmt_CPPFLAGS} \
+	-I${top_srcdir}/src/mbview $(MBTRNINCDIR) ${libgmt_CPPFLAGS} \
 	${libnetcdf_CPPFLAGS} ${libmotif_CPPFLAGS} \
-	${libopengl_CPPFLAGS} $(am__append_1)
+	${libopengl_CPPFLAGS}
 AM_LDFLAGS = 
 mbeditviz_SOURCES = mbeditviz_main.c mbeditviz_callbacks.c mbeditviz_prog.c mbeditviz_creation.c
 mbeditviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
@@ -372,7 +373,7 @@ mbeditviz_LDADD = ${top_builddir}/src/mbio/libmbio.la \
 	${top_builddir}/src/mbaux/libmbxgr.la \
 	${top_builddir}/src/mbview/libmbview.la ${libgmt_LIBS} \
 	${libnetcdf_LIBS} ${libproj_LIBS} ${libmotif_LIBS} \
-	${libopengl_LIBS} $(LIBM)
+	${libopengl_LIBS} $(MBTRNLIB) $(LIBM)
 all: all-am
 
 .SUFFIXES:

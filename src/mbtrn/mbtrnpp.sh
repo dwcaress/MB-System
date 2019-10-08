@@ -3,9 +3,10 @@
 #########################################
 # Name: mbtrnpp.sh
 #
-# Summary: Run mbtrnpreprocess
+# Summary: Run mbtrnpp
+#          (TRN pre-process)
 #
-# Description: runs mbtrnpreprocess
+# Description: runs mbtrnpp
 # - automatically restarts after delay
 # - may specify number of cycles (retries)
 #
@@ -22,7 +23,7 @@
 # casual users should not need to change
 # anything below this section
 #########################################
-DESCRIPTION="Run mbtrnpreprocess; restart on exit"
+DESCRIPTION="Run mbtrnpp; restart on exit"
 
 LOOP_DELAY_SEC_DFL=5
 let "CYCLES_DFL=-1"
@@ -45,7 +46,7 @@ CONLOG_PATH=${CONLOG_PATH:-"$CONLOG_PATH_DFL"}
 let CYCLES="${CYCLES_DFL}"
 
 # application path
-APP_CMD="/usr/local/bin/mbtrnpreprocess.exe"
+APP_CMD="/usr/local/bin/mbtrnpp.exe"
 # log directory
 OPT_LOGDIR="--log-directory=/home/reson/axialgeo/out"
 # input source

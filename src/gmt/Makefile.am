@@ -2,15 +2,18 @@ lib_LTLIBRARIES = mbsystem.la
 
 include_HEADERS =
 
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
+endif
+
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libgdal_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
-if BUILD_MBTRN
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-endif
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libgdal_CFLAGS} ${libnetcdf_CFLAGS}
 
@@ -26,3 +29,5 @@ mbsystem_la_LIBADD += ${top_builddir}/src/mbaux/libmbaux.la
 mbsystem_la_LIBADD += ${libgmt_LIBS}
 mbsystem_la_LIBADD += ${libgdal_LIBS}
 mbsystem_la_LIBADD += ${libnetcdf_LIBS}
+mbsystem_la_LIBADD += ${libnetcdf_LIBS}
+mbsystem_la_LIBADD += $(MBTRNLIB)

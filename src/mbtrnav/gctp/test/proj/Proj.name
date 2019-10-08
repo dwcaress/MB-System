@@ -1,0 +1,63 @@
+#!/bin/csh -x
+
+cd alaska
+alaska_test
+cd ../equidc
+equidc_test
+cd ../hammer
+hammer_test
+cd ../lamcc
+lamcc_test
+cd ../obleqa
+obleqa_test
+cd ../ps
+ps_test
+cd ../spcs
+spcs_test
+cd ../vgrint
+vgrint_test
+cd ../albers
+albers_test
+cd ../gnomon
+gnomon_test
+cd ../hom
+hom_test
+cd ../mercat
+mercat_test
+cd ../ortho
+ortho_test
+cd ../robin
+robin_test
+cd ../stereo
+stereo_test
+cd ../wagiv
+wagiv_test
+cd ../azmeqd
+azmeqd_test
+cd ../good
+good_test
+cd ../imoll
+imoll_test
+cd ../miller
+miller_test
+cd ../polyc
+polyc_test
+cd ../snsoid
+snsoid_test
+cd ../tm
+tm_test
+cd ../wagvii
+wagvii_test
+cd ../eqrect
+eqrect_test
+cd ../gvnsp
+gvnsp_test
+cd ../lamaz
+lamaz_test
+cd ../moll
+moll_test
+cd ../som
+som_test
+cd ../utm
+utm_test
+cd ..

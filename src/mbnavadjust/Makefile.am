@@ -2,6 +2,11 @@ if BUILD_PCLTOOLS
   MBNAVADJUSTFINE = mbnavadjustfine
 endif
 
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
+endif
+
 bin_PROGRAMS = mbnavadjust mbnavadjustmerge $(MBNAVADJUSTFINE)
 
 AM_CFLAGS =  ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
@@ -10,13 +15,11 @@ AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I${top_srcdir}/src/mbview
+AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += -I${top_srcdir}/src/gsf
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}
-if BUILD_MBTRN
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-endif
 
 AM_LDFLAGS =
 
@@ -28,6 +31,7 @@ LIBS += ${top_builddir}/src/mbview/libmbview.la
 LIBS += ${libgmt_LIBS}
 LIBS += ${libnetcdf_LIBS}
 LIBS += ${libproj_LIBS}
+LIBS += $(MBTRNINCDIR)
 LIBS += ${libmotif_LIBS}
 LIBS += ${libopengl_LIBS}
 LIBS += $(LIBM)

@@ -2,18 +2,20 @@ if BUILD_MOTIF
   XGRLIB = libmbxgr.la
   XGRINC = mb_xgraphics.h
 endif
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+  MBTRNLIB = $(top_builddir)/src/mbtrn/libr7kr.la
+endif
 
 lib_LTLIBRARIES = libmbaux.la ${XGRLIB}
 include_HEADERS = mb_aux.h ${XGRINC}
 
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
+AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libgdal_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
-if BUILD_MBTRN
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-endif
 
 AM_CFLAGS =
 AM_CFLAGS += ${libgmt_CFLAGS}
@@ -33,6 +35,7 @@ libmbaux_la_SOURCES += mb_zgrid.c
 
 libmbaux_la_LIBADD =
 libmbaux_la_LIBADD += ${top_builddir}/src/mbio/libmbio.la
+libmbaux_la_LIBADD += $(MBTRNLIB)
 libmbaux_la_LIBADD += ${libgmt_LIBS}
 libmbaux_la_LIBADD += ${libgdal_LIBS}
 libmbaux_la_LIBADD += ${libnetcdf_LIBS}

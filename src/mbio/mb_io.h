@@ -29,14 +29,11 @@
 #include "mb_process.h"
 
 #ifdef MBTRN_ENABLED
-#include "mbtrn.h"
+#include "r7k-reader.h"
 #include "r7kc.h"
-//#include "iowrap.h"
 #include "msocket.h"
 #include "mfile.h"
 #include "merror.h"
-//#include "mcbuf.h"
-//#include "mdebug.h"
 #endif
 
 /* ---------------------------------------------------------------------------*/
@@ -484,9 +481,10 @@ struct mb_io_struct {
 	              in km/hr */
 	double timegap;   /* maximum time between pings without
 	              a data gap */
+
+/* application defined i/o */
 #ifdef MBTRN_ENABLED
-    /* application defined i/o */
-    mbtrn_reader_t *mbsp;         /* mbtrn socket i/o */
+    r7kr_reader_t *mbsp;         /* mbtrn socket i/o */
 #else
     void *mbsp;                   /* blank spaceholder */
 #endif

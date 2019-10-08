@@ -3,9 +3,7 @@ if BUILD_FFTW
 endif
 
 if BUILD_MBTRN
-  MBTRN_PROG = mbtrnpreprocess
-  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn
-  MBTRNLIB = ${top_builddir}/src/mbtrn/libmbtrn.la
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
 endif
 
 # TODO(schwehr): What happened to mbps?
@@ -166,19 +164,6 @@ mbsegypsd_LDADD += ${libproj_LIBS}
 mbsegypsd_LDADD += ${libfftw_LIBS}
 mbsegypsd_SOURCES = mbsegypsd.c
 mbsegypsd_LDFLAGS =
-endif
-if BUILD_MBTRN
-mbtrnpreprocess_SOURCES = mbtrnpreprocess.c
-mbtrnpreprocess_LDADD =
-mbtrnpreprocess_LDADD += $(top_builddir)/src/mbtrn/libmbtrn.la
-mbtrnpreprocess_LDADD += $(top_builddir)/src/mbio/libmbio.la
-mbtrnpreprocess_LDADD += $(top_builddir)/src/mbaux/libmbaux.la
-mbtrnpreprocess_LDADD += $(top_builddir)/src/mbaux/libmbxgr.la
-mbtrnpreprocess_LDADD += ${libgmt_LIBS}
-mbtrnpreprocess_LDADD += ${libnetcdf_LIBS}
-mbtrnpreprocess_LDADD += ${libproj_LIBS}
-mbtrnpreprocess_LDADD += $(MBTRNLIB)
-mbtrnpreprocess_LDADD += $(LIBM)
 endif
 
 BUILT_SOURCES = levitus.h
