@@ -1633,13 +1633,6 @@ int main(int argc, char **argv) {
             }
             if (ndevsqsum > (ping[irec].beams_bath / 4)) {
               ping_deviation = sqrt(devsqsum / ndevsqsum);
-//if (ping_deviation > ping_deviation_tolerance/2)
-//fprintf(stderr, "PING DEVIATION: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f - %3d %f %f - %d\n",
-//ping[irec].time_i[0], ping[irec].time_i[1], ping[irec].time_i[2],
-//ping[irec].time_i[3], ping[irec].time_i[4], ping[irec].time_i[5],
-//ping[irec].time_i[6], i, ping[irec].bath[i],
-//ndevsqsum, ping_deviation, ping_deviation_tolerance,
-//(ping_deviation > ping_deviation_tolerance));
               if (ping_deviation > ping_deviation_tolerance) {
                 for (int i = 0; i < ping[irec].beams_bath; i++) {
                   if (mb_beam_ok(ping[irec].beamflag[i])) {

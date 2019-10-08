@@ -1210,13 +1210,6 @@ int main(int argc, char **argv) {
 				ins_speed[nins_speed] = sqrt(velocityx * velocityx + velocityy * velocityy);
 				ins_speed_time_d[nins_speed] = ins_time_d[nins];
 			}
-			/*
-			 * fprintf(stderr,"INS DATA: %f %f %f %f %f %f %f %f
-			 * %f\n", ins_time_d[nins], ins_lon[nins],
-			 * ins_lat[nins], ins_roll[nins], ins_pitch[nins],
-			 * ins_heading[nins], ins_sonardepth[nins],
-			 * ins_altitude[nins], ins_speed[nins]);
-			 */
 			nins++;
 			if (ins_altitude[nins_altitude] < 1000.0)
 				nins_altitude++;
@@ -1290,17 +1283,6 @@ int main(int argc, char **argv) {
 			if (buffer[0] != '#')
 				if (sscanf(buffer, "%lf %lf %lf %lf %lf %lf %lf", &rock_time_d[nrock], &rock_lon[nrock], &rock_lat[nrock],
 				           &rock_sonardepth[nrock], &rock_heading[nrock], &rock_roll[nrock], &rock_pitch[nrock]) == 7) {
-					/*
-					 * fprintf(stderr,"ROCK DATA: %f %f
-					 * %f %f %f %f\n",
-					 * rock_time_d[nrock],
-					 * rock_lon[nrock], rock_lat[nrock],
-					 * rock_sonardepth[nrock],
-					 * rock_heading[nrock],
-					 * rock_roll[nrock],
-					 * rock_pitch[nrock],
-					 * rock_heading[nrock]);
-					 */
 					nrock++;
 				}
 		}
@@ -1373,15 +1355,6 @@ int main(int argc, char **argv) {
 				nscan = sscanf(buffer, "PPL %d/%d/%d %d:%d:%lf %s %lf %lf %lf %lf %lf %lf %lf", &year, &month, &day, &hour,
 				               &minute, &second, sensor, &dsl_lat[ndsl], &dsl_lon[ndsl], &dsl_sonardepth[ndsl],
 				               &dsl_heading[ndsl], &dsl_pitch[ndsl], &dsl_roll[ndsl], &id);
-				/*
-				 * fprintf(stderr,"nscan:%d year:%d month:%d
-				 * day:%d hour:%d minute:%d second:%f
-				 * sensor:%s %f %f %f %f %f %f %f\n",
-				 * nscan,year,month,day,hour,minute,second,sen
-				 * sor,dsl_lat[ndsl], dsl_lon[ndsl],
-				 * dsl_sonardepth[ndsl], dsl_heading[ndsl],
-				 * dsl_pitch[ndsl], dsl_roll[ndsl], id);
-				 */
 				if (nscan == 14) {
 					time_i[0] = year;
 					time_i[1] = month;
@@ -1391,16 +1364,6 @@ int main(int argc, char **argv) {
 					time_i[5] = (int)second;
 					time_i[6] = (int)((second - time_i[5]) * 1000000);
 					mb_get_time(verbose, time_i, &dsl_time_d[ndsl]);
-					/*
-					 * fprintf(stderr,"dsl DATA: %f %f %f
-					 * %f %f %f %f %f\n",
-					 * dsl_time_d[ndsl], dsl_lon[ndsl],
-					 * dsl_lat[ndsl],
-					 * dsl_sonardepth[ndsl],
-					 * dsl_heading[ndsl], dsl_roll[ndsl],
-					 * dsl_pitch[ndsl],
-					 * dsl_heading[ndsl]);
-					 */
 					ndsl++;
 				}
 			}
@@ -1489,11 +1452,6 @@ int main(int argc, char **argv) {
 		while (fread(buffer, sonardepth_len, 1, tfp) == 1) {
 			mb_get_binary_double(MB_YES, &buffer[sonardepth_time_d_index], &(sonardepth_time_d[nsonardepth]));
 			mb_get_binary_double(MB_YES, &buffer[sonardepth_sonardepth_index], &(sonardepth_sonardepth[nsonardepth]));
-			/*
-			 * fprintf(stderr,"SONARDEPTH DATA: %f %f\n",
-			 * sonardepth_time_d[nsonardepth],
-			 * sonardepth_sonardepth[nsonardepth]);
-			 */
 			sonardepth_sonardepth[nsonardepth] += sonardepthoffset;
 			nsonardepth++;
 		}
@@ -2356,8 +2314,6 @@ int main(int argc, char **argv) {
 						dat_sonardepth_time_d[ndat_sonardepth] = time_d;
 						dat_sonardepth_sonardepth[ndat_sonardepth] = -position->height;
 						dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
-						// fprintf(stderr,"Use R7KRECID_Position %f %f
-						// %f\n",dat_sonardepth_time_d[ndat_sonardepth],position->height,dat_sonardepth_sonardepth[ndat_sonardepth]);
 						ndat_sonardepth++;
 					}
 				}
@@ -2538,8 +2494,6 @@ int main(int argc, char **argv) {
 						dat_sonardepth_time_d[ndat_sonardepth] = time_d;
 						dat_sonardepth_sonardepth[ndat_sonardepth] = depth->depth;
 						dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
-						// fprintf(stderr,"Use R7KRECID_Depth %f %f
-						// %f\n",dat_sonardepth_time_d[ndat_sonardepth],depth->depth,dat_sonardepth_sonardepth[ndat_sonardepth]);
 						ndat_sonardepth++;
 					}
 				}
@@ -3172,8 +3126,6 @@ int main(int argc, char **argv) {
 								dat_sonardepth_time_d[ndat_sonardepth] = bluefin->nav[i].depth_time;
 								dat_sonardepth_sonardepth[ndat_sonardepth] = bluefin->nav[i].depth;
 								dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
-								// fprintf(stderr,"Use R7KRECID_Bluefin %f %f %f\n",
-								// dat_sonardepth_time_d[ndat_sonardepth],bluefin->nav[i].depth,dat_sonardepth_sonardepth[ndat_sonardepth]);
 								ndat_sonardepth++;
 							}
 						}
@@ -3181,33 +3133,15 @@ int main(int argc, char **argv) {
 						 * deal with MBARI AUV time delay
 						 * values
 						 */
-						/*
-						 * fprintf(stderr,"TIMEDELAYS:
-						 * count:%d delay:
-						 * %d",ntimedelaycount,bluefin->nav[i]
-						 * .timedelay);
-						 */
 						if (ntimedelaycount == 0) {
 							timedelay_time_d[ntimedelay] = bluefin->nav[i].position_time;
 							timedelay_timedelay[ntimedelay] = (-0.001 * (double)bluefin->nav[i].timedelay);
-							/*
-							 * fprintf(stderr,"   USED:
-							 * %f",timedelay_timedelay[nti
-							 * medelay]);
-							 */
 							ntimedelay++;
 						}
 						else if (timedelay_timedelay[ntimedelay - 1] > (-0.001 * (double)bluefin->nav[i].timedelay)) {
 							timedelay_time_d[ntimedelay - 1] = bluefin->nav[i].position_time;
 							timedelay_timedelay[ntimedelay - 1] = (-0.001 * (double)bluefin->nav[i].timedelay);
-							/*
-							 * fprintf(stderr,"   USED:
-							 * %d
-							 * %f",ntimedelay,timedelay_ti
-							 * medelay[ntimedelay-1]);
-							 */
 						}
-						/* fprintf(stderr,"\n"); */
 						ntimedelaycount++;
 						if (ntimedelaycount >= 100)
 							ntimedelaycount = 0;
@@ -3353,19 +3287,10 @@ int main(int argc, char **argv) {
 			}
 			/* handle unknown data */
 			else if (status == MB_SUCCESS) {
-				/*
-				 * fprintf(stderr,"DATA TYPE UNKNOWN:
-				 * status:%d error:%d
-				 * kind:%d\n",status,error,kind);
-				 */
 				nrec_other++;
 			}
 			/* handle read error */
 			else {
-				/*
-				 * fprintf(stderr,"READ FAILURE: status:%d
-				 * error:%d kind:%d\n",status,error,kind);
-				 */
 			}
 
 			if (verbose >= 2) {
@@ -4748,14 +4673,10 @@ int main(int argc, char **argv) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
 									/* phase picks */
 									if ((bathymetry->quality[i]) == 8) {
-										/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
 										bathymetry->quality[i] = 32 + 15;
-										/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 									}
 									else if ((bathymetry->quality[i]) == 4) {
-										/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
 										bathymetry->quality[i] = 16 + 15;
-										/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 									}
 								}
 							}
@@ -4768,14 +4689,10 @@ int main(int argc, char **argv) {
 									 * phase picks
 									 */
 									if ((bathymetry->quality[i]) == 4) {
-										/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
 										bathymetry->quality[i] = 32 + 15;
-										/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 									}
 									else if ((bathymetry->quality[i]) == 2) {
-										/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
 										bathymetry->quality[i] = 16 + 15;
-										/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 									}
 								}
 							}
@@ -4784,21 +4701,16 @@ int main(int argc, char **argv) {
 							 */
 							else if (bathymetry->header.Version >= 5 && MBARIdata == MB_YES && header->s7kTime.Year <= 2010) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
-									/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
 									bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
 									/*
 									 * phase or amplitude picks
 									 */
 									if (bathymetry->quality[i] & 8) {
-										/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
 										bathymetry->quality[i] += 32;
-										/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
 									}
 									else if (bathymetry->quality[i] & 4) {
-										/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
 										bathymetry->quality[i] += 16;
-										/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
 									}
 
 									/*
@@ -4807,7 +4719,6 @@ int main(int argc, char **argv) {
 									if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0) {
 										bathymetry->quality[i] += 64;
 									}
-									/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
 								}
 							}
 
@@ -4816,21 +4727,16 @@ int main(int argc, char **argv) {
 							 */
 							else if (bathymetry->header.Version >= 5) {
 								for (int i = 0; i < bathymetry->number_beams; i++) {
-									// fprintf(stderr, "S Flag[%d]: %d\n", i, bathymetry->quality[i]);
 									bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
 									/*
 									 * phase or amplitude picks
 									 */
 									if (bathymetry->quality[i] & 8) {
-										// fprintf(stderr, "beam %d: PHASE quality: %d", i, bathymetry->quality[i]);
 										bathymetry->quality[i] += 32;
-										// fprintf(stderr, " %d\n", bathymetry->quality[i]);
 									}
 									else if (bathymetry->quality[i] & 4) {
-										// fprintf(stderr, "beam %d: AMPLI quality: %d", i, bathymetry->quality[i]);
 										bathymetry->quality[i] += 16;
-										// fprintf(stderr, " %d\n", bathymetry->quality[i]);
 									}
 									/*
 									 * flagged by sonar
@@ -4843,7 +4749,6 @@ int main(int argc, char **argv) {
 									else if (bathymetry->quality[i] > 0) {
 										bathymetry->quality[i] += 64;
 									}
-									// fprintf(stderr, "E Flag[%d]: %d\n\n", i, bathymetry->quality[i]);
 								}
 							}
 							/*
@@ -5047,7 +4952,6 @@ int main(int argc, char **argv) {
 							else {
 								sonardepth = 0.0;
 							}
-							// fprintf(stderr, "\nStarting sonardepth:%f\n", sonardepth);
 
 							/*
 							 * get local translation between lon lat degrees and meters
@@ -5089,7 +4993,6 @@ int main(int argc, char **argv) {
 								bathymetry->pointing_angle[i] = 0.0;
 								bathymetry->azimuth_angle[i] = 0.0;
 							}
-							// fprintf(stderr, "sonardepth:%f heave:%f\n", sonardepth, heave);
 
 							/* set ping values */
 							bathymetry->longitude = DTR * navlon;
@@ -5106,10 +5009,6 @@ int main(int argc, char **argv) {
 							else {
 								bathymetry->vehicle_height = -sonardepth;
 							}
-							// fprintf(stderr, "\nPing %d: %14.9f %13.9f %10.3f   %7.3f %7.3f %7.3f\n",
-							// nrec_multibeam + nrec_multibeam_tot,
-							// bathymetry->longitude, bathymetry->latitude, bathymetry->vehicle_height,
-							// bathymetry->heading, bathymetry->roll, bathymetry->pitch);
 
 							/*
 							 * get ready to
@@ -5366,35 +5265,6 @@ int main(int argc, char **argv) {
 									phi = 90.0 - beamAzimuth;
 									if (phi < 0.0)
 										phi += 360.0;
-									// fprintf(stderr, "Beam:%5d:%3.3d tx: %f %f %f %f  rx: %f %f %f %f  refh:%f",
-									// nrec_multibeam + nrec_multibeam_tot, i, tx_orientation.roll, tx_orientation.pitch,
-									// tx_orientation.heading, tx_steer,  rx_orientation.roll, rx_orientation.pitch,
-									// rx_orientation.heading, rx_steer, reference_heading);
-
-									// BD - 90 0 + 90
-									// MB 180 90 0
-									// MB = -BD + X
-									// 180 = 90 + X == >X = 90
-									// 90 = -0 + X == >X = 90
-									// 0 = -90 + X == >X = 90
-
-									/*
-									 * calculate beam angles the old way
-									 */
-									//									alpha = RTD * (beampitchr + v2rawdetection->tx_angle) +
-									//tx_align.pitch;
-									//									beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - beamrollr) +
-									//rx_align.roll; 									mb_rollpitch_to_takeoff(
-									//										verbose,
-									//										alpha, beta,
-									//										&theta2, &phi2,
-									//										&error);
-									// if (phi < 0.0) phi += 360.0;
-									// if (phi > 360.0) phi -= 360.0;
-									// if (phi2 < 0.0) phi2 += 360.0;
-									// if (phi2 > 360.0) phi2 -= 360.0;
-									// fprintf(stderr,"Beam angles[%d]:  Theta: %f %f %f   Phi: %f %f %f\n",
-									//		i, theta, theta2, theta2-theta, phi,phi2, phi2-phi);
 
 									/* calculate bathymetry */
 									rr = 0.5 * soundspeed * bathymetry->range[i];
@@ -5405,9 +5275,6 @@ int main(int argc, char **argv) {
 									bathymetry->depth[i] = zz + sonardepth - heave;
 									bathymetry->pointing_angle[i] = DTR * theta;
 									bathymetry->azimuth_angle[i] = DTR * phi;
-									// fprintf(stderr, " beamAzimuth:%f beamDepression:%f theta:%f phi:%f  bath: %f %f %f\n",
-									// beamAzimuth, beamDepression, theta, phi, bathymetry->acrosstrack[i],
-									// bathymetry->alongtrack[i], zz);
 								}
 							}
 
@@ -5557,37 +5424,6 @@ int main(int argc, char **argv) {
 									phi = 90.0 - beamAzimuth;
 									if (phi < 0.0)
 										phi += 360.0;
-									// fprintf(stderr, "Beam:%5d:%3.3d tx: %f %f %f %f  rx: %f %f %f %f  refh:%f",
-									// nrec_multibeam + nrec_multibeam_tot, i, tx_orientation.roll, tx_orientation.pitch,
-									// tx_orientation.heading, tx_steer,  rx_orientation.roll, rx_orientation.pitch,
-									// rx_orientation.heading, rx_steer, reference_heading);
-
-									// BD - 90 0 + 90
-									// MB 180 90 0
-									// MB = -BD + X
-									// 180 = 90 + X == >X = 90
-									// 90 = -0 + X == >X = 90
-									// 0 = -90 + X == >X = 90
-
-									/*
-									 * calculate beam angles the old way
-									 */
-									//									alpha = RTD * (beampitchr + v2detection->angle_y[j] +
-									//pitchr
-									//										       + volatilesettings->steering_vertical) +
-									//tx_align.pitch;
-									//									beta = 90.0 - RTD * (v2detection->angle_x[j] - rollr) +
-									//rx_align.roll; 									mb_rollpitch_to_takeoff(
-									//												verbose,
-									//												alpha, beta,
-									//												&theta2, &phi2,
-									//												&error);
-									// if (phi < 0.0) phi += 360.0;
-									// if (phi > 360.0) phi -= 360.0;
-									// if (phi2 < 0.0) phi2 += 360.0;
-									// if (phi2 > 360.0) phi2 -= 360.0;
-									// fprintf(stderr,"Beam angles[%d]:  Theta: %f %f %f   Phi: %f %f %f\n",
-									//		i, theta, theta2, theta2-theta, phi,phi2, phi2-phi);
 
 									/*
 									 * calculate bathymetry
@@ -5744,36 +5580,6 @@ int main(int argc, char **argv) {
 									phi = 90.0 - beamAzimuth;
 									if (phi < 0.0)
 										phi += 360.0;
-									// fprintf(stderr, "Beam:%5d:%3.3d tx: %f %f %f %f  rx: %f %f %f %f  refh:%f",
-									// nrec_multibeam + nrec_multibeam_tot, i, tx_orientation.roll, tx_orientation.pitch,
-									// tx_orientation.heading, tx_steer,  rx_orientation.roll, rx_orientation.pitch,
-									// rx_orientation.heading, rx_steer, reference_heading);
-
-									// BD - 90 0 + 90
-									// MB 180 90 0
-									// MB = -BD + X
-									// 180 = 90 + X == >X = 90
-									// 90 = -0 + X == >X = 90
-									// 0 = -90 + X == >X = 90
-
-									/*
-									 * calculate beam angles the old way
-									 */
-									//									alpha = RTD * (v2detection->angle_y[i] + beampitchr
-									//										       + volatilesettings->steering_vertical) +
-									//tx_align.pitch;
-									//									beta = 90.0 - RTD * (v2detection->angle_x[i] - beamrollr) +
-									//rx_align.roll; 									mb_rollpitch_to_takeoff(
-									//										verbose,
-									//										alpha, beta,
-									//										&theta2, &phi2,
-									//										&error);
-									// if (phi < 0.0) phi += 360.0;
-									// if (phi > 360.0) phi -= 360.0;
-									// if (phi2 < 0.0) phi2 += 360.0;
-									// if (phi2 > 360.0) phi2 -= 360.0;
-									// fprintf(stderr,"Beam angles[%d]:  Theta: %f %f %f   Phi: %f %f %f\n",
-									//		i, theta, theta2, theta2-theta, phi,phi2, phi2-phi);
 
 									/*
 									 * calculate bathymetry
@@ -5953,37 +5759,6 @@ int main(int argc, char **argv) {
 										phi = 90.0 - beamAzimuth;
 										if (phi < 0.0)
 											phi += 360.0;
-										// fprintf(stderr, "Beam:%5d:%3.3d tx: %f %f %f %f  rx: %f %f %f %f  refh:%f",
-										// nrec_multibeam + nrec_multibeam_tot, i, tx_orientation.roll, tx_orientation.pitch,
-										// tx_orientation.heading, tx_steer,  rx_orientation.roll, rx_orientation.pitch,
-										// rx_orientation.heading, rx_steer, reference_heading);
-
-										// BD - 90 0 + 90
-										// MB 180 90 0
-										// MB = -BD + X
-										// 180 = 90 + X == >X = 90
-										// 90 = -0 + X == >X = 90
-										// 0 = -90 + X == >X = 90
-
-										/*
-										 * calculate beam angles the old way
-										 */
-										//										alpha = RTD * (beamgeometry->angle_alongtrack[i] +
-										//pitchr
-										//											       + volatilesettings->steering_vertical) +
-										//tx_align.pitch; 										beta = 90.0 - RTD *
-										//(beamgeometry->angle_acrosstrack[i] - beamrollr) + rx_align.roll;
-										//										mb_rollpitch_to_takeoff(
-										//											verbose,
-										//											alpha, beta,
-										//											&theta2, &phi2,
-										//											&error);
-										// if (phi < 0.0) phi += 360.0;
-										// if (phi > 360.0) phi -= 360.0;
-										// if (phi2 < 0.0) phi2 += 360.0;
-										// if (phi2 > 360.0) phi2 -= 360.0;
-										// fprintf(stderr,"Beam angles[%d]:  Theta: %f %f %f   Phi: %f %f %f\n",
-										//		i, theta, theta2, theta2-theta, phi,phi2, phi2-phi);
 
 										rr = 0.5 * soundspeed * bathymetry->range[i];
 										xx = rr * sin(DTR * theta);
@@ -7185,20 +6960,10 @@ int main(int argc, char **argv) {
 				}
 				/* handle unknown data */
 				else if (status == MB_SUCCESS) {
-					/*
-					 * fprintf(stderr,"DATA TYPE UNKNOWN:
-					 * status:%d error:%d
-					 * kind:%d\n",status,error,kind);
-					 */
 					nrec_other++;
 				}
 				/* handle read error */
 				else {
-					/*
-					 * fprintf(stderr,"READ FAILURE:
-					 * status:%d error:%d
-					 * kind:%d\n",status,error,kind);
-					 */
 				}
 
 				if (verbose >= 2) {
@@ -7226,12 +6991,6 @@ int main(int argc, char **argv) {
 					if (ins_output_index < 0) {
 						int i = 0;
 						for (; i < nins && ins_time_d[i] < time_d - 1; i++) {
-							/*
-							 * fprintf(stderr,"i:%
-							 * d time: %f
-							 * ins:%f\n",i,time_d,
-							 * ins_time_d[i]);
-							 */
 						}
 						ins_output_index = MAX(0, i - 1);
 					}
