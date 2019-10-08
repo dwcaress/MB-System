@@ -87,7 +87,7 @@ struct mbareaclean_sndg_struct {
 	char sndg_beamflag_org;
 	char sndg_beamflag_esf;
 	char sndg_beamflag;
-	char sndg_edit;
+	bool sndg_edit;
 };
 
 /* sounding atorage values and arrays */
@@ -142,7 +142,7 @@ int getsoundingptr(int verbose, int soundingid, struct mbareaclean_sndg_struct *
 }
 /*--------------------------------------------------------------------*/
 
-int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct mbareaclean_sndg_struct *sndg, int *error) {
+int flag_sounding(int verbose, int flag, bool output_bad, bool output_good, struct mbareaclean_sndg_struct *sndg, int *error) {
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
 		fprintf(stderr, "dbg2  Input arguments:\n");
@@ -155,19 +155,19 @@ int flag_sounding(int verbose, int flag, int output_bad, int output_good, struct
 		fprintf(stderr, "dbg2       sndg->sndg_beamflag: %d\n", sndg->sndg_beamflag);
 	}
 
-	if (sndg->sndg_edit == MB_YES) {
-		if (output_bad == MB_YES && mb_beam_ok(sndg->sndg_beamflag) && flag) {
+	if (sndg->sndg_edit) {
+		if (output_bad && mb_beam_ok(sndg->sndg_beamflag) && flag) {
 			sndg->sndg_beamflag = MB_FLAG_FLAG + MB_FLAG_FILTER;
 			files[sndg->sndg_file].nflagged++;
 		}
 
-		else if (output_good == MB_YES && !mb_beam_ok(sndg->sndg_beamflag) && sndg->sndg_beamflag != MB_FLAG_NULL && !flag) {
+		else if (output_good && !mb_beam_ok(sndg->sndg_beamflag) && sndg->sndg_beamflag != MB_FLAG_NULL && !flag) {
 			sndg->sndg_beamflag = MB_FLAG_NONE;
 			files[sndg->sndg_file].nunflagged++;
 		}
 
-		else if (output_good == MB_YES && !mb_beam_ok(sndg->sndg_beamflag) && sndg->sndg_beamflag != MB_FLAG_NULL && flag) {
-			sndg->sndg_edit = MB_NO;
+		else if (output_good && !mb_beam_ok(sndg->sndg_beamflag) && sndg->sndg_beamflag != MB_FLAG_NULL && flag) {
+			sndg->sndg_edit = false;
 		}
 	}
 
@@ -197,7 +197,6 @@ int main(int argc, char **argv) {
 	void *mbio_ptr = NULL;
 	void *store_ptr = NULL;
 	int kind;
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	char swathfile[MB_PATH_MAXLINE];
 	char swathfileread[MB_PATH_MAXLINE];
@@ -258,8 +257,8 @@ int main(int argc, char **argv) {
 	int std_dev_filter = MB_NO;
 	double std_dev_threshold = 2.0;
 	int std_dev_nmin = 10;
-	int output_good = MB_NO;
-	int output_bad = MB_NO;
+	bool output_good = false;
+	bool output_bad = false;
 	int flag_detect = MB_DETECT_AMPLITUDE;
 	int use_detect = MB_NO;
 	int limit_beams = MB_NO;
@@ -352,7 +351,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'B':
 			case 'b':
-				output_bad = MB_YES;
+				output_bad = true;
 				break;
 			case 'D':
 			case 'd':
@@ -365,7 +364,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'G':
 			case 'g':
-				output_good = MB_YES;
+				output_good = true;
 				break;
 			case 'I':
 			case 'i':
@@ -443,8 +442,8 @@ int main(int argc, char **argv) {
 			median_filter = MB_YES;
 
 		/* turn on output bad if nothing specified */
-		if (output_bad == MB_NO && output_good == MB_NO)
-			output_bad = MB_YES;
+		if (!output_bad && !output_good)
+			output_bad = true;
 
 		if (verbose == 1 || help) {
 			fprintf(stderr, "\nProgram %s\n", program_name);
@@ -626,11 +625,11 @@ int main(int argc, char **argv) {
 		else
 			fprintf(stderr, "     Flag all beams\n");
 		fprintf(stderr, "Output:\n");
-		if (output_bad == MB_YES)
+		if (output_bad)
 			fprintf(stderr, "     Flag unflagged soundings identified as bad:  ON\n");
 		else
 			fprintf(stderr, "     Flag unflagged soundings identified as bad:  OFF\n");
-		if (output_good == MB_YES)
+		if (output_good)
 			fprintf(stderr, "     Unflag flagged soundings identified as good: ON\n");
 		else
 			fprintf(stderr, "     Unflag flagged soundings identified as good: OFF\n");
@@ -641,8 +640,7 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
 
 	/* open file list */
 	if (read_datalist == MB_YES) {
@@ -954,15 +952,15 @@ int main(int argc, char **argv) {
 							sndg->sndg_beamflag = beamflagorg[ib];
 							sndg->sndg_edit = MB_YES;
 							if (use_detect && detect[ib] != flag_detect)
-								sndg->sndg_edit = MB_NO;
+								sndg->sndg_edit = false;
 							if (limit_beams == MB_YES) {
 								if (min_beam <= ib && ib <= max_beam) {
 									if (beam_in == MB_NO)
-										sndg->sndg_edit = MB_NO;
+										sndg->sndg_edit = false;
 								}
 								else {
 									if (beam_in == MB_YES)
-										sndg->sndg_edit = MB_NO;
+										sndg->sndg_edit = false;
 								}
 							}
 							files[nfile - 1].nsndg++;

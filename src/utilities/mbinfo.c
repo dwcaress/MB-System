@@ -456,7 +456,7 @@ int main(int argc, char **argv) {
 
 
 	/* determine whether to read one file or a list of files */
-	const int read_datalist = format < 0 ? MB_YES : MB_NO;
+	const bool read_datalist = format < 0;
 
 	/* if reading from datalist then variance calculations
 	    are disabled */

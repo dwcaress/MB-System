@@ -107,7 +107,6 @@ int main(int argc, char **argv) {
 	void *mbio_ptr = NULL;
 	void *store_ptr = NULL;
 	int kind;
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	char swathfile[MB_PATH_MAXLINE];
 	char swathfileread[MB_PATH_MAXLINE];
@@ -384,8 +383,7 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
 
 	/* open file list */
 	if (read_datalist == MB_YES) {
