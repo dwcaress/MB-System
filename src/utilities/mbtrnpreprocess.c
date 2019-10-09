@@ -1801,7 +1801,7 @@ int main(int argc, char **argv)
   const bool read_datalist = format < 0;
 
   /* open file list */
-  if (read_datalist == MB_YES)
+  if (read_datalist)
     {
     if ((status =mb_datalist_open(verbose, &datalist, input, look_processed, &error)) != MB_SUCCESS)
       {
@@ -2887,7 +2887,7 @@ int main(int argc, char **argv)
 
       /* give the statistics
          figure out whether and what to read next*/
-      if (read_datalist == MB_YES)
+      if (read_datalist)
         {
         if ((status =
           mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight,
@@ -2913,7 +2913,7 @@ int main(int argc, char **argv)
     }
 
   fprintf(stderr, "exit loop\n");
-  if (read_datalist == MB_YES)
+  if (read_datalist)
     mb_datalist_close(verbose, &datalist, &error);
 
   /* close log file */

@@ -723,7 +723,7 @@ int main(int argc, char **argv) {
 		read_datalist = MB_YES;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1515,7 +1515,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = MB_YES;
 			else
@@ -1527,7 +1527,7 @@ int main(int argc, char **argv) {
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* if desired apply filtering to sonardepth data */
@@ -1771,7 +1771,7 @@ int main(int argc, char **argv) {
 	if (mode >= MBKONSBERGPREPROCESS_PROCESS) {
 
 		/* open file list */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 				fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 				fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -2651,7 +2651,7 @@ int main(int argc, char **argv) {
 			nrec_0xE5_bathymetry_mbari59_tot += nrec_0xE5_bathymetry_mbari59;
 
 			/* figure out whether and what to read next */
-			if (read_datalist == MB_YES) {
+			if (read_datalist) {
 				if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 					read_data = MB_YES;
 				else
@@ -2728,7 +2728,7 @@ int main(int argc, char **argv) {
 
 			/* end loop over files in list */
 		}
-		if (read_datalist == MB_YES)
+		if (read_datalist)
 			mb_datalist_close(verbose, &datalist, &error);
 
 		/* output counts */

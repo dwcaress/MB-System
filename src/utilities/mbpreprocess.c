@@ -1313,7 +1313,7 @@ int main(int argc, char **argv) {
   const bool read_datalist = format < 0;
 
   /* open file list */
-  if (read_datalist == MB_YES) {
+  if (read_datalist) {
     if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -1726,7 +1726,7 @@ int main(int argc, char **argv) {
         n_rt_files++;
 
     /* figure out whether and what to read next */
-    if (read_datalist == MB_YES) {
+    if (read_datalist) {
       if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &iformat, &file_weight, &error)) == MB_SUCCESS)
         read_data = MB_YES;
       else
@@ -1738,7 +1738,7 @@ int main(int argc, char **argv) {
 
     /* end loop over files in list */
   }
-  if (read_datalist == MB_YES)
+  if (read_datalist)
     mb_datalist_close(verbose, &datalist, &error);
 
   /* output data counts */
@@ -2297,7 +2297,7 @@ int main(int argc, char **argv) {
   }
 
   /* open file list */
-  if (read_datalist == MB_YES) {
+  if (read_datalist) {
     if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
       fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
       fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -3094,7 +3094,7 @@ int main(int argc, char **argv) {
     }
 
     /* figure out whether and what to read next */
-    if (read_datalist == MB_YES) {
+    if (read_datalist) {
       if ((status = mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
         read_data = MB_YES;
       else
@@ -3106,7 +3106,7 @@ int main(int argc, char **argv) {
 
     /* end loop over files in list */
   }
-  if (read_datalist == MB_YES)
+  if (read_datalist)
     mb_datalist_close(verbose, &datalist, &error);
 
   /* output data counts */

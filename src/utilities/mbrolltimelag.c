@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
 	fprintf(stderr, "%d roll data read from %s\n", nroll, swathdata);
 
 	/* open total cross correlation file */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		sprintf(xcorfiletot, "%s_xcorr.txt", outroot);
 		if ((fpt = fopen(xcorfiletot, "w")) == NULL) {
 			fprintf(stderr, "\nUnable to open cross correlation output: %s\n", xcorfiletot);
@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, swathdata, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", swathdata);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -567,7 +567,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = MB_YES;
 			else
@@ -579,11 +579,11 @@ int main(int argc, char **argv) {
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close cross correlation file */
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		fclose(fpt);
 
 	/* close estimate file */
@@ -596,7 +596,7 @@ int main(int argc, char **argv) {
 	fclose(fpm);
 
 	/* generate plot shellscript for cross correlation file */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		sprintf(cmdfile, "mbm_xyplot -I%s -N -L\"Roll Correlation With Acrosstrack Slope:Time Lag (sec):Correlation:\"",
 		        xcorfiletot);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
