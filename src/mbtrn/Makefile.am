@@ -1,93 +1,89 @@
-lib_LTLIBRARIES = libmbtrn.la
+lib_LTLIBRARIES = libr7kr.la
 
-include_HEADERS =
-include_HEADERS += mframe.h
-include_HEADERS += mcbuf.h
-include_HEADERS += msocket.h
-include_HEADERS += mthread.h
-include_HEADERS += mfile.h
-include_HEADERS += mtime.h
-include_HEADERS += mconfig.h
-include_HEADERS += medebug.h
-include_HEADERS += mmdebug.h
-include_HEADERS += merror.h
-include_HEADERS += mlog.h
-include_HEADERS += mlist.h
-include_HEADERS += mstats.h
-include_HEADERS += mbtrn.h
-include_HEADERS += mbtrn-server.h
-include_HEADERS += mbtrn-test.h
-include_HEADERS += r7kc.h
+include_HEADERS = \
+				mframe/src/mframe.h \
+				mframe/src/mcbuf.h \
+                mframe/src/msocket.h \
+                mframe/src/mthread.h \
+				mframe/src/mfile.h \
+				mframe/src/mtime.h\
+                mframe/src/medebug.h \
+                mframe/src/mmdebug.h \
+				mframe/src/merror.h \
+				mframe/src/mlog.h \
+                mframe/src/mlist.h \
+                mframe/src/mstats.h \
+                utils/mconfig.h \
+                utils/mb1_msg.h \
+                utils/mb71_msg.h \
+                r7kr/r7k-reader.h \
+				r7kr/r7kc.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
-# add -DMBTRN_VER="<version>" to override version defined in mbtrn.h
+# configure mframe compilation flags
+BUILD_DATE=`date +%Y/%m/%dT%H:%M:%S%z`
+MFRAME_VERSIONS=-DMFRAME_BUILD="${BUILD_DATE}" -DTRNC_VER=1.0 -DFRAMES7K_VER=1.0 -DSTREAM7K_VER=1.0 -DTBINX_VER=1.0 -DEMU7K_VER=1.0
+MFRAME_TESTS=-DWITH_TESTS -DWITH_R7KR_TEST
+MFRAME_FEATURES=-DWITH_MST_MSTATS -DMST_STATS_EN -DWITH_PDEBUG -DWITH_MMDEBUG
+MFRAME_OPTS=$(MFRAME_VERSIONS) $(MFRAME_FEATURES) $(MFRAME_TESTS)
 
-AM_CPPFLAGS =
-AM_CPPFLAGS += -g -O0
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-AM_CPPFLAGS += -DHAVE_CONFIG_H
-AM_CPPFLAGS += -DWITH_TESTS
-AM_CPPFLAGS += -DWITH_MST_MSTATS
-AM_CPPFLAGS += -DMST_STATS_EN
-AM_CPPFLAGS += -DWITH_PDEBUG
-AM_CPPFLAGS += -DWITH_MMDEBUG
-AM_CPPFLAGS += -D_GNU_SOURCE
-AM_CPPFLAGS += -DMBTRN_BUILD="`date +%Y/%m/%dT%H:%M:%S%z`"
+AM_CPPFLAGS = -g -O0 -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src \
+ -DHAVE_CONFIG_H  -D_GNU_SOURCE $(MFRAME_OPTS)
 
 
-    WITH_MEDEBUG_DEBUG     : enable medebug debug macros
+libr7kr_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 
-libmbtrn_la_LDFLAGS =  -no-undefined -version-info 0:0:0
+libr7kr_la_SOURCES =  mframe/src/mframe.c \
+                mframe/src/mcbuf.c \
+                mframe/src/msocket.c \
+                mframe/src/mthread.c \
+                mframe/src/mfile.c \
+                mframe/src/mtime.c\
+                mframe/src/mmdebug.c \
+                mframe/src/merror.c \
+                mframe/src/mlog.c \
+                mframe/src/mlist.c \
+                mframe/src/mstats.c \
+                mframe/src/mswap.c \
+                mframe/src/mutils.c \
+				utils/mconfig.c \
+				utils/mb1_msg.c \
+				utils/mb71_msg.c \
+                r7kr/r7k-reader.c \
+                r7kr/r7kc.c
 
-libmbtrn_la_SOURCES =
-libmbtrn_la_SOURCES += mframe.c
-libmbtrn_la_SOURCES += mcbuf.c
-libmbtrn_la_SOURCES += msocket.c
-libmbtrn_la_SOURCES += mthread.c
-libmbtrn_la_SOURCES += mfile.c
-libmbtrn_la_SOURCES += mtime.c
-libmbtrn_la_SOURCES += mmdebug.c
-libmbtrn_la_SOURCES += mconfig.c
-libmbtrn_la_SOURCES += merror.c
-libmbtrn_la_SOURCES += mlog.c
-libmbtrn_la_SOURCES += mlist.c
-libmbtrn_la_SOURCES += mstats.c
-libmbtrn_la_SOURCES += mswap.c
-libmbtrn_la_SOURCES += mbtrn.c
-libmbtrn_la_SOURCES += mbtrn-server.c
-libmbtrn_la_SOURCES += r7kc.c
 
-libmbtrn_la_LIBADD = -lpthread
+libr7kr_la_LIBADD = -lpthread
 
-bin_PROGRAMS = tmbtrn stream7k frames7k trnc emu7k tbinx udps udpc mb1conv
+bin_PROGRAMS =  stream7k frames7k emu7k trnc tbinx udps udpc mb1conv r7kr_test
 
-tmbtrn_SOURCES = mbtrn-test.c
-tmbtrn_LDADD = libmbtrn.la
+stream7k_SOURCES = utils/stream7k.c
+stream7k_LDADD = libr7kr.la
 
-stream7k_SOURCES = stream7k.c
-stream7k_LDADD = libmbtrn.la
+frames7k_SOURCES = utils/frames7k.c
+frames7k_LDADD = libr7kr.la
 
-frames7k_SOURCES = frames7k.c
-frames7k_LDADD = libmbtrn.la
+trnc_SOURCES = utils/trnc.c
+trnc_LDADD = libr7kr.la
 
-trnc_SOURCES = trnc.c
-trnc_LDADD = libmbtrn.la
+emu7k_SOURCES = utils/emu7k.c
+emu7k_LDADD = libr7kr.la
 
-emu7k_SOURCES = emu7k.c
-emu7k_LDADD = libmbtrn.la
+tbinx_SOURCES = utils/tbinx.c
+tbinx_LDADD = libr7kr.la
 
-tbinx_SOURCES = tbinx.c
-tbinx_LDADD = libmbtrn.la
+udps_SOURCES = utils/udps.c
+udps_LDADD = libr7kr.la
 
-udps_SOURCES = udps.c
-udps_LDADD = libmbtrn.la
+udpc_SOURCES = utils/udpc.c
+udpc_LDADD = libr7kr.la
 
-udpc_SOURCES = udpc.c
-udpc_LDADD = libmbtrn.la
+mb1conv_SOURCES = utils/mb1conv.c
+mb1conv_LDADD = libr7kr.la
 
-mb1conv_SOURCES = mb1conv.c mb1_msg.c mb71_msg.c
-mb1conv_LDADD = libmbtrn.la
+r7kr_test_SOURCES = r7kr/r7kr-test.c
+r7kr_test_LDADD = libr7kr.la
 
 dist_bin_SCRIPTS = mbtrnpp.sh emu7k.sh
 

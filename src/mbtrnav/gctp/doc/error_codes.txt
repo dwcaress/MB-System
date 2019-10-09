@@ -1,0 +1,47 @@
+Error Messages:
+
+Since different projections my have the same error but different error
+code numbers, duplicate descriptions occur.
+
+code	Corresponding Message
+----	---------------------
+2	"Convergence error"
+3	"Latitude failed to converge after 15 iterations"
+4	"Latitude failed to converge"
+5	"Illegal source or target unit code"
+6	"Output file name not specified"
+11	"Illegal zone number"
+21	"Illegal zone #<zone_code> for spheroid #<sph_code>"
+22	"Error opening State Plane parameter file"
+23	"Illegal spheroid #<sph_code>"
+31	"Equal latitudes for St. Parallels on opposite sides of equator",
+41	"Equal Latitudes for St. Parallels on opposite sides of equator",
+44	"Point can not be projected"
+53	"Transformation cannot be computed at the poles"
+81	"Standard Parallels on opposite sides of equator"
+93	"Point projects into infinity"
+95	"Latitude failed to converge"
+103	"Point projects into infinity"
+113	"Point projects to a circle of radius = <radius>"
+115	"Input data error"
+123	"Point projects into a circle of radius = <radius>"
+125	"Input data error"
+133	"Point projects into infinity"
+143	"Point can not be projected"
+145	"Input data error"
+153	"Point cannot be projected"
+155	"Input data error"
+164	"Input data error"
+174	"Input data error"
+201	"Input data error"
+202	"Input data error"
+205	"Point projects into infinity"
+214	"50 iterations without convergence"
+234	"Too many iterations in inverse"
+235	"Too many iterations in inverse"
+236	"Too many iterations in inverse"
+241	"Iteration failed to converge"
+251	"Iteration failed to converge"
+252	"Input data error"
+1101	"Incompatable unit codes"
+1116	"Illegal DMS field"

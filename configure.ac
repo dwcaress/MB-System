@@ -24,7 +24,7 @@ AC_INIT([mbsystem],[5.7.6beta13],[http://listserver.mbari.org/sympa/arc/mbsystem
 AC_CONFIG_MACRO_DIR(m4)
 AC_LANG(C)
 # AC_LANG([C++])
-AC_DEFINE(VERSION_DATE, "6 October 2019", [Set VERSION_DATE define in mb_config.h])
+AC_DEFINE(VERSION_DATE, "7 October 2019", [Set VERSION_DATE define in mb_config.h])
 
 dnl Check system arch
 AC_CANONICAL_HOST
@@ -100,6 +100,8 @@ AS_ECHO(["        --with-opengl-lib     - location of OpenGL libs (optional)"])
 AS_ECHO(["        --with-opengl-include - location of OpenGL headers (optional)"])
 AS_ECHO(["        --with-otps-dir       - location of OTPS installation (optional)"])
 AS_ECHO(["        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"])
+AS_ECHO(["        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"])
+AS_ECHO(["        --disable-mbtools     - disable building graphical tools (use with mbtrn,mbtnav)"])
 AS_ECHO(["        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"])
 AS_ECHO(["        --enable-test         - Enable building unit tests in test/ and third-party/"])
 AS_ECHO([" "])
@@ -883,6 +885,42 @@ else
 fi
 
 dnl--------------------------------------------------------------------
+dnl MBTNAV Section - optionally build terrain relative navigation (TRN) tools
+dnl--------------------------------------------------------------------
+
+dnl Check if the mbtnav tools should be built
+AS_ECHO(["Check if the mbtnav tools should be built"])
+AC_ARG_ENABLE(mbtnav, [AS_HELP_STRING([--enable-mbtnav], [build mbtnav tools])],
+[build_mbtnav=yes], [build_mbtnav=no])
+AM_CONDITIONAL([BUILD_MBTNAV], [test x$build_mbtnav = xyes])
+if test "$build_mbtnav" = "yes" ; then
+dnl Building mbtnav tools
+AS_ECHO(["Building mbtnav tools"])
+AC_DEFINE(MBTNAV_ENABLED, 1, [Build libmbtnav])
+else
+dnl Not building mbtnav tools
+AS_ECHO(["Not building mbtnav tools"])
+fi
+
+dnl--------------------------------------------------------------------
+dnl UTILS Section - optionally build utils
+dnl--------------------------------------------------------------------
+
+dnl Check if the mbsys tools should be built
+AS_ECHO(["Check if the graphical utils should be built"])
+AC_ARG_ENABLE(mbtools, [AS_HELP_STRING([--disable-mbtools], [do not build graphical tools])],
+        [build_mbtools=no], [build_mbtools=yes])
+AM_CONDITIONAL([BUILD_MBUTILS], [test x$build_mbtools = xyes])
+if test "$build_mbtools" = "yes" ; then
+    dnl Building mbsys tools
+    AS_ECHO(["Building graphical tools"])
+    AC_DEFINE(MBUTILS_ENABLED, 1, [Build graphical tools])
+else
+    dnl Not building mbsys tools
+    AS_ECHO(["Not building graphical tools"])
+fi
+
+dnl--------------------------------------------------------------------
 dnl Point Cloud Library Section - optionally build ICP based feature matching
 dnl in mbnavadjust - uses ICP algorithm in Point Cloud Library (PCL)
 dnl--------------------------------------------------------------------
@@ -972,6 +1010,8 @@ AC_CONFIG_FILES([\
       src/mbnavadjust/Makefile \
       src/otps/Makefile \
       src/mbtrn/Makefile \
+      src/mbtrnav/Makefile \
+      src/mbtrnutils/Makefile \
       src/mbview/Makefile \
       src/mbgrdviz/Makefile \
       src/mbeditviz/Makefile  \
@@ -1057,6 +1097,16 @@ if test "$build_mbtrn" = "yes" ; then
     AS_ECHO(["Build mbtrn tools: Enabled"])
 else
     AS_ECHO(["Build mbtrn tools: Disabled"])
+fi
+if test "$build_mbtnav" = "yes" ; then
+	AS_ECHO(["Build mbtnav tools: Enabled"])
+else
+	AS_ECHO(["Build mbtnav tools: Disabled"])
+fi
+if test "$build_mbtools" = "yes" ; then
+	AS_ECHO(["Build graphical tools: Enabled"])
+else
+	AS_ECHO(["Build graphical tools: Disabled"])
 fi
 if test "$build_pcltools" = "yes" ; then
     AS_ECHO(["Build PCL tools: Enabled"])

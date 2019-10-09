@@ -1,15 +1,18 @@
 bin_PROGRAMS = mbnavedit
 
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
+endif
+
 AM_CFLAGS = ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += -I${top_srcdir}/src/gsf
 AM_CPPFLAGS += ${libmotif_CPPFLAGS}
-if BUILD_MBTRN
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-endif
 
 AM_LDFLAGS =
 
@@ -21,6 +24,7 @@ LIBS += ${libgmt_LIBS}
 LIBS += ${libnetcdf_LIBS}
 LIBS += ${libproj_LIBS}
 LIBS += ${libmotif_LIBS}
+LIBS += $(MBTRNLIB) 
 LIBS += $(LIBM)
 
 mbnavedit_SOURCES =
@@ -32,5 +36,3 @@ mbnavedit_SOURCES += mbnavedit_creation.h
 mbnavedit_SOURCES += mbnavedit_extrawidgets.h
 mbnavedit_SOURCES += mbnavedit_prog.c
 mbnavedit_SOURCES += mbnavedit_util.c
-
-

@@ -646,6 +646,10 @@ BUILD_TEST_FALSE
 BUILD_TEST_TRUE
 BUILD_PCLTOOLS_FALSE
 BUILD_PCLTOOLS_TRUE
+BUILD_MBUTILS_FALSE
+BUILD_MBUTILS_TRUE
+BUILD_MBTNAV_FALSE
+BUILD_MBTNAV_TRUE
 BUILD_MBTRN_FALSE
 BUILD_MBTRN_TRUE
 BUILD_GL_FALSE
@@ -859,6 +863,8 @@ with_motif_include
 with_opengl_lib
 with_opengl_include
 enable_mbtrn
+enable_mbtnav
+enable_mbtools
 enable_pcltools
 enable_test
 enable_gsf
@@ -1526,6 +1532,8 @@ Optional Features:
   --enable-hardening      Enable compiler and linker options to frustrate
                           memory corruption exploits [yes]
   --enable-mbtrn          build mbtrn tools
+  --enable-mbtnav         build mbtnav tools
+  --disable-mbtools       do not build graphical tools
   --enable-pcltools       build tools using PCL
   --enable-test           build test tools
   --disable-gsf           build without the GSF driver
@@ -2563,7 +2571,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 # AC_LANG([C++])
 
-$as_echo "#define VERSION_DATE \"6 October 2019\"" >>confdefs.h
+$as_echo "#define VERSION_DATE \"7 October 2019\"" >>confdefs.h
 
 
 ac_aux_dir=
@@ -2739,6 +2747,8 @@ $as_echo "        --with-opengl-lib     - location of OpenGL libs (optional)"
 $as_echo "        --with-opengl-include - location of OpenGL headers (optional)"
 $as_echo "        --with-otps-dir       - location of OTPS installation (optional)"
 $as_echo "        --enable-mbtrn        - enable building terrain relative navigation (TRN) tools (optional)"
+$as_echo "        --enable-mbtnav       - enable building terrain relative navigation (TRN) tools (optional)"
+$as_echo "        --disable-mbtools     - disable building graphical tools (use with mbtrn,mbtnav)"
 $as_echo "        --enable-hardening    - Enable compiler and linker options to frustrate memory corruption exploits  (e.g. -fPIE and -pie) (optional)"
 $as_echo "        --enable-test         - Enable building unit tests in test/ and third-party/"
 $as_echo " "
@@ -20462,6 +20472,58 @@ else
 fi
 
 
+$as_echo "Check if the mbtnav tools should be built"
+# Check whether --enable-mbtnav was given.
+if test "${enable_mbtnav+set}" = set; then :
+  enableval=$enable_mbtnav; build_mbtnav=yes
+else
+  build_mbtnav=no
+fi
+
+ if test x$build_mbtnav = xyes; then
+  BUILD_MBTNAV_TRUE=
+  BUILD_MBTNAV_FALSE='#'
+else
+  BUILD_MBTNAV_TRUE='#'
+  BUILD_MBTNAV_FALSE=
+fi
+
+if test "$build_mbtnav" = "yes" ; then
+$as_echo "Building mbtnav tools"
+
+$as_echo "#define MBTNAV_ENABLED 1" >>confdefs.h
+
+else
+$as_echo "Not building mbtnav tools"
+fi
+
+
+$as_echo "Check if the graphical utils should be built"
+# Check whether --enable-mbtools was given.
+if test "${enable_mbtools+set}" = set; then :
+  enableval=$enable_mbtools; build_mbtools=no
+else
+  build_mbtools=yes
+fi
+
+ if test x$build_mbtools = xyes; then
+  BUILD_MBUTILS_TRUE=
+  BUILD_MBUTILS_FALSE='#'
+else
+  BUILD_MBUTILS_TRUE='#'
+  BUILD_MBUTILS_FALSE=
+fi
+
+if test "$build_mbtools" = "yes" ; then
+        $as_echo "Building graphical tools"
+
+$as_echo "#define MBUTILS_ENABLED 1" >>confdefs.h
+
+else
+        $as_echo "Not building graphical tools"
+fi
+
+
 $as_echo "Check if programs using PCL should be built"
 # Check whether --enable-pcltools was given.
 if test "${enable_pcltools+set}" = set; then :
@@ -20600,7 +20662,7 @@ fi
 
 $as_echo " "
 $as_echo "About to create Makefiles..."
-ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/bsio/Makefile src/gsf/Makefile src/mbaux/Makefile src/utilities/Makefile src/gmt/Makefile src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile src/mbvelocitytool/Makefile src/mbnavadjust/Makefile src/otps/Makefile src/mbtrn/Makefile src/mbview/Makefile src/mbgrdviz/Makefile src/mbeditviz/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/ps/Makefile src/share/Makefile third_party/Makefile third_party/googletest/Makefile third_party/googlemock/Makefile test/Makefile test/mbio/Makefile test/utilities/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/mbio/Makefile src/surf/Makefile src/bsio/Makefile src/gsf/Makefile src/mbaux/Makefile src/utilities/Makefile src/gmt/Makefile src/macros/Makefile src/mbedit/Makefile src/mbnavedit/Makefile src/mbvelocitytool/Makefile src/mbnavadjust/Makefile src/otps/Makefile src/mbtrn/Makefile src/mbtrnav/Makefile src/mbtrnutils/Makefile src/mbview/Makefile src/mbgrdviz/Makefile src/mbeditviz/Makefile src/man/Makefile src/man/man1/Makefile src/man/man3/Makefile src/html/Makefile src/ps/Makefile src/share/Makefile third_party/Makefile third_party/googletest/Makefile third_party/googlemock/Makefile test/Makefile test/mbio/Makefile test/utilities/Makefile"
 
 
 
@@ -20681,6 +20743,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_MBTRN_TRUE}" && test -z "${BUILD_MBTRN_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_MBTRN\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_MBTNAV_TRUE}" && test -z "${BUILD_MBTNAV_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_MBTNAV\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_MBUTILS_TRUE}" && test -z "${BUILD_MBUTILS_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_MBUTILS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_PCLTOOLS_TRUE}" && test -z "${BUILD_PCLTOOLS_FALSE}"; then
@@ -21692,6 +21762,8 @@ do
     "src/mbnavadjust/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbnavadjust/Makefile" ;;
     "src/otps/Makefile") CONFIG_FILES="$CONFIG_FILES src/otps/Makefile" ;;
     "src/mbtrn/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrn/Makefile" ;;
+    "src/mbtrnav/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrnav/Makefile" ;;
+    "src/mbtrnutils/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbtrnutils/Makefile" ;;
     "src/mbview/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbview/Makefile" ;;
     "src/mbgrdviz/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbgrdviz/Makefile" ;;
     "src/mbeditviz/Makefile") CONFIG_FILES="$CONFIG_FILES src/mbeditviz/Makefile" ;;
@@ -23209,6 +23281,16 @@ if test "$build_mbtrn" = "yes" ; then
     $as_echo "Build mbtrn tools: Enabled"
 else
     $as_echo "Build mbtrn tools: Disabled"
+fi
+if test "$build_mbtnav" = "yes" ; then
+	$as_echo "Build mbtnav tools: Enabled"
+else
+	$as_echo "Build mbtnav tools: Disabled"
+fi
+if test "$build_mbtools" = "yes" ; then
+	$as_echo "Build graphical tools: Enabled"
+else
+	$as_echo "Build graphical tools: Disabled"
 fi
 if test "$build_pcltools" = "yes" ; then
     $as_echo "Build PCL tools: Enabled"

@@ -1,0 +1,185 @@
+February 1996
+
+     Appendix C -- State Plane Zone Codes
+
+     State Plane Coordinate System uses zone codes instead of specific
+     projection parameters.  The table that follows lists State Plane
+     zone codes as used by the GCTPc Projection Transformation Package.
+
+				NAD27     NAD83
+     Jurisdiction		Zone      Zone
+     Zone name or number	Code      Code
+     -------------------	-----	  -----
+     Alabama
+          East              	0101     0101
+          West              	0102     0102
+     Alaska
+          01 through 10     	5001     5001
+              thru     		5010     5010
+     Arizona
+          East              	0201     0201
+          Central           	0202     0202
+          West              	0203     0203
+     Arkansas
+          North             	0301     0301
+          South             	0302     0302
+     California
+          01 through 07     	0401     0401
+              thru     		0407     0406
+     Colorado
+          North        		0501     0501
+          Central     		0502     0502
+          South        		0503     0503
+     Connecticut       		0600     0600
+     Delaware          		0700     0700
+     District of Columbia	1900     1900
+     Florida
+          East         		0901     0901
+          West         		0902     0902
+          North        		0903     0903
+     Georgia
+          East         		1001     1001
+          West         		1002     1002
+     Hawaii
+          01 through 05		5101     5101
+              thru     		5105     5105
+     Idaho
+          East         		1101     1101
+          Central      		1102     1102
+          West         		1103     1103
+     Illinois
+          East         		1201     1201
+          West         		1202     1202
+     Indiana
+          East         		1301     1301
+          West         		1302     1302
+     Iowa
+          North      		1401     1401
+          South        		1402     1402
+     Kansas
+          North       		1501     1501
+          South       		1502     1502
+     Kentucky
+          North      		1601     1601
+          South      		1602     1602
+     Louisiana
+          North       		1701     1701
+          South      		1702     1702
+          Offshore   		1703     1703
+     Maine
+          East      		1801     1801
+          West       		1802     1802
+     Maryland          		1900     1900
+     Massachusetts
+          Mainland     		2001     2001
+          Island       		2002     2002
+     Michigan
+          East(TM)  		2101     ----
+          Central(TM)		2102     ----
+          West(TM)  		2103     ----
+          North(Lam)   		2111     2111
+          Central(Lam) 		2112     2112
+          South(Lam)   		2113     2113
+     Minnesota
+          North        		2201     2201
+          Central      		2202     2202
+          South        		2203     2203
+     Mississippi
+          East        		2301     2301
+          West         		2302     2302 
+     Missouri
+          East         		2401     2401
+          Central      		2402     2402
+          West    		2403     2403
+     Montana          		----     2500
+          North       		2501     ----
+          Central     		2502     ----
+          South      		2503     ----
+     Nebraska        		----     2600
+          North       		2601     ----
+          South      		2602     ----
+     Nevada
+          East        		2701     2701
+          Central    		2702     2702
+          West      		2703     2703
+     New Hampshire    		2800     2800
+     New Jersey      		2900     2900
+     New Mexico
+          East        		3001     3001
+          Central     		3002     3002
+          West       		3003     3003
+     New York
+          East        		3101     3101
+          Central    		3102     3102
+          West       		3103     3103
+          Long Island       	3104     3104
+     North Carolina   		3200     3200
+     North Dakota
+          North        		3301     3301
+          South        		3302     3302
+     Ohio
+          North        		3401     3401
+          South        		3402     3402
+     Oklahoma
+          North        		3501     3501
+          South        		3502     3502
+     Oregon
+          North        		3601     3601
+          South        		3602     3602
+     Pennsylvania
+          North        		3701     3701
+          South        		3702     3702
+     Rhode Island      		3800     3800
+     South Carolina    		----     3900
+          North      		3901     ----
+          South       		3902     ----
+     South Dakota
+          North      		4001     4001
+          South       		4002     4002
+     Tennessee        		4100     4100
+     Texas
+          North         	4201     4201
+          North Central   	4202     4202
+          Central       	4203     4203
+          South Central		4204     4204
+          South        		4205     4205
+     Utah
+          North        		4301     4301
+          Central      		4302     4302
+          South        		4303     4303
+     Vermont           		4400     4400
+     Virginia
+          North        		4501     4501
+          South        		4502     4502
+     Washington
+          North        		4601     4601
+          South        		4602     4602
+     West Virginia
+          North        		4701     4701
+          South        		4702     4702
+     Wisconsin
+          North       		4801     4801
+          Central     		4802     4802
+          South       		4803     4803
+     Wyoming
+          East         		4901     4901
+          East Central 		4902     4902
+          West Central 		4903     4903
+          West         		4904     4904
+     Puerto Rico       		5201     5200
+     Virgin Islands    		----     5200
+          St. John, St. Thomas	5201     ----
+          St. Croix    		5202     ----
+     American Samoa    		5300     ----
+     Guam              		5400     ----
+
+     Obtained from Software Documentation for GCTP General Cartographic
+     Transformation Package: National Mapping Program Technical Instructions,
+     U.S. Geological Survey, National Mapping Division, Oct 1990,
+
+     Note:  Equations for State Plane zones are given in:
+
+        Clarie, Charles N, State Plane Coordinates by Automatic Data
+        Processing, U.S. Department of Commerce, Environmental Science
+        Services Administration, Coast and Geodetic Survey, United States
+        Government Printing Office, Publication 62-4, 1973.

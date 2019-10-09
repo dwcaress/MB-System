@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# Run Trn and log console output with today's date and time.
+# Tee the output back to the console.
+#
+_log=$(date -u +"%Y.%j.%H%M%S").txt && linux/trn_server 2>&1 | tee $_log

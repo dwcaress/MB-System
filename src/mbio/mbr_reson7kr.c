@@ -5020,7 +5020,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
   short *shortptrphase;
   int *intptramp;
   int *intptrphase;
-  
+
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
     fprintf(stderr, "dbg2  Input arguments:\n");
@@ -8930,9 +8930,9 @@ store->read_beam,store->read_verticaldepth,store->read_tvg,store->read_image);
 #ifdef MBTRN_ENABLED
     else if (mb_io_ptr->mbsp != NULL) {
         if (*save_flag == MB_YES)
-            mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp) - *size;
+            mb_io_ptr->file_bytes = r7kr_reader_tell(mb_io_ptr->mbsp) - *size;
         else
-            mb_io_ptr->file_bytes = mbtrn_reader_tell(mb_io_ptr->mbsp);
+            mb_io_ptr->file_bytes = r7kr_reader_tell(mb_io_ptr->mbsp);
     }else{
         fprintf(stderr,"ERROR - both file and socket input pointers are NULL\n");
     }

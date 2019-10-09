@@ -1,5 +1,10 @@
 lib_LTLIBRARIES = libmbview.la
 
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
+endif
+
 include_HEADERS = mbview.h
 
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
@@ -7,13 +12,11 @@ AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
+AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}
-if BUILD_MBTRN
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-endif
 
 libmbview_la_CFLAGS = -DMBVIEW_LIBRARY
 libmbview_la_LDFLAGS = -no-undefined -version-info 0:0:0
@@ -29,5 +32,5 @@ libmbview_la_LIBADD = \
         ${top_builddir}/src/mbio/libmbio.la \
         ${top_builddir}/src/mbaux/libmbaux.la \
         ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        ${libmotif_LIBS} ${libopengl_LIBS} \
+        $(MBTRNLIB) ${libmotif_LIBS} ${libopengl_LIBS} \
         ${XDR_LIB}

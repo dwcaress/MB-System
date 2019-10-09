@@ -89,7 +89,6 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = mbvelocitytool$(EXEEXT)
-@BUILD_MBTRN_TRUE@am__append_1 = -I${top_srcdir}/src/mbtrn
 subdir = src/mbvelocitytool
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
@@ -229,12 +228,10 @@ LDFLAGS = @LDFLAGS@
 LIBM = @LIBM@
 LIBOBJS = @LIBOBJS@
 LIBS = ${top_builddir}/src/mbio/libmbio.la \
-        ${top_builddir}/src/mbaux/libmbaux.la \
-        ${top_builddir}/src/mbaux/libmbxgr.la \
-        ${libgmt_LIBS} ${libnetcdf_LIBS} ${libproj_LIBS} \
-        ${libmotif_LIBS} \
-        $(LIBM)
-
+	${top_builddir}/src/mbaux/libmbaux.la \
+	${top_builddir}/src/mbaux/libmbxgr.la ${libgmt_LIBS} \
+	${libnetcdf_LIBS} ${libproj_LIBS} ${libmotif_LIBS} $(MBTRNLIB) \
+	$(LIBM)
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
@@ -361,10 +358,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+@BUILD_MBTRN_TRUE@MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+@BUILD_MBTRN_TRUE@MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
 AM_CFLAGS = ${libnetcdf_CFLAGS}
 AM_CPPFLAGS = -I${top_srcdir}/src/mbio -I${top_srcdir}/src/mbaux \
-	-I${top_srcdir}/src/gsf ${libnetcdf_CPPFLAGS} \
-	${libmotif_CPPFLAGS} $(am__append_1)
+	-I${top_srcdir}/src/gsf $(MBTRNINCDIR) ${libnetcdf_CPPFLAGS} \
+	${libmotif_CPPFLAGS}
 AM_LDFLAGS = 
 mbvelocitytool_SOURCES = mbvelocity_bxutils.c mbvelocity.c mbvelocity_callbacks.c \
         mbvelocity_creation.c mbvelocity_prog.c mbvelocity_creation.h mbvelocity.h

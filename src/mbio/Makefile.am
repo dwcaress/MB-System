@@ -1,5 +1,10 @@
 lib_LTLIBRARIES = libmbio.la
 
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
+endif
+
 include_HEADERS =
 include_HEADERS += mb_config.h
 include_HEADERS += mb_define.h
@@ -93,15 +98,13 @@ AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I@top_srcdir@/src/bsio
 AM_CPPFLAGS += -I@top_srcdir@/src/surf
+AM_CPPFLAGS += $(MBTRNINCDIR)
 if BUILD_GSF
 AM_CPPFLAGS += -I@top_srcdir@/src/gsf
 endif
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libproj_CPPFLAGS}
-if BUILD_MBTRN
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-endif
 
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0
 
@@ -270,9 +273,7 @@ libmbio_la_LIBADD += ${libgmt_LIBS}
 libmbio_la_LIBADD += ${libnetcdf_LIBS}
 libmbio_la_LIBADD += ${libproj_LIBS}
 libmbio_la_LIBADD += ${XDR_LIB}
-if BUILD_MBTRN
-libmbio_la_LIBADD += $(top_builddir)/src/mbtrn/libmbtrn.la
-endif
+libmbio_la_LIBADD += $(MBTRNLIB)
 nodist_libmbio_la_SOURCES = projections.h
 
 BUILT_SOURCES = projections.h

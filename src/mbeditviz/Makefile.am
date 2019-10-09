@@ -1,18 +1,21 @@
 bin_PROGRAMS = mbeditviz
 
+if BUILD_MBTRN
+  MBTRNINCDIR = -I${top_srcdir}/src/mbtrn/r7kr -I${top_srcdir}/src/mbtrn/utils -I${top_srcdir}/src/mbtrn/mframe/src
+  MBTRNLIB = ${top_builddir}/src/mbtrn/libr7kr.la
+endif
+
 AM_CFLAGS = ${libgmt_CFLAGS} ${libnetcdf_CFLAGS}
 
 AM_CPPFLAGS =
 AM_CPPFLAGS += -I${top_srcdir}/src/mbio
 AM_CPPFLAGS += -I${top_srcdir}/src/mbaux
 AM_CPPFLAGS += -I${top_srcdir}/src/mbview
+AM_CPPFLAGS += $(MBTRNINCDIR)
 AM_CPPFLAGS += ${libgmt_CPPFLAGS}
 AM_CPPFLAGS += ${libnetcdf_CPPFLAGS}
 AM_CPPFLAGS += ${libmotif_CPPFLAGS}
 AM_CPPFLAGS += ${libopengl_CPPFLAGS}
-if BUILD_MBTRN
-AM_CPPFLAGS += -I${top_srcdir}/src/mbtrn
-endif
 
 AM_LDFLAGS =
 
@@ -27,4 +30,5 @@ mbeditviz_LDADD += ${libnetcdf_LIBS}
 mbeditviz_LDADD += ${libproj_LIBS}
 mbeditviz_LDADD += ${libmotif_LIBS}
 mbeditviz_LDADD += ${libopengl_LIBS}
+mbeditviz_LDADD += $(MBTRNLIB) 
 mbeditviz_LDADD += $(LIBM)
