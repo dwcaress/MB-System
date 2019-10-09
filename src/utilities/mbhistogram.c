@@ -106,7 +106,6 @@ int main(int argc, char **argv) {
 	char *message;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -376,8 +375,7 @@ int main(int argc, char **argv) {
 		histogram[i] = 0;
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
 
 	/* open file list */
 	if (read_datalist == MB_YES) {

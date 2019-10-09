@@ -212,7 +212,7 @@ int main(int argc, char **argv) {
 	char *message;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
+	const bool read_datalist = false;  // TODO(schwehr): Never changes???
 	mb_path swath_file;
 	mb_path dfile;
 	void *datalist;
@@ -652,7 +652,7 @@ int main(int argc, char **argv) {
 					status = mb_close(verbose, &mbio_ptr, &error);
 
 					/* figure out whether and what to read next */
-					if (read_datalist == MB_YES) {
+					if (read_datalist) {
 						if ((status = mb_datalist_read(verbose, datalist, swath_file, dfile, &input_swath_format, &file_weight,
 						                               &error)) == MB_SUCCESS)
 							read_data = MB_YES;
@@ -664,7 +664,7 @@ int main(int argc, char **argv) {
 					}
 				}
 
-				if (read_datalist == MB_YES)
+				if (read_datalist)
 					mb_datalist_close(verbose, &datalist, &error);
 
 				if (verbose > 0 && input_swath_platform_defined == MB_YES) {

@@ -1238,7 +1238,6 @@ int main(int argc, char **argv)
   char *message;
 
   /* MBIO read control parameters */
-  int read_datalist = MB_NO;
   int read_data = MB_NO;
   int read_socket = MB_NO;
   mb_path input;
@@ -1799,8 +1798,7 @@ int main(int argc, char **argv)
     mb_get_format(verbose, input, NULL, &format, &error);
 
   /* determine whether to read one file or a list of files */
-  if (format < 0)
-    read_datalist = MB_YES;
+  const bool read_datalist = format < 0;
 
   /* open file list */
   if (read_datalist == MB_YES)

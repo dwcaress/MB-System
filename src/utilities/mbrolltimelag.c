@@ -78,7 +78,6 @@ int main(int argc, char **argv) {
 	FILE *fpe = NULL;
 	FILE *fph = NULL;
 	FILE *fpm = NULL;
-	int read_datalist = MB_NO;
 	int read_data = MB_NO;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
@@ -249,8 +248,7 @@ int main(int argc, char **argv) {
 		strcpy(outroot, swathroot);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
 
 	/* get time lag step */
 	lagstep = (lagend - lagstart) / (nlag - 1);

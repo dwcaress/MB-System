@@ -76,7 +76,6 @@ int main(int argc, char **argv) {
 
 	/* processing variables */
 	int explicit = MB_NO;
-	int read_datalist = MB_NO;
 	int read_data = MB_NO;
 	char read_file[MBP_FILENAMESIZE];
 	void *datalist;
@@ -182,8 +181,7 @@ int main(int argc, char **argv) {
 		mb_get_format(verbose, read_file, NULL, &format, &error);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
 
 	int status = MB_SUCCESS;
 
