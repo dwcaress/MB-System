@@ -2654,7 +2654,6 @@ int mb_loadtimeshiftdata(int verbose, char *merge_timeshift_file, int merge_time
 
 int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int time_latency_mode, double time_latency_static,
                           int time_latency_num, double *time_latency_time_d, double *time_latency_value, int *error) {
-	int interp_status;
 	double time_latency;
 	int interp_error = MB_ERROR_NO_ERROR;
 	int j;
@@ -2679,7 +2678,7 @@ int mb_apply_time_latency(int verbose, int data_num, double *data_time_d, int ti
 	if (time_latency_mode == MB_SENSOR_TIME_LATENCY_MODEL) {
 		j = 0;
 		for (int i = 0; i < data_num; i++) {
-			interp_status = mb_linear_interp(verbose, time_latency_time_d - 1, time_latency_value - 1, time_latency_num,
+			/* int interp_status = */ mb_linear_interp(verbose, time_latency_time_d - 1, time_latency_value - 1, time_latency_num,
 			                                 data_time_d[i], &time_latency, &j, &interp_error);
 			data_time_d[i] -= time_latency;
 		}

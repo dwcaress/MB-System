@@ -1658,7 +1658,12 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 	char *result;
 
 	short *shortptr;
-	short type1, sonar1, type2, sonar2, type1swap, sonar1swap, type2swap, sonar2swap;
+	short type1;
+	short type2;
+	short sonar2;
+	short type1swap;
+	short type2swap;
+	short sonar2swap;
 	int nsonar, nlow, nhigh, subsystem, size;
 	int done;
 
@@ -1681,8 +1686,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 						type1 = *shortptr;
 						type1swap = (short)mb_swap_short(type1);
 						shortptr = (short *)&buffer[2];
-						sonar1 = *shortptr;
-						sonar1swap = (short)mb_swap_short(sonar1);
+						// const short sonar1 = *shortptr;
+						// const short sonar1swap = (short)mb_swap_short(sonar1);
 
 						shortptr = (short *)&buffer[4];
 						type2 = *shortptr;
@@ -1753,8 +1758,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 						type1 = *shortptr;
 						type1swap = (short)mb_swap_short(type1);
 						shortptr = (short *)&buffer[2];
-						sonar1 = *shortptr;
-						sonar1swap = (short)mb_swap_short(sonar1);
+						// const short sonar1 = *shortptr;
+						// const short sonar1swap = (short)mb_swap_short(sonar1);
 
 						shortptr = (short *)&buffer[4];
 						type2 = *shortptr;
