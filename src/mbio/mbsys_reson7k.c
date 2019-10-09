@@ -4976,14 +4976,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         for (int i = 0; i < bathymetry->number_beams; i++) {
           /* phase picks */
           if ((bathymetry->quality[i]) == 8) {
-            /*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
             bathymetry->quality[i] = 32 + 15;
-            /*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
           }
           else if ((bathymetry->quality[i]) == 4) {
-            /*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
             bathymetry->quality[i] = 16 + 15;
-            /*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
           }
         }
       }
@@ -4993,14 +4989,10 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
         for (int i = 0; i < bathymetry->number_beams; i++) {
           /* phase picks */
           if ((bathymetry->quality[i]) == 4) {
-            //fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);
             bathymetry->quality[i] = 32 + 15;
-            //fprintf(stderr," %d\n",bathymetry->quality[i]);
           }
           else if ((bathymetry->quality[i]) == 2) {
-            //fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);
             bathymetry->quality[i] = 16 + 15;
-            //fprintf(stderr," %d\n",bathymetry->quality[i]);
           }
         }
       }
@@ -5008,45 +5000,34 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
       /* fix upgraded MBARI version 5 quality flags */
       else if (bathymetry->header.Version >= 5 && store->nrec_bluefinnav > 0 && header->s7kTime.Year <= 2010) {
         for (int i = 0; i < bathymetry->number_beams; i++) {
-          /* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
           bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
           /* phase or amplitude picks */
           if (bathymetry->quality[i] & 8) {
-            /* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
             bathymetry->quality[i] += 32;
-            /* fprintf(stderr," %d\n",bathymetry->quality[i]); */
           }
           else if (bathymetry->quality[i] & 4) {
-            /* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
             bathymetry->quality[i] += 16;
-            /* fprintf(stderr," %d\n",bathymetry->quality[i]); */
           }
 
           /* flagged by sonar */
           if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0) {
             bathymetry->quality[i] += 64;
           }
-          /* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
         }
       }
 
       /* fix upgraded version 5 quality flags */
       else if (bathymetry->header.Version >= 5) {
         for (int i = 0; i < bathymetry->number_beams; i++) {
-          // fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]);
           bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
           /* phase or amplitude picks */
           if (bathymetry->quality[i] & 8) {
-            // fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);
             bathymetry->quality[i] += 32;
-            // fprintf(stderr," %d\n",bathymetry->quality[i]);
           }
           else if (bathymetry->quality[i] & 4) {
-            // fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);
             bathymetry->quality[i] += 16;
-            // fprintf(stderr," %d\n",bathymetry->quality[i]);
           }
 
           /* flagged by sonar */
@@ -5063,7 +5044,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           else if (bathymetry->quality[i] > 0) {
             bathymetry->quality[i] += 64;
           }
-          // fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]);
         }
       }
 
@@ -5243,7 +5223,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
           bathymetry->pointing_angle[i] = 0.0;
           bathymetry->azimuth_angle[i] = 0.0;
         }
-        // fprintf(stderr,"sonardepth:%f heave:%f\n",sonardepth,heave);
 
         /* set ping values */
         bathymetry->longitude = DTR * navlon;
@@ -5498,9 +5477,6 @@ int mbsys_reson7k_preprocess(int verbose,     /* in: verbosity level set on comm
             bathymetry->depth[i] = zz + sensordepth - 0.5 * (heave + beamheave);
             bathymetry->pointing_angle[i] = DTR * theta;
             bathymetry->azimuth_angle[i] = DTR * phi;
-            // fprintf(stderr,"beam:%d time_d:%f heading:%f %f roll:%f %f pitch:%f %f theta:%f phi:%f bath:%f %f
-            // %f\n",  i,time_d + bathymetry->range[i],heading,beamheading,roll,beamroll,pitch,beampitch,theta,phi,
-            // bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);
           }
         }
 
@@ -6080,8 +6056,6 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kin
     if (bathymetry->optionaldata == MB_YES && bathymetry->longitude != 0.0 && bathymetry->latitude != 0.0) {
       *navlon = RTD * bathymetry->longitude;
       *navlat = RTD * bathymetry->latitude;
-      /* fprintf(stderr,"mbsys_reson7k_extract: radians lon lat: %.10f %.10f  degrees lon lat: %.10f %.10f\n",
-      bathymetry->longitude,bathymetry->latitude,*navlon,*navlat); */
     }
 
     /* set beamwidths in mb_io structure */
@@ -6804,9 +6778,6 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind,
 
     /* copy comment */
     if (status == MB_SUCCESS) {
-      /*fprintf(stderr,"INSERTING COMMENT: %s\n",comment);
-      fprintf(stderr,"INSERTING COMMENT: msglen:%d message_alloc:%d status:%d error:%d\n",
-      msglen,systemeventmessage->message_alloc,status,*error);*/
       store->type = R7KRECID_7kSystemEventMessage;
       systemeventmessage->serial_number = 0;
       systemeventmessage->event_id = 1;
@@ -8451,7 +8422,6 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int
 
     /* get the trace weight */
     weight = exp(MB_LN_2 * ((double)fsdwsegyheader->weightingFactor));
-    /*fprintf(stderr, "Subbottom: Weight: %d %f\n",fsdwsegyheader->weightingFactor,weight);*/
 
     /* extract the data */
     if (fsdwsb->data_format == EDGETECH_TRACEFORMAT_ENVELOPE) {
@@ -9704,17 +9674,10 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
             ss_spacing_use = beam_foot / nsample_use;
           else
             ss_spacing_use = ss_spacing / sint;
-          /* fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
-          ss_spacing, ss_spacing_use,
-          nsample_use, sint, angle, range, beam_foot,
-          nsample_use * ss_spacing / beam_foot); */
           sample_start = MAX(((int)calibratedsnippettimeseries->detect_sample - (nsample_use / 2)),
                              (int)calibratedsnippettimeseries->begin_sample);
           sample_end = MIN(((int)calibratedsnippettimeseries->detect_sample + (nsample_use / 2)),
                            (int)calibratedsnippettimeseries->end_sample);
-          /* fprintf(stderr,"beam:%d snippet samples: b:%d d:%d e:%d   start:%d end:%d\n",
-          ibeam,calibratedsnippettimeseries->begin_sample,calibratedsnippettimeseries->detect_sample,calibratedsnippettimeseries->end_sample,sample_start,sample_end);
-          */
           for (int k = sample_start; k <= sample_end; k++) {
             if (xtrack < 0.0)
               xtrackss = xtrack - ss_spacing_use * (k - (int)calibratedsnippettimeseries->detect_sample);
@@ -9726,8 +9689,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
                 (double)calibratedsnippettimeseries->amplitude[k - (int)calibratedsnippettimeseries->begin_sample];
             ssalongtrack[kk] += bathymetry->alongtrack[i];
             ss_cnt[kk]++;
-            /* fprintf(stderr,"k:%d detect:%d xtrack:%f xtrackss:%f kk:%d ss:%f ss_cnt:%d\n",
-            k,snippettimeseries->detect_sample,xtrack,xtrackss,kk,ss[kk],ss_cnt[kk]); */
           }
         }
       }
@@ -9758,17 +9719,10 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
             ss_spacing_use = beam_foot / nsample_use;
           else
             ss_spacing_use = ss_spacing / sint;
-          /* fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
-          ss_spacing, ss_spacing_use,
-          nsample_use, sint, angle, range, beam_foot,
-          nsample_use * ss_spacing / beam_foot); */
           sample_start =
               MAX(((int)snippettimeseries->detect_sample - (nsample_use / 2)), (int)snippettimeseries->begin_sample);
           sample_end =
               MIN(((int)snippettimeseries->detect_sample + (nsample_use / 2)), (int)snippettimeseries->end_sample);
-          /* fprintf(stderr,"beam:%d snippet samples: b:%d d:%d e:%d   start:%d end:%d\n",
-          ibeam,snippettimeseries->begin_sample,snippettimeseries->detect_sample,snippettimeseries->end_sample,sample_start,sample_end);
-          */
           for (int k = sample_start; k <= sample_end; k++) {
             if (xtrack < 0.0)
               xtrackss = xtrack - ss_spacing_use * (k - (int)snippettimeseries->detect_sample);
@@ -9779,8 +9733,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
             ss[kk] += (double)snippettimeseries->amplitude[k - (int)snippettimeseries->begin_sample];
             ssalongtrack[kk] += bathymetry->alongtrack[i];
             ss_cnt[kk]++;
-            /* fprintf(stderr,"k:%d detect:%d xtrack:%f xtrackss:%f kk:%d ss:%f ss_cnt:%d\n",
-            k,snippettimeseries->detect_sample,xtrack,xtrackss,kk,ss[kk],ss_cnt[kk]); */
           }
         }
       }
@@ -9806,11 +9758,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
             ss_spacing_use = beam_foot / nsample_use;
           else
             ss_spacing_use = ss_spacing / sint;
-          /* fprintf(stderr, "spacing: %f %f xtrack:%f altitude:%f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
-          ss_spacing, ss_spacing_use,
-          xtrack,altitude,
-          nsample_use, sint, angle, range, beam_foot,
-          nsample_use * ss_spacing / beam_foot); */
           sample_detect = volatilesettings->sample_rate * bathymetry->range[ibeam];
           sample_start = MAX(sample_detect - (nsample_use / 2), snippet->begin_sample);
           sample_end = MIN(sample_detect + (nsample_use / 2), snippet->end_sample);
@@ -9835,8 +9782,6 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr, int sourc
               ss[kk] += (double)data_uchar[k - snippet->begin_sample];
             ssalongtrack[kk] += bathymetry->alongtrack[ibeam];
             ss_cnt[kk]++;
-            /* fprintf(stderr,"ibeam:%d k:%d kk:%d ss_cnt:%d ss:%f xtrackss:%f %f ssalongtrack:%f \n",
-            ibeam,k,kk,ss_cnt[kk],ss[kk], xtrackss, (k-nss/2)*(*pixel_size), ssalongtrack[kk]); */
           }
         }
       }

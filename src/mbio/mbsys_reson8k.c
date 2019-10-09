@@ -1300,7 +1300,6 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 				if (goodbeam2 >= 0 && goodbeam1 >= 0) {
 					const int pixel1 = (ttscale * store->range[goodbeam1] - store->ssrawtimedelay) / ss_spacing;
 					const int pixel2 = (ttscale * store->range[goodbeam2] - store->ssrawtimedelay) / ss_spacing;
-					/*fprintf(stderr, "port beams:%d %d  pixels: %d %d\n", goodbeam1, goodbeam2, pixel1, pixel2);*/
 					for (int ipixel = pixel1; ipixel < pixel2; ipixel++) {
 						const double xtrackss = store->bath_acrosstrack[goodbeam1] +
 						           ((double)(ipixel - pixel1)) / ((double)(pixel2 - pixel1)) *

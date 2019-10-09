@@ -526,8 +526,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 	time_d = store->time_d;
 	mb_get_date(verbose, time_d, time_i);
 
-	// fprintf(stderr,"time_d:%f   1: lon:%.12f lat:%.12f ", store->time_d, store->navlon, store->navlat);
-
 	/* get nav sensordepth heading attitude values for record timestamp */
 	if (pars->n_nav > 0) {
 		interp_status = mb_linear_interp_longitude(verbose, pars->nav_time_d - 1, pars->nav_lon - 1, pars->n_nav, time_d,
@@ -537,7 +535,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 		interp_status = mb_linear_interp(verbose, pars->nav_time_d - 1, pars->nav_speed - 1, pars->n_nav, time_d, &speed, &jnav,
 		                                 &interp_error);
 		store->speed = (float)speed;
-		// fprintf(stderr," 2: lon:%.12f lat:%.12f ", store->navlon, store->navlat);
 	}
 	if (pars->n_sensordepth > 0) {
 		interp_status = mb_linear_interp(verbose, pars->sensordepth_time_d - 1, pars->sensordepth_sensordepth - 1,
@@ -563,22 +560,15 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 		interp_status = mb_linear_interp(verbose, pars->attitude_time_d - 1, pars->attitude_pitch - 1, pars->n_attitude, time_d,
 		                                 &pitch, &jattitude, &interp_error);
 		store->pitch = (float)pitch;
-		// interp_status = mb_linear_interp(verbose,
-		//			pars->attitude_time_d-1, pars->attitude_heave-1, pars->n_attitude,
-		//			time_d, &store->heave, &jattitude,
-		//			&interp_error);
 	}
 
 	/* do lever arm correction */
 	if (platform_ptr != NULL) {
-		// fprintf(stderr,"Before: lon:%f lat:%f sensordepth:%f heading:%f roll:%f pitch:%f   ",
-		// store->navlon,store->navlat,store->sensordepth,heading,roll,pitch);
 
 		/* calculate sonar position position */
 		status =
 		    mb_platform_position(verbose, platform_ptr, pars->target_sensor, 0, store->navlon, store->navlat, store->sensordepth,
 		                         heading, roll, pitch, &store->navlon, &store->navlat, &store->sensordepth, error);
-		// printf(stderr,"   3: lon:%.12f lat:%.12f \n", store->navlon, store->navlat);
 
 		/* calculate sonar attitude */
 		status = mb_platform_orientation_target(verbose, platform_ptr, pars->target_sensor, 0, heading, roll, pitch, &heading,
@@ -586,8 +576,6 @@ int mbsys_3datdepthlidar_preprocess(int verbose,     /* in: verbosity level set 
 		store->heading = (float)heading;
 		store->roll = (float)roll;
 		store->pitch = (float)pitch;
-		// fprintf(stderr,"After: lon:%f lat:%f sensordepth:%f heading:%f roll:%f pitch:%f\n",
-		// store->navlon,store->navlat,store->sensordepth,store->heading,store->roll,store->pitch);
 	}
 
 	/* loop over all pulses */
@@ -1980,9 +1968,6 @@ int mbsys_3datdepthlidar_calculatebathymetry(int verbose,     /* in: verbosity l
 				pulse->acrosstrack = xx * cos(DTR * phi) + pulse->cross_track_offset;
 				pulse->alongtrack =
 				    xx * sin(DTR * phi) + pulse->forward_track_offset + 0.0000002777777 * pulse->pulse_time_offset * store->speed;
-				// fprintf(stderr,"pulse:%d time_d:%f %f heading:%f roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  bath:
-				// %f %f %f\n",  i, store->time_d, pulse->time_d, store->heading, store->roll, pulse->roll, store->pitch,
-				// pulse->pitch,  alpha, beta, theta, phi,  pulse->depth, pulse->acrosstrack, pulse->alongtrack);
 			}
 			else {
 				/* null everything */

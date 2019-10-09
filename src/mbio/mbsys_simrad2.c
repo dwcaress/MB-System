@@ -4695,10 +4695,6 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 							ss_spacing_use = beam_foot / ping->png_beam_samples[i];
 						else
 							ss_spacing_use = ss_spacing / sint;
-						/*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
-						ss_spacing, ss_spacing_use,
-						ping->png_beam_samples[i], sint, angle, range, beam_foot,
-						ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					}
 					for (int k = 0; k < ping->png_beam_samples[i]; k++) {
 						if (beam_ss[k] != EM2_INVALID_AMP) {
@@ -4952,10 +4948,6 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 							ss_spacing_use = beam_foot / ping->png_beam_samples[i];
 						else
 							ss_spacing_use = ss_spacing / sint;
-						/*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
-						ss_spacing, ss_spacing_use,
-						ping->png_beam_samples[i], sint, angle, range, beam_foot,
-						ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					}
 					for (int k = 0; k < ping->png_beam_samples[i]; k++) {
 						if (beam_ss[k] != EM2_INVALID_AMP) {

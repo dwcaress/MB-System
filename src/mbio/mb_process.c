@@ -4136,8 +4136,6 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 				slopes[i] = (depths[i] - depths[i - 1]) / dxtrack;
 			else
 				slopes[i] = 0.0;
-			/*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
-			i,depths[i-1],depths[i],depthacrosstrack[i-1],depthacrosstrack[i],slopes[i]);*/
 		}
 		slopeacrosstrack[*ndepths] = depthacrosstrack[*ndepths - 1];
 		slopes[*ndepths] = 0.0;
@@ -4282,8 +4280,6 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 		for (int i = 0; i < nbath - 1; i++) {
 			slopes[i + 1] = (depths[i + 1] - depths[i]) / (depthacrosstrack[i + 1] - depthacrosstrack[i]);
 			slopeacrosstrack[i + 1] = 0.5 * (depthacrosstrack[i + 1] + depthacrosstrack[i]);
-			/*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
-			i,depths[i],depths[i+1],depthacrosstrack[i],depthacrosstrack[i+1],slopes[i+1]);*/
 		}
 		slopes[0] = 0.0;
 		slopeacrosstrack[0] = depthacrosstrack[0];

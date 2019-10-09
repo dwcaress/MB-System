@@ -278,10 +278,6 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 	}
-	/*fprintf(stderr,"_RAWLINE:");
-	for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
-	fprintf(stderr,"%c",line[i]);
-	fprintf(stderr,"\n");*/
 
 	/* handle "pseudo-mgd77" in which each record is
 	 * followed by a cr or lf or both */
@@ -304,12 +300,7 @@ int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 		}
-		/*fprintf(stderr,"---SKIPPED %zu BYTES---\n",skip);*/
 	}
-	/*fprintf(stderr,"+FIXLINE:");
-	for (i=0;i<MBF_MGD77DAT_DATA_LEN;i++)
-	fprintf(stderr,"%c",line[i]);
-	fprintf(stderr,"\n");*/
 
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
 

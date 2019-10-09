@@ -851,9 +851,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 						if (EorW == 'W')
 							data->longitude = -data->longitude;
 						data->speed = 0.0;
-						/*fprintf(stderr, "time: %2.2d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%2.2d lat: %c %2d %8.5f  lon: %c %3d
-						%9.5f\n", data->pos_day, data->pos_month, data->pos_year, data->pos_hour, data->pos_minute,
-						data->pos_second, data->pos_centisecond, NorS, latdeg, latmin, EorW, londeg, lonmin);*/
 
 						navdone = MB_YES;
 						data->kind = MB_DATA_NAV;

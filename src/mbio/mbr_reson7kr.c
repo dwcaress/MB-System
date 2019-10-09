@@ -2885,9 +2885,6 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
     s7k_fsdwchannel *fsdwchannel = &(fsdwsslo->channel[i]);
     mbr_reson7kr_rd_fsdwchannel(verbose, fsdwsslo->data_format, buffer, &index, fsdwchannel, error);
   }
-  /*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsslo: index:%d OffsetToOptionalData:%d\n",
-  index, header->OffsetToOptionalData);
-      index = header->OffsetToOptionalData;*/
   s7k_fsdwssheader *fsdwssheader;
   for (int i = 0; i < 2; i++) {
     fsdwssheader = &(fsdwsslo->ssheader[i]);
@@ -3111,24 +3108,6 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
           }
   */
 
-  /*fprintf(stderr,"altitude:%f depth:%f sv:%f heading:%f bottompick:%d weight:%d ADCGain:%d ADCMax:%d max:%f\n",
-  survey->sonar_altitude,survey->sonar_depth,sound_speed,survey->heading,bottompick,
-  fsdwssheader->weightingFactor,fsdwssheader->ADCGain,fsdwssheader->ADCMax,tracemax);
-  fprintf(stderr,"\n\nbottompick:%d altitude:%f pixelsize:%f\n",bottompick,survey->sonar_altitude,pixelsize);
-  for (j=0;j<fsdwchannel->number_samples;j++)
-  {
-  fsdwchannel = &(fsdwsslo->channel[0]);
-  ushortptr = (unsigned short *) fsdwchannel->data;
-  value = (double) ushortptr[j];
-  fprintf(stderr,"SSL[%5d]: %10.0f",j,value);
-  fsdwchannel = &(fsdwsslo->channel[1]);
-  ushortptr = (unsigned short *) fsdwchannel->data;
-  value = (double) ushortptr[j];
-  fprintf(stderr," %10.0f",value);
-  if (j == bottompick) fprintf(stderr," BOTTOMPICK");
-  fprintf(stderr,"\n");
-  }*/
-
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
     fprintf(stderr, "dbg2  Return values:\n");
@@ -3186,9 +3165,6 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
     fsdwchannel = &(fsdwsshi->channel[i]);
     mbr_reson7kr_rd_fsdwchannel(verbose, fsdwsshi->data_format, buffer, &index, fsdwchannel, error);
   }
-  /*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsshi: index:%d OffsetToOptionalData:%d\n",
-  index, header->OffsetToOptionalData);
-      index = header->OffsetToOptionalData;*/
   for (int i = 0; i < 2; i++) {
     fsdwssheader = &(fsdwsshi->ssheader[i]);
     mbr_reson7kr_rd_fsdwssheader(verbose, buffer, &index, fsdwssheader, error);
@@ -3347,7 +3323,6 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
   index += 12;
   fsdwchannel = &(fsdwsb->channel);
   mbr_reson7kr_rd_fsdwchannel(verbose, fsdwsb->data_format, buffer, &index, fsdwchannel, error);
-  /* fprintf(stderr,"index:%d offset:%d\n",index,header->OffsetToOptionalData);*/
   fsdwsegyheader = &(fsdwsb->segyheader);
   mbr_reson7kr_rd_fsdwsegyheader(verbose, buffer, &index, fsdwsegyheader, error);
 
@@ -4712,8 +4687,6 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
       index += 4;
       mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->azimuth_angle[i]));
       index += 4;
-//fprintf(stderr,"READ BEAM:%d d:%f l:%f x:%f ax:%f az:%f\n",
-//i,bathymetry->depth[i],bathymetry->alongtrack[i],bathymetry->acrosstrack[i],bathymetry->pointing_angle[i],bathymetry->azimuth_angle[i]);
     }
 
     /* now check to see if these data were written incorrectly with acrosstrack before alongtrack
@@ -8047,8 +8020,6 @@ Have a nice day...\n");
         }
       }
     }
-    /* fprintf(stderr,"ping_record:%d last_ping:%d new_ping:%d current_ping:%d done:%d status:%d error:%d\n",
-    ping_record,*last_ping,*new_ping,*current_ping,done,status,*error); */
 
     /* check for ping data already read in read error case */
     if (status == MB_FAILURE && *last_ping >= 0) {
@@ -8887,9 +8858,6 @@ Have a nice day...\n");
         else if (nscan >= 2) {
           store->bathymetry.acrossalongerror = MB_NO;
         }
-//if (nscan > 0)
-//fprintf(stderr,"READ OLD MB-System Version %s   nscan:%d %d %d %d acrossalongerror:%d\n",
-//store->systemeventmessage.message,nscan,version_major,version_minor,version_svn,store->bathymetry.acrossalongerror);
       }
     }
 
@@ -9310,10 +9278,6 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         bathymetry->depth[i] = zz + sonar_depth - heave;
         bathymetry->pointing_angle[i] = DTR * theta;
         bathymetry->azimuth_angle[i] = DTR * phi;
-        /*fprintf(stderr,"j:%d i:%d quality:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
-        j, i, bathymetry->quality[i], roll, bathymetry->roll,pitch, bathymetry->pitch,
-        alpha,beta,theta,phi,
-        bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
       }
     }
 
@@ -9335,10 +9299,6 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         bathymetry->depth[i] = zz + sonar_depth - heave;
         bathymetry->pointing_angle[i] = DTR * theta;
         bathymetry->azimuth_angle[i] = DTR * phi;
-        /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
-        i,roll, bathymetry->roll,pitch, bathymetry->pitch,
-        alpha,beta,theta,phi,
-        bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
       }
     }
 
@@ -9360,10 +9320,6 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
         bathymetry->depth[i] = zz + sonar_depth - heave;
         bathymetry->pointing_angle[i] = DTR * theta;
         bathymetry->azimuth_angle[i] = DTR * phi;
-        /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
-        i,roll, bathymetry->roll,pitch, bathymetry->pitch,
-        alpha,beta,theta,phi,
-        bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
       }
     }
 
@@ -9384,10 +9340,6 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
           bathymetry->depth[i] = zz + sonar_depth - heave;
           bathymetry->pointing_angle[i] = DTR * theta;
           bathymetry->azimuth_angle[i] = DTR * phi;
-          /* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
-          i,roll, bathymetry->roll,pitch, bathymetry->pitch,
-          alpha,beta,theta,phi,
-          bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
         }
         else {
           bathymetry->quality[i] = 0;
@@ -11931,9 +11883,6 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
       fsdwchannel = &(fsdwsslo->channel[i]);
       mbr_reson7kr_wr_fsdwchannel(verbose, fsdwsslo->data_format, buffer, &index, fsdwchannel, error);
     }
-    /*fprintf(stderr,"In mbr_reson7kr_wr_fsdwsslo: index:%d OffsetToOptionalData:%d\n",
-    index, header->OffsetToOptionalData);
-        index = header->OffsetToOptionalData;*/
     for (int i = 0; i < 2; i++) {
       fsdwssheader = &(fsdwsslo->ssheader[i]);
       mbr_reson7kr_wr_fsdwssheader(verbose, buffer, &index, fsdwssheader, error);
@@ -12063,9 +12012,6 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
       fsdwchannel = &(fsdwsshi->channel[i]);
       mbr_reson7kr_wr_fsdwchannel(verbose, fsdwsshi->data_format, buffer, &index, fsdwchannel, error);
     }
-    /*fprintf(stderr,"In mbr_reson7kr_wr_fsdwsshi: index:%d OffsetToOptionalData:%d\n",
-    index, header->OffsetToOptionalData);
-        index = header->OffsetToOptionalData;*/
     for (int i = 0; i < 2; i++) {
       fsdwssheader = &(fsdwsshi->ssheader[i]);
       mbr_reson7kr_wr_fsdwssheader(verbose, buffer, &index, fsdwssheader, error);
@@ -12198,7 +12144,6 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
     index += 12;
     fsdwchannel = &(fsdwsb->channel);
     mbr_reson7kr_wr_fsdwchannel(verbose, fsdwsb->data_format, buffer, &index, fsdwchannel, error);
-    /* fprintf(stderr,"index:%d offset:%d\n",index,header->OffsetToOptionalData);*/
     fsdwsegyheader = &(fsdwsb->segyheader);
     mbr_reson7kr_wr_fsdwsegyheader(verbose, buffer, &index, fsdwsegyheader, error);
 
@@ -13433,8 +13378,6 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
         index += 4;
         mb_put_binary_float(MB_YES, bathymetry->azimuth_angle[i], &buffer[index]);
         index += 4;
-//fprintf(stderr,"WRITE BEAM:%d d:%f l:%f x:%f ax:%f az:%f\n",
-//i,bathymetry->depth[i],bathymetry->alongtrack[i],bathymetry->acrosstrack[i],bathymetry->pointing_angle[i],bathymetry->azimuth_angle[i]);
       }
     }
 

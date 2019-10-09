@@ -323,7 +323,6 @@ int mbr_reson7k3_wr_FileCatalog(int verbose, int *bufferalloc, char **bufferptr,
   *size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
   *size += R7KHDRSIZE_FileCatalog;
   *size += FileCatalog->n * R7KRDTSIZE_FileCatalog;
-//fprintf(stderr, "File %s Line %d: FileCatalog n:%d size: %d\n", __FILE__, __LINE__, FileCatalog->n, *size);
 
   int status = MB_SUCCESS;
 
@@ -508,8 +507,6 @@ int mbr_dem_reson7k3(int verbose, void *mbio_ptr, int *error) {
     write_len = index;
     status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
     fseek(mb_io_ptr->mbfp, 0L, SEEK_END);
-//fprintf(stderr, "#---> RESET FileHeader pointers to FileCatalog index:%d size:%d offset:%ld\n",
-//*filecatalogoffsetoffset, size, offset);
   }
 
   /* deallocate memory for preprocessing parameters */
@@ -3708,8 +3705,6 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
       index += 4;
       mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->azimuth_angle[i]));
       index += 4;
-//fprintf(stderr,"READ BEAM:%d d:%f l:%f x:%f ax:%f az:%f\n",
-//i,Bathymetry->depth[i],Bathymetry->alongtrack[i],Bathymetry->acrosstrack[i],Bathymetry->pointing_angle[i],Bathymetry->azimuth_angle[i]);
     }
   }
   else {
@@ -9168,12 +9163,6 @@ int mbr_rt_reson7k3(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
   asynch_source_heading = (int *)&mb_io_ptr->save18;
   asynch_source_attitude = (int *)&mb_io_ptr->save19;
   asynch_source_altitude = (int *)&mb_io_ptr->save20;
-//fprintf(stderr,"asynch_source_nav:%d %d asynch_source_sensordepth:%d %d asynch_source_heading:%d %d asynch_source_attitude:%d %d asynch_source_altitude:%d %d\n",
-//*asynch_source_nav, mb_io_ptr->nfix,
-//*asynch_source_sensordepth, mb_io_ptr->nsonardepth,
-//*asynch_source_heading, mb_io_ptr->nheading,
-//*asynch_source_attitude, mb_io_ptr->nattitude,
-//*asynch_source_altitude, mb_io_ptr->naltitude);
 
   // Use the following asynchronous data source priority order:
   //    Position lon lat -
@@ -12650,8 +12639,6 @@ int mbr_reson7k3_wr_Bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
         index += 4;
         mb_put_binary_float(MB_YES, Bathymetry->azimuth_angle[i], &buffer[index]);
         index += 4;
-//fprintf(stderr,"WRITE BEAM:%d d:%f l:%f x:%f ax:%f az:%f\n",
-//i,Bathymetry->depth[i],Bathymetry->alongtrack[i],Bathymetry->acrosstrack[i],Bathymetry->pointing_angle[i],Bathymetry->azimuth_angle[i]);
       }
     }
 
@@ -15336,10 +15323,6 @@ int mbr_reson7k3_wr_SegmentedRawDetection(int verbose, int *bufferalloc, char **
   } else {
     header->OptionalDataOffset = 0;
   }
-// fprintf(stderr, "Writing SegmentedRawDetection: header->Size:%u *size:%u\n", header->Size, *size);
-// fprintf(stderr, "segment_field_size:%d rx_field_size:%d n_segments:%d n_rx:%d\n",
-// SegmentedRawDetection->segment_field_size, SegmentedRawDetection->rx_field_size,
-// SegmentedRawDetection->n_segments, SegmentedRawDetection->n_rx);
 
   /* allocate memory to write rest of record if necessary */
   if (*bufferalloc < *size) {
@@ -16512,9 +16495,6 @@ int mbr_reson7k3_wr_FileHeader(int verbose, int *bufferalloc, char **bufferptr, 
       *size = 0;
     }
   }
-
-//fprintf(stderr, "File %s Line %d: size:%d index:%d OptionalDataOffset:%d\n",
-//__FILE__, __LINE__, *size, index, header->OptionalDataOffset);
 
   if (verbose >= 2) {
     fprintf(stderr, "\ndbg2  MBIO function <%s> completed\n", __func__);
@@ -17756,8 +17736,6 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
   int *fileheaders = (int *)&mb_io_ptr->save12;
   int *filecatalogoffsetoffset = (int *)&mb_io_ptr->save5;
 
-//fprintf(stderr, "%s %d Called %s  ostore->n_saved_comments: %d\n", __FILE__, __LINE__, __func__, ostore->n_saved_comments);
-
   // The FileHeader record must be at the start of the file, but in general
   // MB-System programs will pass in comments before the first data records
   // are passed in from the original data file, including the FileHeader.
@@ -17799,8 +17777,6 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     // overwritten just before the file is closed.
     *filecatalogoffsetoffset = store->FileHeader.header.OptionalDataOffset;
 
-//fprintf(stderr,"%s %d Writing comments after FileHeader: ostore->n_saved_comments:%d\n", __FILE__, __LINE__, ostore->n_saved_comments);
-
     for (int i = 0; i < ostore->n_saved_comments; i++) {
       store->type = R7KRECID_SystemEventMessage;
       store->kind = MB_DATA_COMMENT;
@@ -17823,7 +17799,6 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       if (store->SystemEventMessage.message_alloc
           >= store->SystemEventMessage.message_length) {
         strncpy(store->SystemEventMessage.message, ostore->comments[i], store->SystemEventMessage.message_alloc-1);
-//fprintf(stderr,"%s %d Writing comment %d: %s\n", __FILE__, __LINE__, i, store->SystemEventMessage.message);
         status = mbr_reson7k3_wr_SystemEventMessage(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
         buffer = (char *)*bufferptr;
         write_len = (size_t)size;
@@ -18129,7 +18104,6 @@ int mbr_reson7k3_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
     if (ostore->n_saved_comments < MBSYS_RESON7K_MAX_BUFFERED_COMMENTS) {
       strncpy(ostore->comments[ostore->n_saved_comments], ostore->SystemEventMessage.message, MB_PATH_MAXLINE);
       (ostore->n_saved_comments)++;
-//fprintf(stderr, "%s %d saved a comment %s %d\n", __FILE__, __LINE__, ostore->comments[ostore->n_saved_comments-1], ostore->n_saved_comments);
     }
   }
 

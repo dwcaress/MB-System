@@ -3293,10 +3293,6 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* read next data from file */
 	const int status = mbr_l3xseraw_rd_data(verbose, mbio_ptr, store_ptr, error);
 
-	/*fprintf(stderr, "read kind:%d\n", store->kind);
-	fprintf(stderr, "store->mul_frame:%d store->sid_frame:%d\n\n",
-	store->mul_frame, store->sid_frame);*/
-
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = store->kind;

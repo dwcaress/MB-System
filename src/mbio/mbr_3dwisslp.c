@@ -1236,10 +1236,6 @@ int mbr_3dwisslp_rd_data
             &(pulse->soundings[isounding].alongtrack)); index += 4;
           mb_get_binary_float(MB_YES, (void *)&buffer[index],
             &(pulse->soundings[isounding].depth)); index += 4;
-/*#ifdef MBF_3DWISSLP_DEBUG */
-/*fprintf(stderr,"%s:%s():%d Reading sounding ipulse:%d isounding:%d beamflag:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, pulse->soundings[isounding].beamflag); */
-/*#endif */
           }
 
         store->bathymetry_calculated = MB_YES;
@@ -2338,10 +2334,6 @@ int mbr_3dwisslp_wr_data
             mb_put_binary_float(MB_YES,
               pulse->soundings[isounding].depth,
               (void **)&buffer[index]); index += 4;
-/*#ifdef MBF_3DWISSLP_DEBUG */
-/*fprintf(stderr,"%s:%s():%d Writing sounding ipulse:%d isounding:%d beamflag:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, pulse->soundings[isounding].beamflag); */
-/*#endif */
             }
         }
       }

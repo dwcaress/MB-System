@@ -3170,11 +3170,6 @@ int mbr_em710mba_rd_bath3_mba(int verbose, void *mbio_ptr, int swap, struct mbsy
 				mb_get_binary_float(swap, &line[32], &float_val);
 				ping->png_bheave[i] = float_val;
 				ping->png_beamflag[i] = (int)((mb_s_char)line[36]);
-				/* fprintf(stderr,"READ ping:%d beam %d  png_depression:%f ",ping->png_count,i,ping->png_depression[i]);
-				fprintf(stderr,"png_azimuth:%f ",ping->png_azimuth[i]);
-				fprintf(stderr,"png_range:%f ",ping->png_range[i]);
-				fprintf(stderr,"png_bheave:%f ",ping->png_bheave[i]);
-				fprintf(stderr,"png_beamflag:%d\n",ping->png_beamflag[i]); */
 				/* ignore line[37] */
 			}
 		}
@@ -3327,8 +3322,6 @@ int mbr_em710mba_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 		ping->png_raw_sample_rate = float_val;
 		mb_get_binary_int(swap, &line[24], &int_val);
 		ping->png_raw_spare = (int)(int_val);
-		/*fprintf(stderr,"ping->png_raw_date:%d ping->png_raw_msec:%d ping->png_raw_count:%d ping->png_raw_nbeams:%d\n",
-		ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);*/
 	}
 
 	/* check for some indicators of a broken record
@@ -3730,8 +3723,6 @@ int mbr_em710mba_rd_ss2_mba(int verbose, void *mbio_ptr, int swap, struct mbsys_
 		ping->png_pixel_size = float_val;
 		mb_get_binary_int(swap, &line[32], &int_val);
 		ping->png_pixels_ss = int_val;
-		/*fprintf(stderr," ping->png_ss_date:%d  ping->png_ss_msec:%d  ping->png_ss_count:%d  ping->png_nbeams_ss:%d\n",
-		ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 	}
 
 	/* check for some indicators of a broken record
@@ -4852,8 +4843,6 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ss_time_d);
-		/* fprintf(stderr,"Check: png_count:%d png_raw_count:%d png_ss_count:%d    Beams:%d %d %d\n",
-		ping->png_count,ping->png_raw_count,ping->png_ss_count,ping->png_nbeams,ping->png_raw_nbeams,ping->png_nbeams_ss);*/
 
 		/* check for time match - if bath newer than
 		   sidescan then zero sidescan,  if sidescan
@@ -7705,11 +7694,6 @@ int mbr_em710mba_wr_bath3_mba(int verbose, void *mbio_ptr, int swap, struct mbsy
 			mb_put_binary_float(swap, ping->png_bheave[i], (void *)&line[32]);
 			line[36] = (mb_s_char)ping->png_beamflag[i];
 			line[37] = (mb_u_char)0;
-			/* fprintf(stderr,"WRITE ping:%d beam %d  png_depression:%f ",ping->png_count,i,ping->png_depression[i]);
-			fprintf(stderr,"png_azimuth:%f ",ping->png_azimuth[i]);
-			fprintf(stderr,"png_range:%f ",ping->png_range[i]);
-			fprintf(stderr,"png_bheave:%f ",ping->png_bheave[i]);
-			fprintf(stderr,"png_beamflag:%d\n",ping->png_beamflag[i]); */
 
 			/* compute checksum */
 			uchar_ptr = (mb_u_char *)line;

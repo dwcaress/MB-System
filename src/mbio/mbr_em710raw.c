@@ -2900,8 +2900,6 @@ int mbr_em710raw_rd_rawbeam4(int verbose, void *mbio_ptr, int swap, struct mbsys
 		ping->png_raw_sample_rate = float_val;
 		mb_get_binary_int(swap, &line[24], &int_val);
 		ping->png_raw_spare = (int)(int_val);
-		/*fprintf(stderr,"ping->png_raw_date:%d ping->png_raw_msec:%d ping->png_raw_count:%d ping->png_raw_nbeams:%d\n",
-		ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);*/
 	}
 
 	/* check for some indicators of a broken record
@@ -3300,8 +3298,6 @@ int mbr_em710raw_rd_ss2(int verbose, void *mbio_ptr, int swap, struct mbsys_simr
 		ping->png_tvg_crossover = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[26], &short_val);
 		ping->png_nbeams_ss = (int)((unsigned short)short_val);
-		// fprintf(stderr," ping->png_ss_date:%d  ping->png_ss_msec:%d  ping->png_ss_count:%d  ping->png_nbeams_ss:%d\n",
-		// ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);
 	}
 
 	/* check for some indicators of a broken record
@@ -4468,8 +4464,6 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ss_time_d);
-		/* fprintf(stderr,"Check: png_count:%d png_raw_count:%d png_ss_count:%d    Beams:%d %d %d\n",
-		ping->png_count,ping->png_raw_count,ping->png_ss_count,ping->png_nbeams,ping->png_raw_nbeams,ping->png_nbeams_ss);*/
 
 		/* check for time match - if bath newer than
 		   sidescan then zero sidescan,  if sidescan
@@ -4500,21 +4494,6 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 	/* add some calculated data to survey records */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		/*fprintf(stderr, "mode:%d absorption:%d tran_pulse:%d tran_beam:%d tran_pow:%d rec_beam:%d rec_band:%d rec_gain:%d
-		tvg_cross:%d\n", store->run_mode, store->run_absorption, store->run_tran_pulse, store->run_tran_pow, store->run_rec_beam,
-		store->run_rec_band, store->run_rec_gain, store->run_tvg_cross); fprintf(stderr, "max_range:%d r_zero:%d r_zero_corr:%d
-		tvg_start:%d tvg_stop:%d bsn:%d bso:%d tx:%d tvg_crossover:%d\n", ping->png_max_range, ping->png_r_zero,
-		ping->png_r_zero_corr, ping->png_tvg_start,
-		ping->png_tvg_stop, ping->png_bsn,
-		ping->png_bso, ping->png_tx,
-		ping->png_tvg_crossover);
-		fprintf(stderr, "mode:%d depth:%11f max_range:%d r_zero:%d r_zero_corr:%d bsn:%d bso:%d\n",
-		store->run_mode,
-		0.01 * ping->png_depth_res * ping->png_depth[ping->png_nbeams/2],
-		ping->png_max_range, ping->png_r_zero,
-		ping->png_r_zero_corr, ping->png_bsn,
-		ping->png_bso);*/
-
 		/* get transducer offsets */
 		if (store->par_stc == 0) {
 			tx_x = store->par_s1x;
@@ -4832,8 +4811,6 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			ping->png_azimuth[i] = 90.0 + beamAzimuth;
 			if (ping->png_azimuth[i] < 0.0)
 				ping->png_azimuth[i] += 360.0;
-			/* fprintf(stderr,"i:%d %f %f     %f %f\n",
-			i,beamDepression,beamAzimuth,ping->png_depression[i],ping->png_azimuth[i]);*/
 
 			/* calculate beamflag */
 			detection_mask = (mb_u_char)ping->png_raw_rxdetection[i];

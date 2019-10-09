@@ -396,13 +396,9 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, in
 		for (int i = 0; i < nbath; i++) {
 			if (mb_beam_check_flag_null(beamflag[i])) {
 				store->depth[i] = 0.0;
-				/*fprintf(stderr, "NULL: time_d:%f i:%d flag:%d bath: %f %d\n",
-				time_d, i, beamflag[i], bath[i], store->depth[i]);*/
 			}
 			else if (mb_beam_check_flag(beamflag[i])) {
 				store->depth[i] = -scalefactor * bath[i];
-				/*fprintf(stderr, "FLAG: time_d:%f i:%d flag:%d bath: %f %d\n",
-				time_d, i, beamflag[i], bath[i], store->depth[i]);*/
 			}
 			else {
 				store->depth[i] = scalefactor * bath[i];

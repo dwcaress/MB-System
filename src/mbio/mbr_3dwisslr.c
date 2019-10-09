@@ -1014,10 +1014,6 @@ int mbr_3dwisslr_rd_data
         if (status == MB_SUCCESS)
           store->num_pulses_alloc = store->pulses_per_scan;
         }
-      /*fprintf(stderr,"%s:%s():%d INDEX at end of scan information: %zu
-          size_pulse_record_raw:%d size_pulse_record_processed:%d data_structure_size:%d\n", */
-      /*__FILE__, __FUNCTION__, __LINE__,
-         index,store->size_pulse_record_raw,store->size_pulse_record_processed,mb_io_ptr->data_structure_size); */
 
       /* set the WiSSL two optical head geometry using predefined values */
       store->heada_offset_x_m = MBSYS_3DDWISSL_HEADA_OFFSET_X_M;
@@ -1137,8 +1133,6 @@ int mbr_3dwisslr_rd_data
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
           &(calibration_v1s1->el_angle_fixed_deg)); index += 4;
         memcpy(calibration_v1s1->unused, &buffer[index], 116); index += 116;
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration a: %zu\n", */
-        /*__FILE__, __FUNCTION__, __LINE__, index); */
 
         /* get calibration information for head b */
         calibration_v1s1 = &store->calibration_v1s1_b;
@@ -1241,8 +1235,6 @@ int mbr_3dwisslr_rd_data
         mb_get_binary_float(MB_YES, (void *)&buffer[index],
           &(calibration_v1s1->el_angle_fixed_deg)); index += 4;
         memcpy(calibration_v1s1->unused, &buffer[index], 116); index += 116;
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration b: %zu\n", */
-        /*__FILE__, __FUNCTION__, __LINE__, index); */
         }
 
       /* format V1S2 has 407-byte calibration structures */
@@ -1383,8 +1375,6 @@ int mbr_3dwisslr_rd_data
             &(calibration_v1s3->prf_tune_wait_ms)); index += 4;
           memcpy(calibration_v1s3->unused, &buffer[index], 33); index += 33;
           }
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration a: %zu\n", */
-        /*__FILE__, __FUNCTION__, __LINE__, index); */
 
         /* get calibration information for head b */
         calibration_v1s3 = &store->calibration_v1s3_b;
@@ -1519,8 +1509,6 @@ int mbr_3dwisslr_rd_data
             &(calibration_v1s3->prf_tune_wait_ms)); index += 4;
           memcpy(calibration_v1s3->unused, &buffer[index], 33); index += 33;
           }
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration b: %zu\n", */
-        /*__FILE__, __FUNCTION__, __LINE__, index); */
         }
 
       /* if ok and parameter_id is for the fileheader and the magic number is correct
@@ -1574,9 +1562,6 @@ int mbr_3dwisslr_rd_data
       mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->range_start)); index += 4;
       mb_get_binary_float(MB_YES, (void *)&buffer[index], &(store->range_end)); index += 4;
       mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->pulse_count)); index += 4;
-/*fprintf(stderr,"read %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%9.9d pulse_count:%d\n", */
-/*store->year,store->month,store->day,store->hour,store->minutes,store->seconds, */
-/*store->nanoseconds,store->pulse_count); */
 
       /* read the pulses */
       for (int ipulse=0; ipulse<store->pulses_per_scan; ipulse++)
@@ -1666,9 +1651,6 @@ int mbr_3dwisslr_rd_data
     status = MB_FAILURE;
     *error = MB_ERROR_EOF;
     }
-
-/*fprintf(stderr,"%s:%s():%d END of mbr_3dwisslr_rd_data: status:%d error:%d kind:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__, status,*error,store->kind); */
 
   /* print out status info */
   if (( verbose >= 3) && ( status == MB_SUCCESS) )
@@ -1867,12 +1849,6 @@ int mbr_3dwisslr_wr_data
       index += 2;
       mb_put_binary_short(MB_YES, store->headb_scans_per_file, (void **)&buffer[index]);
       index += 2;
-/*fprintf(stderr,"%s:%s():%d INDEX at end of scan information: %zu  size_pulse_record_raw:%d
-   size_pulse_record_processed:%d data_structure_size:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__,
-   index,store->size_pulse_record_raw,store->size_pulse_record_processed,mb_io_ptr->data_structure_size); */
-/*fprintf(stderr,"    file_version:%d sub_version:%d pulses_per_scan:%d soundings_per_pulse:%d\n", */
-/*store->file_version,store->sub_version,store->pulses_per_scan,store->soundings_per_pulse); */
 
       /* format V1S1 has 450-byte calibration structures */
       if (( store->file_version == 1) && ( store->sub_version == 1) )
@@ -2006,8 +1982,6 @@ int mbr_3dwisslr_wr_data
         mb_put_binary_float(MB_YES, calibration_v1s1->el_angle_fixed_deg,
           (void **)&buffer[index]); index += 4;
         memcpy((void **)&buffer[index], calibration_v1s1->unused, 116); index +=116;
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration_v1s1 a: %zu\n", */
-        /*__FILE__, __FUNCTION__, __LINE__, index); */
 
         /* put calibration information for head b */
         calibration_v1s1 = &store->calibration_v1s1_b;
@@ -2138,8 +2112,6 @@ int mbr_3dwisslr_wr_data
         mb_put_binary_float(MB_YES, calibration_v1s1->el_angle_fixed_deg,
           (void **)&buffer[index]); index += 4;
         memcpy((void **)&buffer[index], calibration_v1s1->unused, 116); index +=116;
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration_v1s1 b: %zu\n", */
-        /*__FILE__, __FUNCTION__, __LINE__, index); */
         }
 
       /* format V1S2 has 407-byte calibration structures but we write them as V1S3 */
@@ -2303,8 +2275,6 @@ int mbr_3dwisslr_wr_data
         mb_put_binary_int(MB_YES, calibration_v1s3->prf_tune_wait_ms,
         (void **)&buffer[index]); index += 4;
         memcpy((void **)&buffer[index], calibration_v1s3->unused, 33); index +=33;
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration_v1s3 a: %zu\n", */
-        /*__FILE__, __FUNCTION__, __LINE__, index); */
 
         /* put calibration information for head b */
         calibration_v1s3 = &store->calibration_v1s3_b;
@@ -2463,14 +2433,10 @@ int mbr_3dwisslr_wr_data
         mb_put_binary_int(MB_YES, calibration_v1s3->prf_tune_wait_ms,
         (void **)&buffer[index]); index += 4;
         memcpy((void **)&buffer[index], calibration_v1s3->unused, 33); index +=33;
-        /*fprintf(stderr,"%s:%s():%d INDEX at end of calibration_v1s3 b: %zu\n", */
-        /*__FILE__, __FUNCTION__, __LINE__, index); */
         }
 
       /* write file header from buffer */
       status = mb_fileio_put(verbose, mbio_ptr, (void *)buffer, &write_len, error);
-/*fprintf(stderr,"%s:%s():%d Wrote file header %zu bytes\n", */
-/*__FILE__, __FUNCTION__, __LINE__, write_len); */
 
       /* reset file position to end of file in case comments have been written */
       fseek(mb_io_ptr->mbfp, 0, SEEK_END);
@@ -2521,8 +2487,6 @@ int mbr_3dwisslr_wr_data
 
       /* write file header from buffer */
       status = mb_fileio_put(verbose, mbio_ptr, (void *)buffer, &write_len, error);
-/*fprintf(stderr,"%s:%s():%d Wrote dummy file header %zu bytes\n", */
-/*__FILE__, __FUNCTION__, __LINE__, write_len); */
 
       /* reset file position to end of file in case comments have been written */
       fseek(mb_io_ptr->mbfp, 0, SEEK_END);
@@ -2546,8 +2510,6 @@ int mbr_3dwisslr_wr_data
     /* write comment record */
     write_len = (size_t)index;
     status = mb_fileio_put(verbose, mbio_ptr, (void *)buffer, &write_len, error);
-    /*fprintf(stderr,"%s:%s():%d Wrote comment %zu bytes\n", */
-    /*__FILE__, __FUNCTION__, __LINE__, write_len); */
     }
 
   /* write LIDAR scan record */
@@ -2654,17 +2616,11 @@ int mbr_3dwisslr_wr_data
           buffer[index] = pulse->soundings[isounding].diagnostic; index += 1;
           }
         }
-/*for (int isounding=0; isounding<store->soundings_per_pulse; isounding++) { */
-/*fprintf(stderr,"%s:%s():%d Writing sounding ipulse:%d isounding:%d beamflag:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, pulse->soundings[isounding].beamflag); */
-/*} */
       }
 
     /* write LIDAR scan record */
     write_len = (size_t)index;
     status = mb_fileio_put(verbose, mbio_ptr, (void *)buffer, &write_len, error);
-/*fprintf(stderr,"%s:%s():%d Wrote lidar record %zu bytes  pulse_count:%d time_d:%f\n", */
-/*__FILE__, __FUNCTION__, __LINE__, write_len, store->pulse_count, store->time_d); */
     }
 
   if (verbose >= 2)

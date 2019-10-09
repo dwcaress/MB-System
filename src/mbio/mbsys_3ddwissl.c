@@ -764,7 +764,6 @@ int mbsys_3ddwissl_preprocess
       &jnav,
       &interp_error);
     store->speed = (float)speed;
-    /* fprintf(stderr," 2: lon:%.12f lat:%.12f ", store->navlon, store->navlat); */
     }
   if (pars->n_sensordepth > 0)
     interp_status = mb_linear_interp(verbose,
@@ -814,17 +813,11 @@ int mbsys_3ddwissl_preprocess
       &jattitude,
       &interp_error);
     store->pitch = (float)pitch;
-    /* interp_status = mb_linear_interp(verbose, */
-    /*      pars->attitude_time_d-1, pars->attitude_heave-1, pars->n_attitude, */
-    /*      time_d, &store->heave, &jattitude, */
-    /*      &interp_error); */
     }
 
   /* do lever arm correction */
   if (platform_ptr != NULL)
     {
-    /* fprintf(stderr,"Before: lon:%f lat:%f sensordepth:%f heading:%f roll:%f pitch:%f   ", */
-    /* store->navlon,store->navlat,store->sensordepth,heading,roll,pitch); */
 
     /* calculate sonar position position */
     status =mb_platform_position(verbose,
@@ -841,7 +834,6 @@ int mbsys_3ddwissl_preprocess
       &store->navlat,
       &store->sensordepth,
       error);
-    /* printf(stderr,"   3: lon:%.12f lat:%.12f \n", store->navlon, store->navlat); */
 
     /* calculate sonar attitude */
     status = mb_platform_orientation_target(verbose,
@@ -858,8 +850,6 @@ int mbsys_3ddwissl_preprocess
     store->heading = (float)heading;
     store->roll = (float)roll;
     store->pitch = (float)pitch;
-    /* fprintf(stderr,"After: lon:%f lat:%f sensordepth:%f heading:%f roll:%f pitch:%f\n", */
-    /* store->navlon,store->navlat,store->sensordepth,store->heading,store->roll,store->pitch); */
     }
 
   /* get scaling */
@@ -1205,8 +1195,6 @@ int mbsys_3ddwissl_extract
         amp[ibath] = (double) sounding->amplitude;
         bathacrosstrack[ibath] = sounding->acrosstrack;
         bathalongtrack[ibath] = sounding->alongtrack;
-/*fprintf(stderr,"%s:%s():%d Extracting sounding ipulse:%d isounding:%d ibath:%d beamflag:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, ibath, beamflag[ibath]); */
         }
       }
 
@@ -1357,8 +1345,6 @@ int mbsys_3ddwissl_insert
         sounding->amplitude = amp[ibath];
         sounding->acrosstrack = bathacrosstrack[ibath];
         sounding->alongtrack = bathalongtrack[ibath];
-/*fprintf(stderr,"%s:%s():%d Inserting sounding ipulse:%d isounding:%d ibath:%d beamflag:%d\n", */
-/*__FILE__, __FUNCTION__, __LINE__, ipulse, isounding, ibath, beamflag[ibath]); */
         }
       }
 
@@ -3669,7 +3655,6 @@ int mbsys_3ddwissl_calculatebathymetry
           amplitude_max = sounding->amplitude;
         }
       }
-/*fprintf(stderr,"\namplitude_max:%d amplitude_threshold:%f\n", amplitude_max, amplitude_threshold); */
 
     /* loop over all pulses and soundings */
     for (int ipulse = 0; ipulse < store->pulses_per_scan; ipulse++)
@@ -3704,8 +3689,6 @@ int mbsys_3ddwissl_calculatebathymetry
             {
             amplitude_factor = 1.0;
             }
-/*fprintf(stderr,"amplitude_max:%d amplitude_threshold:%f amplitude_factor:%f\n", */
-/*amplitude_max, amplitude_threshold, amplitude_factor); */
 
           /* set beamflag */
           if (sounding->amplitude * amplitude_factor >= amplitude_threshold)
@@ -3750,8 +3733,6 @@ int mbsys_3ddwissl_calculatebathymetry
         sounding = &pulse->soundings[isounding_largest];
         if (sounding->beamflag != MB_FLAG_NULL)
           sounding->beamflag = MB_FLAG_NONE;
-/*fprintf(stderr," ipulse:%d isounding:%d angle_az_sign:%f xyz: %f %f %f\n", */
-/*ipulse,isounding,angle_az_sign,sounding->acrosstrack,sounding->alongtrack,sounding->depth); */
         }
       }
 
@@ -3863,47 +3844,12 @@ int mbsys_3ddwissl_indextablefix
 
   /* resort the total index table so that the data records are sorted by
    * left/right head, then file, then original order */
-/*fprintf(stderr,"\nOriginal Index Table:\n");
-   for (i=0;i<num_indextable;i++) {
-   double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
-   i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
-   indextable[i].subsensor, indextable[i].subsensor_index,
-   indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
-   indextable[i].offset, indextable[i].size, indextable[i].kind,
-   indextable[i].read);
-   }*/
   qsort((void *)indextable,
     num_indextable,
     sizeof(struct mb_io_indextable_struct),
     (void *)mbsys_3ddwissl_wissl_indextable_compare1);
   for (i=0; i<num_indextable; i++)
     indextable[i].total_index_sorted = i;
-/*
-   fprintf(stderr,"\nSorted Index Table:\n");
-   dt = 0.0;
-   for (i=0;i<num_indextable;i++) {
-   if (i > 0 && indextable[i].kind == MB_DATA_DATA && indextable[i].subsensor ==
-      indextable[i-1].subsensor) {
-   dt = indextable[i].time_d_org - indextable[i-1].time_d_org;
-   }
-   else {
-   dt = 0.0;
-   }
-   double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d   %10.6f",
-   i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
-   indextable[i].subsensor, indextable[i].subsensor_index,
-   indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
-   indextable[i].offset, indextable[i].size, indextable[i].kind,
-   indextable[i].read, dt);
-   if (fabs(dt) > 0.05) fprintf(stderr, " *****");
-   if (indextable[i].time_d_org - nearest_minute_time_d >= 0.0
-     && indextable[i].time_d_org - nearest_minute_time_d < 0.01)
-    fprintf(stderr, " $$$$$");
-   fprintf(stderr, "\n");
-   }
- */
 
   /* Correct the WiSSL timestamps produced by the first version of the sensor.
    * The timestamps need correcting because the clock drifts between being reset t
@@ -3941,8 +3887,6 @@ int mbsys_3ddwissl_indextablefix
         head_b_end = i;
       }
     }
-/*fprintf(stderr,"head_a_start:%d head_a_end:%d\n", head_a_start, head_a_end); */
-/*fprintf(stderr,"head_b_start:%d head_b_end:%d\n\n", head_b_start, head_b_end); */
 
   /* deal with head A data - start by identifying all good timestamps */
   dt = 0.0;
@@ -3958,7 +3902,6 @@ int mbsys_3ddwissl_indextablefix
       ( indextable[i].time_d_org - nearest_minute_time_d < dt_threshold) &&
       ( fabs(dt) > dt_threshold) )
       {
-/*fprintf(stderr,"Good timestamp A: %d %.6f\n",i,indextable[i].time_d_org); */
       indextable[i].time_d_corrected = indextable[i].time_d_org;
       num_good_timestamps++;
       if (first_good_timestamp > i)
@@ -3970,9 +3913,6 @@ int mbsys_3ddwissl_indextablefix
       indextable[i].time_d_corrected = 0.0;
       }
     }
-/*fprintf(stderr,"\nHead A: dt_threshold:%f num_good_timestamps:%d first_good_timestamp:%d
-   last_good_timestamp:%d\n\n", */
-/*dt_threshold, num_good_timestamps,first_good_timestamp,last_good_timestamp); */
 
   /* if good timestamps found then extrapolate and interpolate the other timestamps */
   if (last_good_timestamp > first_good_timestamp)
@@ -3981,15 +3921,12 @@ int mbsys_3ddwissl_indextablefix
       (indextable[last_good_timestamp].time_d_corrected -
       indextable[first_good_timestamp].time_d_corrected)/
       ((double)(last_good_timestamp - first_good_timestamp));
-/*fprintf(stderr,"dt:%.6f\n",dt); */
     for (int i = head_a_start; i < first_good_timestamp; i++)
       indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected+ dt *
         (i - first_good_timestamp);
-/*fprintf(stderr,"New time_d A-0: %5d %.6f\n", i, indextable[i].time_d_corrected); */
     for (int i = last_good_timestamp + 1; i <= head_a_end; i++)
       indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected+ dt *
         (i - last_good_timestamp);
-/*fprintf(stderr,"New time_d A-2: %5d %.6f\n", i, indextable[i].time_d_corrected); */
     done = MB_NO;
     next_good_timestamp = first_good_timestamp;
     while (done == MB_NO)
@@ -4007,7 +3944,6 @@ int mbsys_3ddwissl_indextablefix
       for (int i = first_good_timestamp + 1; i < next_good_timestamp; i++)
         indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected+
           dt * (i - first_good_timestamp);
-/*fprintf(stderr,"New time_d A-1: %5d %.6f\n", i, indextable[i].time_d_corrected); */
       first_good_timestamp = next_good_timestamp;
       if (next_good_timestamp == last_good_timestamp)
         done = MB_YES;
@@ -4036,7 +3972,6 @@ int mbsys_3ddwissl_indextablefix
       ( indextable[i].time_d_org - nearest_minute_time_d < dt_threshold) &&
       ( fabs(dt) > dt_threshold) )
       {
-/*fprintf(stderr,"Good timestamp B: %d %.6f\n",i,indextable[i].time_d_org); */
       indextable[i].time_d_corrected = indextable[i].time_d_org;
       num_good_timestamps++;
       if (first_good_timestamp > i)
@@ -4048,9 +3983,6 @@ int mbsys_3ddwissl_indextablefix
       indextable[i].time_d_corrected = 0.0;
       }
     }
-/*fprintf(stderr,"\nHead B: dt_threshold:%f num_good_timestamps:%d first_good_timestamp:%d
-   last_good_timestamp:%d\n", */
-/*dt_threshold, num_good_timestamps,first_good_timestamp,last_good_timestamp); */
 
   /* if good timestamps found then extrapolate and interpolate the other timestamps */
   if (last_good_timestamp > first_good_timestamp)
@@ -4062,11 +3994,9 @@ int mbsys_3ddwissl_indextablefix
     for (int i = head_b_start; i < first_good_timestamp; i++)
       indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected+ dt *
         (i - first_good_timestamp);
-/*fprintf(stderr,"New time_d B-0: %5d %.6f\n", i, indextable[i].time_d_corrected); */
     for (int i = last_good_timestamp + 1; i <= head_b_end; i++)
       indextable[i].time_d_corrected = indextable[last_good_timestamp].time_d_corrected+ dt *
         (i - last_good_timestamp);
-/*fprintf(stderr,"New time_d B-2: %5d %.6f\n", i, indextable[i].time_d_corrected); */
     done = MB_NO;
     next_good_timestamp = first_good_timestamp;
     while (done == MB_NO)
@@ -4084,7 +4014,6 @@ int mbsys_3ddwissl_indextablefix
       for (int i = first_good_timestamp + 1; i < next_good_timestamp; i++)
         indextable[i].time_d_corrected = indextable[first_good_timestamp].time_d_corrected+
           dt * (i - first_good_timestamp);
-/*fprintf(stderr,"New time_d B-1: %5d %.6f\n", i, indextable[i].time_d_corrected); */
       first_good_timestamp = next_good_timestamp;
       if (next_good_timestamp == last_good_timestamp)
         done = MB_YES;
@@ -4098,31 +4027,6 @@ int mbsys_3ddwissl_indextablefix
     for (int i = head_b_start; i <= head_b_end; i++)
       indextable[i].time_d_corrected = indextable[i].time_d_org;
     }
-
-/*fprintf(stderr,"\nCorrected Timestamp Index Table:\n");
-   dt = 0.0;
-   for (i=0;i<num_indextable;i++) {
-   if (i > 0 && indextable[i].kind == MB_DATA_DATA && indextable[i].subsensor ==
-      indextable[i-1].subsensor) {
-   dt = indextable[i].time_d_corrected - indextable[i-1].time_d_corrected;
-   }
-   else {
-   dt = 0.0;
-   }
-   double nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"FIX: %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d
-        %10.6f",
-   i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
-   indextable[i].subsensor, indextable[i].subsensor_index,
-   indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
-   indextable[i].offset, indextable[i].size, indextable[i].kind,
-   indextable[i].read, dt);
-   if (fabs(dt) > 0.05) fprintf(stderr, " *****");
-   if (indextable[i].time_d_corrected - nearest_minute_time_d >= 0.0
-     && indextable[i].time_d_corrected - nearest_minute_time_d < dt_threshold)
-    fprintf(stderr, " $$$$$");
-   fprintf(stderr, "\n");
-   }*/
 
   if (verbose >= 2)
     {
@@ -4177,30 +4081,6 @@ int mbsys_3ddwissl_indextableapply
   /* get index table structure pointer */
   indextable = (struct mb_io_indextable_struct *)indextable_ptr;
 
-/*fprintf(stderr,"\nExternal Index Table:\n");
-   for (i=0;i<num_indextable;i++) {
-   nearest_minute_time_d = 60.0 * round(indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"EXT %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
-   i, indextable[i].file_index, indextable[i].total_index_org, indextable[i].total_index_sorted,
-   indextable[i].subsensor, indextable[i].subsensor_index,
-   indextable[i].time_d_org, indextable[i].time_d_corrected, nearest_minute_time_d,
-   indextable[i].offset, indextable[i].size, indextable[i].kind,
-   mb_io_ptr->indextable[i].read);
-   }*//*
-
-   fprintf(stderr,"\nOriginal internal Index Table:\n");
-   for (i=0;i<mb_io_ptr->num_indextable;i++) {
-   nearest_minute_time_d = 60.0 * round(mb_io_ptr->indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"INT %4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
-   i, mb_io_ptr->indextable[i].file_index, mb_io_ptr->indextable[i].total_index_org,
-      mb_io_ptr->indextable[i].total_index_sorted,
-   mb_io_ptr->indextable[i].subsensor, mb_io_ptr->indextable[i].subsensor_index,
-   mb_io_ptr->indextable[i].time_d_org, mb_io_ptr->indextable[i].time_d_corrected,
-      nearest_minute_time_d,
-   mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size, mb_io_ptr->indextable[i].kind,
-   mb_io_ptr->indextable[i].read);
-   }*/
-
   /* correct timestamps in the file's internal index table using information
    * supplied in the external index table */
 
@@ -4234,14 +4114,6 @@ int mbsys_3ddwissl_indextableapply
       for (giindex = giindex_a_begin; giindex <= giindex_a_end; giindex++)
         if (mb_io_ptr->indextable[iindex].subsensor_index ==
           indextable[giindex].subsensor_index)
-/*fprintf(stderr,"A Replacing iindex:%d giindex:%d  file: %d %d subsensor: %d:%d %d:%d  time_d: %.6f
-   %.6f %.6f\n",
-   iindex, giindex, n_file, indextable[giindex].file_index,
-   mb_io_ptr->indextable[iindex].subsensor, mb_io_ptr->indextable[iindex].subsensor_index,
-   indextable[giindex].subsensor, indextable[giindex].subsensor_index,
-   mb_io_ptr->indextable[iindex].time_d_org,
-   indextable[giindex].time_d_org,
-   indextable[giindex].time_d_corrected);*/
           mb_io_ptr->indextable[iindex].time_d_corrected =
             indextable[giindex].time_d_corrected;
 
@@ -4251,14 +4123,6 @@ int mbsys_3ddwissl_indextableapply
       for (giindex = giindex_b_begin; giindex <= giindex_b_end; giindex++)
         if (mb_io_ptr->indextable[iindex].subsensor_index ==
           indextable[giindex].subsensor_index)
-/*fprintf(stderr,"B Replacing iindex:%d giindex:%d  file: %d %d subsensor: %d:%d %d:%d  time_d: %.6f
-   %.6f %.6f\n",
-   iindex, giindex, n_file, indextable[giindex].file_index,
-   mb_io_ptr->indextable[iindex].subsensor, mb_io_ptr->indextable[iindex].subsensor_index,
-   indextable[giindex].subsensor, indextable[giindex].subsensor_index,
-   mb_io_ptr->indextable[iindex].time_d_org,
-   indextable[giindex].time_d_org,
-   indextable[giindex].time_d_corrected);*/
           mb_io_ptr->indextable[iindex].time_d_corrected =
             indextable[giindex].time_d_corrected;
 
@@ -4270,18 +4134,6 @@ int mbsys_3ddwissl_indextableapply
     sizeof(struct mb_io_indextable_struct), (void *)mbsys_3ddwissl_wissl_indextable_compare2);
   for (i=0; i<mb_io_ptr->num_indextable; i++)
     mb_io_ptr->indextable[i].total_index_sorted = i;
-/*fprintf(stderr,"\nCorrected and resorted Index Table:\n");
-   for (i=0;i<mb_io_ptr->num_indextable;i++) {
-   nearest_minute_time_d = 60.0 * round(mb_io_ptr->indextable[i].time_d_org / 60.0);
-   fprintf(stderr,"%4.4d %4.4d %4.4d %4.4d %d %4.4d %15.6f %15.6f %15.6f %5ld %lu %d %d\n",
-   i, mb_io_ptr->indextable[i].file_index, mb_io_ptr->indextable[i].total_index_org,
-      mb_io_ptr->indextable[i].total_index_sorted,
-   mb_io_ptr->indextable[i].subsensor, mb_io_ptr->indextable[i].subsensor_index,
-   mb_io_ptr->indextable[i].time_d_org, mb_io_ptr->indextable[i].time_d_corrected,
-      nearest_minute_time_d,
-   mb_io_ptr->indextable[i].offset, mb_io_ptr->indextable[i].size, mb_io_ptr->indextable[i].kind,
-   mb_io_ptr->indextable[i].read);
-   }*/
 
   if (verbose >= 2)
     {

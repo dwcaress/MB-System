@@ -256,7 +256,6 @@ int mb_proj_init(int verbose, char *projection, void **pjptr, int *error) {
     } else {
       strcpy(projection_use, projection);
     }
-//fprintf(stderr,"projection: %s %s\n",projection,projection_use);
 
     /* initialize the projection */
     char pj_init_args[MB_PATH_MAXLINE];

@@ -1111,7 +1111,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_name_code error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "units", store->mbHistCode_units);
-				/*fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);*/
 				if (verbose >= 2 && nc_status != NC_NOERR)
 					fprintf(stderr, "nc_get_att mbHistCode_units error: %s\n", nc_strerror(nc_status));
 				nc_status = nc_get_att_text(mb_io_ptr->ncid, store->mbHistCode_id, "unit_code", store->mbHistCode_unit_code);
@@ -4461,8 +4460,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	else if (status == MB_SUCCESS && recreadmax > *recread) {
 		/* set kind */
 		store->kind = MB_DATA_DATA;
-		/*fprintf(stderr,"*recread:%d mbCycleNbr:%d mbCycle_id:%d mbAntennaNbr:%d CIB_BLOCK_DIM:%d\n",
-		 *recread,store->mbCycleNbr,store->mbCycle_id,store->mbAntennaNbr,store->CIB_BLOCK_DIM);*/
 
 		/* set index and count arrays for per-ping variables */
 		if (store->CIB_BLOCK_DIM > 0) {
@@ -4484,8 +4481,6 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* read the per-ping variables from next record */
 		if (store->mbCycle_id >= 0) {
-			/* fprintf(stderr,"index: %d %d count:%d %d mbCycleNbr:%d
-			 * mbCycle_id:%d\n",index[0],index[1],count[0],count[1],store->mbCycleNbr,store->mbCycle_id);*/
 			nc_status = nc_get_vara_int(mb_io_ptr->ncid, store->mbCycle_id, index, count, store->mbCycle);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_get_vara mbCycle error: %s\n", nc_strerror(nc_status));
@@ -5017,7 +5012,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			nc_status = nc_def_dim(mb_io_ptr->ncid, "CIB_BLOCK_DIM", storelocal->CIB_BLOCK_DIM, &CIB_BLOCK_DIM_id);
 			if (verbose >= 2 && nc_status != NC_NOERR)
 				fprintf(stderr, "nc_def_dim CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
-			/*fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%lu\n",storelocal->CIB_BLOCK_DIM);*/
 		}
 		int mbHistoryRecNbr_id;
 		nc_status = nc_def_dim(mb_io_ptr->ncid, "mbHistoryRecNbr", storelocal->mbHistoryRecNbr, &mbHistoryRecNbr_id);
@@ -9243,8 +9237,6 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			count[1] = storelocal->mbAntennaNbr;
 			count[2] = 0;
 		}
-		/* fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d index: %d %d %d count: %d %d %d\n",
-		storelocal->CIB_BLOCK_DIM,index[0],index[1],index[2],count[0],count[1],count[2]); */
 		nc_status = nc_put_vara_int(mb_io_ptr->ncid, storelocal->mbCycle_id, index, count, store->mbCycle);
 		if (verbose >= 2 && nc_status != NC_NOERR)
 			fprintf(stderr, "nc_put_vara mbCycle error: %s\n", nc_strerror(nc_status));
