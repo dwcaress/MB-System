@@ -643,7 +643,7 @@ int main(int argc, char **argv) {
 	const bool read_datalist = format < 0;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			error = MB_ERROR_OPEN_FAIL;
@@ -995,7 +995,7 @@ int main(int argc, char **argv) {
 		}
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = MB_YES;
 			else
@@ -1007,7 +1007,7 @@ int main(int argc, char **argv) {
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* loop over grid cells to find maximum number of soundings */

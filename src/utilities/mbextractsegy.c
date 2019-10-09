@@ -575,7 +575,7 @@ int main(int argc, char **argv) {
 	const bool read_datalist = format < 0;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -596,7 +596,7 @@ int main(int argc, char **argv) {
 	if ((route_file_set == MB_YES && nroutepoint > 1) || (timelist_file_set == MB_YES && ntimepoint > 1)) {
 		sprintf(scriptfile, "%s_section.cmd", lineroot);
 	}
-	else if (output_file_set == MB_NO || read_datalist == MB_YES) {
+	else if (output_file_set == MB_NO || read_datalist) {
 		sprintf(scriptfile, "%s_section.cmd", read_file);
 	}
 	else {
@@ -1301,7 +1301,7 @@ int main(int argc, char **argv) {
 		buffer_alloc = 0;
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = MB_YES;
 			else
@@ -1430,7 +1430,7 @@ int main(int argc, char **argv) {
 
 		/* end loop over files in list */
 	}
-	if (read_datalist == MB_YES)
+	if (read_datalist)
 		mb_datalist_close(verbose, &datalist, &error);
 
 	/* close plotting script file */
