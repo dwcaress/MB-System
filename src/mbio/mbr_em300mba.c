@@ -183,7 +183,6 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	short *sonar_save;
 	short sonarunswap;
 	short sonarswap;
-	int swap;
 	int *databyteswapped;
 	int typegood;
 	int sonargood;
@@ -272,7 +271,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	}
 
 	/* set flag to swap bytes if necessary */
-	swap = *databyteswapped;
+	// const int swap = *databyteswapped;
 
 	*type = *((short *)&label[0]);
 	*sonar = *((short *)&label[2]);
@@ -2063,7 +2062,6 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 	short short_val;
 	int png_count;
 	int png_serial;
-	int head;
 	int read_len;
 
 	if (verbose >= 2) {
@@ -2079,7 +2077,6 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	head = 0;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_DATA;
@@ -2106,7 +2103,6 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 
 		if (png_count == ping->png_count && png_serial != ping->png_serial) {
 			ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
-			head = 1;
 		}
 	}
 
@@ -2414,7 +2410,6 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	char line[EM2_RAWBEAM2_HEADER_SIZE];
 	short short_val;
 	int read_len;
-	int spare;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -2476,7 +2471,7 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		mb_get_binary_short(swap, &line[38], &short_val);
 		ping->png_raw_ntx = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[40], &short_val);
-		spare = (int)((unsigned short)short_val);
+		// spare = (int)((unsigned short)short_val);
 	}
 
 	/* check for some indicators of a broken record
@@ -2642,7 +2637,6 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 	int int_val;
 	int png_raw3_count;
 	int png_raw3_serial;
-	int head;
 	int read_len;
 
 	if (verbose >= 2) {
@@ -2657,7 +2651,6 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	head = 0;
 
 	int status = MB_SUCCESS;
 
@@ -2679,7 +2672,6 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 
 		if (png_raw3_count == ping->png_raw3_count && png_raw3_serial != ping->png_raw3_serial) {
 			ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
-			head = 1;
 		}
 	}
 
@@ -2856,7 +2848,6 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	short short_val;
 	int png_ss_count;
 	int png_ss_serial;
-	int head;
 	int read_len;
 	int done;
 	int junk_bytes;
@@ -2876,7 +2867,6 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *)store->ping;
-	head = 0;
 
 	/* set kind and type values */
 	store->kind = MB_DATA_DATA;
@@ -2904,7 +2894,6 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		if ((png_ss_count == ping->png_ss_count && png_ss_serial != ping->png_ss_serial) ||
 		    (png_ss_count == store->ping2->png_count && png_ss_serial == store->ping2->png_serial)) {
 			ping = (struct mbsys_simrad2_ping_struct *)store->ping2;
-			head = 1;
 		}
 	}
 
@@ -3195,7 +3184,6 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	short short_val;
 	int read_len;
 	int done;
-	int file_bytes;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -3214,7 +3202,7 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 	store->kind = MB_DATA_WATER_COLUMN;
 	store->type = EM2_WATERCOLUMN;
 	store->sonar = sonar;
-	file_bytes = ftell(mbfp);
+	/* int file_bytes = ftell(mbfp); */
 
 	int status = MB_SUCCESS;
 

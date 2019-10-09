@@ -163,9 +163,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 	struct stat file_status;
 	int fstat;
 	char fmode[16];
-	int shellstatus;
 	int header = MB_YES;
-	int nscan = 0;
 
 	/* time, user, host variables */
 	time_t right_now;
@@ -244,8 +242,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 					if (strncmp(esf_header, "ESFVERSION03", 12) == 0) {
 						esf->version = 3;
 						esf->nedit -= MB_PATH_MAXLINE / (sizeof(double) + 2 * sizeof(int));
-						nscan = sscanf(&esf_header[13], "ESF Mode: %d", &esf->mode);
-//fprintf(stderr,"sscanf ESF V3 mode: nscan:%d mode:%d\n",nscan,esf->mode);
+						sscanf(&esf_header[13], "ESF Mode: %d", &esf->mode);
 					}
 					else if (strncmp(esf_header, "ESFVERSION02", 12) == 0) {
 						esf->version = 2;
@@ -263,7 +260,6 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 					esf->version = 1;
 					esf->mode = MB_ESF_MODE_EXPLICIT;
 				}
-//fprintf(stderr,"ESF file loaded:%s VERSION:%d MODE:%d\n", esf->esffile, esf->version, esf->mode);
 
 				*error = MB_ERROR_NO_ERROR;
 				nedit = 0;
@@ -333,7 +329,7 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 			/* copy old edit save file to tmp file */
 			if (load == MB_YES) {
 				sprintf(command, "cp %s %s.tmp\n", esffile, esffile);
-				shellstatus = system(command);
+				/* shellstatus = */ system(command);
 				if (output == MBP_ESF_APPEND)
 					header = MB_NO;
 			}
