@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 	struct printfield {
 		char name[MB_PATH_MAXLINE];
 		int index;
-		int formatset;
+		bool formatset;
 		char format[MB_PATH_MAXLINE];
 	};
 	int nfields = 0;
@@ -225,11 +225,11 @@ int main(int argc, char **argv) {
 	struct printfield printfields[NFIELDSMAX];
 	int nrecord;
 	int recordsize;
-	int printheader = MB_NO;
-	int angles_in_degrees = MB_NO;
+	bool printheader = false;
+	bool angles_in_degrees = false;
 
 	/* navigation, heading, attitude data for merging in fnv format */
-	int nav_merge = MB_NO;
+	bool nav_merge = false;
 	mb_path nav_file;
 	int nav_num = 0;
 	int nav_alloc = 0;
@@ -244,28 +244,27 @@ int main(int argc, char **argv) {
 	double *nav_heave = NULL;
 
     /* calculate time by adding time of date  to Kearfott time of day value */
-    int calc_ktime = MB_NO;
-    int ktime_available = MB_NO;
+    bool calc_ktime = false;
     double startofday_time_d = 0.0;
     double ktime_calc = 0.0;
 
     /* recalculate ctd data from fundamental observations */
-    int recalculate_ctd = MB_NO;
+    bool recalculate_ctd = false;
     int ctd_calibration_id = 0;
     struct ctd_calibration_struct ctd_calibration;
-    int cond_frequency_available = MB_NO;
-    int temp_counts_available = MB_NO;
-    int pressure_counts_available = MB_NO;
-    int thermistor_available = MB_NO;
-    int conductivity_available = MB_NO;
-    int temperature_available = MB_NO;
-    int pressure_available = MB_NO;
-    int ctd_available = MB_NO;
+    bool cond_frequency_available = false;
+    bool temp_counts_available = false;
+    bool pressure_counts_available = false;
+    bool thermistor_available = false;
+    bool conductivity_available = false;
+    bool temperature_available = false;
+    bool pressure_available = false;
+    bool ctd_available = false;
 
 	/* values used to calculate some water properties */
-    int calc_potentialtemp = MB_NO;
-    int calc_soundspeed = MB_NO;
-    int calc_density = MB_NO;
+    bool calc_potentialtemp = false;
+    bool calc_soundspeed = false;
+    bool calc_density = false;
 	double cond_frequency = 0.0;
 	double temp_counts = 0.0;
 	double pressure_counts = 0.0;
@@ -338,42 +337,42 @@ int main(int argc, char **argv) {
 			case 'N':
 			case 'n':
 				sscanf(optarg, "%s", nav_file);
-				nav_merge = MB_YES;
+				nav_merge = true;
 				break;
 			case 'O':
 			case 'o':
 				nscan = sscanf(optarg, "%s", printfields[nprintfields].name);
 				if (strlen(printformat) > 0 && strcmp(printformat, "default") != 0) {
-					printfields[nprintfields].formatset = MB_YES;
+					printfields[nprintfields].formatset = true;
 					strcpy(printfields[nprintfields].format, printformat);
 				}
 				else {
-					printfields[nprintfields].formatset = MB_NO;
+					printfields[nprintfields].formatset = false;
 					strcpy(printfields[nprintfields].format, "");
 				}
             if (strcmp(printfields[nprintfields].name, "calcPotentialTemperature") == 0)
-                calc_potentialtemp = MB_YES;
+                calc_potentialtemp = true;
             if (strcmp(printfields[nprintfields].name, "calcSoundspeed") == 0)
-                calc_soundspeed = MB_YES;
+                calc_soundspeed = true;
             if (strcmp(printfields[nprintfields].name, "calcDensity") == 0)
-                calc_density = MB_YES;
+                calc_density = true;
             if (strcmp(printfields[nprintfields].name, "calcKTime") == 0)
-                calc_ktime = MB_YES;
+                calc_ktime = true;
 				printfields[nprintfields].index = -1;
 				nprintfields++;
 				break;
 			case 'P':
 			case 'p':
-				printheader = MB_YES;
+				printheader = true;
 				break;
 			case 'R':
 			case 'r':
-				recalculate_ctd = MB_YES;
+				recalculate_ctd = true;
 				sscanf(optarg, "%d", &ctd_calibration_id);
 				break;
 			case 'S':
 			case 's':
-				angles_in_degrees = MB_YES;
+				angles_in_degrees = true;
 				break;
 			case '?':
 				errflg = true;
@@ -441,7 +440,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* if nav merging to be done get nav */
-	if (nav_merge == MB_YES && strlen(nav_file) > 0) {
+	if (nav_merge && strlen(nav_file) > 0) {
 		/* count the data points in the nav file */
 		nav_num = 0;
 		const int nchar = MB_PATH_MAXLINE - 1;
@@ -489,19 +488,15 @@ int main(int argc, char **argv) {
 				&time_i[3], &time_i[4], &sec, &nav_time_d[nav_num], &nav_navlon[nav_num], &nav_navlat[nav_num],
 				&nav_heading[nav_num], &nav_speed[nav_num], &nav_sensordepth[nav_num], &nav_roll[nav_num],
 				&nav_pitch[nav_num], &nav_heave[nav_num]);
-			int nav_ok;
-			if (nget >= 9)
-				nav_ok = MB_YES;
-			else
-				nav_ok = MB_NO;
+			bool nav_ok = nget >= 9;
 			if (nav_num > 0 && nav_time_d[nav_num] <= nav_time_d[nav_num - 1])
-				nav_ok = MB_NO;
-			if (nav_ok == MB_YES)
+				nav_ok = false;
+			if (nav_ok)
 				nav_num++;
 		}
 		fclose(fp);
 	}
-	if (nav_merge == MB_YES)
+	if (nav_merge)
 		fprintf(stderr, "%d %d records read from nav file %s\n", nav_alloc, nav_num, nav_file);
 
 	/* open the input file */
@@ -514,16 +509,17 @@ int main(int argc, char **argv) {
 
 	nfields = 0;
 	recordsize = 0;
+	bool ktime_available = false;
 	while ((result = fgets(buffer, MB_PATH_MAXLINE, fp)) == buffer &&
            strncmp(buffer, "# begin", 7) != 0) {
 		nscan = sscanf(buffer, "# %s %s %s", type, fields[nfields].name, fields[nfields].format);
 		if (nscan == 2) {
-			if (printheader == MB_YES)
+			if (printheader)
 				fprintf(stdout, "# csv %s\n", fields[nfields].name);
 		}
 
 		else if (nscan == 3) {
-			if (printheader == MB_YES)
+			if (printheader)
 				fprintf(stdout, "%s", buffer);
 
 			result = (char *)strchr(buffer, ',');
@@ -538,7 +534,7 @@ int main(int argc, char **argv) {
 				fields[nfields].type = TYPE_DOUBLE;
 				fields[nfields].size = 8;
 				/* TODO(schwehr): Is something missing? */
-				if (angles_in_degrees == MB_YES &&
+				if (angles_in_degrees &&
 				    (/* strcmp(fields[nfields].name, "mLatK") == 0 || */ strcmp(fields[nfields].name, "mLonK") == 0 ||
 				     strcmp(fields[nfields].name, "mLatK") == 0 || strcmp(fields[nfields].name, "mRollK") == 0 ||
 				     strcmp(fields[nfields].name, "mPitchK") == 0 || strcmp(fields[nfields].name, "mHeadK") == 0 ||
@@ -566,7 +562,7 @@ int main(int argc, char **argv) {
 			else if (strcmp(type, "angle") == 0) {
 				fields[nfields].type = TYPE_ANGLE;
 				fields[nfields].size = 8;
-				if (angles_in_degrees == MB_YES &&
+				if (angles_in_degrees &&
 				    (strcmp(fields[nfields].name, "mRollCB") == 0 || strcmp(fields[nfields].name, "mOmega_xCB") == 0 ||
                     strcmp(fields[nfields].name, "mPitchCB") == 0 || strcmp(fields[nfields].name, "mOmega_yCB") == 0 ||
 				    strcmp(fields[nfields].name, "mYawCB") == 0 || strcmp(fields[nfields].name, "mOmega_zCB") == 0))
@@ -578,23 +574,23 @@ int main(int argc, char **argv) {
 
             /* check if kearfott time is in this file */
             if (strcmp(fields[nfields].name, "utcTime") == 0)
-                ktime_available = MB_YES;
+                ktime_available = true;
 
             /* check if raw and processed ctd data are in this file */
             if (strcmp(fields[nfields].name, "cond_frequency") == 0)
-                cond_frequency_available = MB_YES;
+                cond_frequency_available = true;
             else if (strcmp(fields[nfields].name, "temp_counts") == 0)
-                temp_counts_available = MB_YES;
+                temp_counts_available = true;
             else if (strcmp(fields[nfields].name, "pressure_counts") == 0)
-                pressure_counts_available = MB_YES;
+                pressure_counts_available = true;
             else if (strcmp(fields[nfields].name, "pressure_temp_comp_voltage_reading") == 0)
-                thermistor_available = MB_YES;
+                thermistor_available = true;
             else if (strcmp(fields[nfields].name, "conductivity") == 0)
-                conductivity_available = MB_YES;
+                conductivity_available = true;
             else if (strcmp(fields[nfields].name, "temperature") == 0)
-                temperature_available = MB_YES;
+                temperature_available = true;
             else if (strcmp(fields[nfields].name, "pressure") == 0)
-                pressure_available = MB_YES;
+                pressure_available = true;
 
             /* increment counter */
 			nfields++;
@@ -602,7 +598,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* end here if asked only to print header */
-	if (nprintfields == 0 && printheader == MB_YES)
+	if (nprintfields == 0 && printheader)
 		exit(error);
 
 	/* by default print everything */
@@ -611,35 +607,32 @@ int main(int argc, char **argv) {
 		for (int i = 0; i < nfields; i++) {
 			strcpy(printfields[i].name, fields[i].name);
 			printfields[i].index = i;
-			printfields[i].formatset = MB_NO;
+			printfields[i].formatset = false;
 			strcpy(printfields[i].format, fields[i].format);
 		}
 	}
 
     /* if recalculating CTD data then check for available raw CTD data */
-    if (recalculate_ctd == MB_YES) {
-        if (cond_frequency_available == MB_NO
-            || temp_counts_available == MB_NO
-            || pressure_counts_available == MB_NO
-            || thermistor_available == MB_NO) {
-            error = MB_ERROR_BAD_FORMAT;
-		    status = MB_FAILURE;
-		    fprintf(stderr, "\nUnable to recalculate CTD data as requested, raw CTD data not in file <%s>\n", file);
-		    exit(status);
+    if (recalculate_ctd) {
+        if (!cond_frequency_available
+            || !temp_counts_available
+            || !pressure_counts_available
+            || !thermistor_available) {
+		fprintf(stderr, "\nUnable to recalculate CTD data as requested, raw CTD data not in file <%s>\n", file);
+		exit(MB_ERROR_BAD_FORMAT);
         } else {
             calibration_MAUV1_2017(&ctd_calibration);
         }
     }
-    if (conductivity_available == MB_YES
-        && temperature_available == MB_YES
-        && pressure_available == MB_YES) {
-        ctd_available = MB_YES;
+    if (conductivity_available
+        && temperature_available
+        && pressure_available) {
+        ctd_available = true;
     }
-    if (calc_potentialtemp == MB_YES
-        || calc_soundspeed == MB_YES
-        || calc_density == MB_YES) {
-        if (recalculate_ctd == MB_NO
-            && ctd_available == MB_NO) {
+    if (calc_potentialtemp
+        || calc_soundspeed
+        || calc_density) {
+        if (!recalculate_ctd && !ctd_available) {
                 error = MB_ERROR_BAD_FORMAT;
                 status = MB_FAILURE;
                 fprintf(stderr, "\nUnable to calculate CTD data products as requested, CTD data not in file <%s>\n", file);
@@ -651,115 +644,115 @@ int main(int argc, char **argv) {
 	for (int i = 0; i < nprintfields; i++) {
 		if (strcmp(printfields[i].name, "zero") == 0) {
 			printfields[i].index = INDEX_ZERO;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "timeTag") == 0) {
 			printfields[i].index = INDEX_ZERO;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergeLon") == 0) {
 			printfields[i].index = INDEX_MERGE_LON;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.9f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergeLat") == 0) {
 			printfields[i].index = INDEX_MERGE_LAT;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.9f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergeHeading") == 0) {
 			printfields[i].index = INDEX_MERGE_HEADING;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergeSpeed") == 0) {
 			printfields[i].index = INDEX_MERGE_SPEED;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergeDraft") == 0) {
 			printfields[i].index = INDEX_MERGE_SENSORDEPTH;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergeSensordepth") == 0) {
 			printfields[i].index = INDEX_MERGE_SENSORDEPTH;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergeRoll") == 0) {
 			printfields[i].index = INDEX_MERGE_ROLL;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergePitch") == 0) {
 			printfields[i].index = INDEX_MERGE_PITCH;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "mergeHeave") == 0) {
 			printfields[i].index = INDEX_MERGE_HEAVE;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.3f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "calcConductivity") == 0) {
 			printfields[i].index = INDEX_CALC_CONDUCTIVITY;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "calcTemperature") == 0) {
 			printfields[i].index = INDEX_CALC_TEMPERATURE;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "calcPressure") == 0) {
 			printfields[i].index = INDEX_CALC_PRESSURE;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "calcSalinity") == 0) {
 			printfields[i].index = INDEX_CALC_SALINITY;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "calcSoundspeed") == 0) {
 			printfields[i].index = INDEX_CALC_SOUNDSPEED;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "CalcPotentialTemperature") == 0) {
 			printfields[i].index = INDEX_CALC_POTENTIALTEMP;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "calcDensity") == 0) {
 			printfields[i].index = INDEX_CALC_DENSITY;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
 		else if (strcmp(printfields[i].name, "calcKTime") == 0) {
 			printfields[i].index = INDEX_CALC_KTIME;
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, "%.8f");
 			}
 		}
@@ -768,7 +761,7 @@ int main(int argc, char **argv) {
 				if (strcmp(printfields[i].name, fields[j].name) == 0)
 					printfields[i].index = j;
 			}
-			if (printfields[i].formatset == MB_NO) {
+			if (!printfields[i].formatset) {
 				strcpy(printfields[i].format, fields[printfields[i].index].format);
 			}
 		}
@@ -793,7 +786,7 @@ int main(int argc, char **argv) {
 	nrecord = 0;
 	while (fread(buffer, recordsize, 1, fp) == 1) {
         /* recalculate CTD data if requested */
-        if (recalculate_ctd == MB_YES) {
+        if (recalculate_ctd) {
             for (int ii = 0; ii < nfields; ii++) {
                 if (strcmp(fields[ii].name, "cond_frequency") == 0)
                     mb_get_binary_double(MB_YES, &buffer[fields[ii].index], &cond_frequency);
@@ -817,7 +810,7 @@ int main(int argc, char **argv) {
             /* interp_status = */ mb_potential_temperature(verbose, temperature_calc, salinity_calc, pressure_calc,
                                         &potentialtemperature_calc, &error);
             /* interp_status = */ mb_seabird_density(verbose, salinity_calc, temperature_calc, pressure_calc, &density_calc, &error);
-        } else if (ctd_available == MB_YES) {
+        } else if (ctd_available) {
             /* else deal with existing values if available */
             for (int ii = 0; ii < nprintfields; ii++) {
 				if (strcmp(fields[ii].name, "temperature") == 0)
@@ -839,7 +832,7 @@ int main(int argc, char **argv) {
 
         /* calculate timestamp by adding Kearfott second-of-day value (utcTime) to seconds to the start of day
          * from the overall timestamp (time) */
-        if (ktime_available == MB_YES && calc_ktime == MB_YES) {
+        if (ktime_available && calc_ktime) {
             /* else deal with existing values if available */
             startofday_time_d = 0.0;
             ktime_calc = 0.0;
@@ -997,7 +990,7 @@ int main(int argc, char **argv) {
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
 				dvalue *= fields[index].scale;
 				if ((strcmp(fields[nfields].name, "mHeadK") == 0 || strcmp(fields[nfields].name, "mYawK") == 0) &&
-				    angles_in_degrees == MB_YES && dvalue < 0.0)
+				    angles_in_degrees && dvalue < 0.0)
 					dvalue += 360.0;
 				if (output_mode == OUTPUT_MODE_BINARY)
 					fwrite(&dvalue, sizeof(double), 1, stdout);
@@ -1050,7 +1043,7 @@ int main(int argc, char **argv) {
 			else if (fields[index].type == TYPE_ANGLE) {
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);
 				dvalue *= fields[index].scale;
-				if (strcmp(fields[index].name, "mYawCB") == 0 && angles_in_degrees == MB_YES && dvalue < 0.0)
+				if (strcmp(fields[index].name, "mYawCB") == 0 && angles_in_degrees && dvalue < 0.0)
 					dvalue += 360.0;
 				if (output_mode == OUTPUT_MODE_BINARY)
 					fwrite(&dvalue, sizeof(double), 1, stdout);
