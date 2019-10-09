@@ -60,7 +60,6 @@ int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
 	/* MBIO read control parameters */
-	int read_datalist = MB_NO;
 	mb_path read_file = "";
 	mb_path output_file = "";
 	int output_file_set = MB_NO;
@@ -573,8 +572,7 @@ int main(int argc, char **argv) {
 		sprintf(zbounds, "-%f/%f", zmax, zmax);
 
 	/* determine whether to read one file or a list of files */
-	if (format < 0)
-		read_datalist = MB_YES;
+	const bool read_datalist = format < 0;
 
 	/* open file list */
 	if (read_datalist == MB_YES) {

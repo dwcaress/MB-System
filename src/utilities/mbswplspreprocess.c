@@ -1125,7 +1125,6 @@ static int print_counts(int verbose, counts *recs, int *error) {
 int main(int argc, char **argv) {
 	int error = MB_ERROR_NO_ERROR;
 
-	int read_datalist = MB_NO;
 	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_UNSET;
 	double file_weight;
@@ -1181,9 +1180,7 @@ int main(int argc, char **argv) {
 	}
 
 	/* determine whether to read one file or a list of files */
-	if (opts.format < 0) {
-		read_datalist = MB_YES;
-	}
+	const bool read_datalist = opts.format < 0;
 
 	/* open file list */
 	if (read_datalist == MB_YES) {
