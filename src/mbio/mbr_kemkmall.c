@@ -2006,7 +2006,7 @@ int mbr_kemkmall_rd_mrz(int verbose, char *buffer, void *store_ptr, void *header
       fprintf(stderr, "dbg5       postProcessingInfo:              %d\n", mrz->sounding[i].postProcessingInfo);
       fprintf(stderr, "dbg5       detectionClass:                  %d\n", mrz->sounding[i].detectionClass);
       fprintf(stderr, "dbg5       detectionConfidenceLevel:        %d\n", mrz->sounding[i].detectionConfidenceLevel);
-      // fprintf(stderr, "dbg5       padding:                        %d\n", mrz->sounding[i].padding);
+      // Skip mrz->sounding[i].padding
       fprintf(stderr, "dbg5       beamflag_enabled:                %d\n", mrz->sounding[i].beamflag_enabled);
       fprintf(stderr, "dbg5       beamflag:                        %d\n", mrz->sounding[i].beamflag);
       fprintf(stderr, "dbg5       rangeFactor:                     %f\n", mrz->sounding[i].rangeFactor);
@@ -2630,7 +2630,6 @@ int mbr_kemkmall_rd_iip(int verbose, char *buffer, void *store_ptr, void *header
   index += 2;
   size_t numBytesRawSensorData = iip->header.numBytesDgm - MBSYS_KMBES_IIP_VAR_OFFSET;
   memcpy(&iip->install_txt, &buffer[index], numBytesRawSensorData);
-//fprintf(stderr, "\niip->install_txt:\n%s\n", iip->install_txt);
 
   if (verbose >= 5) {
     fprintf(stderr, "\ndbg5  Values read in MBIO function <%s>\n", __func__);
@@ -3437,11 +3436,8 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
     /* allocate memory to read the record if necessary */
     read_len = (size_t)dgm_index->header.numBytesDgm;
-//fprintf(stderr, "\n----------->%s:%d READ dgm_index->header.numBytesDgm:%d\n", __FILE__, __LINE__, dgm_index->header.numBytesDgm);
     if (*bufferalloc <= read_len) {
       *bufferalloc = ((read_len / MBSYS_KMBES_START_BUFFER_SIZE) + 1) * MBSYS_KMBES_START_BUFFER_SIZE;
-//fprintf(stderr, "\nAlloc more buffer: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
-//*bufferalloc, bufferptr, buffer, status);
       status = mb_reallocd(verbose, __FILE__, __LINE__, *bufferalloc, (void **)bufferptr, error);
       if (status != MB_SUCCESS) {
         *bufferalloc = 0;
@@ -3450,20 +3446,13 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       else {
         buffer = (char *)*bufferptr;
       }
-//fprintf(stderr, "Realloc done: *bufferalloc:%d bufferptr:%p buffer:%p status:%d\n",
-//*bufferalloc, bufferptr, buffer, status);
     }
 
     /* read the next datagram */
     if (status == MB_SUCCESS) {
-//fprintf(stderr, "Reading datagram %c%c%c%c size:%d *bufferalloc:%d bufferptr:%p buffer:%p\n",
-//dgm_index->header.dgmType[0], dgm_index->header.dgmType[1],
-//dgm_index->header.dgmType[2], dgm_index->header.dgmType[3],
-//dgm_index->header.numBytesDgm, *bufferalloc, bufferptr, buffer);
       fseek(mb_io_ptr->mbfp, dgm_index->file_pos, SEEK_SET);
       status = mb_fileio_get(verbose, mbio_ptr, (void *)&buffer[0], &read_len, error);
       mb_io_ptr->file_pos = ftell(mb_io_ptr->mbfp);
-//fprintf(stderr, "Read %zu bytes status:%d\n", read_len, status);
     }
 
     /* if valid read the record type */
@@ -3545,9 +3534,6 @@ int mbr_kemkmall_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
           /* #MRZ - multibeam data for raw range, depth, reflectivity, seabed image(SI) etc. */
           /*        not done until all MRZ datagrams for a ping are read */
           status = mbr_kemkmall_rd_mrz(verbose, buffer, store_ptr, (void *)&dgm_index->header, error);
-//store = (struct mbsys_kmbes_struct *)store_ptr;
-//fprintf(stderr, "----------->%s:%d READ dgm_index->header.numBytesDgm:%d store->mrz[0].header.numBytesDgm:%d store->mrz[1].header.numBytesDgm:%d \n",
-//__FILE__, __LINE__, dgm_index->header.numBytesDgm, store->mrz[0].header.numBytesDgm, store->mrz[0].header.numBytesDgm);
 
           /* check to see if done */
           if (status != MB_SUCCESS) {
@@ -4928,8 +4914,6 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
                             + MBSYS_KMBES_END_SIZE;
 
   *size = (size_t) mrz->header.numBytesDgm;
-//fprintf(stderr, "************>%s:%d WRITE mbr_kemkmall_wr_mrz mrz->header.numBytesDgm:%d\n",
-//__FILE__, __LINE__, mrz->header.numBytesDgm);
 
   int status = MB_SUCCESS;
 
@@ -5390,7 +5374,7 @@ int mbr_kemkmall_wr_mrz(int verbose, int *bufferalloc, char **bufferptr, void *s
         fprintf(stderr, "dbg5       postProcessingInfo:             %d\n", mrz->sounding[i].postProcessingInfo);
         fprintf(stderr, "dbg5       detectionClass:                 %d\n", mrz->sounding[i].detectionClass);
         fprintf(stderr, "dbg5       detectionConfidenceLevel        %d\n", mrz->sounding[i].detectionConfidenceLevel);
-        // fprintf(stderr, "dbg5       padding:                       %d\n", mrz->sounding[i].padding);
+        // Skip mrz->sounding[i].padding
         fprintf(stderr, "dbg5       beamflag_enabled:               %d\n", mrz->sounding[i].beamflag_enabled);
         fprintf(stderr, "dbg5       beamflag:                       %d\n", mrz->sounding[i].beamflag);
         fprintf(stderr, "dbg5       rangeFactor:                    %f\n", mrz->sounding[i].rangeFactor);
@@ -6606,7 +6590,6 @@ int mbr_kemkmall_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
       /* #MRZ - multibeam data for raw range,
       depth, reflectivity, seabed image(SI) etc. */
       for (imrz=0;imrz<store->n_mrz_read;imrz++) {
-////fprintf(stderr, "************>%s:%d WRITE mbr_kemkmall_wr_data imrz:%d mrz->header.numBytesDgm:%d\n", __FILE__, __LINE__, imrz, store->mrz[imrz].header.numBytesDgm);
         status = mbr_kemkmall_wr_mrz(verbose, bufferalloc, bufferptr, store_ptr, imrz, &size, error);
         if (status == MB_SUCCESS)
           status = mb_fileio_put(verbose, mbio_ptr, (char *)(*bufferptr), &size, error);

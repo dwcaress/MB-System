@@ -672,10 +672,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 					         (double)(0.01 * data->motion_sensor_x), (double)(0.01 * data->motion_sensor_y),
 					         (double)(0.01 * data->motion_sensor_z), (double)(0.01 * data->pitch_offset - pitch),
 					         (double)(roll - 0.01 * data->roll_offset), &lever_x, &lever_y, &lever_z, error);
-					/*fprintf(stderr,"roll:%f pitch:%f    dz:%f\n",
-					(double) (roll - 0.01 * data->roll_offset),
-					(double) (0.01 * data->pitch_offset - pitch),
-					lever_z);*/
 					heave += lever_z;
 					data->heave = 1000 * heave;
 					data->roll = 200 * roll;
@@ -696,12 +692,6 @@ int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error) {
 						data->bath_acrosstrack[i] = 100 * xx * cos(DTR * phi);
 						data->bath_alongtrack[i] = 100 * xx * sin(DTR * phi);
 						data->bath[i] = 100 * (zz + heave) + data->transducer_depth;
-						/*fprintf(stderr, "i:%d tt:%d angle:%f roll:%f pitch:%f heave:%f\n",
-						i, data->tt[i], angle, roll, pitch, heave);
-						fprintf(stderr, "theta:%f phi:%f\n", theta, phi);
-						fprintf(stderr, "rr:%f xx:%f zz:%f\n", rr, xx, zz);
-						fprintf(stderr, "bath: %d %d %d\n\n",
-						data->bath[i], data->bath_acrosstrack[i], data->bath_alongtrack[i]);*/
 
 						/* deal with Mesotech SM2000 quality values */
 						if (data->sonar == MBSYS_RESON_MESOTECHSM2000) {

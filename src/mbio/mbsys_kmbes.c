@@ -2299,9 +2299,6 @@ int mbsys_kmbes_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_s
             }
           }
           nsamples += mrz->sounding[i].SInumSamples;
-//fprintf(stderr,"SS calculation: sounding %d angle:%f dx: %f %f %f N: %2d %4d %4d %4d\n",
-//i, mrz->sounding[i].beamAngleReRx_deg, dx, dx1, dx2,
-//mrz->sounding[i].SInumSamples, k1, kc, k2);
         }
       }
     }

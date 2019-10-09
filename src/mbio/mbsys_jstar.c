@@ -707,7 +707,6 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		else
 			pixelsize = rawpixelsize;
 		altitude = 0.001 * ssport->sonarAltitude;
-		// fprintf(stderr,"rawpixelsize:%f pixelsize:%f altitude:%f\n", rawpixelsize,pixelsize,altitude);
 
 		/* zero the array */
 		for (int i = 0; i < *nss; i++) {
@@ -717,34 +716,25 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			if (i < *nss / 2)
 				ssacrosstrack[i] = -ssacrosstrack[i];
 			ssalongtrack[i] = 0.0;
-			/*fprintf(stderr,"i:%d range:%f altitude:%f xtrack:%f\n",i,range,altitude,ssacrosstrack[i]);*/
 		}
 
 		/* bin the data */
 		istart = (int)(altitude / rawpixelsize);
-		/*fprintf(stderr,"istart:%d altitude:%f rawpixelsize:%f startDepth:%d\n",
-		istart,altitude,rawpixelsize,ssport->startDepth);*/
 		weight = exp(MB_LN_2 * ((double)ssport->weightingFactor));
-		/*fprintf(stderr, "Subsystem: %d Weights: %d %f ",ssport->message.subsystem,ssport->weightingFactor,weight);*/
 		jstart = *nss / 2;
-		/*fprintf(stderr,"Port istart:%d of %d    jstart:%d of %d\n",istart,ssport->samples,jstart,*nss);*/
 		for (int i = istart; i < ssport->samples; i++) {
 			range = rawpixelsize * (i + ssport->startDepth);
 			const int j = jstart - (int)((i - istart) * rawpixelsize / pixelsize);
 			ss[j] += ssport->trace[i] / weight;
 			ssalongtrack[j] += 1.0;
-			/*fprintf(stderr,"Binning Port: i:%d j:%d ss:%f\n",i,j,ss[j]/ssalongtrack[j]);*/
 		}
 		istart = MAX(0, ((int)(altitude / rawpixelsize)));
 		weight = exp(MB_LN_2 * ((double)ssstbd->weightingFactor));
-		/*fprintf(stderr, "   %d %f\n",ssstbd->weightingFactor,weight);*/
-		/*fprintf(stderr,"Stbd istart:%d of %d    jstart:%d of %d\n",istart,ssstbd->samples,jstart,*nss);*/
 		for (int i = istart; i < ssstbd->samples; i++) {
 			range = rawpixelsize * (i + ssstbd->startDepth);
 			const int j = jstart + (int)((i - istart) * rawpixelsize / pixelsize);
 			ss[j] += ssstbd->trace[i] / weight;
 			ssalongtrack[j] += 1.0;
-			/*fprintf(stderr,"Binning Stbd: i:%d j:%d ss:%f\n",i,j,ss[j]/ssalongtrack[j]);*/
 		}
 
 		/* average the data in the bins */
@@ -2355,7 +2345,6 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr, int *
 
 		/* get the trace weight */
 		const double weight = exp(MB_LN_2 * ((double)sbp->weightingFactor));
-		/*fprintf(stderr, "Subsystem: %d Weight: %d %f\n",sbp->message.subsystem,sbp->weightingFactor,weight);*/
 
 		/* extract the data */
 		if (sbp->dataFormat == MBSYS_JSTAR_TRACEFORMAT_ENVELOPE) {

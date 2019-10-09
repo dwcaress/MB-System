@@ -887,7 +887,6 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 						store->kind = MB_DATA_DATA;
 					else if (message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)
 						store->kind = MB_DATA_SIDESCAN2;
-//fprintf(stderr, "READ SIDESCAN format:%d subsystem:%d kind:%d\n", mb_io_ptr->format, message.subsystem, store->kind);
 				}
 				else {
 					if (message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSHIGH)

@@ -279,12 +279,8 @@ int mb_esf_open(int verbose, const char *program_name, char *esffile, int load, 
 						nedit++;
 					}
 					else {
-						// fprintf(stderr,"mb_open_esf() detected errant header in middle of esf file %s\n",esffile);
 						fread(esf_header, MB_PATH_MAXLINE - (sizeof(double) + 2 * sizeof(int)), 1, esffp);
 					}
-					/*fprintf(stderr,"EDITS READ: i:%d edit: %f %d %d  use:%d\n",
-					i,esf->edit[i].time_d,esf->edit[i].beam,
-					esf->edit[i].action,esf->edit[i].use);*/
 				}
 				esf->nedit = nedit;
 				if (*error == MB_ERROR_EOF) {
@@ -516,8 +512,6 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 		firstedit = esf->startnextsearch;
 	lastedit = firstedit - 1;
 	for (j = firstedit; j < esf->nedit && time_d >= (esf->edit[j].time_d - maxtimediff); j++) {
-		// fprintf(stderr,"--in loop: j:%d maxtimediff:%f time_d: %.6f %.6f\n",
-		// j,maxtimediff,time_d,(esf->edit[j].time_d - maxtimediff));
 		if (fabs(esf->edit[j].time_d - time_d) < maxtimediff && esf->edit[j].beam >= beamoffset &&
 		    esf->edit[j].beam < beamoffsetmax) {
 			if (lastedit < firstedit)
@@ -525,8 +519,6 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf, double time_d, int ping
 			lastedit = j;
 		}
 	}
-//fprintf(stderr,"time_d:%.9f pingmultiplicity:%d beamoffset:%d beamoffsetmax:%d   startnextsearch:%d firstedit:%d lastedit:%d\n",
-//time_d,pingmultiplicity,beamoffset,beamoffsetmax,esf->startnextsearch,firstedit,lastedit);
 
 	/* apply edits */
 	if (lastedit >= firstedit) {
@@ -681,7 +673,6 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 
 	/* write out the edit */
 	if (esf->esffp != NULL) {
-		/*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
 		if (esf->byteswapped == MB_YES) {
 			mb_swap_double(&time_d);
 			beam = mb_swap_int(beam);
@@ -735,7 +726,6 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf, double time_d, int beam,
 
 	/* write out the edit */
 	if (esf->essfp != NULL) {
-		/*fprintf(stderr,"OUTPUT EDIT: %f %d %d\n",time_d,beam,action);*/
 		if (esf->byteswapped == MB_YES) {
 			mb_swap_double(&time_d);
 			beam = mb_swap_int(beam);

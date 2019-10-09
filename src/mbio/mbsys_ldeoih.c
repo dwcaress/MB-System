@@ -659,7 +659,6 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, int kind, 
 		}
 		if (depthmax > 0.0)
 			store->depth_scale = 0.001 * (float)(MAX((depthmax / 30.0), 1.0));
-// fprintf(stderr,"depthmax:%f depth_scale:%f\n",depthmax,store->depth_scale);
 		if (distmax > 0.0)
 			store->distance_scale = 0.001 * (float)(MAX((distmax / 30.0), 1.0));
 		double ss_scale = 0.0;

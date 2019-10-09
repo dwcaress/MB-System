@@ -3740,10 +3740,6 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 					else if (beam->offset <= 0 && offset_start > 0)
 						beam->offset = offset_start + sample_count;
 					sample_count += beam->no_samples;
-					/*fprintf(stderr, "i:%d flag:%d samples:%d sample_cnt:%d offset:%d offset_start:%d\n",
-					i, mb_io_ptr->new_beamflag[i], beam->no_samples,
-					sample_count, beam->offset, offset_start);
-					*/
 					for (int j = 0; j < beam->no_samples; j++) {
 						const int jj = j + beam->offset - offset_start;
 

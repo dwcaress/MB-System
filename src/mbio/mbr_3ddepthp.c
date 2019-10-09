@@ -302,7 +302,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* read next record in format version 1.1 */
 	if (status == MB_SUCCESS && done == MB_NO && store->file_version == 1 && store->sub_version == 1) {
-		// fprintf(stderr,"READ NEXT RECORD verions %d %d\n",store->file_version,store->sub_version);
 
 		/* read the next record header */
 		size_t read_len = (size_t)sizeof(short);
@@ -323,14 +322,11 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				}
 			}
 		} while (status == MB_SUCCESS && valid_id == MB_NO);
-		// fprintf(stderr,"RECORD ID: %x %d skip:%d valid_id:%d status:%d
-		// error:%d\n",store->record_id,store->record_id,skip,valid_id,status,*error);
 
 		/* read the full record */
 		if (status == MB_SUCCESS) {
 			/* read parameter record */
 			if (store->record_id == MBF_3DDEPTHP_RECORD_PARAMETER) {
-				// fprintf(stderr,"Reading MBF_3DDEPTHP_RECORD_PARAMETER\n");
 				/* read file header into buffer */
 				read_len = (size_t)MBF_3DDEPTHP_VERSION_1_1_PARAMETER_SIZE - 2;
 				status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
@@ -395,7 +391,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* read comment record */
 			else if (store->record_id == MBF_3DDEPTHP_RECORD_COMMENT) {
-				// fprintf(stderr,"Reading MBF_3DDEPTHP_RECORD_COMMENT\n");
 				/* read the comment data */
 				read_len = (size_t)sizeof(short);
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)&store->comment_len, &read_len, error);
@@ -409,7 +404,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* read position record */
 			else if (store->record_id == MBF_3DDEPTHP_RECORD_POSITION) {
-				// fprintf(stderr,"Reading MBF_3DDEPTHP_RECORD_POSITION\n");
 				/* read the position data */
 				read_len = (size_t)(3 * sizeof(double));
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -430,7 +424,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* read attitude record */
 			else if (store->record_id == MBF_3DDEPTHP_RECORD_ATTITUDE) {
-				// fprintf(stderr,"Reading MBF_3DDEPTHP_RECORD_ATTITUDE\n");
 				/* read the attitude data */
 				read_len = (size_t)(4 * sizeof(double));
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -453,7 +446,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* read heading record */
 			else if (store->record_id == MBF_3DDEPTHP_RECORD_HEADING) {
-				// fprintf(stderr,"Reading MBF_3DDEPTHP_RECORD_HEADING\n");
 				/* read the heading data */
 				read_len = (size_t)(2 * sizeof(double));
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -472,7 +464,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* read sensordepth record */
 			else if (store->record_id == MBF_3DDEPTHP_RECORD_SENSORDEPTH) {
-				// fprintf(stderr,"Reading MBF_3DDEPTHP_RECORD_SENSORDEPTH\n");
 				/* read the sensordepth data */
 				read_len = (size_t)(2 * sizeof(double));
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -491,7 +482,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* read raw LIDAR scan record */
 			else if (store->record_id == MBF_3DDEPTHP_RECORD_RAWLIDAR) {
-				// fprintf(stderr,"Reading MBF_3DDEPTHP_RECORD_RAWLIDAR\n");
 				/* read the next scan header */
 				read_len = (size_t)MBF_3DDEPTHP_VERSION_1_1_RAWSCANHEADER_SIZE;
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -519,8 +509,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->num_pulses));
 					index += 4;
 					store->bathymetry_calculated = MB_NO;
-					// fprintf(stderr,"   %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%9.9d\n",
-					// store->year,store->month,store->day,store->hour,store->minutes,store->seconds,store->nanoseconds);
 
 					/* get time_d timestamp */
 					int time_i[7];
@@ -613,7 +601,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* read processed LIDAR scan record */
 			else if (store->record_id == MBF_3DDEPTHP_RECORD_LIDAR) {
-				// fprintf(stderr,"Reading MBF_3DDEPTHP_RECORD_LIDAR\n");
 				/* read the next scan header */
 				read_len = (size_t)MBF_3DDEPTHP_VERSION_1_1_SCANHEADER_SIZE;
 				status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
@@ -657,8 +644,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 					mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->num_pulses));
 					index += 4;
 					store->bathymetry_calculated = MB_YES;
-					// fprintf(stderr,"   %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%9.9d\n",
-					// store->year,store->month,store->day,store->hour,store->minutes,store->seconds,store->nanoseconds);
 				}
 
 				/* read all of the pulses */
@@ -744,7 +729,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* else there is an unexpected value and something is wrong */
 			else {
-				// fprintf(stderr,"there is an unexpected value and something is wrong\n");
 				store->kind = MB_DATA_NONE;
 				*error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -755,16 +739,12 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* else read next record in the obsolete format version 1.0
 	        - LIDAR scans only with no record id's */
 	else if (status == MB_SUCCESS && done == MB_NO && store->file_version == 1 && store->sub_version == 0) {
-		// fprintf(stderr,"READ NEXT RECORD obsolete version %d %d\n",store->file_version,store->sub_version);
-
 		/* read the next scan header */
 		if (mb_io_ptr->save2 == MB_NO) {
-			// fprintf(stderr,"No save, read full scan\n");
 			size_t read_len = (size_t)MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE;
 			status = mb_fileio_get(verbose, mbio_ptr, (void *)buffer, &read_len, error);
 		}
 		else {
-			// fprintf(stderr,"Bytes saved, read rest of scan\n");
 			for (int i = 0; i < 4; i++)
 				buffer[i] = mb_io_ptr->save_label[i];
 			size_t read_len = (size_t)(MBF_3DDEPTHP_VERSION_1_0_SCANHEADER_SIZE - 4);
@@ -798,8 +778,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			index++;
 			mb_get_binary_int(MB_YES, (void *)&buffer[index], &(store->nanoseconds));
 			index += 4;
-			// fprintf(stderr,"DATE: %d %d %d  %d  %d %d %d
-			// %d\n",store->year,store->month,store->day,store->days_since_jan_1,store->hour,store->minutes,store->seconds,store->nanoseconds);
 			store->bathymetry_calculated = MB_NO;
 
 			/* fix timestamp problem with the original data files */
@@ -841,7 +819,6 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				   else check to see if the new pulse is valid or is really the start of a new scan
 				   by checking the first four bytes */
 				unsigned int *newscancheck = (unsigned int *)buffer;
-				// fprintf(stderr,"Pulse %d header:%x  %f\n",store->num_pulses,*newscancheck, *((float *)newscancheck));
 				if (status == MB_FAILURE) {
 					done = MB_YES;
 					status = MB_SUCCESS;
@@ -925,24 +902,16 @@ int mbr_3ddepthp_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			}
 
 			store->kind = MB_DATA_DATA;
-			// fprintf(stderr,"READ %d pulses, save status:%d
-			// current_scan:%d\n",store->num_pulses,mb_io_ptr->save2,store->current_scan);
 		}
 
 		/* else there is an unexpected value and something is wrong */
 		else {
-			// fprintf(stderr,"there is an unexpected value and something is wrong\n");
 			store->kind = MB_DATA_NONE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			status = MB_FAILURE;
 		}
 	}
 
-	// if (store->kind == MB_DATA_DATA)
-	//{
-	// fprintf(stderr,"JUST READ: store->bathymetry_calculated:%d sensordepth: %f %f error:%d status:%d done:%d\n",
-	// store->bathymetry_calculated, store->time_d, store->sensordepth,*error,status,done);
-	//}
 	/* print out status info */
 	if (verbose >= 3 && status == MB_SUCCESS)
 		mbsys_3datdepthlidar_print_store(verbose, store_ptr, error);
@@ -1226,7 +1195,6 @@ int mbr_3ddepthp_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			index += 4;
 			mb_put_binary_int(MB_YES, store->num_pulses, &buffer[index]);
 			index += 4;
-			// fprintf(stderr,"WRITE: %f %f\n ", store->time_d, store->sensordepth);
 
 			/* write LIDAR scan record header */
 			write_len = (size_t)index;
