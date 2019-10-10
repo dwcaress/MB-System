@@ -299,7 +299,7 @@ int get_corrtable(int verbose, double time_d, int ncorrtable, int ncorrangle, st
 }
 /*--------------------------------------------------------------------*/
 int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double angle, double *corr, int *error) {
-	int iangle, found;
+	int iangle;
 	int ifirst, ilast;
 
 	if (verbose >= 2) {
@@ -315,15 +315,15 @@ int get_anglecorr(int verbose, int nangle, double *angles, double *corrs, double
 	}
 
 	/* search for the specified angle */
-	found = MB_NO;
+	bool found = false;
 	for (int i = 0; i < nangle - 1; i++)
 		if (angle >= angles[i] && angle <= angles[i + 1]) {
-			found = MB_YES;
+			found = true;
 			iangle = i;
 		}
 
 	/* interpolate the correction */
-	if (found == MB_YES) {
+	if (found) {
 		*corr = corrs[iangle] +
 		        (corrs[iangle + 1] - corrs[iangle]) * (angle - angles[iangle]) / (angles[iangle + 1] - angles[iangle]);
 	}

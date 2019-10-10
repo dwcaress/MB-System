@@ -572,7 +572,6 @@ int mbmosaic_get_beampriorities(int verbose, int priority_mode, int n_priority_a
 /*--------------------------------------------------------------------*/
 int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double *bath, double *bathacrosstrack, double *slopes,
                             int *error) {
-	int found_pre, found_post;
 	int i0, i1;
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBmosaic function <%s> called\n", __func__);
@@ -589,41 +588,41 @@ int mbmosaic_get_beamslopes(int verbose, int beams_bath, char *beamflag, double 
 	for (int i = 0; i < beams_bath; i++) {
 		if (mb_beam_ok(beamflag[i])) {
 			/* find previous good beam */
-			found_pre = MB_NO;
+			bool found_pre = false;
 			if (i > 0) {
 				for (int j = i - 1; j >= 0 && found_pre == MB_NO; j--) {
 					if (mb_beam_ok(beamflag[j])) {
-						found_pre = MB_YES;
+						found_pre = true;
 						i0 = j;
 					}
 				}
 			}
 
 			/* find post good beam */
-			found_post = MB_NO;
+			bool found_post = false;
 			if (i < beams_bath - 1) {
 				for (int j = i + 1; j < beams_bath && found_post == MB_NO; j++) {
 					if (mb_beam_ok(beamflag[j])) {
-						found_post = MB_YES;
+						found_post = true;
 						i1 = j;
 					}
 				}
 			}
 
 			/* calculate slope */
-			if (found_pre == MB_YES && found_post == MB_YES) {
+			if (found_pre && found_post) {
 				if (bathacrosstrack[i1] != bathacrosstrack[i0])
 					slopes[i] = -(bath[i1] - bath[i0]) / (bathacrosstrack[i1] - bathacrosstrack[i0]);
 				else
 					slopes[i] = 0.0;
 			}
-			else if (found_pre == MB_YES) {
+			else if (found_pre) {
 				if (bathacrosstrack[i] != bathacrosstrack[i0])
 					slopes[i] = -(bath[i] - bath[i0]) / (bathacrosstrack[i] - bathacrosstrack[i0]);
 				else
 					slopes[i] = 0.0;
 			}
-			else if (found_post == MB_YES) {
+			else if (found_post) {
 				if (bathacrosstrack[i1] != bathacrosstrack[i])
 					slopes[i] = -(bath[i1] - bath[i]) / (bathacrosstrack[i1] - bathacrosstrack[i]);
 				else
@@ -658,7 +657,6 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
                                 double *table_angle, double *table_xtrack, double *table_ltrack, double *table_altitude,
                                 double *table_range, int *error) {
 	double dangle, angle0, angle1, factor;
-	int found, foundnext;
 	int jj, jstart, jnext;
 
 	if (verbose >= 2) {
@@ -688,23 +686,23 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 		table_range[i] = 0.0;
 
 		/* estimate the table values for this angle from the bathymetry */
-		found = MB_NO;
-		for (int j = jstart; j < beams_bath - 1 && found == MB_NO; j++) {
+		bool found = false;
+		for (int j = jstart; j < beams_bath - 1 && !found; j++) {
 			/* check if this beam is valid */
 			if (mb_beam_ok(beamflag[j])) {
 				/* look for the next valid beam */
-				foundnext = MB_NO;
+				bool foundnext = false;
 				jnext = j;
-				for (jj = j + 1; jj < beams_bath && foundnext == MB_NO; jj++) {
+				for (jj = j + 1; jj < beams_bath && !foundnext; jj++) {
 					if (mb_beam_ok(beamflag[jj])) {
 						jnext = jj;
-						foundnext = MB_YES;
+						foundnext = true;
 					}
 				}
 
 				/* get the angle for beam j */
 				angle0 = RTD * atan(bathacrosstrack[j] / (bath[j] - sonardepth));
-				if (foundnext == MB_YES)
+				if (foundnext)
 					angle1 = RTD * atan(bathacrosstrack[jnext] / (bath[jnext] - sonardepth));
 
 				/* deal with angle to port of swath edge */
@@ -714,43 +712,43 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 					table_ltrack[i] = bathalongtrack[j];
 					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
 					                      table_ltrack[i] * table_ltrack[i]);
-					found = MB_YES;
+					found = true;
 					jstart = j;
 				}
 
 				/* deal with angle to starboard of swath edge */
-				else if (foundnext == MB_NO) {
+				else if (!foundnext) {
 					table_altitude[i] = bath[j] - sonardepth;
 					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
 					table_ltrack[i] = bathalongtrack[j];
 					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
 					                      table_ltrack[i] * table_ltrack[i]);
-					found = MB_YES;
+					found = true;
 					jstart = j;
 				}
 
 				/* deal with angle to starboard of swath edge */
-				else if (foundnext == MB_YES && table_angle[i] > angle1) {
+				else if (foundnext && table_angle[i] > angle1) {
 					if (jnext == beams_bath - 1) {
 						table_altitude[i] = bath[j] - sonardepth;
 						table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
 						table_ltrack[i] = bathalongtrack[j];
 						table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
 						                      table_ltrack[i] * table_ltrack[i]);
-						found = MB_YES;
+						found = true;
 					}
 					jstart = j;
 				}
 
 				/* deal with angle between the two valid beams */
-				else if (foundnext == MB_YES && table_angle[i] >= angle0 && table_angle[i] <= angle1) {
+				else if (foundnext && table_angle[i] >= angle0 && table_angle[i] <= angle1) {
 					factor = (table_angle[i] - angle0) / (angle1 - angle0);
 					table_altitude[i] = (bath[j] - sonardepth) + factor * (bath[jnext] - bath[j]);
 					table_xtrack[i] = table_altitude[i] * tan(DTR * table_angle[i]);
 					table_ltrack[i] = bathalongtrack[j] + factor * (bathalongtrack[jnext] - bathalongtrack[j]);
 					table_range[i] = sqrt(table_altitude[i] * table_altitude[i] + table_xtrack[i] * table_xtrack[i] +
 					                      table_ltrack[i] * table_ltrack[i]);
-					found = MB_YES;
+					found = true;
 					jstart = j;
 				}
 
@@ -759,7 +757,7 @@ int mbmosaic_bath_getangletable(int verbose, double sonardepth, int beams_bath, 
 		}
 
 		/* set error if necessary */
-		if (found == MB_NO) {
+		if (!found) {
 			status = MB_FAILURE;
 			*error = MB_ERROR_NOT_ENOUGH_DATA;
 		}
@@ -828,7 +826,6 @@ int mbmosaic_flatbottom_getangletable(int verbose, double altitude, double angle
 int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *table_xtrack, double *table_ltrack,
                           double *table_altitude, double *table_range, int pixels_ss, double *ss, double *ssacrosstrack,
                           double *gangles, int *error) {
-	int found;
 	int jstart;
 
 	if (verbose >= 2) {
@@ -851,21 +848,21 @@ int mbmosaic_get_ssangles(int verbose, int nangle, double *table_angle, double *
 	for (int i = 0; i < pixels_ss; i++) {
 		/* get angles only for valid sidescan */
 		if (ss[i] > MB_SIDESCAN_NULL) {
-			found = MB_NO;
-			for (int j = jstart; j < nangle - 1 && found == MB_NO; j++) {
+			bool found = false;
+			for (int j = jstart; j < nangle - 1 && !found; j++) {
 				if (ssacrosstrack[i] < table_xtrack[j]) {
 					gangles[i] = table_angle[j];
-					found = MB_YES;
+					found = true;
 				}
 				else if (ssacrosstrack[i] >= table_xtrack[j] && ssacrosstrack[i] <= table_xtrack[j + 1]) {
 					gangles[i] = table_angle[j] + (table_angle[j + 1] - table_angle[j]) * (ssacrosstrack[i] - table_xtrack[j]) /
 					                                  (table_xtrack[j + 1] - table_xtrack[j]);
-					found = MB_YES;
+					found = true;
 					jstart = j;
 				}
 				else if (ssacrosstrack[i] >= table_xtrack[j + 1] && j == nangle - 2) {
 					gangles[i] = table_angle[j + 1];
-					found = MB_YES;
+					found = true;
 				}
 			}
 		}

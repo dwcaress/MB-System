@@ -556,12 +556,10 @@ int main(int argc, char **argv) {
 	int read_data;
 	int testformat;
 	char fileroot[MB_PATH_MAXLINE];
-	int found;
 	int reson_lastread;
 	int sslo_lastread;
 	double sslo_last_time_d;
 	int sslo_last_ping;
-	int foundstart, foundend;
 	int start, end;
 	int nscan, startdata;
 	int ins_time_d_index = -1;
@@ -3922,28 +3920,28 @@ int main(int argc, char **argv) {
 	else if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
 		for (int i = 0; i < nbatht; i++) {
 			if (batht_good_offset[i] == MB_NO) {
-				foundstart = MB_NO;
-				foundend = MB_NO;
-				for (int j = i - 1; j >= 0 && foundstart == MB_NO; j--) {
+				bool foundstart = false;
+				bool foundend = false;
+				for (int j = i - 1; j >= 0 && !foundstart; j--) {
 					if (batht_good_offset[j] == MB_YES) {
-						foundstart = MB_YES;
+						foundstart = true;
 						start = j;
 					}
 				}
-				for (int j = i + 1; j < nbatht && foundend == MB_NO; j++) {
+				for (int j = i + 1; j < nbatht && !foundend; j++) {
 					if (batht_good_offset[j] == MB_YES) {
-						foundend = MB_YES;
+						foundend = true;
 						end = j;
 					}
 				}
-				if (foundstart == MB_YES && foundend == MB_YES) {
+				if (foundstart && foundend) {
 					batht_time_offset[i] = batht_time_offset[start] + (batht_time_offset[end] - batht_time_offset[start]) *
 					                                                      ((double)(i - start)) / ((double)(end - start));
 				}
-				else if (foundstart == MB_YES) {
+				else if (foundstart) {
 					batht_time_offset[i] = batht_time_offset[start];
 				}
-				else if (foundend == MB_YES) {
+				else if (foundend) {
 					batht_time_offset[i] = batht_time_offset[end];
 				}
 			}
@@ -3954,11 +3952,11 @@ int main(int argc, char **argv) {
 	if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
 		for (int i = 0; i < nedget; i++) {
 			if (edget_good_offset[i] == MB_NO) {
-				foundstart = MB_NO;
-				foundend = MB_NO;
-				for (int j = i - 1; j >= 0 && foundstart == MB_NO; j--) {
+				bool foundstart = false;
+				bool foundend = false;
+				for (int j = i - 1; j >= 0 && !foundstart; j--) {
 					if (edget_good_offset[j] == MB_YES) {
-						foundstart = MB_YES;
+						foundstart = true;
 						start = j;
 					}
 				}
@@ -3968,14 +3966,14 @@ int main(int argc, char **argv) {
 						end = j;
 					}
 				}
-				if (foundstart == MB_YES && foundend == MB_YES) {
+				if (foundstart && foundend) {
 					edget_time_offset[i] = edget_time_offset[start] + (edget_time_offset[end] - edget_time_offset[start]) *
 					                                                      ((double)(i - start)) / ((double)(end - start));
 				}
-				else if (foundstart == MB_YES) {
+				else if (foundstart) {
 					edget_time_offset[i] = edget_time_offset[start];
 				}
-				else if (foundend == MB_YES) {
+				else if (foundend) {
 					edget_time_offset[i] = edget_time_offset[end];
 				}
 			}
@@ -4337,10 +4335,11 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "Checking for existing bathymetry edits...\n");
 
 				/* check for existing esf file */
+				int found;  // TOOD(schwehr): Convert mb_esf_check found to bool.
 				esf_status = mb_esf_check(verbose, ofile, esffile, &found, &error);
 
 				/* if esf file found load it */
-				if (esf_status == MB_SUCCESS && found == MB_YES) {
+				if (esf_status == MB_SUCCESS && found) {
 					esf_status = mb_esf_load(verbose, program_name, ofile, MB_YES, MB_YES, esffile, &esf, &error);
 					if (status == MB_SUCCESS && esf.esffp != NULL)
 						esffile_open = MB_YES;
@@ -4426,20 +4425,20 @@ int main(int argc, char **argv) {
 						 */
 						bathymetry = &(istore->bathymetry);
 						header = &(bathymetry->header);
-						found = MB_NO;
-						for (int i = iping; i < nbatht && found == MB_NO; i++) {
+						bool found = false;
+						for (int i = iping; i < nbatht && !found; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
-								found = MB_YES;
+								found = true;
 							}
 						}
-						for (int i = 0; i < nbatht && found == MB_NO; i++) {
+						for (int i = 0; i < nbatht && !found; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
-								found = MB_YES;
+								found = true;
 							}
 						}
-						if (found == MB_YES && batht_good_offset[iping] == MB_YES) {
+						if (found && batht_good_offset[iping] == MB_YES) {
 							fprintf(stderr,
 							        "*** Timestamp adjusted from "
 							        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d to ",
@@ -4631,10 +4630,10 @@ int main(int argc, char **argv) {
 						if (status == MB_SUCCESS) {
 							/* fix time stamp */
 							if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
-								found = MB_NO;
-								for (int j = 0; j < nbatht && found == MB_NO; j++) {
+								bool found = false;
+								for (int j = 0; j < nbatht && !found; j++) {
 									if (bathymetry->ping_number == batht_ping[j]) {
-										found = MB_YES;
+										found = true;
 										time_d = batht_time_d_new[j];
 										mb_get_date(verbose, time_d, time_i);
 										mb_get_jtime(verbose, time_i, time_j);
@@ -6790,10 +6789,10 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						found = MB_NO;
-						for (int j = 0; j < nedget && found == MB_NO; j++) {
+						bool found = false;
+						for (int j = 0; j < nedget && !found; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
-								found = MB_YES;
+								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
 								mb_get_date(verbose, time_d, time_i);
 								mb_get_jtime(verbose, time_i, time_j);
@@ -6853,10 +6852,10 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						found = MB_NO;
-						for (int j = 0; j < nedget && found == MB_NO; j++) {
+						bool found = false;
+						for (int j = 0; j < nedget && !found; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
-								found = MB_YES;
+								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
 								mb_get_date(verbose, time_d, time_i);
 								mb_get_jtime(verbose, time_i, time_j);
@@ -6922,10 +6921,10 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						found = MB_NO;
-						for (int j = 0; j < nedget && found == MB_NO; j++) {
+						bool found = false;
+						for (int j = 0; j < nedget && !found; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
-								found = MB_YES;
+								found = true;
 								time_d = istore->time_d + edget_time_offset[j];
 								mb_get_date(verbose, time_d, time_i);
 								mb_get_jtime(verbose, time_i, time_j);

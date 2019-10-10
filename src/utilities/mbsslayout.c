@@ -588,7 +588,7 @@ int main(int argc, char **argv) {
 	int portchannelpick, stbdchannelpick;
 	int kangle, kstart;
 	double xtrack, ltrack, rr, rangemin, factor, fraction;
-	int done, found;
+	int done;
 	int istart;
 	int jport, jstbd;
 	int previous, interpable;
@@ -2490,30 +2490,30 @@ int main(int argc, char **argv) {
 					/* look up position(s) for this range */
 					done = MB_NO;
 					for (kangle = kstart; kangle > 0 && done == MB_NO; kangle--) {
-						found = MB_NO;
+						bool found = false;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
 							ltrack = table_ltrack[kstart];
 							done = MB_YES;
-							found = MB_YES;
+							found = true;
 						}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle - 1]) {
 							factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
 							xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle - 1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle - 1] - table_ltrack[kangle]);
-							found = MB_YES;
+							found = true;
 							done = MB_YES;
 						}
 						else if (rr < table_range[kangle] && rr >= table_range[kangle - 1]) {
 							factor = (rr - table_range[kangle]) / (table_range[kangle - 1] - table_range[kangle]);
 							xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle - 1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle - 1] - table_ltrack[kangle]);
-							found = MB_YES;
+							found = true;
 							done = MB_YES;
 						}
 
 						/* bin the value and position */
-						if (found == MB_YES) {
+						if (found) {
 							const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
 							if (j >= 0 && j < opixels_ss) {
 								oss[j] += raw_samples_port[i];
@@ -2543,30 +2543,30 @@ int main(int argc, char **argv) {
 					/* look up position for this range */
 					done = MB_NO;
 					for (kangle = kstart; kangle < nangle - 1 && done == MB_NO; kangle++) {
-						found = MB_NO;
+						bool found = false;
 						if (rr <= table_range[kstart]) {
 							xtrack = table_xtrack[kstart];
 							ltrack = table_ltrack[kstart];
 							done = MB_YES;
-							found = MB_YES;
+							found = true;
 						}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle + 1]) {
 							factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
 							xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle + 1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle + 1] - table_ltrack[kangle]);
-							found = MB_YES;
+							found = true;
 							done = MB_YES;
 						}
 						else if (rr < table_range[kangle] && rr >= table_range[kangle + 1]) {
 							factor = (rr - table_range[kangle]) / (table_range[kangle + 1] - table_range[kangle]);
 							xtrack = table_xtrack[kangle] + factor * (table_xtrack[kangle + 1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] + factor * (table_ltrack[kangle + 1] - table_ltrack[kangle]);
-							found = MB_YES;
+							found = true;
 							done = MB_YES;
 						}
 
 						/* bin the value and position */
-						if (found == MB_YES) {
+						if (found) {
 							const int j = opixels_ss / 2 + (int)(xtrack / pixel_width);
 							if (j >= 0 && j < opixels_ss) {
 								oss[j] += raw_samples_stbd[i];
