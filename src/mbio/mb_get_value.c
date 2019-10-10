@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
-  *
+ *
  *    Copyright (c) 1993-2019 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -18,11 +18,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 15, 1993
- *
- *
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,7 +33,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-char tmp[MB_GET_VALUE_MAXLINE];
+static char tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/
 /*	function mb_get_double reads a double value from a string.
@@ -61,10 +60,10 @@ int mb_get_binary_short(int swapped, void *buffer, void *ptr) {
 	short *value = (short *)ptr;
 	memcpy(value, buffer, sizeof(short));
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		*value = mb_swap_short(*((short *)value));
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		*value = mb_swap_short(*value);
 #endif
 	return (0);
@@ -77,10 +76,10 @@ int mb_get_binary_int(int swapped, void *buffer, void *ptr) {
 	int *value = (int *)ptr;
 	memcpy(value, buffer, sizeof(int));
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		*value = mb_swap_int(*value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		*value = mb_swap_int(*value);
 #endif
 	return (0);
@@ -93,10 +92,10 @@ int mb_get_binary_float(int swapped, void *buffer, void *ptr) {
 	float *value = (float *)ptr;
 	memcpy(value, buffer, sizeof(float));
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		mb_swap_float(value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		mb_swap_float(value);
 #endif
 	return (0);
@@ -109,10 +108,10 @@ int mb_get_binary_double(int swapped, void *buffer, void *ptr) {
 	double *value = (double *)ptr;
 	memcpy(value, buffer, sizeof(double));
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		mb_swap_double(value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		mb_swap_double(value);
 #endif
 	return (0);
@@ -125,10 +124,10 @@ int mb_get_binary_long(int swapped, void *buffer, void *ptr) {
 	mb_s_long *value = (mb_s_long *)ptr;
 	memcpy(value, buffer, sizeof(mb_s_long));
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		mb_swap_long(value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		mb_swap_long(value);
 #endif
 	return (0);
@@ -139,10 +138,10 @@ int mb_get_binary_long(int swapped, void *buffer, void *ptr) {
  */
 int mb_put_binary_short(int swapped, short value, void *buffer) {
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		value = mb_swap_short(value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		value = mb_swap_short(value);
 #endif
 	memcpy(buffer, &value, sizeof(short));
@@ -154,10 +153,10 @@ int mb_put_binary_short(int swapped, short value, void *buffer) {
  */
 int mb_put_binary_int(int swapped, int value, void *buffer) {
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		value = mb_swap_int(value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		value = mb_swap_int(value);
 #endif
 	memcpy(buffer, &value, sizeof(int));
@@ -169,10 +168,10 @@ int mb_put_binary_int(int swapped, int value, void *buffer) {
  */
 int mb_put_binary_float(int swapped, float value, void *buffer) {
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		mb_swap_float(&value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		mb_swap_float(&value);
 #endif
 	memcpy(buffer, &value, sizeof(float));
@@ -184,10 +183,10 @@ int mb_put_binary_float(int swapped, float value, void *buffer) {
  */
 int mb_put_binary_double(int swapped, double value, void *buffer) {
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		mb_swap_double(&value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		mb_swap_double(&value);
 #endif
 	memcpy(buffer, &value, sizeof(double));
@@ -199,10 +198,10 @@ int mb_put_binary_double(int swapped, double value, void *buffer) {
  */
 int mb_put_binary_long(int swapped, mb_s_long value, void *buffer) {
 #ifdef BYTESWAPPED
-	if (swapped == MB_NO)
+	if (!swapped)
 		mb_swap_long(&value);
 #else
-	if (swapped == MB_YES)
+	if (swapped)
 		mb_swap_long(&value);
 #endif
 	memcpy(buffer, &value, sizeof(mb_s_long));
