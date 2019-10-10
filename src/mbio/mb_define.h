@@ -22,6 +22,8 @@
 #ifndef MB_DEFINE_H_
 #define MB_DEFINE_H_
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -527,16 +529,18 @@ int mb_apply_time_filter(int verbose, int data_num, double *data_time_d, double 
 int mb_swap_check(void);
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
-int mb_get_binary_short(int, void *, void *);
-int mb_get_binary_int(int, void *, void *);
-int mb_get_binary_float(int, void *, void *);
-int mb_get_binary_double(int, void *, void *);
-int mb_get_binary_long(int, void *, void *);
-int mb_put_binary_short(int, short, void *);
-int mb_put_binary_int(int, int, void *);
-int mb_put_binary_float(int, float, void *);
-int mb_put_binary_double(int, double, void *);
-int mb_put_binary_long(int, mb_s_long, void *);
+
+int mb_get_binary_short(bool swapped, void *buffer, const void *ptr);
+int mb_get_binary_int(bool swapped, void *buffer, const void *ptr);
+int mb_get_binary_float(bool swapped, void *buffer, const void *ptr);
+int mb_get_binary_double(bool swapped, void *buffer, const void *ptr);
+int mb_get_binary_long(bool swapped, void *buffer, const void *ptr);
+int mb_put_binary_short(bool swapped, short value, void *buffer);
+int mb_put_binary_int(bool swapped, int value, void *buffer);
+int mb_put_binary_float(bool swapped, float value, void *buffer);
+int mb_put_binary_double(bool swapped, double value, void *buffer);
+int mb_put_binary_long(bool swapped, mb_s_long value, void *buffer);
+
 int mb_get_bounds(char *text, double *bounds);
 double mb_ddmmss_to_degree(const char *text);
 int mb_takeoff_to_rollpitch(int verbose, double theta, double phi, double *pitch, double *roll, int *error);
