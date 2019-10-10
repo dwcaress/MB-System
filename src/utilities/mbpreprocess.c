@@ -2844,11 +2844,11 @@ int main(int argc, char **argv) {
           /* output synchronous attitude */
           if (kind == MB_DATA_DATA) {
             index = 0;
-            mb_put_binary_double(MB_YES, time_d, &buffer[index]);
+            mb_put_binary_double(true, time_d, &buffer[index]);
             index += 8;
-            mb_put_binary_float(MB_YES, (float)roll, &buffer[index]);
+            mb_put_binary_float(true, (float)roll, &buffer[index]);
             index += 4;
-            mb_put_binary_float(MB_YES, (float)pitch, &buffer[index]);
+            mb_put_binary_float(true, (float)pitch, &buffer[index]);
             index += 4;
             fwrite(buffer, (size_t)index, 1, afp);
           }
@@ -3005,9 +3005,9 @@ int main(int argc, char **argv) {
               fprintf(stderr, "Generating bah file for %s using samples %d:%d out of %d\n", ofile, istart, iend, n_heading);
             for (int i = istart; i < iend; i++) {
               index = 0;
-              mb_put_binary_double(MB_YES, heading_time_d[i], &buffer[index]);
+              mb_put_binary_double(true, heading_time_d[i], &buffer[index]);
               index += 8;
-              mb_put_binary_float(MB_YES, (float)heading_heading[i], &buffer[index]);
+              mb_put_binary_float(true, (float)heading_heading[i], &buffer[index]);
               index += 4;
               fwrite(buffer, (size_t)index, 1, afp);
             }
@@ -3042,9 +3042,9 @@ int main(int argc, char **argv) {
                 n_sensordepth);
             for (int i = istart; i < iend; i++) {
               index = 0;
-              mb_put_binary_double(MB_YES, sensordepth_time_d[i], &buffer[index]);
+              mb_put_binary_double(true, sensordepth_time_d[i], &buffer[index]);
               index += 8;
-              mb_put_binary_float(MB_YES, (float)sensordepth_sensordepth[i], &buffer[index]);
+              mb_put_binary_float(true, (float)sensordepth_sensordepth[i], &buffer[index]);
               index += 4;
               fwrite(buffer, (size_t)index, 1, afp);
             }
@@ -3079,11 +3079,11 @@ int main(int argc, char **argv) {
                 n_attitude);
             for (int i = istart; i < iend; i++) {
               index = 0;
-              mb_put_binary_double(MB_YES, attitude_time_d[i], &buffer[index]);
+              mb_put_binary_double(true, attitude_time_d[i], &buffer[index]);
               index += 8;
-              mb_put_binary_float(MB_YES, (float)attitude_roll[i], &buffer[index]);
+              mb_put_binary_float(true, (float)attitude_roll[i], &buffer[index]);
               index += 4;
-              mb_put_binary_float(MB_YES, (float)attitude_pitch[i], &buffer[index]);
+              mb_put_binary_float(true, (float)attitude_pitch[i], &buffer[index]);
               index += 4;
               fwrite(buffer, (size_t)index, 1, afp);
             }
