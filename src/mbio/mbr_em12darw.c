@@ -280,7 +280,7 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	/* get data type */
 	kind = MB_DATA_NONE;
 	if (status == MB_SUCCESS) {
-		mb_get_binary_short(MB_NO, &line[0], &(data->func));
+		mb_get_binary_short(false, &line[0], &(data->func));
 	}
 
 	/* deal with comment */
@@ -295,66 +295,66 @@ int mbr_rt_em12darw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		kind = MB_DATA_DATA;
 
 		index = 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->year));
+		mb_get_binary_short(false, &line[index], &(data->year));
 		index += 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->jday));
+		mb_get_binary_short(false, &line[index], &(data->jday));
 		index += 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->minute));
+		mb_get_binary_short(false, &line[index], &(data->minute));
 		index += 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->secs));
+		mb_get_binary_short(false, &line[index], &(data->secs));
 		index += 8;
-		mb_get_binary_double(MB_NO, &line[index], &(data->latitude));
+		mb_get_binary_double(false, &line[index], &(data->latitude));
 		index += 8;
-		mb_get_binary_double(MB_NO, &line[index], &(data->longitude));
+		mb_get_binary_double(false, &line[index], &(data->longitude));
 		index += 8;
-		mb_get_binary_short(MB_NO, &line[index], &(data->corflag));
+		mb_get_binary_short(false, &line[index], &(data->corflag));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->utm_merd));
+		mb_get_binary_float(false, &line[index], &(data->utm_merd));
 		index += 4;
-		mb_get_binary_short(MB_NO, &line[index], &(data->utm_zone));
+		mb_get_binary_short(false, &line[index], &(data->utm_zone));
 		index += 2;
-		mb_get_binary_short(MB_NO, &line[index], &(data->posq));
+		mb_get_binary_short(false, &line[index], &(data->posq));
 		index += 2;
-		mb_get_binary_int(MB_NO, &line[index], &(data->pingno));
+		mb_get_binary_int(false, &line[index], &(data->pingno));
 		index += 4;
-		mb_get_binary_short(MB_NO, &line[index], &(data->mode));
+		mb_get_binary_short(false, &line[index], &(data->mode));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->depthl));
+		mb_get_binary_float(false, &line[index], &(data->depthl));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->speed));
+		mb_get_binary_float(false, &line[index], &(data->speed));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->gyro));
+		mb_get_binary_float(false, &line[index], &(data->gyro));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->roll));
+		mb_get_binary_float(false, &line[index], &(data->roll));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->pitch));
+		mb_get_binary_float(false, &line[index], &(data->pitch));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->heave));
+		mb_get_binary_float(false, &line[index], &(data->heave));
 		index += 4;
-		mb_get_binary_float(MB_NO, &line[index], &(data->sndval));
+		mb_get_binary_float(false, &line[index], &(data->sndval));
 		index += 4;
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->depth[i]));
+			mb_get_binary_short(false, &line[index], &(data->depth[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->distacr[i]));
+			mb_get_binary_short(false, &line[index], &(data->distacr[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->distalo[i]));
+			mb_get_binary_short(false, &line[index], &(data->distalo[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->range[i]));
+			mb_get_binary_short(false, &line[index], &(data->range[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->refl[i]));
+			mb_get_binary_short(false, &line[index], &(data->refl[i]));
 			index += 2;
 		}
 		for (int i = 0; i < MBF_EM12DARW_BEAMS; i++) {
-			mb_get_binary_short(MB_NO, &line[index], &(data->beamq[i]));
+			mb_get_binary_short(false, &line[index], &(data->beamq[i]));
 			index += 2;
 		}
 

@@ -627,12 +627,12 @@ int mbr_emoldraw_rd_svp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		mb_get_int(&(store->svp_minute), line + 8, 2);
 		mb_get_int(&(store->svp_second), line + 10, 2);
 		mb_get_int(&(store->svp_centisecond), line + 12, 2);
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(false, &line[14], &short_val);
 		store->svp_num = short_val;
 		for (int i = 0; i < store->svp_num; i++) {
-			mb_get_binary_short(MB_YES, &line[16 + 4 * i], &short_val);
+			mb_get_binary_short(false, &line[16 + 4 * i], &short_val);
 			store->svp_depth[i] = short_val;
-			mb_get_binary_short(MB_YES, &line[18 + 4 * i], &short_val);
+			mb_get_binary_short(false, &line[18 + 4 * i], &short_val);
 			store->svp_vel[i] = short_val;
 		}
 	}
@@ -705,32 +705,32 @@ int mbr_emoldraw_rd_em1000bath(int verbose, FILE *mbfp, struct mbsys_simrad_stru
 		mb_get_int(&(store->centisecond), line + 12, 2);
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(false, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
 		ping->bath_mode = (int)line[16];
 		ping->bath_quality = (int)line[17];
-		mb_get_binary_short(MB_YES, &line[18], &short_val);
+		mb_get_binary_short(false, &line[18], &short_val);
 		ping->keel_depth = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[20], &short_val);
+		mb_get_binary_short(false, &line[20], &short_val);
 		ping->heading = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[22], &short_val);
+		mb_get_binary_short(false, &line[22], &short_val);
 		ping->roll = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[24], &short_val);
+		mb_get_binary_short(false, &line[24], &short_val);
 		ping->pitch = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[26], &short_val);
+		mb_get_binary_short(false, &line[26], &short_val);
 		ping->xducer_pitch = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[28], &short_val);
+		mb_get_binary_short(false, &line[28], &short_val);
 		ping->ping_heave = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[30], &short_val);
+		mb_get_binary_short(false, &line[30], &short_val);
 		ping->sound_vel = (int)short_val;
 		for (int i = 0; i < MBSYS_EM1000_MAXBEAMS; i++) {
 			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[32 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
-			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);
+			mb_get_binary_short(false, &short_ptr[0], (short *)&ping->bath[i]);
+			mb_get_binary_short(false, &short_ptr[1], &ping->bath_acrosstrack[i]);
+			mb_get_binary_short(false, &short_ptr[2], &ping->bath_alongtrack[i]);
+			mb_get_binary_short(false, &short_ptr[3], &ping->tt[i]);
 			ping->amp[i] = (mb_s_char)beamarray[8];
 			ping->quality[i] = (mb_u_char)beamarray[9];
 			ping->heave[i] = (mb_s_char)beamarray[10];
@@ -835,32 +835,32 @@ int mbr_emoldraw_rd_em12bath(int verbose, FILE *mbfp, struct mbsys_simrad_struct
 		ping->swath_id = swath_id;
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(false, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
 		ping->beams_bath = MBSYS_EM12_MAXBEAMS;
 		ping->bath_res = (int)line[16];
 		ping->bath_quality = (int)line[17];
-		mb_get_binary_short(MB_YES, &line[18], &short_val);
+		mb_get_binary_short(false, &line[18], &short_val);
 		ping->keel_depth = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[20], &short_val);
+		mb_get_binary_short(false, &line[20], &short_val);
 		ping->heading = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[22], &short_val);
+		mb_get_binary_short(false, &line[22], &short_val);
 		ping->roll = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[24], &short_val);
+		mb_get_binary_short(false, &line[24], &short_val);
 		ping->pitch = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[26], &short_val);
+		mb_get_binary_short(false, &line[26], &short_val);
 		ping->ping_heave = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[28], &short_val);
+		mb_get_binary_short(false, &line[28], &short_val);
 		ping->sound_vel = (int)short_val;
 		ping->bath_mode = (int)line[30];
 		for (int i = 0; i < ping->beams_bath; i++) {
 			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[32 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
-			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);
+			mb_get_binary_short(false, &short_ptr[0], (short *)&ping->bath[i]);
+			mb_get_binary_short(false, &short_ptr[1], &ping->bath_acrosstrack[i]);
+			mb_get_binary_short(false, &short_ptr[2], &ping->bath_alongtrack[i]);
+			mb_get_binary_short(false, &short_ptr[3], &ping->tt[i]);
 			ping->amp[i] = (mb_s_char)beamarray[8];
 			ping->quality[i] = (mb_u_char)beamarray[9];
 			ping->heave[i] = (mb_s_char)beamarray[10];
@@ -949,7 +949,7 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		mb_get_int(&(store->centisecond), line + 12, 2);
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(false, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
 		ping->bath_mode = (int)line[16];
 		ping->bath_res = 0;
@@ -961,17 +961,17 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 		ping->power_level = (int)line[21];
 		ping->tx_status = (int)line[22];
 		ping->rx_status = (int)line[23];
-		mb_get_binary_short(MB_YES, &line[24], &short_val);
+		mb_get_binary_short(false, &line[24], &short_val);
 		ping->keel_depth = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[26], &short_val);
+		mb_get_binary_short(false, &line[26], &short_val);
 		ping->heading = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[28], &short_val);
+		mb_get_binary_short(false, &line[28], &short_val);
 		ping->roll = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[30], &short_val);
+		mb_get_binary_short(false, &line[30], &short_val);
 		ping->pitch = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[32], &short_val);
+		mb_get_binary_short(false, &line[32], &short_val);
 		ping->ping_heave = (int)short_val;
-		mb_get_binary_short(MB_YES, &line[34], &short_val);
+		mb_get_binary_short(false, &line[34], &short_val);
 		ping->sound_vel = (int)short_val;
 		ping->along_res = (int)line[36];
 		ping->across_res = (int)line[37];
@@ -981,10 +981,10 @@ int mbr_emoldraw_rd_em121bath(int verbose, FILE *mbfp, struct mbsys_simrad_struc
 			for (int j = 0; j < 11; j++)
 				beamarray[j] = line[44 + 11 * i + j];
 			short_ptr = (short int *)beamarray;
-			mb_get_binary_short(MB_YES, &short_ptr[0], (short *)&ping->bath[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[1], &ping->bath_acrosstrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[2], &ping->bath_alongtrack[i]);
-			mb_get_binary_short(MB_YES, &short_ptr[3], &ping->tt[i]);
+			mb_get_binary_short(false, &short_ptr[0], (short *)&ping->bath[i]);
+			mb_get_binary_short(false, &short_ptr[1], &ping->bath_acrosstrack[i]);
+			mb_get_binary_short(false, &short_ptr[2], &ping->bath_alongtrack[i]);
+			mb_get_binary_short(false, &short_ptr[3], &ping->tt[i]);
 			ping->amp[i] = (mb_s_char)beamarray[8];
 			ping->quality[i] = (mb_u_char)beamarray[9];
 			ping->heave[i] = (mb_s_char)beamarray[10];
@@ -1103,9 +1103,9 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		ping->swath_id = swath_id;
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(false, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
-		/*		mb_get_binary_short(MB_YES, &line[16], &short_val); ping->sound_vel = (int) short_val;*/
+		/*		mb_get_binary_short(false, &line[16], &short_val); ping->sound_vel = (int) short_val;*/
 		ping->ss_mode = (int)line[18];
 		num_datagrams = (int)line[19];
 		datagram = (int)line[20];
@@ -1122,8 +1122,8 @@ int mbr_emoldraw_rd_ss(int verbose, FILE *mbfp, struct mbsys_simrad_struct *stor
 		for (int i = 0; i < num_beams; i++) {
 			beamlist[i] = ((int)line[22 + 6 * i]) - 1;
 			ping->beam_frequency[beamlist[i]] = (short int)line[23 + 6 * i];
-			mb_get_binary_short(MB_YES, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
-			mb_get_binary_short(MB_YES, &line[26 + 6 * i], &ping->beam_center_sample[beamlist[i]]);
+			mb_get_binary_short(false, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
+			mb_get_binary_short(false, &line[26 + 6 * i], &ping->beam_center_sample[beamlist[i]]);
 			npixelsum += ping->beam_samples[beamlist[i]];
 		}
 
@@ -1266,9 +1266,9 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		ping->swath_id = swath_id;
 
 		/* get binary stuff */
-		mb_get_binary_short(MB_YES, &line[14], &short_val);
+		mb_get_binary_short(false, &line[14], &short_val);
 		ping->ping_number = (int)short_val;
-		/*		mb_get_binary_short(MB_YES, &line[16], &short_val); ping->sound_vel = (int) short_val;*/
+		/*		mb_get_binary_short(false, &line[16], &short_val); ping->sound_vel = (int) short_val;*/
 		ping->ss_mode = (int)line[18];
 		num_datagrams = (int)line[19];
 		datagram = (int)line[20];
@@ -1285,8 +1285,8 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 		for (int i = 0; i < num_beams; i++) {
 			beamlist[i] = ((int)line[22 + 6 * i]) - 1;
 			ping->beam_frequency[beamlist[i]] = (short int)line[23 + 6 * i];
-			mb_get_binary_short(MB_YES, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
-			mb_get_binary_short(MB_YES, &line[26 + 6 * i], &ping->beam_center_sample[beamlist[i]]);
+			mb_get_binary_short(false, &line[24 + 6 * i], &ping->beam_samples[beamlist[i]]);
+			mb_get_binary_short(false, &line[26 + 6 * i], &ping->beam_center_sample[beamlist[i]]);
 			npixelsum += ping->beam_samples[beamlist[i]];
 		}
 
@@ -1311,7 +1311,7 @@ int mbr_emoldraw_rd_ssp(int verbose, FILE *mbfp, struct mbsys_simrad_struct *sto
 				ping->ssraw[ping->pixels_ssraw] = (mb_s_char)line[ioffset];
 				char_ptr[0] = line[ioffset + 1];
 				char_ptr[1] = line[ioffset + 2];
-				mb_get_binary_short(MB_YES, (short *)char_ptr, &ping->ssp[ping->pixels_ssraw]);
+				mb_get_binary_short(false, (short *)char_ptr, &ping->ssp[ping->pixels_ssraw]);
 				ioffset += 3;
 				ping->pixels_ssraw++;
 			}

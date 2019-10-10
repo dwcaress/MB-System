@@ -1582,9 +1582,9 @@ int swpls_chk_header(int verbose, void *mbio_ptr, char *buffer, int *recordid, i
 
 	/* get values to check */
 	index = 0;
-	mb_get_binary_int(MB_YES, &buffer[index], recordid);
+	mb_get_binary_int(false, &buffer[index], recordid);
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], size);
+	mb_get_binary_int(false, &buffer[index], size);
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -1633,9 +1633,9 @@ int swpls_rd_sxpheader(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(header->swver));
+	mb_get_binary_int(false, &buffer[index], &(header->swver));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(header->fmtver));
+	mb_get_binary_int(false, &buffer[index], &(header->fmtver));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -1685,36 +1685,36 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 	strncpy(&buffer[index], ping->linename, SWPLS_MAX_LINENAME);
 	index += SWPLS_MAX_LINENAME;
 	ping->linename[SWPLS_MAX_LINENAME - 1] = '\0';
-	mb_get_binary_int(MB_YES, &buffer[index], &int_val);
+	mb_get_binary_int(false, &buffer[index], &int_val);
 	index += 4;
 	ping->pingnumber = (unsigned int)int_val;
 	index += 4; /* padding bytes */
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->time_d));
+	mb_get_binary_double(false, &buffer[index], &(ping->time_d));
 	index += 8;
-	mb_get_binary_int(MB_YES, &buffer[index], &(ping->notxers));
+	mb_get_binary_int(false, &buffer[index], &(ping->notxers));
 	index += 4;
 	index += 4; /* padding bytes */
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->easting));
+	mb_get_binary_double(false, &buffer[index], &(ping->easting));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->northing));
+	mb_get_binary_double(false, &buffer[index], &(ping->northing));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->roll));
+	mb_get_binary_double(false, &buffer[index], &(ping->roll));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->pitch));
+	mb_get_binary_double(false, &buffer[index], &(ping->pitch));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->heading));
+	mb_get_binary_double(false, &buffer[index], &(ping->heading));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->height));
+	mb_get_binary_double(false, &buffer[index], &(ping->height));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->tide));
+	mb_get_binary_double(false, &buffer[index], &(ping->tide));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->sos));
+	mb_get_binary_double(false, &buffer[index], &(ping->sos));
 	index += 8;
 	ping->txno = buffer[index++];
 	ping->txstat = buffer[index++];
 	ping->txpower = buffer[index++];
 	index += 1; /* padding byte */
-	mb_get_binary_short(MB_YES, &buffer[index], &(ping->analoggain));
+	mb_get_binary_short(false, &buffer[index], &(ping->analoggain));
 	index += 2;
 	ping->nostaves = buffer[index++];
 	for (int i = 0; i < SWPLS_MAX_TX_INFO; i++) {
@@ -1723,47 +1723,47 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 	index += 1; /* padding bytes */
 	ping->freq = buffer[index++];
 	index += 4; /* padding bytes */
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->frequency));
+	mb_get_binary_double(false, &buffer[index], &(ping->frequency));
 	index += 8;
-	mb_get_binary_short(MB_YES, &buffer[index], &(ping->trnstime));
+	mb_get_binary_short(false, &buffer[index], &(ping->trnstime));
 	index += 2;
-	mb_get_binary_short(MB_YES, &buffer[index], &(ping->recvtime));
+	mb_get_binary_short(false, &buffer[index], &(ping->recvtime));
 	index += 2;
 	ping->samprate = buffer[index++];
 	index += 3; /* padding bytes */
-	mb_get_binary_int(MB_YES, &buffer[index], &(ping->nosampsorig));
+	mb_get_binary_int(false, &buffer[index], &(ping->nosampsorig));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(ping->nosampsfile));
+	mb_get_binary_int(false, &buffer[index], &(ping->nosampsfile));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(ping->nosampslots));
+	mb_get_binary_int(false, &buffer[index], &(ping->nosampslots));
 	index += 4;
 	index += 4; /* padding bytes */
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_e));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_e));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_n));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_n));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_height));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_height));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_forward));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_forward));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_starboard));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_starboard));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_azimuth));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_azimuth));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_elevation));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_elevation));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_skew));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_skew));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_time));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_time));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_waterdepth));
+	mb_get_binary_double(false, &buffer[index], &(ping->txer_waterdepth));
 	index += 8;
 
 	if (pingtype == SWPLS_ID_PROCESSED_PING) {
 		ping->txer_pitch = 0.0;
 	}
 	else if (pingtype == SWPLS_ID_PROCESSED_PING2) {
-		mb_get_binary_double(MB_YES, &buffer[index], &(ping->txer_pitch));
+		mb_get_binary_double(false, &buffer[index], &(ping->txer_pitch));
 		index += 8;
 	}
 
@@ -1785,19 +1785,19 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 	/* extract the point data from the buffer into the ping struct */
 	if (status == MB_SUCCESS) {
 		for (int i = 0; i < ping->nosampsfile; i++) {
-			mb_get_binary_int(MB_YES, &buffer[index], &(ping->points[i].sampnum));
+			mb_get_binary_int(false, &buffer[index], &(ping->points[i].sampnum));
 			index += 4;
 			index += 4; /* padding bytes */
-			mb_get_binary_double(MB_YES, &buffer[index], &(ping->points[i].y));
+			mb_get_binary_double(false, &buffer[index], &(ping->points[i].y));
 			index += 8;
-			mb_get_binary_double(MB_YES, &buffer[index], &(ping->points[i].x));
+			mb_get_binary_double(false, &buffer[index], &(ping->points[i].x));
 			index += 8;
-			mb_get_binary_float(MB_YES, &buffer[index], &(ping->points[i].z));
+			mb_get_binary_float(false, &buffer[index], &(ping->points[i].z));
 			index += 4;
-			mb_get_binary_short(MB_YES, &buffer[index], &short_val);
+			mb_get_binary_short(false, &buffer[index], &short_val);
 			index += 2;
 			ping->points[i].amp = (unsigned short)short_val;
-			mb_get_binary_short(MB_YES, &buffer[index], &short_val);
+			mb_get_binary_short(false, &buffer[index], &short_val);
 			index += 2;
 			ping->points[i].procamp = (unsigned short)short_val;
 			ping->points[i].status = buffer[index++];
@@ -1808,7 +1808,7 @@ int swpls_rd_sxpping(int verbose, char *buffer, void *store_ptr, int pingtype, i
 				ping->points[i].tpu = 0.0;
 			}
 			else if (pingtype == SWPLS_ID_PROCESSED_PING2) {
-				mb_get_binary_double(MB_YES, &buffer[index], &(ping->points[i].tpu));
+				mb_get_binary_double(false, &buffer[index], &(ping->points[i].tpu));
 				index += 8;
 			}
 		}
@@ -1865,11 +1865,11 @@ int swpls_rd_projection(int verbose, char *buffer, void *store_ptr, int *error) 
 
 		/* extract the data */
 		int index = SWPLS_SIZE_BLOCKHEADER;
-		mb_get_binary_int(MB_YES, &buffer[index], &(projection->time_d));
+		mb_get_binary_int(false, &buffer[index], &(projection->time_d));
 		index += 4;
-		mb_get_binary_int(MB_YES, &buffer[index], &(projection->microsec));
+		mb_get_binary_int(false, &buffer[index], &(projection->microsec));
 		index += 4;
-		mb_get_binary_int(MB_YES, &buffer[index], &(projection->nchars));
+		mb_get_binary_int(false, &buffer[index], &(projection->nchars));
 		index += 4;
 
 		/* allocated memory to hold the message if necessary */
@@ -1935,11 +1935,11 @@ int swpls_rd_comment(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(comment->time_d));
+	mb_get_binary_int(false, &buffer[index], &(comment->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(comment->microsec));
+	mb_get_binary_int(false, &buffer[index], &(comment->microsec));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(comment->nchars));
+	mb_get_binary_int(false, &buffer[index], &(comment->nchars));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -1999,9 +1999,9 @@ int swpls_rd_sxiheader(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(header->swver));
+	mb_get_binary_int(false, &buffer[index], &(header->swver));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(header->fmtver));
+	mb_get_binary_int(false, &buffer[index], &(header->fmtver));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2047,34 +2047,34 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(ping->time_d));
+	mb_get_binary_int(false, &buffer[index], &(ping->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(ping->microsec));
+	mb_get_binary_int(false, &buffer[index], &(ping->microsec));
 	index += 4;
 	ping->channel = buffer[index];
 	index++;
-	mb_get_binary_int(MB_YES, &buffer[index], &int_val);
+	mb_get_binary_int(false, &buffer[index], &int_val);
 	index += 4;
 	ping->pingnumber = (unsigned long)int_val;
-	mb_get_binary_float(MB_YES, &buffer[index], &(ping->frequency));
+	mb_get_binary_float(false, &buffer[index], &(ping->frequency));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(ping->samp_period));
+	mb_get_binary_float(false, &buffer[index], &(ping->samp_period));
 	index += 4;
-	mb_get_binary_short(MB_YES, &buffer[index], &short_val);
+	mb_get_binary_short(false, &buffer[index], &short_val);
 	index += 2;
 	ping->nosamps = (unsigned short)short_val;
-	mb_get_binary_float(MB_YES, &buffer[index], &(ping->sos));
+	mb_get_binary_float(false, &buffer[index], &(ping->sos));
 	index += 4;
-	mb_get_binary_short(MB_YES, &buffer[index], &(ping->txpulse));
+	mb_get_binary_short(false, &buffer[index], &(ping->txpulse));
 	index += 2;
 	ping->data_options = buffer[index];
 	index++;
 	ping->ping_state = (unsigned char)buffer[index];
 	index++;
-	mb_get_binary_short(MB_YES, &buffer[index], &short_val);
+	mb_get_binary_short(false, &buffer[index], &short_val);
 	index += 2;
 	ping->max_count = (unsigned short)short_val;
-	mb_get_binary_short(MB_YES, &buffer[index], &short_val);
+	mb_get_binary_short(false, &buffer[index], &short_val);
 	index += 2;
 	ping->reserve1 = (unsigned short)short_val;
 
@@ -2108,12 +2108,12 @@ int swpls_rd_sxiping(int verbose, char *buffer, void *store_ptr, int *error) {
 	/* extract the sample data from the buffer into the ping struct */
 	if (status == MB_SUCCESS) {
 		for (int i = 0; i < ping->nosamps; i++) {
-			mb_get_binary_short(MB_YES, &buffer[index], &short_val);
+			mb_get_binary_short(false, &buffer[index], &short_val);
 			index += 2;
 			ping->sampnum[i] = (unsigned short)short_val;
-			mb_get_binary_short(MB_YES, &buffer[index], &(ping->angle[i]));
+			mb_get_binary_short(false, &buffer[index], &(ping->angle[i]));
 			index += 2;
-			mb_get_binary_short(MB_YES, &buffer[index], &short_val);
+			mb_get_binary_short(false, &buffer[index], &short_val);
 			index += 2;
 			ping->amplitude[i] = (unsigned short)short_val;
 			ping->quality[i] = (unsigned char)buffer[index];
@@ -2160,19 +2160,19 @@ int swpls_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(attitude->time_d));
+	mb_get_binary_int(false, &buffer[index], &(attitude->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(attitude->microsec));
+	mb_get_binary_int(false, &buffer[index], &(attitude->microsec));
 	index += 4;
 	attitude->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(attitude->roll));
+	mb_get_binary_float(false, &buffer[index], &(attitude->roll));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(attitude->pitch));
+	mb_get_binary_float(false, &buffer[index], &(attitude->pitch));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(attitude->heading));
+	mb_get_binary_float(false, &buffer[index], &(attitude->heading));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(attitude->height));
+	mb_get_binary_float(false, &buffer[index], &(attitude->height));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2216,15 +2216,15 @@ int swpls_rd_posll(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(posll->time_d));
+	mb_get_binary_int(false, &buffer[index], &(posll->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(posll->microsec));
+	mb_get_binary_int(false, &buffer[index], &(posll->microsec));
 	index += 4;
 	posll->channel = buffer[index];
 	index++;
-	mb_get_binary_double(MB_YES, &buffer[index], &(posll->latitude));
+	mb_get_binary_double(false, &buffer[index], &(posll->latitude));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(posll->longitude));
+	mb_get_binary_double(false, &buffer[index], &(posll->longitude));
 	index += 8;
 
 	int status = MB_SUCCESS;
@@ -2268,15 +2268,15 @@ int swpls_rd_posen(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(posen->time_d));
+	mb_get_binary_int(false, &buffer[index], &(posen->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(posen->microsec));
+	mb_get_binary_int(false, &buffer[index], &(posen->microsec));
 	index += 4;
 	posen->channel = buffer[index];
 	index++;
-	mb_get_binary_double(MB_YES, &buffer[index], &(posen->easting));
+	mb_get_binary_double(false, &buffer[index], &(posen->easting));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(posen->northing));
+	mb_get_binary_double(false, &buffer[index], &(posen->northing));
 	index += 8;
 
 	int status = MB_SUCCESS;
@@ -2320,13 +2320,13 @@ int swpls_rd_ssv(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(ssv->time_d));
+	mb_get_binary_int(false, &buffer[index], &(ssv->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(ssv->microsec));
+	mb_get_binary_int(false, &buffer[index], &(ssv->microsec));
 	index += 4;
 	ssv->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(ssv->ssv));
+	mb_get_binary_float(false, &buffer[index], &(ssv->ssv));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2370,13 +2370,13 @@ int swpls_rd_tide(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(tide->time_d));
+	mb_get_binary_int(false, &buffer[index], &(tide->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(tide->microsec));
+	mb_get_binary_int(false, &buffer[index], &(tide->microsec));
 	index += 4;
 	tide->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(tide->tide));
+	mb_get_binary_float(false, &buffer[index], &(tide->tide));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2420,13 +2420,13 @@ int swpls_rd_echosounder(int verbose, char *buffer, void *store_ptr, int *error)
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(echosounder->time_d));
+	mb_get_binary_int(false, &buffer[index], &(echosounder->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(echosounder->microsec));
+	mb_get_binary_int(false, &buffer[index], &(echosounder->microsec));
 	index += 4;
 	echosounder->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(echosounder->altitude));
+	mb_get_binary_float(false, &buffer[index], &(echosounder->altitude));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2470,15 +2470,15 @@ int swpls_rd_agds(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(agds->time_d));
+	mb_get_binary_int(false, &buffer[index], &(agds->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(agds->microsec));
+	mb_get_binary_int(false, &buffer[index], &(agds->microsec));
 	index += 4;
 	agds->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(agds->hardness));
+	mb_get_binary_float(false, &buffer[index], &(agds->hardness));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(agds->roughness));
+	mb_get_binary_float(false, &buffer[index], &(agds->roughness));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2522,19 +2522,19 @@ int swpls_rd_pos_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(pos_offset->time_d));
+	mb_get_binary_int(false, &buffer[index], &(pos_offset->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(pos_offset->microsec));
+	mb_get_binary_int(false, &buffer[index], &(pos_offset->microsec));
 	index += 4;
 	pos_offset->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(pos_offset->height));
+	mb_get_binary_float(false, &buffer[index], &(pos_offset->height));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(pos_offset->forward));
+	mb_get_binary_float(false, &buffer[index], &(pos_offset->forward));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(pos_offset->starboard));
+	mb_get_binary_float(false, &buffer[index], &(pos_offset->starboard));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(pos_offset->time));
+	mb_get_binary_float(false, &buffer[index], &(pos_offset->time));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2578,19 +2578,19 @@ int swpls_rd_imu_offset(int verbose, char *buffer, void *store_ptr, int *error) 
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(imu_offset->time_d));
+	mb_get_binary_int(false, &buffer[index], &(imu_offset->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(imu_offset->microsec));
+	mb_get_binary_int(false, &buffer[index], &(imu_offset->microsec));
 	index += 4;
 	imu_offset->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(imu_offset->height));
+	mb_get_binary_float(false, &buffer[index], &(imu_offset->height));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(imu_offset->forward));
+	mb_get_binary_float(false, &buffer[index], &(imu_offset->forward));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(imu_offset->starboard));
+	mb_get_binary_float(false, &buffer[index], &(imu_offset->starboard));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(imu_offset->time));
+	mb_get_binary_float(false, &buffer[index], &(imu_offset->time));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2634,27 +2634,27 @@ int swpls_rd_txer_offset(int verbose, char *buffer, void *store_ptr, int *error)
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(txer_offset->time_d));
+	mb_get_binary_int(false, &buffer[index], &(txer_offset->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(txer_offset->microsec));
+	mb_get_binary_int(false, &buffer[index], &(txer_offset->microsec));
 	index += 4;
 	txer_offset->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(txer_offset->height));
+	mb_get_binary_float(false, &buffer[index], &(txer_offset->height));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(txer_offset->forward));
+	mb_get_binary_float(false, &buffer[index], &(txer_offset->forward));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(txer_offset->starboard));
+	mb_get_binary_float(false, &buffer[index], &(txer_offset->starboard));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(txer_offset->azimuth));
+	mb_get_binary_float(false, &buffer[index], &(txer_offset->azimuth));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(txer_offset->elevation));
+	mb_get_binary_float(false, &buffer[index], &(txer_offset->elevation));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(txer_offset->pitch));
+	mb_get_binary_float(false, &buffer[index], &(txer_offset->pitch));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(txer_offset->skew));
+	mb_get_binary_float(false, &buffer[index], &(txer_offset->skew));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(txer_offset->time));
+	mb_get_binary_float(false, &buffer[index], &(txer_offset->time));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -2698,13 +2698,13 @@ int swpls_rd_wl_offset(int verbose, char *buffer, void *store_ptr, int *error) {
 
 	/* extract the data */
 	int index = SWPLS_SIZE_BLOCKHEADER;
-	mb_get_binary_int(MB_YES, &buffer[index], &(wl_offset->time_d));
+	mb_get_binary_int(false, &buffer[index], &(wl_offset->time_d));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(wl_offset->microsec));
+	mb_get_binary_int(false, &buffer[index], &(wl_offset->microsec));
 	index += 4;
 	wl_offset->channel = buffer[index];
 	index++;
-	mb_get_binary_float(MB_YES, &buffer[index], &(wl_offset->height));
+	mb_get_binary_float(false, &buffer[index], &(wl_offset->height));
 	index += 4;
 
 	int status = MB_SUCCESS;

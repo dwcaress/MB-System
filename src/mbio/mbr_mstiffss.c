@@ -279,7 +279,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 
 		/* now get the image file directory offset */
 		if ((status = fread(buffer, sizeof(int), 1, mb_io_ptr->mbfp)) == 1) {
-			mb_get_binary_int(MB_YES, buffer, &ifd_offset);
+			mb_get_binary_int(false, buffer, &ifd_offset);
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}
@@ -294,19 +294,19 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			status = fseek(mb_io_ptr->mbfp, (size_t)ifd_offset, SEEK_SET);
 			status = ftell(mb_io_ptr->mbfp);
 			if ((status = fread(buffer, sizeof(short), 1, mb_io_ptr->mbfp)) == 1) {
-				mb_get_binary_short(MB_YES, buffer, &nentry);
+				mb_get_binary_short(false, buffer, &nentry);
 
 				/* loop over all entries in the directory */
 				if ((status = fread(buffer, 6 * nentry * sizeof(short), 1, mb_io_ptr->mbfp)) == 1) {
 					index = 0;
 					for (int i = 0; i < nentry && status == MB_SUCCESS; i++) {
-						mb_get_binary_short(MB_YES, &(buffer[index]), &tag);
+						mb_get_binary_short(false, &(buffer[index]), &tag);
 						index += sizeof(short);
-						mb_get_binary_short(MB_YES, &(buffer[index]), &type);
+						mb_get_binary_short(false, &(buffer[index]), &type);
 						index += sizeof(short);
-						mb_get_binary_int(MB_YES, &(buffer[index]), &count);
+						mb_get_binary_int(false, &(buffer[index]), &count);
 						index += sizeof(int);
-						mb_get_binary_int(MB_YES, &(buffer[index]), &value_offset);
+						mb_get_binary_int(false, &(buffer[index]), &value_offset);
 						index += sizeof(int);
 
 						/* set values for important entries */
@@ -437,10 +437,10 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				fseek(mb_io_ptr->mbfp, timecorr_offset, SEEK_SET);
 				if ((status = fread(buffer, sizeof(int) + 9 * sizeof(short), 1, mb_io_ptr->mbfp)) == 1) {
 					index = 0;
-					mb_get_binary_int(MB_YES, &(buffer[index]), ref_windows_time);
+					mb_get_binary_int(false, &(buffer[index]), ref_windows_time);
 					index += sizeof(int);
 					for (int i = 0; i < 9; i++) {
-						mb_get_binary_short(MB_YES, &(buffer[index]), &(corr_time[i]));
+						mb_get_binary_short(false, &(buffer[index]), &(corr_time[i]));
 						index += sizeof(short);
 					}
 					mb_fix_y2k(verbose, (int)corr_time[5], &corr_time_i[0]);
@@ -467,11 +467,11 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				fseek(mb_io_ptr->mbfp, timecorr_offset, SEEK_SET);
 				if ((status = fread(buffer, 3 * sizeof(int), 1, mb_io_ptr->mbfp)) == 1) {
 					index = 0;
-					mb_get_binary_int(MB_YES, &(buffer[index]), ref_windows_time);
+					mb_get_binary_int(false, &(buffer[index]), ref_windows_time);
 					index += sizeof(int);
-					mb_get_binary_int(MB_YES, &(buffer[index]), &date);
+					mb_get_binary_int(false, &(buffer[index]), &date);
 					index += sizeof(int);
-					mb_get_binary_int(MB_YES, &(buffer[index]), &time);
+					mb_get_binary_int(false, &(buffer[index]), &time);
 					index += sizeof(int);
 					corr_time_i[0] = date / 10000;
 					corr_time_i[1] = (date - corr_time_i[0] * 10000) / 100;
@@ -509,14 +509,14 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fseek(mb_io_ptr->mbfp, *sonar_data_info_offset + (*n_read) * (sizeof(int) + 3 * sizeof(short)), SEEK_SET);
 			if ((status = fread(buffer, sizeof(int) + 3 * sizeof(short), 1, mb_io_ptr->mbfp)) == 1) {
 				index = 0;
-				mb_get_binary_int(MB_YES, &(buffer[index]), &pingtime);
+				mb_get_binary_int(false, &(buffer[index]), &pingtime);
 				index += sizeof(int);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &range_code);
+				mb_get_binary_short(false, &(buffer[index]), &range_code);
 				index += sizeof(short);
 				frequency_code = FREQ_UNKNOWN;
-				mb_get_binary_short(MB_YES, &(buffer[index]), &range_delay_bin);
+				mb_get_binary_short(false, &(buffer[index]), &range_delay_bin);
 				index += sizeof(short);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &altitude_bin);
+				mb_get_binary_short(false, &(buffer[index]), &altitude_bin);
 				index += sizeof(short);
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
@@ -534,15 +534,15 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fseek(mb_io_ptr->mbfp, *sonar_data_info_offset + (*n_read) * (sizeof(int) + 4 * sizeof(short)), SEEK_SET);
 			if ((status = fread(buffer, sizeof(int) + 4 * sizeof(short), 1, mb_io_ptr->mbfp)) == 1) {
 				index = 0;
-				mb_get_binary_int(MB_YES, &(buffer[index]), &pingtime);
+				mb_get_binary_int(false, &(buffer[index]), &pingtime);
 				index += sizeof(int);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &range_code);
+				mb_get_binary_short(false, &(buffer[index]), &range_code);
 				index += sizeof(short);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &frequency_code);
+				mb_get_binary_short(false, &(buffer[index]), &frequency_code);
 				index += sizeof(short);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &range_delay_bin);
+				mb_get_binary_short(false, &(buffer[index]), &range_delay_bin);
 				index += sizeof(short);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &altitude_bin);
+				mb_get_binary_short(false, &(buffer[index]), &altitude_bin);
 				index += sizeof(short);
 				status = MB_SUCCESS;
 				*error = MB_ERROR_NO_ERROR;
@@ -562,18 +562,18 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fseek(mb_io_ptr->mbfp, *sonar_data_info_offset + (*n_read) * (sizeof(int) + 20 * sizeof(short)), SEEK_SET);
 			if ((status = fread(buffer, sizeof(int) + 20 * sizeof(short), 1, mb_io_ptr->mbfp)) == 1) {
 				index = 0;
-				mb_get_binary_int(MB_YES, &(buffer[index]), &pingtime);
+				mb_get_binary_int(false, &(buffer[index]), &pingtime);
 				index += sizeof(int);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &range_code);
+				mb_get_binary_short(false, &(buffer[index]), &range_code);
 				index += sizeof(short);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &frequency_code);
+				mb_get_binary_short(false, &(buffer[index]), &frequency_code);
 				index += sizeof(short);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &range_delay_bin);
+				mb_get_binary_short(false, &(buffer[index]), &range_delay_bin);
 				index += sizeof(short);
-				mb_get_binary_short(MB_YES, &(buffer[index]), &altitude_bin);
+				mb_get_binary_short(false, &(buffer[index]), &altitude_bin);
 				index += sizeof(short);
 				for (int i = 0; i < 16; i++) {
-					mb_get_binary_short(MB_YES, &(buffer[index]), &(sonar_gain[i]));
+					mb_get_binary_short(false, &(buffer[index]), &(sonar_gain[i]));
 					index += sizeof(short);
 				}
 				status = MB_SUCCESS;
@@ -679,18 +679,18 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fseek(mb_io_ptr->mbfp, *nav_info_offset + (*n_nav_use) * navsize, SEEK_SET);
 			if ((status = fread(buffer, navsize, 1, mb_io_ptr->mbfp)) == 1) {
 				index = 0;
-				mb_get_binary_int(MB_YES, &(buffer[index]), &navtime1);
+				mb_get_binary_int(false, &(buffer[index]), &navtime1);
 				index += sizeof(int);
-				mb_get_binary_float(MB_YES, &(buffer[index]), &lat1);
+				mb_get_binary_float(false, &(buffer[index]), &lat1);
 				index += sizeof(float);
-				mb_get_binary_float(MB_YES, &(buffer[index]), &lon1);
+				mb_get_binary_float(false, &(buffer[index]), &lon1);
 				index += sizeof(float);
-				mb_get_binary_float(MB_YES, &(buffer[index]), &speed1);
+				mb_get_binary_float(false, &(buffer[index]), &speed1);
 				index += sizeof(float);
-				mb_get_binary_float(MB_YES, &(buffer[index]), &course1);
+				mb_get_binary_float(false, &(buffer[index]), &course1);
 				if (*nav_info_tag == NavInfo6) {
 					index += 3 * sizeof(float);
-					mb_get_binary_float(MB_YES, &(buffer[index]), &heading1);
+					mb_get_binary_float(false, &(buffer[index]), &heading1);
 				}
 				else {
 					heading1 = course1;
@@ -710,18 +710,18 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			fseek(mb_io_ptr->mbfp, *nav_info_offset + (*n_nav_use + 1) * navsize, SEEK_SET);
 			if ((status = fread(buffer, navsize, 1, mb_io_ptr->mbfp)) == 1) {
 				index = 0;
-				mb_get_binary_int(MB_YES, &(buffer[index]), &navtime2);
+				mb_get_binary_int(false, &(buffer[index]), &navtime2);
 				index += sizeof(int);
-				mb_get_binary_float(MB_YES, &(buffer[index]), &lat2);
+				mb_get_binary_float(false, &(buffer[index]), &lat2);
 				index += sizeof(float);
-				mb_get_binary_float(MB_YES, &(buffer[index]), &lon2);
+				mb_get_binary_float(false, &(buffer[index]), &lon2);
 				index += sizeof(float);
-				mb_get_binary_float(MB_YES, &(buffer[index]), &speed2);
+				mb_get_binary_float(false, &(buffer[index]), &speed2);
 				index += sizeof(float);
-				mb_get_binary_float(MB_YES, &(buffer[index]), &course2);
+				mb_get_binary_float(false, &(buffer[index]), &course2);
 				if (*nav_info_tag == NavInfo6) {
 					index += 3 * sizeof(float);
-					mb_get_binary_float(MB_YES, &(buffer[index]), &heading2);
+					mb_get_binary_float(false, &(buffer[index]), &heading2);
 				}
 				else {
 					heading2 = course2;
@@ -753,18 +753,18 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				fseek(mb_io_ptr->mbfp, *nav_info_offset + (*n_nav_use + 2) * navsize, SEEK_SET);
 				if ((status = fread(buffer, navsize, 1, mb_io_ptr->mbfp)) == 1) {
 					index = 0;
-					mb_get_binary_int(MB_YES, &(buffer[index]), &navtime2);
+					mb_get_binary_int(false, &(buffer[index]), &navtime2);
 					index += sizeof(int);
-					mb_get_binary_float(MB_YES, &(buffer[index]), &lat2);
+					mb_get_binary_float(false, &(buffer[index]), &lat2);
 					index += sizeof(float);
-					mb_get_binary_float(MB_YES, &(buffer[index]), &lon2);
+					mb_get_binary_float(false, &(buffer[index]), &lon2);
 					index += sizeof(float);
-					mb_get_binary_float(MB_YES, &(buffer[index]), &speed2);
+					mb_get_binary_float(false, &(buffer[index]), &speed2);
 					index += sizeof(float);
-					mb_get_binary_float(MB_YES, &(buffer[index]), &course2);
+					mb_get_binary_float(false, &(buffer[index]), &course2);
 					if (*nav_info_tag == NavInfo6) {
 						index += 3 * sizeof(float);
-						mb_get_binary_float(MB_YES, &(buffer[index]), &heading2);
+						mb_get_binary_float(false, &(buffer[index]), &heading2);
 					}
 					else {
 						heading2 = course2;

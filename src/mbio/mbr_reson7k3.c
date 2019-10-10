@@ -551,14 +551,14 @@ int mbr_reson7k3_chk_header(int verbose, void *mbio_ptr, char *buffer, int *reco
   unsigned short offset;
   unsigned int sync;
   unsigned short reserved;
-  mb_get_binary_short(MB_YES, &buffer[0], &version);
-  mb_get_binary_short(MB_YES, &buffer[2], &offset);
-  mb_get_binary_int(MB_YES, &buffer[4], &sync);
-  mb_get_binary_int(MB_YES, &buffer[8], size);
-  mb_get_binary_int(MB_YES, &buffer[32], recordid);
-  mb_get_binary_int(MB_YES, &buffer[36], deviceid);
-  mb_get_binary_short(MB_YES, &buffer[40], &reserved);
-  mb_get_binary_short(MB_YES, &buffer[42], enumerator);
+  mb_get_binary_short(false, &buffer[0], &version);
+  mb_get_binary_short(false, &buffer[2], &offset);
+  mb_get_binary_int(false, &buffer[4], &sync);
+  mb_get_binary_int(false, &buffer[8], size);
+  mb_get_binary_int(false, &buffer[32], recordid);
+  mb_get_binary_int(false, &buffer[36], deviceid);
+  mb_get_binary_short(false, &buffer[40], &reserved);
+  mb_get_binary_short(false, &buffer[42], enumerator);
 #ifdef MBR_RESON7K3_DEBUG3
   fprintf(stderr, "\nChecking header in mbr_reson7k3_chk_header:\n");
   fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
@@ -846,129 +846,129 @@ int mbr_reson7k3_chk_pingnumber(int verbose, int recordid, char *buffer, int *pi
   }
 
   /* get offset to data section */
-  mb_get_binary_short(MB_YES, &buffer[2], &offset);
+  mb_get_binary_short(false, &buffer[2], &offset);
 
   /* check ping number if one of the ping records */
   switch (recordid) {
 
     case R7KRECID_ProcessedSideScan:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_SonarSettings:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_MatchFilter:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_Bathymetry:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_SideScan:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_WaterColumn:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_VerticalDepth:
       index = offset + 8;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_TVG:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_Image:
       index = offset + 4;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_PingMotion:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_AdaptiveGate:
       index = offset + 14;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_DetectionDataSetup:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_Beamformed:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_VernierProcessingDataRaw:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_RawDetection:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_Snippet:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_VernierProcessingDataFiltered:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_CompressedBeamformedMagnitude:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_CompressedWaterColumn:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_SegmentedRawDetection:
       index = offset + 26;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_CalibratedBeam:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_CalibratedSideScan:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_SnippetBackscatteringStrength:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
     case R7KRECID_RemoteControlSonarSettings:
       index = offset + 12;
-      mb_get_binary_int(MB_YES, &buffer[index], ping_number);
+      mb_get_binary_int(false, &buffer[index], ping_number);
       break;
 
       default:
@@ -997,49 +997,49 @@ int mbr_reson7k3_rd_header(int verbose, char *buffer, int *index, s7k3_header *h
   }
 
   /* extract the header */
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->Version));
+  mb_get_binary_short(false, &buffer[*index], &(header->Version));
   *index += 2;
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->Offset));
+  mb_get_binary_short(false, &buffer[*index], &(header->Offset));
   *index += 2;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->SyncPattern));
+  mb_get_binary_int(false, &buffer[*index], &(header->SyncPattern));
   *index += 4;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->Size));
+  mb_get_binary_int(false, &buffer[*index], &(header->Size));
   *index += 4;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->OptionalDataOffset));
+  mb_get_binary_int(false, &buffer[*index], &(header->OptionalDataOffset));
   *index += 4;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->OptionalDataIdentifier));
+  mb_get_binary_int(false, &buffer[*index], &(header->OptionalDataIdentifier));
   *index += 4;
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->s7kTime.Year));
+  mb_get_binary_short(false, &buffer[*index], &(header->s7kTime.Year));
   *index += 2;
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->s7kTime.Day));
+  mb_get_binary_short(false, &buffer[*index], &(header->s7kTime.Day));
   *index += 2;
-  mb_get_binary_float(MB_YES, &buffer[*index], &(header->s7kTime.Seconds));
+  mb_get_binary_float(false, &buffer[*index], &(header->s7kTime.Seconds));
   *index += 4;
   header->s7kTime.Hours = (mb_u_char)buffer[*index];
   (*index)++;
   header->s7kTime.Minutes = (mb_u_char)buffer[*index];
   (*index)++;
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->RecordVersion));
+  mb_get_binary_short(false, &buffer[*index], &(header->RecordVersion));
   *index += 2;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->RecordType));
+  mb_get_binary_int(false, &buffer[*index], &(header->RecordType));
   *index += 4;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->DeviceId));
+  mb_get_binary_int(false, &buffer[*index], &(header->DeviceId));
   *index += 4;
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->Reserved));
+  mb_get_binary_short(false, &buffer[*index], &(header->Reserved));
   *index += 2;
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->SystemEnumerator));
+  mb_get_binary_short(false, &buffer[*index], &(header->SystemEnumerator));
   *index += 2;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->Reserved2));
+  mb_get_binary_int(false, &buffer[*index], &(header->Reserved2));
   *index += 4;
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->Flags));
+  mb_get_binary_short(false, &buffer[*index], &(header->Flags));
   *index += 2;
-  mb_get_binary_short(MB_YES, &buffer[*index], &(header->Reserved3));
+  mb_get_binary_short(false, &buffer[*index], &(header->Reserved3));
   *index += 2;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->Reserved4));
+  mb_get_binary_int(false, &buffer[*index], &(header->Reserved4));
   *index += 4;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->FragmentedTotal));
+  mb_get_binary_int(false, &buffer[*index], &(header->FragmentedTotal));
   *index += 4;
-  mb_get_binary_int(MB_YES, &buffer[*index], &(header->FragmentNumber));
+  mb_get_binary_int(false, &buffer[*index], &(header->FragmentNumber));
   *index += 4;
 
   /* print out the results */
@@ -1084,13 +1084,13 @@ int mbr_reson7k3_rd_ReferencePoint(int verbose, char *buffer, void *store_ptr, i
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(ReferencePoint->offset_x));
+  mb_get_binary_float(false, &buffer[index], &(ReferencePoint->offset_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(ReferencePoint->offset_y));
+  mb_get_binary_float(false, &buffer[index], &(ReferencePoint->offset_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(ReferencePoint->offset_z));
+  mb_get_binary_float(false, &buffer[index], &(ReferencePoint->offset_z));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(ReferencePoint->water_z));
+  mb_get_binary_float(false, &buffer[index], &(ReferencePoint->water_z));
   index += 4;
 
   /* set kind */
@@ -1163,17 +1163,17 @@ int mbr_reson7k3_rd_UncalibratedSensorOffset(int verbose, char *buffer, void *st
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(UncalibratedSensorOffset->offset_x));
+  mb_get_binary_float(false, &buffer[index], &(UncalibratedSensorOffset->offset_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(UncalibratedSensorOffset->offset_y));
+  mb_get_binary_float(false, &buffer[index], &(UncalibratedSensorOffset->offset_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(UncalibratedSensorOffset->offset_z));
+  mb_get_binary_float(false, &buffer[index], &(UncalibratedSensorOffset->offset_z));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(UncalibratedSensorOffset->offset_roll));
+  mb_get_binary_float(false, &buffer[index], &(UncalibratedSensorOffset->offset_roll));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(UncalibratedSensorOffset->offset_pitch));
+  mb_get_binary_float(false, &buffer[index], &(UncalibratedSensorOffset->offset_pitch));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(UncalibratedSensorOffset->offset_yaw));
+  mb_get_binary_float(false, &buffer[index], &(UncalibratedSensorOffset->offset_yaw));
   index += 4;
 
   /* set kind */
@@ -1246,17 +1246,17 @@ int mbr_reson7k3_rd_CalibratedSensorOffset(int verbose, char *buffer, void *stor
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CalibratedSensorOffset->offset_x));
+  mb_get_binary_float(false, &buffer[index], &(CalibratedSensorOffset->offset_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CalibratedSensorOffset->offset_y));
+  mb_get_binary_float(false, &buffer[index], &(CalibratedSensorOffset->offset_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CalibratedSensorOffset->offset_z));
+  mb_get_binary_float(false, &buffer[index], &(CalibratedSensorOffset->offset_z));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CalibratedSensorOffset->offset_roll));
+  mb_get_binary_float(false, &buffer[index], &(CalibratedSensorOffset->offset_roll));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CalibratedSensorOffset->offset_pitch));
+  mb_get_binary_float(false, &buffer[index], &(CalibratedSensorOffset->offset_pitch));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CalibratedSensorOffset->offset_yaw));
+  mb_get_binary_float(false, &buffer[index], &(CalibratedSensorOffset->offset_yaw));
   index += 4;
 
   /* set kind */
@@ -1329,15 +1329,15 @@ int mbr_reson7k3_rd_Position(int verbose, char *buffer, void *store_ptr, int *er
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Position->datum));
+  mb_get_binary_int(false, &buffer[index], &(Position->datum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Position->latency));
+  mb_get_binary_float(false, &buffer[index], &(Position->latency));
   index += 4;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Position->latitude_northing));
+  mb_get_binary_double(false, &buffer[index], &(Position->latitude_northing));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Position->longitude_easting));
+  mb_get_binary_double(false, &buffer[index], &(Position->longitude_easting));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Position->height));
+  mb_get_binary_double(false, &buffer[index], &(Position->height));
   index += 8;
   Position->type = buffer[index];
   index++;
@@ -1425,9 +1425,9 @@ int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, i
   index++;
   CustomAttitude->reserved = (mb_u_char)buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CustomAttitude->n));
+  mb_get_binary_short(false, &buffer[index], &(CustomAttitude->n));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->frequency));
+  mb_get_binary_float(false, &buffer[index], &(CustomAttitude->frequency));
   index += 4;
 
   /* make sure enough memory is allocated for channel data */
@@ -1459,42 +1459,42 @@ int mbr_reson7k3_rd_CustomAttitude(int verbose, char *buffer, void *store_ptr, i
 
   if (CustomAttitude->fieldmask & 1)
     for (int i = 0; i < CustomAttitude->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->pitch[i]));
+      mb_get_binary_float(false, &buffer[index], &(CustomAttitude->pitch[i]));
       index += 4;
     }
   if (CustomAttitude->fieldmask & 2)
     for (int i = 0; i < CustomAttitude->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->roll[i]));
+      mb_get_binary_float(false, &buffer[index], &(CustomAttitude->roll[i]));
       index += 4;
     }
   if (CustomAttitude->fieldmask & 4)
     for (int i = 0; i < CustomAttitude->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->heading[i]));
+      mb_get_binary_float(false, &buffer[index], &(CustomAttitude->heading[i]));
       index += 4;
     }
   if (CustomAttitude->fieldmask & 8)
     for (int i = 0; i < CustomAttitude->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->heave[i]));
+      mb_get_binary_float(false, &buffer[index], &(CustomAttitude->heave[i]));
       index += 4;
     }
   if (CustomAttitude->fieldmask & 16)
     for (int i = 0; i < CustomAttitude->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->pitchrate[i]));
+      mb_get_binary_float(false, &buffer[index], &(CustomAttitude->pitchrate[i]));
       index += 4;
     }
   if (CustomAttitude->fieldmask & 32)
     for (int i = 0; i < CustomAttitude->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->rollrate[i]));
+      mb_get_binary_float(false, &buffer[index], &(CustomAttitude->rollrate[i]));
       index += 4;
     }
   if (CustomAttitude->fieldmask & 64)
     for (int i = 0; i < CustomAttitude->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->headingrate[i]));
+      mb_get_binary_float(false, &buffer[index], &(CustomAttitude->headingrate[i]));
       index += 4;
     }
   if (CustomAttitude->fieldmask & 128)
     for (int i = 0; i < CustomAttitude->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(CustomAttitude->heaverate[i]));
+      mb_get_binary_float(false, &buffer[index], &(CustomAttitude->heaverate[i]));
       index += 4;
     }
 
@@ -1568,23 +1568,23 @@ int mbr_reson7k3_rd_Tide(int verbose, char *buffer, void *store_ptr, int *error)
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Tide->tide));
+  mb_get_binary_float(false, &buffer[index], &(Tide->tide));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Tide->source));
+  mb_get_binary_short(false, &buffer[index], &(Tide->source));
   index += 2;
   Tide->flags = buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Tide->gauge));
+  mb_get_binary_short(false, &buffer[index], &(Tide->gauge));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Tide->datum));
+  mb_get_binary_int(false, &buffer[index], &(Tide->datum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Tide->latency));
+  mb_get_binary_float(false, &buffer[index], &(Tide->latency));
   index += 4;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Tide->latitude_northing));
+  mb_get_binary_double(false, &buffer[index], &(Tide->latitude_northing));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Tide->longitude_easting));
+  mb_get_binary_double(false, &buffer[index], &(Tide->longitude_easting));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Tide->height));
+  mb_get_binary_double(false, &buffer[index], &(Tide->height));
   index += 8;
   Tide->type = buffer[index];
   index++;
@@ -1661,7 +1661,7 @@ int mbr_reson7k3_rd_Altitude(int verbose, char *buffer, void *store_ptr, int *er
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Altitude->altitude));
+  mb_get_binary_float(false, &buffer[index], &(Altitude->altitude));
   index += 4;
 
   /* set kind */
@@ -1739,9 +1739,9 @@ int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr,
   index++;
   MotionOverGround->reserved = (mb_u_char)buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(MotionOverGround->n));
+  mb_get_binary_short(false, &buffer[index], &(MotionOverGround->n));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(MotionOverGround->frequency));
+  mb_get_binary_float(false, &buffer[index], &(MotionOverGround->frequency));
   index += 4;
 
   /* make sure enough memory is allocated for channel data */
@@ -1769,29 +1769,29 @@ int mbr_reson7k3_rd_MotionOverGround(int verbose, char *buffer, void *store_ptr,
 
   if (MotionOverGround->flags & 1) {
     for (int i = 0; i < MotionOverGround->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(MotionOverGround->x[i]));
+      mb_get_binary_float(false, &buffer[index], &(MotionOverGround->x[i]));
       index += 4;
     }
     for (int i = 0; i < MotionOverGround->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(MotionOverGround->y[i]));
+      mb_get_binary_float(false, &buffer[index], &(MotionOverGround->y[i]));
       index += 4;
     }
     for (int i = 0; i < MotionOverGround->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(MotionOverGround->z[i]));
+      mb_get_binary_float(false, &buffer[index], &(MotionOverGround->z[i]));
       index += 4;
     }
   }
   if (MotionOverGround->flags & 2) {
     for (int i = 0; i < MotionOverGround->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(MotionOverGround->xa[i]));
+      mb_get_binary_float(false, &buffer[index], &(MotionOverGround->xa[i]));
       index += 4;
     }
     for (int i = 0; i < MotionOverGround->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(MotionOverGround->ya[i]));
+      mb_get_binary_float(false, &buffer[index], &(MotionOverGround->ya[i]));
       index += 4;
     }
     for (int i = 0; i < MotionOverGround->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(MotionOverGround->za[i]));
+      mb_get_binary_float(false, &buffer[index], &(MotionOverGround->za[i]));
       index += 4;
     }
   }
@@ -1870,9 +1870,9 @@ int mbr_reson7k3_rd_Depth(int verbose, char *buffer, void *store_ptr, int *error
   index++;
   Depth->correction = (mb_u_char)buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Depth->reserved));
+  mb_get_binary_short(false, &buffer[index], &(Depth->reserved));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Depth->depth));
+  mb_get_binary_float(false, &buffer[index], &(Depth->depth));
   index += 4;
 
   /* set kind */
@@ -1950,13 +1950,13 @@ int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_
   index++;
   SoundVelocityProfile->reserved1 = (mb_u_char)buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SoundVelocityProfile->reserved2));
+  mb_get_binary_short(false, &buffer[index], &(SoundVelocityProfile->reserved2));
   index += 2;
-  mb_get_binary_double(MB_YES, &buffer[index], &(SoundVelocityProfile->latitude));
+  mb_get_binary_double(false, &buffer[index], &(SoundVelocityProfile->latitude));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(SoundVelocityProfile->longitude));
+  mb_get_binary_double(false, &buffer[index], &(SoundVelocityProfile->longitude));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SoundVelocityProfile->n));
+  mb_get_binary_int(false, &buffer[index], &(SoundVelocityProfile->n));
   index += 4;
 
   /* make sure enough memory is allocated for channel data */
@@ -1975,9 +1975,9 @@ int mbr_reson7k3_rd_SoundVelocityProfile(int verbose, char *buffer, void *store_
   }
 
   for (int i = 0; i < SoundVelocityProfile->n; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(SoundVelocityProfile->depth[i]));
+    mb_get_binary_float(false, &buffer[index], &(SoundVelocityProfile->depth[i]));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SoundVelocityProfile->sound_velocity[i]));
+    mb_get_binary_float(false, &buffer[index], &(SoundVelocityProfile->sound_velocity[i]));
     index += 4;
   }
 
@@ -2052,7 +2052,7 @@ int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) 
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CTD->frequency));
+  mb_get_binary_float(false, &buffer[index], &(CTD->frequency));
   index += 4;
   CTD->velocity_source_flag = (mb_u_char)buffer[index];
   index++;
@@ -2066,15 +2066,15 @@ int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) 
   index++;
   CTD->validity = (mb_u_char)buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CTD->reserved));
+  mb_get_binary_short(false, &buffer[index], &(CTD->reserved));
   index += 2;
-  mb_get_binary_double(MB_YES, &buffer[index], &(CTD->latitude));
+  mb_get_binary_double(false, &buffer[index], &(CTD->latitude));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(CTD->longitude));
+  mb_get_binary_double(false, &buffer[index], &(CTD->longitude));
   index += 8;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CTD->sample_rate));
+  mb_get_binary_float(false, &buffer[index], &(CTD->sample_rate));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CTD->n));
+  mb_get_binary_int(false, &buffer[index], &(CTD->n));
   index += 4;
 
   /* make sure enough memory is allocated for channel data */
@@ -2099,15 +2099,15 @@ int mbr_reson7k3_rd_CTD(int verbose, char *buffer, void *store_ptr, int *error) 
   }
 
   for (int i = 0; i < CTD->n; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(CTD->conductivity_salinity[i]));
+    mb_get_binary_float(false, &buffer[index], &(CTD->conductivity_salinity[i]));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(CTD->temperature[i]));
+    mb_get_binary_float(false, &buffer[index], &(CTD->temperature[i]));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(CTD->pressure_depth[i]));
+    mb_get_binary_float(false, &buffer[index], &(CTD->pressure_depth[i]));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(CTD->sound_velocity[i]));
+    mb_get_binary_float(false, &buffer[index], &(CTD->sound_velocity[i]));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(CTD->absorption[i]));
+    mb_get_binary_float(false, &buffer[index], &(CTD->absorption[i]));
     index += 4;
   }
 
@@ -2185,9 +2185,9 @@ int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *err
     Geodesy->spheroid[i] = (mb_u_char)buffer[index];
     index++;
   }
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->semimajoraxis));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->semimajoraxis));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->flattening));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->flattening));
   index += 8;
   for (int i = 0; i < 16; i++) {
     Geodesy->reserved1[i] = (mb_u_char)buffer[index];
@@ -2197,23 +2197,23 @@ int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *err
     Geodesy->datum[i] = (mb_u_char)buffer[index];
     index++;
   }
-  mb_get_binary_int(MB_YES, &buffer[index], &(Geodesy->calculation_method));
+  mb_get_binary_int(false, &buffer[index], &(Geodesy->calculation_method));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Geodesy->number_parameters));
+  mb_get_binary_int(false, &buffer[index], &(Geodesy->number_parameters));
   index += 4;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->dx));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->dx));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->dy));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->dy));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->dz));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->dz));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->rx));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->rx));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->ry));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->ry));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->rz));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->rz));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->scale));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->scale));
   index += 8;
   for (int i = 0; i < 35; i++) {
     Geodesy->reserved2[i] = (mb_u_char)buffer[index];
@@ -2227,17 +2227,17 @@ int mbr_reson7k3_rd_Geodesy(int verbose, char *buffer, void *store_ptr, int *err
   index++;
   Geodesy->angular_units = (mb_u_char)buffer[index];
   index++;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->latitude_origin));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->latitude_origin));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->central_meridian));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->central_meridian));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->false_easting));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->false_easting));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->false_northing));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->false_northing));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Geodesy->central_scale_factor));
+  mb_get_binary_double(false, &buffer[index], &(Geodesy->central_scale_factor));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Geodesy->custom_identifier));
+  mb_get_binary_int(false, &buffer[index], &(Geodesy->custom_identifier));
   index += 4;
   for (int i = 0; i < 50; i++) {
     Geodesy->reserved3[i] = (mb_u_char)buffer[index];
@@ -2314,11 +2314,11 @@ int mbr_reson7k3_rd_RollPitchHeave(int verbose, char *buffer, void *store_ptr, i
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RollPitchHeave->roll));
+  mb_get_binary_float(false, &buffer[index], &(RollPitchHeave->roll));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RollPitchHeave->pitch));
+  mb_get_binary_float(false, &buffer[index], &(RollPitchHeave->pitch));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RollPitchHeave->heave));
+  mb_get_binary_float(false, &buffer[index], &(RollPitchHeave->heave));
   index += 4;
 
   /* set kind */
@@ -2391,7 +2391,7 @@ int mbr_reson7k3_rd_Heading(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Heading->heading));
+  mb_get_binary_float(false, &buffer[index], &(Heading->heading));
   index += 4;
 
   /* set kind */
@@ -2465,11 +2465,11 @@ int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SurveyLine->n));
+  mb_get_binary_short(false, &buffer[index], &(SurveyLine->n));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SurveyLine->type));
+  mb_get_binary_short(false, &buffer[index], &(SurveyLine->type));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SurveyLine->turnradius));
+  mb_get_binary_float(false, &buffer[index], &(SurveyLine->turnradius));
   index += 4;
   for (int i = 0; i < 64; i++) {
     SurveyLine->name[i] = (char)buffer[index];
@@ -2492,9 +2492,9 @@ int mbr_reson7k3_rd_SurveyLine(int verbose, char *buffer, void *store_ptr, int *
   }
 
   for (int i = 0; i < SurveyLine->n; i++) {
-    mb_get_binary_double(MB_YES, &buffer[index], &(SurveyLine->latitude_northing[i]));
+    mb_get_binary_double(false, &buffer[index], &(SurveyLine->latitude_northing[i]));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(SurveyLine->longitude_easting[i]));
+    mb_get_binary_double(false, &buffer[index], &(SurveyLine->longitude_easting[i]));
     index += 8;
   }
 
@@ -2570,21 +2570,21 @@ int mbr_reson7k3_rd_Navigation(int verbose, char *buffer, void *store_ptr, int *
   index = header->Offset + 4;
   Navigation->vertical_reference = (mb_u_char)buffer[index];
   index++;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Navigation->latitude));
+  mb_get_binary_double(false, &buffer[index], &(Navigation->latitude));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(Navigation->longitude));
+  mb_get_binary_double(false, &buffer[index], &(Navigation->longitude));
   index += 8;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Navigation->position_accuracy));
+  mb_get_binary_float(false, &buffer[index], &(Navigation->position_accuracy));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Navigation->height));
+  mb_get_binary_float(false, &buffer[index], &(Navigation->height));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Navigation->height_accuracy));
+  mb_get_binary_float(false, &buffer[index], &(Navigation->height_accuracy));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Navigation->speed));
+  mb_get_binary_float(false, &buffer[index], &(Navigation->speed));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Navigation->course));
+  mb_get_binary_float(false, &buffer[index], &(Navigation->course));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Navigation->heading));
+  mb_get_binary_float(false, &buffer[index], &(Navigation->heading));
   index += 4;
 
   /* set kind */
@@ -2684,15 +2684,15 @@ int mbr_reson7k3_rd_Attitude(int verbose, char *buffer, void *store_ptr, int *er
   }
 
   for (int i = 0; i < Attitude->n; i++) {
-    mb_get_binary_short(MB_YES, &buffer[index], &(Attitude->delta_time[i]));
+    mb_get_binary_short(false, &buffer[index], &(Attitude->delta_time[i]));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Attitude->roll[i]));
+    mb_get_binary_float(false, &buffer[index], &(Attitude->roll[i]));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Attitude->pitch[i]));
+    mb_get_binary_float(false, &buffer[index], &(Attitude->pitch[i]));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Attitude->heave[i]));
+    mb_get_binary_float(false, &buffer[index], &(Attitude->heave[i]));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Attitude->heading[i]));
+    mb_get_binary_float(false, &buffer[index], &(Attitude->heading[i]));
     index += 4;
   }
 
@@ -2989,34 +2989,34 @@ int mbr_reson7k3_rd_ProcessedSideScan(int verbose, char *buffer, void *store_ptr
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(ProcessedSideScan->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(ProcessedSideScan->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(ProcessedSideScan->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(ProcessedSideScan->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(ProcessedSideScan->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(ProcessedSideScan->multi_ping));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(ProcessedSideScan->recordversion));
+  mb_get_binary_short(false, &buffer[index], &(ProcessedSideScan->recordversion));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(ProcessedSideScan->ss_source));
+  mb_get_binary_int(false, &buffer[index], &(ProcessedSideScan->ss_source));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(ProcessedSideScan->number_pixels));
+  mb_get_binary_int(false, &buffer[index], &(ProcessedSideScan->number_pixels));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(ProcessedSideScan->ss_type));
+  mb_get_binary_int(false, &buffer[index], &(ProcessedSideScan->ss_type));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(ProcessedSideScan->pixelwidth));
+  mb_get_binary_float(false, &buffer[index], &(ProcessedSideScan->pixelwidth));
   index += 4;
-  mb_get_binary_double(MB_YES, &buffer[index], &(ProcessedSideScan->sonardepth));
+  mb_get_binary_double(false, &buffer[index], &(ProcessedSideScan->sonardepth));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(ProcessedSideScan->altitude));
+  mb_get_binary_double(false, &buffer[index], &(ProcessedSideScan->altitude));
   index += 8;
 
   /* extract the data */
   for (int i = 0; i < ProcessedSideScan->number_pixels; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(ProcessedSideScan->sidescan[i]));
+    mb_get_binary_float(false, &buffer[index], &(ProcessedSideScan->sidescan[i]));
     index += 4;
   }
   for (int i = 0; i < ProcessedSideScan->number_pixels; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(ProcessedSideScan->alongtrack[i]));
+    mb_get_binary_float(false, &buffer[index], &(ProcessedSideScan->alongtrack[i]));
     index += 4;
   }
 
@@ -3091,83 +3091,83 @@ int mbr_reson7k3_rd_SonarSettings(int verbose, char *buffer, void *store_ptr, in
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(SonarSettings->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(SonarSettings->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SonarSettings->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(SonarSettings->multi_ping));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->frequency));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->frequency));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->sample_rate));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->sample_rate));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->receiver_bandwidth));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->receiver_bandwidth));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->tx_pulse_width));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->tx_pulse_width));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->tx_pulse_type));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->tx_pulse_type));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->tx_pulse_envelope));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->tx_pulse_envelope));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->tx_pulse_envelope_par));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->tx_pulse_envelope_par));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->tx_pulse_mode));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->tx_pulse_mode));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->max_ping_rate));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->max_ping_rate));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->ping_period));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->ping_period));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->range_selection));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->range_selection));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->power_selection));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->power_selection));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->gain_selection));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->gain_selection));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->control_flags));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->control_flags));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->projector_id));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->projector_id));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->steering_vertical));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->steering_vertical));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->steering_horizontal));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->steering_horizontal));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->beamwidth_vertical));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->beamwidth_vertical));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->beamwidth_horizontal));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->beamwidth_horizontal));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->focal_point));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->focal_point));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->projector_weighting));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->projector_weighting));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->projector_weighting_par));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->projector_weighting_par));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->transmit_flags));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->transmit_flags));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->hydrophone_id));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->hydrophone_id));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->rx_weighting));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->rx_weighting));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->rx_weighting_par));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->rx_weighting_par));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SonarSettings->rx_flags));
+  mb_get_binary_int(false, &buffer[index], &(SonarSettings->rx_flags));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->rx_width));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->rx_width));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->range_minimum));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->range_minimum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->range_maximum));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->range_maximum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->depth_minimum));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->depth_minimum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->depth_maximum));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->depth_maximum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->absorption));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->absorption));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->sound_velocity));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->sound_velocity));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SonarSettings->spreading));
+  mb_get_binary_float(false, &buffer[index], &(SonarSettings->spreading));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SonarSettings->reserved));
+  mb_get_binary_short(false, &buffer[index], &(SonarSettings->reserved));
   index += 2;
 
   /* set kind */
@@ -3242,25 +3242,25 @@ int mbr_reson7k3_rd_Configuration(int verbose, char *buffer, void *store_ptr, in
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(Configuration->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(Configuration->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Configuration->number_devices));
+  mb_get_binary_int(false, &buffer[index], &(Configuration->number_devices));
   index += 4;
 
   /* extract the data for each device */
   for (int i = 0; i < Configuration->number_devices; i++) {
     device = &(Configuration->device[i]);
-    mb_get_binary_int(MB_YES, &buffer[index], &(device->magic_number));
+    mb_get_binary_int(false, &buffer[index], &(device->magic_number));
     index += 4;
     for (int j = 0; j < 60; j++) {
       device->description[j] = buffer[index];
       index++;
     }
-    mb_get_binary_int(MB_YES, &buffer[index], &(device->alphadata_card));
+    mb_get_binary_int(false, &buffer[index], &(device->alphadata_card));
     index += 4;
-    mb_get_binary_long(MB_YES, &buffer[index], &(device->serial_number));
+    mb_get_binary_long(false, &buffer[index], &(device->serial_number));
     index += 8;
-    mb_get_binary_int(MB_YES, &buffer[index], &(device->info_length));
+    mb_get_binary_int(false, &buffer[index], &(device->info_length));
     index += 4;
 
     /* make sure enough memory is allocated for info data */
@@ -3352,24 +3352,24 @@ int mbr_reson7k3_rd_MatchFilter(int verbose, char *buffer, void *store_ptr, int 
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(MatchFilter->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(MatchFilter->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(MatchFilter->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(MatchFilter->ping_number));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(MatchFilter->operation));
+  mb_get_binary_int(false, &buffer[index], &(MatchFilter->operation));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(MatchFilter->start_frequency));
+  mb_get_binary_float(false, &buffer[index], &(MatchFilter->start_frequency));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(MatchFilter->end_frequency));
+  mb_get_binary_float(false, &buffer[index], &(MatchFilter->end_frequency));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(MatchFilter->window_type));
+  mb_get_binary_int(false, &buffer[index], &(MatchFilter->window_type));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(MatchFilter->shading));
+  mb_get_binary_float(false, &buffer[index], &(MatchFilter->shading));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(MatchFilter->pulse_width));
+  mb_get_binary_float(false, &buffer[index], &(MatchFilter->pulse_width));
   index += 4;
   for (int i = 0;i<13;i++) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(MatchFilter->reserved[i]));
+    mb_get_binary_int(false, &buffer[index], &(MatchFilter->reserved[i]));
     index += 4;
   }
 
@@ -3444,9 +3444,9 @@ int mbr_reson7k3_rd_FirmwareHardwareConfiguration(int verbose, char *buffer, voi
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(FirmwareHardwareConfiguration->device_count));
+  mb_get_binary_int(false, &buffer[index], &(FirmwareHardwareConfiguration->device_count));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(FirmwareHardwareConfiguration->info_length));
+  mb_get_binary_int(false, &buffer[index], &(FirmwareHardwareConfiguration->info_length));
   index += 4;
 
   /* make sure enough memory is allocated for info data */
@@ -3532,26 +3532,26 @@ int mbr_reson7k3_rd_BeamGeometry(int verbose, char *buffer, void *store_ptr, int
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(BeamGeometry->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(BeamGeometry->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(BeamGeometry->number_beams));
+  mb_get_binary_int(false, &buffer[index], &(BeamGeometry->number_beams));
   index += 4;
 
   /* extract the data */
   for (int i = 0; i < BeamGeometry->number_beams; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(BeamGeometry->angle_alongtrack[i]));
+    mb_get_binary_float(false, &buffer[index], &(BeamGeometry->angle_alongtrack[i]));
     index += 4;
   }
   for (int i = 0; i < BeamGeometry->number_beams; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(BeamGeometry->angle_acrosstrack[i]));
+    mb_get_binary_float(false, &buffer[index], &(BeamGeometry->angle_acrosstrack[i]));
     index += 4;
   }
   for (int i = 0; i < BeamGeometry->number_beams; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(BeamGeometry->beamwidth_alongtrack[i]));
+    mb_get_binary_float(false, &buffer[index], &(BeamGeometry->beamwidth_alongtrack[i]));
     index += 4;
   }
   for (int i = 0; i < BeamGeometry->number_beams; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(BeamGeometry->beamwidth_acrosstrack[i]));
+    mb_get_binary_float(false, &buffer[index], &(BeamGeometry->beamwidth_acrosstrack[i]));
     index += 4;
   }
 
@@ -3621,13 +3621,13 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(Bathymetry->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(Bathymetry->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Bathymetry->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(Bathymetry->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Bathymetry->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(Bathymetry->multi_ping));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Bathymetry->number_beams));
+  mb_get_binary_int(false, &buffer[index], &(Bathymetry->number_beams));
   index += 4;
 
   /* deal with version 5 records */
@@ -3636,7 +3636,7 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
     index++;
     Bathymetry->sound_vel_flag = buffer[index];
     index++;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->sound_velocity));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->sound_velocity));
     index += 4;
   }
   else {
@@ -3647,7 +3647,7 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
 
   /* extract the data */
   for (int i = 0; i < Bathymetry->number_beams; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->range[i]));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->range[i]));
     index += 4;
   }
   for (int i = 0; i < Bathymetry->number_beams; i++) {
@@ -3655,17 +3655,17 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
     index++;
   }
   for (int i = 0; i < Bathymetry->number_beams; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->intensity[i]));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->intensity[i]));
     index += 4;
   }
   if ((header->OptionalDataOffset == 0 && header->Size >= 92 + 17 * Bathymetry->number_beams) ||
       (header->OptionalDataOffset > 0 && header->Size >= 137 + 37 * Bathymetry->number_beams)) {
     for (int i = 0; i < Bathymetry->number_beams; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->min_depth_gate[i]));
+      mb_get_binary_float(false, &buffer[index], &(Bathymetry->min_depth_gate[i]));
       index += 4;
     }
     for (int i = 0; i < Bathymetry->number_beams; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->max_depth_gate[i]));
+      mb_get_binary_float(false, &buffer[index], &(Bathymetry->max_depth_gate[i]));
       index += 4;
     }
   }
@@ -3674,36 +3674,36 @@ int mbr_reson7k3_rd_Bathymetry(int verbose, char *buffer, void *store_ptr, int *
   if (header->OptionalDataOffset > 0) {
     index = header->OptionalDataOffset;
     Bathymetry->optionaldata = MB_YES;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->frequency));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->frequency));
     index += 4;
-    mb_get_binary_double(MB_YES, &buffer[index], &(Bathymetry->latitude));
+    mb_get_binary_double(false, &buffer[index], &(Bathymetry->latitude));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(Bathymetry->longitude));
+    mb_get_binary_double(false, &buffer[index], &(Bathymetry->longitude));
     index += 8;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->heading));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->heading));
     index += 4;
     Bathymetry->height_source = buffer[index];
     index++;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->tide));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->tide));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->roll));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->roll));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->pitch));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->pitch));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->heave));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->heave));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->vehicle_depth));
+    mb_get_binary_float(false, &buffer[index], &(Bathymetry->vehicle_depth));
     index += 4;
     for (int i = 0; i < Bathymetry->number_beams; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->depth[i]));
+      mb_get_binary_float(false, &buffer[index], &(Bathymetry->depth[i]));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->alongtrack[i]));
+      mb_get_binary_float(false, &buffer[index], &(Bathymetry->alongtrack[i]));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->acrosstrack[i]));
+      mb_get_binary_float(false, &buffer[index], &(Bathymetry->acrosstrack[i]));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->pointing_angle[i]));
+      mb_get_binary_float(false, &buffer[index], &(Bathymetry->pointing_angle[i]));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(Bathymetry->azimuth_angle[i]));
+      mb_get_binary_float(false, &buffer[index], &(Bathymetry->azimuth_angle[i]));
       index += 4;
     }
   }
@@ -3799,27 +3799,27 @@ int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *er
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(SideScan->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(SideScan->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SideScan->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(SideScan->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SideScan->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(SideScan->multi_ping));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SideScan->beam_position));
+  mb_get_binary_float(false, &buffer[index], &(SideScan->beam_position));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SideScan->control_flags));
+  mb_get_binary_int(false, &buffer[index], &(SideScan->control_flags));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SideScan->number_samples));
+  mb_get_binary_int(false, &buffer[index], &(SideScan->number_samples));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SideScan->nadir_depth));
+  mb_get_binary_int(false, &buffer[index], &(SideScan->nadir_depth));
   index += 4;
   for (int i = 0; i<7; i++) {
-     mb_get_binary_int(MB_YES, &buffer[index], &(SideScan->reserved[i]));
+     mb_get_binary_int(false, &buffer[index], &(SideScan->reserved[i]));
       index += 4;
   }
-  mb_get_binary_short(MB_YES, &buffer[index], &(SideScan->number_beams));
+  mb_get_binary_short(false, &buffer[index], &(SideScan->number_beams));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SideScan->current_beam));
+  mb_get_binary_short(false, &buffer[index], &(SideScan->current_beam));
   index += 2;
   SideScan->sample_size = buffer[index];
   index++;
@@ -3855,24 +3855,24 @@ int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *er
   else if (SideScan->sample_size == 2) {
     short_ptr = (short *)SideScan->port_data;
     for (int i = 0; i < SideScan->number_samples; i++) {
-      mb_get_binary_short(MB_YES, &buffer[index], &(short_ptr[i]));
+      mb_get_binary_short(false, &buffer[index], &(short_ptr[i]));
       index += 2;
     }
     short_ptr = (short *)SideScan->stbd_data;
     for (int i = 0; i < SideScan->number_samples; i++) {
-      mb_get_binary_short(MB_YES, &buffer[index], &(short_ptr[i]));
+      mb_get_binary_short(false, &buffer[index], &(short_ptr[i]));
       index += 2;
     }
   }
   else if (SideScan->sample_size == 4) {
     int_ptr = (int *)SideScan->port_data;
     for (int i = 0; i < SideScan->number_samples; i++) {
-      mb_get_binary_int(MB_YES, &buffer[index], &(int_ptr[i]));
+      mb_get_binary_int(false, &buffer[index], &(int_ptr[i]));
       index += 4;
     }
     int_ptr = (int *)SideScan->stbd_data;
     for (int i = 0; i < SideScan->number_samples; i++) {
-      mb_get_binary_int(MB_YES, &buffer[index], &(int_ptr[i]));
+      mb_get_binary_int(false, &buffer[index], &(int_ptr[i]));
       index += 4;
     }
   }
@@ -3881,17 +3881,17 @@ int mbr_reson7k3_rd_SideScan(int verbose, char *buffer, void *store_ptr, int *er
   if (header->OptionalDataOffset > 0) {
     index = header->OptionalDataOffset;
     SideScan->optionaldata = MB_YES;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SideScan->frequency));
+    mb_get_binary_float(false, &buffer[index], &(SideScan->frequency));
     index += 4;
-    mb_get_binary_double(MB_YES, &buffer[index], &(SideScan->latitude));
+    mb_get_binary_double(false, &buffer[index], &(SideScan->latitude));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(SideScan->longitude));
+    mb_get_binary_double(false, &buffer[index], &(SideScan->longitude));
     index += 8;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SideScan->heading));
+    mb_get_binary_float(false, &buffer[index], &(SideScan->heading));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SideScan->altitude));
+    mb_get_binary_float(false, &buffer[index], &(SideScan->altitude));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SideScan->depth));
+    mb_get_binary_float(false, &buffer[index], &(SideScan->depth));
     index += 4;
   }
   else {
@@ -3985,36 +3985,36 @@ int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int 
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(WaterColumn->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(WaterColumn->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(WaterColumn->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(WaterColumn->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(WaterColumn->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(WaterColumn->multi_ping));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(WaterColumn->number_beams));
+  mb_get_binary_short(false, &buffer[index], &(WaterColumn->number_beams));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(WaterColumn->reserved));
+  mb_get_binary_short(false, &buffer[index], &(WaterColumn->reserved));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(WaterColumn->samples));
+  mb_get_binary_int(false, &buffer[index], &(WaterColumn->samples));
   index += 4;
   WaterColumn->subset_flag = buffer[index];
   index++;
   WaterColumn->column_flag = buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(WaterColumn->reserved2));
+  mb_get_binary_short(false, &buffer[index], &(WaterColumn->reserved2));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(WaterColumn->sample_type));
+  mb_get_binary_int(false, &buffer[index], &(WaterColumn->sample_type));
   index += 4;
   sample_type_amp = WaterColumn->sample_type & 15;
   sample_type_phase = (WaterColumn->sample_type >> 4) & 15;
   sample_type_iandq = (WaterColumn->sample_type >> 8) & 15;
   for (int i = 0; i < WaterColumn->number_beams; i++) {
     wcd = &WaterColumn->wcd[i];
-    mb_get_binary_short(MB_YES, &buffer[index], &(wcd->beam_number));
+    mb_get_binary_short(false, &buffer[index], &(wcd->beam_number));
     index += 2;
-    mb_get_binary_int(MB_YES, &buffer[index], &(wcd->begin_sample));
+    mb_get_binary_int(false, &buffer[index], &(wcd->begin_sample));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(wcd->end_sample));
+    mb_get_binary_int(false, &buffer[index], &(wcd->end_sample));
     index += 4;
   }
 
@@ -4069,12 +4069,12 @@ int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int 
         }
         else if (sample_type_amp == 2) {
           ushortptr = (unsigned short *)wcd->amplitude;
-          mb_get_binary_short(MB_YES, &buffer[index], &(ushortptr[j]));
+          mb_get_binary_short(false, &buffer[index], &(ushortptr[j]));
           index += 2;
         }
         else if (sample_type_amp == 3) {
           uintptr = (unsigned int *)wcd->amplitude;
-          mb_get_binary_int(MB_YES, &buffer[index], &(uintptr[j]));
+          mb_get_binary_int(false, &buffer[index], &(uintptr[j]));
           index += 4;
         }
         if (sample_type_phase == 1) {
@@ -4084,28 +4084,28 @@ int mbr_reson7k3_rd_WaterColumn(int verbose, char *buffer, void *store_ptr, int 
         }
         else if (sample_type_phase == 2) {
           ushortptr = (unsigned short *)wcd->phase;
-          mb_get_binary_short(MB_YES, &buffer[index], &(ushortptr[j]));
+          mb_get_binary_short(false, &buffer[index], &(ushortptr[j]));
           index += 2;
         }
         else if (sample_type_phase == 3) {
           uintptr = (unsigned int *)wcd->phase;
-          mb_get_binary_int(MB_YES, &buffer[index], &(uintptr[j]));
+          mb_get_binary_int(false, &buffer[index], &(uintptr[j]));
           index += 4;
         }
         if (sample_type_iandq == 1) {
           shortptramp = (short *)wcd->amplitude;
           shortptrphase = (short *)wcd->phase;
-          mb_get_binary_short(MB_YES, &buffer[index], &(shortptramp[j]));
+          mb_get_binary_short(false, &buffer[index], &(shortptramp[j]));
           index += 2;
-          mb_get_binary_short(MB_YES, &buffer[index], &(shortptrphase[j]));
+          mb_get_binary_short(false, &buffer[index], &(shortptrphase[j]));
           index += 2;
         }
         else if (sample_type_iandq == 2) {
           intptramp = (int *)wcd->amplitude;
           intptrphase = (int *)wcd->phase;
-          mb_get_binary_int(MB_YES, &buffer[index], &(intptramp[j]));
+          mb_get_binary_int(false, &buffer[index], &(intptramp[j]));
           index += 4;
-          mb_get_binary_int(MB_YES, &buffer[index], &(intptrphase[j]));
+          mb_get_binary_int(false, &buffer[index], &(intptrphase[j]));
           index += 4;
         }
       }
@@ -4179,23 +4179,23 @@ int mbr_reson7k3_rd_VerticalDepth(int verbose, char *buffer, void *store_ptr, in
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(VerticalDepth->frequency));
+  mb_get_binary_float(false, &buffer[index], &(VerticalDepth->frequency));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(VerticalDepth->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(VerticalDepth->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(VerticalDepth->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(VerticalDepth->multi_ping));
   index += 2;
-  mb_get_binary_double(MB_YES, &buffer[index], &(VerticalDepth->latitude));
+  mb_get_binary_double(false, &buffer[index], &(VerticalDepth->latitude));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(VerticalDepth->longitude));
+  mb_get_binary_double(false, &buffer[index], &(VerticalDepth->longitude));
   index += 8;
-  mb_get_binary_float(MB_YES, &buffer[index], &(VerticalDepth->heading));
+  mb_get_binary_float(false, &buffer[index], &(VerticalDepth->heading));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(VerticalDepth->alongtrack));
+  mb_get_binary_float(false, &buffer[index], &(VerticalDepth->alongtrack));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(VerticalDepth->acrosstrack));
+  mb_get_binary_float(false, &buffer[index], &(VerticalDepth->acrosstrack));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(VerticalDepth->vertical_depth));
+  mb_get_binary_float(false, &buffer[index], &(VerticalDepth->vertical_depth));
   index += 4;
 
   /* set kind */
@@ -4266,16 +4266,16 @@ int mbr_reson7k3_rd_TVG(int verbose, char *buffer, void *store_ptr, int *error) 
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(TVG->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(TVG->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(TVG->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(TVG->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(TVG->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(TVG->multi_ping));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(TVG->n));
+  mb_get_binary_int(false, &buffer[index], &(TVG->n));
   index += 4;
   for (int i = 0; i < 8; i++) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(TVG->reserved[i]));
+    mb_get_binary_int(false, &buffer[index], &(TVG->reserved[i]));
     index += 4;
   }
 
@@ -4364,28 +4364,28 @@ int mbr_reson7k3_rd_Image(int verbose, char *buffer, void *store_ptr, int *error
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Image->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(Image->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Image->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(Image->multi_ping));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Image->width));
+  mb_get_binary_int(false, &buffer[index], &(Image->width));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Image->height));
+  mb_get_binary_int(false, &buffer[index], &(Image->height));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Image->color_depth));
+  mb_get_binary_short(false, &buffer[index], &(Image->color_depth));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Image->reserved));
+  mb_get_binary_short(false, &buffer[index], &(Image->reserved));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Image->compression));
+  mb_get_binary_short(false, &buffer[index], &(Image->compression));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Image->samples));
+  mb_get_binary_int(false, &buffer[index], &(Image->samples));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Image->flag));
+  mb_get_binary_int(false, &buffer[index], &(Image->flag));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(Image->rx_delay));
+  mb_get_binary_float(false, &buffer[index], &(Image->rx_delay));
   index += 4;
   for (int i = 0; i < 6; i++) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(Image->reserved2[i]));
+    mb_get_binary_int(false, &buffer[index], &(Image->reserved2[i]));
     index += 4;
   }
 
@@ -4413,14 +4413,14 @@ int mbr_reson7k3_rd_Image(int verbose, char *buffer, void *store_ptr, int *error
   else if (Image->color_depth == 2) {
     ushortptr = (unsigned short *)Image->image;
     for (int i = 0; i < Image->width * Image->height; i++) {
-      mb_get_binary_short(MB_YES, &buffer[index], &(ushortptr[i]));
+      mb_get_binary_short(false, &buffer[index], &(ushortptr[i]));
       index += 2;
     }
   }
   else if (Image->color_depth == 4) {
     uintptr = (unsigned int *)Image->image;
     for (int i = 0; i < Image->width * Image->height; i++) {
-      mb_get_binary_int(MB_YES, &buffer[index], &(uintptr[i]));
+      mb_get_binary_int(false, &buffer[index], &(uintptr[i]));
       index += 4;
     }
   }
@@ -4492,22 +4492,22 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(PingMotion->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(PingMotion->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(PingMotion->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(PingMotion->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(PingMotion->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(PingMotion->multi_ping));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(PingMotion->n));
+  mb_get_binary_int(false, &buffer[index], &(PingMotion->n));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(PingMotion->flags));
+  mb_get_binary_short(false, &buffer[index], &(PingMotion->flags));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(PingMotion->error_flags));
+  mb_get_binary_int(false, &buffer[index], &(PingMotion->error_flags));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(PingMotion->frequency));
+  mb_get_binary_float(false, &buffer[index], &(PingMotion->frequency));
   index += 4;
   if (PingMotion->flags & 1) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(PingMotion->pitch));
+    mb_get_binary_float(false, &buffer[index], &(PingMotion->pitch));
     index += 4;
   }
 
@@ -4534,7 +4534,7 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
   /* extract PingMotion data */
   if (PingMotion->flags & 2) {
     for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(PingMotion->roll[i]));
+      mb_get_binary_float(false, &buffer[index], &(PingMotion->roll[i]));
       index += 4;
     }
   }
@@ -4545,7 +4545,7 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
   }
   if (PingMotion->flags & 4) {
     for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(PingMotion->heading[i]));
+      mb_get_binary_float(false, &buffer[index], &(PingMotion->heading[i]));
       index += 4;
     }
   }
@@ -4556,7 +4556,7 @@ int mbr_reson7k3_rd_PingMotion(int verbose, char *buffer, void *store_ptr, int *
   }
   if (PingMotion->flags & 8) {
     for (int i = 0; i < PingMotion->n; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(PingMotion->heave[i]));
+      mb_get_binary_float(false, &buffer[index], &(PingMotion->heave[i]));
       index += 4;
     }
   }
@@ -4667,65 +4667,65 @@ int mbr_reson7k3_rd_DetectionDataSetup(int verbose, char *buffer, void *store_pt
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(DetectionDataSetup->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(DetectionDataSetup->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(DetectionDataSetup->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(DetectionDataSetup->multi_ping));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->number_beams));
+  mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->number_beams));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->data_block_size));
+  mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->data_block_size));
   index += 4;
   DetectionDataSetup->detection_algorithm = buffer[index];
   index++;
-  mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->detection_flags));
+  mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->detection_flags));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->minimum_depth));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->minimum_depth));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->maximum_depth));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->maximum_depth));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->minimum_range));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->minimum_range));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->maximum_range));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->maximum_range));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->minimum_nadir_search));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->minimum_nadir_search));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->maximum_nadir_search));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->maximum_nadir_search));
   index += 4;
   DetectionDataSetup->automatic_filter_window = buffer[index];
   index++;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->applied_roll));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->applied_roll));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->depth_gate_tilt));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->depth_gate_tilt));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->nadir_depth));
+  mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->nadir_depth));
   index += 4;
   for (int i = 0; i < 13; i++) {
-    mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->reserved[i]));
+    mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->reserved[i]));
     index += 4;
   }
 
   /* extract DetectionDataSetup data */
   for (int i = 0; i < DetectionDataSetup->number_beams; i++) {
-    mb_get_binary_short(MB_YES, &buffer[index], &(DetectionDataSetup->beam_descriptor[i]));
+    mb_get_binary_short(false, &buffer[index], &(DetectionDataSetup->beam_descriptor[i]));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->detection_point[i]));
+    mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->detection_point[i]));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->flags[i]));
+    mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->flags[i]));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->auto_limits_min_sample[i]));
+    mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->auto_limits_min_sample[i]));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->auto_limits_max_sample[i]));
+    mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->auto_limits_max_sample[i]));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->user_limits_min_sample[i]));
+    mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->user_limits_min_sample[i]));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->user_limits_max_sample[i]));
+    mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->user_limits_max_sample[i]));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(DetectionDataSetup->quality[i]));
+    mb_get_binary_int(false, &buffer[index], &(DetectionDataSetup->quality[i]));
     index += 4;
     if (DetectionDataSetup->data_block_size >= R7KRDTSIZE_DetectionDataSetup) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(DetectionDataSetup->uncertainty[i]));
+      mb_get_binary_float(false, &buffer[index], &(DetectionDataSetup->uncertainty[i]));
       index += 4;
     } else {
       DetectionDataSetup->uncertainty[i] = 0.0;
@@ -4804,15 +4804,15 @@ int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(Beamformed->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(Beamformed->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Beamformed->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(Beamformed->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Beamformed->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(Beamformed->multi_ping));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Beamformed->number_beams));
+  mb_get_binary_short(false, &buffer[index], &(Beamformed->number_beams));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Beamformed->number_samples));
+  mb_get_binary_int(false, &buffer[index], &(Beamformed->number_samples));
   index += 4;
   for (int i = 0; i < 8; i++) {
     Beamformed->reserved[i] = buffer[index];
@@ -4842,9 +4842,9 @@ int mbr_reson7k3_rd_Beamformed(int verbose, char *buffer, void *store_ptr, int *
 
     /* extract Beamformed data */
     for (int j = 0; j < Beamformed->number_samples; j++) {
-      mb_get_binary_short(MB_YES, &buffer[index], &(amplitudephase->amplitude[j]));
+      mb_get_binary_short(false, &buffer[index], &(amplitudephase->amplitude[j]));
       index += 2;
-      mb_get_binary_short(MB_YES, &buffer[index], &(amplitudephase->phase[j]));
+      mb_get_binary_short(false, &buffer[index], &(amplitudephase->phase[j]));
       index += 2;
     }
     amplitudephase->beam_number = i;
@@ -4955,7 +4955,7 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(BITE->number_reports));
+  mb_get_binary_short(false, &buffer[index], &(BITE->number_reports));
   index += 2;
 
   /* allocate memory for BITE->reports if needed */
@@ -4978,17 +4978,17 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
     }
     bitereport->source_address = buffer[index];
     index++;
-    mb_get_binary_float(MB_YES, &buffer[index], &(bitereport->reserved));
+    mb_get_binary_float(false, &buffer[index], &(bitereport->reserved));
     index += 4;
-    mb_get_binary_short(MB_YES, &buffer[index], &(bitereport->reserved2));
+    mb_get_binary_short(false, &buffer[index], &(bitereport->reserved2));
     index += 2;
 
     s7kTime = &(bitereport->downlink_time);
-    mb_get_binary_short(MB_YES, &buffer[index], &(s7kTime->Year));
+    mb_get_binary_short(false, &buffer[index], &(s7kTime->Year));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(s7kTime->Day));
+    mb_get_binary_short(false, &buffer[index], &(s7kTime->Day));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(s7kTime->Seconds));
+    mb_get_binary_float(false, &buffer[index], &(s7kTime->Seconds));
     index += 4;
     s7kTime->Hours = (mb_u_char)buffer[index];
     index++;
@@ -4996,11 +4996,11 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
     index++;
 
     s7kTime = &(bitereport->uplink_time);
-    mb_get_binary_short(MB_YES, &buffer[index], &(s7kTime->Year));
+    mb_get_binary_short(false, &buffer[index], &(s7kTime->Year));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(s7kTime->Day));
+    mb_get_binary_short(false, &buffer[index], &(s7kTime->Day));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(s7kTime->Seconds));
+    mb_get_binary_float(false, &buffer[index], &(s7kTime->Seconds));
     index += 4;
     s7kTime->Hours = (mb_u_char)buffer[index];
     index++;
@@ -5008,11 +5008,11 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
     index++;
 
     s7kTime = &(bitereport->bite_time);
-    mb_get_binary_short(MB_YES, &buffer[index], &(s7kTime->Year));
+    mb_get_binary_short(false, &buffer[index], &(s7kTime->Year));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(s7kTime->Day));
+    mb_get_binary_short(false, &buffer[index], &(s7kTime->Day));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(s7kTime->Seconds));
+    mb_get_binary_float(false, &buffer[index], &(s7kTime->Seconds));
     index += 4;
     s7kTime->Hours = (mb_u_char)buffer[index];
     index++;
@@ -5021,10 +5021,10 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
 
     bitereport->status = buffer[index];
     index++;
-    mb_get_binary_short(MB_YES, &buffer[index], &(bitereport->number_bite));
+    mb_get_binary_short(false, &buffer[index], &(bitereport->number_bite));
     index += 2;
     for (int j = 0; j < 4; j++) {
-      mb_get_binary_long(MB_YES, &buffer[index], &(bitereport->bite_status[j]));
+      mb_get_binary_long(false, &buffer[index], &(bitereport->bite_status[j]));
       index += 8;
     }
 
@@ -5032,7 +5032,7 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
     for (int j = 0; j < bitereport->number_bite; j++) {
       bitefield = &(bitereport->bitefield[j]);
 
-      mb_get_binary_short(MB_YES, &buffer[index], &(bitefield->field));
+      mb_get_binary_short(false, &buffer[index], &(bitefield->field));
       index += 2;
       for (int k = 0; k < 64; k++) {
         bitefield->name[k] = buffer[index];
@@ -5040,11 +5040,11 @@ int mbr_reson7k3_rd_BITE(int verbose, char *buffer, void *store_ptr, int *error)
       }
       bitefield->device_type = buffer[index];
       index++;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bitefield->minimum));
+      mb_get_binary_float(false, &buffer[index], &(bitefield->minimum));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bitefield->maximum));
+      mb_get_binary_float(false, &buffer[index], &(bitefield->maximum));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bitefield->value));
+      mb_get_binary_float(false, &buffer[index], &(bitefield->value));
       index += 4;
     }
   }
@@ -5262,58 +5262,58 @@ int mbr_reson7k3_rd_RawDetection(int verbose, char *buffer, void *store_ptr, int
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(RawDetection->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(RawDetection->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RawDetection->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(RawDetection->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(RawDetection->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(RawDetection->multi_ping));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RawDetection->number_beams));
+  mb_get_binary_int(false, &buffer[index], &(RawDetection->number_beams));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RawDetection->data_field_size));
+  mb_get_binary_int(false, &buffer[index], &(RawDetection->data_field_size));
   index += 4;
   RawDetection->detection_algorithm = buffer[index];
   index++;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RawDetection->flags));
+  mb_get_binary_int(false, &buffer[index], &(RawDetection->flags));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->sampling_rate));
+  mb_get_binary_float(false, &buffer[index], &(RawDetection->sampling_rate));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->tx_angle));
+  mb_get_binary_float(false, &buffer[index], &(RawDetection->tx_angle));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->applied_roll));
+  mb_get_binary_float(false, &buffer[index], &(RawDetection->applied_roll));
   index += 4;
   for (int i = 0; i < 15; i++) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(RawDetection->reserved[i]));
+    mb_get_binary_int(false, &buffer[index], &(RawDetection->reserved[i]));
     index += 4;
   }
 
   /* extract the data */
   for (int i = 0; i < RawDetection->number_beams; i++) {
     rawdetectiondata = (s7k3_rawdetectiondata *)&RawDetection->rawdetectiondata[i];
-    mb_get_binary_short(MB_YES, &buffer[index], &(rawdetectiondata->beam_descriptor));
+    mb_get_binary_short(false, &buffer[index], &(rawdetectiondata->beam_descriptor));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(rawdetectiondata->detection_point));
+    mb_get_binary_float(false, &buffer[index], &(rawdetectiondata->detection_point));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(rawdetectiondata->rx_angle));
+    mb_get_binary_float(false, &buffer[index], &(rawdetectiondata->rx_angle));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(rawdetectiondata->flags));
+    mb_get_binary_int(false, &buffer[index], &(rawdetectiondata->flags));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(rawdetectiondata->quality));
+    mb_get_binary_int(false, &buffer[index], &(rawdetectiondata->quality));
     index += 4;
     if (RawDetection->data_field_size >= 22) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(rawdetectiondata->uncertainty));
+      mb_get_binary_float(false, &buffer[index], &(rawdetectiondata->uncertainty));
       index += 4;
     }
     if (RawDetection->data_field_size >= 26) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(rawdetectiondata->signal_strength));
+      mb_get_binary_float(false, &buffer[index], &(rawdetectiondata->signal_strength));
       index += 4;
     }
     if (RawDetection->data_field_size >= 30) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(rawdetectiondata->min_limit));
+      mb_get_binary_float(false, &buffer[index], &(rawdetectiondata->min_limit));
       index += 4;
     }
     if (RawDetection->data_field_size >= 34) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(rawdetectiondata->max_limit));
+      mb_get_binary_float(false, &buffer[index], &(rawdetectiondata->max_limit));
       index += 4;
     }
 
@@ -5327,37 +5327,37 @@ int mbr_reson7k3_rd_RawDetection(int verbose, char *buffer, void *store_ptr, int
     RawDetection->optionaldata = MB_YES;
     index = header->OptionalDataOffset;
 
-    mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->frequency));
+    mb_get_binary_float(false, &buffer[index], &(RawDetection->frequency));
     index += 4;
-    mb_get_binary_double(MB_YES, &buffer[index], &(RawDetection->latitude));
+    mb_get_binary_double(false, &buffer[index], &(RawDetection->latitude));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(RawDetection->longitude));
+    mb_get_binary_double(false, &buffer[index], &(RawDetection->longitude));
     index += 8;
-    mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->heading));
+    mb_get_binary_float(false, &buffer[index], &(RawDetection->heading));
     index += 4;
     RawDetection->height_source = buffer[index];
     index += 1;
-    mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->tide));
+    mb_get_binary_float(false, &buffer[index], &(RawDetection->tide));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->roll));
+    mb_get_binary_float(false, &buffer[index], &(RawDetection->roll));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->pitch));
+    mb_get_binary_float(false, &buffer[index], &(RawDetection->pitch));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->heave));
+    mb_get_binary_float(false, &buffer[index], &(RawDetection->heave));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(RawDetection->vehicle_depth));
+    mb_get_binary_float(false, &buffer[index], &(RawDetection->vehicle_depth));
     index += 4;
     for (int i = 0; i < RawDetection->number_beams; i++) {
       bathydata = (s7k3_bathydata *)&RawDetection->bathydata[i];
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->depth));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->depth));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->alongtrack));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->alongtrack));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->acrosstrack));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->acrosstrack));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->pointing_angle));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->pointing_angle));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->azimuth_angle));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->azimuth_angle));
       index += 4;
     }
   }
@@ -5446,22 +5446,22 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(Snippet->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(Snippet->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Snippet->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(Snippet->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Snippet->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(Snippet->multi_ping));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(Snippet->number_beams));
+  mb_get_binary_short(false, &buffer[index], &(Snippet->number_beams));
   index += 2;
   Snippet->error_flag = buffer[index];
   index++;
   Snippet->control_flags = buffer[index];
   index++;
-  mb_get_binary_int(MB_YES, &buffer[index], &(Snippet->flags));
+  mb_get_binary_int(false, &buffer[index], &(Snippet->flags));
   index += 4;
   for (int i = 0; i < 6; i++) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(Snippet->reserved[i]));
+    mb_get_binary_int(false, &buffer[index], &(Snippet->reserved[i]));
     index += 4;
   }
 
@@ -5470,13 +5470,13 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
     snippetdata = (s7k3_snippetdata *)&(Snippet->snippetdata[i]);
 
     /* extract snippet data */
-    mb_get_binary_short(MB_YES, &buffer[index], &(snippetdata->beam_number));
+    mb_get_binary_short(false, &buffer[index], &(snippetdata->beam_number));
     index += 2;
-    mb_get_binary_int(MB_YES, &buffer[index], &(snippetdata->begin_sample));
+    mb_get_binary_int(false, &buffer[index], &(snippetdata->begin_sample));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(snippetdata->detect_sample));
+    mb_get_binary_int(false, &buffer[index], &(snippetdata->detect_sample));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(snippetdata->end_sample));
+    mb_get_binary_int(false, &buffer[index], &(snippetdata->end_sample));
     index += 4;
 
     /* allocate memory for snippet data if needed */
@@ -5506,7 +5506,7 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
         u32_ptr = (u32 *)snippetdata->amplitude;
         nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
         for (int j = 0; j < nsample; j++) {
-          mb_get_binary_int(MB_YES, &buffer[index], &(u32_ptr[j]));
+          mb_get_binary_int(false, &buffer[index], &(u32_ptr[j]));
           index += 4;
         }
       }
@@ -5517,7 +5517,7 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
         u16_ptr = (u16 *)snippetdata->amplitude;
         nsample = snippetdata->end_sample - snippetdata->begin_sample + 1;
         for (int j = 0; j < nsample; j++) {
-          mb_get_binary_short(MB_YES, &buffer[index], &(u16_ptr[j]));
+          mb_get_binary_short(false, &buffer[index], &(u16_ptr[j]));
           index += 2;
         }
       }
@@ -5529,20 +5529,20 @@ int mbr_reson7k3_rd_Snippet(int verbose, char *buffer, void *store_ptr, int *err
     Snippet->optionaldata = MB_YES;
     index = header->OptionalDataOffset;
 
-    mb_get_binary_float(MB_YES, &buffer[index], &(Snippet->frequency));
+    mb_get_binary_float(false, &buffer[index], &(Snippet->frequency));
     index += 4;
-    mb_get_binary_double(MB_YES, &buffer[index], &(Snippet->latitude));
+    mb_get_binary_double(false, &buffer[index], &(Snippet->latitude));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(Snippet->longitude));
+    mb_get_binary_double(false, &buffer[index], &(Snippet->longitude));
     index += 8;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Snippet->heading));
+    mb_get_binary_float(false, &buffer[index], &(Snippet->heading));
     index += 4;
     for (int i = 0; i < Snippet->number_beams; i++) {
-      mb_get_binary_float(MB_YES, &buffer[index], &(Snippet->beam_alongtrack[i]));
+      mb_get_binary_float(false, &buffer[index], &(Snippet->beam_alongtrack[i]));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(Snippet->beam_acrosstrack[i]));
+      mb_get_binary_float(false, &buffer[index], &(Snippet->beam_acrosstrack[i]));
       index += 4;
-      mb_get_binary_int(MB_YES, &buffer[index], &(Snippet->center_sample[i]));
+      mb_get_binary_int(false, &buffer[index], &(Snippet->center_sample[i]));
       index += 4;
     }
   }
@@ -5650,79 +5650,79 @@ int mbr_reson7k3_rd_InstallationParameters(int verbose, char *buffer, void *stor
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->frequency));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->frequency));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(InstallationParameters->firmware_version_len));
+  mb_get_binary_short(false, &buffer[index], &(InstallationParameters->firmware_version_len));
   index += 2;
   for (int i = 0; i < 128; i++) {
     InstallationParameters->firmware_version[i] = buffer[index];
     index++;
   }
-  mb_get_binary_short(MB_YES, &buffer[index], &(InstallationParameters->software_version_len));
+  mb_get_binary_short(false, &buffer[index], &(InstallationParameters->software_version_len));
   index += 2;
   for (int i = 0; i < 128; i++) {
     InstallationParameters->software_version[i] = buffer[index];
     index++;
   }
-  mb_get_binary_short(MB_YES, &buffer[index], &(InstallationParameters->s7k3_version_len));
+  mb_get_binary_short(false, &buffer[index], &(InstallationParameters->s7k3_version_len));
   index += 2;
   for (int i = 0; i < 128; i++) {
     InstallationParameters->s7k3_version[i] = buffer[index];
     index++;
   }
-  mb_get_binary_short(MB_YES, &buffer[index], &(InstallationParameters->protocal_version_len));
+  mb_get_binary_short(false, &buffer[index], &(InstallationParameters->protocal_version_len));
   index += 2;
   for (int i = 0; i < 128; i++) {
     InstallationParameters->protocal_version[i] = buffer[index];
     index++;
   }
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->transmit_x));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->transmit_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->transmit_y));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->transmit_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->transmit_z));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->transmit_z));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->transmit_roll));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->transmit_roll));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->transmit_pitch));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->transmit_pitch));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->transmit_heading));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->transmit_heading));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->receive_x));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->receive_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->receive_y));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->receive_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->receive_z));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->receive_z));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->receive_roll));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->receive_roll));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->receive_pitch));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->receive_pitch));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->receive_heading));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->receive_heading));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->motion_x));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->motion_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->motion_y));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->motion_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->motion_z));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->motion_z));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->motion_roll));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->motion_roll));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->motion_pitch));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->motion_pitch));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->motion_heading));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->motion_heading));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(InstallationParameters->motion_time_delay));
+  mb_get_binary_short(false, &buffer[index], &(InstallationParameters->motion_time_delay));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->position_x));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->position_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->position_y));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->position_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->position_z));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->position_z));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(InstallationParameters->position_time_delay));
+  mb_get_binary_short(false, &buffer[index], &(InstallationParameters->position_time_delay));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(InstallationParameters->waterline_z));
+  mb_get_binary_float(false, &buffer[index], &(InstallationParameters->waterline_z));
   index += 4;
 
   /* set kind */
@@ -5870,27 +5870,27 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(CompressedWaterColumn->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(CompressedWaterColumn->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CompressedWaterColumn->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(CompressedWaterColumn->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CompressedWaterColumn->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(CompressedWaterColumn->multi_ping));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CompressedWaterColumn->number_beams));
+  mb_get_binary_short(false, &buffer[index], &(CompressedWaterColumn->number_beams));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CompressedWaterColumn->samples));
+  mb_get_binary_int(false, &buffer[index], &(CompressedWaterColumn->samples));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CompressedWaterColumn->compressed_samples));
+  mb_get_binary_int(false, &buffer[index], &(CompressedWaterColumn->compressed_samples));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CompressedWaterColumn->flags));
+  mb_get_binary_int(false, &buffer[index], &(CompressedWaterColumn->flags));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CompressedWaterColumn->first_sample));
+  mb_get_binary_int(false, &buffer[index], &(CompressedWaterColumn->first_sample));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CompressedWaterColumn->sample_rate));
+  mb_get_binary_float(false, &buffer[index], &(CompressedWaterColumn->sample_rate));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CompressedWaterColumn->compression_factor));
+  mb_get_binary_float(false, &buffer[index], &(CompressedWaterColumn->compression_factor));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CompressedWaterColumn->reserved));
+  mb_get_binary_int(false, &buffer[index], &(CompressedWaterColumn->reserved));
   index += 4;
 
   /* calculate bytes per sample and allocate memory for time series if needed */
@@ -5979,13 +5979,13 @@ int mbr_reson7k3_rd_CompressedWaterColumn(int verbose, char *buffer, void *store
     compressedwatercolumndata = (s7k3_compressedwatercolumndata *)&(CompressedWaterColumn->compressedwatercolumndata[i]);
 
     /* extract CompressedWaterColumn data */
-    mb_get_binary_short(MB_YES, &buffer[index], &(compressedwatercolumndata->beam_number));
+    mb_get_binary_short(false, &buffer[index], &(compressedwatercolumndata->beam_number));
     index += 2;
     if (segmentnumbersvalid == MB_YES) {
       compressedwatercolumndata->segment_number = buffer[index];
       index += 1;
     }
-    mb_get_binary_int(MB_YES, &buffer[index], &(compressedwatercolumndata->samples));
+    mb_get_binary_int(false, &buffer[index], &(compressedwatercolumndata->samples));
     index += 4;
 
     /* allocate memory for compressedwatercolumndata data if needed */
@@ -6080,67 +6080,67 @@ int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store
   /* extract the data */
   index = header->Offset + 4;
 
-  mb_get_binary_short(MB_YES, &buffer[index], &(SegmentedRawDetection->record_header_size));
+  mb_get_binary_short(false, &buffer[index], &(SegmentedRawDetection->record_header_size));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SegmentedRawDetection->n_segments));
+  mb_get_binary_int(false, &buffer[index], &(SegmentedRawDetection->n_segments));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SegmentedRawDetection->segment_field_size));
+  mb_get_binary_short(false, &buffer[index], &(SegmentedRawDetection->segment_field_size));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SegmentedRawDetection->n_rx));
+  mb_get_binary_int(false, &buffer[index], &(SegmentedRawDetection->n_rx));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SegmentedRawDetection->rx_field_size));
+  mb_get_binary_short(false, &buffer[index], &(SegmentedRawDetection->rx_field_size));
   index += 2;
-  mb_get_binary_long(MB_YES, &buffer[index], &(SegmentedRawDetection->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(SegmentedRawDetection->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(SegmentedRawDetection->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(SegmentedRawDetection->ping_number));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SegmentedRawDetection->multi_ping));
+  mb_get_binary_short(false, &buffer[index], &(SegmentedRawDetection->multi_ping));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->sound_velocity));
+  mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->sound_velocity));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->rx_delay));
+  mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->rx_delay));
   index += 4;
 
   /* extract the data */
   for (int i = 0; i < SegmentedRawDetection->n_segments; i++) {
     segmentedrawdetectiontxdata = (s7k3_segmentedrawdetectiontxdata *)&SegmentedRawDetection->segmentedrawdetectiontxdata[i];
-    mb_get_binary_short(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->segment_number));
+    mb_get_binary_short(false, &buffer[index], &(segmentedrawdetectiontxdata->segment_number));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_angle_along));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_angle_along));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_angle_across));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_angle_across));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_delay));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_delay));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->frequency));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->frequency));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->pulse_type));
+    mb_get_binary_int(false, &buffer[index], &(segmentedrawdetectiontxdata->pulse_type));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->pulse_bandwidth));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->pulse_bandwidth));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_width));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_width));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_width_across));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_width_across));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_width_along));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_width_along));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_envelope));
+    mb_get_binary_int(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_envelope));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_envelope_parameter));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_pulse_envelope_parameter));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->tx_relative_src_level));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->tx_relative_src_level));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->rx_beam_width));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->rx_beam_width));
     index += 4;
     segmentedrawdetectiontxdata->detection_algorithm = buffer[index];
     index += 1;
-    mb_get_binary_int(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->flags));
+    mb_get_binary_int(false, &buffer[index], &(segmentedrawdetectiontxdata->flags));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->sampling_rate));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->sampling_rate));
     index += 4;
     segmentedrawdetectiontxdata->tvg = buffer[index];
     index += 1;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectiontxdata->rx_bandwidth));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectiontxdata->rx_bandwidth));
     index += 4;
 
     /* skip extra data if it exists */
@@ -6150,23 +6150,23 @@ int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store
 
   for (int i = 0;i<SegmentedRawDetection->n_rx;i++) {
     segmentedrawdetectionrxdata = (s7k3_segmentedrawdetectionrxdata *)&(SegmentedRawDetection->segmentedrawdetectionrxdata[i]);
-    mb_get_binary_short(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->beam_number));
+    mb_get_binary_short(false, &buffer[index], &(segmentedrawdetectionrxdata->beam_number));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->used_segment));
+    mb_get_binary_short(false, &buffer[index], &(segmentedrawdetectionrxdata->used_segment));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->detection_point));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectionrxdata->detection_point));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->rx_angle_cross));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectionrxdata->rx_angle_cross));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->flags2));
+    mb_get_binary_int(false, &buffer[index], &(segmentedrawdetectionrxdata->flags2));
     index += 4;
-    mb_get_binary_int(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->quality));
+    mb_get_binary_int(false, &buffer[index], &(segmentedrawdetectionrxdata->quality));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->uncertainty));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectionrxdata->uncertainty));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->signal_strength));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectionrxdata->signal_strength));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(segmentedrawdetectionrxdata->sn_ratio));
+    mb_get_binary_float(false, &buffer[index], &(segmentedrawdetectionrxdata->sn_ratio));
     index += 4;
 
     /* skip extra data if it exists */
@@ -6179,37 +6179,37 @@ int mbr_reson7k3_rd_SegmentedRawDetection(int verbose, char *buffer, void *store
     SegmentedRawDetection->optionaldata = MB_YES;
     index = header->OptionalDataOffset;
 
-    mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->frequency));
+    mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->frequency));
     index += 4;
-    mb_get_binary_double(MB_YES, &buffer[index], &(SegmentedRawDetection->latitude));
+    mb_get_binary_double(false, &buffer[index], &(SegmentedRawDetection->latitude));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(SegmentedRawDetection->longitude));
+    mb_get_binary_double(false, &buffer[index], &(SegmentedRawDetection->longitude));
     index += 8;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->heading));
+    mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->heading));
     index += 4;
     SegmentedRawDetection->height_source = buffer[index];
     index += 1;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->tide));
+    mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->tide));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->roll));
+    mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->roll));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->pitch));
+    mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->pitch));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->heave));
+    mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->heave));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(SegmentedRawDetection->vehicle_depth));
+    mb_get_binary_float(false, &buffer[index], &(SegmentedRawDetection->vehicle_depth));
     index += 4;
     for (int i = 0; i < SegmentedRawDetection->n_rx; i++) {
       bathydata = (s7k3_bathydata *)&SegmentedRawDetection->bathydata[i];
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->depth));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->depth));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->alongtrack));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->alongtrack));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->acrosstrack));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->acrosstrack));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->pointing_angle));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->pointing_angle));
       index += 4;
-      mb_get_binary_float(MB_YES, &buffer[index], &(bathydata->azimuth_angle));
+      mb_get_binary_float(false, &buffer[index], &(bathydata->azimuth_angle));
       index += 4;
     }
   }
@@ -6353,13 +6353,13 @@ int mbr_reson7k3_rd_SystemEventMessage(int verbose, char *buffer, void *store_pt
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(SystemEventMessage->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(SystemEventMessage->serial_number));
   index += 8;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SystemEventMessage->event_id));
+  mb_get_binary_short(false, &buffer[index], &(SystemEventMessage->event_id));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SystemEventMessage->message_length));
+  mb_get_binary_short(false, &buffer[index], &(SystemEventMessage->message_length));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(SystemEventMessage->event_identifier));
+  mb_get_binary_short(false, &buffer[index], &(SystemEventMessage->event_identifier));
   index += 2;
 
   /* make sure enough memory is allocated for channel data */
@@ -6678,20 +6678,20 @@ int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *
   /* extract the data */
   index = header->Offset + 4;
   for (int i = 0; i < 2; i++) {
-    mb_get_binary_long(MB_YES, &buffer[index], &(FileHeader->file_identifier[i]));
+    mb_get_binary_long(false, &buffer[index], &(FileHeader->file_identifier[i]));
     index += 8;
   }
-  mb_get_binary_short(MB_YES, &buffer[index], &(FileHeader->version));
+  mb_get_binary_short(false, &buffer[index], &(FileHeader->version));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(FileHeader->reserved));
+  mb_get_binary_short(false, &buffer[index], &(FileHeader->reserved));
   index += 2;
   for (int i = 0; i < 2; i++) {
-    mb_get_binary_long(MB_YES, &buffer[index], &(FileHeader->session_identifier[i]));
+    mb_get_binary_long(false, &buffer[index], &(FileHeader->session_identifier[i]));
     index += 8;
   }
-  mb_get_binary_int(MB_YES, &buffer[index], &(FileHeader->record_data_size));
+  mb_get_binary_int(false, &buffer[index], &(FileHeader->record_data_size));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(FileHeader->number_devices));
+  mb_get_binary_int(false, &buffer[index], &(FileHeader->number_devices));
   index += 4;
   for (int i = 0; i < 64; i++) {
     FileHeader->recording_name[i] = buffer[index];
@@ -6711,9 +6711,9 @@ int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *
   }
   for (int i = 0; i < FileHeader->number_devices; i++) {
     subsystem = &(FileHeader->subsystem[i]);
-    mb_get_binary_int(MB_YES, &buffer[index], &(subsystem->device_identifier));
+    mb_get_binary_int(false, &buffer[index], &(subsystem->device_identifier));
     index += 4;
-    mb_get_binary_short(MB_YES, &buffer[index], &(subsystem->system_enumerator));
+    mb_get_binary_short(false, &buffer[index], &(subsystem->system_enumerator));
     index += 2;
   }
 
@@ -6721,9 +6721,9 @@ int mbr_reson7k3_rd_FileHeader(int verbose, char *buffer, void *store_ptr, int *
   if (header->OptionalDataOffset > 0) {
     index = header->OptionalDataOffset;
     FileHeader->optionaldata = MB_YES;
-    mb_get_binary_int(MB_YES, &buffer[index], &(FileHeader->file_catalog_size));
+    mb_get_binary_int(false, &buffer[index], &(FileHeader->file_catalog_size));
     index += 4;
-    mb_get_binary_long(MB_YES, &buffer[index], &(FileHeader->file_catalog_offset));
+    mb_get_binary_long(false, &buffer[index], &(FileHeader->file_catalog_offset));
     index += 8;
   }
   else {
@@ -7051,13 +7051,13 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(FileCatalog->size));
+  mb_get_binary_int(false, &buffer[index], &(FileCatalog->size));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(FileCatalog->version));
+  mb_get_binary_short(false, &buffer[index], &(FileCatalog->version));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(FileCatalog->n));
+  mb_get_binary_int(false, &buffer[index], &(FileCatalog->n));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(FileCatalog->reserved));
+  mb_get_binary_int(false, &buffer[index], &(FileCatalog->reserved));
   index += 4;
 
   /* allocate memory for data record catalog if needed */
@@ -7074,30 +7074,30 @@ int mbr_reson7k3_rd_FileCatalog(int verbose, char *buffer, void *store_ptr, int 
   for (int i = 0; i < FileCatalog->n; i++) {
     filecatalogdata = &(FileCatalog->filecatalogdata[i]);
     filecatalogdata->sequence = i;
-    mb_get_binary_int(MB_YES, &buffer[index], &(filecatalogdata->size));
+    mb_get_binary_int(false, &buffer[index], &(filecatalogdata->size));
     index += 4;
-    mb_get_binary_long(MB_YES, &buffer[index], &(filecatalogdata->offset));
+    mb_get_binary_long(false, &buffer[index], &(filecatalogdata->offset));
     index += 8;
-    mb_get_binary_short(MB_YES, &buffer[index], &(filecatalogdata->record_type));
+    mb_get_binary_short(false, &buffer[index], &(filecatalogdata->record_type));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(filecatalogdata->device_id));
+    mb_get_binary_short(false, &buffer[index], &(filecatalogdata->device_id));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(filecatalogdata->system_enumerator));
+    mb_get_binary_short(false, &buffer[index], &(filecatalogdata->system_enumerator));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(filecatalogdata->s7kTime.Year));
+    mb_get_binary_short(false, &buffer[index], &(filecatalogdata->s7kTime.Year));
     index += 2;
-    mb_get_binary_short(MB_YES, &buffer[index], &(filecatalogdata->s7kTime.Day));
+    mb_get_binary_short(false, &buffer[index], &(filecatalogdata->s7kTime.Day));
     index += 2;
-    mb_get_binary_float(MB_YES, &buffer[index], &(filecatalogdata->s7kTime.Seconds));
+    mb_get_binary_float(false, &buffer[index], &(filecatalogdata->s7kTime.Seconds));
     index += 4;
     filecatalogdata->s7kTime.Hours = (mb_u_char)buffer[index];
     index++;
     filecatalogdata->s7kTime.Minutes = (mb_u_char)buffer[index];
     index++;
-    mb_get_binary_int(MB_YES, &buffer[index], &(filecatalogdata->record_count));
+    mb_get_binary_int(false, &buffer[index], &(filecatalogdata->record_count));
     index += 4;
     for (int j = 0;j<8;j++) {
-      mb_get_binary_short(MB_YES, &buffer[index], &(filecatalogdata->reserved[j]));
+      mb_get_binary_short(false, &buffer[index], &(filecatalogdata->reserved[j]));
       index += 2;
     }
 
@@ -7321,146 +7321,146 @@ int mbr_reson7k3_rd_RemoteControlSonarSettings(int verbose, char *buffer, void *
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(RemoteControlSonarSettings->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(RemoteControlSonarSettings->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->ping_number));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->frequency));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->frequency));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->sample_rate));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->sample_rate));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->receiver_bandwidth));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->receiver_bandwidth));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_width));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_width));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_type));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_type));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_envelope));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_envelope));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_envelope_par));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_envelope_par));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_mode));
+  mb_get_binary_short(false, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_mode));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_reserved));
+  mb_get_binary_short(false, &buffer[index], &(RemoteControlSonarSettings->tx_pulse_reserved));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->max_ping_rate));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->max_ping_rate));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->ping_period));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->ping_period));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->range_selection));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->range_selection));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->power_selection));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->power_selection));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->gain_selection));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->gain_selection));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->control_flags));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->control_flags));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->projector_id));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->projector_id));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->steering_vertical));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->steering_vertical));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->steering_horizontal));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->steering_horizontal));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->beamwidth_vertical));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->beamwidth_vertical));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->beamwidth_horizontal));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->beamwidth_horizontal));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->focal_point));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->focal_point));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->projector_weighting));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->projector_weighting));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->projector_weighting_par));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->projector_weighting_par));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->transmit_flags));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->transmit_flags));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->hydrophone_id));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->hydrophone_id));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->rx_weighting));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->rx_weighting));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->rx_weighting_par));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->rx_weighting_par));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->rx_flags));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->rx_flags));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->range_minimum));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->range_minimum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->range_maximum));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->range_maximum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->depth_minimum));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->depth_minimum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->depth_maximum));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->depth_maximum));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->absorption));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->absorption));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->sound_velocity));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->sound_velocity));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->spreading));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->spreading));
   index += 4;
   buffer[index] = RemoteControlSonarSettings->vernier_operation_mode;
   index ++;
   buffer[index] = RemoteControlSonarSettings->autofilter_window;
   index ++;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_offset_x));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->tx_offset_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_offset_y));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->tx_offset_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->tx_offset_z));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->tx_offset_z));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->head_tilt_x));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->head_tilt_x));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->head_tilt_y));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->head_tilt_y));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->head_tilt_z));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->head_tilt_z));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->ping_state));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->ping_state));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(RemoteControlSonarSettings->beam_angle_mode));
+  mb_get_binary_short(false, &buffer[index], &(RemoteControlSonarSettings->beam_angle_mode));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(RemoteControlSonarSettings->s7kcenter_mode));
+  mb_get_binary_short(false, &buffer[index], &(RemoteControlSonarSettings->s7kcenter_mode));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->gate_depth_min));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->gate_depth_min));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->gate_depth_max));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->gate_depth_max));
   index += 4;
 
-  mb_get_binary_double(MB_YES, &buffer[index], &(RemoteControlSonarSettings->trigger_width));
+  mb_get_binary_double(false, &buffer[index], &(RemoteControlSonarSettings->trigger_width));
   index += 8;
-  mb_get_binary_double(MB_YES, &buffer[index], &(RemoteControlSonarSettings->trigger_offset));
+  mb_get_binary_double(false, &buffer[index], &(RemoteControlSonarSettings->trigger_offset));
   index += 8;
-  mb_get_binary_short(MB_YES, &buffer[index], &(RemoteControlSonarSettings->projector_selection));
+  mb_get_binary_short(false, &buffer[index], &(RemoteControlSonarSettings->projector_selection));
   index += 2;
   for (int i = 0;i<2;i++) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->reserved2[i]));
+    mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->reserved2[i]));
     index += 4;
   }
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->alternate_gain));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->alternate_gain));
   index += 4;
   RemoteControlSonarSettings->vernier_filter = buffer[index];
   index ++;
   RemoteControlSonarSettings->reserved3 = buffer[index];
   index ++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(RemoteControlSonarSettings->custom_beams));
+  mb_get_binary_short(false, &buffer[index], &(RemoteControlSonarSettings->custom_beams));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->coverage_angle));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->coverage_angle));
   index += 4;
   RemoteControlSonarSettings->coverage_mode = buffer[index];
   index ++;
   RemoteControlSonarSettings->quality_filter = buffer[index];
   index ++;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->received_steering));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->received_steering));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->flexmode_coverage));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->flexmode_coverage));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->flexmode_steering));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->flexmode_steering));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->constant_spacing));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->constant_spacing));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(RemoteControlSonarSettings->beam_mode));
+  mb_get_binary_short(false, &buffer[index], &(RemoteControlSonarSettings->beam_mode));
   index += 2;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->depth_gate_tilt));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->depth_gate_tilt));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(RemoteControlSonarSettings->applied_frequency));
+  mb_get_binary_float(false, &buffer[index], &(RemoteControlSonarSettings->applied_frequency));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(RemoteControlSonarSettings->element_number));
+  mb_get_binary_int(false, &buffer[index], &(RemoteControlSonarSettings->element_number));
   index += 4;
 
   /* set kind */
@@ -7530,17 +7530,17 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_long(MB_YES, &buffer[index], &(CommonSystemSettings->serial_number));
+  mb_get_binary_long(false, &buffer[index], &(CommonSystemSettings->serial_number));
   index += 8;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->ping_number));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->ping_number));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CommonSystemSettings->sound_velocity));
+  mb_get_binary_float(false, &buffer[index], &(CommonSystemSettings->sound_velocity));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CommonSystemSettings->absorption));
+  mb_get_binary_float(false, &buffer[index], &(CommonSystemSettings->absorption));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CommonSystemSettings->spreading_loss));
+  mb_get_binary_float(false, &buffer[index], &(CommonSystemSettings->spreading_loss));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->sequencer_control));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->sequencer_control));
   index += 4;
   CommonSystemSettings->mru_format = buffer[index];
   index++;
@@ -7556,55 +7556,55 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
   index++;
   CommonSystemSettings->record_version = buffer[index];
   index++;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CommonSystemSettings->motion_latency));
+  mb_get_binary_float(false, &buffer[index], &(CommonSystemSettings->motion_latency));
   index += 4;
   CommonSystemSettings->svp_filter = buffer[index];
   index++;
   CommonSystemSettings->sv_override = buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->activeenum));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->activeenum));
   index += 2;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->active_id));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->active_id));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->system_mode));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->system_mode));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->masterslave_mode));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->masterslave_mode));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->tracker_flags));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->tracker_flags));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CommonSystemSettings->tracker_swathwidth));
+  mb_get_binary_float(false, &buffer[index], &(CommonSystemSettings->tracker_swathwidth));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->multidetect_enable));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->multidetect_enable));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->multidetect_obsize));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->multidetect_obsize));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->multidetect_sensitivity));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->multidetect_sensitivity));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->multidetect_detections));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->multidetect_detections));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->multidetect_reserved[0]));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->multidetect_reserved[0]));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->multidetect_reserved[1]));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->multidetect_reserved[1]));
   index += 2;
   for (int i = 0;i<4;i++) {
     CommonSystemSettings->slave_ip[i] = buffer[index];
     index++;
   }
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->snippet_controlflags));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->snippet_controlflags));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->snippet_minwindow));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->snippet_minwindow));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->snippet_maxwindow));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->snippet_maxwindow));
   index += 4;
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->fullrange_dualhead));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->fullrange_dualhead));
   index += 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CommonSystemSettings->delay_multiplier));
+  mb_get_binary_float(false, &buffer[index], &(CommonSystemSettings->delay_multiplier));
   index += 4;
   CommonSystemSettings->powersaving_mode = buffer[index];
   index++;
   CommonSystemSettings->flags = buffer[index];
   index++;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->range_blank));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->range_blank));
   index += 2;
   CommonSystemSettings->startup_normalization = buffer[index];
   index++;
@@ -7620,7 +7620,7 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
     CommonSystemSettings->reserved1[i] = buffer[index];
     index++;
   }
-  mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->compressed_wcflags));
+  mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->compressed_wcflags));
   index += 4;
   CommonSystemSettings->deckmode = buffer[index];
   index++;
@@ -7630,7 +7630,7 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
   index++;
   CommonSystemSettings->powermode_max = buffer[index];
   index++;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CommonSystemSettings->water_temperature));
+  mb_get_binary_float(false, &buffer[index], &(CommonSystemSettings->water_temperature));
   index += 4;
   CommonSystemSettings->sensor_override = buffer[index];
   index++;
@@ -7640,14 +7640,14 @@ int mbr_reson7k3_rd_CommonSystemSettings(int verbose, char *buffer, void *store_
   index++;
   CommonSystemSettings->reserved3 = buffer[index];
   index++;
-  mb_get_binary_float(MB_YES, &buffer[index], &(CommonSystemSettings->tracker_maxcoverage));
+  mb_get_binary_float(false, &buffer[index], &(CommonSystemSettings->tracker_maxcoverage));
   index += 4;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->dutycycle_mode));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->dutycycle_mode));
   index += 2;
-  mb_get_binary_short(MB_YES, &buffer[index], &(CommonSystemSettings->reserved4));
+  mb_get_binary_short(false, &buffer[index], &(CommonSystemSettings->reserved4));
   index += 2;
   for (int i = 0;i<99;i++) {
-    mb_get_binary_int(MB_YES, &buffer[index], &(CommonSystemSettings->reserved5[i]));
+    mb_get_binary_int(false, &buffer[index], &(CommonSystemSettings->reserved5[i]));
     index += 4;
   }
 
@@ -7786,7 +7786,7 @@ int mbr_reson7k3_rd_SoundVelocity(int verbose, char *buffer, void *store_ptr, in
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SoundVelocity->soundvelocity));
+  mb_get_binary_float(false, &buffer[index], &(SoundVelocity->soundvelocity));
   index += 4;
 
   /* set kind */
@@ -7856,7 +7856,7 @@ int mbr_reson7k3_rd_AbsorptionLoss(int verbose, char *buffer, void *store_ptr, i
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(AbsorptionLoss->absorptionloss));
+  mb_get_binary_float(false, &buffer[index], &(AbsorptionLoss->absorptionloss));
   index += 4;
 
   /* set kind */
@@ -7927,7 +7927,7 @@ int mbr_reson7k3_rd_SpreadingLoss(int verbose, char *buffer, void *store_ptr, in
 
   /* extract the data */
   index = header->Offset + 4;
-  mb_get_binary_float(MB_YES, &buffer[index], &(SpreadingLoss->spreadingloss));
+  mb_get_binary_float(false, &buffer[index], &(SpreadingLoss->spreadingloss));
   index += 4;
 
   /* set kind */
@@ -10155,17 +10155,17 @@ int mbr_reson7k3_wr_Tide(int verbose, int *bufferalloc, char **bufferptr, void *
     index += 2;
     buffer[index] = Tide->flags;
     index++;
-    mb_get_binary_short(MB_YES, &buffer[index], &(Tide->gauge));
+    mb_get_binary_short(false, &buffer[index], &(Tide->gauge));
     index += 2;
-    mb_get_binary_int(MB_YES, &buffer[index], &(Tide->datum));
+    mb_get_binary_int(false, &buffer[index], &(Tide->datum));
     index += 4;
-    mb_get_binary_float(MB_YES, &buffer[index], &(Tide->latency));
+    mb_get_binary_float(false, &buffer[index], &(Tide->latency));
     index += 4;
-    mb_get_binary_double(MB_YES, &buffer[index], &(Tide->latitude_northing));
+    mb_get_binary_double(false, &buffer[index], &(Tide->latitude_northing));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(Tide->longitude_easting));
+    mb_get_binary_double(false, &buffer[index], &(Tide->longitude_easting));
     index += 8;
-    mb_get_binary_double(MB_YES, &buffer[index], &(Tide->height));
+    mb_get_binary_double(false, &buffer[index], &(Tide->height));
     index += 8;
     buffer[index] = Tide->type;
     index++;

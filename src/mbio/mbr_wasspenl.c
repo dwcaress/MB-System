@@ -211,53 +211,53 @@ int mbr_wasspenl_rd_genbathy(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->version));
+	mb_get_binary_int(false, &buffer[index], &(genbathy->version));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(genbathy->msec));
+	mb_get_binary_double(false, &buffer[index], &(genbathy->msec));
 	index += 8;
 	genbathy->day = buffer[index];
 	index++;
 	genbathy->month = buffer[index];
 	index++;
-	mb_get_binary_short(MB_YES, &buffer[index], &(genbathy->year));
+	mb_get_binary_short(false, &buffer[index], &(genbathy->year));
 	index += 2;
-	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->ping_number));
+	mb_get_binary_int(false, &buffer[index], &(genbathy->ping_number));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->sonar_model));
+	mb_get_binary_int(false, &buffer[index], &(genbathy->sonar_model));
 	index += 4;
-	mb_get_binary_long(MB_YES, &buffer[index], &(genbathy->transducer_serial_number));
+	mb_get_binary_long(false, &buffer[index], &(genbathy->transducer_serial_number));
 	index += 8;
-	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->number_beams));
+	mb_get_binary_int(false, &buffer[index], &(genbathy->number_beams));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->modeflags));
+	mb_get_binary_int(false, &buffer[index], &(genbathy->modeflags));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->sampling_frequency));
+	mb_get_binary_float(false, &buffer[index], &(genbathy->sampling_frequency));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->acoustic_frequency));
+	mb_get_binary_float(false, &buffer[index], &(genbathy->acoustic_frequency));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->tx_power));
+	mb_get_binary_float(false, &buffer[index], &(genbathy->tx_power));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->pulse_width));
+	mb_get_binary_float(false, &buffer[index], &(genbathy->pulse_width));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->absorption_loss));
+	mb_get_binary_float(false, &buffer[index], &(genbathy->absorption_loss));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->spreading_loss));
+	mb_get_binary_float(false, &buffer[index], &(genbathy->spreading_loss));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->sample_type));
+	mb_get_binary_int(false, &buffer[index], &(genbathy->sample_type));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->sound_velocity));
+	mb_get_binary_float(false, &buffer[index], &(genbathy->sound_velocity));
 	index += 4;
 	for (int i = 0; i < genbathy->number_beams; i++) {
-		mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->detection_point[i]));
+		mb_get_binary_float(false, &buffer[index], &(genbathy->detection_point[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->rx_angle[i]));
+		mb_get_binary_float(false, &buffer[index], &(genbathy->rx_angle[i]));
 		index += 4;
-		mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->flags[i]));
+		mb_get_binary_int(false, &buffer[index], &(genbathy->flags[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(genbathy->backscatter[i]));
+		mb_get_binary_float(false, &buffer[index], &(genbathy->backscatter[i]));
 		index += 4;
 	}
-	mb_get_binary_int(MB_YES, &buffer[index], &(genbathy->checksum));
+	mb_get_binary_int(false, &buffer[index], &(genbathy->checksum));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -340,44 +340,44 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->version));
+	mb_get_binary_int(false, &buffer[index], &(corbathy->version));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(corbathy->msec));
+	mb_get_binary_double(false, &buffer[index], &(corbathy->msec));
 	index += 8;
-	mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->num_beams));
+	mb_get_binary_int(false, &buffer[index], &(corbathy->num_beams));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->ping_number));
+	mb_get_binary_int(false, &buffer[index], &(corbathy->ping_number));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(corbathy->latitude));
+	mb_get_binary_double(false, &buffer[index], &(corbathy->latitude));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(corbathy->longitude));
+	mb_get_binary_double(false, &buffer[index], &(corbathy->longitude));
 	index += 8;
-	mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->bearing));
+	mb_get_binary_float(false, &buffer[index], &(corbathy->bearing));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->roll));
+	mb_get_binary_float(false, &buffer[index], &(corbathy->roll));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->pitch));
+	mb_get_binary_float(false, &buffer[index], &(corbathy->pitch));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->heave));
+	mb_get_binary_float(false, &buffer[index], &(corbathy->heave));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->sample_type));
+	mb_get_binary_int(false, &buffer[index], &(corbathy->sample_type));
 	index += 4;
 	for (int i = 0; i < 5; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->spare[i]));
+		mb_get_binary_int(false, &buffer[index], &(corbathy->spare[i]));
 		index += 4;
 	}
 	for (int i = 0; i < corbathy->num_beams; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->beam_index[i]));
+		mb_get_binary_int(false, &buffer[index], &(corbathy->beam_index[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->x[i]));
+		mb_get_binary_float(false, &buffer[index], &(corbathy->x[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->y[i]));
+		mb_get_binary_float(false, &buffer[index], &(corbathy->y[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->z[i]));
+		mb_get_binary_float(false, &buffer[index], &(corbathy->z[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->beam_angle[i]));
+		mb_get_binary_float(false, &buffer[index], &(corbathy->beam_angle[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(corbathy->backscatter[i]));
+		mb_get_binary_float(false, &buffer[index], &(corbathy->backscatter[i]));
 		index += 4;
 		corbathy->quality[i] = buffer[index];
 		index++;
@@ -387,10 +387,10 @@ int mbr_wasspenl_rd_corbathy(int verbose, char *buffer, void *store_ptr, int *er
 		index++;
 		corbathy->empty[i] = buffer[index];
 		index++;
-		mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->pad[i]));
+		mb_get_binary_int(false, &buffer[index], &(corbathy->pad[i]));
 		index += 4;
 	}
-	mb_get_binary_int(MB_YES, &buffer[index], &(corbathy->checksum));
+	mb_get_binary_int(false, &buffer[index], &(corbathy->checksum));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -462,38 +462,38 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->version));
+	mb_get_binary_int(false, &buffer[index], &(rawsonar->version));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(rawsonar->msec));
+	mb_get_binary_double(false, &buffer[index], &(rawsonar->msec));
 	index += 8;
-	mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->ping_number));
+	mb_get_binary_int(false, &buffer[index], &(rawsonar->ping_number));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(rawsonar->sample_rate));
+	mb_get_binary_float(false, &buffer[index], &(rawsonar->sample_rate));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->n));
+	mb_get_binary_int(false, &buffer[index], &(rawsonar->n));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->m));
+	mb_get_binary_int(false, &buffer[index], &(rawsonar->m));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(rawsonar->tx_power));
+	mb_get_binary_float(false, &buffer[index], &(rawsonar->tx_power));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(rawsonar->pulse_width));
+	mb_get_binary_float(false, &buffer[index], &(rawsonar->pulse_width));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->sample_type));
+	mb_get_binary_int(false, &buffer[index], &(rawsonar->sample_type));
 	index += 4;
 	for (int i = 0; i < rawsonar->n; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->spare[i]));
+		mb_get_binary_int(false, &buffer[index], &(rawsonar->spare[i]));
 		index += 4;
 	}
 	for (int i = 0; i < rawsonar->n; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->beam_index[i]));
+		mb_get_binary_int(false, &buffer[index], &(rawsonar->beam_index[i]));
 		index += 4;
 	}
 	for (int i = 0; i < rawsonar->n; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->detection_point[i]));
+		mb_get_binary_int(false, &buffer[index], &(rawsonar->detection_point[i]));
 		index += 4;
 	}
 	for (int i = 0; i < rawsonar->n; i++) {
-		mb_get_binary_float(MB_YES, &buffer[index], &(rawsonar->beam_angle[i]));
+		mb_get_binary_float(false, &buffer[index], &(rawsonar->beam_angle[i]));
 		index += 4;
 	}
 	const size_t rawdata_len = (size_t)(rawsonar->n * rawsonar->m);
@@ -507,7 +507,7 @@ int mbr_wasspenl_rd_rawsonar(int verbose, char *buffer, void *store_ptr, int *er
 	}
 	memcpy(rawsonar->rawdata, &buffer[index], rawdata_len);
 	index += rawdata_len;
-	mb_get_binary_int(MB_YES, &buffer[index], &(rawsonar->checksum));
+	mb_get_binary_int(false, &buffer[index], &(rawsonar->checksum));
 	index += 4;
 
 	/* set kind */
@@ -571,17 +571,17 @@ int mbr_wasspenl_rd_gen_sens(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(gen_sens->version));
+	mb_get_binary_int(false, &buffer[index], &(gen_sens->version));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(gen_sens->msec));
+	mb_get_binary_double(false, &buffer[index], &(gen_sens->msec));
 	index += 8;
-	mb_get_binary_int(MB_YES, &buffer[index], &(gen_sens->port_number));
+	mb_get_binary_int(false, &buffer[index], &(gen_sens->port_number));
 	index += 4;
 	gen_sens->message_length = buffer[index];
 	index++;
 	memcpy(gen_sens->message, &buffer[index], (size_t)gen_sens->message_length);
 	index += gen_sens->message_length;
-	mb_get_binary_int(MB_YES, &buffer[index], &(gen_sens->checksum));
+	mb_get_binary_int(false, &buffer[index], &(gen_sens->checksum));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -632,27 +632,27 @@ int mbr_wasspenl_rd_nvupdate(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(nvupdate->version));
+	mb_get_binary_int(false, &buffer[index], &(nvupdate->version));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(nvupdate->latitude));
+	mb_get_binary_double(false, &buffer[index], &(nvupdate->latitude));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(nvupdate->longitude));
+	mb_get_binary_double(false, &buffer[index], &(nvupdate->longitude));
 	index += 8;
-	mb_get_binary_float(MB_YES, &buffer[index], &(nvupdate->sog));
+	mb_get_binary_float(false, &buffer[index], &(nvupdate->sog));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(nvupdate->cog));
+	mb_get_binary_float(false, &buffer[index], &(nvupdate->cog));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(nvupdate->heading));
+	mb_get_binary_float(false, &buffer[index], &(nvupdate->heading));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(nvupdate->roll));
+	mb_get_binary_float(false, &buffer[index], &(nvupdate->roll));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(nvupdate->pitch));
+	mb_get_binary_float(false, &buffer[index], &(nvupdate->pitch));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(nvupdate->heave));
+	mb_get_binary_float(false, &buffer[index], &(nvupdate->heave));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(nvupdate->nadir_depth));
+	mb_get_binary_float(false, &buffer[index], &(nvupdate->nadir_depth));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(nvupdate->checksum));
+	mb_get_binary_int(false, &buffer[index], &(nvupdate->checksum));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -708,21 +708,21 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(wcd_navi->version));
+	mb_get_binary_int(false, &buffer[index], &(wcd_navi->version));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(wcd_navi->latitude));
+	mb_get_binary_double(false, &buffer[index], &(wcd_navi->latitude));
 	index += 8;
-	mb_get_binary_double(MB_YES, &buffer[index], &(wcd_navi->longitude));
+	mb_get_binary_double(false, &buffer[index], &(wcd_navi->longitude));
 	index += 8;
-	mb_get_binary_int(MB_YES, &buffer[index], &(wcd_navi->num_points));
+	mb_get_binary_int(false, &buffer[index], &(wcd_navi->num_points));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(wcd_navi->bearing));
+	mb_get_binary_float(false, &buffer[index], &(wcd_navi->bearing));
 	index += 4;
-	mb_get_binary_double(MB_YES, &buffer[index], &(wcd_navi->msec));
+	mb_get_binary_double(false, &buffer[index], &(wcd_navi->msec));
 	index += 8;
-	mb_get_binary_int(MB_YES, &buffer[index], &(wcd_navi->ping_number));
+	mb_get_binary_int(false, &buffer[index], &(wcd_navi->ping_number));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(wcd_navi->sample_rate));
+	mb_get_binary_float(false, &buffer[index], &(wcd_navi->sample_rate));
 	index += 4;
 	int status = MB_SUCCESS;
 	if (wcd_navi->wcdata_alloc < wcd_navi->num_points) {
@@ -738,14 +738,14 @@ int mbr_wasspenl_rd_wcd_navi(int verbose, char *buffer, void *store_ptr, int *er
 			wcd_navi->wcdata_alloc = wcd_navi->num_points;
 	}
 	for (int i = 0; i < wcd_navi->num_points; i++) {
-		mb_get_binary_float(MB_YES, &buffer[index], &(wcd_navi->wcdata_x[i]));
+		mb_get_binary_float(false, &buffer[index], &(wcd_navi->wcdata_x[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(wcd_navi->wcdata_y[i]));
+		mb_get_binary_float(false, &buffer[index], &(wcd_navi->wcdata_y[i]));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(wcd_navi->wcdata_mag[i]));
+		mb_get_binary_float(false, &buffer[index], &(wcd_navi->wcdata_mag[i]));
 		index += 4;
 	}
-	mb_get_binary_int(MB_YES, &buffer[index], &(wcd_navi->checksum));
+	mb_get_binary_int(false, &buffer[index], &(wcd_navi->checksum));
 	index += 4;
 
 	/* set kind */
@@ -802,19 +802,19 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->version));
+	mb_get_binary_int(false, &buffer[index], &(sensprop->version));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->flags));
+	mb_get_binary_int(false, &buffer[index], &(sensprop->flags));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sea_level_reference));
+	mb_get_binary_float(false, &buffer[index], &(sensprop->sea_level_reference));
 	index += 4;
-	mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->element_spacing));
+	mb_get_binary_float(false, &buffer[index], &(sensprop->element_spacing));
 	index += 4;
 	for (int i = 0; i < 8; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->spare[i]));
+		mb_get_binary_int(false, &buffer[index], &(sensprop->spare[i]));
 		index += 4;
 	}
-	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->n));
+	mb_get_binary_int(false, &buffer[index], &(sensprop->n));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -828,9 +828,9 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 			sensprop->n_alloc = sensprop->n;
 	}
 	for (int i = 0; i < sensprop->n; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->sensors[i].sensor_type));
+		mb_get_binary_int(false, &buffer[index], &(sensprop->sensors[i].sensor_type));
 		index += 4;
-		mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->sensors[i].flags));
+		mb_get_binary_int(false, &buffer[index], &(sensprop->sensors[i].flags));
 		index += 4;
 		sensprop->sensors[i].port_number = buffer[index];
 		index++;
@@ -840,22 +840,22 @@ int mbr_wasspenl_rd_sensprop(int verbose, char *buffer, void *store_ptr, int *er
 		index++;
 		sensprop->sensors[i].sensor_model = buffer[index];
 		index++;
-		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].latency));
+		mb_get_binary_float(false, &buffer[index], &(sensprop->sensors[i].latency));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].roll_bias));
+		mb_get_binary_float(false, &buffer[index], &(sensprop->sensors[i].roll_bias));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].pitch_bias));
+		mb_get_binary_float(false, &buffer[index], &(sensprop->sensors[i].pitch_bias));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].yaw_bias));
+		mb_get_binary_float(false, &buffer[index], &(sensprop->sensors[i].yaw_bias));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].offset_x));
+		mb_get_binary_float(false, &buffer[index], &(sensprop->sensors[i].offset_x));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].offset_y));
+		mb_get_binary_float(false, &buffer[index], &(sensprop->sensors[i].offset_y));
 		index += 4;
-		mb_get_binary_float(MB_YES, &buffer[index], &(sensprop->sensors[i].offset_z));
+		mb_get_binary_float(false, &buffer[index], &(sensprop->sensors[i].offset_z));
 		index += 4;
 	}
-	mb_get_binary_int(MB_YES, &buffer[index], &(sensprop->checksum));
+	mb_get_binary_int(false, &buffer[index], &(sensprop->checksum));
 	index += 4;
 
 	/* set kind */
@@ -921,29 +921,29 @@ int mbr_wasspenl_rd_sys_prop(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->version));
+	mb_get_binary_int(false, &buffer[index], &(sys_prop->version));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->product_type));
+	mb_get_binary_int(false, &buffer[index], &(sys_prop->product_type));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->protocol_version));
+	mb_get_binary_int(false, &buffer[index], &(sys_prop->protocol_version));
 	index += 4;
 	for (int i = 0; i < 4; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->sw_version[i]));
+		mb_get_binary_int(false, &buffer[index], &(sys_prop->sw_version[i]));
 		index += 4;
 	}
-	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->fw_version));
+	mb_get_binary_int(false, &buffer[index], &(sys_prop->fw_version));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->hw_version));
+	mb_get_binary_int(false, &buffer[index], &(sys_prop->hw_version));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->transducer_sn));
+	mb_get_binary_int(false, &buffer[index], &(sys_prop->transducer_sn));
 	index += 4;
-	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->transceiver_sn));
+	mb_get_binary_int(false, &buffer[index], &(sys_prop->transceiver_sn));
 	index += 4;
 	for (int i = 0; i < 8; i++) {
-		mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->spare[i]));
+		mb_get_binary_int(false, &buffer[index], &(sys_prop->spare[i]));
 		index += 4;
 	}
-	mb_get_binary_int(MB_YES, &buffer[index], &(sys_prop->checksum));
+	mb_get_binary_int(false, &buffer[index], &(sys_prop->checksum));
 	index += 4;
 
 	int status = MB_SUCCESS;
@@ -1001,7 +1001,7 @@ int mbr_wasspenl_rd_sys_cfg1(int verbose, char *buffer, void *store_ptr, int *er
 	/* get the size */
 	int index = 4;
 	unsigned int size;
-	mb_get_binary_int(MB_YES, &buffer[index], &size);
+	mb_get_binary_int(false, &buffer[index], &size);
 	sys_cfg1->sys_cfg1_len = size;
 
 	int status = MB_SUCCESS;
@@ -1059,7 +1059,7 @@ int mbr_wasspenl_rd_mcomment(int verbose, char *buffer, void *store_ptr, int *er
 
 	/* extract the data */
 	int index = 16;
-	mb_get_binary_int(MB_YES, &buffer[index], &(mcomment->comment_length));
+	mb_get_binary_int(false, &buffer[index], &(mcomment->comment_length));
 	index += 4;
 	memcpy(mcomment->comment_message, &buffer[index], (size_t)mcomment->comment_length);
 
@@ -1109,7 +1109,7 @@ int mbr_wasspenl_rd_unknown1(int verbose, char *buffer, void *store_ptr, int *er
 	/* get the size */
 	int index = 4;
 	unsigned int size;
-	mb_get_binary_int(MB_YES, &buffer[index], &size);
+	mb_get_binary_int(false, &buffer[index], &size);
 	unknown1->unknown1_len = size;
 
 	int status = MB_SUCCESS;
@@ -1203,14 +1203,14 @@ int mbr_wasspenl_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		/* check header - if not a good header read a byte
 		    at a time until a good header is found */
 		skip = 0;
-		mb_get_binary_int(MB_YES, buffer, &syncvalue);
+		mb_get_binary_int(false, buffer, &syncvalue);
 		while (status == MB_SUCCESS && syncvalue != MBSYS_WASSP_SYNC) {
 			/* get next byte */
 			for (int i = 0; i < 15; i++)
 				buffer[i] = buffer[i + 1];
 			read_len = (size_t)1;
 			status = mb_fileio_get(verbose, mbio_ptr, &buffer[15], &read_len, error);
-			mb_get_binary_int(MB_YES, buffer, &syncvalue);
+			mb_get_binary_int(false, buffer, &syncvalue);
 			skip++;
 		}
 
