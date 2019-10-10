@@ -777,12 +777,6 @@ int mb_register_array(int verbose, void *mbio_ptr, int type, size_t size, void *
 			mb_io_ptr->regarray_type[mb_io_ptr->n_regarray] = type;
 			mb_io_ptr->regarray_size[mb_io_ptr->n_regarray] = size;
 			mb_io_ptr->n_regarray++;
-			/*fprintf(stderr,"Array registered: handle:%lx ptr:%lx  stored handle:%lx ptr:%lx type:%d size:%zu\n",
-			(size_t)handle, (size_t)*handle,
-			(size_t)mb_io_ptr->regarray_handle[mb_io_ptr->n_regarray-1],
-			(size_t)mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1],
-			mb_io_ptr->regarray_type[mb_io_ptr->n_regarray-1],
-			mb_io_ptr->regarray_size[mb_io_ptr->n_regarray-1]);*/
 		}
 	}
 
@@ -811,24 +805,6 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 
 	/* get mbio descriptor */
 	struct mb_io_struct *mb_io_ptr = (struct mb_io_struct *)mbio_ptr;
-	// fprintf(stderr,"\nSTART mb_update_arrays: nbath:%d %d  namp:%d %d  nss:%d %d\n",
-	// nbath,mb_io_ptr->beams_bath_alloc,
-	// namp,mb_io_ptr->beams_amp_alloc,
-	// nss,mb_io_ptr->pixels_ss_alloc);
-	// fprintf(stderr,"KEYPTRS1:\n\tbeamflag: %p\n\tbath:     %p\n\tbathxtrk: %p\n\tbathltrk: %p\n\tbathnum:  %p\n",
-	// mb_io_ptr->beamflag,mb_io_ptr->bath,mb_io_ptr->bath_acrosstrack,mb_io_ptr->bath_alongtrack,mb_io_ptr->bath_num);
-	// fprintf(stderr,"KEYHNDL1:\n\tbeamflag: %p\n\tbath:     %p\n\tbathxtrk: %p\n\tbathltrk: %p\n\tbathnum:  %p\n",
-	//&mb_io_ptr->beamflag,&mb_io_ptr->bath,&mb_io_ptr->bath_acrosstrack,&mb_io_ptr->bath_alongtrack,&mb_io_ptr->bath_num);
-	// if (mb_io_ptr->beamflag != NULL)
-	//{
-	// fprintf(stderr,"VALUES1: \n\tbeamflag: %d\n\tbath:     %f\n\tbathxtrk: %f\n\tbathltrk: %f\n\tbathnum:  %d\n",
-	// mb_io_ptr->beamflag[0],mb_io_ptr->bath[0],mb_io_ptr->bath_acrosstrack[0],mb_io_ptr->bath_alongtrack[0],mb_io_ptr->bath_num[0]);
-	// for (int i=0;i<mb_io_ptr->beams_bath_alloc;i++)
-	//{
-	// fprintf(stderr,"%d ",mb_io_ptr->beamflag[i]);
-	// if (i%25==0 || i==mb_io_ptr->beams_bath_alloc-1) fprintf(stderr,"\n");
-	//}
-	//}
 
 	/* reallocate larger arrays if necessary */
 	int status = MB_SUCCESS;
@@ -844,10 +820,6 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 			if (nbath % 1024 > 0)
 				mb_io_ptr->beams_bath_alloc += 1024;
 		}
-		// fprintf(stderr,"CHECK mb_update_arrays: nbath:%d %d  namp:%d %d  nss:%d %d\n",
-		// nbath,mb_io_ptr->beams_bath_alloc,
-		// namp,mb_io_ptr->beams_amp_alloc,
-		// nss,mb_io_ptr->pixels_ss_alloc);
 
 		/* allocate mb_io_ptr arrays */
 		if (status == MB_SUCCESS)
@@ -889,20 +861,6 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 			mb_io_ptr->new_bath_alongtrack[i] = 0.0;
 		}
 		mb_io_ptr->beams_bath_max = nbath;
-		// fprintf(stderr,"KEYPTRS2:\n\tbeamflag: %p\n\tbath:     %p\n\tbathxtrk: %p\n\tbathltrk: %p\n\tbathnum:  %p\n",
-		// mb_io_ptr->beamflag,mb_io_ptr->bath,mb_io_ptr->bath_acrosstrack,mb_io_ptr->bath_alongtrack,mb_io_ptr->bath_num);
-		// fprintf(stderr,"KEYHNDL2:\n\tbeamflag: %p\n\tbath:     %p\n\tbathxtrk: %p\n\tbathltrk: %p\n\tbathnum:  %p\n",
-		//&mb_io_ptr->beamflag,&mb_io_ptr->bath,&mb_io_ptr->bath_acrosstrack,&mb_io_ptr->bath_alongtrack,&mb_io_ptr->bath_num);
-		// if (mb_io_ptr->beamflag != NULL)
-		//{
-		// fprintf(stderr,"VALUES2: \n\tbeamflag: %d\n\tbath:     %f\n\tbathxtrk: %f\n\tbathltrk: %f\n\tbathnum:  %d\n",
-		// mb_io_ptr->beamflag[0],mb_io_ptr->bath[0],mb_io_ptr->bath_acrosstrack[0],mb_io_ptr->bath_alongtrack[0],mb_io_ptr->bath_num[0]);
-		// for (int i=0;i<mb_io_ptr->beams_bath_alloc;i++)
-		//{
-		// fprintf(stderr,"%d ",mb_io_ptr->beamflag[i]);
-		// if (i%25==0 || i==mb_io_ptr->beams_bath_alloc-1) fprintf(stderr,"\n");
-		//}
-		//}
 
 		/* allocate registered arrays */
 		for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
@@ -1071,20 +1029,6 @@ int mb_update_arrays(int verbose, void *mbio_ptr, int nbath, int namp, int nss, 
 		fprintf(stderr, "dbg2  Return status:\n");
 		fprintf(stderr, "dbg2       status:  %d\n", status);
 	}
-	// fprintf(stderr,"KEYPTRS3:\n\tbeamflag: %p\n\tbath:     %p\n\tbathxtrk: %p\n\tbathltrk: %p\n\tbathnum:  %p\n",
-	// mb_io_ptr->beamflag,mb_io_ptr->bath,mb_io_ptr->bath_acrosstrack,mb_io_ptr->bath_alongtrack,mb_io_ptr->bath_num);
-	// fprintf(stderr,"KEYHNDL3:\n\tbeamflag: %p\n\tbath:     %p\n\tbathxtrk: %p\n\tbathltrk: %p\n\tbathnum:  %p\n",
-	//&mb_io_ptr->beamflag,&mb_io_ptr->bath,&mb_io_ptr->bath_acrosstrack,&mb_io_ptr->bath_alongtrack,&mb_io_ptr->bath_num);
-	// if (mb_io_ptr->beamflag != NULL)
-	//{
-	// fprintf(stderr,"VALUES3: \n\tbeamflag: %d\n\tbath:     %f\n\tbathxtrk: %f\n\tbathltrk: %f\n\tbathnum:  %d\n",
-	// mb_io_ptr->beamflag[0],mb_io_ptr->bath[0],mb_io_ptr->bath_acrosstrack[0],mb_io_ptr->bath_alongtrack[0],mb_io_ptr->bath_num[0]);
-	// for (i=0;i<mb_io_ptr->beams_bath_alloc;i++)
-	//{
-	// fprintf(stderr,"%d ",mb_io_ptr->beamflag[i]);
-	// if (i%25==0 || i==mb_io_ptr->beams_bath_alloc-1) fprintf(stderr,"\n");
-	//}
-	//}
 
 	return (status);
 }
@@ -1106,9 +1050,6 @@ int mb_update_arrayptr(int verbose, void *mbio_ptr, void **handle, int *error) {
 	for (int i = 0; i < mb_io_ptr->n_regarray && found == MB_NO; i++) {
 		if (*handle == mb_io_ptr->regarray_oldptr[i]) {
 			*handle = mb_io_ptr->regarray_ptr[i];
-			/*fprintf(stderr,"check handle:%x old ptrs:%x %x",handle,*handle,mb_io_ptr->regarray_oldptr[i]);
-			fprintf(stderr," found : new ptr:%x",*handle);
-			fprintf(stderr,"\n");*/
 			found = MB_YES;
 		}
 	}
@@ -1198,11 +1139,7 @@ int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error) {
 	mb_io_ptr->pixels_ss_alloc = 0;
 
 	/* deallocate registered arrays */
-	/*fprintf(stderr,"deallocate %d registered arrays\n",mb_io_ptr->n_regarray);*/
 	for (int i = 0; i < mb_io_ptr->n_regarray; i++) {
-		/*fprintf(stderr,"i:%d registered array: stored handle:%x ptr:%x\n",
-		i,mb_io_ptr->regarray_handle[mb_io_ptr->n_regarray-1],
-		mb_io_ptr->regarray_ptr[mb_io_ptr->n_regarray-1]);*/
 		if (status == MB_SUCCESS && mb_io_ptr->regarray_handle[i] != NULL)
 			status = mb_freed(verbose, __FILE__, __LINE__, (void **)(mb_io_ptr->regarray_handle[i]), error);
 	}

@@ -1183,7 +1183,7 @@ int main(int argc, char **argv) {
 	const bool read_datalist = opts.format < 0;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(opts.verbose, &datalist, opts.read_file, look_processed, &error)) != MB_SUCCESS) {
 			char message[MAX_ERROR_STRING];
 			sprintf(message, "Unable to open data list file: %s\n", opts.read_file);
@@ -1228,7 +1228,7 @@ int main(int argc, char **argv) {
 		add_counts(opts.verbose, &totrecs, &filerecs, &error);
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(opts.verbose, datalist, ifile, dfile, &(opts.format), &file_weight, &error)) ==
 			    MB_SUCCESS) {
 				read_data = MB_YES;
@@ -1248,7 +1248,7 @@ int main(int argc, char **argv) {
 		print_counts(opts.verbose, &totrecs, &error);
 	}
 
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		mb_datalist_close(opts.verbose, &datalist, &error);
 	}
 

@@ -166,7 +166,6 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	struct stat statbuf;
 	int len;
 	int explicit;
-	char *bufptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -890,7 +889,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles, struct mb_process_s
 	/* Now make input file global if local */
 	process->mbp_ifile_specified = MB_YES;
 	if (file[0] != '/' && file[1] != ':') {
-		bufptr = getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
+		/* char *bufptr = */ getcwd(process->mbp_ifile, MB_PATH_MAXLINE);
 		strcat(process->mbp_ifile, "/");
 		strcat(process->mbp_ifile, file);
 	}
@@ -1317,7 +1316,6 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 	FILE *fp;
 	time_t right_now;
 	char date[32], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
-	char *bufptr;
 
 	if (verbose >= 2) {
 		fprintf(stderr, "\ndbg2  MBIO function <%s> called\n", __func__);
@@ -1458,7 +1456,7 @@ int mb_pr_writepar(int verbose, char *file, struct mb_process_struct *process, i
 		pwd[strlen(file) - strlen(lastslash)] = '\0';
 	}
 	else {
-		bufptr = getcwd(pwd, MB_PATH_MAXLINE);
+		/* char *bufptr = */ getcwd(pwd, MB_PATH_MAXLINE);
 		if (lastslash != NULL) {
 			strcat(pwd, "/");
 			strcat(pwd, file);
@@ -4138,8 +4136,6 @@ int mb_pr_set_bathyslopenew(int verbose, int nsmooth, int nbath, char *beamflag,
 				slopes[i] = (depths[i] - depths[i - 1]) / dxtrack;
 			else
 				slopes[i] = 0.0;
-			/*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
-			i,depths[i-1],depths[i],depthacrosstrack[i-1],depthacrosstrack[i],slopes[i]);*/
 		}
 		slopeacrosstrack[*ndepths] = depthacrosstrack[*ndepths - 1];
 		slopes[*ndepths] = 0.0;
@@ -4284,8 +4280,6 @@ int mb_pr_set_bathyslope(int verbose, int nsmooth, int nbath, char *beamflag, do
 		for (int i = 0; i < nbath - 1; i++) {
 			slopes[i + 1] = (depths[i + 1] - depths[i]) / (depthacrosstrack[i + 1] - depthacrosstrack[i]);
 			slopeacrosstrack[i + 1] = 0.5 * (depthacrosstrack[i + 1] + depthacrosstrack[i]);
-			/*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
-			i,depths[i],depths[i+1],depthacrosstrack[i],depthacrosstrack[i+1],slopes[i+1]);*/
 		}
 		slopes[0] = 0.0;
 		slopeacrosstrack[0] = depthacrosstrack[0];
@@ -4643,7 +4637,6 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *prog
 	mb_path lock_date;
 	int lock_purpose;
 	mb_path command;
-	int shellstatus;
 
 	/* user, host variables */
 	char user[MBP_FILENAMESIZE], *user_ptr;
@@ -4682,7 +4675,7 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose, const char *prog
         && strncmp(user, lock_user, MAX(strlen(user), strlen(lock_user))) == 0
         && purpose == lock_purpose) {
 			sprintf(command, "/bin/rm -f %s", lockfile);
-			shellstatus = system(command);
+			/* int shellstatus = */ system(command);
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 		}

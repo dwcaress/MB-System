@@ -2305,10 +2305,6 @@ int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel_
 						ss_spacing_use = beam_foot / ping->beam_samples[i];
 					else
 						ss_spacing_use = ss_spacing / sint;
-					/*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
-					ss_spacing, ss_spacing_use,
-					ping->beam_samples[i], sint, angle, range, beam_foot,
-					ping->beam_samples[i] * ss_spacing / beam_foot);*/
 				}
 				for (int k = 0; k < ping->beam_samples[i]; k++) {
 					xtrackss = xtrack + ss_spacing_use * (k - ping->beam_center_sample[i]);

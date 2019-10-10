@@ -308,8 +308,6 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 						index += sizeof(int);
 						mb_get_binary_int(MB_YES, &(buffer[index]), &value_offset);
 						index += sizeof(int);
-						/*fprintf(stderr,"tag:%d type:%d count:%d value_offset:%d\n",
-						tag,type,count,value_offset);*/
 
 						/* set values for important entries */
 

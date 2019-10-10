@@ -851,9 +851,6 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 						if (EorW == 'W')
 							data->longitude = -data->longitude;
 						data->speed = 0.0;
-						/*fprintf(stderr, "time: %2.2d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%2.2d lat: %c %2d %8.5f  lon: %c %3d
-						%9.5f\n", data->pos_day, data->pos_month, data->pos_year, data->pos_hour, data->pos_minute,
-						data->pos_second, data->pos_centisecond, NorS, latdeg, latmin, EorW, londeg, lonmin);*/
 
 						navdone = MB_YES;
 						data->kind = MB_DATA_NAV;
@@ -1408,29 +1405,29 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		line[shift] = '\0';
 		shift += 1;
 		short_value = (short)data->ping_number;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		line[shift] = (char)data->bath_res;
 		shift += 1;
 		line[shift] = (char)data->bath_quality;
 		shift += 1;
 		short_value = (short)data->keel_depth;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->heading;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->roll;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->pitch;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->ping_heave;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->sound_vel;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		line[shift] = (char)data->bath_mode;
 		shift += 1;
@@ -1441,16 +1438,16 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		data->beams_bath = MBF_EM12IFRM_MAXBEAMS;
 		for (int i = 0; i < data->beams_bath; i++) {
 			short_value = (short)data->bath[i];
-			mb_put_binary_short(MB_NO, short_value, &line[shift]);
+			mb_put_binary_short(false, short_value, &line[shift]);
 			shift += 2;
 			short_value = (short)data->bath_acrosstrack[i];
-			mb_put_binary_short(MB_NO, short_value, &line[shift]);
+			mb_put_binary_short(false, short_value, &line[shift]);
 			shift += 2;
 			short_value = (short)data->bath_alongtrack[i];
-			mb_put_binary_short(MB_NO, short_value, &line[shift]);
+			mb_put_binary_short(false, short_value, &line[shift]);
 			shift += 2;
 			short_value = (short)data->tt[i];
-			mb_put_binary_short(MB_NO, short_value, &line[shift]);
+			mb_put_binary_short(false, short_value, &line[shift]);
 			shift += 2;
 			line[shift] = (char)data->amp[i];
 			shift += 1;

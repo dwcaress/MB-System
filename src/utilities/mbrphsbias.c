@@ -386,7 +386,7 @@ int main(int argc, char **argv) {
 	const bool read_datalist = format < 0;
 
 	/* open file list */
-	if (read_datalist == MB_YES) {
+	if (read_datalist) {
 		if ((status = mb_datalist_open(verbose, &datalist, read_file, look_processed, &error)) != MB_SUCCESS) {
 			fprintf(stderr, "\nUnable to open data list file: %s\n", read_file);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
@@ -661,7 +661,7 @@ int main(int argc, char **argv) {
 		status = mb_close(verbose, &mbio_ptr, &error);
 
 		/* figure out whether and what to read next */
-		if (read_datalist == MB_YES) {
+		if (read_datalist) {
 			if ((status = mb_datalist_read(verbose, datalist, swathfile, dfile, &format, &file_weight, &error)) == MB_SUCCESS)
 				read_data = MB_YES;
 			else

@@ -1644,7 +1644,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	/* write the record length */
 	if (status == MB_SUCCESS) {
 		record_length = MBF_SB2100BI_PR_WRITE_LEN + 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
+		mb_put_binary_short(false, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1) {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -1658,38 +1658,38 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		index = 0;
-		mb_put_binary_short(MB_NO, store->year, &buffer[index]);
+		mb_put_binary_short(false, store->year, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->jday, &buffer[index]);
+		mb_put_binary_short(false, store->jday, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->hour, &buffer[index]);
+		mb_put_binary_short(false, store->hour, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->minute, &buffer[index]);
+		mb_put_binary_short(false, store->minute, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->sec, &buffer[index]);
+		mb_put_binary_short(false, store->sec, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->msec, &buffer[index]);
+		mb_put_binary_short(false, store->msec, &buffer[index]);
 		index += 2;
-		mb_put_binary_float(MB_NO, store->roll_bias_port, &buffer[index]);
+		mb_put_binary_float(false, store->roll_bias_port, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->roll_bias_starboard, &buffer[index]);
+		mb_put_binary_float(false, store->roll_bias_starboard, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->pitch_bias, &buffer[index]);
+		mb_put_binary_float(false, store->pitch_bias, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->ship_draft, &buffer[index]);
+		mb_put_binary_float(false, store->ship_draft, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->offset_x, &buffer[index]);
+		mb_put_binary_float(false, store->offset_x, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->offset_y, &buffer[index]);
+		mb_put_binary_float(false, store->offset_y, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->offset_z, &buffer[index]);
+		mb_put_binary_float(false, store->offset_z, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, store->num_svp, &buffer[index]);
+		mb_put_binary_int(false, store->num_svp, &buffer[index]);
 		index += 4;
 		for (int i = 0; i < store->num_svp; i++) {
-			mb_put_binary_float(MB_NO, store->svp[i].depth, &buffer[index]);
+			mb_put_binary_float(false, store->svp[i].depth, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_NO, store->svp[i].velocity, &buffer[index]);
+			mb_put_binary_float(false, store->svp[i].velocity, &buffer[index]);
 			index += 4;
 		}
 
@@ -1698,7 +1698,7 @@ int mbr_sb2100bi_wr_pr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		checksum = 0;
 		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
-		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
+		mb_put_binary_int(false, checksum, &buffer[index]);
 		index += 4;
 		buffer[index] = mbf_sb2100bi_eor[0];
 		index++;
@@ -1766,7 +1766,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 			record_length = MBSYS_SB2100_MAXLINE;
 		}
 		record_length += 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
+		mb_put_binary_short(false, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1) {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -1786,7 +1786,7 @@ int mbr_sb2100bi_wr_tr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
 		index = write_length;
-		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
+		mb_put_binary_int(false, checksum, &buffer[index]);
 		index += 4;
 		buffer[index] = mbf_sb2100bi_eor[0];
 		index++;
@@ -1879,7 +1879,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	/* write the record length */
 	if (status == MB_SUCCESS) {
 		record_length = MBF_SB2100BI_DH_WRITE_LEN + 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
+		mb_put_binary_short(false, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1) {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -1893,37 +1893,37 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	/* write out the data */
 	if (status == MB_SUCCESS) {
 		index = 0;
-		mb_put_binary_short(MB_NO, store->year, &buffer[index]);
+		mb_put_binary_short(false, store->year, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->jday, &buffer[index]);
+		mb_put_binary_short(false, store->jday, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->hour, &buffer[index]);
+		mb_put_binary_short(false, store->hour, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->minute, &buffer[index]);
+		mb_put_binary_short(false, store->minute, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->sec, &buffer[index]);
+		mb_put_binary_short(false, store->sec, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->msec, &buffer[index]);
+		mb_put_binary_short(false, store->msec, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->spare1, &buffer[index]);
+		mb_put_binary_short(false, store->spare1, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->spare2, &buffer[index]);
+		mb_put_binary_short(false, store->spare2, &buffer[index]);
 		index += 2;
-		mb_put_binary_double(MB_NO, store->longitude, &buffer[index]);
+		mb_put_binary_double(false, store->longitude, &buffer[index]);
 		index += 8;
-		mb_put_binary_double(MB_NO, store->latitude, &buffer[index]);
+		mb_put_binary_double(false, store->latitude, &buffer[index]);
 		index += 8;
-		mb_put_binary_float(MB_NO, store->heading, &buffer[index]);
+		mb_put_binary_float(false, store->heading, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->speed, &buffer[index]);
+		mb_put_binary_float(false, store->speed, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->roll, &buffer[index]);
+		mb_put_binary_float(false, store->roll, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->pitch, &buffer[index]);
+		mb_put_binary_float(false, store->pitch, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->heave, &buffer[index]);
+		mb_put_binary_float(false, store->heave, &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, store->ssv, &buffer[index]);
+		mb_put_binary_float(false, store->ssv, &buffer[index]);
 		index += 4;
 		buffer[index] = store->frequency;
 		index++;
@@ -1941,19 +1941,19 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		index++;
 		buffer[index] = store->pixel_algorithm;
 		index++;
-		mb_put_binary_float(MB_NO, store->pixel_size, &buffer[index]);
+		mb_put_binary_float(false, store->pixel_size, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, store->nbeams, &buffer[index]);
+		mb_put_binary_int(false, store->nbeams, &buffer[index]);
 		index += 4;
-		mb_put_binary_int(MB_NO, store->npixels, &buffer[index]);
+		mb_put_binary_int(false, store->npixels, &buffer[index]);
 		index += 4;
-		mb_put_binary_short(MB_NO, store->spare3, &buffer[index]);
+		mb_put_binary_short(false, store->spare3, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->spare4, &buffer[index]);
+		mb_put_binary_short(false, store->spare4, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->spare5, &buffer[index]);
+		mb_put_binary_short(false, store->spare5, &buffer[index]);
 		index += 2;
-		mb_put_binary_short(MB_NO, store->spare6, &buffer[index]);
+		mb_put_binary_short(false, store->spare6, &buffer[index]);
 		index += 2;
 
 		/* do checksum */
@@ -1961,7 +1961,7 @@ int mbr_sb2100bi_wr_dh(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		write_length = MBF_SB2100BI_DH_WRITE_LEN;
 		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
-		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
+		mb_put_binary_int(false, checksum, &buffer[index]);
 		index += 4;
 		buffer[index] = mbf_sb2100bi_eor[0];
 		index++;
@@ -2030,7 +2030,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	/* write the record length */
 	if (status == MB_SUCCESS) {
 		record_length = store->nbeams * MBF_SB2100BI_BR_WRITE_LEN + 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
+		mb_put_binary_short(false, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1) {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -2045,23 +2045,23 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	if (status == MB_SUCCESS) {
 		index = 0;
 		for (int i = 0; i < store->nbeams; i++) {
-			mb_put_binary_float(MB_NO, store->beams[i].depth, &buffer[index]);
+			mb_put_binary_float(false, store->beams[i].depth, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_NO, store->beams[i].acrosstrack, &buffer[index]);
+			mb_put_binary_float(false, store->beams[i].acrosstrack, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_NO, store->beams[i].alongtrack, &buffer[index]);
+			mb_put_binary_float(false, store->beams[i].alongtrack, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_NO, store->beams[i].range, &buffer[index]);
+			mb_put_binary_float(false, store->beams[i].range, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_NO, store->beams[i].angle_across, &buffer[index]);
+			mb_put_binary_float(false, store->beams[i].angle_across, &buffer[index]);
 			index += 4;
-			mb_put_binary_float(MB_NO, store->beams[i].angle_forward, &buffer[index]);
+			mb_put_binary_float(false, store->beams[i].angle_forward, &buffer[index]);
 			index += 4;
-			mb_put_binary_short(MB_NO, store->beams[i].amplitude, &buffer[index]);
+			mb_put_binary_short(false, store->beams[i].amplitude, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_NO, store->beams[i].signal_to_noise, &buffer[index]);
+			mb_put_binary_short(false, store->beams[i].signal_to_noise, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_NO, store->beams[i].echo_length, &buffer[index]);
+			mb_put_binary_short(false, store->beams[i].echo_length, &buffer[index]);
 			index += 2;
 			buffer[index] = store->beams[i].quality;
 			index++;
@@ -2074,7 +2074,7 @@ int mbr_sb2100bi_wr_br(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		write_length = store->nbeams * MBF_SB2100BI_BR_WRITE_LEN;
 		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
-		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
+		mb_put_binary_int(false, checksum, &buffer[index]);
 		index += 4;
 		buffer[index] = mbf_sb2100bi_eor[0];
 		index++;
@@ -2142,7 +2142,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 	/* write the record length */
 	if (status == MB_SUCCESS) {
 		record_length = store->npixels * MBF_SB2100BI_SR_WRITE_LEN + 6;
-		mb_put_binary_short(MB_NO, record_length, &buffer[0]);
+		mb_put_binary_short(false, record_length, &buffer[0]);
 		if (fwrite(buffer, 2, 1, mbfp) != 1) {
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -2159,9 +2159,9 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		for (int i = 0; i < store->npixels; i++) {
 			amplitude_short = (short)store->pixels[i].amplitude;
 			alongtrack_short = (short)(10 * store->pixels[i].alongtrack);
-			mb_put_binary_short(MB_NO, amplitude_short, &buffer[index]);
+			mb_put_binary_short(false, amplitude_short, &buffer[index]);
 			index += 2;
-			mb_put_binary_short(MB_NO, alongtrack_short, &buffer[index]);
+			mb_put_binary_short(false, alongtrack_short, &buffer[index]);
 			index += 2;
 		}
 
@@ -2170,7 +2170,7 @@ int mbr_sb2100bi_wr_sr(int verbose, FILE *mbfp, struct mbsys_sb2100_struct *stor
 		write_length = store->npixels * MBF_SB2100BI_SR_WRITE_LEN;
 		for (int i = 0; i < write_length; i++)
 			checksum += (unsigned int)buffer[i];
-		mb_put_binary_int(MB_NO, checksum, &buffer[index]);
+		mb_put_binary_int(false, checksum, &buffer[index]);
 		index += 4;
 		buffer[index] = mbf_sb2100bi_eor[0];
 		index++;

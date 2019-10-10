@@ -2546,9 +2546,6 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 			;
 		}
 
-		/* fprintf(stderr,"pixel_size:%f swath_width:%f altitude:%f\n",*pixel_size,*swath_width,
-		store->MSS_table_altitude_sort[nbathsort/2]); */
-
 		/* loop over raw sidescan putting each raw sample into the binning arrays */
 		/* get acrosstrack distance versus range table from bathymetry */
 		nrangetable = 0;
@@ -2571,7 +2568,6 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		sample_start = store->MSS_table_range[irangenadir] * store->RSS_sample_rate;
 		sample_end = MIN(store->MSS_table_range[0] * store->RSS_sample_rate, store->RSS_port_num_samples - 1);
 		irange = irangenadir;
-		/* fprintf(stderr,"Port: irangenadir:%d sample_start:%d sample_end:%d\n",irangenadir,sample_start, sample_end); */
 		for (int i = sample_start; i < sample_end; i++) {
 			range = ((double)i) / ((double)store->RSS_sample_rate);
 			found = MB_NO;
@@ -2599,7 +2595,6 @@ int mbsys_hysweep_makess(int verbose, void *mbio_ptr, void *store_ptr, int pixel
 		sample_start = store->MSS_table_range[irangenadir] * store->RSS_sample_rate;
 		sample_end = MIN(store->MSS_table_range[nrangetable - 1] * store->RSS_sample_rate, store->RSS_starboard_num_samples - 1);
 		irange = irangenadir;
-		/* fprintf(stderr,"Starboard: irangenadir:%d sample_start:%d sample_end:%d\n",irangenadir,sample_start, sample_end); */
 		for (int i = sample_start; i < sample_end; i++) {
 			range = ((double)i) / ((double)store->RSS_sample_rate);
 			found = MB_NO;

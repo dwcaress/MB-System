@@ -309,14 +309,11 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* loop over reading data until a record is ready for return */
 	done = MB_NO;
 	while (*error == MB_ERROR_NO_ERROR && done == MB_NO) {
-		/* if (*line_saved == MB_YES)
-		fprintf(stderr,"SAVED:"); */
 		/* read the next line */
 		if (*line_saved == MB_NO)
 			status = mbr_hysweep1_rd_line(verbose, mb_io_ptr->mbfp, line, error);
 		else
 			*line_saved = MB_NO;
-		/* fprintf(stderr,"line:%s",line); */
 
 		/* now make sense of the line */
 		if (status == MB_SUCCESS) {
@@ -344,8 +341,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 			/* RMB multibeam data record */
 			else if (strncmp(line, "RMB", 3) == 0) {
-				/* fprintf(stderr,"Reading line because *RMB_read:%d\n",*RMB_read); */
-
 				/* parse the first line */
 				nscan = sscanf(line + 4, "%d %lf %x %x %x %d %lf %d", &(tmpRMB_device_number), &(tmpRMB_time),
 				               &(tmpRMB_sonar_type), &(tmpRMB_sonar_flags), &(tmpRMB_beam_data_available), &(tmpRMB_num_beams),
@@ -806,7 +801,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						store->time_d = store->TND_survey_time_d + store->RMB_time;
 						mb_get_date(verbose, store->time_d, store->time_i);
 					}
-					/* fprintf(stderr,"RMB SNRok:%d RSSok:%d done:%d store->kind:%d\n",SNRok,RSSok,done,store->kind); */
 				}
 
 				/* set *RMB_read flag */
@@ -950,7 +944,6 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 						store->time_d = store->TND_survey_time_d + store->RMB_time;
 						mb_get_date(verbose, store->time_d, store->time_i);
 					}
-					/* fprintf(stderr,"RSS SNRok:%d RSSok:%d done:%d store->kind:%d\n",SNRok,RSSok,done,store->kind); */
 				}
 
 				/* set *RMB_read flag */
@@ -1984,9 +1977,6 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 				navlat = store->POS_y;
 			}
 			mb_navint_add(verbose, mbio_ptr, store->time_d, navlon, navlat, error);
-			/* fprintf(stderr,"POS %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
-			store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-			store->POS_x,store->POS_y,navlon,navlat);*/
 		}
 	}
 
@@ -2064,9 +2054,6 @@ int mbr_rt_hysweep1(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			store->RMBint_x = 0.0;
 			store->RMBint_y = 0.0;
 		}
-		/* fprintf(stderr,"RMB %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d   %f %f   %f %f\n",
-		store->time_i[0],store->time_i[1],store->time_i[2],store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
-		store->RMBint_x,store->RMBint_y,store->RMBint_lon,store->RMBint_lat);*/
 	}
 
 	/* if survey data then calculate angles and bathymetry as necessary */
@@ -2674,23 +2661,19 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (*add_MB_POS == MB_YES) {
 			sprintf(line, "POS %d %.3f %.2f %.2f\r\n", *device_number_MB_POS, store->RMB_time, store->RMBint_x, store->RMBint_y);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 		if (*add_MB_GYR == MB_YES) {
 			sprintf(line, "GYR %d %.3f %.2f\r\n", *device_number_MB_GYR, store->RMB_time, store->RMBint_heading);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 		if (*add_MB_HCP == MB_YES) {
 			sprintf(line, "HCP %d %.3f %.2f %.2f %.2f\r\n", *device_number_MB_HCP, store->RMB_time, (store->RMBint_heave),
 			        (-store->RMBint_roll), store->RMBint_pitch);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 		if (*add_MB_DFT == MB_YES) {
 			sprintf(line, "DFT %d %.3f %.2f\r\n", *device_number_MB_DFT, store->RMB_time, store->RMBint_draft);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 
 		/* write raw sidescan if it exists */
@@ -2702,7 +2685,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			        store->RSS_sound_velocity, store->RSS_ping_number, store->RSS_altitude, store->RSS_sample_rate,
 			        store->RSS_minimum_amplitude, store->RSS_maximum_amplitude, store->RSS_bit_shift, store->RSS_frequency);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 
 			/* write RSS_port */
 			for (int i = 0; i < store->RSS_port_num_samples; i++) {
@@ -2722,15 +2704,12 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 
 		/* write processed sidescan if it exists */
-		/* fprintf(stderr,"store->MSS_num_pixels:%d store->MSS_ping_number:%d store->RMB_ping_number:%d\n",
-		store->MSS_num_pixels,store->MSS_ping_number,store->RMB_ping_number); */
 		if ((store->MSS_ping_number == store->RMB_ping_number || 10 * store->MSS_ping_number == store->RMB_ping_number) &&
 		    store->MSS_num_pixels > 0) {
 			/* write first line */
 			sprintf(line, "MSS %d %.3f %.2f %d %.3f %d\r\n", store->MSS_device_number, store->MSS_time, store->MSS_sound_velocity,
 			        store->MSS_num_pixels, store->MSS_pixel_size, store->MSS_ping_number);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 
 			/* write MSS_ss */
 			for (int i = 0; i < store->MSS_num_pixels; i++) {
@@ -2760,7 +2739,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			kindex = strlen(line);
 			sprintf(line + kindex, "\r\n");
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 
 		/* write first line */
@@ -2768,7 +2746,6 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		        store->RMB_sonar_flags, store->RMB_beam_data_available, store->RMB_num_beams, store->RMB_sound_velocity,
 		        store->RMB_ping_number);
 		fputs(line, mbfp);
-		/* fprintf(stderr,"writeline: %s",line); */
 
 		/* write RMB_beam_ranges if included */
 		if (store->RMB_beam_data_available & 0x0001) {
@@ -3018,21 +2995,18 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			sprintf(line, "HCP %d %.3f %.2f %.2f %.2f\r\n", store->HCP_device_number, store->HCP_time, store->HCP_heave,
 			        store->HCP_roll, store->HCP_pitch);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 
 		/* write GYR record */
 		else if (store->kind == MB_DATA_HEADING) {
 			sprintf(line, "GYR %d %.3f %.2f\r\n", store->GYR_device_number, store->GYR_time, store->GYR_heading);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 
 		/* write DFT record */
 		else if (store->kind == MB_DATA_SONARDEPTH) {
 			sprintf(line, "DFT %d %.3f %.2f\r\n", store->DFT_device_number, store->DFT_time, store->DFT_draft);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 
 		/* write GPS and POS record */
@@ -3041,32 +3015,27 @@ int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				sprintf(line, "GPS %d %.3f %.2f %.2f %.2f %d %d\r\n", store->GPS_device_number, store->GPS_time, store->GPS_cog,
 				        store->GPS_sog, store->GPS_hdop, store->GPS_mode, store->GPS_nsats);
 				fputs(line, mbfp);
-				/* fprintf(stderr,"writeline: %s",line); */
 			}
 
 			sprintf(line, "POS %d %.3f %.2f %.2f\r\n", store->POS_device_number, store->POS_time, store->POS_x, store->POS_y);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 
 		/* write EC1 record */
 		else if (store->kind == MB_DATA_ALTITUDE) {
 			sprintf(line, "EC1 %d %.3f %.2f\r\n", store->EC1_device_number, store->EC1_time, store->EC1_rawdepth);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 
 		/* write TID record */
 		else if (store->kind == MB_DATA_TIDE) {
 			sprintf(line, "TID %d %.3f %.2f\r\n", store->TID_device_number, store->TID_time, store->TID_tide);
 			fputs(line, mbfp);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 
 		/* write comment */
 		else if (store->kind == MB_DATA_COMMENT) {
 			sprintf(line, "COM %s\r\n", store->COM_comment);
-			/* fprintf(stderr,"writeline: %s",line); */
 		}
 	}
 

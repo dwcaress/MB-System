@@ -1801,7 +1801,7 @@ int main(int argc, char **argv)
   const bool read_datalist = format < 0;
 
   /* open file list */
-  if (read_datalist == MB_YES)
+  if (read_datalist)
     {
     if ((status =mb_datalist_open(verbose, &datalist, input, look_processed, &error)) != MB_SUCCESS)
       {
@@ -2384,24 +2384,24 @@ int main(int argc, char **argv)
               output_buffer[index] = 'B'; index++;
               output_buffer[index] = '1'; index++;
               output_buffer[index] = 0; index++;
-              mb_put_binary_int(MB_YES, mb1_size, &output_buffer[index]); index += 4;
+              mb_put_binary_int(true, mb1_size, &output_buffer[index]); index += 4;
 
-              mb_put_binary_double(MB_YES, ping[i_ping_process].time_d, &output_buffer[index]);
+              mb_put_binary_double(true, ping[i_ping_process].time_d, &output_buffer[index]);
               index += 8;
-              mb_put_binary_double(MB_YES, ping[i_ping_process].navlat, &output_buffer[index]);
+              mb_put_binary_double(true, ping[i_ping_process].navlat, &output_buffer[index]);
               index += 8;
-              mb_put_binary_double(MB_YES, ping[i_ping_process].navlon, &output_buffer[index]);
+              mb_put_binary_double(true, ping[i_ping_process].navlon, &output_buffer[index]);
               index += 8;
-              mb_put_binary_double(MB_YES, ping[i_ping_process].sonardepth, &output_buffer[index]);
+              mb_put_binary_double(true, ping[i_ping_process].sonardepth, &output_buffer[index]);
               index += 8;
-              mb_put_binary_double(MB_YES,
+              mb_put_binary_double(true,
                 (double)(DTR * ping[i_ping_process].heading),
                 &output_buffer[index]); index += 8;
 
-              mb_put_binary_int(MB_YES, ping_number, &output_buffer[index]);
+              mb_put_binary_int(true, ping_number, &output_buffer[index]);
               index += 4;
 
-              mb_put_binary_int(MB_YES, n_output, &output_buffer[index]); index += 4;
+              mb_put_binary_int(true, n_output, &output_buffer[index]); index += 4;
 
               PMPRINT(MOD_MBTRNPP, MM_DEBUG,
                 (stderr,
@@ -2414,19 +2414,19 @@ int main(int argc, char **argv)
               for (int j = 0; j < ping[i_ping_process].beams_bath; j++)
                 if (mb_beam_ok(ping[i_ping_process].beamflag_filter[j]))
                   {
-                  mb_put_binary_int(MB_YES, j, &output_buffer[index]);
+                  mb_put_binary_int(true, j, &output_buffer[index]);
                   index += 4;
-                  mb_put_binary_double(MB_YES,
+                  mb_put_binary_double(true,
                     ping[i_ping_process].bathalongtrack[j],
                     &output_buffer[index]); index += 8;
-                  mb_put_binary_double(MB_YES,
+                  mb_put_binary_double(true,
                     ping[i_ping_process].bathacrosstrack[j],
                     &output_buffer[index]); index += 8;
-/*                                mb_put_binary_double(MB_YES, ping[i_ping_process].bath[j],
+/*                                mb_put_binary_double(true, ping[i_ping_process].bath[j],
    &output_buffer[index]); index += 8; */
                   /* subtract sonar depth from vehicle bathy; changed 12jul18
                      cruises */
-                  mb_put_binary_double(MB_YES,
+                  mb_put_binary_double(true,
                     (ping[i_ping_process].bath[j] -ping[i_ping_process].sonardepth),
                     &output_buffer[index]);
                   index += 8;
@@ -2446,7 +2446,7 @@ int main(int argc, char **argv)
               PMPRINT(MOD_MBTRNPP, MBTRNPP_V1,
                 (stderr, "before put : chk[%08X/%u] idx[%zu] mb1sz[%zu]\n", checksum, checksum,
                 index, mb1_size));
-              mb_put_binary_int(MB_YES, checksum, &output_buffer[index]); index += 4;
+              mb_put_binary_int(true, checksum, &output_buffer[index]); index += 4;
               PMPRINT(MOD_MBTRNPP, MBTRNPP_V1,
                 (stderr, "after put : chk[%08X] idx[%zu] mb1sz[%zu]\n", checksum, index, mb1_size));
 
@@ -2887,7 +2887,7 @@ int main(int argc, char **argv)
 
       /* give the statistics
          figure out whether and what to read next*/
-      if (read_datalist == MB_YES)
+      if (read_datalist)
         {
         if ((status =
           mb_datalist_read(verbose, datalist, ifile, dfile, &format, &file_weight,
@@ -2913,7 +2913,7 @@ int main(int argc, char **argv)
     }
 
   fprintf(stderr, "exit loop\n");
-  if (read_datalist == MB_YES)
+  if (read_datalist)
     mb_datalist_close(verbose, &datalist, &error);
 
   /* close log file */

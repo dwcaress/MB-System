@@ -215,13 +215,6 @@ int mbr_rt_hir2rnav(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		int nget = sscanf(line, "%d-%d-%dT%d:%d:%lfZ %lf %lf %d %d %lf %d", &store->time_i[0], &store->time_i[1], &store->time_i[2],
 		              &store->time_i[3], &store->time_i[4], &sec, &store->longitude, &store->latitude, &store->gps_quality,
 		              &store->gps_nsat, &store->gps_dilution, &store->gps_height);
-		/* fprintf(stderr,"\nLINE:%s\tnget:%d %d/%d/%d %d:%d:%f  lon:%f lat:%f  gps:%d %d %f %d\n",
-		line,nget,
-		store->time_i[0],store->time_i[1],store->time_i[2],
-		store->time_i[3],store->time_i[4],sec,
-		store->longitude,store->latitude,
-		store->gps_quality,store->gps_nsat,
-		store->gps_dilution,store->gps_height);*/
 		if (nget != 12) {
 			store->gps_quality = 0;
 			store->gps_nsat = 0;

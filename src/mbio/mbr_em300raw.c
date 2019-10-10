@@ -2184,8 +2184,6 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2
 		ping->png_distance_res = (mb_u_char)line[21];
 		mb_get_binary_short(swap, &line[22], &short_val);
 		ping->png_sample_rate = (int)((unsigned short)short_val);
-		/*fprintf(stderr,"    ping->png_date:%d     ping->png_msec:%d     ping->png_count:%d     ping->png_nbeams:%d\n",
-		ping->png_date,ping->png_msec,ping->png_count,ping->png_nbeams);*/
 	}
 
 	/* check for some indicators of a broken record
@@ -2769,8 +2767,6 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap, struct mbsys_sim
 		ping->png_raw3_ssv = (int)((unsigned short)short_val);
 		mb_get_binary_short(swap, &line[26], &short_val);
 		ping->png_raw3_nbeams_max = (int)((unsigned short)short_val);
-		/*fprintf(stderr,"ping->png_raw_date:%d ping->png_raw_msec:%d ping->png_raw_count:%d ping->png_raw_nbeams:%d\n",
-		ping->png_raw3_date,ping->png_raw3_msec,ping->png_raw3_count,ping->png_raw3_nbeams);*/
 	}
 
 	/* check for some indicators of a broken record
@@ -2997,8 +2993,6 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap, struct mbsys_simrad2_s
 		ping->png_tx = (int)((unsigned short)short_val);
 		ping->png_tvg_crossover = (mb_u_char)line[26];
 		ping->png_nbeams_ss = (mb_u_char)line[27];
-		/*fprintf(stderr," ping->png_ss_date:%d  ping->png_ss_msec:%d  ping->png_ss_count:%d  ping->png_nbeams_ss:%d\n",
-		ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 	}
 
 	/* check for some indicators of a broken record
@@ -4204,8 +4198,6 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		time_i[5] = (ping->png_ss_msec % 60000) / 1000;
 		time_i[6] = (ping->png_ss_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ss_time_d);
-		/* fprintf(stderr,"Check: png_count:%d png_raw3_count:%d png_ss_count:%d    Beams:%d %d %d\n",
-		ping->png_count,ping->png_raw3_count,ping->png_ss_count,ping->png_nbeams,ping->png_raw3_nbeams,ping->png_nbeams_ss);*/
 
 		/* check for time match - if bath newer than
 		   sidescan then zero sidescan,  if sidescan
@@ -4256,21 +4248,6 @@ int mbr_rt_em300raw(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 	}
 
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA) {
-		/*fprintf(stderr, "mode:%d absorption:%d tran_pulse:%d tran_beam:%d tran_pow:%d rec_beam:%d rec_band:%d rec_gain:%d
-		tvg_cross:%d\n", store->run_mode, store->run_absorption, store->run_tran_pulse, store->run_tran_pow, store->run_rec_beam,
-		store->run_rec_band, store->run_rec_gain, store->run_tvg_cross); fprintf(stderr, "max_range:%d r_zero:%d r_zero_corr:%d
-		tvg_start:%d tvg_stop:%d bsn:%d bso:%d tx:%d tvg_crossover:%d\n", ping->png_max_range, ping->png_r_zero,
-		ping->png_r_zero_corr, ping->png_tvg_start,
-		ping->png_tvg_stop, ping->png_bsn,
-		ping->png_bso, ping->png_tx,
-		ping->png_tvg_crossover);
-		fprintf(stderr, "mode:%d depth:%11f max_range:%d r_zero:%d r_zero_corr:%d bsn:%d bso:%d\n",
-		store->run_mode,
-		0.01 * ping->png_depth_res * ping->png_depth[ping->png_nbeams/2],
-		ping->png_max_range, ping->png_r_zero,
-		ping->png_r_zero_corr, ping->png_bsn,
-		ping->png_bso);*/
-
 		/* get ping time */
 		time_i[0] = ping->png_date / 10000;
 		time_i[1] = (ping->png_date % 10000) / 100;
