@@ -181,7 +181,7 @@ libmframe_la_LIBADD =
 libtnav_la_LIBADD = libgeolib.la \
 					libnewmat.la \
 					libqnx.la \
-					-lm -lnetcdf -lrt -lpthread
+					-lm -lnetcdf -lpthread
 
 libtrnw_la_LDFLAGS =  -no-undefined -version-info 0:0:0
 

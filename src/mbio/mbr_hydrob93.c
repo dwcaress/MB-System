@@ -208,11 +208,11 @@ int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 		int idepth;
 
 		/* parse data */
-		mb_get_binary_int(MB_YES, &line[0], (int *)&ilatitude);
-		mb_get_binary_int(MB_YES, &line[4], (int *)&ilongitude);
-		mb_get_binary_int(MB_YES, &line[8], (int *)&idepth);
+		mb_get_binary_int(true, &line[0], (int *)&ilatitude);
+		mb_get_binary_int(true, &line[4], (int *)&ilongitude);
+		mb_get_binary_int(true, &line[8], (int *)&idepth);
 		short itype;
-		mb_get_binary_short(MB_YES, &line[12], (short *)&itype);
+		mb_get_binary_short(true, &line[12], (short *)&itype);
 		store->longitude = (ilongitude)*0.000001;
 		store->latitude = (ilatitude)*0.000001;
 		store->bath = (idepth)*0.1;
@@ -323,10 +323,10 @@ int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error) {
 			itype = 0;
 		else
 			itype = 10711;
-		mb_put_binary_int(MB_YES, (int)ilatitude, (void *)&line[0]);
-		mb_put_binary_int(MB_YES, (int)ilongitude, (void *)&line[4]);
-		mb_put_binary_int(MB_YES, (int)idepth, (void *)&line[8]);
-		mb_put_binary_short(MB_YES, (short)itype, (void *)&line[12]);
+		mb_put_binary_int(false, (int)ilatitude, (void *)&line[0]);
+		mb_put_binary_int(false, (int)ilongitude, (void *)&line[4]);
+		mb_put_binary_int(false, (int)idepth, (void *)&line[8]);
+		mb_put_binary_short(false, (short)itype, (void *)&line[12]);
 	}
 
 	int status = MB_SUCCESS;

@@ -2405,7 +2405,7 @@ int mb_get_format(int verbose, char *filename, char *fileroot, int *format, int 
 
 						/* read and discard the rest of the record */
 						if (done == MB_NO) {
-							mb_get_binary_int(MB_YES, &buffer[12], &size);
+							mb_get_binary_int(true, &buffer[12], &size);
 							for (i = 0; i < size; i++) {
 								if (fread(buffer, 1, 1, checkfp) != 1)
 									done = MB_YES;

@@ -570,30 +570,30 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 			data->latitude = 0.0;
 
 			/* get binary header */
-			mb_get_binary_short(MB_NO, &line[shift], &short_value);
+			mb_get_binary_short(false, &line[shift], &short_value);
 			data->ping_number = (int)short_value;
 			shift += 2;
 			data->bath_res = (int)line[shift];
 			shift += 1;
 			data->bath_quality = (int)line[shift];
 			shift += 1;
-			mb_get_binary_short(MB_NO, &line[shift], &short_value);
+			mb_get_binary_short(false, &line[shift], &short_value);
 			data->keel_depth = (int)short_value;
 			shift += 2;
-			mb_get_binary_short(MB_NO, &line[shift], &short_value);
+			mb_get_binary_short(false, &line[shift], &short_value);
 			data->heading = (int)short_value;
 			shift += 2;
-			mb_get_binary_short(MB_NO, &line[shift], &short_value);
+			mb_get_binary_short(false, &line[shift], &short_value);
 			data->roll = (int)short_value;
 			shift += 2;
-			mb_get_binary_short(MB_NO, &line[shift], &short_value);
+			mb_get_binary_short(false, &line[shift], &short_value);
 			data->pitch = (int)short_value;
 			shift += 2;
 			data->xducer_pitch = data->pitch;
-			mb_get_binary_short(MB_NO, &line[shift], &short_value);
+			mb_get_binary_short(false, &line[shift], &short_value);
 			data->ping_heave = (int)short_value;
 			shift += 2;
-			mb_get_binary_short(MB_NO, &line[shift], &short_value);
+			mb_get_binary_short(false, &line[shift], &short_value);
 			data->sound_vel = (int)short_value;
 			shift += 2;
 			data->bath_mode = (int)line[shift];
@@ -602,16 +602,16 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 			/* get bathymetry */
 			data->beams_bath = MBF_EM12IFRM_MAXBEAMS;
 			for (int i = 0; i < MBF_EM12IFRM_MAXBEAMS; i++) {
-				mb_get_binary_short(MB_NO, &line[shift], &short_value);
+				mb_get_binary_short(false, &line[shift], &short_value);
 				data->bath[i] = (int)short_value;
 				shift += 2;
-				mb_get_binary_short(MB_NO, &line[shift], &short_value);
+				mb_get_binary_short(false, &line[shift], &short_value);
 				data->bath_acrosstrack[i] = (int)short_value;
 				shift += 2;
-				mb_get_binary_short(MB_NO, &line[shift], &short_value);
+				mb_get_binary_short(false, &line[shift], &short_value);
 				data->bath_alongtrack[i] = (int)short_value;
 				shift += 2;
-				mb_get_binary_short(MB_NO, &line[shift], &short_value);
+				mb_get_binary_short(false, &line[shift], &short_value);
 				data->tt[i] = (int)short_value;
 				shift += 2;
 				data->amp[i] = (int)line[shift];
@@ -702,7 +702,7 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 				shift += 11;
 
 				/* get binary header */
-				mb_get_binary_short(MB_NO, &line[shift], &short_value);
+				mb_get_binary_short(false, &line[shift], &short_value);
 				*ss_ping_number = (int)short_value;
 				shift += 2;
 				data->ss_mode = (int)line[shift];
@@ -724,10 +724,10 @@ int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error) {
 					shift += 1;
 					data->beam_frequency[beamlist[i]] = (int)line[shift];
 					shift += 1;
-					mb_get_binary_short(MB_NO, &line[shift], &short_value);
+					mb_get_binary_short(false, &line[shift], &short_value);
 					data->beam_samples[beamlist[i]] = (int)short_value;
 					shift += 2;
-					mb_get_binary_short(MB_NO, &line[shift], &short_value);
+					mb_get_binary_short(false, &line[shift], &short_value);
 					data->beam_center_sample[beamlist[i]] = (int)short_value;
 					shift += 2;
 				}
@@ -1405,29 +1405,29 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		line[shift] = '\0';
 		shift += 1;
 		short_value = (short)data->ping_number;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		line[shift] = (char)data->bath_res;
 		shift += 1;
 		line[shift] = (char)data->bath_quality;
 		shift += 1;
 		short_value = (short)data->keel_depth;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->heading;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->roll;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->pitch;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->ping_heave;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		short_value = (short)data->sound_vel;
-		mb_put_binary_short(MB_NO, short_value, &line[shift]);
+		mb_put_binary_short(false, short_value, &line[shift]);
 		shift += 2;
 		line[shift] = (char)data->bath_mode;
 		shift += 1;
@@ -1438,16 +1438,16 @@ int mbr_em12ifrm_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		data->beams_bath = MBF_EM12IFRM_MAXBEAMS;
 		for (int i = 0; i < data->beams_bath; i++) {
 			short_value = (short)data->bath[i];
-			mb_put_binary_short(MB_NO, short_value, &line[shift]);
+			mb_put_binary_short(false, short_value, &line[shift]);
 			shift += 2;
 			short_value = (short)data->bath_acrosstrack[i];
-			mb_put_binary_short(MB_NO, short_value, &line[shift]);
+			mb_put_binary_short(false, short_value, &line[shift]);
 			shift += 2;
 			short_value = (short)data->bath_alongtrack[i];
-			mb_put_binary_short(MB_NO, short_value, &line[shift]);
+			mb_put_binary_short(false, short_value, &line[shift]);
 			shift += 2;
 			short_value = (short)data->tt[i];
-			mb_put_binary_short(MB_NO, short_value, &line[shift]);
+			mb_put_binary_short(false, short_value, &line[shift]);
 			shift += 2;
 			line[shift] = (char)data->amp[i];
 			shift += 1;

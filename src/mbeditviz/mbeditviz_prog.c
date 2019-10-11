@@ -1157,9 +1157,9 @@ int mbeditviz_load_file(int ifile) {
 					for (i = 0; i < file->n_async_heading; i++) {
 						nread = fread(buffer, read_size, 1, afp);
 						index = 0;
-						mb_get_binary_double(MB_YES, &buffer[index], &file->async_heading_time_d[i]);
+						mb_get_binary_double(true, &buffer[index], &file->async_heading_time_d[i]);
 						index += 8;
-						mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+						mb_get_binary_float(true, &buffer[index], &value_float);
 						index += 4;
 						file->async_heading_heading[i] = value_float;
 					}
@@ -1266,9 +1266,9 @@ int mbeditviz_load_file(int ifile) {
 					for (i = 0; i < file->n_async_sonardepth; i++) {
 						nread = fread(buffer, read_size, 1, afp);
 						index = 0;
-						mb_get_binary_double(MB_YES, &buffer[index], &file->async_sonardepth_time_d[i]);
+						mb_get_binary_double(true, &buffer[index], &file->async_sonardepth_time_d[i]);
 						index += 8;
-						mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+						mb_get_binary_float(true, &buffer[index], &value_float);
 						index += 4;
 						file->async_sonardepth_sonardepth[i] = value_float;
 					}
@@ -1383,12 +1383,12 @@ int mbeditviz_load_file(int ifile) {
 					for (i = 0; i < file->n_async_attitude; i++) {
 						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
 							index = 0;
-							mb_get_binary_double(MB_YES, &buffer[index], &file->async_attitude_time_d[i]);
+							mb_get_binary_double(true, &buffer[index], &file->async_attitude_time_d[i]);
 							index += 8;
-							mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+							mb_get_binary_float(true, &buffer[index], &value_float);
 							index += 4;
 							file->async_attitude_roll[i] = value_float;
-							mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+							mb_get_binary_float(true, &buffer[index], &value_float);
 							index += 4;
 							file->async_attitude_pitch[i] = value_float;
 						}
@@ -1531,12 +1531,12 @@ int mbeditviz_load_file(int ifile) {
 					for (i = 0; i < file->n_sync_attitude; i++) {
 						if ((nread = fread(buffer, read_size, 1, afp)) == 1) {
 							index = 0;
-							mb_get_binary_double(MB_YES, &buffer[index], &file->sync_attitude_time_d[i]);
+							mb_get_binary_double(true, &buffer[index], &file->sync_attitude_time_d[i]);
 							index += 8;
-							mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+							mb_get_binary_float(true, &buffer[index], &value_float);
 							index += 4;
 							file->sync_attitude_roll[i] = value_float;
-							mb_get_binary_float(MB_YES, &buffer[index], &value_float);
+							mb_get_binary_float(true, &buffer[index], &value_float);
 							index += 4;
 							file->sync_attitude_pitch[i] = value_float;
 						}

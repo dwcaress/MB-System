@@ -556,10 +556,12 @@ int main(int argc, char **argv) {
 	int read_data;
 	int testformat;
 	char fileroot[MB_PATH_MAXLINE];
+	int found;
 	int reson_lastread;
 	int sslo_lastread;
 	double sslo_last_time_d;
 	int sslo_last_ping;
+	int foundstart, foundend;
 	int start, end;
 	int nscan, startdata;
 	int ins_time_d_index = -1;
@@ -1167,43 +1169,43 @@ int main(int argc, char **argv) {
 		nins_speed = 0;
 		while (fread(buffer, ins_len, 1, tfp) == 1) {
 			if (ins_time_d_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_time_d_index], &(ins_time_d[nins]));
+				mb_get_binary_double(true, &buffer[ins_time_d_index], &(ins_time_d[nins]));
 
 			if (ins_lon_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_lon_index], &(ins_lon[nins]));
+				mb_get_binary_double(true, &buffer[ins_lon_index], &(ins_lon[nins]));
 			ins_lon[nins] *= RTD;
 
 			if (ins_lat_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_lat_index], &(ins_lat[nins]));
+				mb_get_binary_double(true, &buffer[ins_lat_index], &(ins_lat[nins]));
 			ins_lat[nins] *= RTD;
 
 			if (ins_roll_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_roll_index], &(ins_roll[nins]));
+				mb_get_binary_double(true, &buffer[ins_roll_index], &(ins_roll[nins]));
 			ins_roll[nins] *= RTD;
 
 			if (ins_pitch_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_pitch_index], &(ins_pitch[nins]));
+				mb_get_binary_double(true, &buffer[ins_pitch_index], &(ins_pitch[nins]));
 			ins_pitch[nins] *= RTD;
 
 			if (ins_heading_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_heading_index], &(ins_heading[nins]));
+				mb_get_binary_double(true, &buffer[ins_heading_index], &(ins_heading[nins]));
 			ins_heading[nins] *= RTD;
 
 			if (ins_sonardepth_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
+				mb_get_binary_double(true, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
 			ins_sonardepth[nins] += sonardepthoffset;
 
 			if (ins_altitude_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
+				mb_get_binary_double(true, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
 			ins_altitude_time_d[nins_altitude] = ins_time_d[nins];
 
 			if (ins_speed_index >= 0)
-				mb_get_binary_double(MB_YES, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
+				mb_get_binary_double(true, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
 			ins_speed_time_d[nins_speed] = ins_time_d[nins];
 
 			if (ins_velocityx_index >= 0 && ins_velocityy_index >= 0) {
-				mb_get_binary_double(MB_YES, &buffer[ins_velocityx_index], &velocityx);
-				mb_get_binary_double(MB_YES, &buffer[ins_velocityy_index], &velocityy);
+				mb_get_binary_double(true, &buffer[ins_velocityx_index], &velocityx);
+				mb_get_binary_double(true, &buffer[ins_velocityy_index], &velocityy);
 				ins_speed[nins_speed] = sqrt(velocityx * velocityx + velocityy * velocityy);
 				ins_speed_time_d[nins_speed] = ins_time_d[nins];
 			}
@@ -1447,8 +1449,8 @@ int main(int argc, char **argv) {
 		/* read the data points in the auv log file */
 		nsonardepth = 0;
 		while (fread(buffer, sonardepth_len, 1, tfp) == 1) {
-			mb_get_binary_double(MB_YES, &buffer[sonardepth_time_d_index], &(sonardepth_time_d[nsonardepth]));
-			mb_get_binary_double(MB_YES, &buffer[sonardepth_sonardepth_index], &(sonardepth_sonardepth[nsonardepth]));
+			mb_get_binary_double(true, &buffer[sonardepth_time_d_index], &(sonardepth_time_d[nsonardepth]));
+			mb_get_binary_double(true, &buffer[sonardepth_sonardepth_index], &(sonardepth_sonardepth[nsonardepth]));
 			sonardepth_sonardepth[nsonardepth] += sonardepthoffset;
 			nsonardepth++;
 		}
@@ -3920,28 +3922,28 @@ int main(int argc, char **argv) {
 	else if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
 		for (int i = 0; i < nbatht; i++) {
 			if (batht_good_offset[i] == MB_NO) {
-				bool foundstart = false;
-				bool foundend = false;
-				for (int j = i - 1; j >= 0 && !foundstart; j--) {
+				foundstart = MB_NO;
+				foundend = MB_NO;
+				for (int j = i - 1; j >= 0 && foundstart == MB_NO; j--) {
 					if (batht_good_offset[j] == MB_YES) {
-						foundstart = true;
+						foundstart = MB_YES;
 						start = j;
 					}
 				}
-				for (int j = i + 1; j < nbatht && !foundend; j++) {
+				for (int j = i + 1; j < nbatht && foundend == MB_NO; j++) {
 					if (batht_good_offset[j] == MB_YES) {
-						foundend = true;
+						foundend = MB_YES;
 						end = j;
 					}
 				}
-				if (foundstart && foundend) {
+				if (foundstart == MB_YES && foundend == MB_YES) {
 					batht_time_offset[i] = batht_time_offset[start] + (batht_time_offset[end] - batht_time_offset[start]) *
 					                                                      ((double)(i - start)) / ((double)(end - start));
 				}
-				else if (foundstart) {
+				else if (foundstart == MB_YES) {
 					batht_time_offset[i] = batht_time_offset[start];
 				}
-				else if (foundend) {
+				else if (foundend == MB_YES) {
 					batht_time_offset[i] = batht_time_offset[end];
 				}
 			}
@@ -3952,11 +3954,11 @@ int main(int argc, char **argv) {
 	if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
 		for (int i = 0; i < nedget; i++) {
 			if (edget_good_offset[i] == MB_NO) {
-				bool foundstart = false;
-				bool foundend = false;
-				for (int j = i - 1; j >= 0 && !foundstart; j--) {
+				foundstart = MB_NO;
+				foundend = MB_NO;
+				for (int j = i - 1; j >= 0 && foundstart == MB_NO; j--) {
 					if (edget_good_offset[j] == MB_YES) {
-						foundstart = true;
+						foundstart = MB_YES;
 						start = j;
 					}
 				}
@@ -3966,14 +3968,14 @@ int main(int argc, char **argv) {
 						end = j;
 					}
 				}
-				if (foundstart && foundend) {
+				if (foundstart == MB_YES && foundend == MB_YES) {
 					edget_time_offset[i] = edget_time_offset[start] + (edget_time_offset[end] - edget_time_offset[start]) *
 					                                                      ((double)(i - start)) / ((double)(end - start));
 				}
-				else if (foundstart) {
+				else if (foundstart == MB_YES) {
 					edget_time_offset[i] = edget_time_offset[start];
 				}
-				else if (foundend) {
+				else if (foundend == MB_YES) {
 					edget_time_offset[i] = edget_time_offset[end];
 				}
 			}
@@ -4335,11 +4337,10 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "Checking for existing bathymetry edits...\n");
 
 				/* check for existing esf file */
-				int found;  // TOOD(schwehr): Convert mb_esf_check found to bool.
 				esf_status = mb_esf_check(verbose, ofile, esffile, &found, &error);
 
 				/* if esf file found load it */
-				if (esf_status == MB_SUCCESS && found) {
+				if (esf_status == MB_SUCCESS && found == MB_YES) {
 					esf_status = mb_esf_load(verbose, program_name, ofile, MB_YES, MB_YES, esffile, &esf, &error);
 					if (status == MB_SUCCESS && esf.esffp != NULL)
 						esffile_open = MB_YES;
@@ -4425,20 +4426,20 @@ int main(int argc, char **argv) {
 						 */
 						bathymetry = &(istore->bathymetry);
 						header = &(bathymetry->header);
-						bool found = false;
-						for (int i = iping; i < nbatht && !found; i++) {
+						found = MB_NO;
+						for (int i = iping; i < nbatht && found == MB_NO; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
-								found = true;
+								found = MB_YES;
 							}
 						}
-						for (int i = 0; i < nbatht && !found; i++) {
+						for (int i = 0; i < nbatht && found == MB_NO; i++) {
 							if (bathymetry->ping_number == batht_ping[i]) {
 								iping = i;
-								found = true;
+								found = MB_YES;
 							}
 						}
-						if (found && batht_good_offset[iping] == MB_YES) {
+						if (found == MB_YES && batht_good_offset[iping] == MB_YES) {
 							fprintf(stderr,
 							        "*** Timestamp adjusted from "
 							        "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d to ",
@@ -4630,10 +4631,10 @@ int main(int argc, char **argv) {
 						if (status == MB_SUCCESS) {
 							/* fix time stamp */
 							if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON) {
-								bool found = false;
-								for (int j = 0; j < nbatht && !found; j++) {
+								found = MB_NO;
+								for (int j = 0; j < nbatht && found == MB_NO; j++) {
 									if (bathymetry->ping_number == batht_ping[j]) {
-										found = true;
+										found = MB_YES;
 										time_d = batht_time_d_new[j];
 										mb_get_date(verbose, time_d, time_i);
 										mb_get_jtime(verbose, time_i, time_j);
@@ -6789,10 +6790,10 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						bool found = false;
-						for (int j = 0; j < nedget && !found; j++) {
+						found = MB_NO;
+						for (int j = 0; j < nedget && found == MB_NO; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
-								found = true;
+								found = MB_YES;
 								time_d = istore->time_d + edget_time_offset[j];
 								mb_get_date(verbose, time_d, time_i);
 								mb_get_jtime(verbose, time_i, time_j);
@@ -6852,10 +6853,10 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						bool found = false;
-						for (int j = 0; j < nedget && !found; j++) {
+						found = MB_NO;
+						for (int j = 0; j < nedget && found == MB_NO; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
-								found = true;
+								found = MB_YES;
 								time_d = istore->time_d + edget_time_offset[j];
 								mb_get_date(verbose, time_d, time_i);
 								mb_get_jtime(verbose, time_i, time_j);
@@ -6921,10 +6922,10 @@ int main(int argc, char **argv) {
 
 					/* fix time stamp */
 					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH) {
-						bool found = false;
-						for (int j = 0; j < nedget && !found; j++) {
+						found = MB_NO;
+						for (int j = 0; j < nedget && found == MB_NO; j++) {
 							if (istore->time_d >= edget_time_d[j]) {
-								found = true;
+								found = MB_YES;
 								time_d = istore->time_d + edget_time_offset[j];
 								mb_get_date(verbose, time_d, time_i);
 								mb_get_jtime(verbose, time_i, time_j);

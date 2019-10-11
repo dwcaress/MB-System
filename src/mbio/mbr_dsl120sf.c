@@ -295,15 +295,15 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 		data->rec_type = DSL_HEADER;
 
 		index = 0;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->rec_len);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->rec_len);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->rec_hdr_len);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->rec_hdr_len);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->p_flags);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->p_flags);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->num_data_types);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->num_data_types);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->ping);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->ping);
 		index += 4;
 		for (int i = 0; i < 4; i++) {
 			data->sonar_cmd[i] = buffer[index];
@@ -313,45 +313,45 @@ int mbr_dsl120sf_rd_header(int verbose, void *mbio_ptr, FILE *mbfp, int *error) 
 			data->time_stamp[i] = buffer[index];
 			index++;
 		}
-		mb_get_binary_float(MB_NO, &buffer[index], &data->nav_x);
+		mb_get_binary_float(false, &buffer[index], &data->nav_x);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->nav_y);
+		mb_get_binary_float(false, &buffer[index], &data->nav_y);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->depth);
+		mb_get_binary_float(false, &buffer[index], &data->depth);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->heading);
+		mb_get_binary_float(false, &buffer[index], &data->heading);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->pitch);
+		mb_get_binary_float(false, &buffer[index], &data->pitch);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->roll);
+		mb_get_binary_float(false, &buffer[index], &data->roll);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->alt);
+		mb_get_binary_float(false, &buffer[index], &data->alt);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->ang_offset);
+		mb_get_binary_float(false, &buffer[index], &data->ang_offset);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->transmit_pwr);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->transmit_pwr);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->gain_port);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->gain_port);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->gain_starbd);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->gain_starbd);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->pulse_width);
+		mb_get_binary_float(false, &buffer[index], &data->pulse_width);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->swath_width);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->swath_width);
 		index += 4;
 		data->side = buffer[index];
 		index++;
 		data->swapped = buffer[index];
 		index++;
 		index += 2;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->tv_sec);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->tv_sec);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->tv_usec);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->tv_usec);
 		index += 4;
-		mb_get_binary_short(MB_NO, &buffer[index], &data->digitalinterface);
+		mb_get_binary_short(false, &buffer[index], &data->digitalinterface);
 		index += 2;
 		for (int i = 0; i < 5; i++) {
-			mb_get_binary_short(MB_NO, &buffer[index], &data->reserved[i]);
+			mb_get_binary_short(false, &buffer[index], &data->reserved[i]);
 			index += 2;
 		}
 	}
@@ -430,9 +430,9 @@ int mbr_dsl120sf_rd_dataheader(int verbose, void *mbio_ptr, FILE *mbfp, char *ty
 	if (status == MB_SUCCESS) {
 		strncpy(type, buffer, 4);
 		index = 4;
-		mb_get_binary_int(MB_NO, &buffer[index], len);
+		mb_get_binary_int(false, &buffer[index], len);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], hdr_len);
+		mb_get_binary_int(false, &buffer[index], hdr_len);
 		index += 4;
 	}
 
@@ -484,22 +484,22 @@ int mbr_dsl120sf_rd_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	/* translate header and data */
 	if (status == MB_SUCCESS) {
 		index = 0;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->bat_num_bins);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->bat_num_bins);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->bat_sampleSize);
+		mb_get_binary_float(false, &buffer[index], &data->bat_sampleSize);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->bat_p_flags);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->bat_p_flags);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->bat_max_range);
+		mb_get_binary_float(false, &buffer[index], &data->bat_max_range);
 		index += 4;
 		for (int i = 0; i < 9; i++) {
-			mb_get_binary_int(MB_NO, &buffer[index], &data->bat_future[i]);
+			mb_get_binary_int(false, &buffer[index], &data->bat_future[i]);
 			index += 4;
 		}
 		for (int i = 0; i < data->bat_num_bins; i++) {
-			mb_get_binary_float(MB_NO, &buffer[index], &data->bat_port[i]);
+			mb_get_binary_float(false, &buffer[index], &data->bat_port[i]);
 			index += 4;
-			mb_get_binary_float(MB_NO, &buffer[index], &data->bat_stbd[i]);
+			mb_get_binary_float(false, &buffer[index], &data->bat_stbd[i]);
 			index += 4;
 		}
 	}
@@ -564,24 +564,24 @@ int mbr_dsl120sf_rd_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error) {
 	/* translate header and data */
 	if (status == MB_SUCCESS) {
 		index = 0;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->amp_num_samp);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->amp_num_samp);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->amp_sampleSize);
+		mb_get_binary_float(false, &buffer[index], &data->amp_sampleSize);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->amp_p_flags);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->amp_p_flags);
 		index += 4;
-		mb_get_binary_float(MB_NO, &buffer[index], &data->amp_max_range);
+		mb_get_binary_float(false, &buffer[index], &data->amp_max_range);
 		index += 4;
-		mb_get_binary_int(MB_NO, &buffer[index], (int *)&data->amp_channel);
+		mb_get_binary_int(false, &buffer[index], (int *)&data->amp_channel);
 		index += 4;
 		for (int i = 0; i < 8; i++) {
-			mb_get_binary_int(MB_NO, &buffer[index], &data->amp_future[i]);
+			mb_get_binary_int(false, &buffer[index], &data->amp_future[i]);
 			index += 4;
 		}
 		for (int i = 0; i < data->bat_num_bins; i++) {
-			mb_get_binary_float(MB_NO, &buffer[index], &data->amp_port[i]);
+			mb_get_binary_float(false, &buffer[index], &data->amp_port[i]);
 			index += 4;
-			mb_get_binary_float(MB_NO, &buffer[index], &data->amp_stbd[i]);
+			mb_get_binary_float(false, &buffer[index], &data->amp_stbd[i]);
 			index += 4;
 		}
 	}
@@ -942,17 +942,17 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 
 	/* construct header record */
 	index = 0;
-	mb_put_binary_int(MB_NO, DSL_HEADER, &buffer[index]);
+	mb_put_binary_int(false, DSL_HEADER, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->rec_len, &buffer[index]);
+	mb_put_binary_int(false, data->rec_len, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->rec_hdr_len, &buffer[index]);
+	mb_put_binary_int(false, data->rec_hdr_len, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->p_flags, &buffer[index]);
+	mb_put_binary_int(false, data->p_flags, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->num_data_types, &buffer[index]);
+	mb_put_binary_int(false, data->num_data_types, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->ping, &buffer[index]);
+	mb_put_binary_int(false, data->ping, &buffer[index]);
 	index += 4;
 	for (int i = 0; i < 4; i++) {
 		buffer[index] = data->sonar_cmd[i];
@@ -962,99 +962,99 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		buffer[index] = data->time_stamp[i];
 		index++;
 	}
-	mb_put_binary_float(MB_NO, data->nav_x, &buffer[index]);
+	mb_put_binary_float(false, data->nav_x, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->nav_y, &buffer[index]);
+	mb_put_binary_float(false, data->nav_y, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->depth, &buffer[index]);
+	mb_put_binary_float(false, data->depth, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->heading, &buffer[index]);
+	mb_put_binary_float(false, data->heading, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->pitch, &buffer[index]);
+	mb_put_binary_float(false, data->pitch, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->roll, &buffer[index]);
+	mb_put_binary_float(false, data->roll, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->alt, &buffer[index]);
+	mb_put_binary_float(false, data->alt, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->ang_offset, &buffer[index]);
+	mb_put_binary_float(false, data->ang_offset, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->transmit_pwr, &buffer[index]);
+	mb_put_binary_int(false, data->transmit_pwr, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->gain_port, &buffer[index]);
+	mb_put_binary_int(false, data->gain_port, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->gain_starbd, &buffer[index]);
+	mb_put_binary_int(false, data->gain_starbd, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->pulse_width, &buffer[index]);
+	mb_put_binary_float(false, data->pulse_width, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->swath_width, &buffer[index]);
+	mb_put_binary_int(false, data->swath_width, &buffer[index]);
 	index += 4;
 	buffer[index] = data->side;
 	index++;
 	buffer[index] = data->swapped;
 	index++;
 	index += 2;
-	mb_put_binary_int(MB_NO, data->tv_sec, &buffer[index]);
+	mb_put_binary_int(false, data->tv_sec, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->tv_usec, &buffer[index]);
+	mb_put_binary_int(false, data->tv_usec, &buffer[index]);
 	index += 4;
-	mb_put_binary_short(MB_NO, data->digitalinterface, &buffer[index]);
+	mb_put_binary_short(false, data->digitalinterface, &buffer[index]);
 	index += 2;
 	for (int i = 0; i < 5; i++) {
-		mb_put_binary_short(MB_NO, data->reserved[i], &buffer[index]);
+		mb_put_binary_short(false, data->reserved[i], &buffer[index]);
 		index += 2;
 	}
 
 	/* construct bathymetry record */
-	mb_put_binary_int(MB_NO, data->bat_type, &buffer[index]);
+	mb_put_binary_int(false, data->bat_type, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->bat_len, &buffer[index]);
+	mb_put_binary_int(false, data->bat_len, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->bat_hdr_len, &buffer[index]);
+	mb_put_binary_int(false, data->bat_hdr_len, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->bat_num_bins, &buffer[index]);
+	mb_put_binary_int(false, data->bat_num_bins, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->bat_sampleSize, &buffer[index]);
+	mb_put_binary_float(false, data->bat_sampleSize, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->bat_p_flags, &buffer[index]);
+	mb_put_binary_int(false, data->bat_p_flags, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->bat_max_range, &buffer[index]);
+	mb_put_binary_float(false, data->bat_max_range, &buffer[index]);
 	index += 4;
 	for (int i = 0; i < 9; i++) {
-		mb_put_binary_int(MB_NO, data->bat_future[i], &buffer[index]);
+		mb_put_binary_int(false, data->bat_future[i], &buffer[index]);
 		index += 4;
 	}
 	for (int i = 0; i < data->bat_num_bins; i++) {
-		mb_put_binary_float(MB_NO, data->bat_port[i], &buffer[index]);
+		mb_put_binary_float(false, data->bat_port[i], &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->bat_stbd[i], &buffer[index]);
+		mb_put_binary_float(false, data->bat_stbd[i], &buffer[index]);
 		index += 4;
 	}
 
 	/* construct amplitude record */
-	mb_put_binary_int(MB_NO, data->amp_type, &buffer[index]);
+	mb_put_binary_int(false, data->amp_type, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->amp_len, &buffer[index]);
+	mb_put_binary_int(false, data->amp_len, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->amp_hdr_len, &buffer[index]);
+	mb_put_binary_int(false, data->amp_hdr_len, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->amp_num_samp, &buffer[index]);
+	mb_put_binary_int(false, data->amp_num_samp, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->amp_sampleSize, &buffer[index]);
+	mb_put_binary_float(false, data->amp_sampleSize, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->amp_p_flags, &buffer[index]);
+	mb_put_binary_int(false, data->amp_p_flags, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->amp_max_range, &buffer[index]);
+	mb_put_binary_float(false, data->amp_max_range, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->amp_channel, &buffer[index]);
+	mb_put_binary_int(false, data->amp_channel, &buffer[index]);
 	index += 4;
 	for (int i = 0; i < 8; i++) {
-		mb_put_binary_int(MB_NO, data->amp_future[i], &buffer[index]);
+		mb_put_binary_int(false, data->amp_future[i], &buffer[index]);
 		index += 4;
 	}
 	for (int i = 0; i < data->bat_num_bins; i++) {
-		mb_put_binary_float(MB_NO, data->amp_port[i], &buffer[index]);
+		mb_put_binary_float(false, data->amp_port[i], &buffer[index]);
 		index += 4;
-		mb_put_binary_float(MB_NO, data->amp_stbd[i], &buffer[index]);
+		mb_put_binary_float(false, data->amp_stbd[i], &buffer[index]);
 		index += 4;
 	}
 
@@ -1108,17 +1108,17 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 	data->rec_hdr_len = 128;
 
 	index = 0;
-	mb_put_binary_int(MB_NO, DSL_HEADER, &buffer[index]);
+	mb_put_binary_int(false, DSL_HEADER, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->rec_len, &buffer[index]);
+	mb_put_binary_int(false, data->rec_len, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->rec_hdr_len, &buffer[index]);
+	mb_put_binary_int(false, data->rec_hdr_len, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->p_flags, &buffer[index]);
+	mb_put_binary_int(false, data->p_flags, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->num_data_types, &buffer[index]);
+	mb_put_binary_int(false, data->num_data_types, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->ping, &buffer[index]);
+	mb_put_binary_int(false, data->ping, &buffer[index]);
 	index += 4;
 	for (int i = 0; i < 4; i++) {
 		buffer[index] = data->sonar_cmd[i];
@@ -1128,54 +1128,54 @@ int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 		buffer[index] = data->time_stamp[i];
 		index++;
 	}
-	mb_put_binary_float(MB_NO, data->nav_x, &buffer[index]);
+	mb_put_binary_float(false, data->nav_x, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->nav_y, &buffer[index]);
+	mb_put_binary_float(false, data->nav_y, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->depth, &buffer[index]);
+	mb_put_binary_float(false, data->depth, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->heading, &buffer[index]);
+	mb_put_binary_float(false, data->heading, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->pitch, &buffer[index]);
+	mb_put_binary_float(false, data->pitch, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->roll, &buffer[index]);
+	mb_put_binary_float(false, data->roll, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->alt, &buffer[index]);
+	mb_put_binary_float(false, data->alt, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->ang_offset, &buffer[index]);
+	mb_put_binary_float(false, data->ang_offset, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->transmit_pwr, &buffer[index]);
+	mb_put_binary_int(false, data->transmit_pwr, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->gain_port, &buffer[index]);
+	mb_put_binary_int(false, data->gain_port, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->gain_starbd, &buffer[index]);
+	mb_put_binary_int(false, data->gain_starbd, &buffer[index]);
 	index += 4;
-	mb_put_binary_float(MB_NO, data->pulse_width, &buffer[index]);
+	mb_put_binary_float(false, data->pulse_width, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->swath_width, &buffer[index]);
+	mb_put_binary_int(false, data->swath_width, &buffer[index]);
 	index += 4;
 	buffer[index] = data->side;
 	index++;
 	buffer[index] = data->swapped;
 	index++;
 	index += 2;
-	mb_put_binary_int(MB_NO, data->tv_sec, &buffer[index]);
+	mb_put_binary_int(false, data->tv_sec, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, data->tv_usec, &buffer[index]);
+	mb_put_binary_int(false, data->tv_usec, &buffer[index]);
 	index += 4;
-	mb_put_binary_short(MB_NO, data->digitalinterface, &buffer[index]);
+	mb_put_binary_short(false, data->digitalinterface, &buffer[index]);
 	index += 2;
 	for (int i = 0; i < 5; i++) {
-		mb_put_binary_short(MB_NO, data->reserved[i], &buffer[index]);
+		mb_put_binary_short(false, data->reserved[i], &buffer[index]);
 		index += 2;
 	}
 
 	/* construct comment record */
-	mb_put_binary_int(MB_NO, DSL_COMMENT, &buffer[index]);
+	mb_put_binary_int(false, DSL_COMMENT, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, 12 + 80, &buffer[index]);
+	mb_put_binary_int(false, 12 + 80, &buffer[index]);
 	index += 4;
-	mb_put_binary_int(MB_NO, 12, &buffer[index]);
+	mb_put_binary_int(false, 12, &buffer[index]);
 	index += 4;
 	strncpy(&buffer[index], data->comment, 79);
 	index += 79;

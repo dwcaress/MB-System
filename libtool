@@ -1,6 +1,6 @@
 #! /bin/sh
-# Generated automatically by config.status (mbsystem) 5.7.6beta13
-# Libtool was configured on host Haxby.local:
+# Generated automatically by config.status (mbsystem) 5.7.6beta15
+# Libtool was configured on host dhcp154.science.atlantis.whoi.edu:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 
 # Provide generalized library-building support services.

@@ -1770,35 +1770,35 @@ int main(int argc, char **argv) {
   /*-------------------------------------------------------------------*/
 
 #ifdef DEBUG_MBPREPROCESS
-  for (i=0;i<n_nav;i++) {
+  for (int i=0;i<n_nav;i++) {
     mb_get_date(verbose,nav_time_d[i],time_i);
     fprintf(stderr,"NAV: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.6f %.6f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
       nav_navlon[i], nav_navlat[i]);
   }
 
-  for (i=0;i<n_sensordepth;i++) {
+  for (int i=0;i<n_sensordepth;i++) {
     mb_get_date(verbose,sensordepth_time_d[i],time_i);
     fprintf(stderr,"DEP: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
       sensordepth_sensordepth[i]);
   }
 
-  for (i=0;i<n_heading;i++) {
+  for (int i=0;i<n_heading;i++) {
     mb_get_date(verbose,heading_time_d[i],time_i);
     fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
       heading_heading[i]);
   }
 
-  for (i=0;i<n_altitude;i++) {
+  for (int i=0;i<n_altitude;i++) {
     mb_get_date(verbose,altitude_time_d[i],time_i);
     fprintf(stderr,"HDG: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
       altitude_altitude[i]);
   }
 
-  for (i=0;i<n_attitude;i++) {
+  for (int i=0;i<n_attitude;i++) {
     mb_get_date(verbose,attitude_time_d[i],time_i);
     fprintf(stderr,"RPH: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %.3f %.3f\n",
       time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
@@ -2662,7 +2662,7 @@ int main(int argc, char **argv) {
             nav sensordepth heading attitude values for record timestamp  */
           if (n_nav > 0) {
             interp_status = mb_linear_interp_longitude(verbose, nav_time_d - 1, nav_navlon - 1, n_nav, time_d,
-                                   &navlon_org, &jnav, &interp_error);
+                                  &navlon_org, &jnav, &interp_error);
             interp_status = mb_linear_interp_latitude(verbose, nav_time_d - 1, nav_navlat - 1, n_nav, time_d, &navlat_org,
                                   &jnav, &interp_error);
             interp_status =
