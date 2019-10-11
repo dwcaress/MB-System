@@ -292,7 +292,6 @@ int set_bathyslope(int verbose, int nbath, char *beamflag, double *bath, double 
 /*--------------------------------------------------------------------*/
 int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacrosstrack, int nslopes, double *slopes,
                    double *slopeacrosstrack, double acrosstrack, double *depth, double *slope, int *error) {
-	int found_depth, found_slope;
 	int idepth, islope;
 
 	if (verbose >= 2) {
@@ -311,46 +310,46 @@ int get_bathyslope(int verbose, int ndepths, double *depths, double *depthacross
 	}
 
 	/* check if acrosstrack is in defined interval */
-	found_depth = MB_NO;
-	found_slope = MB_NO;
+	bool found_depth = false;
+	bool found_slope = false;
 	if (ndepths > 1)
 		if (acrosstrack >= depthacrosstrack[0] && acrosstrack <= depthacrosstrack[ndepths - 1]) {
 
 			/* look for depth */
 			idepth = -1;
-			while (found_depth == MB_NO && idepth < ndepths - 2) {
+			while (found_depth && idepth < ndepths - 2) {
 				idepth++;
 				if (acrosstrack >= depthacrosstrack[idepth] && acrosstrack <= depthacrosstrack[idepth + 1]) {
 					*depth = depths[idepth] + (acrosstrack - depthacrosstrack[idepth]) /
 					                              (depthacrosstrack[idepth + 1] - depthacrosstrack[idepth]) *
 					                              (depths[idepth + 1] - depths[idepth]);
-					found_depth = MB_YES;
+					found_depth = true;
 					*error = MB_ERROR_NO_ERROR;
 				}
 			}
 
 			/* look for slope */
 			islope = -1;
-			while (found_slope == MB_NO && islope < nslopes - 2) {
+			while (!found_slope && islope < nslopes - 2) {
 				islope++;
 				if (acrosstrack >= slopeacrosstrack[islope] && acrosstrack <= slopeacrosstrack[islope + 1]) {
 					*slope = slopes[islope] + (acrosstrack - slopeacrosstrack[islope]) /
 					                              (slopeacrosstrack[islope + 1] - slopeacrosstrack[islope]) *
 					                              (slopes[islope + 1] - slopes[islope]);
-					found_slope = MB_YES;
+					found_slope = true;
 					*error = MB_ERROR_NO_ERROR;
 				}
 			}
 		}
 
 	/* translate slope to degrees */
-	if (found_slope == MB_YES)
+	if (found_slope)
 		*slope = RTD * atan(*slope);
 
 	int status = MB_SUCCESS;
 
 	/* check for failure */
-	if (found_depth != MB_YES || found_slope != MB_YES) {
+	if (!found_depth || !found_slope) {
 		status = MB_FAILURE;
 		*error = MB_ERROR_OTHER;
 		*depth = 0.0;

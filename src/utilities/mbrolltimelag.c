@@ -143,7 +143,6 @@ int main(int argc, char **argv) {
 
 	int nr;
 	double rollint;
-	int found;
 	int nscan;
 	int j0, j1;
 	int shellstatus;
@@ -430,18 +429,18 @@ int main(int argc, char **argv) {
 
 					for (int j = j0; j <= j1; j++) {
 						/* interpolate lagged roll value */
-						found = MB_NO;
+						bool found = MB_NO;
 						time_d = slope_time_d[j] + timelag;
-						for (int l = nr; l < nroll - 1 && found == MB_NO; l++) {
+						for (int l = nr; l < nroll - 1 && !found; l++) {
 							if (time_d >= roll_time_d[l] && time_d <= roll_time_d[l + 1]) {
 								nr = l;
-								found = MB_YES;
+								found = true;
 							}
 						}
-						if (found == MB_NO && time_d < roll_time_d[0]) {
+						if (!found && time_d < roll_time_d[0]) {
 							rollint = roll_roll[0];
 						}
-						else if (found == MB_NO && time_d > roll_time_d[nroll - 1]) {
+						else if (!found && time_d > roll_time_d[nroll - 1]) {
 							rollint = roll_roll[nroll - 1];
 						}
 						else {
